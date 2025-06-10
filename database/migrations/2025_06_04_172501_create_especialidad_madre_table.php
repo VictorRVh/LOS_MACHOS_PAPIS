@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('especialidad_madre', function (Blueprint $table) {
-             $table->uuid('id')->primary();
+            $table->uuid('id')->primary();
             $table->string('nombre_especialidad');
-            $table->uuid('id_ciclo'); 
+            $table->uuid('id_ciclo');
 
             $table->foreign('id_ciclo')->references('id')->on('ciclo_academico')->onDelete('cascade');
             $table->timestamps();

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
             $table->uuid('id_grupo');
-            $table->boolean('status')->default(true);
+            $table->tinyInteger('status')->default(0);
 
             $table->foreign('id_grupo')
                   ->references('id')->on('grupo')

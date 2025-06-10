@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('id_ciclo');
             $table->string('año');
             $table->string('numero_rd')->nullable();
-            $table->string('estado')->nullable();
+            $table->tinyInteger('status')->default(0);
             $table->text('descripcion')->nullable();
 
             $table->foreign('id_ciclo')

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->uuid('id_capacidad');
             $table->uuid('id_entrega')->nullable();
 
-            $table->boolean('status')->default(true);
+            $table->tinyInteger('status')->default(0);
 
             $table->foreign('id_calendario')
                   ->references('id')->on('calendario_admin')

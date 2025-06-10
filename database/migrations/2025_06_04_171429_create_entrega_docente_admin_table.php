@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('entrega_docente_admin', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->string('tipo_entrega', 255); 
+            $table->string('tipo_entrega', 255);
             $table->date('fecha_inicio')->nullable();
             $table->date('fecha_fin')->nullable();
-            $table->boolean('estado')->default(true); 
-            
+            $table->tinyInteger('status')->default(0);
+
             $table->timestamps();
         });
     }

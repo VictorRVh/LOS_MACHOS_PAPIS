@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('turno');
             $table->string('local');
 
-            // Relación con tabla users
             $table->foreign('id_usuario')
                   ->references('id')->on('users')
                   ->onDelete('cascade');

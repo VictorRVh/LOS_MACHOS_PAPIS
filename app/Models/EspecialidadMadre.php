@@ -15,7 +15,9 @@ class EspecialidadMadre extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 'nombre_especialidad', 'id_ciclo',
+        'id',
+        'nombre_especialidad',
+        'id_ciclo',
     ];
 
     protected static function boot()
@@ -27,6 +29,18 @@ class EspecialidadMadre extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+    }
+
+    const STATUS = [
+        0 => 'Pendiente',    // 00
+        1 => 'Activo',       // 01
+        2 => 'Desactivo',    // 10
+        3 => 'Anulado',      // 11
+    ];
+
+    public function getStatusTextoAttribute()
+    {
+        return self::STATUS[$this->status] ?? 'Desconocido';
     }
 
     public function cicloAcademico()

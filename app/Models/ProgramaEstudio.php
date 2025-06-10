@@ -20,7 +20,7 @@ class ProgramaEstudio extends Model
         'id_ciclo',
         'año',
         'numero_rd',
-        'estado',
+        'status',
         'descripcion',
     ];
 
@@ -33,6 +33,18 @@ class ProgramaEstudio extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+    }
+
+    const STATUS = [
+        0 => 'Pendiente',    // 00
+        1 => 'Activo',       // 01
+        2 => 'Desactivo',    // 10
+        3 => 'Anulado',      // 11
+    ];
+
+    public function getStatusTextoAttribute()
+    {
+        return self::STATUS[$this->status] ?? 'Desconocido';
     }
 
     public function ciclo()

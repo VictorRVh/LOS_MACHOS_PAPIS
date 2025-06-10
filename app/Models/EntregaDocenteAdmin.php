@@ -15,7 +15,11 @@ class EntregaDocenteAdmin extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 'tipo_entrega', 'fecha_inicio', 'fecha_fin', 'estado'
+        'id',
+        'tipo_entrega',
+        'fecha_inicio',
+        'fecha_fin',
+        'status'
     ];
 
     protected static function boot()
@@ -29,9 +33,20 @@ class EntregaDocenteAdmin extends Model
         });
     }
 
+    const STATUS = [
+        0 => 'Pendiente',    // 00
+        1 => 'Activo',       // 01
+        2 => 'Desactivo',    // 10
+        3 => 'Anulado',      // 11
+    ];
+
+    public function getStatusTextoAttribute()
+    {
+        return self::STATUS[$this->status] ?? 'Desconocido';
+    }
+
     public function entregaDocente()
     {
         return $this->hasMany(entregaDocente::class, 'id_admin');
     }
 }
-

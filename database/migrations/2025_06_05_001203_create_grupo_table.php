@@ -26,7 +26,7 @@ return new class extends Migration
             $table->date('fecha_entrega_acta')->nullable();
             $table->char('seccion', 1)->nullable();
             $table->char('turno', 1)->nullable();
-            $table->boolean('status')->default(true);
+            $table->tinyInteger('status')->default(0);
 
             $table->foreign('id_programa')->references('id')->on('programa_estudio')->onDelete('cascade');
             $table->foreign('id_especialidad')->references('id')->on('especialidad_programa')->onDelete('cascade');

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('condicion');
             $table->string('nro_recibo');
             $table->string('aporte');
-            $table->boolean('status')->default(true);
+            $table->tinyInteger('status')->default(0);
             $table->timestamps();
         });
     }

@@ -15,7 +15,7 @@ class Convenios extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 'nombre_institucion',  
+        'id', 'nombre_institucion', 'descripcion'
     ];
 
     protected static function boot()

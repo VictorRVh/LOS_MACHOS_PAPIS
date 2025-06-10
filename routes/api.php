@@ -102,4 +102,49 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\PermissionController::class,
         'destroy',
     ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA DE PAGOS
+    Route::get('pago', [
+        \App\Http\Controllers\PagoController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('pago', [
+        \App\Http\Controllers\PagoController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('pago/{pagoId}', [
+        \App\Http\Controllers\PagoController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('pago/{pagoId}', [
+        \App\Http\Controllers\PagoController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+    
+    // RUTAS DE CONVENIOS
+    Route::get('convenio', [
+        \App\Http\Controllers\ConveniosController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('convenio', [
+        \App\Http\Controllers\ConveniosController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('convenio/{id}', [
+        \App\Http\Controllers\ConveniosController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('convenio/{convenioId}', [
+        \App\Http\Controllers\ConveniosController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
 });

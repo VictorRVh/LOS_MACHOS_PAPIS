@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('periodo', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('nombre_periodo');
-            $table->boolean('status')->default(true);
+            $table->tinyInteger('status')->default(0);
 
             $table->timestamps();
         });

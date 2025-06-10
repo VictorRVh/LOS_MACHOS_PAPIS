@@ -32,6 +32,18 @@ class Pago extends Model
         });
     }
 
+    const STATUS = [
+        0 => 'Pendiente',    // 00
+        1 => 'Activo',       // 01
+        2 => 'Desactivo',    // 10
+        3 => 'Anulado',      // 11
+    ];
+
+    public function getStatusTextoAttribute()
+    {
+        return self::STATUS[$this->status] ?? 'Desconocido';
+    }
+
     public function matricula()
     {
         return $this->hasMany(Matricula::class, 'id_pago');

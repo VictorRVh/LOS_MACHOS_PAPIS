@@ -18,9 +18,8 @@ return new class extends Migration
             $table->date('fecha_fin');
             $table->integer('horas');
             $table->uuid('id_grupo');
-            $table->boolean('status')->default(true);
+            $table->tinyInteger('status')->default(0);
 
-            // Relaciones
             $table->foreign('id_grupo')
                   ->references('id')->on('grupo')
                   ->onDelete('cascade');

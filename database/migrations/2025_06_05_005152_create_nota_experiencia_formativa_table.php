@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('documento');
             $table->uuid('id_estudiante');
             $table->uuid('id_grupo');
-            $table->boolean('status')->default(true);
+            $table->tinyInteger('status')->default(0);
 
             $table->foreign('id_experiencia')
                   ->references('id')->on('experiencia_formativa')

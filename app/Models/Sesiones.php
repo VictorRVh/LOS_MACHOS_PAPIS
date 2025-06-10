@@ -28,7 +28,7 @@ class Sesiones extends Model
         'status'
     ];
 
-     protected static function boot()
+    protected static function boot()
     {
         parent::boot();
 
@@ -37,6 +37,18 @@ class Sesiones extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+    }
+
+    const STATUS = [
+        0 => 'Pendiente',    // 00
+        1 => 'Activo',       // 01
+        2 => 'Desactivo',    // 10
+        3 => 'Anulado',      // 11
+    ];
+
+    public function getStatusTextoAttribute()
+    {
+        return self::STATUS[$this->status] ?? 'Desconocido';
     }
 
     public function calendarioAdmin()

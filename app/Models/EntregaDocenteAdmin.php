@@ -22,6 +22,8 @@ class EntregaDocenteAdmin extends Model
         'status'
     ];
 
+    protected $appends = ['status_texto'];
+
     protected static function boot()
     {
         parent::boot();

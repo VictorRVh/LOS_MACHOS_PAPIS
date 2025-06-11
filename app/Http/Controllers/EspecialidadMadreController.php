@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EspecialidadMadre;
 use Illuminate\Http\Request;
 
 class EspecialidadMadreController extends Controller
@@ -11,38 +12,65 @@ class EspecialidadMadreController extends Controller
      */
     public function index()
     {
-        //
+        $especialidades = EspecialidadMadre::with('cicloAcademico')->get();
+        return response()->json($especialidades);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Mostrar uno por ID
+    public function show($id)
+    {
+        $especialidad = EspecialidadMadre::with('cicloAcademico')->find($id);
+
+        if (!$especialidad) {
+            return response()->json(['message' => 'Especialidad no encontrada'], 404);
+        }
+
+        return response()->json($especialidad);
+    }
+
+    // Crear nueva especialidad
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre_especialidad' => 'required|string|max:100',
+            'id_ciclo' => 'required|exists:ciclo_academico,id',
+        ]);
+
+        $especialidad = EspecialidadMadre::create($request->all());
+
+        return response()->json($especialidad, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // Actualizar especialidad existente
+    public function update(Request $request, $id)
     {
-        //
+        $especialidad = EspecialidadMadre::find($id);
+
+        if (!$especialidad) {
+            return response()->json(['message' => 'Especialidad no encontrada'], 404);
+        }
+
+        $request->validate([
+            'nombre_especialidad' => 'sometimes|required|string|max:100',
+            'id_ciclo' => 'sometimes|required|exists:ciclo_academico,id',
+        ]);
+
+        $especialidad->update($request->all());
+
+        return response()->json($especialidad);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Eliminar especialidad
+    public function destroy($id)
     {
-        //
-    }
+        $especialidad = EspecialidadMadre::find($id);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        if (!$especialidad) {
+            return response()->json(['message' => 'Especialidad no encontrada'], 404);
+        }
+
+        $especialidad->delete();
+
+        return response()->json(['message' => 'Especialidad eliminada']);
     }
 }

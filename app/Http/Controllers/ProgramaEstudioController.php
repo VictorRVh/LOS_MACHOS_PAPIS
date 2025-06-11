@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ProgramaEstudio;
 use Illuminate\Http\Request;
 
 class ProgramaEstudioController extends Controller
@@ -11,38 +12,71 @@ class ProgramaEstudioController extends Controller
      */
     public function index()
     {
-        //
+        $programas = ProgramaEstudio::with('ciclo')->get();
+        return response()->json($programas);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Mostrar uno por ID
+    public function show($id)
+    {
+        $programa = ProgramaEstudio::with('ciclo')->find($id);
+
+        if (!$programa) {
+            return response()->json(['message' => 'Programa de estudio no encontrado'], 404);
+        }
+
+        return response()->json($programa);
+    }
+
+    // Crear nuevo programa
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'id_ciclo'    => 'required|exists:ciclo_academico,id',
+            'año'         => 'required|integer|min:2000|max:2100',
+            'numero_rd'   => 'required|string|max:50',
+            'status'      => 'required|integer|in:0,1,2,3',
+            'descripcion' => 'nullable|string|max:255',
+        ]);
+
+        $programa = ProgramaEstudio::create($request->all());
+
+        return response()->json($programa, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // Actualizar un programa existente
+    public function update(Request $request, $id)
     {
-        //
+        $programa = ProgramaEstudio::find($id);
+
+        if (!$programa) {
+            return response()->json(['message' => 'Programa de estudio no encontrado'], 404);
+        }
+
+        $request->validate([
+            'id_ciclo'    => 'sometimes|required|exists:ciclo_academico,id',
+            'año'         => 'sometimes|required|integer|min:2000|max:2100',
+            'numero_rd'   => 'sometimes|required|string|max:50',
+            'status'      => 'sometimes|required|integer|in:0,1,2,3',
+            'descripcion' => 'nullable|string|max:255',
+        ]);
+
+        $programa->update($request->all());
+
+        return response()->json($programa);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Eliminar un programa
+    public function destroy($id)
     {
-        //
-    }
+        $programa = ProgramaEstudio::find($id);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        if (!$programa) {
+            return response()->json(['message' => 'Programa de estudio no encontrado'], 404);
+        }
+
+        $programa->delete();
+
+        return response()->json(['message' => 'Programa eliminado correctamente']);
     }
 }

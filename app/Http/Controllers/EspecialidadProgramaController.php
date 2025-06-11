@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EspecialidadPrograma;
 use Illuminate\Http\Request;
 
 class EspecialidadProgramaController extends Controller
@@ -11,38 +12,72 @@ class EspecialidadProgramaController extends Controller
      */
     public function index()
     {
-        //
+        $data = EspecialidadPrograma::with(['especialidadMadre', 'programaEstudio'])->get();
+        return response()->json($data);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Crear uno nuevo
     public function store(Request $request)
     {
-        //
+        
+        $request->validate([
+            'id_especialidad' => 'sometimes|exists:especialidad_madre,id',
+            'id_programa' => 'sometimes|exists:programa_estudio,id',
+        ]);
+
+        $nuevo = EspecialidadPrograma::create($request->all());
+        return response()->json($nuevo, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // Mostrar uno específico
+    public function show($id)
     {
-        //
+        $registro = EspecialidadPrograma::with(['especialidadMadre', 'programaEstudio'])->find($id);
+
+        if (!$registro) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
+
+        return response()->json($registro);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Actualizar
+    public function update(Request $request, $id)
     {
-        //
+        $registro = EspecialidadPrograma::find($id);
+
+        if (!$registro) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
+
+        // $validator = Validator::make($request->all(), [
+        //     'id_especialidad' => 'sometimes|exists:especialidad_madre,id',
+        //     'id_programa' => 'sometimes|exists:programa_estudio,id',
+        // ]);
+
+        // if ($validator->fails()) {
+        //     return response()->json(['errors' => $validator->errors()], 422);
+        // }
+
+        $request->validate([
+            'id_especialidad' => 'sometimes|exists:especialidad_madre,id',
+            'id_programa' => 'sometimes|exists:programa_estudio,id',
+        ]);
+
+        $registro->update($request->all());
+        return response()->json($registro);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    // Eliminar
+    public function destroy($id)
     {
-        //
+        $registro = EspecialidadPrograma::find($id);
+
+        if (!$registro) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
+
+        $registro->delete();
+        return response()->json(['message' => 'Eliminado correctamente']);
     }
 }

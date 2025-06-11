@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Periodo;
 use Illuminate\Http\Request;
 
 class PeriodoController extends Controller
@@ -11,38 +12,75 @@ class PeriodoController extends Controller
      */
     public function index()
     {
-        //
+        $periodos = Periodo::all()->map(function ($periodo) {
+            return [
+                'id'             => $periodo->id,
+                'nombre_periodo' => $periodo->nombre_periodo,
+                'status'         => $periodo->status,
+                'status_texto'   => $periodo->status_texto,
+            ];
+        });
+
+        return response()->json($periodos);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Crear un nuevo periodo
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre_periodo' => 'sometimes|string|max:100',
+            'status'         => 'sometimes|in:0,1,2,3',
+        ]);
+
+        $periodo = Periodo::create($request->all());
+        return response()->json($periodo, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // Mostrar un periodo específico
+    public function show($id)
     {
-        //
+        $periodo = Periodo::find($id);
+
+        if (!$periodo) {
+            return response()->json(['message' => 'Periodo no encontrado'], 404);
+        }
+
+        return response()->json([
+            'id'             => $periodo->id,
+            'nombre_periodo' => $periodo->nombre_periodo,
+            'status'         => $periodo->status,
+            'status_texto'   => $periodo->status_texto,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Actualizar un periodo
+    public function update(Request $request, $id)
     {
-        //
+        $periodo = Periodo::find($id);
+
+        if (!$periodo) {
+            return response()->json(['message' => 'Periodo no encontrado'], 404);
+        }
+
+        $request->validate([
+            'nombre_periodo' => 'sometimes|string|max:100',
+            'status'         => 'sometimes|in:0,1,2,3',
+        ]);
+
+        $periodo->update($request->all());
+        return response()->json($periodo);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    // Eliminar un periodo
+    public function destroy($id)
     {
-        //
+        $periodo = Periodo::find($id);
+
+        if (!$periodo) {
+            return response()->json(['message' => 'Periodo no encontrado'], 404);
+        }
+
+        $periodo->delete();
+        return response()->json(['message' => 'Periodo eliminado correctamente']);
     }
 }

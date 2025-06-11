@@ -125,7 +125,7 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:permissions-all|permissions-delete');
 
-    
+
     // RUTAS DE CONVENIOS
     Route::get('convenio', [
         \App\Http\Controllers\ConveniosController::class,
@@ -147,4 +147,201 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:permissions-all|permissions-delete');
 
+
+    //RUTA DE ESTUDIANTE
+    Route::get('estudiante', [
+        \App\Http\Controllers\EstudianteController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('estudiante', [
+        \App\Http\Controllers\EstudianteController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('estudiante/{id}', [
+        \App\Http\Controllers\EstudianteController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('estudiante/{id}', [
+        \App\Http\Controllers\EstudianteController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    //RUTA PARA CILCLO ACADEMICO
+    Route::get('ciclo_academico', [
+        \App\Http\Controllers\CicloAcademicoController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('ciclo_academico', [
+        \App\Http\Controllers\CicloAcademicoController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('ciclo_academico/{id}', [
+        \App\Http\Controllers\CicloAcademicoController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('ciclo_academico/{id}', [
+        \App\Http\Controllers\CicloAcademicoController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA CALENDARIO-ADMIN
+    Route::get('calendario_admin', [
+        \App\Http\Controllers\CalendarioAdminController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('calendario_admin', [
+        \App\Http\Controllers\CalendarioAdminController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('calendario_admin/{id}', [
+        \App\Http\Controllers\CalendarioAdminController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('calendario_admin/{id}', [
+        \App\Http\Controllers\CalendarioAdminController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA ENTREGA_DOCENTE_ADMIN
+    Route::get('entrega_docente_admin', [
+        \App\Http\Controllers\EntregaDocenteAdminController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('entrega_docente_admin', [
+        \App\Http\Controllers\EntregaDocenteAdminController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('entrega_docente_admin/{id}', [
+        \App\Http\Controllers\EntregaDocenteAdminController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('entrega_docente_admin/{id}', [
+        \App\Http\Controllers\EntregaDocenteAdminController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA ESPECIALIDAD_MADRE
+    Route::get('especialidad_madre', [
+        \App\Http\Controllers\EspecialidadMadreController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('especialidad_madre', [
+        \App\Http\Controllers\EspecialidadMadreController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('especialidad_madre/{id}', [
+        \App\Http\Controllers\EspecialidadMadreController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('especialidad_madre/{id}', [
+        \App\Http\Controllers\EspecialidadMadreController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA PROGRAMA_ESTUDIO
+    Route::get('programa_estudio', [
+        \App\Http\Controllers\ProgramaEstudioController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('programa_estudio', [
+        \App\Http\Controllers\ProgramaEstudioController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('programa_estudio/{id}', [
+        \App\Http\Controllers\ProgramaEstudioController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('programa_estudio/{id}', [
+        \App\Http\Controllers\ProgramaEstudioController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA ESPECIALIDAD_PROGRAMA
+    Route::get('especialidad_programa', [
+        \App\Http\Controllers\EspecialidadProgramaController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('especialidad_programa', [
+        \App\Http\Controllers\EspecialidadProgramaController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('especialidad_programa/{id}', [
+        \App\Http\Controllers\EspecialidadProgramaController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('especialidad_programa/{id}', [
+        \App\Http\Controllers\EspecialidadProgramaController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA DOCENTE
+    Route::get('docente', [
+        \App\Http\Controllers\DocenteController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('docente', [
+        \App\Http\Controllers\DocenteController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('docente/{id}', [
+        \App\Http\Controllers\DocenteController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('docente/{id}', [
+        \App\Http\Controllers\DocenteController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA PERIODO
+    Route::get('periodo', [
+        \App\Http\Controllers\PeriodoController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('periodo', [
+        \App\Http\Controllers\PeriodoController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('periodo/{id}', [
+        \App\Http\Controllers\PeriodoController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('periodo/{id}', [
+        \App\Http\Controllers\PeriodoController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
 });

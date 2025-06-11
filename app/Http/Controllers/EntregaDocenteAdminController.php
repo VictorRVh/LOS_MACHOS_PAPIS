@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EntregaDocenteAdmin;
 use Illuminate\Http\Request;
 
 class EntregaDocenteAdminController extends Controller
@@ -11,38 +12,55 @@ class EntregaDocenteAdminController extends Controller
      */
     public function index()
     {
-        //
+        $entregas = EntregaDocenteAdmin::all();
+        return response()->json($entregas);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Crear uno nuevo
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'tipo_entrega' => 'required|string|max:100',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'status' => 'required|integer|in:0,1,2,3',
+        ]);
+
+        $entrega = EntregaDocenteAdmin::create($request->all());
+
+        return response()->json($entrega, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // Mostrar uno por ID
+    public function show($id)
     {
-        //
+        $entrega = EntregaDocenteAdmin::findOrFail($id);
+        return response()->json($entrega);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Actualizar
+    public function update(Request $request, $id)
     {
-        //
+        $entrega = EntregaDocenteAdmin::findOrFail($id);
+
+        $request->validate([
+            'tipo_entrega' => 'required|string|max:100',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'status' => 'required|integer|in:0,1,2,3',
+        ]);
+
+        $entrega->update($request->all());
+
+        return response()->json($entrega);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    // Eliminar
+    public function destroy($id)
     {
-        //
+        $entrega = EntregaDocenteAdmin::findOrFail($id);
+        $entrega->delete();
+
+        return response()->json(null, 204);
     }
 }

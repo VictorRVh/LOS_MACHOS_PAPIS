@@ -20,12 +20,12 @@ class DocenteController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'codigo_modular'     => 'sometimes|string|max:20',
-            'especialidad'       => 'sometimes|string|max:100',
-            'condicion'          => 'sometimes|string|max:50',
+            'codigo_modular'     => 'required|string|max:20',
+            'especialidad'       => 'required|string|max:100',
+            'condicion'          => 'required|string|max:50',
             'escala_magisterial' => 'nullable|string|max:50',
             'rd_nombramiento'    => 'nullable|string|max:50',
-            'user_id'            => 'sometimes|exists:users,id',
+            'user_id'            => 'required|exists:users,id',
         ]);
 
         $docente = Docente::create($request->all());

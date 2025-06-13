@@ -13,7 +13,7 @@ class Sesiones extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $table = 'entrega_docente';
+    protected $table = 'sesiones';
 
     protected $fillable = [
         'id',

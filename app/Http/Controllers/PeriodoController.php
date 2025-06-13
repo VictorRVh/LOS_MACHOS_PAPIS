@@ -28,8 +28,8 @@ class PeriodoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_periodo' => 'sometimes|string|max:100',
-            'status'         => 'sometimes|in:0,1,2,3',
+            'nombre_periodo' => 'required|string|max:100',
+            'status'         => 'required|in:0,1,2,3',
         ]);
 
         $periodo = Periodo::create($request->all());

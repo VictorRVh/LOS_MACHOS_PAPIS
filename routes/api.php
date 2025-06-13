@@ -344,4 +344,290 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\PeriodoController::class,
         'destroy',
     ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA MODULO
+    Route::get('modulo', [
+        \App\Http\Controllers\ModuloController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('modulo', [
+        \App\Http\Controllers\ModuloController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('modulo/{id}', [
+        \App\Http\Controllers\ModuloController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('modulo/{id}', [
+        \App\Http\Controllers\ModuloController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA GRUPO
+    Route::get('grupo', [
+        \App\Http\Controllers\GrupoController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('grupo', [
+        \App\Http\Controllers\GrupoController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('grupo/{id}', [
+        \App\Http\Controllers\GrupoController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('grupo/{id}', [
+        \App\Http\Controllers\GrupoController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    //RUTA PARA CAPACIDAD TERMINAL
+    Route::get('capacidad_terminal', [
+        \App\Http\Controllers\CapacidadTerminalController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('capacidad_terminal', [
+        \App\Http\Controllers\CapacidadTerminalController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('capacidad_terminal/{id}', [
+        \App\Http\Controllers\CapacidadTerminalController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('capacidad_terminal/{id}', [
+        \App\Http\Controllers\CapacidadTerminalController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA NOTA DE CAPACIDAD TERMINAL
+    Route::get('nota_capacidad_terminal', [
+        \App\Http\Controllers\NotaCapacidadTerminalController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('nota_capacidad_terminal', [
+        \App\Http\Controllers\NotaCapacidadTerminalController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('nota_capacidad_terminal/{id}', [
+        \App\Http\Controllers\NotaCapacidadTerminalController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('nota_capacidad_terminal/{id}', [
+        \App\Http\Controllers\NotaCapacidadTerminalController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA EXPERIENCIA FORMATIVA
+    Route::get('experiencia_formativa', [
+        \App\Http\Controllers\ExperienciaFormativaController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('experiencia_formativa', [
+        \App\Http\Controllers\ExperienciaFormativaController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('experiencia_formativa/{id}', [
+        \App\Http\Controllers\ExperienciaFormativaController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('experiencia_formativa/{id}', [
+        \App\Http\Controllers\ExperienciaFormativaController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA NOTA DE EXPERIENCIA FORMATIVA
+    Route::get('nota_experiencia_formativa', [
+        \App\Http\Controllers\NotaExperienciaFormativaController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('nota_experiencia_formativa', [
+        \App\Http\Controllers\NotaExperienciaFormativaController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('nota_experiencia_formativa/{id}', [
+        \App\Http\Controllers\NotaExperienciaFormativaController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('nota_experiencia_formativa/{id}', [
+        \App\Http\Controllers\NotaExperienciaFormativaController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA ENTREGAS DOCENTE
+    Route::get('entrega_docente', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('entrega_docente', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('entrega_docente/{id}', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('entrega_docente/{id}', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA SESIONES
+    Route::get('sesiones', [
+        \App\Http\Controllers\SesionesController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('sesiones', [
+        \App\Http\Controllers\SesionesController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('sesiones/{id}', [
+        \App\Http\Controllers\SesionesController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('sesiones/{id}', [
+        \App\Http\Controllers\SesionesController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA ASISTENCIA
+    Route::get('asistencia', [
+        \App\Http\Controllers\AsistenciaController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('asistencia', [
+        \App\Http\Controllers\AsistenciaController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('asistencia/{id}', [
+        \App\Http\Controllers\AsistenciaController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('asistencia/{id}', [
+        \App\Http\Controllers\AsistenciaController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA ENTREGAS REALIZADAS
+    Route::get('entregas_realizadas', [
+        \App\Http\Controllers\EntregasRealizadasController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('entregas_realizadas', [
+        \App\Http\Controllers\EntregasRealizadasController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('entregas_realizadas/{id}', [
+        \App\Http\Controllers\EntregasRealizadasController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('entregas_realizadas/{id}', [
+        \App\Http\Controllers\EntregasRealizadasController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    //RUTA PARA EGRESADOS
+    Route::get('egresados', [
+        \App\Http\Controllers\EgresadosController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('egresados', [
+        \App\Http\Controllers\EgresadosController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('egresados/{id}', [
+        \App\Http\Controllers\EgresadosController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('egresados/{id}', [
+        \App\Http\Controllers\EgresadosController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    // RUTA PARA PERSONAL ADMINISTRATIVO
+    Route::get('personal_administrativo', [
+        \App\Http\Controllers\PersonalAdministrativoController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('personal_administrativo', [
+        \App\Http\Controllers\PersonalAdministrativoController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('personal_administrativo/{id}', [
+        \App\Http\Controllers\PersonalAdministrativoController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('personal_administrativo/{id}', [
+        \App\Http\Controllers\PersonalAdministrativoController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    //RUTA PARA COMISIONES
+    Route::get('comisiones', [
+        \App\Http\Controllers\ComisionesController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('comisiones', [
+        \App\Http\Controllers\ComisionesController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('comisiones/{id}', [
+        \App\Http\Controllers\ComisionesController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('comisiones/{id}', [
+        \App\Http\Controllers\ComisionesController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
 });

@@ -21,8 +21,8 @@ class EspecialidadProgramaController extends Controller
     {
         
         $request->validate([
-            'id_especialidad' => 'sometimes|exists:especialidad_madre,id',
-            'id_programa' => 'sometimes|exists:programa_estudio,id',
+            'id_especialidad' => 'required|exists:especialidad_madre,id',
+            'id_programa' => 'required|exists:programa_estudio,id',
         ]);
 
         $nuevo = EspecialidadPrograma::create($request->all());

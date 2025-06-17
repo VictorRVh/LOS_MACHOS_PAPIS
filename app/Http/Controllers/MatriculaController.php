@@ -59,9 +59,9 @@ class MatriculaController extends Controller
         }
 
         $request->validate([
-            'id_grupo'      => 'required|uuid|exists:grupo,id',
-            'turno'         => 'required|string|max:10',
-            'id_estudiante' => 'required|uuid|exists:estudiante,id',
+            'id_grupo'      => 'sometimes|uuid|exists:grupo,id',
+            'turno'         => 'sometimes|string|max:10',
+            'id_estudiante' => 'sometimes|uuid|exists:estudiante,id',
             'id_pago'       => 'nullable|uuid|exists:pago,id',
             'reserva'       => 'nullable|boolean'
         ]);

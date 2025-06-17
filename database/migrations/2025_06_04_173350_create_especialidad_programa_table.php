@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary(); 
             $table->uuid('id_especialidad'); 
             $table->uuid('id_programa');     
+            $table->integer('nro_modulos')->nullable();
 
             $table->foreign('id_especialidad')
                   ->references('id')

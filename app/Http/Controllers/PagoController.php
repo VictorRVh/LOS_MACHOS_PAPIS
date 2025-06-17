@@ -12,7 +12,8 @@ class PagoController extends Controller
      */
     public function index()
     {
-        return response()->json(Pago::with('matricula')->get(), 200);
+        $pago = Pago::with('matricula')->get();
+        return response()->json($pago);
     }
 
     /**

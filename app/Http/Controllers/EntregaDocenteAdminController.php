@@ -44,10 +44,10 @@ class EntregaDocenteAdminController extends Controller
         $entrega = EntregaDocenteAdmin::findOrFail($id);
 
         $request->validate([
-            'tipo_entrega' => 'required|string|max:100',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'status' => 'required|integer|in:0,1,2,3',
+            'tipo_entrega' => 'sometimes|string|max:100',
+            'fecha_inicio' => 'sometimes|date',
+            'fecha_fin' => 'sometimes|date|after_or_equal:fecha_inicio',
+            'status' => 'sometimes|integer|in:0,1,2,3',
         ]);
 
         $entrega->update($request->all());

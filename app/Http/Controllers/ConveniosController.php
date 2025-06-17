@@ -48,8 +48,8 @@ class ConveniosController extends Controller
         }
 
         $request->validate([
-            'nombre_institucion' => 'required|string|max:255',
-            'descripcion' => 'required|string|max:255',
+            'nombre_institucion' => 'sometimes|string|max:255',
+            'descripcion' => 'sometimes|string|max:255',
         ]);
 
         $convenio->update($request->all());

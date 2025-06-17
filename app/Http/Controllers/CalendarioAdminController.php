@@ -39,8 +39,8 @@ class CalendarioAdminController extends Controller
         $calendario = CalendarioAdmin::findOrFail($id);
 
         $request->validate([
-            'fecha_nacimiento' => 'required|date',
-            'laborable' => 'required|string|max:100',
+            'fecha_nacimiento' => 'sometimes|date',
+            'laborable' => 'sometimes|string|max:100',
             'descripcion' => 'nullable|string|max:255',
         ]);
 

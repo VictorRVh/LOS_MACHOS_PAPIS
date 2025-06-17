@@ -76,18 +76,18 @@ class GrupoController extends Controller
         }
 
         $request->validate([
-            'id_programa'         => 'required|uuid|exists:programa_estudio,id',
-            'id_especialidad'     => 'required|uuid|exists:especialidad_programa,id',
-            'id_modulo'           => 'required|uuid|exists:modulos,id',
-            'id_periodo'          => 'required|uuid|exists:periodo,id',
-            'id_convenio'         => 'nullable|uuid|exists:convenios,id',
-            'fecha_inicio'        => 'required|date',
-            'fecha_fin'           => 'required|date|after_or_equal:fecha_inicio',
-            'fecha_entrega_acta'  => 'nullable|date',
-            'seccion'             => 'required|string|max:10',
-            'turno'               => 'required|string|max:10',
-            'id_docente'          => 'required|uuid|exists:docente,id',
-            'status'              => 'required|integer|in:0,1,2,3'
+            'id_programa'         => 'sometimes|uuid|exists:programa_estudio,id',
+            'id_especialidad'     => 'sometimes|uuid|exists:especialidad_programa,id',
+            'id_modulo'           => 'sometimes|uuid|exists:modulos,id',
+            'id_periodo'          => 'sometimes|uuid|exists:periodo,id',
+            'id_convenio'         => 'sometimes|nullable|uuid|exists:convenios,id',
+            'fecha_inicio'        => 'sometimes|date',
+            'fecha_fin'           => 'sometimes|date|after_or_equal:fecha_inicio',
+            'fecha_entrega_acta'  => 'sometimes|nullable|date',
+            'seccion'             => 'sometimes|string|max:10',
+            'turno'               => 'sometimes|string|max:10',
+            'id_docente'          => 'sometimes|uuid|exists:docente,id',
+            'status'              => 'sometimes|integer|in:0,1,2,3'
         ]);
 
         $grupo->update($request->all());

@@ -22,7 +22,8 @@ class Modulo extends Model
         'creditos',
         'horas',
         'id_especialidad',
-        'id_periodo'
+        'id_periodo',
+        'nro_capacidades'
     ];
 
     protected static function boot()

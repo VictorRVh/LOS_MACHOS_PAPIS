@@ -32,11 +32,11 @@ class CapacidadTerminalController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_capacidad' => 'sometimes|string|max:255',
-            'fecha_inicio' => 'sometimes|date',
-            'fecha_fin' => 'sometimes|date|after_or_equal:fecha_inicio',
-            'id_grupo' => 'sometimes|exists:grupo,id',
-            'status' => 'sometimes|in:0,1,2,3',
+            'nombre_capacidad' => 'required|string|max:255',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'id_grupo' => 'required|exists:grupo,id',
+            'status' => 'required|in:0,1,2,3',
         ]);
 
         $capacidad = CapacidadTerminal::create($request->all());

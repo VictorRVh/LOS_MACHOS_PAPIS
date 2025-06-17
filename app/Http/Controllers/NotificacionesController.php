@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Notificaciones;
 use Illuminate\Http\Request;
 
 class NotificacionesController extends Controller
@@ -11,38 +12,75 @@ class NotificacionesController extends Controller
      */
     public function index()
     {
-        //
+        $notificaciones = Notificaciones::with('usuario')->get();
+        return response()->json($notificaciones);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // GET /api/notificaciones/{id}
+    public function show($id)
+    {
+        $notificacion = Notificaciones::with('usuario')->find($id);
+
+        if (!$notificacion) {
+            return response()->json(['message' => 'Notificación no encontrada'], 404);
+        }
+
+        return response()->json($notificacion);
+    }
+
+    // POST /api/notificaciones
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'id_usuario' => 'required|exists:users,id',
+            'titulo'     => 'required|string|max:150',
+            'descripcion' => 'nullable|string',
+            'link'       => 'nullable|url'
+        ]);
+
+        $notificacion = Notificaciones::create($request->all());
+
+        return response()->json([
+            'message' => 'Notificación creada exitosamente',
+            'data'    => $notificacion
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // PATCH /api/notificaciones/{id}
+    public function update(Request $request, $id)
     {
-        //
+        $notificacion = Notificaciones::find($id);
+
+        if (!$notificacion) {
+            return response()->json(['message' => 'Notificación no encontrada'], 404);
+        }
+
+        $request->validate([
+            'id_usuario' => 'sometimes|exists:users,id',
+            'titulo'     => 'sometimes|string|max:150',
+            'descripcion' => 'nullable|string',
+            'link'       => 'nullable|url'
+        ]);
+
+        $notificacion->update($request->all());
+
+        return response()->json([
+            'message' => 'Notificación actualizada correctamente',
+            'data'    => $notificacion
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // DELETE /api/notificaciones/{id}
+    public function destroy($id)
     {
-        //
-    }
+        $notificacion = Notificaciones::find($id);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        if (!$notificacion) {
+            return response()->json(['message' => 'Notificación no encontrada'], 404);
+        }
+
+        $notificacion->delete();
+
+        return response()->json(['message' => 'Notificación eliminada correctamente']);
     }
 }

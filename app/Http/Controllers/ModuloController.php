@@ -26,6 +26,7 @@ class ModuloController extends Controller
             'horas'              => 'required|integer|min:0',
             'id_especialidad'    => 'required|exists:especialidad_programa,id',
             'id_periodo'         => 'required|exists:periodo,id',
+            'nro_capacidades'    => 'required|integer|min:0',
         ]);
 
         $modulo = Modulo::create($request->all());
@@ -52,6 +53,7 @@ class ModuloController extends Controller
             'horas'              => 'sometimes|integer|min:0',
             'id_especialidad'    => 'sometimes|exists:especialidad_programa,id',
             'id_periodo'         => 'sometimes|exists:periodo,id',
+            'nro_capacidades'    => 'sometimes|integer|min:0',
         ]);
 
         $modulo = Modulo::create($request->all());

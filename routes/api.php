@@ -630,4 +630,47 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\ComisionesController::class,
         'destroy',
     ])->middleware('permission:permissions-all|permissions-delete');
+
+
+    //RUTA PARA NOTIFICACIONES
+    Route::get('notificaciones', [
+        \App\Http\Controllers\NotificacionesController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('notificaciones', [
+        \App\Http\Controllers\NotificacionesController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('notificaciones/{id}', [
+        \App\Http\Controllers\NotificacionesController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('notificaciones/{id}', [
+        \App\Http\Controllers\NotificacionesController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
+
+    //RUTA PARA ACTIVIDADES RECIENTES
+    Route::get('actividades_recientes', [
+        \App\Http\Controllers\ActividadesRecientesController::class,
+        'index',
+    ])->middleware('permission:permissions-all|permissions-view');
+
+    Route::post('actividades_recientes', [
+        \App\Http\Controllers\ActividadesRecientesController::class,
+        'store',
+    ])->middleware('permission:permissions-all|permissions-create');
+
+    Route::patch('actividades_recientes/{id}', [
+        \App\Http\Controllers\ActividadesRecientesController::class,
+        'update',
+    ])->middleware('permission:permissions-all|permissions-edit');
+
+    Route::delete('actividades_recientes/{id}', [
+        \App\Http\Controllers\ActividadesRecientesController::class,
+        'destroy',
+    ])->middleware('permission:permissions-all|permissions-delete');
 });

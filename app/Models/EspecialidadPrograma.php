@@ -19,7 +19,8 @@ class EspecialidadPrograma extends Model
     protected $fillable = [
         'id',
         'id_especialidad',
-        'id_programa'
+        'id_programa',
+        'nro_modulos'
     ];
 
 

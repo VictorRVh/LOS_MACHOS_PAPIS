@@ -19,6 +19,8 @@ return new class extends Migration
             $table->integer('horas')->nullable();
             $table->uuid('id_especialidad');
             $table->uuid('id_periodo');
+            $table->integer('nro_capacidades')->nullable();
+
 
             $table->foreign('id_especialidad')
                 ->references('id')

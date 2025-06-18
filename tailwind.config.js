@@ -18,6 +18,7 @@ export default {
             fontFamily: {
                 lora: ['Lora'],
                 nabla: ['Nabla'],
+                inter: ['Inter','sans-serif'],
             },
             fontSize: {
                 xsm: '13px',

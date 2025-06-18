@@ -8,124 +8,116 @@ import useValidation from '../composables/useValidation';
 import useAppRouter from '../composables/useAppRouter';
 import useUserStore from '../store/useUserStore';
 
+import { string, object } from 'yup';
+
 const { store: login, saving: loggingIn } = useHttpRequest('/login');
 const { runYupValidation } = useValidation();
 const { pushToRoute } = useAppRouter();
 const userStore = useUserStore();
 
-import { string, object } from 'yup';
-
 const formData = ref({
-    email: null,
-    password: null,
+  email: null,
+  password: null,
 });
 const formErrors = ref({});
 
 const schema = object().shape({
-    email: string().email().nullable().required(),
-    password: string().nullable().required(),
+  email: string().email().nullable().required(),
+  password: string().nullable().required(),
 });
 
 const onSignIn = async () => {
-    if (loggingIn.value) return;
+  if (loggingIn.value) return;
+  const { validated, data, errors } = await runYupValidation(schema, formData.value);
+  if (!validated) {
+    formErrors.value = errors;
+    return;
+  }
 
-    const { validated, data, errors } = await runYupValidation(
-        schema,
-        formData.value,
-    );
-
-    if (!validated) {
-        formErrors.value = errors;
-        return;
-    }
-
-    formErrors.value = {};
-    const user = await login(data);
-
-    if (user?.id) {
-        userStore.setUser(user);
-        await pushToRoute({ name: 'users' });
-    }
+  formErrors.value = {};
+  const user = await login(data);
+  if (user?.id) {
+    userStore.setUser(user);
+    await pushToRoute({ name: 'users' });
+  }
 };
 </script>
 
 <template>
-    <section class="">
-        <div
-            class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0"
-        >
-            <div
-                class="w-full bg-white rounded-lg dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700 shadow-google"
-            >
-                <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
-                    <h1
-                        class="text-xl font-bold leading-tight tracking-tight text-active md:text-2xl"
-                    >
-                        Sign in to your account
-                    </h1>
+  <section class="min-h-screen flex flex-col md:flex-row text-[#222] font-inter bg-[#f4fafd]">
+    <!-- Left Panel flex flex-col justify-center-->
+    <div class="md:w-full p-12 bg-[#EAF6FD]">
+      <div class="border-l-8 border-[#00A0E3] m-12 px-4">
+        <h1 class="text-3xl font-extrabold leading-snug text-[#00A0E3] uppercase">
+          CENTRO DE EDUCACIÓN      <br />
+          TÉCNICO PRODUCTIVA PUNO
+        </h1>
+        <p class="text-lg mt-2 text-gray-800">Sistema de Gestión Académica.</p>
+      </div>
 
-                    <div>
-                        <div class="font-bold underline">
-                            Super admin credentials
-                        </div>
-                        <div class="dark:text-[#aaa]">
-                            <b>email:</b> "sadmin@sadmin.com"
-                        </div>
-                        <div class="dark:text-[#aaa]">
-                            <b>password:</b> "password"
-                        </div>
-                    </div>
-
-                    <div class="space-y-4 md:space-y-6">
-                        <div>
-                            <FormInput
-                                v-model="formData.email"
-                                label="Email"
-                                :error="formErrors?.email"
-                            />
-                        </div>
-
-                        <div>
-                            <FormInput
-                                v-model="formData.password"
-                                label="Email"
-                                type="password"
-                                :error="formErrors?.password"
-                            />
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-start">
-                                <div class="flex items-center h-5">
-                                    <input
-                                        id="remember"
-                                        aria-describedby="remember"
-                                        type="checkbox"
-                                        class="w-4 h-4 border border-gray-300 rounded bg-gray-50 dark:border-gray-600 dark:accent-active text-white"
-                                        required=""
-                                    />
-                                </div>
-                                <div class="ml-3 text-sm">
-                                    <label
-                                        for="remember"
-                                        class="text-gray-500 dark:text-gray-300"
-                                        >Remember me</label
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <Button
-                            title="Sign in"
-                            class="!w-full"
-                            loading-title="Signing in..."
-                            :loading="loggingIn"
-                            @click="onSignIn"
-                        />
-                    </div>
-                </div>
-            </div>
+      <!-- Card box -->
+      <div class=" mt-10 m-auto bg-white shadow-md rounded-xl w- max-w-[600px] overflow-hidden">
+        <!-- Header -->
+        <div class="bg-[#00AEEF] text-white text-center font-semibold py-2">
+          Nuestras Plataformas
         </div>
-    </section>
+
+        <!-- Body -->
+        <div class="p-6 flex flex-col items-center">
+          <img
+            src="/img/imagenLogin.png"
+            alt="Ilustración educativa"
+            class="w-40 mb-6"
+          />
+          <button
+            class="bg-[#FFD000] text-white font-bold text-sm py-2 px-6 rounded-md hover:bg-[#e6bc00] transition-colors"
+          >
+            PAGINA WEB
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: login ya hecho -->
+    <div class="md:w-1/2 flex flex-col justify-center items-center px-6 py-12 bg-white">
+      <img src="/img/insignia.png" alt="Logo CETPRO" class="w-24 mb-4" />
+      <h2 class="text-2xl font-bold text-[#00AEEF] mb-6">Bienvenido</h2>
+
+      <!-- Formulario -->
+      <div class="w-full max-w-sm">
+        <FormInput
+          v-model="formData.email"
+          label="Usuario"
+          :error="formErrors?.email"
+        />
+        <div class="mt-4">
+          <FormInput
+            v-model="formData.password"
+            label="Clave"
+            type="password"
+            :error="formErrors?.password"
+            show-password
+          />
+        </div>
+
+        <div class="flex items-center mt-4">
+          <input id="remember" type="checkbox" class="mr-2" />
+          <label for="remember" class="text-sm text-gray-700">Recuerdame</label>
+        </div>
+
+        <Button
+          title="Ingresar"
+          class="!w-full mt-6 bg-[#00AEEF] text-white"
+          loading-title="Ingresando..."
+          :loading="loggingIn"
+          @click="onSignIn"
+        />
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full text-center text-xs text-gray-500 py-4 absolute bottom-0">
+      © 2025 Todos los derechos reservados. CETPRO Puno — Educación Técnica para el Futuro.
+    </footer>
+  </section>
 </template>
-../store/useAuthUserStore

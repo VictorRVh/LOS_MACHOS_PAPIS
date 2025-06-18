@@ -11,7 +11,8 @@ const asyncLoading = ref(false);
     <main class="h-full w-full relative">
         <PageLoader :loading="asyncLoading" />
 
-        <div class="container mx-auto max-w-[1172px] px-4 lg:px-0 h-full">
+        <div class="container mx-auto max-w-full px-4 lg:px-0 h-full">
+
             <RouterView v-slot="{ Component }">
                 <template v-if="Component">
                     <Suspense

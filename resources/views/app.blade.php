@@ -7,14 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-    <title>Laravel vue role permission management</title>
+    <title>INTRANET CETPRO</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     @vite('resources/js/app.js')
 </head>
 
 <body class="box-border p-0 m-0 bg-light-bg text-light-color dark:bg-dark-bg dark:text-dark-color font-lora italic">
     <noscript>
-        <strong>Please enable javascript otherwise this website will not work</strong>
+        <strong>Por favor activar js</strong>
     </noscript>
 
     <div id="app"></div>

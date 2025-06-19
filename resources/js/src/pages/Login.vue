@@ -48,7 +48,7 @@ const onSignIn = async () => {
         <!-- Panel Izquierdo: Imagen SVG como fondo -->
         <!-- Panel izquierdo con imagen SVG como hijo y object-cover aplicado correctamente -->
         <div class="md:w-3/5 h-[300px] md:h-screen relative flex items-center justify-center overflow-hidden">
-            <img src="/img/lastLoginV.svg" alt="Login" class="max-w-[100%] max-h-[100%] object-contain" />
+            <img src="/img/logoFijo.svg" alt="Login" class="max-w-[100%] max-h-[100%] object-contain" />
         </div>
 
         <!-- Panel Derecho: Formulario -->

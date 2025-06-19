@@ -27,8 +27,16 @@ class UserController extends Controller
         try {
             $validated = $request->validate([
                 'name' => ['required'],
+                'usuario' => ['required'],
+                'dni' => ['required', 'unique:users,dni'],
+                'apellido_paterno' => ['required'],
+                'apellido_materno' => ['required'],
+                'fecha_nacimiento' => ['required'],
                 'email' => ['required', 'email', 'unique:users,email'],
+                'telefono' => ['required'],
+                'direccion' => ['required'],
                 'password' => ['required'],
+                'status' => ['required'],
             ]);
 
             $validated['password'] = Hash::make($validated['password']);
@@ -61,14 +69,24 @@ class UserController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => ['required', 'sometimes'],
+                'name' => ['required'],
+                'usuario' => ['required'],
+                'dni' => [
+                    'required',
+                    Rule::unique('users', 'dni')->ignore($request->userId),
+                ],
+                'apellido_paterno' => ['required'],
+                'apellido_materno' => ['required'],
+                'fecha_nacimiento' => ['required'],
                 'email' => [
                     'required',
                     'email',
-                    'sometimes',
-                    Rule::unique('users')->ignore($request->userId),
+                    Rule::unique('users', 'email')->ignore($request->userId),
                 ],
-                'password' => ['required', 'sometimes'],
+                'telefono' => ['required'],
+                'direccion' => ['required'],
+                // 'password' => ['nullable'], // Puede ser opcional en update
+                'status' => ['required'],
             ]);
 
             if (isset($validated['password'])) {

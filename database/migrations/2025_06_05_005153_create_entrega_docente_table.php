@@ -19,6 +19,7 @@ return new class extends Migration
             $table->boolean('estado');
             $table->uuid('id_admin');
             $table->string('documento_admin');
+            $table->string('observacion');
 
             $table->foreign('id_grupo')
                   ->references('id')->on('grupo')

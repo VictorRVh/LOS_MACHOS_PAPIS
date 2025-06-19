@@ -38,6 +38,7 @@ class EntregaDocenteController extends Controller
             'estado'          => 'required|string|max:100',
             'id_admin'        => 'required|uuid|exists:entrega_docente_admin,id',
             'documento_admin' => 'required|string|max:255',
+            'observacion' => 'required|string|max:255',
         ]);
 
         $entrega = EntregaDocente::create($request->all());
@@ -61,6 +62,7 @@ class EntregaDocenteController extends Controller
             'estado'          => 'sometimes|string|max:100',
             'id_admin'        => 'sometimes|uuid|exists:entrega_docente_admin,id',
             'documento_admin' => 'sometimes|string|max:255',
+            'observacion' => 'sometimes|string|max:255',
         ]);
 
         $entrega->update($request->all());

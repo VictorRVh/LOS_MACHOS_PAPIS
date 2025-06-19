@@ -16,13 +16,13 @@ const { pushToRoute } = useAppRouter();
 const userStore = useUserStore();
 
 const formData = ref({
-  email: null,
+  usuario: null,
   password: null,
 });
 const formErrors = ref({});
 
 const schema = object().shape({
-  email: string().email().nullable().required(),
+  usuario: string().nullable().required(),
   password: string().nullable().required(),
 });
 
@@ -86,9 +86,9 @@ const onSignIn = async () => {
       <!-- Formulario -->
       <div class="w-full max-w-sm">
         <FormInput
-          v-model="formData.email"
+          v-model="formData.usuario"
           label="Usuario"
-          :error="formErrors?.email"
+          :error="formErrors?.usuario"
         />
         <div class="mt-4">
           <FormInput

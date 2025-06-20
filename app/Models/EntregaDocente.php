@@ -22,7 +22,8 @@ class EntregaDocente extends Model
         'fecha_fin',
         'estado',
         'id_admin',
-        'documento_admin'
+        'documento_admin',
+        'observacion'
     ];
 
     protected static function boot()

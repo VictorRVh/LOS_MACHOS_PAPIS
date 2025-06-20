@@ -1,4 +1,5 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
+
 import colors from 'tailwindcss/colors';
 import animationDelay from 'tailwindcss-animation-delay';
 
@@ -11,6 +12,7 @@ export default {
     ],
     theme: {
         extend: {
+            // ... tus screens, fontFamily, fontSize están bien ...
             screens: {
                 xs: '470px',
                 mobile: '420px',
@@ -25,18 +27,31 @@ export default {
                 '2xs': '11px',
                 xxs: '10px',
             },
+
             colors: {
+                // COLORES BASE
                 'dark-bg': '#060818',
                 'dark-color': 'rgba(255, 255, 255, 0.87)',
                 'light-bg': '#ffffff',
                 'light-color': '#213547',
+
+                // TU PALETA PERSONALIZADA
+                'cetpro': {
+                    'light': '#338CBF',
+                    'DEFAULT': '#006F9F',
+                    'dark': '#00557F',
+                    'text': '#FFFFFF'
+                },
+                
+                // COLORES DE ESTADO (active)
                 active: {
-                    // DEFAULT: '#E2C537',
                     DEFAULT: colors.emerald[500],
                     light: colors.emerald[700],
                     dark: colors.emerald[500],
                     hover: colors.emerald[200],
                 },
+                
+                // TUS OTROS COLORES 'cc-*'
                 'cc-12': '#1b2e4b',
                 'cc-18': '#191e3a',
                 'cc-10': '#0e1726',
@@ -46,6 +61,8 @@ export default {
                 'cc-20': '#1a1c2d',
                 'cc-21': '#3b3f5c',
             },
+            
+            // ... tu transitionProperty, boxShadow, etc., están bien ...
             transitionProperty: {
                 width: 'width',
                 height: 'height',
@@ -64,23 +81,10 @@ export default {
             },
             animationDelay: {
                 100: '100ms',
-                200: '200ms',
-                300: '300ms',
-                400: '400ms',
-                500: '500ms',
-                600: '600ms',
-                700: '700ms',
-                800: '800ms',
-                900: '900ms',
-                1000: '1000ms',
-                1100: '1100ms',
-                1200: '1200ms',
-                1300: '1300ms',
-                1400: '1400ms',
-                1500: '1500ms',
-                1600: '1600ms',
+                // ... el resto de tus delays
             },
         },
     },
     plugins: [animationDelay],
+    
 };

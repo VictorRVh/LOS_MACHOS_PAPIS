@@ -17,13 +17,14 @@ class AuthController extends Controller
     {
         try {
             $credentials = $request->validate([
-                'email' => ['required', 'email'],
+                'usuario' => ['required'],
                 'password' => ['required'],
             ]);
 
             $user = User::with('roles.permissions')
-                ->where('email', $credentials['email'])
+                ->where('usuario', $credentials['usuario'])
                 ->first();
+
             if (
                 !$user ||
                 !Hash::check($credentials['password'], $user->password)
@@ -42,6 +43,7 @@ class AuthController extends Controller
             return $this->errorResponse($error);
         }
     }
+
 
     public function verify()
     {

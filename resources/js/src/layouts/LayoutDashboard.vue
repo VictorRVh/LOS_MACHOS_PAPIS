@@ -1,42 +1,43 @@
 <script setup>
-import { ref } from 'vue';
-
-import DashboardHeader from './DashboardHeader.vue';
+import { useLayoutStore } from '@/store/useLayoutStore';
+import Sidebar from './components/Sidebar.vue';
+import Header from './components/Header.vue';
 import PageLoader from './PageLoader.vue';
 import SuspenseFallback from './SuspenseFallback.vue';
 
-const asyncLoading = ref(false);
+const layoutStore = useLayoutStore();
 </script>
 
 <template>
-    <div class="w-full">
-        <!-- header -->
-        <header
-            class="w-full bg-cc-10 h-20 min-h-[80px] sticky top-0 shadow-google z-10"
-        >
-            <DashboardHeader
-                class="h-full container mx-auto flex-between max-w-[1172px] px-4 xl:px-0 gap-4 text-dark-color"
-            />
-        </header>
+    <div class="flex h-screen bg-gray-100 dark:bg-cc-10 font-sans">
+        <!-- 1. SIDEBAR LATERAL (AZUL) -->
+        <Sidebar />
 
-        <main class="h-[calc(100%-80px)] w-full relative">
-            <PageLoader :loading="asyncLoading" />
+        <!-- 2. ÁREA DE CONTENIDO PRINCIPAL -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- 2A. HEADER SUPERIOR (BLANCO) -->
+            <Header />
 
-            <div class="container mx-auto max-w-[1172px] px-4 lg:px-0 h-full">
+            <!-- PageLoader tipo barra de progreso -->
+            <PageLoader :loading="layoutStore.isPageLoading" />
+
+            <!-- 2B. CONTENIDO DE LA PÁGINA (CON SCROLL) -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto">
                 <RouterView v-slot="{ Component }">
-                    <template v-if="Component">
-                        <Suspense
-                            @pending="asyncLoading = true"
-                            @resolve="asyncLoading = false"
-                        >
-                            <component :is="Component"></component>
-                            <template #fallback>
-                                <SuspenseFallback />
-                            </template>
-                        </Suspense>
-                    </template>
+                    <Suspense
+                        @pending="layoutStore.setPageLoading(true)"
+                        @resolve="layoutStore.setPageLoading(false)"
+                        @fallback="layoutStore.setPageLoading(false)"
+                    >
+                        <!-- El componente de la página actual se renderiza aquí -->
+                        <component :is="Component"></component>
+
+                        <template #fallback>
+                            <SuspenseFallback />
+                        </template>
+                    </Suspense>
                 </RouterView>
-            </div>
-        </main>
+            </main>
+        </div>
     </div>
 </template>

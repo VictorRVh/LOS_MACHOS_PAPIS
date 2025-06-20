@@ -51,5 +51,10 @@ export default defineConfig(() => {
         define: {
             'process.env': clientEnv,
         },
+         resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './resources/js/src'),
+        },
+        },
     };
 });

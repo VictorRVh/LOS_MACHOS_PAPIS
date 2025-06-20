@@ -40,85 +40,56 @@ const onDelete = (user) => {
         }
     });
 };
+
 </script>
 
 <template>
     <AuthorizationFallback :permissions="['users-all', 'users-view']">
         <div class="w-full space-y-4 py-6">
             <div class="flex-between">
-                <h2 class="text-active font-bold text-2xl">Users</h2>
+                <h2 class="text-active font-bold text-2xl">Usuarios</h2>
 
                 <CreateButton @click="showSlider(true)" />
             </div>
+            <Table>
+                <THead>
+                    <Th>Nro</Th>
+                    <Th>Nombres</Th>
+                    <Th>Apellidos</Th>
+                    <Th>Rol</Th>
+                    <Th>Fecha de Creación</Th>
+                    <Th>Estado</Th>
+                    <Th class="text-center">Opciones</Th>
+                </THead>
 
-            <div class="w-full">
-                <Table>
-                    <THead>
-                        <Tr>
-                            <Th> Id </Th>
-                            <Th> User </Th>
-                            <Th> Roles </Th>
-                            <Th> Permissions </Th>
-                            <Th> Action </Th>
-                        </Tr>
-                    </THead>
-
-                    <TBody>
-                        <Tr
-                            v-for="user in userStore.users"
-                            :key="user.id"
-                        >
-                            <Td>{{ user?.id }}</Td>
-                            <Td>
-                                <div
-                                    class="text-emerald-500 dark:text-emerald-200"
-                                >
-                                    {{ user?.name }}
-                                </div>
-                                <div class="text-xsm text-[#aaa]">
-                                    {{ user?.email }}
-                                </div>
-                            </Td>
-                            <Td>
-                                <ul class="w-max mx-auto list-disc">
-                                    <li
-                                        v-for="role in user.roles"
-                                        :key="role.id"
-                                        class="text-left"
-                                    >
-                                        {{ role?.name }}
-                                    </li>
-                                </ul>
-                            </Td>
-                            <Td>
-                                <ul class="w-max mx-auto list-disc">
-                                    <li
-                                        v-for="permission in user.permissions"
-                                        :key="permission.id"
-                                        class="text-left"
-                                    >
-                                        {{ permission?.name }}
-                                    </li>
-                                </ul>
-                            </Td>
-                            <Td class="align-middle">
-                                <div class="flex flex-col gap-2">
-                                    <EditButton
-                                        @click="showSlider(true, user)"
-                                    />
-                                    <DeleteButton @click="onDelete(user)" />
-                                </div>
-                            </Td>
-                        </Tr>
-                    </TBody>
-                </Table>
-            </div>
+                <TBody>
+                    <Tr v-for="(user, index) in userStore.users" :key="index">
+                        <Td><span class="text-gray-800">{{ index + 1 }}</span></Td>
+                        <Td>{{ user.name }}</Td>
+                        <Td>{{ user.apellido_paterno }}</Td>
+                        <Td>
+                            <span
+                                class="bg-gray-800 text-white text-xs px-2 py-1 rounded-full font-bold">DIRECTOR(a)</span>
+                        </Td>
+                        <Td>{{ user.created_at }}</Td>
+                        <Td>
+                            <span :class="user.status === 1
+                                ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
+                                : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'"
+                                class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
+                                <!-- {{ user.status }} -->
+                                  activo
+                                <span>↗</span>
+                            </span>
+                        </Td>
+                        <Td class="text-center text-gray-600 dark:text-gray-200">
+                            <button class="hover:text-black dark:hover:text-white text-xl">⋮</button>
+                        </Td>
+                    </Tr>
+                </TBody>
+            </Table>
         </div>
 
-        <UserSlider
-            :show="slider"
-            :user="sliderData"
-            @hide="hideSlider"
-        />
+        <UserSlider :show="slider" :user="sliderData" @hide="hideSlider" />
     </AuthorizationFallback>
 </template>

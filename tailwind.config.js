@@ -40,7 +40,7 @@ export default {
                     'light': '#338CBF',
                     'DEFAULT': '#006F9F',
                     'dark': '#00557F',
-                    'text': '#FFFFFF'
+                    'text': '#FFFFFF',
                 },
                 
                 // COLORES DE ESTADO (active)
@@ -60,6 +60,7 @@ export default {
                 'cc-19': '#060818',
                 'cc-20': '#1a1c2d',
                 'cc-21': '#3b3f5c',
+                'cc-22': '#2563EB'
             },
             
             // ... tu transitionProperty, boxShadow, etc., están bien ...

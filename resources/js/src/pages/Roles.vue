@@ -54,61 +54,41 @@ const onDelete = (role) => {
 
                 <CreateButton @click="showSlider(true)" />
             </div>
+            <Table>
+                <THead>
+                        <Th> Id </Th>
+                        <Th> Role </Th>
+                        <Th> Permissions </Th>
+                        <Th> Action </Th>
+                </THead>
 
-            <div class="w-full">
-                <Table>
-                    <THead>
-                        <Tr>
-                            <Th> Id </Th>
-                            <Th> Role </Th>
-                            <Th> Permissions </Th>
-                            <Th> Action </Th>
-                        </Tr>
-                    </THead>
+                <TBody>
+                    <Tr v-for="role in roleStore.roles" :key="role.id">
+                        <Td>{{ role?.id }}</Td>
+                        <Td>
+                            <div class="text-emerald-500 dark:text-emerald-200">
+                                {{ role?.name }}
+                            </div>
+                        </Td>
 
-                    <TBody>
-                        <Tr
-                            v-for="role in roleStore.roles"
-                            :key="role.id"
-                        >
-                            <Td>{{ role?.id }}</Td>
-                            <Td>
-                                <div
-                                    class="text-emerald-500 dark:text-emerald-200"
-                                >
-                                    {{ role?.name }}
-                                </div>
-                            </Td>
-
-                            <Td>
-                                <ul class="w-max mx-auto list-disc">
-                                    <li
-                                        v-for="permission in role.permissions"
-                                        :key="permission.id"
-                                        class="text-left"
-                                    >
-                                        {{ permission?.name }}
-                                    </li>
-                                </ul>
-                            </Td>
-                            <Td class="align-middle">
-                                <div class="flex flex-col gap-2">
-                                    <EditButton
-                                        @click="showSlider(true, role)"
-                                    />
-                                    <DeleteButton @click="onDelete(role)" />
-                                </div>
-                            </Td>
-                        </Tr>
-                    </TBody>
-                </Table>
-            </div>
+                        <Td>
+                            <ul class="w-max mx-auto list-disc">
+                                <li v-for="permission in role.permissions" :key="permission.id" class="text-left">
+                                    {{ permission?.name }}
+                                </li>
+                            </ul>
+                        </Td>
+                        <Td class="align-middle">
+                            <div class="flex flex-col gap-2">
+                                <EditButton @click="showSlider(true, role)" />
+                                <DeleteButton @click="onDelete(role)" />
+                            </div>
+                        </Td>
+                    </Tr>
+                </TBody>
+            </Table>
         </div>
 
-        <RoleSlider
-            :show="slider"
-            :role="sliderData"
-            @hide="hideSlider"
-        />
+        <RoleSlider :show="slider" :role="sliderData" @hide="hideSlider" />
     </AuthorizationFallback>
 </template>

@@ -1,10 +1,14 @@
 <script setup>
+import { ref, computed } from 'vue'
+
 import Table from '../components/table/Table.vue';
 import THead from '../components/table/THead.vue';
 import TBody from '../components/table/TBody.vue';
 import Tr from '../components/table/Tr.vue';
 import Th from '../components/table/Th.vue';
 import Td from '../components/table/Td.vue';
+import SearchBar from '../components/head_table/headSearch.vue'
+
 import CreateButton from '../components/ui/CreateButton.vue';
 import EditButton from '../components/ui/EditButton.vue';
 import DeleteButton from '../components/ui/DeleteButton.vue';
@@ -41,6 +45,22 @@ const onDelete = (user) => {
     });
 };
 
+const usuarios = ref(userStore.users)
+
+const filtro = ref({ field: 'name', query: '' })
+
+function filtrarUsuarios(payload) {
+    filtro.value = payload
+}
+
+const usuariosFiltrados = computed(() => {
+    if (!filtro.value.query) return usuarios.value
+    return usuarios.value.filter(user =>
+        String(user[filtro.value.field]).toLowerCase().includes(filtro.value.query.toLowerCase())
+    )
+})
+
+
 </script>
 
 <template>
@@ -51,11 +71,27 @@ const onDelete = (user) => {
 
                 <CreateButton @click="showSlider(true)" />
             </div>
+            <div class="flex-between space-y-4 py-6 px-6 flex-row-reverse">
+                <SearchBar :options="[
+                    { label: 'Nombre', value: 'name' },
+                    { label: 'Apellido', value: 'apellido_paterno' },
+                    { label: 'DNI', value: 'dni' }
+                ]" placeholder="Buscar usuario"
+                 @search="filtrarUsuarios" 
+                 :totalResultados="usuariosFiltrados.length"
+                  />
+
+                <div class="text-2xl font-inter">
+                    Lista de usuarios
+                </div>
+            </div>
             <Table>
                 <THead>
                     <Th>Nro</Th>
                     <Th>Nombres</Th>
                     <Th>Apellidos</Th>
+                    <Th>Dni</Th>
+                    <Th>Correo</Th>
                     <Th>Rol</Th>
                     <Th>Fecha de Creación</Th>
                     <Th>Estado</Th>
@@ -63,10 +99,12 @@ const onDelete = (user) => {
                 </THead>
 
                 <TBody>
-                    <Tr v-for="(user, index) in userStore.users" :key="index">
+                    <Tr v-for="(user, index) in usuariosFiltrados" :key="index">
                         <Td><span class="text-gray-800">{{ index + 1 }}</span></Td>
                         <Td>{{ user.name }}</Td>
                         <Td>{{ user.apellido_paterno }}</Td>
+                        <Td>{{ user.dni }}</Td>
+                        <Td>{{ user.email }}</Td>
                         <Td>
                             <span
                                 class="bg-gray-800 text-white text-xs px-2 py-1 rounded-full font-bold">DIRECTOR(a)</span>
@@ -79,7 +117,7 @@ const onDelete = (user) => {
                                 : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'"
                                 class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
                                 <!-- {{ user.status }} -->
-                                  activo
+                                activo
                                 <span>↗</span>
                             </span>
                         </Td>

@@ -67,11 +67,11 @@ const onDelete = (permission) => {
             <div class="w-full">
                 <Table>
                     <THead>
-                        <Tr>
+                        
                             <Th> Id </Th>
                             <Th> Permission </Th>
                             <Th> Action </Th>
-                        </Tr>
+                      
                     </THead>
 
                     <TBody>

@@ -8,7 +8,6 @@ export default [
             permissions: [],
         },
     },
-
     {
         path: '/users',
         name: 'users',
@@ -18,7 +17,6 @@ export default [
             permissions: ['users-all', 'users-view'],
         },
     },
-
     {
         path: '/roles',
         name: 'roles',
@@ -28,11 +26,11 @@ export default [
             permissions: ['roles-all', 'roles-view'],
         },
     },
-
     {
+       
         path: '/permissions',
         name: 'permissions',
-        component: () => import('../pages/Permissions.vue'),
+        component: () => import('../pages/newPermission.vue'), 
         meta: {
             layout: 'dashboard',
             permissions: ['permissions-all', 'permissions-view'],

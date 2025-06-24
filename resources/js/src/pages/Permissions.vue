@@ -54,60 +54,37 @@ const onDelete = (permission) => {
 </script>
 
 <template>
-    <AuthorizationFallback
-        :permissions="['permissions-all', 'permissions-view']"
-    >
-        <div class="w-full space-y-4 py-6">
+    <AuthorizationFallback :permissions="['permissions-all', 'permissions-view']">
+        <div class="w-full space-y-8 py-10 px-6">
             <div class="flex-between">
-                <h2 class="text-active font-bold text-2xl">Permissions</h2>
-
+                <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Permisos</h2>
                 <CreateButton @click="showSlider(true)" />
             </div>
+            
+            <Table>
+                <THead>
+                    <Th>Id</Th>
+                    <Th>Permiso</Th>
+                    <Th>Acciones</Th>
+                </THead>
 
-            <div class="w-full">
-                <Table>
-                    <THead>
+                <TBody>
+                    <Tr v-for="permission in permissionStore.permissions" :key="permission.id">
+                        <Td>{{ permission?.id }}</Td>
                         
-                            <Th> Id </Th>
-                            <Th> Permission </Th>
-                            <Th> Action </Th>
-                      
-                    </THead>
+                        <Td>{{ permission?.name }}</Td>
 
-                    <TBody>
-                        <Tr
-                            v-for="permission in permissionStore.permissions"
-                            :key="permission.id"
-                        >
-                            <Td>{{ permission?.id }}</Td>
-                            <Td>
-                                <div
-                                    class="text-emerald-500 dark:text-emerald-200"
-                                >
-                                    {{ permission?.name }}
-                                </div>
-                            </Td>
-
-                            <Td class="align-middle">
-                                <div class="flex flex-col gap-2">
-                                    <EditButton
-                                        @click="showSlider(true, permission)"
-                                    />
-                                    <DeleteButton
-                                        @click="onDelete(permission)"
-                                    />
-                                </div>
-                            </Td>
-                        </Tr>
-                    </TBody>
-                </Table>
-            </div>
+                        <Td class="align-middle">
+                            <div class="flex items-center justify-center gap-2">
+                                <EditButton @click="showSlider(true, permission)" />
+                                <DeleteButton @click="onDelete(permission)" />
+                            </div>
+                        </Td>
+                    </Tr>
+                </TBody>
+            </Table>
         </div>
 
-        <PermissionSlider
-            :show="slider"
-            :permission="sliderData"
-            @hide="hideSlider"
-        />
+        <PermissionSlider :show="slider" :permission="sliderData" @hide="hideSlider" />
     </AuthorizationFallback>
 </template>

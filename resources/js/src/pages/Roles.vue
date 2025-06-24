@@ -48,28 +48,25 @@ const onDelete = (role) => {
 
 <template>
     <AuthorizationFallback :permissions="['roles-all', 'roles-view']">
-        <div class="w-full space-y-4 py-6">
+        <div class="w-full space-y-8 py-10 px-6">
             <div class="flex-between">
-                <h2 class="text-active font-bold text-2xl">Roles</h2>
-
+                <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Roles</h2>
                 <CreateButton @click="showSlider(true)" />
             </div>
+
             <Table>
                 <THead>
-                        <Th> Id </Th>
-                        <Th> Role </Th>
-                        <Th> Permissions </Th>
-                        <Th> Action </Th>
+                    <Th>Id</Th>
+                    <Th>Rol</Th>
+                    <Th>Permisos</Th>
+                    <Th>Acciones</Th>
                 </THead>
 
                 <TBody>
                     <Tr v-for="role in roleStore.roles" :key="role.id">
                         <Td>{{ role?.id }}</Td>
-                        <Td>
-                            <div class="text-emerald-500 dark:text-emerald-200">
-                                {{ role?.name }}
-                            </div>
-                        </Td>
+                        
+                        <Td>{{ role?.name }}</Td>
 
                         <Td>
                             <ul class="w-max mx-auto list-disc">
@@ -78,8 +75,9 @@ const onDelete = (role) => {
                                 </li>
                             </ul>
                         </Td>
+
                         <Td class="align-middle">
-                            <div class="flex flex-col gap-2">
+                            <div class="flex items-center justify-center gap-2">
                                 <EditButton @click="showSlider(true, role)" />
                                 <DeleteButton @click="onDelete(role)" />
                             </div>

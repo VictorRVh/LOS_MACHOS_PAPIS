@@ -88,7 +88,7 @@ const onLogout = async () => {
 
                 <div
                     v-if="userStore.user?.id"
-                    class="text-xs text-emerald-300 flex justify-end"
+                    class="text-xs text-cetpro-default flex justify-end"
                 >
                     {{ `${userStore.user?.name} (${userStore.user?.email})` }}
                 </div>

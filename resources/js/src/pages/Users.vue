@@ -45,12 +45,18 @@ const onDelete = (user) => {
 
 <template>
     <AuthorizationFallback :permissions="['users-all', 'users-view']">
-        <div class="w-full space-y-4 py-6">
+       
+        <div class="w-full space-y-8 py-10 px-6">
             <div class="flex-between">
-                <h2 class="text-active font-bold text-2xl">Usuarios</h2>
-
+                
+                <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Usuarios</h2>
+                
+               
                 <CreateButton @click="showSlider(true)" />
+                
             </div>
+
+            
             <Table>
                 <THead>
                     <Th>Nro</Th>
@@ -62,29 +68,33 @@ const onDelete = (user) => {
                     <Th class="text-center">Opciones</Th>
                 </THead>
 
+               
                 <TBody>
                     <Tr v-for="(user, index) in userStore.users" :key="index">
-                        <Td><span class="text-gray-800">{{ index + 1 }}</span></Td>
+                        <Td><span class="text-gray-800 dark:text-gray-300">{{ index + 1 }}</span></Td>
                         <Td>{{ user.name }}</Td>
                         <Td>{{ user.apellido_paterno }}</Td>
                         <Td>
+                            
                             <span
-                                class="bg-gray-800 text-white text-xs px-2 py-1 rounded-full font-bold">DIRECTOR(a)</span>
+                                class="bg-gray-800 text-white text-xs px-2 py-1 rounded-full font-bold">
+                                DIRECTOR(a)
+                            </span>
                         </Td>
                         <Td>{{ user.created_at.slice(0, 10) }}</Td>
-
                         <Td>
+                            
                             <span :class="user.status === 1
                                 ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
                                 : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'"
                                 class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
-                                <!-- {{ user.status }} -->
-                                  activo
-                                <span>↗</span>
+                                Activo
+                                <span v-if="user.status === 1">✓</span>
                             </span>
                         </Td>
                         <Td class="text-center text-gray-600 dark:text-gray-200">
-                            <button class="hover:text-black dark:hover:text-white text-xl">⋮</button>
+                          
+                            <button class="hover:text-cetpro dark:hover:text-cetpro-light text-xl">⋮</button>
                         </Td>
                     </Tr>
                 </TBody>

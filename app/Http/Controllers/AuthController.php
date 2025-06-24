@@ -39,6 +39,16 @@ class AuthController extends Controller
             Auth::loginUsingId($user->id, true);
 
             return response()->json($this->extractPermissionsFromUser($user));
+
+            // return response()->json([
+            //     'id' => $user->id,
+            //     'nombre' => $user->name,
+            //     'email' => $user->email,
+            //     'usuario' => $user->usuario,
+            //     'rol' => $user->rol,
+            //     'permisos' => $user->$roles->permissions
+            //     // agrega los campos que desees mostrar
+            // ]);
         } catch (\Exception $error) {
             return $this->errorResponse($error);
         }

@@ -76,7 +76,7 @@ const onLogout = async () => {
 
                         <!-- Menú desplegable -->
                         <Transition name="fade">
-                            <userMenu v-if="isMenuOpen" class="absolute right-0 top-12" :nombre="userStore.user?.nombre"
+                            <userMenu v-if="isMenuOpen" class="absolute right-0 top-12" :nombre="userStore?.user?.name"
                                 :apellido="userStore.user?.apellido" @logout="onLogout"
                                 @toggle-theme="updateDarkMode(!isDarkMode)" />
                         </Transition>

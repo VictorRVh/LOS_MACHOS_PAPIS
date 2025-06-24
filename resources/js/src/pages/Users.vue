@@ -71,7 +71,8 @@ const onDelete = (user) => {
                             <span
                                 class="bg-gray-800 text-white text-xs px-2 py-1 rounded-full font-bold">DIRECTOR(a)</span>
                         </Td>
-                        <Td>{{ user.created_at }}</Td>
+                        <Td>{{ user.created_at.slice(0, 10) }}</Td>
+
                         <Td>
                             <span :class="user.status === 1
                                 ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'

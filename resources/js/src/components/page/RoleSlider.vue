@@ -42,8 +42,8 @@ const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
-    if (!props.role?.id) return ['roles-all', 'roles-create'];
-    else return ['roles-all', 'roles-edit'];
+    if (!props.role?.id) return ['todo-acceso-roles', 'roles-create'];
+    else return ['todo-acceso-roles', 'roles-edit'];
 });
 
 const title = computed(() =>

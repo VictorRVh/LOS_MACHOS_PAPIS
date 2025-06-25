@@ -19,7 +19,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <AuthorizationFallback :permissions="['permissions-all', 'permissions-view']">
+    <AuthorizationFallback :permissions="['todo-acceso-permisos', 'ver-permisos']">
         <div class="w-full space-y-8 py-10 px-6">
             <div class="flex-between">
                 <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Listado de Permisos</h2>

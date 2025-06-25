@@ -64,7 +64,7 @@ const usuariosFiltrados = computed(() => {
 </script>
 
 <template>
-    <AuthorizationFallback :permissions="['users-all', 'users-view']">
+    <AuthorizationFallback :permissions="['todo-acceso-usuarios', 'ver-usuarios']">
        
         <div class="w-full space-y-8 py-10 px-6">
             <div class="flex-between">

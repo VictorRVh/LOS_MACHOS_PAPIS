@@ -14,7 +14,7 @@ export default [
         component: () => import('../pages/Users.vue'),
         meta: {
             layout: 'dashboard',
-            permissions: ['todo-acceso-usuarios', 'users-view'],
+            permissions: ['todo-acceso-usuarios', 'ver-usuarios'],
         },
     },
     {
@@ -23,7 +23,7 @@ export default [
         component: () => import('../pages/Roles.vue'),
         meta: {
             layout: 'dashboard',
-            permissions: ['roles-all', 'roles-view'],
+            permissions: ['todo-acceso-roles', 'ver-roles'],
         },
     },
     {
@@ -33,7 +33,7 @@ export default [
         component: () => import('../pages/newPermission.vue'), 
         meta: {
             layout: 'dashboard',
-            permissions: ['permissions-all', 'permissions-view'],
+            permissions: ['todo-acceso-permisos', 'ver-permisos'],
         },
     },
 ];

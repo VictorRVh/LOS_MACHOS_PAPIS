@@ -150,7 +150,7 @@ const onSubmit = async () => {
 
     if (response?.id) {
         showToast(
-            `Role ${props.role?.id ? 'updated' : 'created'} successfully`,
+            `Rol ${props.role?.id ? 'editado' : 'creado'} exitosamente.`,
         );
         roleStore.loadRoles();
         userStore.loadUsers();
@@ -162,9 +162,9 @@ const onSubmit = async () => {
 <template>
     <Slider :show="show" :title="title" @hide="emit('hide')">
         <AuthorizationFallback :permissions="requiredPermissions">
-            <div class="mt-4 space-y-6">
-                <FormInput v-model="formData.name" :focus="show" label="Nombre del permiso" :error="formErrors?.name" required />
-                <FormLabelError label="Añadir Permiso">
+            <div class="mt-4 space-y-6 font-inter">
+                <FormInput v-model="formData.name" :focus="show" label="Nombre del rol" :error="formErrors?.name" required />
+                <FormLabelError label="Añadir permiso">
                     <VSelect v-model="selectedPermission" :options="permissionOptions" label="name" @update:model-value="(permission) => onPermissionSelect(permission)" />
                 </FormLabelError>
                 <div class="w-full space-y-4">

@@ -79,18 +79,21 @@ function showPermissionsModal(role) {
 
                         <Td>{{ role?.name }}</Td>
 
-                        <Td>
-                            <div class="flex flex-col items-start">
-                                <ul class="list-disc ml-4">
-                                    <li v-for="(permission, index) in role.permissions.slice(0, 3)"
+                        <Td class="w-48 whitespace-nowrap">
+                            <div :class="[
+                                'flex gap-2 w-full',
+                                role.permissions.length > 1 ? 'justify-between items-center' : 'justify-center'
+                            ]">
+                                <ul class="text-sm text-gray-700 list-disc list-inside">
+                                    <li v-for="(permission, index) in role.permissions.slice(0, 1)"
                                         :key="permission.id">
                                         {{ permission.name }}
                                     </li>
                                 </ul>
 
-                                <button v-if="role.permissions.length > 3" @click="showPermissionsModal(role)"
-                                    class="text-xs text-blue-600 underline mt-1 hover:text-blue-800">
-                                    Ver más
+                                <button v-if="role.permissions.length > 1" @click="showPermissionsModal(role)"
+                                    class="bg-blue-100 text-blue-700 px-2 py-0.5 text-xs rounded hover:bg-blue-200 transition">
+                                    Ver más ({{ role.permissions.length }})
                                 </button>
                             </div>
                         </Td>
@@ -106,9 +109,9 @@ function showPermissionsModal(role) {
             </Table>
         </div>
 
-        <ModalRoles v-if="showModal" @close="showModal = false">
+        <ModalRoles v-if="showModal" @close="showModal = false" class="font-inter">
             <template #title>
-                Permisos del Rol: {{ selectedRole?.name }}
+                Permisos del Rol: <span class="uppercase">{{ selectedRole?.name }}</span>
             </template>
 
             <template #body>

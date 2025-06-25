@@ -67,7 +67,7 @@ const usuariosFiltrados = computed(() => {
 <template>
     <AuthorizationFallback :permissions="['todo-acceso-usuarios', 'ver-usuarios']">
 
-        <div class="w-full space-y-8 py-10 px-6">
+        <div class="w-full space-y-2 py-2  px-3">
             <div class="flex-between">
 
                 <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Usuarios</h2>
@@ -77,7 +77,7 @@ const usuariosFiltrados = computed(() => {
 
             </div>
 
-            <div class="flex-between space-y-4 py-6 px-6 flex-row-reverse">
+            <div class="flex-between  flex-row-reverse">
                 <SearchBar :options="[
                     { label: 'Nombre', value: 'name' },
                     { label: 'Apellido', value: 'apellido_paterno' },
@@ -85,13 +85,13 @@ const usuariosFiltrados = computed(() => {
                 ]" placeholder="Buscar usuario" @search="filtrarUsuarios"
                     :totalResultados="usuariosFiltrados.length" />
 
-                <div class="text-2xl font-inter">
+                <div class=" font-inter text-md w-full">
                     Lista de usuarios
                 </div>
             </div>
             <Table>
                 <THead>
-                    <Th>Nro</Th>
+                    <Th>N°</Th>
                     <Th>Nombres</Th>
                     <Th>Apellidos</Th>
                     <Th>Dni</Th>
@@ -112,8 +112,8 @@ const usuariosFiltrados = computed(() => {
                         <Td>{{ user.email }}</Td>
                         <Td>
 
-                            <span class="bg-gray-800 text-white text-xs px-2 py-1 rounded-full font-bold">
-                                DIRECTOR(a)
+                            <span class="bg-gray-800 text-white px-2 py-1 rounded-full ">
+                                {{ user.roles[0].name }}
                             </span>
                         </Td>
                         <Td>{{ user.created_at.slice(0, 10) }}</Td>

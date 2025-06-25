@@ -14,7 +14,7 @@ export default [
         component: () => import('../pages/Users.vue'),
         meta: {
             layout: 'dashboard',
-            permissions: ['users-all', 'users-view'],
+            permissions: ['todo-acceso-usuarios', 'users-view'],
         },
     },
     {

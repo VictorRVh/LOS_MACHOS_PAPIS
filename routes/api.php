@@ -36,22 +36,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users', [
         \App\Http\Controllers\UserController::class,
         'index',
-    ])->middleware('permission:users-all|users-view');
+    ])->middleware('permission:todo-acceso-usuarios|users-view');
 
     Route::post('users', [
         \App\Http\Controllers\UserController::class,
         'store',
-    ])->middleware('permission:users-all|users-create');
+    ])->middleware('permission:todo-acceso-usuarios|users-create');
 
     Route::patch('users/{userId}', [
         \App\Http\Controllers\UserController::class,
         'update',
-    ])->middleware('permission:users-all|users-edit');
+    ])->middleware('permission:todo-acceso-usuarios|users-edit');
 
     Route::delete('users/{userId}', [
         \App\Http\Controllers\UserController::class,
         'destroy',
-    ])->middleware('permission:users-all|users-delete');
+    ])->middleware('permission:todo-acceso-usuarios|users-delete');
 
     /**
      * ------------------------------------------------------------------------

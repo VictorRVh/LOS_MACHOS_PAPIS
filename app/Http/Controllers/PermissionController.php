@@ -13,21 +13,21 @@ class PermissionController extends Controller
     use Error;
 
     protected $systemPermissions = [
-        'users-all',
-        'users-view',
-        'users-create',
-        'users-edit',
-        'users-delete',
-        'roles-all',
-        'roles-view',
-        'roles-create',
-        'roles-edit',
-        'roles-delete',
-        'permissions-all',
-        'permissions-view',
-        'permissions-create',
-        'permissions-edit',
-        'permissions-delete',
+        'todo-acceso-usuarios',
+        'ver-usuarios',
+        'crear-usuarios',
+        'editar-usuarios',
+        'eliminar-usuarios',
+        'todo-acceso-roles',
+        'ver-roles',
+        'crear-roles',
+        'editar-roles',
+        'eliminar-roles',
+        'todo-acceso-permisos',
+        'ver-permisos',
+        'crear-permisos',
+        'editar-permisos',
+        'eliminar-permisos',
     ];
 
     public function index(Request $request)
@@ -49,7 +49,7 @@ class PermissionController extends Controller
             }
             $permission->save();
 
-            $superAdminRole = Role::where('name', 'super-admin')->first();
+            $superAdminRole = Role::where('name', 'directora')->first();
             $superAdminRole->permissions()->attach([$permission->id]);
 
             return response()->json($permission);

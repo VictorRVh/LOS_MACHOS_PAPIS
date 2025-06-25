@@ -14,21 +14,21 @@ class PermissionTableSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'users-all',
-            'users-view',
-            'users-create',
-            'users-edit',
-            'users-delete',
-            'roles-all',
-            'roles-view',
-            'roles-create',
-            'roles-edit',
-            'roles-delete',
-            'permissions-all',
-            'permissions-view',
-            'permissions-create',
-            'permissions-edit',
-            'permissions-delete',
+            'todo-acceso-usuarios',
+            'ver-usuarios',
+            'crear-usuarios',
+            'editar-usuarios',
+            'eliminar-usuarios',
+            'todo-acceso-roles',
+            'ver-roles',
+            'crear-roles',
+            'editar-roles',
+            'eliminar-roles',
+            'todo-acceso-permisos',
+            'ver-permisos',
+            'crear-permisos',
+            'editar-permisos',
+            'eliminar-permisos',
         ];
 
         $permissions = array_map(function ($name) {

@@ -49,8 +49,8 @@ class UserController extends Controller
 
             if (isset($request->roles) && is_array($request->roles)) {
                 // removing super admin role if it is exists on the role list;
-                // so there is no possibility to add super-admin role for newly created users
-                $superAdminRole = Role::where('name', 'super-admin')->first();
+                // so there is no possibility to add directora role for newly created users
+                $superAdminRole = Role::where('name', 'directora')->first();
                 $roles = array_filter(
                     $request->roles,
                     fn($roleId) => $roleId !== $superAdminRole->id
@@ -100,7 +100,7 @@ class UserController extends Controller
 
             $usersSuperAdminRole = $user->roles->firstWhere(
                 'name',
-                'super-admin'
+                'directora'
             );
             if ($usersSuperAdminRole) {
                 throw new \Exception(
@@ -116,8 +116,8 @@ class UserController extends Controller
 
             if (isset($request->roles) && is_array($request->roles)) {
                 // removing super admin role if it is exists on the role list;
-                // so there is no possibility to add super-admin role for updated users
-                $superAdminRole = Role::where('name', 'super-admin')->first();
+                // so there is no possibility to add directora role for updated users
+                $superAdminRole = Role::where('name', 'directora')->first();
 
                 $roles = [];
                 if ($superAdminRole) {
@@ -146,7 +146,7 @@ class UserController extends Controller
                 throw new \Exception('Error|User not found--404', 13333);
             }
 
-            $superAdminRole = $user->roles->firstWhere('name', 'super-admin');
+            $superAdminRole = $user->roles->firstWhere('name', 'directora');
             if ($superAdminRole) {
                 throw new \Exception(
                     'Error|Super admin user can\'t be deleted--401',

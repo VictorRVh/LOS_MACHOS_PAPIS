@@ -28,8 +28,8 @@ const { omitPropsFromObject } = useUtils();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
-    if (!props.user?.id) return ['users-all', 'users-create'];
-    else return ['users-all', 'users-edit'];
+    if (!props.user?.id) return ['todo-acceso-usuarios', 'users-create'];
+    else return ['todo-acceso-usuarios', 'users-edit'];
 });
 
 const title = computed(() => (props.user ? `Actualizar Usuario "${props.user?.name}"` : 'Añadir Nuevo Usuario'));
@@ -69,7 +69,7 @@ watch(() => props.show, () => {
 const roleOptions = computed(() => {
     const formDataRoleIds = formData.value.roles.map((role) => role?.id?.toString());
     return roleStore.roles.filter(
-        (role) => !formDataRoleIds.includes(role?.id?.toString()) && role?.name !== 'super-admin'
+        (role) => !formDataRoleIds.includes(role?.id?.toString()) && role?.name !== 'directora'
     );
 });
 

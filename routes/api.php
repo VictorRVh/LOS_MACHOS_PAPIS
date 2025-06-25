@@ -41,12 +41,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('users', [
         \App\Http\Controllers\UserController::class,
         'store',
-    ])->middleware('permission:todo-acceso-usuarios|users-create');
+    ])->middleware('permission:todo-acceso-usuarios|crear-usuarios');
 
     Route::patch('users/{userId}', [
         \App\Http\Controllers\UserController::class,
         'update',
-    ])->middleware('permission:todo-acceso-usuarios|users-edit');
+    ])->middleware('permission:todo-acceso-usuarios|editar-usuarios');
 
     Route::delete('users/{userId}', [
         \App\Http\Controllers\UserController::class,
@@ -66,12 +66,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('roles', [
         \App\Http\Controllers\RoleController::class,
         'store',
-    ])->middleware('permission:todo-acceso-roles|roles-create');
+    ])->middleware('permission:todo-acceso-roles|crear-roles');
 
     Route::patch('roles/{roleId}', [
         \App\Http\Controllers\RoleController::class,
         'update',
-    ])->middleware('permission:todo-acceso-roles|roles-edit');
+    ])->middleware('permission:todo-acceso-roles|editar-roles');
 
     Route::delete('roles/{roleId}', [
         \App\Http\Controllers\RoleController::class,

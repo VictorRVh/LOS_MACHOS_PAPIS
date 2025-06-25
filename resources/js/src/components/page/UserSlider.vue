@@ -28,8 +28,8 @@ const { omitPropsFromObject } = useUtils();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
-    if (!props.user?.id) return ['todo-acceso-usuarios', 'users-create'];
-    else return ['todo-acceso-usuarios', 'users-edit'];
+    if (!props.user?.id) return ['todo-acceso-usuarios', 'crear-usuarios'];
+    else return ['todo-acceso-usuarios', 'editar-usuarios'];
 });
 
 const title = computed(() => (props.user ? `Actualizar Usuario "${props.user?.name}"` : 'Añadir Nuevo Usuario'));

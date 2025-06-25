@@ -17,6 +17,8 @@ import usePermissionStore from '../store/usePermissionStore';
 import useSlider from '../composables/useSlider';
 import useModalToast from '../composables/useModalToast';
 import useHttpRequest from '../composables/useHttpRequest';
+import { ref } from 'vue';
+import ModalRoles from '../layouts/components/ModalRoles.vue';
 
 const userStore = useUserStore();
 const roleStore = useRoleStore();
@@ -38,12 +40,21 @@ const onDelete = (role) => {
 
         const isDeleted = await deleteRole(role?.id);
         if (isDeleted) {
-            showToast(`Role "${role?.name}" deleted successfully...`);
+            showToast(`Rol "${role?.name}" eliminado exitosamente...`);
             roleStore.loadRoles();
             userStore.loadUsers();
         }
     });
 };
+
+const showModal = ref(false);
+const selectedRole = ref(null);
+
+function showPermissionsModal(role) {
+    selectedRole.value = role;
+    showModal.value = true;
+}
+
 </script>
 
 <template>
@@ -65,15 +76,23 @@ const onDelete = (role) => {
                 <TBody>
                     <Tr v-for="role in roleStore.roles" :key="role.id">
                         <Td>{{ role?.id }}</Td>
-                        
+
                         <Td>{{ role?.name }}</Td>
 
                         <Td>
-                            <ul class="w-max mx-auto list-disc">
-                                <li v-for="permission in role.permissions" :key="permission.id" class="text-left">
-                                    {{ permission?.name }}
-                                </li>
-                            </ul>
+                            <div class="flex flex-col items-start">
+                                <ul class="list-disc ml-4">
+                                    <li v-for="(permission, index) in role.permissions.slice(0, 3)"
+                                        :key="permission.id">
+                                        {{ permission.name }}
+                                    </li>
+                                </ul>
+
+                                <button v-if="role.permissions.length > 3" @click="showPermissionsModal(role)"
+                                    class="text-xs text-blue-600 underline mt-1 hover:text-blue-800">
+                                    Ver más
+                                </button>
+                            </div>
                         </Td>
 
                         <Td class="align-middle">
@@ -86,6 +105,28 @@ const onDelete = (role) => {
                 </TBody>
             </Table>
         </div>
+
+        <ModalRoles v-if="showModal" @close="showModal = false">
+            <template #title>
+                Permisos del Rol: {{ selectedRole?.name }}
+            </template>
+
+            <template #body>
+                <ul class="list-disc ml-4 space-y-1">
+                    <li v-for="permission in selectedRole?.permissions" :key="permission.id">
+                        {{ permission.name }}
+                    </li>
+                </ul>
+            </template>
+
+            <template #footer>
+                <button @click="showModal = false"
+                    class="px-3 py-1 text-sm bg-cetpro text-white rounded hover:bg-cetpro-dark">
+                    Cerrar
+                </button>
+            </template>
+        </ModalRoles>
+
 
         <RoleSlider :show="slider" :role="sliderData" @hide="hideSlider" />
     </AuthorizationFallback>

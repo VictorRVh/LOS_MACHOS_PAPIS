@@ -42,12 +42,12 @@ const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
-    if (!props.role?.id) return ['todo-acceso-roles', 'roles-create'];
-    else return ['todo-acceso-roles', 'roles-edit'];
+    if (!props.role?.id) return ['todo-acceso-roles', 'crear-roles'];
+    else return ['todo-acceso-roles', 'editar-roles'];
 });
 
 const title = computed(() =>
-    props.role ? `Update role "${props.role?.name}"` : 'Add new role',
+    props.role ? `Editar rol "${props.role?.name}"` : 'Agregar nuevo rol',
 );
 
 const initialFormData = () => {
@@ -163,7 +163,7 @@ const onSubmit = async () => {
     <Slider :show="show" :title="title" @hide="emit('hide')">
         <AuthorizationFallback :permissions="requiredPermissions">
             <div class="mt-4 space-y-6">
-                <FormInput v-model="formData.name" :focus="show" label="Name" :error="formErrors?.name" required />
+                <FormInput v-model="formData.name" :focus="show" label="Nombre del permiso" :error="formErrors?.name" required />
                 <FormLabelError label="Añadir Permiso">
                     <VSelect v-model="selectedPermission" :options="permissionOptions" label="name" @update:model-value="(permission) => onPermissionSelect(permission)" />
                 </FormLabelError>

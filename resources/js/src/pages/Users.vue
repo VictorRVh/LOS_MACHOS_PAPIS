@@ -75,25 +75,8 @@ const usuariosFiltrados = computed(() => {
                 <CreateButton @click="showSlider(true)" />
                 
             </div>
-<<<<<<< HEAD
 
             
-=======
-            <div class="flex-between space-y-4 py-6 px-6 flex-row-reverse">
-                <SearchBar :options="[
-                    { label: 'Nombre', value: 'name' },
-                    { label: 'Apellido', value: 'apellido_paterno' },
-                    { label: 'DNI', value: 'dni' }
-                ]" placeholder="Buscar usuario"
-                 @search="filtrarUsuarios" 
-                 :totalResultados="usuariosFiltrados.length"
-                  />
-
-                <div class="text-2xl font-inter">
-                    Lista de usuarios
-                </div>
-            </div>
->>>>>>> 824508029a079ddc00468a3d91c2fe2325a5dfef
             <Table>
                 <THead>
                     <Th>Nro</Th>
@@ -109,13 +92,8 @@ const usuariosFiltrados = computed(() => {
 
                
                 <TBody>
-<<<<<<< HEAD
                     <Tr v-for="(user, index) in userStore.users" :key="index">
                         <Td><span class="text-gray-800 dark:text-gray-300">{{ index + 1 }}</span></Td>
-=======
-                    <Tr v-for="(user, index) in usuariosFiltrados" :key="index">
-                        <Td><span class="text-gray-800">{{ index + 1 }}</span></Td>
->>>>>>> 824508029a079ddc00468a3d91c2fe2325a5dfef
                         <Td>{{ user.name }}</Td>
                         <Td>{{ user.apellido_paterno }}</Td>
                         <Td>{{ user.dni }}</Td>
@@ -134,14 +112,8 @@ const usuariosFiltrados = computed(() => {
                                 ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
                                 : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'"
                                 class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
-<<<<<<< HEAD
                                 Activo
                                 <span v-if="user.status === 1">✓</span>
-=======
-                                <!-- {{ user.status }} -->
-                                activo
-                                <span>↗</span>
->>>>>>> 824508029a079ddc00468a3d91c2fe2325a5dfef
                             </span>
                         </Td>
                         <Td class="text-center text-gray-600 dark:text-gray-200">

@@ -1,5 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/solid'
+import SearchBar from '../components/head_table/headSearch.vue'
+
 
 import Table from '../components/table/Table.vue';
 import THead from '../components/table/THead.vue';
@@ -7,8 +10,6 @@ import TBody from '../components/table/TBody.vue';
 import Tr from '../components/table/Tr.vue';
 import Th from '../components/table/Th.vue';
 import Td from '../components/table/Td.vue';
-import SearchBar from '../components/head_table/headSearch.vue'
-
 import CreateButton from '../components/ui/CreateButton.vue';
 import EditButton from '../components/ui/EditButton.vue';
 import DeleteButton from '../components/ui/DeleteButton.vue';
@@ -65,18 +66,29 @@ const usuariosFiltrados = computed(() => {
 
 <template>
     <AuthorizationFallback :permissions="['todo-acceso-usuarios', 'ver-usuarios']">
-       
+
         <div class="w-full space-y-8 py-10 px-6">
             <div class="flex-between">
-                
+
                 <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Usuarios</h2>
-                
-               
+
+
                 <CreateButton @click="showSlider(true)" />
-                
+
             </div>
 
-            
+            <div class="flex-between space-y-4 py-6 px-6 flex-row-reverse">
+                <SearchBar :options="[
+                    { label: 'Nombre', value: 'name' },
+                    { label: 'Apellido', value: 'apellido_paterno' },
+                    { label: 'DNI', value: 'dni' }
+                ]" placeholder="Buscar usuario" @search="filtrarUsuarios"
+                    :totalResultados="usuariosFiltrados.length" />
+
+                <div class="text-2xl font-inter">
+                    Lista de usuarios
+                </div>
+            </div>
             <Table>
                 <THead>
                     <Th>Nro</Th>
@@ -90,24 +102,23 @@ const usuariosFiltrados = computed(() => {
                     <Th class="text-center">Opciones</Th>
                 </THead>
 
-               
+
                 <TBody>
-                    <Tr v-for="(user, index) in userStore.users" :key="index">
+                    <Tr v-for="(user, index) in  usuariosFiltrados" :key="index">
                         <Td><span class="text-gray-800 dark:text-gray-300">{{ index + 1 }}</span></Td>
                         <Td>{{ user.name }}</Td>
-                        <Td>{{ user.apellido_paterno }}</Td>
+                        <Td>{{ user.apellido_paterno }} {{ user.apellido_materno }}</Td>
                         <Td>{{ user.dni }}</Td>
                         <Td>{{ user.email }}</Td>
                         <Td>
-                            
-                            <span
-                                class="bg-gray-800 text-white text-xs px-2 py-1 rounded-full font-bold">
+
+                            <span class="bg-gray-800 text-white text-xs px-2 py-1 rounded-full font-bold">
                                 DIRECTOR(a)
                             </span>
                         </Td>
                         <Td>{{ user.created_at.slice(0, 10) }}</Td>
                         <Td>
-                            
+
                             <span :class="user.status === 1
                                 ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
                                 : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'"
@@ -117,7 +128,7 @@ const usuariosFiltrados = computed(() => {
                             </span>
                         </Td>
                         <Td class="text-center text-gray-600 dark:text-gray-200">
-                          
+
                             <button class="hover:text-cetpro dark:hover:text-cetpro-light text-xl">⋮</button>
                         </Td>
                     </Tr>

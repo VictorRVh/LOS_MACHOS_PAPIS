@@ -39,6 +39,8 @@ const initialFormData = () => ({
     name: null,
     apellido_paterno: null,
     apellido_materno: null,
+    usuario: null,
+    dni: null,
     email: null,
     fecha_nacimiento: null,
     telefono: null,
@@ -87,6 +89,8 @@ const schema = yup.object().shape({
     name: yup.string().nullable().required("El nombre es requerido."),
     apellido_paterno: yup.string().nullable().required("El apellido paterno es requerido."),
     apellido_materno: yup.string().nullable().required("El apellido materno es requerido."),
+    usuario: yup.string().nullable().required("El usuario es requerido."),
+    dni: yup.string().nullable().required("El dni es requerido."),
     email: yup.string().email("Debe ser un email válido.").nullable().required("El email es requerido."),
     fecha_nacimiento: yup.date().nullable().required("La fecha de nacimiento es requerida."),
     telefono: yup.string().nullable().required("El teléfono es requerido."),
@@ -130,6 +134,8 @@ const onSubmit = async () => {
                 <FormInput v-model="formData.name" :focus="show" label="Nombres" :error="formErrors?.name" required />
                 <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno" :error="formErrors?.apellido_paterno" required />
                 <FormInput v-model="formData.apellido_materno" label="Apellido Materno" :error="formErrors?.apellido_materno" required />
+                <FormInput v-model="formData.usuario" label="Usuario" :error="formErrors?.usuario" required />
+                <FormInput v-model="formData.dni" label="DNI" :error="formErrors?.dni" required />
                 <FormInput v-model="formData.email" label="Email" type="email" :error="formErrors?.email" required />
                 <FormInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento" type="date" :error="formErrors?.fecha_nacimiento" required />
                 <FormInput v-model="formData.telefono" label="Teléfono" :error="formErrors?.telefono" required />

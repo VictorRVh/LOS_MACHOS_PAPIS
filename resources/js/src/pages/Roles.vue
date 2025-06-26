@@ -59,78 +59,88 @@ function showPermissionsModal(role) {
 
 <template>
     <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
-        <div class="w-full space-y-8 py-10 px-6">
-            <div class="flex-between">
-                <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Roles</h2>
-                <CreateButton @click="showSlider(true)" />
-            </div>
 
-            <Table>
-                <THead>
-                    <Th>Id</Th>
-                    <Th>Rol</Th>
-                    <Th>Permisos</Th>
-                    <Th>Acciones</Th>
-                </THead>
-
-                <TBody>
-                    <Tr v-for="role in roleStore.roles" :key="role.id">
-                        <Td>{{ role?.id }}</Td>
-
-                        <Td>{{ role?.name }}</Td>
-
-                        <Td class="w-48 whitespace-nowrap">
-                            <div :class="[
-                                'flex gap-2 w-full',
-                                role.permissions.length > 1 ? 'justify-between items-center' : 'justify-center'
-                            ]">
-                                <ul class="text-sm text-gray-700 list-disc list-inside">
-                                    <li v-for="(permission, index) in role.permissions.slice(0, 1)"
-                                        :key="permission.id">
-                                        {{ permission.name }}
-                                    </li>
-                                </ul>
-
-                                <button v-if="role.permissions.length > 1" @click="showPermissionsModal(role)"
-                                    class="bg-blue-100 text-blue-700 px-2 py-0.5 text-xs rounded hover:bg-blue-200 transition">
-                                    Ver más ({{ role.permissions.length }})
-                                </button>
-                            </div>
-                        </Td>
-
-                        <Td class="align-middle">
-                            <div class="flex items-center justify-center gap-2">
-                                <EditButton @click="showSlider(true, role)" />
-                                <DeleteButton @click="onDelete(role)" />
-                            </div>
-                        </Td>
-                    </Tr>
-                </TBody>
-            </Table>
+        <div class="flex justify-between items-center p-4">
+            <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Roles</h2>
+            <!-- <CreateButton @click="showSlider(true)" /> -->
         </div>
 
-        <ModalRoles v-if="showModal" @close="showModal = false" class="font-inter">
-            <template #title>
-                Permisos del Rol: <span class="uppercase">{{ selectedRole?.name }}</span>
-            </template>
-
-            <template #body>
-                <ul class="list-disc ml-4 space-y-1">
-                    <li v-for="permission in selectedRole?.permissions" :key="permission.id">
-                        {{ permission.name }}
-                    </li>
-                </ul>
-            </template>
-
-            <template #footer>
-                <button @click="showModal = false"
-                    class="px-3 py-1 text-sm bg-cetpro text-white rounded hover:bg-cetpro-dark">
-                    Cerrar
-                </button>
-            </template>
-        </ModalRoles>
 
 
-        <RoleSlider :show="slider" :role="sliderData" @hide="hideSlider" />
+        <div class="flex gap-6 px-6">
+
+            <div class="w-1/3 bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">Agregar Rol</h3>
+                <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+                <RoleSlider :show="slider" :role="sliderData" @hide="hideSlider" />
+            </div>
+
+
+            <div class="w-2/3">
+
+
+                <Table>
+                    <THead>
+                        <Th>Id</Th>
+                        <Th>Rol</Th>
+                        <Th>Permisos</Th>
+                        <Th>Acciones</Th>
+                    </THead>
+
+                    <TBody>
+                        <Tr v-for="role in roleStore.roles" :key="role.id">
+                            <Td>{{ role?.id }}</Td>
+                            <Td>{{ role?.name }}</Td>
+                            <Td class="w-48 whitespace-nowrap">
+                                <div :class="[
+                                    'flex gap-2 w-full',
+                                    role.permissions.length > 1 ? 'justify-between items-center' : 'justify-center'
+                                ]">
+                                    <ul class="text-sm text-gray-700 list-disc list-inside">
+                                        <li v-for="(permission, index) in role.permissions.slice(0, 1)"
+                                            :key="permission.id">
+                                            {{ permission.name }}
+                                        </li>
+                                    </ul>
+                                    <button v-if="role.permissions.length > 1" @click="showPermissionsModal(role)"
+                                        class="bg-blue-100 text-blue-700 px-2 py-0.5 text-xs rounded hover:bg-blue-200 transition">
+                                        Ver más ({{ role.permissions.length }})
+                                    </button>
+                                </div>
+                            </Td>
+                            <Td class="align-middle">
+                                <div class="flex items-center justify-center gap-2">
+                                    <EditButton @click="showSlider(true, role)" />
+                                    <DeleteButton @click="onDelete(role)" />
+                                </div>
+                            </Td>
+                        </Tr>
+                    </TBody>
+                </Table>
+            </div>
+
+            <!-- Modal para ver permisos -->
+            <ModalRoles v-if="showModal" @close="showModal = false" class="font-inter">
+                <template #title>
+                    Permisos del Rol: <span class="uppercase">{{ selectedRole?.name }}</span>
+                </template>
+
+                <template #body>
+                    <ul class="list-disc ml-4 space-y-1">
+                        <li v-for="permission in selectedRole?.permissions" :key="permission.id">
+                            {{ permission.name }}
+                        </li>
+                    </ul>
+                </template>
+
+                <template #footer>
+                    <button @click="showModal = false"
+                        class="px-3 py-1 text-sm bg-cetpro text-white rounded hover:bg-cetpro-dark">
+                        Cerrar
+                    </button>
+                </template>
+            </ModalRoles>
+
+        </div>
     </AuthorizationFallback>
 </template>

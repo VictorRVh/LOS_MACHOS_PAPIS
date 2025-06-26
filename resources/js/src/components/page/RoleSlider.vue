@@ -113,7 +113,7 @@ const onPermissionRemove = (permission) => {
 const canShowAddAllPermissions = computed(() =>
     Boolean(
         formData.value.permissions.length !==
-            permissionStore.permissions.length,
+        permissionStore.permissions.length,
     ),
 );
 const onAddAllPermissions = () => {
@@ -154,42 +154,57 @@ const onSubmit = async () => {
         );
         roleStore.loadRoles();
         userStore.loadUsers();
+
+        if (!props.role?.id) {
+            formData.value = initialFormData();
+            formErrors.value = {};
+        }
         emit('hide');
     }
 };
 </script>
 
 <template>
-   
-        <AuthorizationFallback :permissions="requiredPermissions">
-            <div class="mt-4 space-y-6 font-inter">
-                <FormInput v-model="formData.name" :focus="show" label="Nombre del rol" :error="formErrors?.name" required />
-                <FormLabelError label="Añadir permiso">
-                    <VSelect v-model="selectedPermission" :options="permissionOptions" label="name" @update:model-value="(permission) => onPermissionSelect(permission)" />
-                </FormLabelError>
-                <div class="w-full space-y-4">
-                    <div class="flex-between gap-4">
-                        <label class="text-sm font-semibold dark:text-slate-300">Permisos del Rol</label>
-                        <div v-if="canShowAddAllPermissions" class="cursor-pointer text-xs font-bold text-sky-500 hover:underline dark:text-sky-400" @click="onAddAllPermissions">
-                            Añadir todos los permisos
-                        </div>
+
+    <AuthorizationFallback :permissions="requiredPermissions">
+        <div class="mt-4 space-y-6 font-inter">
+            <FormInput v-model="formData.name" :focus="show" label="Nombre del rol" :error="formErrors?.name"
+                required />
+            <FormLabelError label="Añadir permiso">
+                <VSelect v-model="selectedPermission" :options="permissionOptions" label="name"
+                    @update:model-value="(permission) => onPermissionSelect(permission)" />
+            </FormLabelError>
+            <div class="w-full space-y-4">
+                <div class="flex-between gap-4">
+                    <label class="text-sm font-semibold dark:text-slate-300">Permisos del Rol</label>
+                    <div v-if="canShowAddAllPermissions"
+                        class="cursor-pointer text-xs font-bold text-sky-500 hover:underline dark:text-sky-400"
+                        @click="onAddAllPermissions">
+                        Añadir todos los permisos
                     </div>
-                    <TransitionGroup tag="ul" name="edit-list" class="relative space-y-3">
-                        <li v-for="permission in formData.permissions" :key="permission.id" class="rounded-md shadow-sm">
-                            <div class="flex-between w-full rounded-md border border-slate-200 bg-white p-3 dark:border-slate-600 dark:bg-slate-700">
-                                <div class="flex-1 dark:text-slate-200">{{ permission.name }}</div>
-                                <span class="cursor-pointer text-sm text-red-500 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400" @click="onPermissionRemove(permission)">
-                                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </span>
-                            </div>
-                        </li>
-                        <Button :title="role?.id ? 'Guardar Cambios' : 'Crear Rol'" :loading-title="role?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full" :loading="saving || updating" key="submit-btn" @click="onSubmit" />
-                    </TransitionGroup>
                 </div>
+                <TransitionGroup tag="ul" name="edit-list" class="relative space-y-3">
+                    <li v-for="permission in formData.permissions" :key="permission.id" class="rounded-md shadow-sm">
+                        <div
+                            class="flex-between w-full rounded-md border border-slate-200 bg-white p-3 dark:border-slate-600 dark:bg-slate-700">
+                            <div class="flex-1 dark:text-slate-200">{{ permission.name }}</div>
+                            <span
+                                class="cursor-pointer text-sm text-red-500 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400"
+                                @click="onPermissionRemove(permission)">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2"
+                                    fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </span>
+                        </div>
+                    </li>
+                    <Button :title="role?.id ? 'Guardar Cambios' : 'Crear Rol'"
+                        :loading-title="role?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
+                        :loading="saving || updating" key="submit-btn" @click="onSubmit" />
+                </TransitionGroup>
             </div>
-        </AuthorizationFallback>
+        </div>
+    </AuthorizationFallback>
 
 </template>

@@ -9,6 +9,42 @@ export default [
         },
     },
     {
+        path: '/start',
+        name: 'start',
+        component: () => import('../pages/Users.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-usuarios', 'ver-usuarios'],
+        },
+    },
+    {
+        path: '/groups',
+        name: 'groups',
+        component: () => import('../pages/Users.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-usuarios', 'ver-usuarios'],
+        },
+    },
+    {
+        path: '/programs',
+        name: 'programs',
+        component: () => import('../pages/Users.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-usuarios', 'ver-usuarios'],
+        },
+    },
+    {
+        path: '/califications',
+        name: 'califications',
+        component: () => import('../pages/Users.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-usuarios', 'ver-usuarios'],
+        },
+    },
+    {
         path: '/users',
         name: 'users',
         component: () => import('../pages/Users.vue'),

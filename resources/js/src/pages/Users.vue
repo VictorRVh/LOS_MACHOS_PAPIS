@@ -46,7 +46,8 @@ const onDelete = (user) => {
     });
 };
 
-const usuarios = ref(userStore.users)
+// const usuarios = ref(userStore.users)
+const usuarios = computed(() => userStore.users); 
 
 const filtro = ref({ field: 'name', query: '' })
 

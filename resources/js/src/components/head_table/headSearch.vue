@@ -23,13 +23,14 @@
       <input
         type="text"
         v-model="searchQuery"
-        :placeholder="placeholder"
+
+        
         @input="onInput"
         class="w-full h-10 pl-4 pr-10 text-sm border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
-      <!-- Ícono lupa -->
+      <!-- Ícono lupa :placeholder="placeholder" -->
       <div
-        @click="onSearch"
+       
         class="absolute inset-y-0 right-0 flex items-center justify-center bg-gray-800 w-10 h-full rounded-r-md cursor-pointer hover:bg-gray-700"
       >
         <MagnifyingGlassIcon class="w-5 h-5 text-white" />
@@ -55,9 +56,7 @@
   const selected = ref(props.options.length > 0 ? props.options[0].value : '')
   const searchQuery = ref('')
   
-  function onSearch() {
-    emit('search', { field: selected.value, query: searchQuery.value })
-  }
+
   
   function onInput() {
     emit('search', { field: selected.value, query: searchQuery.value })

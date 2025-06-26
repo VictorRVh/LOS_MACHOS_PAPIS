@@ -5,10 +5,10 @@ import {
 } from '@heroicons/vue/24/outline';
 
 const navLinks = [
-    { name: 'Inicio', routeName: 'users', icon: HomeIcon },
-    { name: 'Grupos', routeName: 'users', icon: UserGroupIcon },
-    { name: 'Programas A.', routeName: 'users', icon: AcademicCapIcon },
-    { name: 'Calificaciones', routeName: 'users', icon: ClipboardDocumentListIcon },
+    // { name: 'Inicio', routeName: 'users', icon: HomeIcon },
+    // { name: 'Grupos', routeName: 'users', icon: UserGroupIcon },
+    // { name: 'Programas A.', routeName: 'users', icon: AcademicCapIcon },
+    // { name: 'Calificaciones', routeName: 'users', icon: ClipboardDocumentListIcon },
     { name: 'Usuarios', routeName: 'users', icon: UserGroupIcon },
     { name: 'Roles', routeName: 'roles', icon: ShieldCheckIcon },
     { name: 'Permisos', routeName: 'permissions', icon: KeyIcon }, // Esto ya apunta a la ruta con el nombre 'permissions'

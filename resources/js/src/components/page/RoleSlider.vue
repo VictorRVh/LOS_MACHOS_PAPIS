@@ -160,7 +160,7 @@ const onSubmit = async () => {
 </script>
 
 <template>
-    <Slider :show="show" :title="title" @hide="emit('hide')">
+   
         <AuthorizationFallback :permissions="requiredPermissions">
             <div class="mt-4 space-y-6 font-inter">
                 <FormInput v-model="formData.name" :focus="show" label="Nombre del rol" :error="formErrors?.name" required />
@@ -191,5 +191,5 @@ const onSubmit = async () => {
                 </div>
             </div>
         </AuthorizationFallback>
-    </Slider>
+
 </template>

@@ -47,7 +47,7 @@ const onDelete = (user) => {
 };
 
 // const usuarios = ref(userStore.users)
-const usuarios = computed(() => userStore.users); 
+const usuarios = computed(() => userStore.users);
 
 const filtro = ref({ field: 'name', query: '' })
 
@@ -69,25 +69,25 @@ const usuariosFiltrados = computed(() => {
     <AuthorizationFallback :permissions="['todo-acceso-usuarios', 'ver-usuarios']">
 
         <div class="w-full space-y-2 py-2  px-3">
-            <div class="flex-between">
+            <div class="m-2">
+                <div class="flex-between ">
 
-                <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Usuarios</h2>
+                    <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Usuarios</h2>
+                    <CreateButton @click="showSlider(true)" />
 
+                </div>
 
-                <CreateButton @click="showSlider(true)" />
+                <div class="flex-between  flex-row-reverse my-5">
+                    <SearchBar :options="[
+                        { label: 'Nombre', value: 'name' },
+                        { label: 'Apellido', value: 'apellido_paterno' },
+                        { label: 'DNI', value: 'dni' }
+                    ]" placeholder="Buscar usuario" @search="filtrarUsuarios"
+                        :totalResultados="usuariosFiltrados.length" />
 
-            </div>
-
-            <div class="flex-between  flex-row-reverse">
-                <SearchBar :options="[
-                    { label: 'Nombre', value: 'name' },
-                    { label: 'Apellido', value: 'apellido_paterno' },
-                    { label: 'DNI', value: 'dni' }
-                ]" placeholder="Buscar usuario" @search="filtrarUsuarios"
-                    :totalResultados="usuariosFiltrados.length" />
-
-                <div class=" font-inter text-md w-full">
-                    Lista de usuarios
+                    <div class=" font-inter text-md w-full">
+                        Lista de usuarios
+                    </div>
                 </div>
             </div>
             <Table>
@@ -105,7 +105,7 @@ const usuariosFiltrados = computed(() => {
 
 
                 <TBody>
-                    <Tr v-for="(user, index) in  usuariosFiltrados" :key="index">
+                    <Tr v-for="(user, index) in usuariosFiltrados" :key="index">
                         <Td><span class="text-gray-800 dark:text-gray-300">{{ index + 1 }}</span></Td>
                         <Td>{{ user.name }}</Td>
                         <Td>{{ user.apellido_paterno }} {{ user.apellido_materno }}</Td>

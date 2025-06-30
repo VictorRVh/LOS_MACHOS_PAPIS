@@ -15,6 +15,7 @@ import useHttpRequest from '../../composables/useHttpRequest';
 import useModalToast from '../../composables/useModalToast';
 
 import * as yup from 'yup';
+import SelectedChips from '../ui/selectedChips.vue';
 
 const props = defineProps({
     show: {
@@ -183,26 +184,10 @@ const onSubmit = async () => {
                         Añadir todos los permisos
                     </div>
                 </div>
-                <TransitionGroup tag="ul" name="edit-list" class="relative space-y-3">
-                    <li v-for="permission in formData.permissions" :key="permission.id" class="rounded-md shadow-sm">
-                        <div
-                            class="flex-between w-full rounded-md border border-slate-200 bg-white p-3 dark:border-slate-600 dark:bg-slate-700">
-                            <div class="flex-1 dark:text-slate-200">{{ permission.name }}</div>
-                            <span
-                                class="cursor-pointer text-sm text-red-500 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400"
-                                @click="onPermissionRemove(permission)">
-                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2"
-                                    fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </span>
-                        </div>
-                    </li>
-                    <Button :title="role?.id ? 'Guardar Cambios' : 'Crear Rol'"
-                        :loading-title="role?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
-                        :loading="saving || updating" key="submit-btn" @click="onSubmit" />
-                </TransitionGroup>
+
+
+                <SelectedChips :items="formData.permissions" @remove="onPermissionRemove" />
+
             </div>
         </div>
     </AuthorizationFallback>

@@ -101,7 +101,7 @@ const disableKeys = (event, keys = ['e', 'E', '+', '-']) => {
             :id="id"
             :type="type"
             :step="step ? step : type === 'number' ? 'any' : null"
-            class="bg-gray-50 border border-cetpro sm:text-sm rounded-sm block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 focus:ring-2 focus:ring-cetpro-light focus:border-cetpro-light dark:focus:ring-cetpro-dark dark:focus:border-cetpro-dark outline-none"
+            class="bg-gray-50 border border-cetpro sm:text-sm rounded-sm block w-full sm:p-1.5 xl:p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 focus:ring-2 focus:ring-cetpro-light focus:border-cetpro-light dark:focus:ring-cetpro-dark dark:focus:border-cetpro-dark outline-none"
             :placeholder="placeholder ? placeholder : ''"
             :class="[
                 disabled ? 'cursor-not-allowed' : '',

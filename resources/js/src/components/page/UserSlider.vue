@@ -13,6 +13,8 @@ import useHttpRequest from '../../composables/useHttpRequest';
 import useUtils from '../../composables/useUtils';
 import useModalToast from '../../composables/useModalToast';
 import * as yup from 'yup';
+import SelectedChips from '../ui/selectedChips.vue';
+import CheckBox from '../ui/CheckBox.vue';
 
 const props = defineProps({
     show: { type: Boolean, default: () => false },
@@ -113,6 +115,9 @@ const onSubmit = async () => {
         formErrors.value = errors;
         return;
     }
+
+    console.log(formData.value)
+
     formErrors.value = {};
     const fieldsToBeOmitted = ['confirm_password'];
     if (props.user?.id) fieldsToBeOmitted.push('password');
@@ -131,8 +136,8 @@ const onSubmit = async () => {
         <AuthorizationFallback :permissions="requiredPermissions">
 
             <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
-            
-            <div class="mt-4 space-y-6">
+
+            <div class="mt-4 space-y-3">
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormInput v-model="formData.name" label="Nombres" :error="formErrors?.name" required />
@@ -142,20 +147,19 @@ const onSubmit = async () => {
                         :error="formErrors?.apellido_materno" required />
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormInput v-model="formData.usuario" label="Usuario" :error="formErrors?.usuario"
                         class="md:col-span-1" required />
                     <FormInput v-model="formData.dni" label="DNI" :error="formErrors?.dni" required />
                     <FormInput v-model="formData.telefono" label="Teléfono" :error="formErrors?.telefono" required />
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormInput v-model="formData.email" label="Email" />
                     <FormInput v-model="formData.direccion" label="Dirección" />
                 </div>
 
-                <!-- Fila 4: mezcla de tamaño con col-span -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento" type="date"
                         :error="formErrors?.fecha_nacimiento" required />
                     <template v-if="!user?.id">
@@ -166,32 +170,16 @@ const onSubmit = async () => {
                     </template>
                 </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormLabelError label="Añadir Rol">
+                        <VSelect v-model="selectedRole" :options="roleOptions" label="name"
+                            @update:model-value="(role) => onRoleSelect(role)" />
+                    </FormLabelError>
+                    <CheckBox v-model="formData.status" label="Estado" class="mt-8 pl-4 flex justify-center items-centers" />
+                </div>
 
-
-                <FormLabelError label="Añadir Rol">
-                    <VSelect v-model="selectedRole" :options="roleOptions" label="name"
-                        @update:model-value="(role) => onRoleSelect(role)" />
-                </FormLabelError>
-
-                <div v-if="formData.roles?.length" class="w-full space-y-4">
-                    <FormLabelError label="Roles del Usuario" />
-                    <ul class="relative space-y-3">
-                        <li v-for="role in formData.roles" :key="role.id" class="rounded-md shadow-sm">
-                            <div
-                                class="flex-between w-full rounded-md border border-slate-200 bg-white p-3 dark:border-slate-600 dark:bg-slate-700">
-                                <div class="flex-1 dark:text-slate-200">{{ role.name }}</div>
-                                <span
-                                    class="cursor-pointer text-sm text-red-500 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400"
-                                    @click="onRoleRemove(role)">
-                                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor"
-                                        stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </span>
-                            </div>
-                        </li>
-                    </ul>
+                <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
+                    <SelectedChips :items="formData.roles" @remove="onRoleRemove" />
                 </div>
 
                 <Button :title="user?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"

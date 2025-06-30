@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 defineProps({
     show: {
         type: Boolean,
@@ -97,4 +97,67 @@ const emit = defineEmits(['hide']);
             </div>
         </Transition>
     </Teleport>
+</template> -->
+
+
+<script setup>
+defineProps({
+    show: {
+        type: Boolean,
+        default: () => false,
+    },
+    title: {
+        type: String,
+    },
+});
+const emit = defineEmits(['hide']);
+</script>
+
+<template>
+    <Teleport to="body">
+        <Transition name="fade">
+            <div
+                v-if="show"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+                @click.self="emit('hide', false)"
+            >
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative"
+                >
+                    <div class="flex justify-between items-start mb-4">
+                        <slot name="title">
+                            <h2 class="font-bold text-lg text-cetpro dark:text-cetpro-light">
+                                {{ title ? title : 'Crear o Actualizar Datos' }}
+                            </h2>
+                        </slot>
+
+                        <div class="flex items-center gap-3">
+                            <slot name="before_close" />
+                            <slot name="close">
+                                <button
+                                    @click="emit('hide', false)"
+                                    class="text-xl text-gray-500 hover:text-red-600"
+                                >
+                                    ✕
+                                </button>
+                            </slot>
+                        </div>
+                    </div>
+
+                    <slot />
+                </div>
+            </div>
+        </Transition>
+    </Teleport>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

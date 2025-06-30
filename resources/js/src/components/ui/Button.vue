@@ -34,7 +34,7 @@ const props = defineProps({
 <template>
     <button
         type="button"
-        class="text-white bg-active active:bg-active hover:bg-emerald-600 font-medium rounded text-sm px-5 py-2.5 text-center flex-center"
+        class="text-white bg-cetpro active:bg-cetpro-light hover:bg-cetpro-light font-medium rounded text-sm px-5 py-2.5 text-center flex-center"
         :class="[disabled ? disabledClass : '']"
         :disabled="disabled"
     >

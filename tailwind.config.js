@@ -41,11 +41,12 @@ export default {
                     'DEFAULT': '#006F9F',
                     'dark': '#00557F',
                     'text': '#FFFFFF',
+                    
                 },
                 
                 // COLORES DE ESTADO (active)
                 active: {
-                    DEFAULT: colors.emerald[500],
+                    DEFAULT: colors.blue[500],
                     light: colors.emerald[700],
                     dark: colors.emerald[500],
                     hover: colors.emerald[200],

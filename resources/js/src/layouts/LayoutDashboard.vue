@@ -22,7 +22,7 @@ const layoutStore = useLayoutStore();
             <PageLoader :loading="layoutStore.isPageLoading" />
 
             <!-- 2B. CONTENIDO DE LA PÁGINA (CON SCROLL) -->
-            <main class="flex-1 overflow-x-hidden overflow-y-auto">
+            <main class="flex-1 overflow-x-hidden overflow-hidden">
                 <RouterView v-slot="{ Component }">
                     <Suspense
                         @pending="layoutStore.setPageLoading(true)"

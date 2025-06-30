@@ -10,6 +10,8 @@ import TBody from '../components/table/TBody.vue';
 import Tr from '../components/table/Tr.vue';
 import Th from '../components/table/Th.vue';
 import Td from '../components/table/Td.vue';
+import MenuTable from '../components/table/MenuTable.vue'
+
 import CreateButton from '../components/ui/CreateButton.vue';
 import EditButton from '../components/ui/EditButton.vue';
 import DeleteButton from '../components/ui/DeleteButton.vue';
@@ -46,6 +48,7 @@ const onDelete = (user) => {
     });
 };
 
+/// FILTAR USUARIOS
 // const usuarios = ref(userStore.users)
 const usuarios = computed(() => userStore.users);
 
@@ -63,12 +66,28 @@ const usuariosFiltrados = computed(() => {
 })
 
 
+//// PAGINACION DE USUAIOR 
+const pagina = ref(1)
+const itemsPorPagina = 6
+
+const totalPaginas = computed(() => {
+    return Math.ceil(usuariosFiltrados.value.length / itemsPorPagina)
+})
+
+const usuariosPaginados = computed(() => {
+    const start = (pagina.value - 1) * itemsPorPagina
+    const end = start + itemsPorPagina
+    return usuariosFiltrados.value.slice(start, end)
+})
+
+
+
 </script>
 
 <template>
     <AuthorizationFallback :permissions="['todo-acceso-usuarios', 'ver-usuarios']">
 
-        <div class="w-full space-y-2 py-2  px-3">
+        <div class="w-full space-y-2 py-2  px-3 ">
             <div class="m-2">
                 <div class="flex-between ">
 
@@ -90,7 +109,7 @@ const usuariosFiltrados = computed(() => {
                     </div>
                 </div>
             </div>
-            <Table>
+            <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
                 <THead>
                     <Th>N°</Th>
                     <Th>Nombres</Th>
@@ -103,10 +122,10 @@ const usuariosFiltrados = computed(() => {
                     <Th class="text-center">Acción</Th>
                 </THead>
 
-
                 <TBody>
-                    <Tr v-for="(user, index) in usuariosFiltrados" :key="index">
-                        <Td><span class="text-gray-800 dark:text-gray-300">{{ index + 1 }}</span></Td>
+                    <Tr v-for="(user, index) in usuariosPaginados" :key="index">
+                        <Td><span class="text-gray-800 dark:text-gray-300">{{ ((pagina - 1) * itemsPorPagina) + index +
+                            1 }}</span></Td>
                         <Td>{{ user.name }}</Td>
                         <Td>{{ user.apellido_paterno }} {{ user.apellido_materno }}</Td>
                         <Td>{{ user.dni }}</Td>
@@ -130,7 +149,11 @@ const usuariosFiltrados = computed(() => {
                         </Td>
                         <Td class="text-center text-gray-600 dark:text-gray-200">
 
-                            <button class="hover:text-cetpro dark:hover:text-cetpro-light text-xl">⋮</button>
+                            <MenuTable :actions="{ view: true, edit: true, delete: true, download: false }"
+                                entity-label="usuario" @view="verGrupo(user)" @edit="editarGrupo(user)"
+                                @delete="onDelete(user)" />
+
+
                         </Td>
                     </Tr>
                 </TBody>

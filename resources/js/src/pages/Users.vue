@@ -47,7 +47,7 @@ const onDelete = (user) => {
 };
 
 // const usuarios = ref(userStore.users)
-const usuarios = computed(() => userStore.users); 
+const usuarios = computed(() => userStore.users);
 
 const filtro = ref({ field: 'name', query: '' })
 
@@ -105,7 +105,7 @@ const usuariosFiltrados = computed(() => {
 
 
                 <TBody>
-                    <Tr v-for="(user, index) in  usuariosFiltrados" :key="index">
+                    <Tr v-for="(user, index) in usuariosFiltrados" :key="index">
                         <Td><span class="text-gray-800 dark:text-gray-300">{{ index + 1 }}</span></Td>
                         <Td>{{ user.name }}</Td>
                         <Td>{{ user.apellido_paterno }} {{ user.apellido_materno }}</Td>

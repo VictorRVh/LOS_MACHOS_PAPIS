@@ -7,14 +7,14 @@ const { isObject, isEmptyObject } = useUtils();
 
 const show = ref(false);
 const initialModalData = computed(() => ({
-    message: 'Are you sure to delete?',
+    message: '¿Estás seguro de eliminar?',
     actionButton: {
         class: 'bg-red-500 active:bg-red-500 hover:bg-red-600 shadow-google',
-        text: 'Proceed',
+        text: 'Procesar',
     },
     returnButton: {
         class: 'bg-green-500 active:bg-green-500 hover:bg-green-600 shadow-google',
-        text: 'Go back',
+        text: 'Volver',
     },
 }));
 const setModalData = (data) => {

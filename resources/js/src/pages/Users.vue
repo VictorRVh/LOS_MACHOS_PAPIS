@@ -150,8 +150,8 @@ const usuariosPaginados = computed(() => {
                         <Td class="text-center text-gray-600 dark:text-gray-200">
 
                             <MenuTable :actions="{ view: true, edit: true, delete: true, download: false }"
-                                entity-label="usuario" @view="verGrupo(user)" @edit="editarGrupo(user)"
-                                @delete="onDelete(user)" />
+                                entity-label="usuario" @view="verGrupo(user)" @edit="showSlider(true, user)"
+                                @delete="onDelete(user)" /> 
                         </Td>
                     </Tr>
                 </TBody>

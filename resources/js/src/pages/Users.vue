@@ -143,9 +143,15 @@ const usuariosPaginados = computed(() => {
                                 ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
                                 : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'"
                                 class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
-                                Activo
-                                <span v-if="user.status === 1">✓</span>
+                                <span v-if="user.status === 1">
+                                    Activo ✓
+                                </span>
+                                <span v-else="user.status === 0">
+                                    Inactivo X
+                                </span> 
+                                
                             </span>
+                            
                         </Td>
                         <Td class="text-center text-gray-600 dark:text-gray-200">
 

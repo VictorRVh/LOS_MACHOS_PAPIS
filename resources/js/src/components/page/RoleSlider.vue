@@ -16,6 +16,7 @@ import useModalToast from '../../composables/useModalToast';
 
 import * as yup from 'yup';
 import SelectedChips from '../ui/selectedChips.vue';
+import BaseSelect from '../ui/BaseSelect.vue';
 
 const props = defineProps({
     show: {
@@ -172,8 +173,8 @@ const onSubmit = async () => {
             <FormInput v-model="formData.name" :focus="show" label="Nombre del rol" :error="formErrors?.name"
                 required />
             <FormLabelError label="Añadir permiso">
-                <VSelect v-model="selectedPermission" :options="permissionOptions" label="name"
-                    @update:model-value="(permission) => onPermissionSelect(permission)" />
+                <BaseSelect v-model="selectedPermission" :options="permissionOptions" label="name"
+                    placeholder="Seleccione un permiso" @update:modelValue="onPermissionSelect" />
             </FormLabelError>
             <div class="w-full space-y-4">
                 <div class="flex-between gap-4">
@@ -187,7 +188,9 @@ const onSubmit = async () => {
 
 
                 <SelectedChips :items="formData.permissions" @remove="onPermissionRemove" />
-
+                <Button :title="role?.id ? 'Guardar Cambios' : 'Crear Rol'" Add commentMore actions
+                    :loading-title="role?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
+                    :loading="saving || updating" key="submit-btn" @click="onSubmit" />
             </div>
         </div>
     </AuthorizationFallback>

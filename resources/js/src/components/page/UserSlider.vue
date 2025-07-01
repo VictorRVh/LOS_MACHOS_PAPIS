@@ -47,7 +47,7 @@ const initialFormData = () => ({
     fecha_nacimiento: null,
     telefono: null,
     direccion: null,
-    status: 1,
+    status: null,
     password: null,
     confirm_password: null,
     roles: [],
@@ -69,6 +69,15 @@ watch(() => props.show, () => {
         }
     }
 });
+
+watch(
+  () => formData.value,
+  (newVal) => {
+    console.log('cambios en status:', newVal.status);
+  },
+  { deep: true }
+);
+
 
 const roleOptions = computed(() => {
     const formDataRoleIds = formData.value.roles.map((role) => role?.id?.toString());
@@ -97,7 +106,7 @@ const schema = yup.object().shape({
     fecha_nacimiento: yup.date().nullable().required("La fecha de nacimiento es requerida."),
     telefono: yup.string().nullable().required("El teléfono es requerido."),
     direccion: yup.string().nullable().required("La dirección es requerida."),
-    status: yup.number().required(),
+    status: yup.bool().required(),
     password: yup.string().nullable().test('password-test', '', (value, { createError }) => {
         if (props.user?.id) return true;
         if (!value) return createError({ message: 'La contraseña es requerida.' });

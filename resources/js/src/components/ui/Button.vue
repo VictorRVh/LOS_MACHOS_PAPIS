@@ -10,7 +10,7 @@ const props = defineProps({
     },
     title: {
         type: String,
-        default: () => 'Submit',
+        default: () => 'Enviar',
     },
     loadingTitle: {
         type: String,
@@ -65,7 +65,7 @@ const props = defineProps({
                 loading
                     ? loadingTitle
                         ? loadingTitle
-                        : 'Processing...'
+                        : 'Procesando...'
                     : title
             }}
         </div>

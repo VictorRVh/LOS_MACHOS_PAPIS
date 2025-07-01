@@ -10,7 +10,7 @@ const props = defineProps({
     },
     label: {
         type: String,
-        default: 'label'
+        default: 'Etiqueta'
     },
     placeholder: {
         type: String,

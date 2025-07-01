@@ -96,6 +96,8 @@ watch(
     () => props.role,
     (newRole) => {
         if (props.show && newRole?.id) {
+                        console.log('datos', formData.value)
+
             formData.value = Object.entries(initialFormData()).reduce(
                 (r, [key, val]) => {
                     if (newRole[key]) return { ...r, [key]: newRole[key] };

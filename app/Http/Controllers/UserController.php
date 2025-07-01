@@ -104,7 +104,7 @@ class UserController extends Controller
             );
             if ($usersSuperAdminRole) {
                 throw new \Exception(
-                    'Error|Super admin user can\'t be updated--401',
+                    'Error|Usuario directora\'t no se puede editar--401',
                     13333
                 );
             }

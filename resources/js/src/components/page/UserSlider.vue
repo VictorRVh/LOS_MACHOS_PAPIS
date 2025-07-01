@@ -71,11 +71,11 @@ watch(() => props.show, () => {
 });
 
 watch(
-  () => formData.value,
-  (newVal) => {
-    console.log('cambios en status:', newVal.status);
-  },
-  { deep: true }
+    () => formData.value,
+    (newVal) => {
+        console.log('cambios en status:', newVal.status);
+    },
+    { deep: true }
 );
 
 
@@ -184,11 +184,12 @@ const onSubmit = async () => {
                         <VSelect v-model="selectedRole" :options="roleOptions" label="name"
                             @update:model-value="(role) => onRoleSelect(role)" />
                     </FormLabelError>
-                    <CheckBox v-model="formData.status" label="Estado" class="mt-8 pl-4 flex justify-center items-centers" />
+                    <CheckBox v-model="formData.status" label="Estado"
+                        class="mt-8 pl-4 flex justify-center items-centers" />
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
-                    <SelectedChips :items="formData.roles" @remove="onRoleRemove" />
+                    <SelectedChips :items="formData.permissions" @remove="onPermissionRemove" />
                 </div>
 
                 <Button :title="user?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"

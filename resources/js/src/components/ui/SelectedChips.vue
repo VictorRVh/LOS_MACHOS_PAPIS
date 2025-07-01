@@ -6,7 +6,7 @@ defineProps({
   },
   labelKey: {
     type: String,
-    default: 'Nombre',
+    default: 'name',
   },
 });
 const emit = defineEmits(['remove']);

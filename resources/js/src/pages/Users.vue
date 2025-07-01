@@ -42,7 +42,7 @@ const onDelete = (user) => {
 
         const isDeleted = await deleteUser(user?.id);
         if (isDeleted) {
-            showToast(`"${user?.name}" deleted successfully...`);
+            showToast(`"${user?.name}" eliminado correctamente...`);
             userStore.loadUsers();
         }
     });

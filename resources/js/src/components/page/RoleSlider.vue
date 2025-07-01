@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import Slider from '../ui/Slider.vue';
 import FormInput from '../ui/FormInput.vue';
 import FormLabelError from '../ui/FormLabelError.vue';
@@ -17,6 +17,7 @@ import useModalToast from '../../composables/useModalToast';
 import * as yup from 'yup';
 import SelectedChips from '../ui/selectedChips.vue';
 import BaseSelect from '../ui/BaseSelect.vue';
+
 
 const props = defineProps({
     show: {
@@ -62,6 +63,14 @@ const initialFormData = () => {
 const formData = ref(initialFormData());
 const formErrors = ref({});
 
+const isEditing = computed(() => !!props.role?.id);
+
+const onCancelEdit = () => {
+    formData.value = initialFormData();
+    formErrors.value = {};
+    emit('hide'); // oculta el formulario
+};
+
 watch(
     () => props.show,
     () => {
@@ -81,6 +90,22 @@ watch(
             }
         }
     },
+);
+
+watch(
+    () => props.role,
+    (newRole) => {
+        if (props.show && newRole?.id) {
+            formData.value = Object.entries(initialFormData()).reduce(
+                (r, [key, val]) => {
+                    if (newRole[key]) return { ...r, [key]: newRole[key] };
+                    return { ...r, [key]: val };
+                },
+                {}
+            );
+        }
+    },
+    { immediate: true }
 );
 
 const permissionOptions = computed(() => {
@@ -191,6 +216,11 @@ const onSubmit = async () => {
                 <Button :title="role?.id ? 'Guardar Cambios' : 'Crear Rol'" Add commentMore actions
                     :loading-title="role?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
                     :loading="saving || updating" key="submit-btn" @click="onSubmit" />
+
+                <div class="flex justify-end">
+                    <Button v-if="isEditing" title="Cancelar edición" variant="outline" @click="onCancelEdit" />
+                </div>
+
             </div>
         </div>
     </AuthorizationFallback>

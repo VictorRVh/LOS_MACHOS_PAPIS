@@ -11,9 +11,6 @@ import useAppRouter from '../../composables/useAppRouter';
 import { UserCircleIcon, GlobeEuropeAfricaIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline';
 
 
-
-
-
 const { isDarkMode, updateDarkMode } = inject('theme');
 const { index: logout } = useHttpRequest('/logout');
 
@@ -28,6 +25,8 @@ const isMenuOpen = ref(false);
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
+
+let RolUser = userStore?.user?.roles[0]?.name?.toUpperCase();
 
 const onLogout = async () => {
     const isLoggedOut = await logout();
@@ -61,7 +60,7 @@ const onLogout = async () => {
 
             <!-- LADO DERECHO: Usuario y Notificaciones -->
             <div class="flex items-center gap-4">
-                <span class="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">COORDINADOR</span>
+                <span class="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full"> {{RolUser}} </span>
 
                 <!-- La caja con el borde celestito a la izquierda -->
                 <div class="flex items-center gap-3 pl-4 border-l-2 border-cetpro">

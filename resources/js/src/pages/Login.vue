@@ -25,9 +25,9 @@ const schema = object().shape({
     usuario: string().nullable().required(),
     password: string().nullable().required(),
 });
-
 const onSignIn = async () => {
     if (loggingIn.value) return;
+
     const { validated, data, errors } = await runYupValidation(schema, formData.value);
     if (!validated) {
         formErrors.value = errors;
@@ -35,12 +35,19 @@ const onSignIn = async () => {
     }
 
     formErrors.value = {};
-    const user = await login(data);
-    if (user?.id) {
-        userStore.setUser(user);
-        await pushToRoute({ name: 'users' });
+    const response = await login(data); 
+
+    console.log('LOGIN RESPONSE:', response);
+
+
+    if (response?.user?.id) {
+        userStore.setUser(response.user);
+        userStore.setRequiereCambioPassword(response.requiereCambioPassword); 
+
+        await pushToRoute({ name: 'users' }); 
     }
 };
+
 </script>
 
 <template>

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('direccion');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('password_cambiada')->default(false);
             $table->tinyInteger('status')->default(0);
             $table->rememberToken();
             $table->timestamps();

@@ -30,7 +30,15 @@ class AuthController extends Controller
                 !Hash::check($credentials['password'], $user->password)
             ) {
                 throw new \Exception(
-                    'Error|Credentials doesn\'t match--403',
+                    'Error|Las credenciales no coinciden--403',
+                    13333
+                );
+            }
+
+
+            if ($user->status == 0) {
+                throw new \Exception(
+                    'Error|Este usuario está desactivado--403',
                     13333
                 );
             }
@@ -38,7 +46,11 @@ class AuthController extends Controller
             $request->session()->regenerate();
             Auth::loginUsingId($user->id, true);
 
-            return response()->json($this->extractPermissionsFromUser($user));
+            return response()->json([
+                'requiereCambioPassword' => !$user->password_cambiada,
+                'user' => $this->extractPermissionsFromUser($user),
+            ]);
+
 
             // return response()->json([
             //     'id' => $user->id,
@@ -77,5 +89,21 @@ class AuthController extends Controller
         } catch (\Exception $error) {
             return $this->errorResponse($error);
         }
+    }
+
+    public function cambiarPasswordPrimeraVez(Request $request)
+    {
+        $request->validate([
+            'nueva_password' => 'required|min:6|confirmed',
+        ]);
+
+        /** @var \App\Models\User $user */
+
+        $user = Auth::user();
+        $user->password = Hash::make($request->nueva_password);
+        $user->password_cambiada = true;
+        $user->save();
+
+        return response()->json(['message' => 'Contraseña actualizada con éxito']);
     }
 }

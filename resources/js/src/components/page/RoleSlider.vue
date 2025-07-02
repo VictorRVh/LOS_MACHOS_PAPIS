@@ -222,7 +222,7 @@ const onSubmit = async () => {
                     :loading="saving || updating" key="submit-btn" @click="onSubmit" />
 
                 
-                    <Button class=" mt-6 ml-1 bg-[#f00]"
+                    <Button class=" mt-6 ml-1 bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer transition duration-150"
                      v-if="isEditing" title="Cancelar edición" variant="outline" @click="onCancelEdit" />
                 
 

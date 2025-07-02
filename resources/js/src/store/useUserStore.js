@@ -12,9 +12,14 @@ const useUserStore = defineStore('users', () => {
 
     const user = ref(null);
     const users = ref([]);
+    const requiereCambioPassword = ref(false);
 
     const setUser = (authUser) => {
         user.value = authUser;
+    };
+
+    const setRequiereCambioPassword = (valor) => {
+        requiereCambioPassword.value = valor;
     };
 
     const loadUsers = async () => {
@@ -25,6 +30,8 @@ const useUserStore = defineStore('users', () => {
     return {
         user,
         setUser,
+        requiereCambioPassword,
+        setRequiereCambioPassword,
         users,
         usersLoading,
         usersFirstTimeLoading,

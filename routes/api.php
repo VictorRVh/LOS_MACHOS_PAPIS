@@ -14,6 +14,13 @@ Route::get('auth/verify', [
     'verify',
 ]);
 
+//RUTA PARA CAMBIAR CONTRASEÑA
+
+Route::post('auth/reset_password', [
+    \App\Http\Controllers\AuthController::class,
+    'cambiarPasswordPrimeraVez',
+]);
+
 Route::middleware('auth:sanctum')->group(function () {
     /**
      * ------------------------------------------------------------------------

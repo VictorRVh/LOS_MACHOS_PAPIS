@@ -1,3 +1,4 @@
+
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue';
 import Slider from '../ui/Slider.vue';
@@ -214,13 +215,21 @@ const onSubmit = async () => {
 
 
                 <SelectedChips :items="formData.permissions" @remove="onPermissionRemove" />
+                
+                <div class="flex justify-content"> 
                 <Button :title="role?.id ? 'Guardar Cambios' : 'Crear Rol'" Add commentMore actions
                     :loading-title="role?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
                     :loading="saving || updating" key="submit-btn" @click="onSubmit" />
 
-                <div class="flex justify-end">
-                    <Button v-if="isEditing" title="Cancelar edición" variant="outline" @click="onCancelEdit" />
+                
+                    <Button class=" mt-6 ml-1 bg-[#f00]"
+                     v-if="isEditing" title="Cancelar edición" variant="outline" @click="onCancelEdit" />
+                
+
                 </div>
+
+    
+                
 
             </div>
         </div>

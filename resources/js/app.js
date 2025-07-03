@@ -13,8 +13,12 @@ import 'vue-toastification/dist/index.css';
 
 import focus from './src/directives/focus';
 
+import {registerHeroIcons} from './src/composables/icons/heroicons';
+
 const app = createApp(App);
 const pinia = createPinia();
+
+registerHeroIcons(app);
 
 app.use(pinia)
     .use(router)

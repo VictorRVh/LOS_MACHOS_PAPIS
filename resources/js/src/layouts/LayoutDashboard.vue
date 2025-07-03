@@ -1,9 +1,25 @@
 <script setup>
+import {computed} from 'vue'
 import { useLayoutStore } from '@/store/useLayoutStore';
 import Sidebar from './components/Sidebar.vue';
 import Header from './components/Header.vue';
 import PageLoader from './PageLoader.vue';
 import SuspenseFallback from './SuspenseFallback.vue';
+
+import useUserStore from "../store/useUserStore";
+
+
+const userStore = useUserStore();
+const userPermissions = computed(
+  () => userStore.user?.permissions.map(p => p.name) || []
+);
+
+// Función para verificar permisos
+const hasPermission = (itemPermissions) =>
+  itemPermissions.some(perm => userPermissions.value.includes(perm));
+
+console.log("los permisos  de pepep",userPermissions.value)
+
 
 const layoutStore = useLayoutStore();
 </script>

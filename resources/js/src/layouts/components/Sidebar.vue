@@ -1,18 +1,32 @@
 <script setup>
-import {
-    HomeIcon, UserGroupIcon, AcademicCapIcon, ClipboardDocumentListIcon,
-    ShieldCheckIcon, KeyIcon
-} from '@heroicons/vue/24/outline';
+
+import usePermissions from '@/composables/usePermissions';
+
+const { hasPermission, userPermissions } = usePermissions();
+
+
+
+if (hasPermission(['ver-usuarios', 'editar-usuarios'])) {
+  console.log("Tiene permiso funcoianisd");
+}
+else{
+    console.log("no tiene permiso")
+}
 
 const navLinks = [
     // { name: 'Inicio', routeName: 'users', icon: HomeIcon },
     // { name: 'Grupos', routeName: 'users', icon: UserGroupIcon },
     // { name: 'Programas A.', routeName: 'users', icon: AcademicCapIcon },
     // { name: 'Calificaciones', routeName: 'users', icon: ClipboardDocumentListIcon },
-    { name: 'Usuarios', routeName: 'users', icon: UserGroupIcon },
-    { name: 'Roles', routeName: 'roles', icon: ShieldCheckIcon },
-    { name: 'Permisos', routeName: 'permissions', icon: KeyIcon }, 
+    { name: 'Usuarios', routeName: 'users', icon: "UserGroupIcon" ,permissions: ["todo-acceso-usuarios", "icono-usuarios"]},
+    { name: 'Roles', routeName: 'roles', icon: "ShieldCheckIcon" ,permissions: ["todo-acceso-roles", "icono-roles"]},
+    { name: 'Permisos', routeName: 'permissions', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
+    
+
 ];
+
+//  v-show="item.name === 'Home' || hasPermission(item.permissions)
+
 </script>
 
 <template>
@@ -25,7 +39,7 @@ const navLinks = [
         <nav class="flex-1">
             <ul class="flex flex-col items-center py-4">
                 <li v-for="link in navLinks" :key="link.name" class="w-full">
-                    <RouterLink :to="{ name: link.routeName }" v-slot="{ isActive, href, navigate }">
+                    <RouterLink :to="{ name: link.routeName }" v-slot="{ isActive, href, navigate }"  v-show="link.name === 'Home' || hasPermission(link.permissions)" >
                         <a
                             :href="href"
                             @click="navigate"
@@ -36,10 +50,12 @@ const navLinks = [
                                     : 'text-cetpro-text/80 hover:bg-cetpro-light hover:text-white'
                             ]"
                         >
+                        
                             <component :is="link.icon" class="h-7 w-7" />
                             <span class="text-xs mt-1 font-medium">{{ link.name }}</span>
                         </a>
                     </RouterLink>
+
                 </li>
             </ul>
         </nav>

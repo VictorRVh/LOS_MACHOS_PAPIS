@@ -56,7 +56,7 @@ const loaderWidth = computed(() => `${width.value}%`);
         class="h-1 absolute top-0 left-0 page-loader transition-all duration-100"
         :class="[
             show
-                ? 'z-[9999] dark:bg-active bg-active-light'
+                ? 'z-[9999] dark:bg-cetpro bg-cetpro-light'
                 : 'z-0 bg-transparent',
         ]"
     ></div>

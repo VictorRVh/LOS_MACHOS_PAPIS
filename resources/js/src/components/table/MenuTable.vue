@@ -53,12 +53,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import {
-  EyeIcon,
-  PencilIcon,
-  TrashIcon,
-  ArrowDownTrayIcon,
-} from '@heroicons/vue/24/solid'
+
 
 const props = defineProps({
   actions: {

@@ -8,8 +8,6 @@ import useRoleStore from '../../store/useRoleStore';
 import usePermissionStore from '../../store/usePermissionStore';
 import useAppRouter from '../../composables/useAppRouter';
 // ÍCONOS FINALES: Usuario, Mundo-Africa, Flecha-Izquierda
-import { UserCircleIcon, GlobeEuropeAfricaIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline';
-
 
 const { isDarkMode, updateDarkMode } = inject('theme');
 const { index: logout } = useHttpRequest('/logout');
@@ -35,7 +33,6 @@ const onLogout = async () => {
         userStore.users = [];
         roleStore.roles = [];
         permissionStore.permissions = [];
-
         await pushToRoute({ name: 'login' });
     }
 };
@@ -95,7 +92,7 @@ const onLogout = async () => {
         <div class="h-10 flex items-center px-4 border-t border-gray-200 dark:border-cc-21">
             <p class="text-sm text-gray-500 dark:text-gray-400">
                 Inicio / Grupos / Grupo A
-            </p>
+           </p>
         </div>
     </div>
 </template>

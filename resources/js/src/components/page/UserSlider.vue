@@ -83,7 +83,7 @@ watch(
 const roleOptions = computed(() => {
     const formDataRoleIds = formData.value.roles.map((role) => role?.id?.toString());
     return roleStore.roles.filter(
-        (role) => !formDataRoleIds.includes(role?.id?.toString()) && role?.name !== 'directora'
+        (role) => !formDataRoleIds.includes(role?.id?.toString()) && role?.name !== 'super-directora'
     );
 });
 

@@ -16,13 +16,17 @@ class PermissionRoleTableSeeder extends Seeder
         $permissionRole = [];
 
         for ($i = 1; $i <= 15; $i++) {
-            $item = [
+            $permissionRole[] = [
                 'role_id' => 1,
                 'permission_id' => $i,
                 'created_at' => now(),
             ];
 
-            $permissionRole[] = $item;
+            $permissionRole[] = [
+                'role_id' => 2,
+                'permission_id' => $i,
+                'created_at' => now(),
+            ];
         }
 
         DB::table('permission_role')->insert($permissionRole);

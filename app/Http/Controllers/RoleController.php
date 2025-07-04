@@ -52,7 +52,7 @@ class RoleController extends Controller
             if (!$role) {
                 throw new \Exception('Error|Role not found--404', 13333);
             }
-            if ($role->name === 'directora') {
+            if ($role->name === 'super-directora') {
                 throw new \Exception(
                     'Error|Super admin role can\'t be updated--404',
                     13333
@@ -80,7 +80,7 @@ class RoleController extends Controller
             if (!$role) {
                 throw new \Exception('Error|Role not found--404', 13333);
             }
-            if ($role->name === 'directora') {
+            if ($role->name === 'super-directora') {
                 throw new \Exception(
                     'Error|Super admin role can\'t be deleted--404',
                     13333

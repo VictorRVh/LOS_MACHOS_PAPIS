@@ -13,10 +13,10 @@ class RoleTableSeeder extends Seeder
     public function run(): void
     {
         $roles = [
-            // [
-            //     'name' => 'super-admin',
-            //     'created_at' => now(),
-            // ],
+            [
+                'name' => 'super-directora',
+                'created_at' => now(),
+            ],
             [
                 'name' => 'directora',
                 'created_at' => now(),

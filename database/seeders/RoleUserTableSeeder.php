@@ -58,6 +58,11 @@ class RoleUserTableSeeder extends Seeder
                 'user_id' => 9,
                 'created_at' => now(),
             ],
+            [
+                'role_id' => 5,
+                'user_id' => 10,
+                'created_at' => now(),
+            ],
         ];
 
         DB::table('role_user')->insert($roleUser);

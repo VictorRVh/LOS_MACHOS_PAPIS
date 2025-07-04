@@ -49,7 +49,7 @@ class PermissionController extends Controller
             }
             $permission->save();
 
-            $superAdminRole = Role::where('name', 'directora')->first();
+            $superAdminRole = Role::where('name', 'super-directora')->first();
             $superAdminRole->permissions()->attach([$permission->id]);
 
             return response()->json($permission);

@@ -17,6 +17,20 @@ class UserTableSeeder extends Seeder
 
         $users = [
             [
+                'name' => 'Monica-pro',
+                'usuario' => 'super-directora',
+                'dni' => '12345633',
+                'apellido_paterno' => 'Calderon',
+                'apellido_materno' => 'Muñoz',
+                'fecha_nacimiento' => '1990-01-01',
+                'telefono' => '987654321',
+                'direccion' => 'Av. Principal 123',
+                'email' => 'monicapro@gmail.com',
+                'password' => $password,
+                'status' => 1,
+                'created_at' => now(),
+            ],
+            [
                 'name' => 'Monica',
                 'usuario' => 'directora',
                 'dni' => '12345678',

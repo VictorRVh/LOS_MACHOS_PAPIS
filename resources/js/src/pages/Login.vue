@@ -9,6 +9,7 @@ import useAppRouter from '../composables/useAppRouter';
 import useUserStore from '../store/useUserStore';
 
 import { string, object } from 'yup';
+import axios from 'axios';
 
 const { store: login, saving: loggingIn } = useHttpRequest('/login');
 const { runYupValidation } = useValidation();
@@ -35,10 +36,10 @@ const onSignIn = async () => {
     }
 
     formErrors.value = {};
+
+    await axios.get('/sanctum/csrf-cookie');
+
     const response = await login(data); 
-
-    console.log('LOGIN RESPONSE:', response);
-
 
     if (response?.user?.id) {
         userStore.setUser(response.user);

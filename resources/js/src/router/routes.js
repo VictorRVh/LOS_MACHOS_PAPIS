@@ -67,34 +67,34 @@ export default [
             breadcrumb: [
                 { name: 'ROLES', to: { name: 'roles' } }
             ]
-
-        },
-        children: [
-            {
-                path: 'crear',
-                name: 'roles.crear',
-                component: () => import('../pages/RolesCrear.vue'),
-                meta: {
-                    breadcrumb: [
-                        { name: 'ROLES', to: { name: 'roles' } },
-                        { name: 'CREAR', to: { name: 'roles.crear' } }
-                    ]
-                }
-            },
-            {
-                path: 'confirmar',
-                name: 'roles.confirmar',
-                component: () => import('../pages/Confirmar.vue'),
-                meta: {
-                    breadcrumb: [
-                        { name: 'ROLES', to: { name: 'roles' } },
-                        { name: 'CREAR', to: { name: 'roles.crear' } },
-                        { name: 'CONFIRMAR' }
-                    ]
-                }
-            }
-        ]
+        }
     },
+    {
+        path: '/roles/crear',
+        name: 'roles.crear',
+        component: () => import('../pages/RolesCrear.vue'),
+        meta: {
+            layout: 'dashboard',
+            breadcrumb: [
+                { name: 'ROLES', to: { name: 'roles' } },
+                { name: 'CREAR' }
+            ]
+        }
+    },
+    {
+        path: '/roles/confirmar',
+        name: 'roles.confirmar',
+        component: () => import('../pages/Confirmar.vue'),
+        meta: {
+            layout: 'dashboard',
+            breadcrumb: [
+                { name: 'ROLES', to: { name: 'roles' } },
+                { name: 'CREAR', to: { name: 'roles.crear' } },
+                { name: 'CONFIRMAR' }
+            ]
+        }
+    }
+    ,
     {
 
         path: '/permissions',

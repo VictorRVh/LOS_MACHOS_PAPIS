@@ -72,26 +72,6 @@ const onCancelEdit = () => {
     emit('hide'); // oculta el formulario
 };
 
-watch(
-    () => props.show,
-    () => {
-        if (props.show) {
-            if (props.role?.id) {
-                formData.value = Object.entries(initialFormData()).reduce(
-                    (r, [key, val]) => {
-                        if (props.role[key])
-                            return { ...r, [key]: props.role[key] };
-                        return { ...r, [key]: val };
-                    },
-                    {},
-                );
-            } else {
-                formData.value = initialFormData();
-                formErrors.value = {};
-            }
-        }
-    },
-);
 
 watch(
     () => props.role,
@@ -196,18 +176,18 @@ const onSubmit = async () => {
 <template>
 
     <AuthorizationFallback :permissions="requiredPermissions">
-        <div class="mt-4 space-y-6 font-inter">
+        <div class="mt-2 space-y-1.5 font-inter">
             <FormInput v-model="formData.name" :focus="show" label="Nombre del rol" :error="formErrors?.name"
                 required />
             <FormLabelError label="Añadir permiso">
                 <BaseSelect v-model="selectedPermission" :options="permissionOptions" label="name"
                     placeholder="Seleccione un permiso" @update:modelValue="onPermissionSelect" />
             </FormLabelError>
-            <div class="w-full space-y-4">
-                <div class="flex-between gap-4">
+            <div class="w-full space-y-3">
+                <div class="flex-between gap-6">
                     <label class="text-sm font-semibold dark:text-slate-300">Permisos del Rol</label>
                     <div v-if="canShowAddAllPermissions"
-                        class="cursor-pointer text-xs font-bold text-sky-500 hover:underline dark:text-sky-400"
+                        class="cursor-pointer text-sm font-bold text-sky-500 hover:underline dark:text-sky-400"
                         @click="onAddAllPermissions">
                         Añadir todos los permisos
                     </div>
@@ -218,13 +198,11 @@ const onSubmit = async () => {
                 
                 <div class="flex justify-content"> 
                 <Button :title="role?.id ? 'Guardar Cambios' : 'Crear Rol'" Add commentMore actions
-                    :loading-title="role?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
+                    :loading-title="role?.id ? 'Guardando...' : 'Creando...'" class="!mt-1 !w-full"
                     :loading="saving || updating" key="submit-btn" @click="onSubmit" />
-
                 
-                    <Button class=" mt-6 ml-1 bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer transition duration-150"
-                     v-if="isEditing" title="Cancelar edición" variant="outline" @click="onCancelEdit" />
-                
+                    <Button class=" mt-1 ml-1 bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer transition duration-150"
+                     v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit" />
 
                 </div>
 

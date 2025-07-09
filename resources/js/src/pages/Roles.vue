@@ -61,17 +61,17 @@ function showPermissionsModal(role) {
       <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Roles</h2>
       <!-- <CreateButton @click="showSlider(true)" /> -->
     </div>
-    <div class="flex gap-6 px-6">
-      <div class="w-1/3 bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+    <div class="flex  px-6">
+      <div class="w-1/2 bg-white dark:bg-gray-900 rounded-lg shadow-md p-4">
         <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
           Agregar Rol
         </h3>
-        <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+        <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
         <RoleSlider :show="slider" :role="sliderData" @hide="hideSlider" />
       </div>
       
 
-      <div class="w-2/3">
+      <div class="w-full">
         <Table>
           <THead>
             <Th>Id</Th>
@@ -93,7 +93,7 @@ function showPermissionsModal(role) {
                       : 'justify-center',
                   ]"
                 >
-                  <ul class="text-sm text-gray-700 list-disc list-inside">
+                  <ul class="text-sm text-gray-700  w-30 list-none">
                     <li
                       v-for="(permission, index) in role.permissions.slice(0, 1)"
                       :key="permission.id"
@@ -111,7 +111,7 @@ function showPermissionsModal(role) {
                 </div>
               </Td>
               <Td class="align-middle">
-                <div class="flex items-center justify-center gap-2">
+                <div class="flex items-center justify-center gap-1">
                   <EditButton @click="showSlider(true, role)" />
                   <DeleteButton @click="onDelete(role)" />
                 </div>
@@ -128,8 +128,8 @@ function showPermissionsModal(role) {
         </template>
 
         <template #body>
-          <ul class="list-disc ml-4 space-y-1">
-            <li v-for="permission in selectedRole?.permissions" :key="permission.id">
+          <ul class="ml-4 space-y-1 ">
+            <li class="" v-for="permission in selectedRole?.permissions" :key="permission.id">
               {{ permission.name }}
             </li>
           </ul>

@@ -3,27 +3,27 @@ import vSelect from 'vue-select'
 import 'vue-select/dist/vue-select.css'
 
 const props = defineProps({
-    modelValue: [String, Number, Object, Array, Boolean, null],
-    options: {
-        type: Array,
-        default: () => []
-    },
-    label: {
-        type: String,
-        default: 'Etiqueta'
-    },
-    placeholder: {
-        type: String,
-        default: 'Seleccione una opción'
-    },
-    multiple: {
-        type: Boolean,
-        default: false
-    },
-    clearable: {
-        type: Boolean,
-        default: true
-    }
+  modelValue: [String, Number, Object, Array, Boolean, null],
+  options: {
+    type: Array,
+    default: () => []
+  },
+  label: {
+    type: String,
+    default: 'Etiqueta'
+  },
+  placeholder: {
+    type: String,
+    default: 'Seleccione una opción'
+  },
+  multiple: {
+    type: Boolean,
+    default: false
+  },
+  clearable: {
+    type: Boolean,
+    default: true
+  }
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -51,3 +51,9 @@ const emit = defineEmits(['update:modelValue'])
     </template>
   </v-select>
 </template>
+
+<style scoped>
+:deep(.vs__dropdown-menu) {
+  @apply max-h-[140px] overflow-y-auto;
+}
+</style>

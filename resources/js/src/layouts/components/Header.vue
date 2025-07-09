@@ -7,6 +7,7 @@ import useUserStore from '../../store/useUserStore';
 import useRoleStore from '../../store/useRoleStore';
 import usePermissionStore from '../../store/usePermissionStore';
 import useAppRouter from '../../composables/useAppRouter';
+import Breadcrumbs from '../../components/breadcrumbs/Breadcrumbs.vue';
 // ÍCONOS FINALES: Usuario, Mundo-Africa, Flecha-Izquierda
 
 const { isDarkMode, updateDarkMode } = inject('theme');
@@ -21,7 +22,7 @@ const permissionStore = usePermissionStore();
 const isMenuOpen = ref(false);
 
 const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value;
+    isMenuOpen.value = !isMenuOpen.value;
 };
 
 let RolUser = userStore?.user?.roles[0]?.name?.toUpperCase();
@@ -57,7 +58,7 @@ const onLogout = async () => {
 
             <!-- LADO DERECHO: Usuario y Notificaciones -->
             <div class="flex items-center gap-4">
-                <span class="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full"> {{RolUser}} </span>
+                <span class="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full"> {{ RolUser }} </span>
 
                 <!-- La caja con el borde celestito a la izquierda -->
                 <div class="flex items-center gap-3 pl-4 border-l-2 border-cetpro">
@@ -91,8 +92,8 @@ const onLogout = async () => {
         <!-- BREADCRUMBS (La parte de abajo) -->
         <div class="h-10 flex items-center px-4 border-t border-gray-200 dark:border-cc-21">
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                Inicio / Grupos / Grupo A
-           </p>
+                <Breadcrumbs />
+            </p>
         </div>
     </div>
 </template>

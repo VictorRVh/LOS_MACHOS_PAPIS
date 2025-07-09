@@ -1,3 +1,5 @@
+import Breadcrumbs from '../components/breadcrumbs/Breadcrumbs.vue';
+
 export default [
     {
         path: '/',
@@ -15,6 +17,7 @@ export default [
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-usuarios', 'ver-usuarios'],
+            breadcrumb: 'Start'
         },
     },
     {
@@ -51,6 +54,7 @@ export default [
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-usuarios', 'ver-usuarios'],
+            breadcrumb: 'Usuarios'
         },
     },
     {
@@ -60,16 +64,46 @@ export default [
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-roles', 'ver-roles'],
+            breadcrumb: [
+                { name: 'ROLES', to: { name: 'roles' } }
+            ]
+
         },
+        children: [
+            {
+                path: 'crear',
+                name: 'roles.crear',
+                component: () => import('../pages/RolesCrear.vue'),
+                meta: {
+                    breadcrumb: [
+                        { name: 'ROLES', to: { name: 'roles' } },
+                        { name: 'CREAR', to: { name: 'roles.crear' } }
+                    ]
+                }
+            },
+            {
+                path: 'confirmar',
+                name: 'roles.confirmar',
+                component: () => import('../pages/Confirmar.vue'),
+                meta: {
+                    breadcrumb: [
+                        { name: 'ROLES', to: { name: 'roles' } },
+                        { name: 'CREAR', to: { name: 'roles.crear' } },
+                        { name: 'CONFIRMAR' }
+                    ]
+                }
+            }
+        ]
     },
     {
-       
+
         path: '/permissions',
         name: 'permissions',
-        component: () => import('../pages/newPermission.vue'), 
+        component: () => import('../pages/newPermission.vue'),
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            breadcrumb: 'Permisos'
         },
     },
 ];

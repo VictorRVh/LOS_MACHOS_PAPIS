@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 
 import SearchBar from "../components/head_table/headSearch.vue";
 
@@ -24,13 +24,12 @@ import useUserStore from "../store/useUserStore";
 import useSlider from "../composables/useSlider";
 import useModalToast from "../composables/useModalToast";
 import useHttpRequest from "../composables/useHttpRequest";
+import useTableData from "../composables/tabla/useTableData";
 import ChangePasswordModal from "../components/page/ChangePasswordModal.vue";
 
 const userStore = useUserStore();
 
-
 if (!userStore.users?.length) await userStore.loadUsers();
-
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("user-crud");
 const { showConfirmModal, showToast } = useModalToast();
@@ -45,6 +44,7 @@ onMounted(() => {
     showModal.value = true;
   }
 });
+
 
 const onPasswordChanged = () => {
   showModal.value = false;
@@ -69,63 +69,22 @@ const onDelete = (user) => {
 // const usuarios = ref(userStore.users)
 const usuarios = computed(() => userStore.users);
 
-const query = ref("");
-const orderDirection = ref("asc");
-const orderBy = ref("apellidos"); // podrías cambiarlo por otro campo si fuese nombre, dni, etc.
 
-function filtrarUsuarios({ query: texto, orderDirection: orden, orderBy: campo }) {
-  query.value = texto.toLowerCase()
-  orderDirection.value = orden
-  orderBy.value = campo
-}
 
-const usuariosFiltrados = computed(() => {
-
-  if (!query.value) return usuarios.value;
-
-  return usuarios.value.filter(
-    (user) =>
-      user.name.toLowerCase().includes(query.value) ||
-      user.apellido_paterno.toLowerCase().includes(query.value) ||
-      user.dni.includes(query.value)
-  );
+const {
+  query,
+  orderBy,
+  orderDirection,
+  pagina,
+  itemsPorPagina,
+  paginados: usuariosPaginados,
+  totalPaginas,
+  ordenados: usuariosOrdenados,
+  filtrar: filtrarUsuarios
+} = useTableData(usuarios, {
+  defaultOrderBy: "apellido_paterno",
+  searchFields: ["name", "apellido_paterno", "dni"]
 });
-
-const usuariosOrdenados = computed(() => {
-  const lista = [...usuariosFiltrados.value];
-  return lista.sort((a, b) => {
-    const campoA =
-      orderBy.value === "apellidos"
-        ? `${a.apellido_paterno} ${a.apellido_materno}`.toLowerCase()
-        : (a[orderBy.value] || "").toLowerCase();
-
-    const campoB =
-      orderBy.value === "apellidos"
-        ? `${b.apellido_paterno} ${b.apellido_materno}`.toLowerCase()
-        : (b[orderBy.value] || "").toLowerCase();
-
-    return orderDirection.value === "asc"
-      ? campoA.localeCompare(campoB)
-      : campoB.localeCompare(campoA);
-  });
-});
-
-
-//// PAGINACION DE USUAIOR
-const pagina = ref(1);
-const itemsPorPagina = 6;
-
-const totalPaginas = computed(() => {
-  return Math.ceil(usuariosOrdenados.value.length / itemsPorPagina);
-});
-
-
-const usuariosPaginados = computed(() => {
-  const inicio = (pagina.value - 1) * itemsPorPagina;
-  const fin = inicio + itemsPorPagina;
-  return usuariosOrdenados.value.slice(inicio, fin);
-});
-
 
 </script>
 
@@ -140,9 +99,9 @@ const usuariosPaginados = computed(() => {
 
         <div class="flex-between flex-row-reverse my-5">
           <SearchBar
-             :totalResultados="usuariosOrdenados.length"
-             :campoOrden="'apellidos'"
-             @search="filtrarUsuarios"
+            :totalResultados="usuariosOrdenados.length"
+            :campoOrden="'apellido_paterno'"
+            @search="filtrarUsuarios"
           />
 
           <div class="font-inter text-md w-full">Lista de usuarios</div>
@@ -178,7 +137,7 @@ const usuariosPaginados = computed(() => {
             <Td>{{ user.dni }}</Td>
             <Td>{{ user.email }}</Td>
             <Td>
-              <span class="bg-gray-800 text-white px-2 py-1 rounded-full">
+              <span class="bg-gray-800 dark:bg-gray-600 text-white px-2 py-1 rounded-full">
                 {{ user.roles[0].name }}
               </span>
             </Td>
@@ -209,7 +168,6 @@ const usuariosPaginados = computed(() => {
         </TBody>
       </Table>
     </div>
-
 
     <UserSlider :show="slider" :user="sliderData" @hide="hideSlider" />
   </AuthorizationFallback>

@@ -1,7 +1,7 @@
 <template>
   <div class="flex justify-end items-center w-full max-w-5xl gap-4">
     <!-- Resultado dinámico -->
-    <div class="flex items-center gap-1 text-md text-gray-600">
+    <div class="flex text-gray-800 dark:text-gray-300 items-center gap-1 text-md">
       <span>Resultados:</span>
       <span
         class="border border-gray-300 bg-white text-gray-800 text-sm px-3 py-1 rounded-md shadow-sm min-w-[40px] text-center"
@@ -66,11 +66,10 @@
 
 <script setup>
 import { ref } from "vue";
-import { MagnifyingGlassIcon, AdjustmentsVerticalIcon } from "@heroicons/vue/24/solid";
 
 const props = defineProps({
   totalResultados: { type: Number, default: 0 },
-  campoOrden: { type: String, default: "apellidos" }, // por defecto, "apellidos"
+  campoOrden: { type: String, default: "id" }, // por defecto, "apellidos"
 });
 
 const emit = defineEmits(["search"]);
@@ -85,6 +84,7 @@ function emitSearch() {
     orderDirection: orden.value,
     orderBy: props.campoOrden,
   });
+  
 }
 
 function toggleOrdenMenu() {

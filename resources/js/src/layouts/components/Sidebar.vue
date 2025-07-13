@@ -4,7 +4,7 @@ import usePermissions from '@/composables/usePermissions';
 
 const { hasPermission, userPermissions } = usePermissions();
 
-
+/*
 
 if (hasPermission(['ver-usuarios', 'editar-usuarios'])) {
   console.log("Tiene permiso funcoianisd");
@@ -12,6 +12,7 @@ if (hasPermission(['ver-usuarios', 'editar-usuarios'])) {
 else{
     console.log("no tiene permiso")
 }
+*/
 
 const navLinks = [
     // { name: 'Inicio', routeName: 'users', icon: HomeIcon },
@@ -30,7 +31,7 @@ const navLinks = [
 </script>
 
 <template>
-    <aside class="w-24 bg-cetpro text-white flex flex-col shrink-0">
+    <aside class="w-24 bg-cetpro dark:bg-gray-800 text-gray-800 dark:text-gray-300 flex flex-col shrink-0">
         <div class="h-20 flex items-center justify-center border-b border-cetpro-dark">
             <RouterLink :to="{ name: 'users' }">
                 <img src="/img/insignia.png" alt="CETPRO Puno" class="h-12">
@@ -43,7 +44,7 @@ const navLinks = [
                         <a
                             :href="href"
                             @click="navigate"
-                            class="flex flex-col items-center justify-center w-full h-20 transition-colors"
+                            class="flex flex-col items-center justify-center w-full h-20 transition-colors "
                             :class="[
                                 isActive
                                     ? 'bg-cetpro-dark text-white border-l-4 border-white'

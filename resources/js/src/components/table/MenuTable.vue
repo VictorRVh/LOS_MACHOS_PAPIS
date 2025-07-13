@@ -1,15 +1,91 @@
+<script setup>
+import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
+
+const props = defineProps({
+  actions: {
+    type: Object,
+    default: () => ({
+      view: false,
+      edit: false,
+      delete: false,
+      download: false,
+    }),
+  },
+  entityLabel: {
+    type: String,
+    default: "elemento",
+  },
+});
+
+const emit = defineEmits(["view", "edit", "delete", "download"]);
+
+const isOpen = ref(false);
+const positionTop = ref(true);
+const menuRef = ref(null);
+const buttonRef = ref(null);
+
+const toggleMenu = async () => {
+  isOpen.value = !isOpen.value;
+
+  if (isOpen.value) {
+    await nextTick();
+
+    const button = buttonRef.value;
+    if (!button || typeof button.getBoundingClientRect !== "function") {
+      console.warn("buttonRef is not a valid DOM element");
+      return;
+    }
+
+    const rect = button.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const espacioDisponibleAbajo = windowHeight - rect.bottom;
+    positionTop.value = espacioDisponibleAbajo > 160;
+
+    menuStyles.value = {
+      top: positionTop.value ? `${rect.bottom + 4}px` : `${rect.top - 80}px`,
+      left: `${rect.left - 150}px`,
+    };
+  }
+};
+
+const menuStyles = ref({});
+
+const emitAndClose = (action) => {
+  emit(action);
+  isOpen.value = false;
+};
+
+const handleClickOutside = (event) => {
+  if (menuRef.value && !menuRef.value.contains(event.target)) {
+    isOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+});
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
+</script>
+
 <template>
   <div class="relative inline-block text-left" ref="menuRef">
-    <button @click="toggleMenu" class="text-xl hover:text-cetpro dark:hover:text-cetpro-light">
+    <button
+      ref="buttonRef"
+      @click="toggleMenu"
+      class="text-xl hover:text-cetpro dark:hover:text-cetpro-light"
+    >
       ⋮
     </button>
 
     <transition name="fade">
       <div
         v-if="isOpen"
-        class="absolute right-0 mt-2 w-[180px] origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 z-20"
+        class="fixed z-40 w-[180px]  origin-top-right rounded-md bg-white dark:bg-gray-800 dark:ring-white dark:ring-opacity-20  shadow-lg ring-1 ring-black ring-opacity-5"
+        :style="menuStyles"
       >
-        <div class="py-1 text-sm text-gray-700 dark:text-gray-200">
+        <div class="py-1 text-sm text-gray-700  dark:text-gray-200">
           <button
             v-if="actions.view"
             @click="emitAndClose('view')"
@@ -50,50 +126,6 @@
     </transition>
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-
-
-const props = defineProps({
-  actions: {
-    type: Object,
-    default: () => ({
-      view: false,
-      edit: false,
-      delete: false,
-      download: false,
-    }),
-  },
-  entityLabel: {
-    type: String,
-    default: 'elemento', // si no pasas nada, dirá: "Ver elemento"
-  },
-})
-
-const emit = defineEmits(['view', 'edit', 'delete', 'download'])
-
-const isOpen = ref(false)
-const toggleMenu = () => (isOpen.value = !isOpen.value)
-const emitAndClose = (action) => {
-  emit(action)
-  isOpen.value = false
-}
-
-const menuRef = ref(null)
-const handleClickOutside = (event) => {
-  if (menuRef.value && !menuRef.value.contains(event.target)) {
-    isOpen.value = false
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
-</script>
 
 <style scoped>
 .fade-enter-active,

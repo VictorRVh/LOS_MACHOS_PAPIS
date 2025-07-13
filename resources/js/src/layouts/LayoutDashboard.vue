@@ -25,7 +25,7 @@ const layoutStore = useLayoutStore();
 </script>
 
 <template>
-    <div class="flex h-screen bg-gray-100 dark:bg-cc-10 font-sans">
+    <div class="flex h-screen bg-gray-100 dark:bg-slate-600  dark:text-gray-100 font-sans">
         <!-- 1. SIDEBAR LATERAL (AZUL) -->
         <Sidebar />
 

@@ -62,7 +62,7 @@ function showPermissionsModal(role) {
       <!-- <CreateButton @click="showSlider(true)" /> -->
     </div>
     <div class="flex  px-6">
-      <div class="w-1/2 bg-white dark:bg-gray-900 rounded-lg shadow-md p-4">
+      <div class="w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
         <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
           Agregar Rol
         </h3>

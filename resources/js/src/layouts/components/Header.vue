@@ -43,7 +43,7 @@ const onLogout = async () => {
 
 <template>
 
-    <div class="bg-white dark:bg-cc-18 border-b-2 border-cetpro">
+    <div class="bg-white dark:bg-gray-800 border-b-2 border-cetpro">
 
         <!-- HEADER SUPERIOR: LOGO Y USUARIO -->
         <header class="h-16 flex items-center justify-between px-4">

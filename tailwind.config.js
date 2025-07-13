@@ -53,9 +53,9 @@ export default {
                 },
                 
                 // TUS OTROS COLORES 'cc-*'
-                'cc-12': '#006F9F',
-                'cc-18': '#006F9F',
-                'cc-10': '#006F9F',
+                'cc-12': '#475569',
+                'cc-18': '#475569',
+                'cc-10': '#334155',
                 'cc-13': '#006F9F',
                 'cc-14': '#006F9F',
                 'cc-19': '#006F9F',
@@ -63,7 +63,7 @@ export default {
                 'cc-21': '#3b3f5c',
                 'cc-22': '#2563EB'
             },
-            
+          //  dark:bg-gray-600  dark:text-gray-100
             // ... tu transitionProperty, boxShadow, etc., están bien ...
             transitionProperty: {
                 width: 'width',

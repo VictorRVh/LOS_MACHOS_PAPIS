@@ -118,4 +118,17 @@ export default [
             breadcrumb: 'Permisos'
         },
     },
+
+    // CONVENIO
+    {
+
+        path: '/convenio',
+        name: 'convenio',
+        component: () => import('../pages/Convenio/Convenio.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            breadcrumb: 'Permisos'
+        },
+    },
 ];

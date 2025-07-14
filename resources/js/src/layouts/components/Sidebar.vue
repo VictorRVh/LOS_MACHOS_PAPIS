@@ -23,6 +23,7 @@ const navLinks = [
     { name: 'Roles', routeName: 'roles', icon: "ShieldCheckIcon" ,permissions: ["todo-acceso-roles", "icono-roles"]},
     { name: 'Permisos', routeName: 'permissions', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
     { name: 'Docentes', routeName: 'docente', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
+    { name: 'Convenios', routeName: 'convenio', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
 
 ];
 

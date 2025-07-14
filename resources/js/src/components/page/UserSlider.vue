@@ -25,10 +25,14 @@ const emit = defineEmits(['hide']);
 
 const userStore = useUserStore();
 const roleStore = useRoleStore();
+
 const { store: createUser, saving, update: updateUser, updating } = useHttpRequest('/users');
 const { runYupValidation } = useValidation();
 const { omitPropsFromObject } = useUtils();
 const { showToast } = useModalToast();
+
+
+if (!roleStore.roles?.length) await roleStore.loadRoles();
 
 const requiredPermissions = computed(() => {
     if (!props.user?.id) return ['todo-acceso-usuarios', 'crear-usuarios'];

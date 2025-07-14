@@ -106,4 +106,16 @@ export default [
             breadcrumb: 'Permisos'
         },
     },
+    ///teacher
+    {
+
+        path: '/docente',
+        name: 'docente',
+        component: () => import('../pages/Docente/Docente.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            breadcrumb: 'Permisos'
+        },
+    },
 ];

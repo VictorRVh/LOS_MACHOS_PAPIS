@@ -39,27 +39,27 @@ class RoleUserTableSeeder extends Seeder
                 'created_at' => now(),
             ],
             [
-                'role_id' => 5,
+                'role_id' => 6,
                 'user_id' => 6,
                 'created_at' => now(),
             ],
             [
-                'role_id' => 5,
+                'role_id' => 6,
                 'user_id' => 7,
                 'created_at' => now(),
             ],
             [
-                'role_id' => 5,
+                'role_id' => 6,
                 'user_id' => 8,
                 'created_at' => now(),
             ],
             [
-                'role_id' => 5,
+                'role_id' => 6,
                 'user_id' => 9,
                 'created_at' => now(),
             ],
             [
-                'role_id' => 5,
+                'role_id' => 6,
                 'user_id' => 10,
                 'created_at' => now(),
             ],

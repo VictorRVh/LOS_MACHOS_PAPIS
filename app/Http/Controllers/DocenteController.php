@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Docente;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class DocenteController extends Controller
@@ -12,9 +13,15 @@ class DocenteController extends Controller
      */
     public function index()
     {
-        $docentes = Docente::with('user')->get();
-        return response()->json($docentes);
+        $usuariosDocentes = User::whereHas('roles', function ($query) {
+            $query->where('name', 'docente');
+        })
+            ->with('docente')
+            ->get();
+
+        return response()->json($usuariosDocentes);
     }
+
 
     // Crear un nuevo docente
     public function store(Request $request)

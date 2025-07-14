@@ -17,7 +17,7 @@ import CreateButton from "../../components/ui/CreateButton.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
-import UserSlider from "../../components/page/UserSlider.vue";
+import UserSlider from "../../components/page/Docente/DocenteSlider.vue";
 
 import useDocenteStore from "../../store/Docente/useDocenteStore";
 
@@ -94,7 +94,7 @@ const {
     <div class="w-full space-y-2 py-2 px-3">
       <div class="m-2">
         <div class="flex-between">
-          <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Usuarios</h2>
+          <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Docentes</h2>
           <CreateButton @click="showSlider(true)" />
         </div>
 
@@ -105,7 +105,7 @@ const {
             @search="filtrarUsuarios"
           />
 
-          <div class="font-inter text-md w-full">Lista de usuarios</div>
+          <div class="font-inter text-md w-full">Lista de docentes</div>
         </div>
       </div>
       <Table
@@ -120,7 +120,7 @@ const {
           <Th>Apellidos</Th>
           <Th>Dni</Th>
           <Th>Correo</Th>
-          <Th>Rol</Th>
+  
           <Th>Fecha de Creación</Th>
           <Th>Estado</Th>
           <Th class="text-center">Acción</Th>
@@ -137,11 +137,7 @@ const {
             <Td>{{ docente.apellido_paterno }} {{ docente.apellido_materno }}</Td>
             <Td>{{ docente.dni }}</Td>
             <Td>{{ docente.email }}</Td>
-            <Td>
-              <span class="bg-gray-800 dark:bg-gray-600 text-white px-2 py-1 rounded-full">
-                {{ docente.roles[0].name }}
-              </span>
-            </Td>
+        
             <Td>{{ docente.created_at.slice(0, 10) }}</Td>
             <Td>
               <span

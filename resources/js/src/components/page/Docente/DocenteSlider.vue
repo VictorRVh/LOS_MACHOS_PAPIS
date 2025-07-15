@@ -54,7 +54,7 @@ const initialFormData = () => ({
     status: null,
     password: null,
     confirm_password:null,
-    roles: [[8]],
+    roles: ['8'],
     codigo_modular:null,
     especialidad:null,
     condicion: null,
@@ -131,7 +131,7 @@ const schema = yup.object().shape({
 
 const onSubmit = async () => {
     if (saving.value || updating.value) return;
-    let data = { ...formData.value, roles: formData.value.roles?.map((role) => role?.id).sort((a, b) => Number(a) - Number(b)) };
+    let data = { ...formData.value, roles: formData.value.roles[0]};
     const { validated, errors } = await runYupValidation(schema, data);
     if (!validated) {
         formErrors.value = errors;

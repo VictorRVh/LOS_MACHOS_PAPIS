@@ -138,7 +138,7 @@ const {
             <Td>{{ user.email }}</Td>
             <Td>
               <span class="bg-gray-800 dark:bg-gray-600 text-white px-2 py-1 rounded-full">
-                {{ user.roles[0].name }}
+                {{ user?.roles[0]?.name }}
               </span>
             </Td>
             <Td>{{ user.created_at.slice(0, 10) }}</Td>

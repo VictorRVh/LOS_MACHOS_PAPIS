@@ -40,17 +40,6 @@ const showModal = ref(false);
 
 const { requiereCambioPassword } = storeToRefs(docenteStore);
 
-onMounted(() => {
-  if (requiereCambioPassword.value) {
-    showModal.value = true;
-  }
-});
-
-
-const onPasswordChanged = () => {
-  showModal.value = false;
-  docenteStore.setRequiereCambioPassword(false);
-};
 
 const onDelete = (docente) => {
   if (deleting.value) return;

@@ -131,4 +131,15 @@ export default [
             breadcrumb: 'Permisos'
         },
     },
+    {
+
+        path: '/periodo',
+        name: 'periodo',
+        component: () => import('../pages/Periodo/Periodo.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            breadcrumb: 'Permisos'
+        },
+    },
 ];

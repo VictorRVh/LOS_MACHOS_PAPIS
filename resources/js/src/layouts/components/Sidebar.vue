@@ -24,6 +24,7 @@ const navLinks = [
     { name: 'Permisos', routeName: 'permissions', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
     { name: 'Docentes', routeName: 'docente', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
     { name: 'Convenios', routeName: 'convenio', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
+    { name: 'Periodo', routeName: 'periodo', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
 
 ];
 

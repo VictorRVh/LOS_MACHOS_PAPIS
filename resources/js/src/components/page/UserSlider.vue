@@ -52,7 +52,7 @@ const initialFormData = () => ({
     fecha_nacimiento: null,
     telefono: null,
     direccion: null,
-    status: null,
+    status: false,
     password: null,
     confirm_password: null,
     roles: [],

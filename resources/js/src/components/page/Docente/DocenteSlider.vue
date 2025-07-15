@@ -8,6 +8,7 @@ import Button from '../../ui/Button.vue';
 import AuthorizationFallback from '../AuthorizationFallback.vue';
 import useRoleStore from '../../../store/useRoleStore';
 import useUserStore from '../../../store/useUserStore';
+import useDocenteStore from '../../../store/Docente/useDocenteStore';
 import useValidation from '../../../composables/useValidation';
 import useHttpRequest from '../../../composables/useHttpRequest';
 import useUtils from '../../../composables/useUtils';
@@ -23,15 +24,15 @@ const props = defineProps({
 });
 const emit = defineEmits(['hide']);
 
+
 const userStore = useUserStore();
 const roleStore = useRoleStore();
+const docenteStore = useDocenteStore();
 
 const { store: createUser, saving, update: updateUser, updating } = useHttpRequest('docente');
 const { runYupValidation } = useValidation();
 const { omitPropsFromObject } = useUtils();
 const { showToast } = useModalToast()
-
-
 
 
 const requiredPermissions = computed(() => {
@@ -54,7 +55,7 @@ const initialFormData = () => ({
     status: null,
     password: null,
     confirm_password:null,
-    roles: ['8'],
+    roles: ['6'],
     codigo_modular:null,
     especialidad:null,
     condicion: null,
@@ -78,15 +79,6 @@ watch(() => props.show, () => {
         }
     }
 });
-
-watch(
-    () => formData.value,
-    (newVal) => {
-        console.log('cambios en status:', newVal.status);
-    },
-    { deep: true }
-);
-
 
 const roleOptions = computed(() => {
     const formDataRoleIds = formData.value.roles.map((role) => role?.id?.toString());
@@ -138,16 +130,17 @@ const onSubmit = async () => {
         return;
     }
 
-    console.log(formData.value)
+    // console.log(formData.value)
 
     formErrors.value = {};
     const fieldsToBeOmitted = ['confirm_password'];
     if (props.user?.id) fieldsToBeOmitted.push('password');
     data = omitPropsFromObject(data, fieldsToBeOmitted);
     const response = props.user?.id ? await updateUser(props.user?.id, data) : await createUser(data);
-    if (response?.id) {
-        showToast(`Usuario ${props.user?.id ? 'actualizado' : 'creado'} correctamente.`);
+    if (response?.user.id) {
+        showToast(`Docente ${props.user?.id ? 'actualizado' : 'creado'} correctamente.`);
         userStore.loadUsers();
+        docenteStore.loadDocentes();
         emit('hide');
     }
 };

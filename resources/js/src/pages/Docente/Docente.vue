@@ -17,7 +17,7 @@ import CreateButton from "../../components/ui/CreateButton.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
-import UserSlider from "../../components/page/Docente/DocenteSlider.vue";
+import docenteSlider from "../../components/page/Docente/DocenteSlider.vue";
 
 import useDocenteStore from "../../store/Docente/useDocenteStore";
 

@@ -40,7 +40,7 @@ class PersonalAdministrativoController extends Controller
         $item = PersonalAdministrativo::create($request->all());
 
         return response()->json([
-            'message' => 'Personal administrativo creado correctamente',
+            'message' => 'Datos del personal creado correctamente',
             'data'    => $item
         ], 201);
     }
@@ -51,7 +51,16 @@ class PersonalAdministrativoController extends Controller
         $item = PersonalAdministrativo::find($id);
 
         if (!$item) {
-            return response()->json(['message' => 'Personal no encontrado'], 404);
+
+            $item = PersonalAdministrativo::create(array_merge(
+                $request->all(),
+                //['id' => $id] // Solo si quieres mantener el mismo ID
+            ));
+
+            return response()->json([
+                'message' => 'Datos del personal creado porque no existía',
+                'data'    => $item
+            ], 201);
         }
 
         $request->validate([
@@ -63,7 +72,7 @@ class PersonalAdministrativoController extends Controller
         $item->update($request->all());
 
         return response()->json([
-            'message' => 'Personal administrativo actualizado correctamente',
+            'message' => 'Datos del personal actualizado correctamente',
             'data'    => $item
         ]);
     }
@@ -79,6 +88,6 @@ class PersonalAdministrativoController extends Controller
 
         $item->delete();
 
-        return response()->json(['message' => 'Personal administrativo eliminado correctamente']);
+        return response()->json(['message' => 'Datos del personal eliminado correctamente']);
     }
 }

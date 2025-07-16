@@ -17,17 +17,18 @@ import CreateButton from "../../components/ui/CreateButton.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
-import UserSlider from "../../components/page/UserSlider.vue";
+import UserSlider from "../../components/page/Administrativo/AdministrativoSlider.vue";
 
-import useUserStore from "../../store/useUserStore";
+import useUserStore from "../../store/Administrativo/useAdministrativoStore";
 
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import useTableData from "../../composables/tabla/useTableData";
-import ChangePasswordModal from "../../components/page/ChangePasswordModal.vue";
+
 
 const userStore = useUserStore();
+
 
 if (!userStore.users?.length) await userStore.loadUsers();
 
@@ -37,19 +38,6 @@ const { destroy: deleteUser, deleting } = useHttpRequest("/users");
 
 const showModal = ref(false);
 
-const { requiereCambioPassword } = storeToRefs(userStore);
-
-onMounted(() => {
-  if (requiereCambioPassword.value) {
-    showModal.value = true;
-  }
-});
-
-
-const onPasswordChanged = () => {
-  showModal.value = false;
-  userStore.setRequiereCambioPassword(false);
-};
 
 const onDelete = (user) => {
   if (deleting.value) return;
@@ -68,9 +56,6 @@ const onDelete = (user) => {
 /// FILTAR USUARIOS
 // const usuarios = ref(userStore.users)
 const usuarios = computed(() => userStore.users);
-
-
-
 const {
   query,
   orderBy,
@@ -93,8 +78,8 @@ const {
     <div class="w-full space-y-2 py-2 px-3">
       <div class="m-2">
         <div class="flex-between">
-          <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Usuarios</h2>
-          <CreateButton @click="showSlider(true)" />
+          <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Administrativos</h2>
+         
         </div>
 
         <div class="flex-between flex-row-reverse my-5">
@@ -118,10 +103,9 @@ const {
           <Th>Nombres</Th>
           <Th>Apellidos</Th>
           <Th>Dni</Th>
-          <Th>Correo</Th>
           <Th>Rol</Th>
-          <Th>Fecha de Creación</Th>
-          <Th>Estado</Th>
+          <Th>Local</Th>
+          <Th>Turno</Th>
           <Th class="text-center">Acción</Th>
         </THead>
 
@@ -132,37 +116,24 @@ const {
                 (pagina - 1) * itemsPorPagina + index + 1
               }}</span></Td
             >
-            <Td>{{ user.name }}</Td>
-            <Td>{{ user.apellido_paterno }} {{ user.apellido_materno }}</Td>
-            <Td>{{ user.dni }}</Td>
-            <Td>{{ user.email }}</Td>
+            <Td>{{ user.usuario?.name }}</Td>
+            <Td>{{ user.usuario?.apellido_paterno }} {{ user.usuario?.apellido_materno }}</Td>
+            <Td>{{ user.usuario?.dni }}</Td>
+
             <Td>
               <span class="bg-gray-800 dark:bg-gray-600 text-white px-2 py-1 rounded-full">
-                {{ user?.roles[0]?.name }}
+                
               </span>
             </Td>
-            <Td>{{ user.created_at.slice(0, 10) }}</Td>
             <Td>
-              <span
-                :class="
-                  user.status === 1
-                    ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
-                    : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
-                "
-                class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1"
-              >
-                <span v-if="user.status === 1"> Activo ✓ </span>
-                <span v-else="user.status === 0"> Inactivo X </span>
-              </span>
+     {{ user.turno }}
             </Td>
-            <Td class="text-center text-gray-600 dark:text-gray-200">
-              <MenuTable
-                :actions="{ view: true, edit: true, delete: true, download: false }"
-                entity-label="usuario"
-                @view="verGrupo(user)"
-                @edit="showSlider(true, user)"
-                @delete="onDelete(user)"
-              />
+            <Td>
+                {{ user.local }}
+            </Td>
+           
+            <Td class="flex items-center justify-center gap-1">
+              <EditButton @click="showSlider(true, user)" />
             </Td>
           </Tr>
         </TBody>
@@ -171,5 +142,5 @@ const {
 
     <UserSlider :show="slider" :user="sliderData" @hide="hideSlider" />
   </AuthorizationFallback>
-  <ChangePasswordModal v-if="showModal" @success="onPasswordChanged" />
+
 </template>

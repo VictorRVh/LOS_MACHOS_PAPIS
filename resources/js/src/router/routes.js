@@ -157,7 +157,7 @@ export default [
 
         path: '/especialidad',
         name: 'especialidad',
-        component: () => import('../pages/Periodo/Periodo.vue'),
+        component: () => import('../pages/Especialidad/Especialidad.vue'),
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos', 'ver-permisos'],

@@ -15,14 +15,9 @@ import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import { ref } from "vue";
 
-
 import periodoSlider from "../../components/page/Periodo/PeriodoSlider.vue";
 
 import usePeriodosStore from "../../store/Periodo/usePeriodoStore";
-
-
-
-
 
 const periodosStore = usePeriodosStore();
 
@@ -32,23 +27,23 @@ const { slider, sliderData, showSlider, hideSlider } =  useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy:deletePeriodo, deleting } = useHttpRequest("/periodo");
 
-const onDelete = (role) => {
+const onDelete = (periodo) => {
+
+  console.log('nombre periodo', periodo)
+
   if (deleting.value) return;
 
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
 
-    const isDeleted = await deletePeriodo(role?.id);
+    const isDeleted = await deletePeriodo(periodo?.id);
     if (isDeleted) {
-      showToast(`Rol "${role?.name}" eliminado exitosamente...`);
-      roleStore.loadPeriodos();
+      showToast(`Periodo "${periodo?.nombre_periodo}" eliminado exitosamente...`);
+      periodosStore.loadPeriodos();
 
     }
   });
 };
-
-
-
 
 </script>
 

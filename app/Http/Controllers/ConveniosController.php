@@ -65,6 +65,6 @@ class ConveniosController extends Controller
         }
 
         $convenio->delete();
-        return response()->json(['message' => 'Convenio eliminado'], 200);
+        return response()->json(['message' => 'Convenio eliminado'], 204);
     }
 }

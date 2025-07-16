@@ -33,26 +33,21 @@ if (!conveniosStore.convenios.length) await conveniosStore.loadConvenios();
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
-const { destroy: deleteRole, deleting } = useHttpRequest("/convenio");
+const { destroy: deleteConvenio, deleting } = useHttpRequest("/convenio");
 
-const onDelete = (role) => {
+const onDelete = (convenio) => {
   if (deleting.value) return;
 
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
 
-    const isDeleted = await deleteRole(role?.id);
+    const isDeleted = await deleteConvenio(convenio?.id);
     if (isDeleted) {
-      showToast(`Rol "${role?.name}" eliminado exitosamente...`);
-      roleStore.loadRoles();
-      userStore.loadUsers();
+      showToast(`Rol "${convenio?.nombre_institucion}" eliminado exitosamente...`);
+      conveniosStore.loadConvenios();
     }
   });
 };
-
-const showModal = ref(false);
-const selectedRole = ref(null);
-
 
 </script>
 

@@ -81,6 +81,6 @@ class PeriodoController extends Controller
         }
 
         $periodo->delete();
-        return response()->json(['message' => 'Periodo eliminado correctamente']);
+        return response()->json(['message' => 'Periodo eliminado correctamente'], 204);
     }
 }

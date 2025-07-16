@@ -1,31 +1,31 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 
-import SearchBar from "../components/head_table/headSearch.vue";
+import SearchBar from "../../components/head_table/headSearch.vue";
 
 import { storeToRefs } from "pinia";
 
-import Table from "../components/table/Table.vue";
-import THead from "../components/table/THead.vue";
-import TBody from "../components/table/TBody.vue";
-import Tr from "../components/table/Tr.vue";
-import Th from "../components/table/Th.vue";
-import Td from "../components/table/Td.vue";
-import MenuTable from "../components/table/MenuTable.vue";
+import Table from "../../components/table/Table.vue";
+import THead from "../../components/table/THead.vue";
+import TBody from "../../components/table/TBody.vue";
+import Tr from "../../components/table/Tr.vue";
+import Th from "../../components/table/Th.vue";
+import Td from "../../components/table/Td.vue";
+import MenuTable from "../../components/table/MenuTable.vue";
 
-import CreateButton from "../components/ui/CreateButton.vue";
-import EditButton from "../components/ui/EditButton.vue";
-import DeleteButton from "../components/ui/DeleteButton.vue";
-import AuthorizationFallback from "../components/page/AuthorizationFallback.vue";
-import UserSlider from "../components/page/UserSlider.vue";
+import CreateButton from "../../components/ui/CreateButton.vue";
+import EditButton from "../../components/ui/EditButton.vue";
+import DeleteButton from "../../components/ui/DeleteButton.vue";
+import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+import UserSlider from "../../components/page/UserSlider.vue";
 
-import useUserStore from "../store/useUserStore";
+import useUserStore from "../../store/useUserStore";
 
-import useSlider from "../composables/useSlider";
-import useModalToast from "../composables/useModalToast";
-import useHttpRequest from "../composables/useHttpRequest";
-import useTableData from "../composables/tabla/useTableData";
-import ChangePasswordModal from "../components/page/ChangePasswordModal.vue";
+import useSlider from "../../composables/useSlider";
+import useModalToast from "../../composables/useModalToast";
+import useHttpRequest from "../../composables/useHttpRequest";
+import useTableData from "../../composables/tabla/useTableData";
+import ChangePasswordModal from "../../components/page/ChangePasswordModal.vue";
 
 const userStore = useUserStore();
 

@@ -22,9 +22,9 @@ const navLinks = [
     { name: 'Usuarios', routeName: 'users', icon: "UserGroupIcon" ,permissions: ["todo-acceso-usuarios", "icono-usuarios"]},
     { name: 'Roles', routeName: 'roles', icon: "ShieldCheckIcon" ,permissions: ["todo-acceso-roles", "icono-roles"]},
     { name: 'Permisos', routeName: 'permissions', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
-    { name: 'Docentes', routeName: 'docente', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
-    { name: 'Convenios', routeName: 'convenio', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
-    { name: 'Periodo', routeName: 'periodo', icon: "KeyIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
+    { name: 'Docentes', routeName: 'docente', icon: "AcademicCapIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
+    { name: 'Convenios', routeName: 'convenio', icon: "PresentationChartLineIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
+    { name: 'Periodo', routeName: 'periodo', icon: "CalendarDateRangeIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
 
 ];
 

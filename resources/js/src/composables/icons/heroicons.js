@@ -38,10 +38,11 @@ const icons = {
   AdjustmentsVerticalIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/AdjustmentsVerticalIcon')),
   PencilIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/PencilIcon')),
   ArrowDownTrayIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/ArrowDownTrayIcon')),
-  
+  CalendarDateRangeIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/CalendarDateRangeIcon')),
+  PresentationChartLineIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/PresentationChartLineIcon')),
+  AcademicCapIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/AcademicCapIcon')),
   ///___________________________________
-  PencilSquareIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/PencilSquareIcon')),
- 
+  
 };
 
 // Registra los íconos como componentes globales

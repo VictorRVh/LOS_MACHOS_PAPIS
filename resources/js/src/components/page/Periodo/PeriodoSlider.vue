@@ -50,7 +50,7 @@ const initialFormData = () => {
   return {
     nombre_periodo: null,
     descripcion: null,
-    status: false,
+    status: 0,
   };
 };
 
@@ -161,7 +161,7 @@ const onPeriodoInput = (e) => {
         <CheckBox
           v-model="formData.status"
           label="Estado"
-          class="flex items-center h-full"
+          class="mt-8 pl-4 flex justify-center items-centers"
         />
       </div>
       <FormInput

@@ -146,7 +146,7 @@ export default [
 
         path: '/administrativos',
         name: 'administrativos',
-        component: () => import('../pages/Periodo/Periodo.vue'),
+        component: () => import('../pages/Administrativo/Administrativo.vue'),
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos', 'ver-permisos'],

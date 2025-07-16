@@ -41,7 +41,6 @@ const requiredPermissions = computed(() => {
 
 const title = computed(() => (props.user ? `Actualizar Usuario "${props.user?.name}"` : 'Añadir Nuevo Usuario'));
 
-
 const initialFormData = () => ({
     name: null,
     apellido_paterno: null,

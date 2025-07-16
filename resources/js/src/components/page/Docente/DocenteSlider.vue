@@ -6,9 +6,11 @@ import FormLabelError from '../../ui/FormLabelError.vue';
 import VSelect from 'vue-select';
 import Button from '../../ui/Button.vue';
 import AuthorizationFallback from '../AuthorizationFallback.vue';
-import useRoleStore from '../../../store/useRoleStore';
-import useUserStore from '../../../store/useUserStore';
+
+
+
 import useDocenteStore from '../../../store/Docente/useDocenteStore';
+
 import useValidation from '../../../composables/useValidation';
 import useHttpRequest from '../../../composables/useHttpRequest';
 import useUtils from '../../../composables/useUtils';
@@ -25,8 +27,8 @@ const props = defineProps({
 const emit = defineEmits(['hide']);
 
 
-const userStore = useUserStore();
-const roleStore = useRoleStore();
+
+
 const docenteStore = useDocenteStore();
 
 const { store: createUser, saving, update: updateUser, updating } = useHttpRequest('docente');
@@ -52,7 +54,7 @@ const initialFormData = () => ({
     fecha_nacimiento: null,
     telefono: null,
     direccion: null,
-    status: null,
+    status: false,
     password: null,
     confirm_password:null,
     roles: ['6'],
@@ -80,21 +82,9 @@ watch(() => props.show, () => {
     }
 });
 
-const roleOptions = computed(() => {
-    const formDataRoleIds = formData.value.roles.map((role) => role?.id?.toString());
-    return roleStore.roles.filter(
-        (role) => !formDataRoleIds.includes(role?.id?.toString()) && role?.name !== 'super-directora'
-    );
-});
 
-const selectedRole = ref(null);
-const onRoleSelect = (role) => {
-    formData.value.roles.unshift(role);
-    selectedRole.value = null;
-};
-const onRoleRemove = (role) => {
-    formData.value.roles = formData.value.roles.filter((fRole) => fRole?.id?.toString() !== role?.id?.toString());
-};
+
+
 
 
 const schema = yup.object().shape({
@@ -139,7 +129,7 @@ const onSubmit = async () => {
     const response = props.user?.id ? await updateUser(props.user?.id, data) : await createUser(data);
     if (response?.user.id) {
         showToast(`Docente ${props.user?.id ? 'actualizado' : 'creado'} correctamente.`);
-        userStore.loadUsers();
+        
         docenteStore.loadDocentes();
         emit('hide');
     }

@@ -25,6 +25,8 @@ const navLinks = [
     { name: 'Docentes', routeName: 'docente', icon: "AcademicCapIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
     { name: 'Convenios', routeName: 'convenio', icon: "PresentationChartLineIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
     { name: 'Periodo', routeName: 'periodo', icon: "CalendarDateRangeIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
+    { name: 'Administrativos', routeName: 'administrativos', icon: "CalendarDateRangeIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
+    { name: 'Especialidad', routeName: 'especialidad', icon: "CalendarDateRangeIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
 
 ];
 

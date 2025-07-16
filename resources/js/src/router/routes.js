@@ -142,4 +142,26 @@ export default [
             breadcrumb: 'Permisos'
         },
     },
+    {
+
+        path: '/administrativos',
+        name: 'administrativos',
+        component: () => import('../pages/Periodo/Periodo.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            breadcrumb: 'Permisos'
+        },
+    },
+    {
+
+        path: '/especialidad',
+        name: 'especialidad',
+        component: () => import('../pages/Periodo/Periodo.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            breadcrumb: 'Permisos'
+        },
+    },
 ];

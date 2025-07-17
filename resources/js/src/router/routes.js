@@ -164,4 +164,16 @@ export default [
             breadcrumb: 'Permisos'
         },
     },
+    
+     {
+
+        path: '/comision',
+        name: 'comision',
+        component: () => import('../pages/Especialidad/Especialidad.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            breadcrumb: 'Permisos'
+        },
+    },
 ];

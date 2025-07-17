@@ -12,36 +12,36 @@ class PersonalAdministrativoController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-{
-    // Obtener todos los usuarios que NO sean docentes
-    $usuarios = User::whereDoesntHave('roles', function ($query) {
-        $query->where('name', 'docente');
-    })
-    ->with(['roles', 'personalAdministrativo']) // ahora funciona gracias a la relación agregada
-    ->get();
+    {
+        // Obtener todos los usuarios que NO sean docentes
+        $usuarios = User::whereDoesntHave('roles', function ($query) {
+            $query->where('name', 'docente');
+        })
+            ->with(['roles', 'personalAdministrativo']) // ahora funciona gracias a la relación agregada
+            ->get();
 
-    // Armar la respuesta
-    $administrativo = $usuarios->map(function ($usuario) {
-        return [
-            'id'=> $usuario->id,
-            'name' => $usuario->name,
-            'apellido_paterno' => $usuario->apellido_paterno,
-            'apellido_materno' =>  $usuario->apellido_materno,
-            'dni'=>  $usuario->dni,
-            'correo' => $usuario->email,
-            'roles' => $usuario->roles->pluck('name'),
-            'administrativo' => $usuario->personalAdministrativo
-                ? [
-                    'id' => $usuario->personalAdministrativo->id,
-                    'turno' => $usuario->personalAdministrativo->turno,
-                    'local' => $usuario->personalAdministrativo->local,
-                ]
-                : null,
-        ];
-    });
+        // Armar la respuesta
+        $administrativo = $usuarios->map(function ($usuario) {
+            return [
+                'id' => $usuario->id,
+                'name' => $usuario->name,
+                'apellido_paterno' => $usuario->apellido_paterno,
+                'apellido_materno' =>  $usuario->apellido_materno,
+                'dni' =>  $usuario->dni,
+                'correo' => $usuario->email,
+                'roles' => $usuario->roles->pluck('name'),
+                'administrativo' => $usuario->personalAdministrativo
+                    ? [
+                        'id' => $usuario->personalAdministrativo->id,
+                        'turno' => $usuario->personalAdministrativo->turno,
+                        'local' => $usuario->personalAdministrativo->local,
+                    ]
+                    : null,
+            ];
+        });
 
-    return response()->json($administrativo);
-}
+        return response()->json($administrativo);
+    }
 
 
     // GET /api/personal-administrativo/{id}
@@ -61,8 +61,8 @@ class PersonalAdministrativoController extends Controller
     {
         $request->validate([
             'id_usuario' => 'required|exists:users,id',
-            'turno'      => 'required|string|max:2',
-            'local'      => 'required|string|max:100',
+            'turno'      => 'string|max:100',
+            'local'      => 'string|max:100',
         ]);
 
         $item = PersonalAdministrativo::create($request->all());
@@ -78,6 +78,13 @@ class PersonalAdministrativoController extends Controller
     {
         $item = PersonalAdministrativo::find($id);
 
+        $request->validate([
+            'id_usuario' => 'sometimes|exists:users,id',
+            'turno'      => 'sometimes|nullable|string|max:100',
+            'local'      => 'sometimes|nullable|string|max:100',
+        ]);
+
+
         if (!$item) {
 
             $item = PersonalAdministrativo::create(array_merge(
@@ -91,11 +98,7 @@ class PersonalAdministrativoController extends Controller
             ], 201);
         }
 
-        $request->validate([
-            'id_usuario' => 'sometimes|exists:users,id',
-            'turno'      => 'sometimes|string|max:2',
-            'local'      => 'sometimes|string|max:100',
-        ]);
+
 
         $item->update($request->all());
 

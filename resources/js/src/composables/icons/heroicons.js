@@ -41,6 +41,8 @@ const icons = {
   CalendarDateRangeIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/CalendarDateRangeIcon')),
   PresentationChartLineIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/PresentationChartLineIcon')),
   AcademicCapIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/AcademicCapIcon')),
+  SquaresPlusIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/SquaresPlusIcon')),
+  RectangleGroupIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/RectangleGroupIcon')),
   ///___________________________________
   
 };

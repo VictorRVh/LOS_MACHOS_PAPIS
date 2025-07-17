@@ -7,7 +7,7 @@ import VSelect from 'vue-select';
 import Button from '../../ui/Button.vue';
 import AuthorizationFallback from '../AuthorizationFallback.vue';
 
-import useDocenteStore from '../../../store/Administrativo/useAdministrativoStore';
+import useAdminStore from '../../../store/Administrativo/useAdministrativoStore';
 
 import useValidation from '../../../composables/useValidation';
 import useHttpRequest from '../../../composables/useHttpRequest';
@@ -20,11 +20,14 @@ import BaseSelect from '../../ui/BaseSelect.vue';
 
 const props = defineProps({
     show: { type: Boolean, default: () => false },
-    user: { type: [Object, null], default: () => null },
+    admin: { type: [Object, null], default: () => null },
 });
 const emit = defineEmits(['hide']);
 
-const docenteStore = useDocenteStore();
+
+
+
+const adminStore = useAdminStore();
 
 const { store: createUser, saving, update: updateUser, updating } = useHttpRequest('personal_administrativo');
 const { runYupValidation } = useValidation();
@@ -32,14 +35,14 @@ const { showToast } = useModalToast()
 
 
 const requiredPermissions = computed(() => {
-    if (!props.user?.id) return ['todo-acceso-usuarios', 'crear-usuarios'];
+    if (!props.admin?.id) return ['todo-acceso-usuarios', 'crear-usuarios'];
     else return ['todo-acceso-usuarios', 'editar-usuarios'];
 });
 
-const title = computed(() => (props.user ? `Actualizar Local y Turno para "${props.user?.name}"` : 'Añadir Nuevo  Docente'));
+const title = computed(() => (props.admin ? `Actualizar Local y Turno para "${props.admin?.name}"` : 'Añadir Nuevo  Admin'));
 
 const initialFormData = () => ({
-    id_usuario: props.user?.id,
+    id_usuario: props.admin?.id,
     turno: null,
     local: null,
     
@@ -50,9 +53,10 @@ const formErrors = ref({});
 
 watch(() => props.show, () => {
     if (props.show) {
-        if (props.user?.id) {
+       // console.log("silder administrativo: ",props.admin)
+        if (props.admin?.id) {
             formData.value = Object.entries(initialFormData()).reduce(
-                (r, [key, val]) => ({ ...r, [key]: props.user[key] || val }),
+                (r, [key, val]) => ({ ...r, [key]: props.admin?.administrativo[key] || val }),
                 {}
             );
         } else {
@@ -78,14 +82,14 @@ const onSubmit = async () => {
 
     // console.log(formData.value)
     //console.log()
-    const response = props.user?.id ? await updateUser(props.user?.id, data) : await createUser(data);
+    const response = props.admin?.id ? await updateUser(props.admin?.id, data) : await createUser(data);
     
-   // console.log("administrativo: ",response?.data?.id);
+    console.log("administrativo: ",response);
 
     if (response?.data?.id) {
-        showToast(`Datos de ${props.user?.id ? 'actualizado' : 'creado'} correctamente.`);
+        showToast(`Datos de ${props.admin?.id ? 'actualizado' : 'creado'} correctamente.`);
         
-        docenteStore.loadDocentes();
+        adminStore.loadUsers();
         emit('hide');
     }
 };

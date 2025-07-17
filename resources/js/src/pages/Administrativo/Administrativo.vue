@@ -19,7 +19,7 @@ import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 import UserSlider from "../../components/page/Administrativo/AdministrativoSlider.vue";
 
-import useUserStore from "../../store/Administrativo/useAdministrativoStore";
+import useAdministraticoStore from "../../store/Administrativo/useAdministrativoStore";
 
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
@@ -27,17 +27,18 @@ import useHttpRequest from "../../composables/useHttpRequest";
 import useTableData from "../../composables/tabla/useTableData";
 
 
-const userStore = useUserStore();
+const administrativo = useAdministraticoStore();
 
 
-if (!userStore.users?.length) await userStore.loadUsers();
+if (!administrativo.users?.length) await administrativo.loadUsers();
+
+///console.log("Administrativo: pe: ",administrativo.users);
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("user-crud");
 const { showConfirmModal, showToast } = useModalToast();
-const { destroy: deleteUser, deleting } = useHttpRequest("/users");
+const { destroy: deleteUser, deleting } = useHttpRequest("/personal_administrativo");
 
 const showModal = ref(false);
-
 
 const onDelete = (user) => {
   if (deleting.value) return;
@@ -48,14 +49,14 @@ const onDelete = (user) => {
     const isDeleted = await deleteUser(user?.id);
     if (isDeleted) {
       showToast(`"${user?.name}" eliminado correctamente...`);
-      userStore.loadUsers();
+     administrativo.loadUsers();
     }
   });
 };
 
 /// FILTAR USUARIOS
-// const usuarios = ref(userStore.users)
-const usuarios = computed(() => userStore.users);
+
+const usuarios = computed(() => administrativo.users);
 const {
   query,
   orderBy,
@@ -65,12 +66,11 @@ const {
   paginados: usuariosPaginados,
   totalPaginas,
   ordenados: usuariosOrdenados,
-  filtrar: filtrarUsuarios
+  filtrar: filtrarUsuarios,
 } = useTableData(usuarios, {
   defaultOrderBy: "apellido_paterno",
-  searchFields: ["name", "apellido_paterno", "dni"]
+  searchFields: ["name", "apellido_paterno", "dni"],
 });
-
 </script>
 
 <template>
@@ -78,8 +78,9 @@ const {
     <div class="w-full space-y-2 py-2 px-3">
       <div class="m-2">
         <div class="flex-between">
-          <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Administrativos</h2>
-         
+          <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">
+            Administrativos
+          </h2>
         </div>
 
         <div class="flex-between flex-row-reverse my-5">
@@ -116,22 +117,25 @@ const {
                 (pagina - 1) * itemsPorPagina + index + 1
               }}</span></Td
             >
-            <Td>{{ user.usuario?.name }}</Td>
-            <Td>{{ user.usuario?.apellido_paterno }} {{ user.usuario?.apellido_materno }}</Td>
-            <Td>{{ user.usuario?.dni }}</Td>
+            <Td>{{ user.name }}</Td>
+            <Td
+              >{{ user.apellido_paterno }}
+              {{ user.apellido_materno }}</Td
+            >
+            <Td>{{ user.dni }}</Td>
 
             <Td>
               <span class="bg-gray-800 dark:bg-gray-600 text-white px-2 py-1 rounded-full">
-                
+                {{ user?.roles[0] }}
               </span>
             </Td>
             <Td>
-     {{ user.turno }}
+              {{ user?.administrativo?.turno }}
             </Td>
             <Td>
-                {{ user.local }}
+              {{ user?.administrativo?.local }}
             </Td>
-           
+
             <Td class="flex items-center justify-center gap-1">
               <EditButton @click="showSlider(true, user)" />
             </Td>
@@ -140,7 +144,6 @@ const {
       </Table>
     </div>
 
-    <UserSlider :show="slider" :user="sliderData" @hide="hideSlider" />
+    <UserSlider :show="slider" :admin="sliderData" @hide="hideSlider" />
   </AuthorizationFallback>
-
 </template>

@@ -42,13 +42,13 @@ const navLinks = [
             </RouterLink>
         </div>
         <nav class="flex-1">
-            <ul class="flex flex-col items-center py-4">
+            <ul class="flex flex-col items-center py-1">
                 <li v-for="link in navLinks" :key="link.name" class="w-full">
                     <RouterLink :to="{ name: link.routeName }" v-slot="{ isActive, href, navigate }"  v-show="link.name === 'Home' || hasPermission(link.permissions)" >
                         <a
                             :href="href"
                             @click="navigate"
-                            class="flex flex-col items-center justify-center w-full h-20 transition-colors "
+                            class="flex flex-col items-center justify-center w-full h-[60px] transition-colors "
                             :class="[
                                 isActive
                                     ? 'bg-cetpro-dark text-white border-l-4 border-white'
@@ -56,7 +56,7 @@ const navLinks = [
                             ]"
                         >
                         
-                            <component :is="link.icon" class="h-7 w-7" />
+                            <component :is="link.icon" class="h-8 w-8" />
                             <span class="text-xs mt-1 font-medium">{{ link.name }}</span>
                         </a>
                     </RouterLink>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PersonalAdministrativo;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class PersonalAdministrativoController extends Controller
 {
@@ -11,10 +12,37 @@ class PersonalAdministrativoController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $personal = PersonalAdministrativo::with('usuario')->get();
-        return response()->json($personal);
-    }
+{
+    // Obtener todos los usuarios que NO sean docentes
+    $usuarios = User::whereDoesntHave('roles', function ($query) {
+        $query->where('name', 'docente');
+    })
+    ->with(['roles', 'personalAdministrativo']) // ahora funciona gracias a la relación agregada
+    ->get();
+
+    // Armar la respuesta
+    $administrativo = $usuarios->map(function ($usuario) {
+        return [
+            'id'=> $usuario->id,
+            'name' => $usuario->name,
+            'apellido_paterno' => $usuario->apellido_paterno,
+            'apellido_materno' =>  $usuario->apellido_materno,
+            'dni'=>  $usuario->dni,
+            'correo' => $usuario->email,
+            'roles' => $usuario->roles->pluck('name'),
+            'administrativo' => $usuario->personalAdministrativo
+                ? [
+                    'id' => $usuario->personalAdministrativo->id,
+                    'turno' => $usuario->personalAdministrativo->turno,
+                    'local' => $usuario->personalAdministrativo->local,
+                ]
+                : null,
+        ];
+    });
+
+    return response()->json($administrativo);
+}
+
 
     // GET /api/personal-administrativo/{id}
     public function show($id)
@@ -54,7 +82,7 @@ class PersonalAdministrativoController extends Controller
 
             $item = PersonalAdministrativo::create(array_merge(
                 $request->all(),
-                //['id' => $id] // Solo si quieres mantener el mismo ID
+                ['id' => $id] // Solo si quieres mantener el mismo ID
             ));
 
             return response()->json([

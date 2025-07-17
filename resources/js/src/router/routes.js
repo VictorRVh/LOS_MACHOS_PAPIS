@@ -169,7 +169,7 @@ export default [
 
         path: '/comision',
         name: 'comision',
-        component: () => import('../pages/Especialidad/Especialidad.vue'),
+        component: () => import('../pages/Comision/Comision.vue'),
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos', 'ver-permisos'],

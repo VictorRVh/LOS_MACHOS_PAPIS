@@ -29,6 +29,7 @@ const navLinks = [
     { name: 'Administrativos', routeName: 'administrativos', icon: "UsersIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
     { name: 'Especialidad', routeName: 'especialidad', icon: "SquaresPlusIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
     { name: 'Comisión', routeName: 'comision', icon: "RectangleGroupIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
+    { name: 'Programa', routeName: 'programa', icon: "RectangleGroupIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
 
 ];
 

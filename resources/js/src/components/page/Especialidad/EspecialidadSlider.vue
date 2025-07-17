@@ -16,6 +16,7 @@ import AuthorizationFallback from "../AuthorizationFallback.vue";
 import useCicloStore from "../../../store/Ciclo/useCicloStore";
 import BaseSelect from "../../ui/BaseSelect.vue";
 import useEspecialidadStore from "../../../store/Especialidad/useEspecialidad";
+import BaseSelectCiclo from "../../ui/BaseSelectCiclo.vue";
 
 
 const props = defineProps({
@@ -114,7 +115,7 @@ const onSubmit = async () => {
 
     console.log(props.especialidad)
 
-    if (props.especialidad?.id) {
+    if (!props.especialidad?.id) {
       formData.value = initialFormData();
       formErrors.value = {};
     }
@@ -129,13 +130,10 @@ const onSubmit = async () => {
       <FormInput v-model="formData.nombre_especialidad" :focus="show" label="Nombre de la especialidad"
         :error="formErrors?.nombre_especialidad" required />
 
-      <select v-model="formData.id_ciclo">
-        <option disabled value="">Seleccione un ciclo</option>
-        <option v-for="c in ciclo" :key="c.id" :value="c.id">
-          {{ c.nombre_ciclo }}
-        </option>
-      </select>
-
+      <FormLabelError label="Ciclo" required>
+        <BaseSelectCiclo v-model="formData.id_ciclo" :options="ciclo" label="nombre_ciclo"
+          placeholder="Seleccione un ciclo" />
+      </FormLabelError>
 
       <div class="w-full space-y-3">
 

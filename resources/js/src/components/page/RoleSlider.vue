@@ -92,6 +92,7 @@ const permissionOptions = computed(() => {
 
 const selectedPermission = ref(null);
 const onPermissionSelect = (permission) => {
+  console.log("selec: ",permission)
   formData.value = {
     ...formData.value,
     permissions: [permission].concat(formData.value.permissions),

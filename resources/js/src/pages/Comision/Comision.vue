@@ -15,31 +15,31 @@ import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import { ref } from "vue";
 
-import periodoSlider from "../../components/page/Periodo/PeriodoSlider.vue";
+import comisionSlider from "../../components/page/Comision/ComisionSlider.vue";
 
-import usePeriodosStore from "../../store/Periodo/usePeriodoStore";
+import useComisionesStore from "../../store/Comision/useComisionesStore";
 
-const periodosStore = usePeriodosStore();
+const comisionesStore = useComisionesStore();
 
-if (!periodosStore.periodos.length) await periodosStore.loadPeriodos();
+if (!comisionesStore.comisiones.length) await comisionesStore.loadComisiones();
 
 const { slider, sliderData, showSlider, hideSlider } =  useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
-const { destroy:deletePeriodo, deleting } = useHttpRequest("/periodo");
+const { destroy:deletecomision, deleting } = useHttpRequest("/comisiones");
 
-const onDelete = (periodo) => {
+const onDelete = (comision) => {
 
-  console.log('nombre periodo', periodo)
+
 
   if (deleting.value) return;
 
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
 
-    const isDeleted = await deletePeriodo(periodo?.id);
+    const isDeleted = await deletecomision(comision?.id);
     if (isDeleted) {
-      showToast(`Periodo "${periodo?.nombre_periodo}" eliminado exitosamente...`);
-      periodosStore.loadPeriodos();
+      showToast(`Comisión "${comision?.nombre_comision}" eliminado exitosamente...`);
+      comisionesStore.loadComisiones();
 
     }
   });
@@ -53,13 +53,14 @@ const onDelete = (periodo) => {
       <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Comisión</h2>
       <!-- <CreateButton @click="showSlider(true)" /> -->
     </div>
+    
     <div class="flex  px-6">
       <div class="w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
         <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-          Agregar Periodo
+          Agregar comision
         </h3>
         <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
-        <periodoSlider :show="slider" :periodo="sliderData" @hide="hideSlider" />
+        <comisionSlider :show="slider" :comision="sliderData" @hide="hideSlider" />
       </div>
       
 
@@ -67,20 +68,20 @@ const onDelete = (periodo) => {
         <Table>
           <THead>
             <Th>Id</Th>
-            <Th>Periodo</Th>
+            <Th>Comision</Th>
             <Th>Estado</Th>
             <Th>Acciones</Th>
           </THead>
 
           <TBody>
-            <Tr v-for="(periodo,index) in periodosStore.periodos" :key="periodo.id">
+            <Tr v-for="(comision,index) in comisionesStore.comisiones" :key="comision.id">
               <Td>{{ index +1 }}</Td>
-              <Td>{{ periodo?.nombre_periodo }}</Td> 
-               <Td>{{ periodo?.status }}</Td>
+              <Td>{{ comision?.titulo }}</Td> 
+               <Td>{{ comision?.status }}</Td>
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">
-                  <EditButton @click="showSlider(true, periodo)" />
-                  <DeleteButton @click="onDelete(periodo)" />
+                  <EditButton @click="showSlider(true, comision)" />
+                  <DeleteButton @click="onDelete(comision)" />
                 </div>
               </Td>
             </Tr>

@@ -13,13 +13,8 @@ return new class extends Migration
     {
         Schema::create('comisiones', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('id_usuario');
             $table->string('titulo');
             $table->string('descripcion');
-
-            $table->foreign('id_usuario')
-                  ->references('id')->on('users')
-                  ->onDelete('cascade');
             $table->timestamps();
         });
     }

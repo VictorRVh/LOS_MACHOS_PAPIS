@@ -680,4 +680,26 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\ActividadesRecientesController::class,
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+
+    // RUTA COMISION USUARIO
+
+    Route::get('comision_usuario', [
+        \App\Http\Controllers\ComisionUsuarioController::class,
+        'index',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+    Route::post('comision_usuario', [
+        \App\Http\Controllers\ComisionUsuarioController::class,
+        'store',
+    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+
+    Route::patch('comision_usuario/{id}', [
+        \App\Http\Controllers\ComisionUsuarioController::class,
+        'update',
+    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+
+    Route::delete('comision_usuario/{id}', [
+        \App\Http\Controllers\ComisionUsuarioController::class,
+        'destroy',
+    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
 });

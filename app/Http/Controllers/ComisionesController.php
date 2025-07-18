@@ -12,14 +12,14 @@ class ComisionesController extends Controller
      */
     public function index()
     {
-        $comisiones = Comisiones::with('usuario')->get();
+        $comisiones = Comisiones::all(); // Ya no con 'usuario'
         return response()->json($comisiones);
     }
 
     // GET /api/comisiones/{id}
     public function show($id)
     {
-        $comision = Comisiones::with('usuario')->find($id);
+        $comision = Comisiones::find($id);
 
         if (!$comision) {
             return response()->json(['message' => 'Comisión no encontrada'], 404);
@@ -32,12 +32,11 @@ class ComisionesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_usuario' => 'required|exists:users,id',
-            'titulo'     => 'required|string|max:100',
+            'titulo'      => 'required|string|max:100',
             'descripcion' => 'nullable|string',
         ]);
 
-        $comision = Comisiones::create($request->all());
+        $comision = Comisiones::create($request->only(['titulo', 'descripcion']));
 
         return response()->json([
             'message' => 'Comisión creada correctamente',
@@ -55,12 +54,11 @@ class ComisionesController extends Controller
         }
 
         $request->validate([
-            'id_usuario' => 'sometimes|exists:users,id',
-            'titulo'     => 'sometimes|string|max:100',
+            'titulo'      => 'sometimes|string|max:100',
             'descripcion' => 'nullable|string',
         ]);
 
-        $comision->update($request->all());
+        $comision->update($request->only(['titulo', 'descripcion']));
 
         return response()->json([
             'message' => 'Comisión actualizada correctamente',

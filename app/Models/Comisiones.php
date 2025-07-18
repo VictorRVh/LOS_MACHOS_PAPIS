@@ -16,7 +16,6 @@ class Comisiones extends Model
 
     protected $fillable = [
         'id',
-        'id_usuario',
         'titulo',
         'descripcion'
     ];
@@ -32,9 +31,8 @@ class Comisiones extends Model
         });
     }
 
-    public function usuario()
+    public function usuarios()
     {
-        return $this->belongsTo(User::class, 'id_usuario');
+        return $this->belongsToMany(User::class, 'comision_usuario', 'id_comision', 'id_usuario');
     }
-    
 }

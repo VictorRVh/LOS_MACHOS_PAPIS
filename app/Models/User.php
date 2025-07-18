@@ -64,4 +64,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(PersonalAdministrativo::class, 'id_usuario');
     }
+
+    public function comisiones()
+    {
+        return $this->belongsToMany(Comisiones::class, 'comision_usuario', 'id_usuario', 'id_comision');
+    }
 }

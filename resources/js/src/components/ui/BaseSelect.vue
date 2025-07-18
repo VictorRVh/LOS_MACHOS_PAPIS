@@ -31,13 +31,14 @@ const emit = defineEmits(['update:modelValue'])
 
 <template>
   <v-select
-  v-model="model"
-  :options="props.options"
-  :label="props.label"
-  :placeholder="props.placeholder"
-  :multiple="props.multiple"
-  :clearable="props.clearable"
-  class="text-sm"
+  :modelValue="props.modelValue"
+    @update:modelValue="emit('update:modelValue', $event)"
+    :options="props.options"
+    :label="props.label"
+    :placeholder="props.placeholder"
+    :multiple="props.multiple"
+    :clearable="props.clearable"
+    class="text-sm"
 >
     <!-- Slot para cuando no hay ninguna opción disponible -->
     <template #no-options>

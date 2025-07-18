@@ -13,13 +13,19 @@ use Illuminate\Support\Facades\DB;
 class ComisionUsuarioController extends Controller
 {
     // Listar integrantes de una comisión
-    public function index($comisionId)
-    {
-        $integrantes = ComisionUsuario::with('usuario')
-            ->where('id_comision', $comisionId)
-            ->get();
+    // public function index($comisionId)
+    // {
+    //     $integrantes = ComisionUsuario::with('usuario')
+    //         ->where('id_comision', $comisionId)
+    //         ->get();
 
-        return response()->json($integrantes);
+    //     return response()->json($integrantes);
+    // }
+
+    public function index()
+    {
+        $comisiones = Comisiones::with(['usuarios'])->get(); // Ya no con 'usuario'
+        return response()->json($comisiones);
     }
 
     // Añadir un usuario a una comisión

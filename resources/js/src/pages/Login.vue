@@ -37,13 +37,11 @@ const onSignIn = async () => {
 
     formErrors.value = {};
 
-    await axios.get('/sanctum/csrf-cookie');
-
     const response = await login(data); 
 
     if (response?.user?.id) {
         userStore.setUser(response.user);
-        userStore.setRequiereCambioPassword(response.requiereCambioPassword); 
+        // userStore.setRequiereCambioPassword(response.requiereCambioPassword); 
 
         await pushToRoute({ name: 'users' }); 
     }

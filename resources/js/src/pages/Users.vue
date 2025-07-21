@@ -171,5 +171,5 @@ const {
 
     <UserSlider :show="slider" :user="sliderData" @hide="hideSlider" />
   </AuthorizationFallback>
-  <ChangePasswordModal v-if="showModal" @success="onPasswordChanged" />
+  <!-- <ChangePasswordModal v-if="showModal" @success="onPasswordChanged" /> -->
 </template>

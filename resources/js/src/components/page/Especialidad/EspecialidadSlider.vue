@@ -15,7 +15,7 @@ import Button from "../../ui/Button.vue";
 import AuthorizationFallback from "../AuthorizationFallback.vue";
 import useCicloStore from "../../../store/Ciclo/useCicloStore";
 import BaseSelect from "../../ui/BaseSelect.vue";
-import useEspecialidadStore from "../../../store/Especialidad/useEspecialidad";
+import useEspecialidadStore from "../../../store/Especialidad/useEspecialidadStore";
 import BaseSelectCiclo from "../../ui/BaseSelectCiclo.vue";
 
 
@@ -38,6 +38,7 @@ const emit = defineEmits(["hide"]);
 const userStore = useUserStore();
 const roleStore = useRoleStore();
 const especialidadStore = useEspecialidadStore();
+
 
 const { store: createEspecialidad, saving, update: updateEspecialidad, updating } = useHttpRequest(
   "/especialidad_madre"

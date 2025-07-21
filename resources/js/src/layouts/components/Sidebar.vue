@@ -30,6 +30,7 @@ const navLinks = [
     { name: 'Especialidad', routeName: 'especialidad', icon: "SquaresPlusIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
     { name: 'Comisión', routeName: 'comision', icon: "RectangleGroupIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
     { name: 'Programa', routeName: 'programa', icon: "RectangleGroupIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
+    { name: 'EspecialidadPrograma', routeName: 'especialidadPrograma', icon: "RectangleGroupIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
 
 ];
 

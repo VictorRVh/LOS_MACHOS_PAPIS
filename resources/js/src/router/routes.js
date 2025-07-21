@@ -186,4 +186,15 @@ export default [
             breadcrumb: 'Permisos'
         },
     },
+    {
+
+        path: '/especialidadPrograma',
+        name: 'especialidadPrograma',
+        component: () => import('../pages/EspecialidadPrograma/EspecialidadPrograma.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            breadcrumb: 'Permisos'
+        },
+    },
 ];

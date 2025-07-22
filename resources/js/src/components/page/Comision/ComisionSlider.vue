@@ -1,4 +1,5 @@
 <script setup>
+
 import { computed, onMounted, ref, watch } from "vue";
 import FormInput from "../../ui/FormInput.vue";
 import FormLabelError from "../../ui/FormLabelError.vue";
@@ -72,11 +73,10 @@ watch(
   () => props.comision,
   (newComision) => {
     if (props.show && newComision?.id) {
+     
       formData.value = Object.entries(initialFormData()).reduce((r, [key, val]) => {
-        return {
-          ...r,
-          [key]: newComision[key] ?? val,
-        };
+        if (newComision[key]) return { ...r, [key]: newComision[key] };
+        return { ...r, [key]: val };
       }, {});
     }
   },
@@ -87,8 +87,8 @@ watch(
 const schema = yup.object().shape({
   titulo: yup
     .string()
-    .required("El nombre de la comisión es obligatorio.")
-    .matches(/^\d{4}-I{1,2}$/, "Formato inválido. Usa: 2024-I o 2024-II"),
+    .required("El nombre de la comisión es obligatorio."),
+
   descripcion: yup.string().nullable(),
   usuarios: yup.array().min(1, "Debe seleccionar al menos un usuario para la comisión."),
 });
@@ -96,14 +96,26 @@ const schema = yup.object().shape({
 // Opciones para el select de usuarios
 const selectedUsuario = ref(null);
 
+
 const usuarioOptions = computed(() => {
   const selectedIds = formData.value.usuarios.map((u) => u.id);
-  return userStore.users.filter((u) => !selectedIds.includes(u.id));
+  return userStore.users
+    .filter((u) => !selectedIds.includes(u.id))
+    .map((u) => ({
+      ...u,
+      nameCompleto: `${u.name} ${u.apellido_paterno} ${u.apellido_materno} `, // o `${u.apellido_paterno} ${u.apellido_materno} ${u.name}`
+    }));
 });
 
 const onUsuarioSelect = (usuario) => {
-  console.log("SELECCIONADO:", usuario); // <- agrega esto
+  const nameCompleto = `${usuario.name} ${usuario.apellido_paterno} ${usuario.apellido_materno}`;
+  const usuarioConNombre = { ...usuario, nameCompleto };
 
+  if (!formData.value.usuarios.find((u) => u.id === usuario.id)) {
+    formData.value.usuarios = [usuarioConNombre, ...formData.value.usuarios];
+   // console.log("Usuarios seleccionados:", formData.value.usuarios);
+  }
+  selectedUsuario.value = null;
 };
 
 const onUsuarioRemove = (usuario) => {
@@ -164,20 +176,12 @@ const onCancelEdit = () => {
         label="Título de comisión"
         :error="formErrors?.titulo"
       />
-
-      <FormInput
-        v-model="formData.descripcion"
-        :focus="show"
-        label="Descripción"
-        :error="formErrors?.descripcion"
-      />
-
       <!-- Select de usuarios -->
       <FormLabelError label="Añadir integrantes">
         <BaseSelect
           v-model="selectedUsuario"
           :options="usuarioOptions"
-          label="name"
+          label='nameCompleto'
           placeholder="Seleccione un usuario"
           @update:modelValue="onUsuarioSelect"
         />
@@ -189,10 +193,18 @@ const onCancelEdit = () => {
         </label>
         <SelectedChips
           :items="formData.usuarios"
+          labelKey="nameCompleto"
           @remove="onUsuarioRemove"
         />
       </div>
 
+      <FormInput
+        v-model="formData.descripcion"
+        :focus="show"
+        label="Descripción"
+        :error="formErrors?.descripcion"
+      />
+      
       <div class="flex gap-2 mt-4">
         <Button
           :title="comision?.id ? 'Guardar Cambios' : 'Crear Comisión'"

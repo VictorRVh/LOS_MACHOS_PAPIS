@@ -39,12 +39,17 @@ const onDelete = (comision) => {
     }
   });
 };
-const showUserModal = ref(false);
-const selectedComision = ref(null);
 
-function showUsersModal(comision) {
-  selectedComision.value = comision;
-  showUserModal.value = true;
+const showModal = ref(false);
+const selectedRole = ref(null);
+
+function showPermissionsModal(comision) {
+
+  selectedRole.value = comision;
+
+  // console.log('comision selec', selectedRole.value)
+
+  showModal.value = true;
 }
 </script>
 
@@ -70,7 +75,7 @@ function showUsersModal(comision) {
           <THead>
             <Th>#</Th>
             <Th>Comisión</Th>
-            <Th>Usuarios</Th>s
+            <Th>Usuarios</Th>
             <Th>Acciones</Th>
           </THead>
 
@@ -80,25 +85,26 @@ function showUsersModal(comision) {
               <Td>{{ comision?.titulo }}</Td>
 
               <!-- Mostrar usuarios -->
-              <Td class="w-56">
-                <div class="flex flex-wrap gap-1">
-                  <span
-                    v-for="(usuario, idx) in comision.usuarios.slice(0, 2)"
-                    :key="usuario.id"
-                    class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full"
-                  >
-                    {{ usuario.nombre_completo }}
-                  </span>
-                  <span
-                    v-if="comision.usuarios.length > 2"
-                    class="text-xs text-gray-500"
-                  >
-                    +{{ comision.usuarios.length - 2 }} más
-                  </span>
+              <Td class="w-48 whitespace-nowrap">
+                <div :class="[
+                  'flex gap-2 w-full',
+                  comision.length > 1
+                    ? 'justify-between items-center'
+                    : 'justify-center',
+                ]">
+                  <ul class="text-sm text-gray-700  w-30 list-none">
+                    <li v-for="(usuario, index) in comision.usuarios.slice(0, 1)" :key="usuario.id">
+                      {{ usuario.nameCompleto }}
+                    </li>
+                  </ul>
+                  <button v-if="comision.usuarios.length > 1" @click="showPermissionsModal(comision)"
+                    class="bg-blue-100 text-blue-700 px-2 py-0.5 text-xs rounded hover:bg-blue-200 transition">
+                    Ver más ({{ comision.usuarios.length }})
+                  </button>
                 </div>
               </Td>
 
- 
+
 
               <Td>
                 <div class="flex items-center justify-center gap-1">
@@ -110,6 +116,28 @@ function showUsersModal(comision) {
           </TBody>
         </Table>
       </div>
+
+      <ModalRoles v-if="showModal" @close="showModal = false" class="font-inter">
+        <template #title>
+          Usuarios de la comision: <span class="uppercase">{{ selectedRole?.name }}</span>
+        </template>
+
+        <template #body>
+          <ul class="ml-4 space-y-1 ">
+            <li class="" v-for="usuario in selectedRole?.usuarios" :key="usuario.id">
+              {{ usuario.nameCompleto }}
+            </li>
+          </ul>
+        </template>
+
+        <template #footer>
+          <button @click="showModal = false"
+            class="px-3 py-1 text-sm bg-cetpro text-white rounded hover:bg-cetpro-dark">
+            Cerrar
+          </button>
+        </template>
+      </ModalRoles>
+
     </div>
   </AuthorizationFallback>
 </template>

@@ -187,14 +187,15 @@ export default [
         },
     },
     {
-
-        path: '/especialidadPrograma',
+        path: '/especialidadPrograma/:idPrograma', // ✅ Parámetro dinámico
         name: 'especialidadPrograma',
         component: () => import('../pages/EspecialidadPrograma/EspecialidadPrograma.vue'),
+        props: true,
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos', 'ver-permisos'],
             breadcrumb: 'Permisos'
         },
-    },
+    }
+
 ];

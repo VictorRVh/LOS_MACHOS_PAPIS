@@ -73,7 +73,9 @@ const onCancelEdit = () => {
 watch(
     () => props.programa,
     (newRole) => {
+
         if (props.show && newRole?.id) {
+
             console.log(formData.value);
             formData.value = Object.entries(initialFormData()).reduce((r, [key, val]) => {
                 if (newRole[key]) return { ...r, [key]: newRole[key] };

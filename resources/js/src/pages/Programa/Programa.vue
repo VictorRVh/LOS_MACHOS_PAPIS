@@ -15,6 +15,9 @@ import useHttpRequest from "../../composables/useHttpRequest";
 import useProgramaStore from "../../store/Programa/useProgramaStore";
 import useCicloStore from "../../store/Ciclo/useCicloStore";
 import ProgramaSlider from "../../components/page/Programa/ProgramaSlider.vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const programaStore = useProgramaStore();
 const cicloStore = useCicloStore();
@@ -22,9 +25,9 @@ const cicloStore = useCicloStore();
 if (!programaStore.programa.length) await programaStore.loadPrograma();
 if (!cicloStore.ciclo.length) await cicloStore.loadCiclo();
 
-const { slider, sliderData, showSlider, hideSlider } =  useSlider("role-crud");
+const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
-const { destroy:deletePrograma, deleting } = useHttpRequest("/programa_estudio");
+const { destroy: deletePrograma, deleting } = useHttpRequest("/programa_estudio");
 
 const onDelete = (programa) => {
 
@@ -33,7 +36,7 @@ const onDelete = (programa) => {
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
 
-    const isDeleted = await deletePrograma  (programa?.id);
+    const isDeleted = await deletePrograma(programa?.id);
     if (isDeleted) {
       showToast(`Programa "${programa?.año}" eliminado exitosamente...`);
       programaStore.loadPeriodos();
@@ -41,6 +44,17 @@ const onDelete = (programa) => {
     }
   });
 };
+
+const SeeMore = (id) => {
+
+  console.log('id del programa', id);
+
+  router.push({
+    name: "especialidadPrograma",
+    params: { idPrograma: id},
+  });
+};
+
 
 </script>
 
@@ -58,7 +72,7 @@ const onDelete = (programa) => {
         <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
         <ProgramaSlider :show="slider" :programa="sliderData" :ciclo="cicloStore.ciclo" @hide="hideSlider" />
       </div>
-      
+
 
       <div class="w-full">
         <Table>
@@ -70,14 +84,21 @@ const onDelete = (programa) => {
           </THead>
 
           <TBody>
-            <Tr v-for="(programa,index) in programaStore.programa" :key="programa.id">
-              <Td>{{ index +1 }}</Td>
-              <Td>{{ programa?.año }}</Td> 
-               <Td>{{ programa?.numero_rd }}</Td>
+            <Tr v-for="(programa, index) in programaStore.programa" :key="programa.id">
+              <Td>{{ index + 1 }}</Td>
+              <Td>{{ programa?.año }}</Td>
+              <Td>{{ programa?.numero_rd }}</Td>
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">
                   <EditButton @click="showSlider(true, programa)" />
                   <DeleteButton @click="onDelete(programa)" />
+                  <div class="flex items-center justify-center space-x-2">
+                    <div @click="SeeMore(programa.id)"
+                      class="text-blue-500 hover:text-blue-700 font-semibold cursor-pointer border-b-2 border-transparent hover:border-blue-500">
+                      Asignar Especialidades
+                    </div>
+
+                  </div>
                 </div>
               </Td>
             </Tr>

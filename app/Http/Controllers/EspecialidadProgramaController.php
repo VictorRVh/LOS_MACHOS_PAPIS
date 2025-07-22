@@ -19,11 +19,11 @@ class EspecialidadProgramaController extends Controller
     // Crear uno nuevo
     public function store(Request $request)
     {
-        
+
         $request->validate([
             'id_especialidad' => 'required|exists:especialidad_madre,id',
             'id_programa' => 'required|exists:programa_estudio,id',
-            'nro_modulos' => 'required|integer|min:0' 
+            'nro_modulos' => 'required|integer|min:0'
         ]);
 
         $nuevo = EspecialidadPrograma::create($request->all());
@@ -33,14 +33,17 @@ class EspecialidadProgramaController extends Controller
     // Mostrar uno específico
     public function show($id)
     {
-        $registro = EspecialidadPrograma::with(['especialidadMadre', 'programaEstudio'])->find($id);
+        $registros = EspecialidadPrograma::with(['especialidadMadre', 'programaEstudio'])
+            ->where('id_programa', $id)
+            ->get();
 
-        if (!$registro) {
-            return response()->json(['message' => 'No encontrado'], 404);
+        if ($registros->isEmpty()) {
+            return response()->json(['message' => 'Sin especialidades dentro del programa'], 404);
         }
 
-        return response()->json($registro);
+        return response()->json($registros);
     }
+
 
     // Actualizar
     public function update(Request $request, $id)
@@ -63,7 +66,7 @@ class EspecialidadProgramaController extends Controller
         $request->validate([
             'id_especialidad' => 'sometimes|exists:especialidad_madre,id',
             'id_programa' => 'sometimes|exists:programa_estudio,id',
-            'nro_modulos' => 'sometimes|integer|min:0' 
+            'nro_modulos' => 'sometimes|integer|min:0'
         ]);
 
         $registro->update($request->all());

@@ -16,7 +16,7 @@ import useProgramaStore from "../../store/Programa/useProgramaStore";
 import useCicloStore from "../../store/Ciclo/useCicloStore";
 import ProgramaSlider from "../../components/page/Programa/ProgramaSlider.vue";
 import useEspecialidadStore from "../../store/Especialidad/useEspecialidadStore";
-import useEspecialidadProgramaStore from "../../store/EspecialidadPrograma/useEspecialidadPrograma";
+import useEspecialidadProgramaStore from "../../store/EspecialidadPrograma/useEspecialidadProgramaStore";
 import EspecialidadProgramaSlider from "../../components/page/EspecialidadPrograma/EspecialidadProgramaSlider.vue";
 
 const programaStore = useProgramaStore();
@@ -25,11 +25,23 @@ const especialidadProgramaStore = useEspecialidadProgramaStore();
 
 if (!programaStore.programa.length) await programaStore.loadPrograma();
 if (!especialidadStore.especialidad.length) await especialidadStore.loadEspecialidad();
-if (!especialidadProgramaStore.especialidadPrograma.length) await especialidadProgramaStore.loadEspecialidadPrograma();
 
 const { slider, sliderData, showSlider, hideSlider } =  useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy:deletePrograma, deleting } = useHttpRequest("/especialidad_programa");
+
+const props = defineProps({
+  idPrograma: {
+    type: Number,
+    default: null,
+  }
+  
+});
+
+
+if (!especialidadProgramaStore.especialidadPrograma.length) await especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma)
+
+console.log('props de programa', programaStore.programa)
 
 const onDelete = (especialidadPrograma) => {
 
@@ -41,7 +53,7 @@ const onDelete = (especialidadPrograma) => {
     const isDeleted = await deletePrograma  (especialidadPrograma?.id);
     if (isDeleted) {
       showToast(`Programa "${programa?.año}" eliminado exitosamente...`);
-      especialidadProgramaStore.loadEspecialidadPrograma();
+      especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma)
 
     }
   });
@@ -52,7 +64,7 @@ const onDelete = (especialidadPrograma) => {
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
     <div class="flex justify-between items-center p-4">
-      <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Especialidades</h2>
+      <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Asignar especialidad</h2>
       <!-- <CreateButton @click="showSlider(true)" /> -->
     </div>
     <div class="flex  px-6">
@@ -61,7 +73,7 @@ const onDelete = (especialidadPrograma) => {
           Asignar Especialidad
         </h3>
         <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
-        <EspecialidadProgramaSlider :show="slider" :especialidadPrograma="sliderData" :especialidad="especialidadStore.especialidad" :programa="programaStore.programa" @hide="hideSlider" />
+        <EspecialidadProgramaSlider :show="slider" :especialidadPrograma="sliderData" :especialidad="especialidadStore.especialidad" :programa="programaStore.programa" :idPrograma="props.idPrograma" @hide="hideSlider" />
       </div>
       
 
@@ -70,19 +82,19 @@ const onDelete = (especialidadPrograma) => {
           <THead>
             <Th>Id</Th>
             <Th>Especialidad</Th>
-            <Th>Programa</Th>
+            <Th>Nro modulos</Th>
             <Th>Acciones</Th>
           </THead>
 
           <TBody>
-            <Tr v-for="(especialidadPrograma,index) in especialidadProgramaStore.especialidadPrograma" :key="especialidadPrograma.id">
+            <Tr v-for="(especialidadPrograma,index) in especialidadProgramaStore.especialidadProgramaFiltrado" :key="especialidadPrograma.id">
               <Td>{{ index +1 }}</Td>
-              <Td>{{ especialidadPrograma?.id_especialidad }}</Td> 
-               <Td>{{ especialidadPrograma?.id_programa }}</Td>
+              <Td>{{ especialidadPrograma?.especialidad_madre.nombre_especialidad }}</Td> 
+               <Td>{{ especialidadPrograma?.nro_modulos }}</Td>
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">
-                  <EditButton @click="showSlider(true, programa)" />
-                  <DeleteButton @click="onDelete(programa)" />
+                  <EditButton @click="showSlider(true, especialidadPrograma)" />
+                  <DeleteButton @click="onDelete(especialidadPrograma)" />
                 </div>
               </Td>
             </Tr>

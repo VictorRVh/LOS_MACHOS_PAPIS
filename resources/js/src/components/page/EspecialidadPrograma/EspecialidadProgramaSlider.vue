@@ -15,7 +15,7 @@ import BaseSelect from "../../ui/BaseSelect.vue";
 import useProgramaStore from "../../../store/Programa/useProgramaStore";
 import CheckBox from "../../ui/CheckBox.vue";
 import BaseSelectCiclo from "../../ui/BaseSelectCiclo.vue";
-import useEspecialidadProgramaStore from "../../../store/EspecialidadPrograma/useEspecialidadPrograma";
+import useEspecialidadProgramaStore from "../../../store/EspecialidadPrograma/useEspecialidadProgramaStore";
 
 const props = defineProps({
     show: {
@@ -31,6 +31,10 @@ const props = defineProps({
         default: () => []
     },
     programa: {
+        type: Array,
+        default: () => []
+    },
+    idPrograma: {
         type: Array,
         default: () => []
     }
@@ -50,20 +54,19 @@ const requiredPermissions = computed(() => {
     else return ["todo-acceso-roles", "editar-roles"];
 });
 
-const title = computed(() =>
-    props.especialidadPrograma ? `Editar programa "${props.programa?.nombre_programa}"` : "Agregar nuevo rol"
-);
-
 const initialFormData = () => {
     return {
         id_especialidad: null,
-        id_programa: null,
+        id_programa: props.idPrograma,
         nro_modulos: null,
     };
 };
 
+console.log('prop independiente: ', props.idPrograma)
+
 const formData = ref(initialFormData());
 const formErrors = ref({});
+
 
 const isEditing = computed(() => !!props.especialidadPrograma?.id);
 
@@ -74,17 +77,22 @@ const onCancelEdit = () => {
 };
 
 watch(
-    () => props.especialidadPrograma,
-    (newRole) => {
-        if (props.show && newRole?.id) {
-            console.log(formData.value);
-            formData.value = Object.entries(initialFormData()).reduce((r, [key, val]) => {
-                if (newRole[key]) return { ...r, [key]: newRole[key] };
-                return { ...r, [key]: val };
-            }, {});
-        }
-    },
-    { immediate: true }
+  () => props.especialidadPrograma,
+  (newRole) => {
+    if (props.show && newRole?.id) {
+
+      const baseData = initialFormData();
+
+      formData.value = {
+        ...baseData,
+        ...Object.keys(baseData).reduce((acc, key) => {
+          if (newRole[key] !== undefined) acc[key] = newRole[key];
+          return acc;
+        }, {})
+      };
+    }
+  },
+  { immediate: true }
 );
 
 const schema = yup.object().shape({
@@ -93,7 +101,7 @@ const schema = yup.object().shape({
     nro_modulos: yup.string().nullable().required(),
 });
 
-console.log('cilco', props.programa)
+// console.log('cilco', props.programa)
 
 const onSubmit = async () => {
 
@@ -104,8 +112,6 @@ const onSubmit = async () => {
     let data = {
         ...formData.value,
     };
-
-    console.log('dedede', data)
 
     const { validated, errors } = await runYupValidation(schema, data);
     if (!validated) {
@@ -120,12 +126,9 @@ const onSubmit = async () => {
 
     if (response?.id) {
         showToast(`programa ${props.programa?.id ? "editado" : "creado"} exitosamente.`);
-        especialidadProgramaStore.loadEspecialidadPrograma();
+        especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma)
 
-
-        console.log('props', props.programa)
-
-        if (!props.especialidadPrograma?.id) {
+        if (props.especialidadPrograma?.id) {
             formData.value = initialFormData();
             formErrors.value = {};
         }
@@ -138,14 +141,9 @@ const onSubmit = async () => {
     <AuthorizationFallback :permissions="requiredPermissions">
         <div class="mt-2 space-y-1.5 font-inter">
 
-            <FormLabelError label="Ciclo" required>
+            <FormLabelError label="Especialidad" required>
                 <BaseSelectCiclo v-model="formData.id_especialidad" :options="especialidad" label="nombre_especialidad"
                     placeholder="Seleccione una especialidad" />
-            </FormLabelError>
-
-            <FormLabelError label="Ciclo" required>
-                <BaseSelectCiclo v-model="formData.id_programa" :options="programa" label="descripcion"
-                    placeholder="Seleccione un programa" />
             </FormLabelError>
 
             <FormInput v-model="formData.nro_modulos" :focus="show" label="Numero de modulos" :error="formErrors?.nro_modulos"
@@ -162,7 +160,7 @@ const onSubmit = async () => {
 
                 <div class="flex gap-2 mt-1">
                     <!-- Botón Guardar: ancho completo -->
-                    <Button :title="programa?.id ? 'Guardar Cambios' : 'Crear Programa'"
+                    <Button :title="especialidadPrograma?.id ? 'Guardar Cambios' : 'Asignar especialidad'"
                         :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
                         key="submit-btn" @click="onSubmit" class="!w-full" />
 

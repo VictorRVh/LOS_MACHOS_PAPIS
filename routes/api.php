@@ -293,6 +293,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
+    Route::get('especialidad_programa/{id}', [
+        \App\Http\Controllers\EspecialidadProgramaController::class,
+        'show',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
     Route::post('especialidad_programa', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'store',

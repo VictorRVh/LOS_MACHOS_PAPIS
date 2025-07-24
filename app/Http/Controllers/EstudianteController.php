@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Estudiante;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class EstudianteController extends Controller
 {
@@ -131,5 +132,22 @@ class EstudianteController extends Controller
         $estudiante->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function buscar(Request $request)
+    {
+        $dni = $request->input('dni');
+
+        if (strlen($dni) !== 8) {
+            return response()->json(['error' => 'DNI inválido'], 422);
+        }
+
+        $response = Http::post('https://api.consultasperu.com/api/v1/query', [
+            'token' => 'dec72d9ad1fb5d75afebfe184ae63de34b98230be262c7d29db38d1f63c1b753',
+            'type_document' => 'dni',
+            'document_number' => $dni,
+        ]);
+
+        return $response->json();
     }
 }

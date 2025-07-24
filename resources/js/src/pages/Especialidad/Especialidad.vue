@@ -26,8 +26,6 @@ const { slider, sliderData, showSlider, hideSlider } =  useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy:deleteEspecialidad, deleting } = useHttpRequest("/especialidad_madre");
 
-console.log('ciclo', cicloStore.ciclo)
-
 const onDelete = (especialidad) => {
 
   if (deleting.value) return;

@@ -196,6 +196,17 @@ export default [
             permissions: ['todo-acceso-permisos', 'ver-permisos'],
             breadcrumb: 'Permisos'
         },
+    },
+    {
+        path: '/matricula',
+        name: 'matricula',
+        component: () => import('../pages/Estudiante/Estudiante.vue'),
+        props: true,
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            breadcrumb: 'Permisos'
+        },
     }
 
 ];

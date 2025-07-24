@@ -176,6 +176,12 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|permissions-delete');
 
+    //BUSCAR DNI
+    Route::post('buscar-dni', [
+        \App\Http\Controllers\EstudianteController::class,
+        'buscar',
+    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+
 
     //RUTA PARA CILCLO ACADEMICO
     Route::get('ciclo_academico', [

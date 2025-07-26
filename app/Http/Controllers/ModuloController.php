@@ -37,8 +37,15 @@ class ModuloController extends Controller
     // Mostrar un módulo específico
     public function show($id)
     {
-        $modulo = Modulo::with(['periodo', 'especialidadPrograma'])->findOrFail($id);
-        return response()->json($modulo);
+        $registros = Modulo::with(['especialidadPrograma', 'periodo'])
+            ->where('id_especialidad', $id)
+            ->get();
+
+        if ($registros->isEmpty()) {
+            return response()->json(['message' => 'Sin modulos dentro de la especialidad'], 404);
+        }
+
+        return response()->json($registros);
     }
 
     // Actualizar un módulo
@@ -56,17 +63,22 @@ class ModuloController extends Controller
             'nro_capacidades'    => 'sometimes|integer|min:0',
         ]);
 
-        $modulo = Modulo::create($request->all());
+        $modulo->update($request->all());
 
         return response()->json($modulo);
     }
 
+
     // Eliminar un módulo
     public function destroy($id)
     {
-        $modulo = Modulo::findOrFail($id);
-        $modulo->delete();
+        $modulo = Modulo::find($id);
 
-        return response()->json(['message' => 'Módulo eliminado correctamente']);
+        if (!$modulo) {
+            return response()->json(['message' => 'Modulo no encontrado'], 404);
+        }
+
+        $modulo->delete();
+        return response()->json(['message' => 'Modulo eliminado correctamente'], 204);
     }
 }

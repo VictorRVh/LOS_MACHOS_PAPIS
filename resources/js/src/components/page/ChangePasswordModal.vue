@@ -62,9 +62,6 @@ const onSubmit = async () => {
   }
 
   try {
-
-    await axios.get('/sanctum/csrf-cookie');
-
     await axios.post('/auth/reset_password', {
       nueva_password: form.value.password,
       nueva_password_confirmation: form.value.password_confirmation,

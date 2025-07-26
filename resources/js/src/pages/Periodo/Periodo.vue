@@ -29,8 +29,6 @@ const { destroy:deletePeriodo, deleting } = useHttpRequest("/periodo");
 
 const onDelete = (periodo) => {
 
-  console.log('nombre periodo', periodo)
-
   if (deleting.value) return;
 
   showConfirmModal(null, async (confirmed) => {

@@ -83,6 +83,6 @@ class EspecialidadProgramaController extends Controller
         }
 
         $registro->delete();
-        return response()->json(['message' => 'Eliminado correctamente']);
+        return response()->json(['message' => 'Eliminado correctamente'], 204);
     }
 }

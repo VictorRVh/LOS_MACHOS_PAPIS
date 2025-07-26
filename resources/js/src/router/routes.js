@@ -207,6 +207,17 @@ export default [
             permissions: ['todo-acceso-permisos', 'ver-permisos'],
             breadcrumb: 'Permisos'
         },
+    },
+    {
+        path: '/modulo/:idEspecialidadPrograma',
+        name: 'modulo',
+        component: () => import('../pages/Modulo/Modulo.vue'),
+        props: true,
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            breadcrumb: 'Permisos'
+        },
     }
 
 ];

@@ -14,12 +14,21 @@ Route::get('auth/verify', [
     'verify',
 ]);
 
-//RUTA PARA CAMBIAR CONTRASEÑA
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::get('logout', [\App\Http\Controllers\AuthController::class, 'logout']);
+//     Route::get('user', function (Request $request) {
+//         return $request->user();
+//     });
 
-Route::post('auth/reset_password', [
-    \App\Http\Controllers\AuthController::class,
-    'cambiarPasswordPrimeraVez',
-]);
+//     // Permitir cambiar la contraseña inicial
+//     Route::post('auth/reset_password', [
+//         \App\Http\Controllers\AuthController::class,
+//         'cambiarPasswordPrimeraVez',
+//     ]);
+// });
+
+// Route::middleware('auth:sanctum', 'password.cambiada')->group(function () {
+
 
 Route::middleware('auth:sanctum')->group(function () {
     /**
@@ -34,6 +43,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('user', function (Request $request) {
         return $request->user();
     });
+
+    //RUTA PARA CAMBIAR CONTRASEÑA
+
+    Route::post('auth/reset_password', [
+        \App\Http\Controllers\AuthController::class,
+        'cambiarPasswordPrimeraVez',
+    ]);
 
     /**
      * ------------------------------------------------------------------------
@@ -368,6 +384,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('modulo', [
         \App\Http\Controllers\ModuloController::class,
         'index',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+    Route::get('modulo/{id}', [
+        \App\Http\Controllers\ModuloController::class,
+        'show',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
     Route::post('modulo', [

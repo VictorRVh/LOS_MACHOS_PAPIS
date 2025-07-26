@@ -18,6 +18,7 @@ import ProgramaSlider from "../../components/page/Programa/ProgramaSlider.vue";
 import useEspecialidadStore from "../../store/Especialidad/useEspecialidadStore";
 import useEspecialidadProgramaStore from "../../store/EspecialidadPrograma/useEspecialidadProgramaStore";
 import EspecialidadProgramaSlider from "../../components/page/EspecialidadPrograma/EspecialidadProgramaSlider.vue";
+import { useRouter } from "vue-router";
 
 const programaStore = useProgramaStore();
 const especialidadStore = useEspecialidadStore();
@@ -30,14 +31,15 @@ const { slider, sliderData, showSlider, hideSlider } =  useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy:deletePrograma, deleting } = useHttpRequest("/especialidad_programa");
 
+const router = useRouter();
+
 const props = defineProps({
   idPrograma: {
     type: Number,
     default: null,
-  }
+  },
   
 });
-
 
 if (!especialidadProgramaStore.especialidadPrograma.length) await especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma)
 
@@ -56,6 +58,16 @@ const onDelete = (especialidadPrograma) => {
       especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma)
 
     }
+  });
+};
+
+const SeeMore = (id) => {
+
+  console.log('id de especialidadPrograma', id);
+
+  router.push({
+    name: "modulo",
+    params: { idEspecialidadPrograma: id},
   });
 };
 
@@ -95,7 +107,15 @@ const onDelete = (especialidadPrograma) => {
                 <div class="flex items-center justify-center gap-1">
                   <EditButton @click="showSlider(true, especialidadPrograma)" />
                   <DeleteButton @click="onDelete(especialidadPrograma)" />
+                  <div class="flex items-center justify-center space-x-2">
+                    <div @click="SeeMore(especialidadPrograma.id)"
+                      class="text-blue-500 hover:text-blue-700 font-semibold cursor-pointer border-b-2 border-transparent hover:border-blue-500">
+                      Modulos
+                    </div>
+
+                  </div>
                 </div>
+                
               </Td>
             </Tr>
           </TBody>

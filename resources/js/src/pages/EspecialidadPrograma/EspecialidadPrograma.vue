@@ -12,7 +12,7 @@ import useSlider from "../../composables/useSlider";
 
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
-import useProgramaStore from "../../store/Programa/useProgramaStore";
+
 import useCicloStore from "../../store/Ciclo/useCicloStore";
 import ProgramaSlider from "../../components/page/Programa/ProgramaSlider.vue";
 import useEspecialidadStore from "../../store/Especialidad/useEspecialidadStore";
@@ -20,12 +20,12 @@ import useEspecialidadProgramaStore from "../../store/EspecialidadPrograma/useEs
 import EspecialidadProgramaSlider from "../../components/page/EspecialidadPrograma/EspecialidadProgramaSlider.vue";
 import { useRouter } from "vue-router";
 
-const programaStore = useProgramaStore();
+
 const especialidadStore = useEspecialidadStore();
 const especialidadProgramaStore = useEspecialidadProgramaStore();
 
-if (!programaStore.programa.length) await programaStore.loadPrograma();
-if (!especialidadStore.especialidad.length) await especialidadStore.loadEspecialidad();
+
+
 
 const { slider, sliderData, showSlider, hideSlider } =  useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
@@ -41,9 +41,15 @@ const props = defineProps({
   
 });
 
+
+
 if (!especialidadProgramaStore.especialidadPrograma.length) await especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma)
 
-console.log('props de programa', programaStore.programa)
+//console.log("tu papi",especialidadProgramaStore.especialidadProgramaFiltrado[0]?.programa_estudio
+//?.id_ciclo)
+
+if (!especialidadStore.especialidadCiclo.length) await especialidadStore.loadEspecialidadCiclo(especialidadProgramaStore.especialidadProgramaFiltrado[0]?.programa_estudio
+?.id_ciclo);
 
 const onDelete = (especialidadPrograma) => {
 
@@ -85,7 +91,7 @@ const SeeMore = (id) => {
           Asignar Especialidad
         </h3>
         <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
-        <EspecialidadProgramaSlider :show="slider" :especialidadPrograma="sliderData" :especialidad="especialidadStore.especialidad" :programa="programaStore.programa" :idPrograma="props.idPrograma" @hide="hideSlider" />
+        <EspecialidadProgramaSlider :show="slider" :especialidadPrograma="sliderData" :especialidad="especialidadStore.especialidadCiclo"  :idPrograma="props.idPrograma" @hide="hideSlider" />
       </div>
       
 

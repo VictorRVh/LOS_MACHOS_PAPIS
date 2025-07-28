@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CicloAcademico;
 use App\Models\EspecialidadMadre;
 use Illuminate\Http\Request;
 
@@ -72,5 +73,38 @@ class EspecialidadMadreController extends Controller
         $especialidad->delete();
 
         return response()->json(['message' => 'Especialidad eliminada']);
+    }
+
+    public function getEspecialidadesPorCiclo($idCiclo)
+    {
+        // $ciclo = CicloAcademico::with('especialidades')->find($idCiclo);
+
+        // if (!$ciclo) {
+        //     return response()->json(['mensaje' => 'Ciclo no encontrado'], 404);
+        // }
+
+        // return response()->json([
+        //     'ciclo' => $ciclo->nombre_ciclo,
+        //     'especialidades' => $ciclo->especialidades
+        // ]);
+
+        $ciclo = CicloAcademico::with('especialidades')->find($idCiclo);
+
+        if (!$ciclo) {
+            return response()->json(['mensaje' => 'Ciclo no encontrado'], 404);
+        }
+
+        $especialidades = $ciclo->especialidades->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'nombre_especialidad' => $item->nombre_especialidad
+            ];
+        });
+
+        return response()->json([
+            'ciclo' => $ciclo->nombre_ciclo,
+            'id_ciclo' => $ciclo->id,
+            'especialidades' => $especialidades
+        ]);
     }
 }

@@ -271,6 +271,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
+    Route::get('especialidad_ciclo/{id_ciclo}', [
+        \App\Http\Controllers\EspecialidadMadreController::class,
+        'getEspecialidadesPorCiclo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
     Route::post('especialidad_madre', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'store',

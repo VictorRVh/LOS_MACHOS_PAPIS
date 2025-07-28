@@ -34,5 +34,10 @@ class CicloAcademico extends Model
     {
         return $this->hasMany(ProgramaEstudio::class, 'id_ciclo');
     }
+
+    public function especialidades()
+    {
+        return $this->hasMany(EspecialidadMadre::class, 'id_ciclo', 'id');
+    }
 }
 

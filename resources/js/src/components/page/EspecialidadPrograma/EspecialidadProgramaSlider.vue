@@ -30,10 +30,6 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
-    programa: {
-        type: Array,
-        default: () => []
-    },
     idPrograma: {
         type: Array,
         default: () => []
@@ -41,7 +37,8 @@ const props = defineProps({
 });
 const emit = defineEmits(["hide"]);
 
-const especialidadProgramaStore = useEspecialidadProgramaStore();
+const especialidadProgramaStore = null;
+
 
 const { store: createPrograma, saving, update: updatePrograma, updating } = useHttpRequest(
     "/especialidad_programa"
@@ -62,7 +59,7 @@ const initialFormData = () => {
     };
 };
 
-console.log('prop independiente 222: ', props.especialidadPrograma)
+console.log('prop independiente: ', props.idPrograma)
 
 const formData = ref(initialFormData());
 const formErrors = ref({});
@@ -101,7 +98,7 @@ const schema = yup.object().shape({
     nro_modulos: yup.string().nullable().required(),
 });
 
-// console.log('cilco', props.programa)
+
 
 const onSubmit = async () => {
 
@@ -125,7 +122,7 @@ const onSubmit = async () => {
         : await createPrograma(data);
 
     if (response?.id) {
-        showToast(`programa ${props.programa?.id ? "editado" : "creado"} exitosamente.`);
+        showToast(`programa ${props.idPrograma ? "editado" : "creado"} exitosamente.`);
         especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma)
 
         if (props.especialidadPrograma?.id) {

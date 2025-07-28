@@ -7,8 +7,6 @@ import VSelect from 'vue-select';
 import Button from '../../ui/Button.vue';
 import AuthorizationFallback from '../AuthorizationFallback.vue';
 
-
-
 import useDocenteStore from '../../../store/Docente/useDocenteStore';
 
 import useValidation from '../../../composables/useValidation';
@@ -20,6 +18,9 @@ import SelectedChips from '../../ui/selectedChips.vue';
 import CheckBox from '../../ui/CheckBox.vue';
 import BaseSelect from '../../ui/BaseSelect.vue';
 import BaseSelectCiclo from '../../ui/BaseSelectCiclo.vue';
+import useProgramaStore from '../../../store/Programa/useProgramaStore'
+import useGrupoStore from '../../../store/Grupo/useGrupoStore';
+import BaseSelectGrupo from '../../ui/BaseSelectGrupo.vue';
 
 const props = defineProps({
     show: { type: Boolean, default: () => false },
@@ -27,10 +28,9 @@ const props = defineProps({
 });
 const emit = defineEmits(['hide']);
 
-
-
-
 const docenteStore = useDocenteStore();
+const programaStore = useProgramaStore();
+const grupoStore = useGrupoStore();
 
 const { store: createUser, saving, update: updateUser, updating } = useHttpRequest('docente');
 const { runYupValidation } = useValidation();
@@ -43,22 +43,26 @@ const requiredPermissions = computed(() => {
     else return ['todo-acceso-usuarios', 'editar-usuarios'];
 });
 
+if (!programaStore.programa.length) await programaStore.loadPrograma();
+
 const title = computed(() => (props.user ? `Actualizar Docente "${props.user?.name}"` : 'Añadir Nuevo  Docente'));
 
 const initialFormData = () => ({
-    name: null,
-    especialidad: null,
-    modulo: null,
-    periodo: null,
+    id_programa: null,
+    id_especialidad: null,
+    id_modulo: null,
+    id_periodo: null,
     convenio: null,
     fecha_inicio: null,
     fecha_fin: null,
     fecha_entrega_acta: null,
     seccion: null,
     turno: null,
-    docente: false,
+    docente: null,
     status: null,
 });
+
+console.log('store de prograa', programaStore.programa)
 
 const formData = ref(initialFormData());
 const formErrors = ref({});
@@ -77,9 +81,33 @@ watch(() => props.show, () => {
     }
 });
 
+const onProgramaChange = async (programaId) => {
 
+    console.log('entradn qui')
+    formData.value.id_especialidad = null;
+    formData.value.id_modulo = null;
+    formData.value.id_periodo = null;
+    await grupoStore.loadEspecialidades(programaId);
+    console.log('store de grupoesp', grupoStore.especialidades)
 
+};
 
+const onEspecialidadChange = async (especialidadId) => {
+    console.log('entrado por modulos')
+    formData.value.id_modulo = null;
+    formData.value.id_periodo = null;
+    await grupoStore.loadModulos(especialidadId);
+};
+
+const onModuloChange = async (moduloId) => {
+    formData.value.id_periodo = null;
+    await grupoStore.loadPeriodo(moduloId); // esto guarda el periodo en el store
+
+    // Asignar el id del periodo automáticamente al select
+    if (grupoStore.periodo?.id) {
+        formData.value.id_periodo = grupoStore.periodo.id;
+    }
+};
 
 
 const schema = yup.object().shape({
@@ -89,21 +117,6 @@ const schema = yup.object().shape({
     usuario: yup.string().nullable().required("El usuario es requerido."),
     dni: yup.string().nullable().required("El dni es requerido."),
     email: yup.string().email("Debe ser un email válido.").nullable().required("El email es requerido."),
-    fecha_nacimiento: yup.date().nullable().required("La fecha de nacimiento es requerida."),
-    telefono: yup.string().nullable().required("El teléfono es requerido."),
-    direccion: yup.string().nullable().required("La dirección es requerida."),
-    status: yup.bool().required(),
-    password: yup.string().nullable().test('password-test', '', (value, { createError }) => {
-        if (props.user?.id) return true;
-        if (!value) return createError({ message: 'La contraseña es requerida.' });
-        if (value.length < 8) return createError({ message: 'La contraseña debe tener al menos 8 caracteres.' });
-        if (value !== formData.value.confirm_password) return createError({ message: "Las contraseñas no coinciden." });
-        return true;
-    }),
-    codigo_modular: yup.string().nullable().required("El código modular es requerido."),
-    especialidad: yup.string().nullable().required("La especialidad es requerido."),
-    condicion: yup.string().nullable(),
-    escala_magisterial: yup.string().nullable(),
 });
 
 const onSubmit = async () => {
@@ -140,66 +153,34 @@ const onSubmit = async () => {
             <div class="mt-4 space-y-3">
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormLabelError label="Ciclo" required>
-                        <BaseSelectCiclo v-model="formData.id_ciclo" :options="ciclo" label="nombre_ciclo"
-                            placeholder="Seleccione un ciclo" />
+                    <FormLabelError label="Programa" required>
+                        <BaseSelectGrupo v-model="formData.id_programa" :options="programaStore.programa"
+                            label="numero_rd" placeholder="Seleccione un programa" @change="onProgramaChange" />
                     </FormLabelError>
 
-                    <FormInput v-model="formData.name" label="Ciclo Académico" :error="formErrors?.name" required />
-                    <FormInput v-model="formData.apellido_paterno" label="Especialidad"
-                        :error="formErrors?.apellido_paterno" required />
+                    <FormLabelError label="Especialidad" required>
+                        <BaseSelectGrupo v-model="formData.id_especialidad" :options="grupoStore.especialidades"
+                            label="nombre_especialidad" placeholder="Seleccione una especialidad"
+                            @change="onEspecialidadChange" />
+                    </FormLabelError>
+
+                    <FormLabelError label="Modulos" required>
+                        <BaseSelectGrupo v-model="formData.id_modulo" :options="grupoStore.modulos"
+                            label="nombre_modulo" placeholder="Seleccione un módulo" @change="onModuloChange" />
+                    </FormLabelError>
 
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormInput v-model="formData.apellido_materno" label="Modulos" :error="formErrors?.apellido_materno"
-                        required />
+                    <!-- <FormLabelError label="Periodo" required>
+                        <BaseSelectGrupo v-model="formData.id_periodo" :options="grupoStore.periodo" label="nombre"
+                            placeholder="Seleccione un periodo" disabled />
+                    </FormLabelError> -->
                     <FormInput v-model="formData.usuario" label="Periodo" :error="formErrors?.usuario"
                         class="md:col-span-1" required />
                     <FormInput v-model="formData.dni" label="Convenio" :error="formErrors?.dni" required />
 
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormInput v-model="formData.telefono" label="Fecha de inicio" :error="formErrors?.telefono"
-                        required />
-                    <FormInput v-model="formData.email" label="Fecha de fin" />
-                    <FormInput v-model="formData.direccion" label="Fecha de entrega de acta" />
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormInput v-model="formData.codigo_modular" label="Seccion" :error="formErrors?.codigo_modular"
-                        required />
-                    <FormInput v-model="formData.especialidad" label="Turno" :error="formErrors?.especialidad"
-                        required />
-                    <FormInput v-model="formData.rd_nombramiento" label="Habilitado para matricula"
-                        :error="formErrors?.rd_nombramiento" required />
-
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                    <FormInput v-model="formData.condicion" label="Condición" :error="formErrors?.condicion" required />
-                    <FormInput v-model="formData.escala_magisterial" label="Escala Magisterial"
-                        :error="formErrors?.escala_magisterial" required />
-                    <FormInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento" type="date"
-                        :error="formErrors?.fecha_nacimiento" required />
-                </div>
-
-
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                    <template v-if="!user?.id">
-                        <FormInput v-model="formData.password" label="Contraseña" type="password"
-                            :error="formErrors?.password" required />
-                        <FormInput v-model="formData.confirm_password" type="password" label="Confirmar Contraseña"
-                            required />
-                        <CheckBox v-model="formData.status" label="Estado"
-                            class="mt-8 pl-4 flex justify-center items-centers" />
-                    </template>
-                </div>
-
-
 
                 <Button :title="user?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
                     :loading-title="user?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"

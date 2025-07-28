@@ -438,6 +438,22 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|permissions-delete');
 
+    // Rutas para el formulario
+    Route::get('especialidadByPrograma/{id}', [
+        \App\Http\Controllers\GrupoController::class,
+        'getEspecialidadesPorPrograma',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+    Route::get('moduloByEspecialidad/{id}', [
+        \App\Http\Controllers\GrupoController::class,
+        'getModulosPorEspecialidad',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+    Route::get('periodoByModulo/{id}', [
+        \App\Http\Controllers\GrupoController::class,
+        'getPeriodoPorModulo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
 
     //RUTA PARA CAPACIDAD TERMINAL
     Route::get('capacidad_terminal', [

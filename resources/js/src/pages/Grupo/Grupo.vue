@@ -28,8 +28,10 @@ import useHttpRequest from "../../composables/useHttpRequest";
 import useTableData from "../../composables/tabla/useTableData";
 import ChangePasswordModal from "../../components/page/ChangePasswordModal.vue";
 import GrupoSlider from "../../components/page/Grupo/GrupoSlider.vue";
+import useGrupoStore from "../../store/Grupo/useGrupoStore";
 
 const docenteStore = useDocenteStore();
+const grupoStore = useGrupoStore();
 
 if (!docenteStore.docentes?.length) await docenteStore.loadDocentes();
 

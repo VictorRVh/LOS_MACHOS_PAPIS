@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EspecialidadPrograma;
 use App\Models\Grupo;
+use App\Models\Modulo;
 use Illuminate\Http\Request;
 
 class GrupoController extends Controller
@@ -107,5 +109,55 @@ class GrupoController extends Controller
         $grupo->delete();
 
         return response()->json(['message' => 'Grupo eliminado con éxito']);
+    }
+
+    //ESPECIALIDADE DE UN PROGRAMA
+
+    public function getEspecialidadesPorPrograma($idPrograma)
+    {
+        $especialidades = EspecialidadPrograma::with('especialidadMadre')
+            ->where('id_programa', $idPrograma)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'nombre_especialidad' => $item->especialidadMadre->nombre_especialidad
+                ];
+            });
+
+        return response()->json($especialidades);
+    }
+
+    // MODULOS POR ESPECIALIDAD
+    public function getModulosPorEspecialidad($idEspecialidad)
+    {
+        $modulos = Modulo::where('id_especialidad', $idEspecialidad)
+            ->get(['id', 'numero_modulo', 'descripcion']); 
+
+        $modulos = $modulos->map(function ($modulo) {
+            return [
+                'id' => $modulo->id,
+                'numero_modulo' => $modulo->numero_modulo,
+                'nombre_modulo' => $modulo->descripcion
+            ];
+        });
+
+        return response()->json($modulos);
+    }
+
+
+    // PERIODO POR MODULO
+    public function getPeriodoPorModulo($idModulo)
+    {
+        $modulo = Modulo::with('periodo')->find($idModulo);
+
+        if (!$modulo) {
+            return response()->json(['mensaje' => 'Módulo no encontrado'], 404);
+        }
+
+        return response()->json([
+            'id' => $modulo->periodo->id,
+            'nombre' => $modulo->periodo->nombre ?? null
+        ]);
     }
 }

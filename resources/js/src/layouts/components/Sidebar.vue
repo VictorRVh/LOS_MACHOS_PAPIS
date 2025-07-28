@@ -31,6 +31,7 @@ const navLinks = [
     { name: 'Comisión', routeName: 'comision', icon: "RectangleGroupIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
     { name: 'Programa', routeName: 'programa', icon: "RectangleGroupIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
     { name: 'Matricula', routeName: 'matricula', icon: "RectangleGroupIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
+    { name: 'Grupo', routeName: 'grupo', icon: "RectangleGroupIcon" ,permissions: [ "todo-acceso-permisos","icono-permisos"]},
 ];
 
 //  v-show="item.name === 'Home' || hasPermission(item.permissions)

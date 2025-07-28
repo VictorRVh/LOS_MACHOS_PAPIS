@@ -320,6 +320,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'show',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
+    Route::get('especialidad_programa/{id}/modulos', [
+        \App\Http\Controllers\EspecialidadProgramaController::class,
+        'getRelacionadosPorEspecialidadPrograma',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
     Route::post('especialidad_programa', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'store',

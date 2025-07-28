@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EspecialidadPrograma;
+use App\Models\Periodo;
 use Illuminate\Http\Request;
 
 class EspecialidadProgramaController extends Controller
@@ -84,5 +85,17 @@ class EspecialidadProgramaController extends Controller
 
         $registro->delete();
         return response()->json(['message' => 'Eliminado correctamente'], 204);
+    }
+
+    public function getRelacionadosPorEspecialidadPrograma($id)
+    {
+        $especialidadesPrograma = EspecialidadPrograma::with([
+            'programaEstudio',
+            'modulo',
+        ])->where('id_especialidad', $id)->get();
+
+        return response()->json([
+            'relaciones' => $especialidadesPrograma,
+        ]);
     }
 }

@@ -218,6 +218,17 @@ export default [
             permissions: ['todo-acceso-permisos', 'ver-permisos'],
             breadcrumb: 'Permisos'
         },
-    }
+    },
+    {
+        path: '/grupo',
+        name: 'grupo',
+        component: () => import('../pages/Grupo/Grupo.vue'),
+        props: true,
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            breadcrumb: 'Permisos'
+        },
+    },
 
 ];

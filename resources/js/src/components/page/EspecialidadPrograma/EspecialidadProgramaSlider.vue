@@ -62,7 +62,7 @@ const initialFormData = () => {
     };
 };
 
-console.log('prop independiente: ', props.idPrograma)
+console.log('prop independiente 222: ', props.especialidadPrograma)
 
 const formData = ref(initialFormData());
 const formErrors = ref({});

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ProgramaEstudio;
 use App\Models\EspecialidadPrograma;
 use App\Models\Periodo;
 use Illuminate\Http\Request;
+
 
 class EspecialidadProgramaController extends Controller
 {
@@ -34,15 +36,34 @@ class EspecialidadProgramaController extends Controller
     // Mostrar uno específico
     public function show($id)
     {
-        $registros = EspecialidadPrograma::with(['especialidadMadre', 'programaEstudio'])
-            ->where('id_programa', $id)
-            ->get();
+        $programa = ProgramaEstudio::with([
+            'ciclo:id,nombre_ciclo',
+            'especialidadPrograma.especialidadMadre:id,nombre_especialidad'
+        ])->find($id);
 
-        if ($registros->isEmpty()) {
-            return response()->json(['message' => 'Sin especialidades dentro del programa'], 404);
+        if (!$programa) {
+            return response()->json(['message' => 'Programa no encontrado'], 404);
         }
 
-        return response()->json($registros);
+        if ($programa->especialidadPrograma->isEmpty()) {
+            return response()->json([
+                'ciclo' => $programa->ciclo,
+                'message' => 'No se encontraron especialidades asociadas a este programa'
+            ]);
+        }
+
+        return response()->json([
+            'ciclo' => $programa->ciclo,
+            'especialidad_programas' => $programa->especialidadPrograma->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'id_especialidad' => $item->id_especialidad,
+                    'id_programa' => $item->id_programa,
+                    'nro_modulos' => $item->nro_modulos,
+                    'especialidad_madre' => $item->especialidadMadre,
+                ];
+            })
+        ]);
     }
 
 

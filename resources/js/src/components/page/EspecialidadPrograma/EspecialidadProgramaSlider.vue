@@ -37,7 +37,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["hide"]);
 
-const especialidadProgramaStore = null;
+const especialidadProgramaStore = useEspecialidadProgramaStore();
 
 
 const { store: createPrograma, saving, update: updatePrograma, updating } = useHttpRequest(

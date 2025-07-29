@@ -43,23 +43,26 @@ const { destroy: deletePrograma, deleting } = useHttpRequest("/especialidad_prog
 const router = useRouter();
 
 // Cargar datos iniciales
-if (!especialidadProgramaStore.especialidadPrograma.length) {
+if (!especialidadProgramaStore?.especialidadPrograma?.length) {
   await especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma);
 }
 
-if (!especialidadStore.especialidadCiclo.length) {
-  const cicloId = especialidadProgramaStore.especialidadProgramaFiltrado[0]?.programa_estudio?.id_ciclo;
+console.log("saba: ",especialidadProgramaStore?.especialidadProgramaFiltrado?.ciclo)
+
+
+if (!especialidadStore?.especialidadCiclo?.length||especialidadProgramaStore?.especialidadProgramaFiltrado?.ciclo) {
+  const cicloId = especialidadProgramaStore.especialidadProgramaFiltrado?.ciclo?.id;
   await especialidadStore.loadEspecialidadCiclo(cicloId);
 }
 
-// 🔍 Computed: especialidades NO asignadas
+// Computed: especialidades NO asignadas
 const especialidadesDisponibles = computed(() => {
-  const asignadas = especialidadProgramaStore.especialidadProgramaFiltrado.map(
-    (ep) => ep.especialidad_madre.id
+  const asignadas = especialidadProgramaStore?.especialidadProgramaFiltrado?.especialidad_programas?.map(
+    (ep) => ep?.especialidad_madre.id
   );
 
   return especialidadStore.especialidadCiclo?.especialidades?.filter(
-    (especialidad) => !asignadas.includes(especialidad.id)
+    (especialidad) => !asignadas?.includes(especialidad?.id)
   ) || [];
 });
 
@@ -122,11 +125,11 @@ const SeeMore = (id) => {
 
           <TBody>
             <Tr
-              v-for="(especialidadPrograma, index) in especialidadProgramaStore.especialidadProgramaFiltrado"
+              v-for="(especialidadPrograma, index) in especialidadProgramaStore?.especialidadProgramaFiltrado?.especialidad_programas"
               :key="especialidadPrograma.id"
             >
               <Td>{{ index + 1 }}</Td>
-              <Td>{{ especialidadPrograma?.especialidad_madre.nombre_especialidad }}</Td>
+              <Td>{{ especialidadPrograma?.especialidad_madre?.nombre_especialidad }}</Td>
               <Td>{{ especialidadPrograma?.nro_modulos }}</Td>
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">

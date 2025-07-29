@@ -4,11 +4,11 @@ import { defineStore } from 'pinia';
 import useHttpRequest from '../../composables/useHttpRequest';
 
 const useGrupoStore = defineStore('grupo', () => {
-    // const {
-    //     index: getDocentes,
-    //     loading: docentesLoading,
-    //     initialLoading: docentesFirstTimeLoading,
-    // } = useHttpRequest('/docente');
+    const {
+        index: getGrupos,
+        loading: docentesLoading,
+        initialLoading: docentesFirstTimeLoading,
+    } = useHttpRequest('/docente');
 
     const {
         show: getEspecialidadesPorPrograma,
@@ -22,25 +22,20 @@ const useGrupoStore = defineStore('grupo', () => {
         show: getPeriodoPorModulo,
     } = useHttpRequest('/periodoByModulo');
 
-    const docente = ref(null);
-    const docentes = ref([]);
-    const requiereCambioPassword = ref(false);
+    // const docente = ref(null);
+    const grupos = ref([]);
 
     const especialidades = ref([]);
     const modulos = ref([]);
-    const periodo = ref(null);
+    const periodo = ref([]);
 
     const setDocente = (authDocente) => {
         docente.value = authDocente;
     };
 
-    const setRequiereCambioPassword = (valor) => {
-        requiereCambioPassword.value = valor;
-    };
-
-    const loadDocentes = async () => {
-        const response = await getDocentes();
-        docentes.value = response;
+    const loadGrupos = async () => {
+        const response = await getGrupos();
+        grupos.value = response;
     };
 
     const loadEspecialidades = async (programaId) => {
@@ -64,7 +59,9 @@ const useGrupoStore = defineStore('grupo', () => {
         periodo,
         loadEspecialidades,
         loadModulos,
+        loadGrupos,
         loadPeriodo,
+        grupos
     };
 });
 

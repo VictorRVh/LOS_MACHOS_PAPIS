@@ -40,7 +40,8 @@ class GrupoController extends Controller
             'fecha_entrega_acta'  => 'nullable|date',
             'seccion'             => 'required|string|max:10',
             'turno'               => 'required|string|max:10',
-            'id_docente'          => 'required|uuid|exists:docente,id',
+            // 'id_docente'          => 'required|uuid|exists:docente,id',
+            'id_docente'          => 'nullable',
             'status'              => 'required|integer|in:0,1,2,3'
         ]);
 
@@ -132,7 +133,7 @@ class GrupoController extends Controller
     public function getModulosPorEspecialidad($idEspecialidad)
     {
         $modulos = Modulo::where('id_especialidad', $idEspecialidad)
-            ->get(['id', 'numero_modulo', 'descripcion']); 
+            ->get(['id', 'numero_modulo', 'descripcion']);
 
         $modulos = $modulos->map(function ($modulo) {
             return [
@@ -156,8 +157,10 @@ class GrupoController extends Controller
         }
 
         return response()->json([
-            'id' => $modulo->periodo->id,
-            'nombre' => $modulo->periodo->nombre ?? null
+            [
+                'id' => $modulo->periodo->id,
+                'nombre' => $modulo->periodo->nombre_periodo ?? null
+            ]
         ]);
     }
 }

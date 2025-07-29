@@ -30,19 +30,15 @@ import ChangePasswordModal from "../../components/page/ChangePasswordModal.vue";
 import GrupoSlider from "../../components/page/Grupo/GrupoSlider.vue";
 import useGrupoStore from "../../store/Grupo/useGrupoStore";
 
-const docenteStore = useDocenteStore();
 const grupoStore = useGrupoStore();
 
-if (!docenteStore.docentes?.length) await docenteStore.loadDocentes();
+if (!grupoStore.grupos?.length) await grupoStore.loadEspecialidades();
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("user-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteDocente, deleting } = useHttpRequest("/docente");
 
 const showModal = ref(false);
-
-const { requiereCambioPassword } = storeToRefs(docenteStore);
-
 
 const onDelete = (docente) => {
   if (deleting.value) return;
@@ -60,7 +56,7 @@ const onDelete = (docente) => {
 
 /// FILTAR USUARIOS
 // const usuarios = ref(docenteStore.docentes)
-const usuarios = computed(() => docenteStore.docentes);
+const usuarios = computed(() => grupoStore.grupos);
 
 
 
@@ -158,7 +154,7 @@ const {
       </Table>
     </div>
 
-    <GrupoSlider :show="slider" :user="sliderData" @hide="hideSlider" />
+    <GrupoSlider :show="slider" :grupo="sliderData" @hide="hideSlider" />
   </AuthorizationFallback>
   <ChangePasswordModal v-if="showModal" @success="onPasswordChanged" />
 </template>

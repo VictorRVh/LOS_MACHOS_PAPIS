@@ -5,7 +5,7 @@ import 'vue-select/dist/vue-select.css'
 const props = defineProps({
   modelValue: [String, Number, Object, null],
   options: { type: Array, default: () => [] },
-  label: { type: String, default: 'label' }, // campo a mostrar
+  label: { type: String, default: 'label' }, 
   placeholder: { type: String, default: 'Seleccione una opción' },
   disabled: { type: Boolean, default: false },
 });

@@ -65,7 +65,7 @@ const programas = ref([
 const periodos = ref([
   { label: "2025-I", value: "2025-1" },
   { label: "2025-II", value: "2025-2" },
-]);s
+]);
 
 const anios = ref(
   Array.from({ length: 6 }, (_, i) => {

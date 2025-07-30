@@ -32,7 +32,7 @@ const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteGrupo, deleting } = useHttpRequest("/grupo");
 
 const showModal = ref(false);
-
+//VICTOR CABRO........................................
 const onDelete = (grupo) => {
   if (deleting.value) return;
 

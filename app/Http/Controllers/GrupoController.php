@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Docente;
 use App\Models\EspecialidadPrograma;
 use App\Models\Grupo;
 use App\Models\Modulo;
@@ -162,5 +163,21 @@ class GrupoController extends Controller
                 'nombre' => $modulo->periodo->nombre_periodo ?? null
             ]
         ]);
+    }
+
+    public function docentesPorGrupo()
+    {
+        $docentes = Docente::with('user:id,name,apellido_paterno,apellido_materno')
+            ->get()
+            ->map(function ($docente) {
+                return [
+                    'id_docente' => $docente->id,
+                    'nombre' => $docente->user->name,
+                    'apellido_paterno' => $docente->user->apellido_paterno,
+                    'apellido_materno' => $docente->user->apellido_materno,
+                ];
+            });
+
+        return response()->json($docentes);
     }
 }

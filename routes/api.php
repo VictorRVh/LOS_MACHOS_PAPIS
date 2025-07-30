@@ -454,6 +454,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'getPeriodoPorModulo',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
+    // grupo-docente
+    Route::get('docenteGrupo', [
+        \App\Http\Controllers\GrupoController::class,
+        'docentesPorGrupo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
     //RUTA PARA CAPACIDAD TERMINAL
     Route::get('capacidad_terminal', [

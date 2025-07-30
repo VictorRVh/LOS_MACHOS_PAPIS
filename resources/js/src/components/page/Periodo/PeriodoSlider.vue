@@ -48,6 +48,7 @@ const title = computed(() =>
 
 const initialFormData = () => {
   return {
+    anio: null,
     nombre_periodo: null,
     descripcion: null,
     status: 0,
@@ -82,8 +83,11 @@ watch(
 const schema = yup.object().shape({
   nombre_periodo: yup
     .string()
-    .required("El nombre del periodo es obligatorio.")
+    .required("El periodo es obligatorio.")
     .matches(/^\d{4}-I{1,2}$/, "Formato inválido. Usa: 2024-I o 2024-II"),
+  anio:   yup.string()
+    .required("El año del periodo es obligatorio.")
+    .matches(/^\d{4}$/, "Formato inválido. Usa: 2024 o 2024"),
 });
 
 const onSubmit = async () => {
@@ -147,11 +151,21 @@ const onPeriodoInput = (e) => {
 <template>
   <AuthorizationFallback :permissions="requiredPermissions">
     <div class="mt-2 space-y-1.5 font-inter">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <FormInput
+          v-model="formData.anio"
+          :focus="show"
+          label="Año"
+          :error="formErrors?.anio"
+          required
+          placeholder="2024"
+          @input="onPeriodoInput"
+        />
+
         <FormInput
           v-model="formData.nombre_periodo"
           :focus="show"
-          label="Nombre del Periodo"
+          label="Periodo"
           :error="formErrors?.nombre_periodo"
           required
           placeholder="2024-I"

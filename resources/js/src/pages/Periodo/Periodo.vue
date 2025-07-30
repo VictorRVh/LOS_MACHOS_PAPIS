@@ -65,6 +65,7 @@ const onDelete = (periodo) => {
         <Table>
           <THead>
             <Th>Id</Th>
+            <Th>Año</Th>
             <Th>Periodo</Th>
             <Th>Estado</Th>
             <Th>Acciones</Th>
@@ -73,8 +74,9 @@ const onDelete = (periodo) => {
           <TBody>
             <Tr v-for="(periodo,index) in periodosStore.periodos" :key="periodo.id">
               <Td>{{ index +1 }}</Td>
+              <Td>{{ periodo?.anio }}</Td> 
               <Td>{{ periodo?.nombre_periodo }}</Td> 
-               <Td>{{ periodo?.status }}</Td>
+               <Td>{{ periodo?.status_texto }}</Td>
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">
                   <EditButton @click="showSlider(true, periodo)" />

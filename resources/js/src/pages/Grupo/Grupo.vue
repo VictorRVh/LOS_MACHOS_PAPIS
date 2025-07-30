@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 
 import SearchBar from "../../components/head_table/headSearch.vue";
 import Table from "../../components/table/Table.vue";
@@ -21,9 +21,9 @@ import useHttpRequest from "../../composables/useHttpRequest";
 import useTableData from "../../composables/tabla/useTableData";
 
 import useGrupoStore from "../../store/Grupo/useGrupoStore";
-import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
+import BaseSelectGrupo from '../../components/ui/BaseSelectGrupo.vue';
 
-// Grupo store
+
 const grupoStore = useGrupoStore();
 if (!grupoStore.grupos?.length) await grupoStore.loadGrupos();
 
@@ -32,7 +32,7 @@ const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteGrupo, deleting } = useHttpRequest("/grupo");
 
 const showModal = ref(false);
-//VICTOR CABRO........................................
+
 const onDelete = (grupo) => {
   if (deleting.value) return;
 
@@ -47,12 +47,11 @@ const onDelete = (grupo) => {
   });
 };
 
-// Computed de grupos
 const grupos = computed(() => grupoStore.grupos);
 
-// Filtros
+// Filtros superiores
 const programaAcademico = ref(null);
-const anio = ref(null);
+const anio = ref(new Date().getFullYear());
 const periodo = ref(null);
 
 const programas = ref([
@@ -65,12 +64,10 @@ const periodos = ref([
   { label: "2025-II", value: "2025-2" },
 ]);
 
-const anios = ref(
-  Array.from({ length: 6 }, (_, i) => {
-    const year = new Date().getFullYear() - i;
-    return { label: `${year}`, value: year };
-  })
-);
+const anios = computed(() => {
+  const current = new Date().getFullYear();
+  return Array.from({ length: 6 }, (_, i) => current - i);
+});
 
 const filtrarPorSeleccion = () => {
   console.log("Filtrar por:", {
@@ -78,10 +75,9 @@ const filtrarPorSeleccion = () => {
     anio: anio.value,
     periodo: periodo.value,
   });
-  // Aquí podrías aplicar lógica de filtrado real si lo deseas.
+  // Aquí podrías aplicar filtros reales a la data
 };
 
-// Tabla
 const {
   query,
   orderBy,
@@ -97,8 +93,13 @@ const {
   searchFields: ["nombre", "modulo.nombre_modulo", "docente.name"]
 });
 
-</script>
 
+const select_programa = ref
+
+const onProgramaChange = ()=>{
+
+}
+</script>
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
@@ -110,46 +111,45 @@ const {
         </div>
 
         <!-- Filtros Superiores -->
-        <div class="w-full border-cetpro-light dark:bg-gray-800 shadow-md border border-gray-200 dark:border-gray-700 p-4 my-5">
+        <div class="w-full border-cetpro-light dark:bg-gray-800  shadow-md border border-gray-200 dark:border-gray-700 p-4 my-5">
           <div class="grid md:grid-cols-4 gap-4 items-center">
-            
             <!-- Programa Académico -->
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Programa Académico</label>
               <BaseSelectGrupo
-                v-model="programaAcademico"
-                :options="programas"
+                v-model="select_programa"
+                :options="programaAcademico"
                 label="Programa Académico"
                 placeholder="Seleccione un programa"
-                @change="filtrarPorSeleccion"
-                :loading="false"
+                @change="onProgramaChange"
+                :loading="programas"
               />
+              
             </div>
 
             <!-- Año -->
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Año</label>
-              <BaseSelectGrupo
+              <select
                 v-model="anio"
-                :options="anios"
-                label="Año"
-                placeholder="Seleccione un año"
-                @change="filtrarPorSeleccion"
-                :loading="false"
-              />
+                class="w-full mt-1 px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:text-white"
+              >
+                <option v-for="year in anios" :key="year" :value="year">{{ year }}</option>
+              </select>
             </div>
 
             <!-- Periodo -->
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
-              <BaseSelectGrupo
+              <select
                 v-model="periodo"
-                :options="periodos"
-                label="Periodo"
-                placeholder="Seleccione un periodo"
-                @change="filtrarPorSeleccion"
-                :loading="false"
-              />
+                class="w-full mt-1 px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:text-white"
+              >
+                <option disabled value="">Seleccione</option>
+                <option v-for="item in periodos" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </option>
+              </select>
             </div>
 
             <!-- Botón Filtrar -->
@@ -163,7 +163,6 @@ const {
             </div>
           </div>
         </div>
-
 
         <div class="flex-between flex-row-reverse mb-4">
           <SearchBar

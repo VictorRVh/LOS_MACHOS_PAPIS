@@ -86,6 +86,9 @@ watch(() => props.show, () => {
     }
 });
 
+console.log('props de convenio: ', convenioStore.convenios)
+console.log('props de docente: ', docenteStore.docentesGrupo)
+
 const onProgramaChange = async (programaId) => {
 
     console.log('entradn qui')
@@ -144,8 +147,10 @@ const onSubmit = async () => {
         ? await updateGrupo(props.grupo?.id, data)
         : await createGrupo(data);
 
-    if (response?.id) {
-        showToast(`especialidad ${props.grupo?.id ? "editado" : "creado"} exitosamente.`);
+        console.log('response del create', response)
+
+    if (response?.data.id) {
+        showToast(`Grupo ${props.grupo?.id ? "editado" : "creado"} exitosamente.`);
         grupoStore.loadGrupos();
 
         if (!props.grupo?.id) {

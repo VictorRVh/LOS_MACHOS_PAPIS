@@ -14,18 +14,20 @@ class GrupoController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $grupos = Grupo::with([
-            'programaEstudio:id,año',
-            'especialidad:id',
-            'modulo:id,numero_modulo,descripcion',
-            'periodo:id,nombre_periodo',
-            'convenio:id,nombre_institucion',
-            'docente:id,codigo_modular'
-        ])->get();
+{
+    $grupos = Grupo::with([
+        'programaEstudio:id,año',
+        'especialidad:id',
+        'modulo:id,numero_modulo,descripcion',
+        'periodo:id,nombre_periodo',
+        'convenio:id,nombre_institucion',
+        'docente:id,user_id,codigo_modular',
+        'docente.user:id,name,apellido_paterno,apellido_materno' 
+    ])->get();
 
-        return response()->json($grupos);
-    }
+    return response()->json($grupos);
+}
+
 
     // POST /api/grupos
     public function store(Request $request)
@@ -171,7 +173,7 @@ class GrupoController extends Controller
             ->get()
             ->map(function ($docente) {
                 return [
-                    'id_docente' => $docente->id,
+                    'id' => $docente->id,
                     'nombre' => $docente->user->name,
                     'apellido_paterno' => $docente->user->apellido_paterno,
                     'apellido_materno' => $docente->user->apellido_materno,

@@ -197,11 +197,11 @@ const {
         <TBody>
           <Tr v-for="(grupo, index) in gruposPaginados" :key="grupo.id">
             <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
-            <Td>{{ grupo.nombre }}</Td>
-            <Td>{{ grupo.modulo?.nombre_modulo ?? '---' }}</Td>
-            <Td>{{ grupo.docente?.name ?? '---' }}</Td>
-            <Td>{{ grupo.periodo?.nombre ?? '---' }}</Td>
-            <Td>{{ grupo.created_at?.slice(0, 10) ?? '---' }}</Td>
+            <Td>{{ grupo.nombre ?? 'Grupo' }}</Td>
+            <Td>{{ grupo.modulo?.descripcion }}</Td>
+            <Td>{{ grupo.docente?.user?.name }} {{ grupo.docente?.user?.apellido_paterno }} {{ grupo.docente?.user?.apellido_materno }}</Td>
+            <Td>{{ grupo.periodo?.nombre_periodo }}</Td>
+            <Td>{{ grupo.created_at?.slice(0, 10) ?? '---'}}</Td>
             <Td>
               <span
                 :class="grupo.status === 1

@@ -70,7 +70,7 @@ const periodos = ref([
 const anios = ref(
   Array.from({ length: 6 }, (_, i) => {
     const year = new Date().getFullYear() - i;
-    return { label: `${year}`, value: year };
+    return { label: `${year}`, value: year }; 
   })
 );
 

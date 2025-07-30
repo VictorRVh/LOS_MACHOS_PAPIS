@@ -15,11 +15,11 @@ class GrupoController extends Controller
     public function index()
     {
         $grupos = Grupo::with([
-            'programaEstudio:id,nombre_programa',
+            'programaEstudio:id,año',
             'especialidad:id',
             'modulo:id,numero_modulo,descripcion',
             'periodo:id,nombre_periodo',
-            'convenio:id,nombre',
+            'convenio:id,nombre_institucion',
             'docente:id,codigo_modular'
         ])->get();
 

@@ -77,6 +77,7 @@ class ProgramaEstudioController extends Controller
 
         $programa->delete();
 
-        return response()->json(['message' => 'Programa eliminado correctamente']);
+        return response()->json(['message' => 'Programa eliminado correctamente'], 204);
     }
+    
 }

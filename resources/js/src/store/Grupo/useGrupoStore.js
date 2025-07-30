@@ -1,40 +1,53 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-
 import useHttpRequest from '../../composables/useHttpRequest';
 
 const useGrupoStore = defineStore('grupo', () => {
+    // HTTP requests individuales
     const {
-        index: getGrupos,
+        index: getGrupo,
+        loading: gruposLoading,
+        initialLoading: gruposFirstTimeLoading,
+    } = useHttpRequest('/grupo');
+
+    const {
+        index: getDocentes,
         loading: docentesLoading,
         initialLoading: docentesFirstTimeLoading,
     } = useHttpRequest('/docente');
 
     const {
         show: getEspecialidadesPorPrograma,
+        loading: especialidadByProgramLoading,
+        initialLoading: especialidadByProgramtesFirstTimeLoading,
     } = useHttpRequest('/especialidadByPrograma');
 
     const {
         show: getModulosPorEspecialidad,
+        loading: moduloByEspecialidadLoading,
+        initialLoading: moduloByEspecialidadFirstTimeLoading,
     } = useHttpRequest('/moduloByEspecialidad');
 
     const {
         show: getPeriodoPorModulo,
+        loading: docenteperiodoByModuloLoading,
+        initialLoading: periodoByModuloFirstTimeLoading,
     } = useHttpRequest('/periodoByModulo');
 
-    // const docente = ref(null);
+    // Datos
     const grupos = ref([]);
-
     const especialidades = ref([]);
     const modulos = ref([]);
     const periodo = ref([]);
 
-    const setDocente = (authDocente) => {
-        docente.value = authDocente;
+    // Métodos
+    const loadGrupos = async () => {
+        const response = await getGrupo();
+        grupos.value = response;
     };
 
-    const loadGrupos = async () => {
-        const response = await getGrupos();
+    const loadDocentes = async () => {
+        const response = await getDocentes();
         grupos.value = response;
     };
 
@@ -54,14 +67,34 @@ const useGrupoStore = defineStore('grupo', () => {
     };
 
     return {
+        // Datos
+        grupos,
         especialidades,
         modulos,
         periodo,
+
+        // Métodos
+        loadGrupos,
+        loadDocentes,
         loadEspecialidades,
         loadModulos,
-        loadGrupos,
         loadPeriodo,
-        grupos
+
+        // Estados de carga individuales
+        gruposLoading,
+        gruposFirstTimeLoading,
+
+        docentesLoading,
+        docentesFirstTimeLoading,
+
+        especialidadByProgramLoading,
+        especialidadByProgramtesFirstTimeLoading,
+
+        moduloByEspecialidadLoading,
+        moduloByEspecialidadFirstTimeLoading,
+
+        docenteperiodoByModuloLoading,
+        periodoByModuloFirstTimeLoading,
     };
 });
 

@@ -35,11 +35,13 @@ const onDelete = (programa) => {
 
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
-
+   
+    //console.log("elelinad porgrma: ",programa?.id)
     const isDeleted = await deletePrograma(programa?.id);
+    console.log("elelinad porgrma: ",isDeleted)
     if (isDeleted) {
       showToast(`Programa "${programa?.año}" eliminado exitosamente...`);
-      programaStore.loadPeriodos();
+      programaStore.loadPrograma();
 
     }
   });

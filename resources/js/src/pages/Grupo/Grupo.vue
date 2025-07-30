@@ -2,9 +2,6 @@
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 
 import SearchBar from "../../components/head_table/headSearch.vue";
-
-import { storeToRefs } from "pinia";
-
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
 import TBody from "../../components/table/TBody.vue";
@@ -14,51 +11,70 @@ import Td from "../../components/table/Td.vue";
 import MenuTable from "../../components/table/MenuTable.vue";
 
 import CreateButton from "../../components/ui/CreateButton.vue";
-import EditButton from "../../components/ui/EditButton.vue";
-import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
-import docenteSlider from "../../components/page/Docente/DocenteSlider.vue";
-
-import useDocenteStore from "../../store/Docente/useDocenteStore";
+import ChangePasswordModal from "../../components/page/ChangePasswordModal.vue";
+import GrupoSlider from "../../components/page/Grupo/GrupoSlider.vue";
 
 import useSlider from "../../composables/useSlider";
-
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import useTableData from "../../composables/tabla/useTableData";
-import ChangePasswordModal from "../../components/page/ChangePasswordModal.vue";
-import GrupoSlider from "../../components/page/Grupo/GrupoSlider.vue";
+
 import useGrupoStore from "../../store/Grupo/useGrupoStore";
 
 const grupoStore = useGrupoStore();
+if (!grupoStore.grupos?.length) await grupoStore.loadGrupos();
 
-if (!grupoStore.grupos?.length) await grupoStore.loadEspecialidades();
-
-const { slider, sliderData, showSlider, hideSlider } = useSlider("user-crud");
+const { slider, sliderData, showSlider, hideSlider } = useSlider("grupo-crud");
 const { showConfirmModal, showToast } = useModalToast();
-const { destroy: deleteDocente, deleting } = useHttpRequest("/docente");
+const { destroy: deleteGrupo, deleting } = useHttpRequest("/grupo");
 
 const showModal = ref(false);
 
-const onDelete = (docente) => {
+const onDelete = (grupo) => {
   if (deleting.value) return;
 
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
 
-    const isDeleted = await deleteDocente(docente?.id);
+    const isDeleted = await deleteGrupo(grupo?.id);
     if (isDeleted) {
-      showToast(`"${docente?.name}" eliminado correctamente...`);
-      docenteStore.loadDocentes();
+      showToast(`Grupo "${grupo?.nombre}" eliminado correctamente...`);
+      grupoStore.loadGrupos();
     }
   });
 };
 
-/// FILTAR USUARIOS
-// const usuarios = ref(docenteStore.docentes)
-const usuarios = computed(() => grupoStore.grupos);
+const grupos = computed(() => grupoStore.grupos);
 
+// Filtros superiores
+const programaAcademico = ref(null);
+const anio = ref(new Date().getFullYear());
+const periodo = ref(null);
 
+const programas = ref([
+  { label: "Auxiliar Técnico", value: "auxiliar" },
+  { label: "Operador Industrial", value: "operador" },
+]);
+
+const periodos = ref([
+  { label: "2025-I", value: "2025-1" },
+  { label: "2025-II", value: "2025-2" },
+]);
+
+const anios = computed(() => {
+  const current = new Date().getFullYear();
+  return Array.from({ length: 6 }, (_, i) => current - i);
+});
+
+const filtrarPorSeleccion = () => {
+  console.log("Filtrar por:", {
+    programa: programaAcademico.value,
+    anio: anio.value,
+    periodo: periodo.value,
+  });
+  // Aquí podrías aplicar filtros reales a la data
+};
 
 const {
   query,
@@ -66,36 +82,89 @@ const {
   orderDirection,
   pagina,
   itemsPorPagina,
-  paginados: usuariosPaginados,
+  paginados: gruposPaginados,
   totalPaginas,
-  ordenados: usuariosOrdenados,
-  filtrar: filtrarUsuarios
-} = useTableData(usuarios, {
-  defaultOrderBy: "apellido_paterno",
-  searchFields: ["name", "apellido_paterno", "dni"]
+  ordenados: gruposOrdenados,
+  filtrar: filtrarGrupos
+} = useTableData(grupos, {
+  defaultOrderBy: "nombre",
+  searchFields: ["nombre", "modulo.nombre_modulo", "docente.name"]
 });
-
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-usuarios', 'ver-usuarios']">
+  <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
     <div class="w-full space-y-2 py-2 px-3">
       <div class="m-2">
         <div class="flex-between">
-          <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Docentes</h2>
+          <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Grupos</h2>
           <CreateButton @click="showSlider(true)" />
         </div>
 
-        <div class="flex-between flex-row-reverse my-5">
-          <SearchBar
-            :totalResultados="usuariosOrdenados.length"
-            :campoOrden="'apellido_paterno'"
-            @search="filtrarUsuarios"
-          />
+        <!-- Filtros Superiores -->
+        <div class="w-full bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-4 my-5">
+          <div class="grid md:grid-cols-4 gap-4 items-center">
+            <!-- Programa Académico -->
+            <div>
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Programa Académico</label>
+              <select
+                v-model="programaAcademico"
+                class="w-full mt-1 px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:text-white"
+              >
+                <option disabled value="">Seleccione</option>
+                <option v-for="programa in programas" :key="programa.value" :value="programa.value">
+                  {{ programa.label }}
+                </option>
+              </select>
+            </div>
 
-          <div class="font-inter text-md w-full">Lista de docentes</div>
+            <!-- Año -->
+            <div>
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Año</label>
+              <select
+                v-model="anio"
+                class="w-full mt-1 px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:text-white"
+              >
+                <option v-for="year in anios" :key="year" :value="year">{{ year }}</option>
+              </select>
+            </div>
+
+            <!-- Periodo -->
+            <div>
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
+              <select
+                v-model="periodo"
+                class="w-full mt-1 px-3 py-2 border rounded-md text-sm dark:bg-gray-700 dark:text-white"
+              >
+                <option disabled value="">Seleccione</option>
+                <option v-for="item in periodos" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Botón Filtrar -->
+            <div class="flex items-end pt-5">
+              <button
+                @click="filtrarPorSeleccion"
+                class="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md w-full"
+              >
+                Filtrar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-between flex-row-reverse mb-4">
+          <SearchBar
+            :totalResultados="gruposOrdenados.length"
+            :campoOrden="'nombre'"
+            @search="filtrarGrupos"
+          />
+          <div class="font-inter text-md w-full">Lista de grupos</div>
         </div>
       </div>
+
       <Table
         :paginacion="true"
         :current-page="pagina"
@@ -104,49 +173,41 @@ const {
       >
         <THead>
           <Th>N°</Th>
-          <Th>Nombres</Th>
-          <Th>Apellidos</Th>
-          <Th>Dni</Th>
-          <Th>Correo</Th>
-  
+          <Th>Nombre</Th>
+          <Th>Módulo</Th>
+          <Th>Docente</Th>
+          <Th>Periodo</Th>
           <Th>Fecha de Creación</Th>
           <Th>Estado</Th>
           <Th class="text-center">Acción</Th>
         </THead>
 
         <TBody>
-          <Tr v-for="(docente, index) in usuariosPaginados" :key="index">
-            <Td
-              ><span class="text-gray-800 dark:text-gray-300">{{
-                (pagina - 1) * itemsPorPagina + index + 1
-              }}</span></Td
-            >
-            <Td>{{ docente.name }}</Td>
-            <Td>{{ docente.apellido_paterno }} {{ docente.apellido_materno }}</Td>
-            <Td>{{ docente.dni }}</Td>
-            <Td>{{ docente.email }}</Td>
-        
-            <Td>{{ docente.created_at.slice(0, 10) }}</Td>
+          <Tr v-for="(grupo, index) in gruposPaginados" :key="grupo.id">
+            <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
+            <Td>{{ grupo.nombre }}</Td>
+            <Td>{{ grupo.modulo?.nombre_modulo ?? '---' }}</Td>
+            <Td>{{ grupo.docente?.name ?? '---' }}</Td>
+            <Td>{{ grupo.periodo?.nombre ?? '---' }}</Td>
+            <Td>{{ grupo.created_at?.slice(0, 10) ?? '---' }}</Td>
             <Td>
               <span
-                :class="
-                  docente.status === 1
-                    ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
-                    : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
-                "
+                :class="grupo.status === 1
+                  ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
+                  : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'"
                 class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1"
               >
-                <span v-if="docente.status === 1"> Activo ✓ </span>
-                <span v-else="docente.status === 0"> Inactivo X </span>
+                <span v-if="grupo.status === 1">Activo ✓</span>
+                <span v-else>Inactivo X</span>
               </span>
             </Td>
             <Td class="text-center text-gray-600 dark:text-gray-200">
               <MenuTable
                 :actions="{ view: true, edit: true, delete: true, download: false }"
-                entity-label="usuario"
-                @view="verGrupo(user)"
-                @edit="showSlider(true, user)"
-                @delete="onDelete(user)"
+                entity-label="grupo"
+                @view="showSlider(true, grupo)"
+                @edit="showSlider(true, grupo)"
+                @delete="onDelete(grupo)"
               />
             </Td>
           </Tr>

@@ -48,6 +48,7 @@ const requiredPermissions = computed(() => {
 if (!programaStore.programa.length) await programaStore.loadPrograma();
 if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
 if (!docenteStore.docentes?.length) await docenteStore.loadDocentes();
+if (!docenteStore.docentesGrupo?.length) await docenteStore.loadDocentesGrupo();
 
 const title = computed(() => (props.grupo ? `Actualizar Docente "${props.grupo?.name}"` : 'Añadir Nuevo  Docente'));
 
@@ -214,7 +215,7 @@ const onSubmit = async () => {
                     </FormLabelError>
 
                     <FormLabelError label="Docente" >
-                        <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentes" label="name"
+                        <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentesGrupo" label="nombre"
                             placeholder="Seleccione un docente" />
                     </FormLabelError>
 

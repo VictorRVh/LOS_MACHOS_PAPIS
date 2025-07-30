@@ -10,8 +10,14 @@ const useDocenteStore = defineStore('docentes', () => {
         initialLoading: docentesFirstTimeLoading,
     } = useHttpRequest('/docente');
 
+    const {
+        index: getDocentesGrupo,
+        loading: docentesGrupoLoading,
+    } = useHttpRequest('/docenteGrupo');
+
     const docente = ref(null);
     const docentes = ref([]);
+    const docentesGrupo = ref([]);
     const requiereCambioPassword = ref(false);
 
     const setDocente = (authDocente) => {
@@ -27,6 +33,11 @@ const useDocenteStore = defineStore('docentes', () => {
         docentes.value = response;
     };
 
+    const loadDocentesGrupo = async () => {
+        const response = await getDocentesGrupo();
+        docentesGrupo.value = response;
+    }
+
     return {
         docente,
         setDocente,
@@ -36,6 +47,8 @@ const useDocenteStore = defineStore('docentes', () => {
         docentesLoading,
         docentesFirstTimeLoading,
         loadDocentes,
+        loadDocentesGrupo,
+        docentesGrupo
     };
 });
 

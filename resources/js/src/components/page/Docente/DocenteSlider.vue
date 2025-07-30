@@ -22,7 +22,7 @@ import BaseSelect from '../../ui/BaseSelect.vue';
 
 const props = defineProps({
     show: { type: Boolean, default: () => false },
-    user: { type: [Object, null], default: () => null },
+    docente: { type: [Object, null], default: () => null },
 });
 const emit = defineEmits(['hide']);
 
@@ -31,38 +31,38 @@ const emit = defineEmits(['hide']);
 
 const docenteStore = useDocenteStore();
 
-const { store: createUser, saving, update: updateUser, updating } = useHttpRequest('docente');
+const { store: createDocente, saving, update: updateDocente, updating } = useHttpRequest('/docente');
 const { runYupValidation } = useValidation();
 const { omitPropsFromObject } = useUtils();
 const { showToast } = useModalToast()
 
 
 const requiredPermissions = computed(() => {
-    if (!props.user?.id) return ['todo-acceso-usuarios', 'crear-usuarios'];
+    if (!props.docente?.id) return ['todo-acceso-usuarios', 'crear-usuarios'];
     else return ['todo-acceso-usuarios', 'editar-usuarios'];
 });
 
-const title = computed(() => (props.user ? `Actualizar Docente "${props.user?.name}"` : 'Añadir Nuevo  Docente'));
+const title = computed(() => (props.docente ? `Actualizar Docente "${props.docente?.name}"` : 'Añadir Nuevo  Docente'));
 
 const initialFormData = () => ({
     name: null,
     apellido_paterno: null,
     apellido_materno: null,
-    usuario:null,
+    usuario: null,
     dni: null,
     email: null,
     fecha_nacimiento: null,
     telefono: null,
     direccion: null,
-    status: false,
+    status: 1,
     password: null,
-    confirm_password:null,
+    confirm_password: null,
     roles: ['6'],
-    codigo_modular:null,
-    especialidad:null,
+    codigo_modular: null,
+    especialidad: null,
     condicion: null,
     escala_magisterial: null
-    
+
 });
 
 const formData = ref(initialFormData());
@@ -70,20 +70,22 @@ const formErrors = ref({});
 
 watch(() => props.show, () => {
     if (props.show) {
-        if (props.user?.id) {
-            formData.value = Object.entries(initialFormData()).reduce(
-                (r, [key, val]) => ({ ...r, [key]: props.user[key] || val }),
-                {}
+        if (props.docente?.id) {
+            console.log('props de docente', props.docente);
+
+            formData.value = Object.assign(
+                {},
+                initialFormData(),
+                props.docente,
+                props.docente.docente || {}
             );
+
         } else {
             formData.value = initialFormData();
             formErrors.value = {};
         }
     }
 });
-
-
-
 
 
 
@@ -99,7 +101,7 @@ const schema = yup.object().shape({
     direccion: yup.string().nullable().required("La dirección es requerida."),
     status: yup.bool().required(),
     password: yup.string().nullable().test('password-test', '', (value, { createError }) => {
-        if (props.user?.id) return true;
+        if (props.docente?.id) return true;
         if (!value) return createError({ message: 'La contraseña es requerida.' });
         if (value.length < 8) return createError({ message: 'La contraseña debe tener al menos 8 caracteres.' });
         if (value !== formData.value.confirm_password) return createError({ message: "Las contraseñas no coinciden." });
@@ -112,24 +114,25 @@ const schema = yup.object().shape({
 });
 
 const onSubmit = async () => {
+
+
     if (saving.value || updating.value) return;
-    let data = { ...formData.value, roles: formData.value.roles[0]};
+    let data = { ...formData.value, roles: formData.value.roles[0] };
     const { validated, errors } = await runYupValidation(schema, data);
     if (!validated) {
         formErrors.value = errors;
         return;
     }
 
-    // console.log(formData.value)
-
     formErrors.value = {};
     const fieldsToBeOmitted = ['confirm_password'];
-    if (props.user?.id) fieldsToBeOmitted.push('password');
+    if (props.docente?.id) fieldsToBeOmitted.push('password');
     data = omitPropsFromObject(data, fieldsToBeOmitted);
-    const response = props.user?.id ? await updateUser(props.user?.id, data) : await createUser(data);
+    const docenteId = props.docente?.docente?.id;
+    const response = docenteId ? await updateDocente(docenteId, data) : await createDocente(data);
     if (response?.user.id) {
-        showToast(`Docente ${props.user?.id ? 'actualizado' : 'creado'} correctamente.`);
-        
+        showToast(`Docente ${props.docente?.id ? 'actualizado' : 'creado'} correctamente.`);
+
         docenteStore.loadDocentes();
         emit('hide');
     }
@@ -163,39 +166,43 @@ const onSubmit = async () => {
                     <FormInput v-model="formData.email" label="Email" />
                     <FormInput v-model="formData.direccion" label="Dirección" />
                 </div>
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                     <FormInput v-model="formData.codigo_modular"  label="Código Modular" :error="formErrors?.codigo_modular" required />
-                     <FormInput v-model="formData.especialidad" label="Especialidad" :error="formErrors?.especialidad" required />
-                      <FormInput v-model="formData.rd_nombramiento" label="Resolusión Directorial" :error="formErrors?.rd_nombramiento" required />
-                     
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormInput v-model="formData.codigo_modular" label="Código Modular"
+                        :error="formErrors?.codigo_modular" required />
+                    <FormInput v-model="formData.especialidad" label="Especialidad" :error="formErrors?.especialidad"
+                        required />
+                    <FormInput v-model="formData.rd_nombramiento" label="Resolusión Directorial"
+                        :error="formErrors?.rd_nombramiento" required />
+
                 </div>
-                
-                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    
-                      <FormInput v-model="formData.condicion"  label="Condición" :error="formErrors?.condicion" required />
-                      <FormInput v-model="formData.escala_magisterial"  label="Escala Magisterial" :error="formErrors?.escala_magisterial" required />
-                      <FormInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento" type="date"
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                    <FormInput v-model="formData.condicion" label="Condición" :error="formErrors?.condicion" required />
+                    <FormInput v-model="formData.escala_magisterial" label="Escala Magisterial"
+                        :error="formErrors?.escala_magisterial" required />
+                    <FormInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento" type="date"
                         :error="formErrors?.fecha_nacimiento" required />
                 </div>
 
-                
-                
+
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    
-                    <template v-if="!user?.id">
+
+                    <template v-if="!docente?.id">
                         <FormInput v-model="formData.password" label="Contraseña" type="password"
                             :error="formErrors?.password" required />
                         <FormInput v-model="formData.confirm_password" type="password" label="Confirmar Contraseña"
                             required />
-                            <CheckBox v-model="formData.status" label="Estado"
-                        class="mt-8 pl-4 flex justify-center items-centers" />
+                        <CheckBox v-model="formData.status" label="Estado"
+                            class="mt-8 pl-4 flex justify-center items-centers" />
                     </template>
                 </div>
 
 
 
-                <Button :title="user?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
-                    :loading-title="user?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
+                <Button :title="docente?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
+                    :loading-title="docente?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
                     :loading="saving || updating" @click="onSubmit" />
             </div>
         </AuthorizationFallback>

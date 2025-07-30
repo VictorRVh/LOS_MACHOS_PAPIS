@@ -167,36 +167,36 @@ const onSubmit = async () => {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormLabelError label="Programa" required>
                         <BaseSelectGrupo
-  v-model="formData.id_programa"
-  :options="programaStore.programa"
-  label="numero_rd"
-  placeholder="Seleccione un programa"
-  @change="onProgramaChange"
-  :loading="grupoStore.especialidadByProgramLoading"
-/>
+                            v-model="formData.id_programa"
+                            :options="programaStore.programa"
+                            label="numero_rd"
+                            placeholder="Seleccione un programa"
+                            @change="onProgramaChange"
+                            :loading="grupoStore.especialidadByProgramLoading"
+                            />
                     </FormLabelError>
 
                     <FormLabelError label="Especialidad" required>
                         <BaseSelectGrupo
-  v-model="formData.id_especialidad"
-  :options="grupoStore.especialidades"
-  label="nombre_especialidad"
-  placeholder="Seleccione una especialidad"
-  @change="onEspecialidadChange"
-  :loading="grupoStore.moduloByEspecialidadLoading"
-/>
+                            v-model="formData.id_especialidad"
+                            :options="grupoStore.especialidades"
+                            label="nombre_especialidad"
+                            placeholder="Seleccione una especialidad"
+                            @change="onEspecialidadChange"
+                            :loading="grupoStore.moduloByEspecialidadLoading"
+                            />
 
                     </FormLabelError>
 
                     <FormLabelError label="Modulos" required>
                         <BaseSelectGrupo
-  v-model="formData.id_modulo"
-  :options="grupoStore.modulos"
-  label="nombre_modulo"
-  placeholder="Seleccione un módulo"
-  @change="onModuloChange"
-  :loading="grupoStore.docenteperiodoByModuloLoading"
-/>
+                        v-model="formData.id_modulo"
+                        :options="grupoStore.modulos"
+                        label="nombre_modulo"
+                        placeholder="Seleccione un módulo"
+                        @change="onModuloChange"
+                        :loading="grupoStore.docenteperiodoByModuloLoading"
+                        />
                     </FormLabelError>
 
                 </div>

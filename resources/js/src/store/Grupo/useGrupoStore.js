@@ -37,6 +37,7 @@ const useGrupoStore = defineStore('grupo', () => {
     // Datos
     const grupos = ref([]);
     const especialidades = ref([]);
+    const docentes =ref([]);
     const modulos = ref([]);
     const periodo = ref([]);
 
@@ -48,7 +49,7 @@ const useGrupoStore = defineStore('grupo', () => {
 
     const loadDocentes = async () => {
         const response = await getDocentes();
-        grupos.value = response;
+        docentes.value = response;
     };
 
     const loadEspecialidades = async (programaId) => {
@@ -69,6 +70,7 @@ const useGrupoStore = defineStore('grupo', () => {
     return {
         // Datos
         grupos,
+        docentes,
         especialidades,
         modulos,
         periodo,

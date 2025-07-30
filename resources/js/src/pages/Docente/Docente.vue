@@ -17,7 +17,7 @@ import CreateButton from "../../components/ui/CreateButton.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
-import docenteSlider from "../../components/page/Docente/DocenteSlider.vue";
+import DocenteSlider from '../../components/page/Docente/DocenteSlider.vue'
 
 import useDocenteStore from "../../store/Docente/useDocenteStore";
 
@@ -32,7 +32,7 @@ const docenteStore = useDocenteStore();
 
 if (!docenteStore.docentes?.length) await docenteStore.loadDocentes();
 
-const { slider, sliderData, showSlider, hideSlider } = useSlider("user-crud");
+const { slider, sliderData, showSlider, hideSlider } = useSlider("docente-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteDocente, deleting } = useHttpRequest("/docente");
 
@@ -144,10 +144,10 @@ const {
             <Td class="text-center text-gray-600 dark:text-gray-200">
               <MenuTable
                 :actions="{ view: true, edit: true, delete: true, download: false }"
-                entity-label="usuario"
-                @view="verGrupo(user)"
-                @edit="showSlider(true, user)"
-                @delete="onDelete(user)"
+                entity-label="docente"
+                @view="verGrupo(docente)"
+                @edit="showSlider(true, docente)"
+                @delete="onDelete(docente)"
               />
             </Td>
           </Tr>
@@ -155,7 +155,7 @@ const {
       </Table>
     </div>
 
-    <UserSlider :show="slider" :user="sliderData" @hide="hideSlider" />
+    <DocenteSlider :show="slider" :docente="sliderData" @hide="hideSlider" />
   </AuthorizationFallback>
   <ChangePasswordModal v-if="showModal" @success="onPasswordChanged" />
 </template>

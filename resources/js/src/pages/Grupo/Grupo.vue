@@ -110,7 +110,7 @@ const {
         </div>
 
         <!-- Filtros Superiores -->
-        <div class="w-full border-cetpro-light dark:bg-gray-800 shadow-md border border-gray-200 dark:border-gray-700 p-4 my-5">
+        <div class="w-full border-cetpro-light dark:bg-gray-800 shadow-md border dark:border-gray-700 p-4 my-5">
           <div class="grid md:grid-cols-4 gap-4 items-center">
             
             <!-- Programa Académico -->

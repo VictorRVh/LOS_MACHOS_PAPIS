@@ -122,17 +122,70 @@ class DocenteController extends Controller
             return response()->json(['message' => 'Docente no encontrado'], 404);
         }
 
-        $request->validate([
-            'codigo_modular'     => 'sometimes|string|max:20',
-            'especialidad'       => 'sometimes|string|max:100',
-            'condicion'          => 'sometimes|string|max:50',
-            'escala_magisterial' => 'nullable|string|max:50',
-            'rd_nombramiento'    => 'nullable|string|max:50',
-            'user_id'            => 'sometimes|exists:users,id',
-        ]);
+        $user = $docente->user;
 
-        $docente->update($request->all());
-        return response()->json($docente);
+        DB::beginTransaction();
+
+        try {
+            // Validación
+            $request->validate([
+                // Datos de usuario
+                'name'              => 'required|string|max:255',
+                'usuario'           => 'required|string|max:50|unique:users,usuario,' . $user->id,
+                'dni'               => 'required|string|max:8|unique:users,dni,' . $user->id,
+                'apellido_paterno'  => 'required|string|max:100',
+                'apellido_materno'  => 'required|string|max:100',
+                'fecha_nacimiento'  => 'required|date',
+                'email'             => 'required|email|unique:users,email,' . $user->id,
+                'telefono'          => 'nullable|string|max:15',
+                'direccion'         => 'nullable|string|max:255',
+                'status'            => 'required|integer|in:0,1,2,3',
+
+                // Datos del docente
+                'codigo_modular'     => 'required|string|max:20',
+                'especialidad'       => 'required|string|max:100',
+                'condicion'          => 'required|string|max:50',
+                'escala_magisterial' => 'nullable|string|max:50',
+                'rd_nombramiento'    => 'nullable|string|max:50',
+            ]);
+
+            // Actualizar usuario
+            $user->update([
+                'name'             => $request->name,
+                'usuario'          => $request->usuario,
+                'dni'              => $request->dni,
+                'apellido_paterno' => $request->apellido_paterno,
+                'apellido_materno' => $request->apellido_materno,
+                'fecha_nacimiento' => $request->fecha_nacimiento,
+                'email'            => $request->email,
+                'telefono'         => $request->telefono,
+                'direccion'        => $request->direccion,
+                'status'           => $request->status,
+            ]);
+
+            // Actualizar docente
+            $docente->update([
+                'codigo_modular'     => $request->codigo_modular,
+                'especialidad'       => $request->especialidad,
+                'condicion'          => $request->condicion,
+                'escala_magisterial' => $request->escala_magisterial,
+                'rd_nombramiento'    => $request->rd_nombramiento,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Docente actualizado correctamente',
+                'user' => $user,
+                'docente' => $docente
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Error al actualizar docente',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // Eliminar un docente

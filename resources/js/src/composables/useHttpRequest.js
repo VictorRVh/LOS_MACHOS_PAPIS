@@ -113,6 +113,28 @@ const useHttpRequest = (path = '') => {
         }
     };
 
+    const indexWithParams = async (params = {}, callback = null) => {
+        try {
+            loading.value = true;
+            const response = await axios.get(path, { params });
+            loading.value = false;
+
+            if (typeof callback === 'function') {
+                callback(null, response);
+            }
+
+            initialLoading.value = false;
+
+            if (response.data) {
+                return response.data;
+            }
+            return [];
+        } catch (error) {
+            loading.value = false;
+            return handleError(error, [], callback, false);
+        }
+    };
+
     const handleError = (
         error,
         returnValue,
@@ -167,6 +189,8 @@ const useHttpRequest = (path = '') => {
         store,
         update,
         destroy,
+
+        indexWithParams,
     };
 };
 

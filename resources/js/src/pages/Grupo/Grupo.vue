@@ -29,12 +29,20 @@ import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 const grupoStore = useGrupoStore();
 if (!grupoStore.grupos?.length) await grupoStore.loadGrupos();
 
+//ESTA ES LA PRUEBA VICTOR CABRO ------------------------ ES LA FUNCION LOADGRUPOSFILTRADOS DEL STORE CAGADA
+
+if (!grupoStore.gruposFiltrados?.length) await grupoStore.loadGruposFiltrados({
+    id_programa: 'cf038d06-a7e9-463a-9181-aded46e2bd6e',
+    anio: '2025',
+    id_periodo: '042e6745-0e73-46eb-802f-29cfc01befc7'
+});
+
 const { slider, sliderData, showSlider, hideSlider } = useSlider("grupo-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteGrupo, deleting } = useHttpRequest("/grupo");
 
 const showModal = ref(false);
-//VICTOR CABRO........................................
+
 const onDelete = (grupo) => {
   if (deleting.value) return;
 
@@ -73,6 +81,8 @@ const anios = ref(
     return { label: `${year}`, value: year }; 
   })
 );
+
+console.log('GRUPOS FILTRADOS: ', grupoStore.gruposFiltrados)
 
 const filtrarPorSeleccion = () => {
   console.log("Filtrar por:", {

@@ -460,6 +460,12 @@ Route::middleware('auth:sanctum')->group(function () {
         'docentesPorGrupo',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
+    // grupos filtrados
+    Route::get('gruposFiltrados', [
+        \App\Http\Controllers\GrupoController::class,
+        'gruposPorProgramaAnioPeriodo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
     //RUTA PARA CAPACIDAD TERMINAL
     Route::get('capacidad_terminal', [
         \App\Http\Controllers\CapacidadTerminalController::class,

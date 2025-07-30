@@ -147,7 +147,7 @@ const onSubmit = async () => {
         ? await updateGrupo(props.grupo?.id, data)
         : await createGrupo(data);
 
-        console.log('response del create', response)
+    console.log('response del create', response)
 
     if (response?.data.id) {
         showToast(`Grupo ${props.grupo?.id ? "editado" : "creado"} exitosamente.`);
@@ -172,37 +172,22 @@ const onSubmit = async () => {
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormLabelError label="Programa" required>
-                        <BaseSelectGrupo
-                            v-model="formData.id_programa"
-                            :options="programaStore.programa"
-                            label="numero_rd"
-                            placeholder="Seleccione un programa"
-                            @change="onProgramaChange"
-                            :loading="grupoStore.especialidadByProgramLoading"
-                            />
+                        <BaseSelectGrupo v-model="formData.id_programa" :options="programaStore.programa"
+                            label="numero_rd" placeholder="Seleccione un programa" @change="onProgramaChange"
+                            :loading="grupoStore.especialidadByProgramLoading" />
                     </FormLabelError>
 
                     <FormLabelError label="Especialidad" required>
-                        <BaseSelectGrupo
-                            v-model="formData.id_especialidad"
-                            :options="grupoStore.especialidades"
-                            label="nombre_especialidad"
-                            placeholder="Seleccione una especialidad"
-                            @change="onEspecialidadChange"
-                            :loading="grupoStore.moduloByEspecialidadLoading"
-                            />
+                        <BaseSelectGrupo v-model="formData.id_especialidad" :options="grupoStore.especialidades"
+                            label="nombre_especialidad" placeholder="Seleccione una especialidad"
+                            @change="onEspecialidadChange" :loading="grupoStore.moduloByEspecialidadLoading" />
 
                     </FormLabelError>
 
                     <FormLabelError label="Modulos" required>
-                        <BaseSelectGrupo
-                        v-model="formData.id_modulo"
-                        :options="grupoStore.modulos"
-                        label="nombre_modulo"
-                        placeholder="Seleccione un módulo"
-                        @change="onModuloChange"
-                        :loading="grupoStore.docenteperiodoByModuloLoading"
-                        />
+                        <BaseSelectGrupo v-model="formData.id_modulo" :options="grupoStore.modulos"
+                            label="nombre_modulo" placeholder="Seleccione un módulo" @change="onModuloChange"
+                            :loading="grupoStore.docenteperiodoByModuloLoading" />
                     </FormLabelError>
 
                 </div>
@@ -219,9 +204,9 @@ const onSubmit = async () => {
                             label="nombre_institucion" placeholder="Seleccione un convenio" />
                     </FormLabelError>
 
-                    <FormLabelError label="Docente" >
-                        <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentesGrupo" label="nombre"
-                            placeholder="Seleccione un docente" />
+                    <FormLabelError label="Docente">
+                        <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentesGrupo"
+                            label="nombre" placeholder="Seleccione un docente" />
                     </FormLabelError>
 
                 </div>

@@ -18,6 +18,10 @@ import {registerHeroIcons} from './src/composables/icons/heroicons';
 const app = createApp(App);
 const pinia = createPinia();
 
+pinia.use(({ store }) => {
+  store.router = router;
+});
+
 registerHeroIcons(app);
 
 app.use(pinia)

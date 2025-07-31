@@ -4,9 +4,9 @@ import { ref } from 'vue';
 export const useBreadcrumbStore = defineStore('breadcrumb', () => {
   const items = ref([]);
 
-  function setItems(newItems = []) {
-    items.value = newItems;
+  function setBase(baseItems = []) {
+    items.value = baseItems;
   }
 
-  return { items, setItems };
+  return { items, setBase };
 });

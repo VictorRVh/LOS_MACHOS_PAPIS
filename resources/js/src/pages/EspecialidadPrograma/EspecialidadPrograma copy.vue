@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter } from "vue-router";
+import { useBreadcrumbStore } from "../../store/useBreadcrumbStore"; 
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
 import TBody from "../../components/table/TBody.vue";
@@ -18,10 +19,7 @@ import useEspecialidadProgramaStore from "../../store/EspecialidadPrograma/useEs
 import EspecialidadProgramaSlider from "../../components/page/EspecialidadPrograma/EspecialidadProgramaSlider.vue";
 
 const props = defineProps({
-  idPrograma: {
-    type: Number,
-    default: null,
-  },
+  idPrograma: { type: String, required: true },
 });
 
 const especialidadStore = useEspecialidadStore();
@@ -30,32 +28,31 @@ const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deletePrograma, deleting } = useHttpRequest("/especialidad_programa");
 const router = useRouter();
+const breadcrumbStore = useBreadcrumbStore(); 
 
-if (!especialidadProgramaStore?.especialidadPrograma?.length) {
+// Cargar datos iniciales
+if (!especialidadProgramaStore.especialidadPrograma.length) {
   await especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma);
 }
 
-if (!especialidadStore?.especialidadCiclo?.length||especialidadProgramaStore?.especialidadProgramaFiltrado?.ciclo) {
-  const cicloId = especialidadProgramaStore.especialidadProgramaFiltrado?.ciclo?.id;
+if (!especialidadStore.especialidadCiclo.length) {
+  const cicloId = especialidadProgramaStore.especialidadProgramaFiltrado[0]?.programa_estudio?.id_ciclo;
   await especialidadStore.loadEspecialidadCiclo(cicloId);
 }
 
 const especialidadesDisponibles = computed(() => {
-  const asignadas = especialidadProgramaStore?.especialidadProgramaFiltrado?.especialidad_programas?.map(
-    (ep) => ep?.especialidad_madre.id
+  const asignadas = especialidadProgramaStore.especialidadProgramaFiltrado.map(
+    (ep) => ep.especialidad_madre.id
   );
-
   return especialidadStore.especialidadCiclo?.especialidades?.filter(
-    (especialidad) => !asignadas?.includes(especialidad?.id)
+    (especialidad) => !asignadas.includes(especialidad.id)
   ) || [];
 });
 
 const onDelete = (especialidadPrograma) => {
   if (deleting.value) return;
-
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
-
     const isDeleted = await deletePrograma(especialidadPrograma?.id);
     if (isDeleted) {
       showToast(`Especialidad eliminada exitosamente.`);
@@ -65,6 +62,10 @@ const onDelete = (especialidadPrograma) => {
 };
 
 const SeeMore = (especialidadPrograma) => {
+  breadcrumbStore.push({
+    text: especialidadPrograma.especialidad_madre.nombre_especialidad,
+    to: { name: 'modulo', params: { idEspecialidadPrograma: especialidadPrograma.id } }
+  });
   router.push({
     name: "modulo",
     params: { idEspecialidadPrograma: especialidadPrograma.id },
@@ -77,14 +78,12 @@ const SeeMore = (especialidadPrograma) => {
     <div class="flex justify-between items-center p-4">
       <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Asignar especialidad</h2>
     </div>
-
     <div class="flex px-6">
       <div class="w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
         <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
           Asignar Especialidad
         </h3>
         <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
-
         <EspecialidadProgramaSlider
           :show="slider"
           :especialidadPrograma="sliderData"
@@ -102,14 +101,13 @@ const SeeMore = (especialidadPrograma) => {
             <Th>Nro módulos</Th>
             <Th>Acciones</Th>
           </THead>
-
           <TBody>
             <Tr
-              v-for="(especialidadPrograma, index) in especialidadProgramaStore?.especialidadProgramaFiltrado?.especialidad_programas"
+              v-for="(especialidadPrograma, index) in especialidadProgramaStore.especialidadProgramaFiltrado"
               :key="especialidadPrograma.id"
             >
               <Td>{{ index + 1 }}</Td>
-              <Td>{{ especialidadPrograma?.especialidad_madre?.nombre_especialidad }}</Td>
+              <Td>{{ especialidadPrograma?.especialidad_madre.nombre_especialidad }}</Td>
               <Td>{{ especialidadPrograma?.nro_modulos }}</Td>
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">

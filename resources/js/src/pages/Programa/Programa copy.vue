@@ -15,8 +15,10 @@ import useProgramaStore from "../../store/Programa/useProgramaStore";
 import useCicloStore from "../../store/Ciclo/useCicloStore";
 import ProgramaSlider from "../../components/page/Programa/ProgramaSlider.vue";
 import { useRouter } from "vue-router";
+import { useBreadcrumbStore } from "../../store/useBreadcrumbStore";
 
 const router = useRouter();
+const breadcrumbStore = useBreadcrumbStore();
 const programaStore = useProgramaStore();
 const cicloStore = useCicloStore();
 
@@ -42,6 +44,12 @@ const onDelete = (programa) => {
 };
 
 const SeeMore = (programa) => {
+  // Tu lógica de breadcrumbs, usando el dato correcto 'nameCiclo'
+  breadcrumbStore.push({
+    text: programa.nameCiclo, 
+    to: { name: 'especialidadPrograma', params: { idPrograma: programa.id } }
+  });
+
   router.push({
     name: "especialidadPrograma",
     params: { idPrograma: programa.id },

@@ -32,6 +32,9 @@ class Grupo extends Model
         'status',
     ];
 
+    protected $hidden = ['created_at', 'updated_at'];
+
+
     protected static function boot()
     {
         parent::boot();

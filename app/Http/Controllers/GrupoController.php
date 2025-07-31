@@ -14,19 +14,19 @@ class GrupoController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-{
-    $grupos = Grupo::with([
-        'programaEstudio:id,año',
-        'especialidad:id',
-        'modulo:id,numero_modulo,descripcion',
-        'periodo:id,nombre_periodo',
-        'convenio:id,nombre_institucion',
-        'docente:id,user_id,codigo_modular',
-        'docente.user:id,name,apellido_paterno,apellido_materno' 
-    ])->get();
+    {
+        $grupos = Grupo::with([
+            'programaEstudio:id,año',
+            'especialidad:id',
+            'modulo:id,numero_modulo,descripcion',
+            'periodo:id,nombre_periodo',
+            'convenio:id,nombre_institucion',
+            'docente:id,user_id,codigo_modular',
+            'docente.user:id,name,apellido_paterno,apellido_materno'
+        ])->get();
 
-    return response()->json($grupos);
-}
+        return response()->json($grupos);
+    }
 
 
     // POST /api/grupos
@@ -181,5 +181,33 @@ class GrupoController extends Controller
             });
 
         return response()->json($docentes);
+    }
+
+    public function gruposPorProgramaAnioPeriodo(Request $request)
+    {
+        $request->validate([
+            'id_programa' => 'required|uuid',
+            'anio'        => 'required|string',
+            'id_periodo'  => 'required|uuid',
+        ]);
+
+        $grupos = Grupo::with([
+            'programaEstudio:id,año,numero_rd',
+            'especialidad:id,id_especialidad,id_programa',
+            'especialidad.especialidadMadre:id,nombre_especialidad',
+            'modulo:id,numero_modulo,descripcion',
+            'periodo:id,nombre_periodo',
+            'convenio:id,nombre_institucion',
+            'docente:id,user_id,codigo_modular',
+            'docente.user:id,name,apellido_paterno,apellido_materno'
+        ])
+            ->where('id_programa', $request->id_programa)
+            ->where('id_periodo', $request->id_periodo)
+            ->whereHas('programaEstudio', function ($query) use ($request) {
+                $query->where('año', $request->anio);
+            })
+            ->get();
+
+        return response()->json($grupos);
     }
 }

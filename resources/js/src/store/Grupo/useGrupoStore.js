@@ -34,12 +34,20 @@ const useGrupoStore = defineStore('grupo', () => {
         initialLoading: periodoByModuloFirstTimeLoading,
     } = useHttpRequest('/periodoByModulo');
 
+    const {
+        indexWithParams: getGruposFiltrados,
+        loading: gruposFiltradosLoading,
+        initialLoading: gruposFiltradosFirstTimeLoading,
+    } = useHttpRequest('/gruposFiltrados');
+
+
     // Datos
     const grupos = ref([]);
     const especialidades = ref([]);
-    const docentes =ref([]);
+    const docentes = ref([]);
     const modulos = ref([]);
     const periodo = ref([]);
+    const gruposFiltrados = ref([]);
 
     // Métodos
     const loadGrupos = async () => {
@@ -65,6 +73,22 @@ const useGrupoStore = defineStore('grupo', () => {
     const loadPeriodo = async (moduloId) => {
         const response = await getPeriodoPorModulo(moduloId);
         periodo.value = response;
+    };
+
+    const loadGruposFiltrados = async ({ id_programa, anio, id_periodo }) => {
+        try {
+            const response = await getGruposFiltrados({
+                id_programa,
+                anio,
+                id_periodo,
+            });
+
+            console.log('response de grupos filtrados', response)
+
+            gruposFiltrados.value = response;
+        } catch (error) {
+            console.error('Error al cargar grupos filtrados:', error);
+        }
     };
 
     return {
@@ -97,6 +121,13 @@ const useGrupoStore = defineStore('grupo', () => {
 
         docenteperiodoByModuloLoading,
         periodoByModuloFirstTimeLoading,
+
+        gruposFiltrados,
+        loadGruposFiltrados,
+
+        gruposFiltradosLoading,
+        gruposFiltradosFirstTimeLoading,
+
     };
 });
 

@@ -118,34 +118,9 @@ const onSubmit = async () => {
     showToast(`Grupo ${props.grupo?.id ? "editado" : "creado"} exitosamente.`);
     grupoStore.loadGrupos();
 
-<<<<<<< HEAD
     if (!props.grupo?.id) {
       formData.value = initialFormData();
       formErrors.value = {};
-=======
-    // const { validated, errors } = await runYupValidation(schema, data);
-    // if (!validated) {
-    //     formErrors.value = errors;
-    //     return;
-    // }
-    // formErrors.value = {};
-
-    const response = props.grupo?.id
-        ? await updateGrupo(props.grupo?.id, data)
-        : await createGrupo(data);
-
-    console.log('response del create', response)
-
-    if (response?.data.id) {
-        showToast(`Grupo ${props.grupo?.id ? "editado" : "creado"} exitosamente.`);
-        grupoStore.loadGrupos();
-
-        if (!props.grupo?.id) {
-            formData.value = initialFormData();
-            formErrors.value = {};
-        }
-        emit("hide");
->>>>>>> 3ca904534ba19c9b89aec73c8e30cce2c373f44b
     }
     emit("hide");
   }
@@ -181,7 +156,6 @@ const onSubmit = async () => {
             />
           </FormLabelError>
 
-<<<<<<< HEAD
           <FormLabelError label="Módulos" required>
             <BaseSelectGrupo
               v-model="formData.id_modulo"
@@ -204,19 +178,6 @@ const onSubmit = async () => {
               disabled
             />
           </FormLabelError>
-=======
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormLabelError label="Programa" required>
-                        <BaseSelectGrupo v-model="formData.id_programa" :options="programaStore.programa"
-                            label="numero_rd" placeholder="Seleccione un programa" @change="onProgramaChange"
-                            :loading="grupoStore.especialidadByProgramLoading" />
-                    </FormLabelError>
-
-                    <FormLabelError label="Especialidad" required>
-                        <BaseSelectGrupo v-model="formData.id_especialidad" :options="grupoStore.especialidades"
-                            label="nombre_especialidad" placeholder="Seleccione una especialidad"
-                            @change="onEspecialidadChange" :loading="grupoStore.moduloByEspecialidadLoading" />
->>>>>>> 3ca904534ba19c9b89aec73c8e30cce2c373f44b
 
           <FormLabelError label="Convenio" required>
             <BaseSelectCiclo
@@ -227,7 +188,6 @@ const onSubmit = async () => {
             />
           </FormLabelError>
 
-<<<<<<< HEAD
           <FormLabelError label="Docente">
             <BaseSelectCiclo
               v-model="formData.id_docente"
@@ -237,13 +197,6 @@ const onSubmit = async () => {
             />
           </FormLabelError>
         </div>
-=======
-                    <FormLabelError label="Modulos" required>
-                        <BaseSelectGrupo v-model="formData.id_modulo" :options="grupoStore.modulos"
-                            label="nombre_modulo" placeholder="Seleccione un módulo" @change="onModuloChange"
-                            :loading="grupoStore.docenteperiodoByModuloLoading" />
-                    </FormLabelError>
->>>>>>> 3ca904534ba19c9b89aec73c8e30cce2c373f44b
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormInput v-model="formData.fecha_inicio" label="Fecha Inicio" type="date" />
@@ -257,7 +210,6 @@ const onSubmit = async () => {
           <CheckBox v-model="formData.status" label="Habilitado" class="mt-8 pl-4 flex justify-center items-center" />
         </div>
 
-<<<<<<< HEAD
         <Button
           :title="grupo?.id ? 'Guardar Cambios' : 'Crear Usuario'"
           :loading-title="grupo?.id ? 'Guardando...' : 'Creando...'"
@@ -269,46 +221,3 @@ const onSubmit = async () => {
     </AuthorizationFallback>
   </Slider>
 </template>
-=======
-                    <FormLabelError label="Periodo" required>
-                        <BaseSelectGrupo v-model="formData.id_periodo" :options="grupoStore.periodo" label="nombre"
-                            placeholder="Seleccione un periodo" disabled />
-                    </FormLabelError>
-
-                    <FormLabelError label="Convenio" required>
-                        <BaseSelectCiclo v-model="formData.id_convenio" :options="convenioStore.convenios"
-                            label="nombre_institucion" placeholder="Seleccione un convenio" />
-                    </FormLabelError>
-
-                    <FormLabelError label="Docente">
-                        <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentesGrupo"
-                            label="nombre" placeholder="Seleccione un docente" />
-                    </FormLabelError>
-
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                    <FormInput v-model="formData.fecha_inicio" label="Fecha Inicio" type="date" />
-                    <FormInput v-model="formData.fecha_fin" label="Fecha de Fin" type="date" />
-                    <FormInput v-model="formData.fecha_entrega_acta" label="Entrega de acta" type="date" />
-
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                    <FormInput v-model="formData.seccion" label="Seccion" />
-                    <FormInput v-model="formData.turno" label="Turno" />
-                    <CheckBox v-model="formData.status" label="Habilitado"
-                        class="mt-8 pl-4 flex justify-center items-centers" />
-
-                </div>
-
-                <Button :title="grupo?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
-                    :loading-title="grupo?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
-                    :loading="saving || updating" @click="onSubmit" />
-            </div>
-        </AuthorizationFallback>
-    </Slider>
-</template>
->>>>>>> 3ca904534ba19c9b89aec73c8e30cce2c373f44b

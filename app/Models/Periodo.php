@@ -18,7 +18,6 @@ class Periodo extends Model
 
     protected $fillable = [
         'id',
-        'anio',
         'nombre_periodo',
         'status',
     ];

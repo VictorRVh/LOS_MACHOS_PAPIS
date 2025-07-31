@@ -35,7 +35,8 @@ const useGrupoStore = defineStore('grupo', () => {
     } = useHttpRequest('/periodoByModulo');
 
     const {
-        indexWithParams: getGruposFiltrados,
+       // indexWithParams: getGruposFiltrados,
+        show: getGruposFiltrados,
         loading: gruposFiltradosLoading,
         initialLoading: gruposFiltradosFirstTimeLoading,
     } = useHttpRequest('/gruposFiltrados');
@@ -75,20 +76,10 @@ const useGrupoStore = defineStore('grupo', () => {
         periodo.value = response;
     };
 
-    const loadGruposFiltrados = async ({ id_programa, anio, id_periodo }) => {
-        try {
-            const response = await getGruposFiltrados({
-                id_programa,
-                anio,
-                id_periodo,
-            });
+    const loadGruposFiltrados = async ( id_periodo ) => {
+        const response = await getGruposFiltrados(id_periodo);
+        gruposFiltrados.value = response;
 
-            console.log('response de grupos filtrados', response)
-
-            gruposFiltrados.value = response;
-        } catch (error) {
-            console.error('Error al cargar grupos filtrados:', error);
-        }
     };
 
     return {

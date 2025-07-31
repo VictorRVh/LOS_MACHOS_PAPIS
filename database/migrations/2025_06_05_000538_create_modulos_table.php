@@ -18,7 +18,6 @@ return new class extends Migration
             $table->integer('creditos')->nullable();
             $table->integer('horas')->nullable();
             $table->uuid('id_especialidad');
-            $table->uuid('id_periodo');
             $table->integer('nro_capacidades')->nullable();
 
 
@@ -27,11 +26,6 @@ return new class extends Migration
                 ->on('especialidad_programa')
                 ->onDelete('cascade');
 
-            $table->foreign('id_periodo')
-                ->references('id')
-                ->on('periodo')
-                ->onDelete('cascade');
-            $table->timestamps();
         });
     }
 

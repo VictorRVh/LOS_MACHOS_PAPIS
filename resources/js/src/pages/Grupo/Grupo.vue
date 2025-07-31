@@ -39,7 +39,7 @@ if (!peridoStore.periodos?.length) await peridoStore.loadPeriodos();
 console.log("perido grupo: ",peridoStore.periodos)
 
 const programasSelect = ref(
-  programaStore.programa.programas.map(p => ({
+  programaStore?.programa?.programas?.map(p => ({
     id: p.id,
     name: p.nameCiclo,
   }))

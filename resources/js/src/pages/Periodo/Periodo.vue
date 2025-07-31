@@ -65,7 +65,6 @@ const onDelete = (periodo) => {
         <Table>
           <THead>
             <Th>Id</Th>
-            <Th>Año</Th>
             <Th>Periodo</Th>
             <Th>Estado</Th>
             <Th>Acciones</Th>

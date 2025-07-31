@@ -13,8 +13,32 @@ class ProgramaEstudioController extends Controller
     public function index()
     {
         $programas = ProgramaEstudio::with('ciclo')->get();
-        return response()->json($programas);
+
+        if ($programas->isEmpty()) {
+            return response()->json(['message' => 'No hay programas de estudio disponibles'], 404);
+        }
+
+        // Procesar los programas: limpiar datos y agregar campo nameCiclo
+        $programasProcesados = $programas->map(function ($programa) {
+            $nuevoPrograma = $programa->toArray();
+
+            $nombreCiclo = $programa->ciclo->nombre_ciclo ?? 'Ciclo desconocido';
+            $nuevoPrograma['nameCiclo'] = $nombreCiclo . ' - ' . $programa->año;
+
+            unset($nuevoPrograma['ciclo']);
+            unset($nuevoPrograma['created_at']);
+            unset($nuevoPrograma['updated_at']);
+
+            return $nuevoPrograma;
+        });
+
+        return response()->json([
+            'programas' => $programasProcesados,
+        ]);
     }
+
+
+
 
     // Mostrar uno por ID
     public function show($id)
@@ -79,5 +103,4 @@ class ProgramaEstudioController extends Controller
 
         return response()->json(['message' => 'Programa eliminado correctamente'], 204);
     }
-    
 }

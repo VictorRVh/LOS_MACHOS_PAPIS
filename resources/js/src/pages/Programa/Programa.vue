@@ -12,9 +12,12 @@ import useSlider from "../../composables/useSlider";
 
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
+
 import useProgramaStore from "../../store/Programa/useProgramaStore";
+
 import useCicloStore from "../../store/Ciclo/useCicloStore";
 import ProgramaSlider from "../../components/page/Programa/ProgramaSlider.vue";
+
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -86,9 +89,9 @@ const SeeMore = (id) => {
           </THead>
 
           <TBody>
-            <Tr v-for="(programa, index) in programaStore.programa" :key="programa.id">
+            <Tr v-for="(programa, index) in programaStore?.programa?.programas" :key="programa.id">
               <Td>{{ index + 1 }}</Td>
-              <Td>{{ programa?.año }}</Td>
+              <Td>{{ programa?.nameCiclo }}</Td>
               <Td>{{ programa?.numero_rd }}</Td>
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">

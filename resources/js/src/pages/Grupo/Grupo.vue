@@ -1,6 +1,4 @@
-
 <script setup>
-
 import { ref, computed } from "vue";
 
 import SearchBar from "../../components/head_table/headSearch.vue";
@@ -22,25 +20,41 @@ import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import useTableData from "../../composables/tabla/useTableData";
 
+import useProgramaStore from '../../store/Programa/useProgramaStore'
 import useGrupoStore from "../../store/Grupo/useGrupoStore";
 import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 
-// Grupo store
+import usePeriodoStore from "../../store/Periodo/usePeriodoStore";
+
+// Stores
 const grupoStore = useGrupoStore();
+const programaStore = useProgramaStore();
+const peridoStore = usePeriodoStore();
+
 if (!grupoStore.grupos?.length) await grupoStore.loadGrupos();
+if (!programaStore.programa?.length) await programaStore.loadPrograma();
+
+if (!peridoStore.periodos?.length) await peridoStore.loadPeriodos();
+
+console.log("perido grupo: ",peridoStore.periodos)
+
+const programasSelect = ref(
+  programaStore.programa.programas.map(p => ({
+    id: p.id,
+    name: p.nameCiclo,
+  }))
+);
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("grupo-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteGrupo, deleting } = useHttpRequest("/grupo");
 
 const showModal = ref(false);
-//VICTOR CABRO........................................
+
 const onDelete = (grupo) => {
   if (deleting.value) return;
-
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
-
     const isDeleted = await deleteGrupo(grupo?.id);
     if (isDeleted) {
       showToast(`Grupo "${grupo?.nombre}" eliminado correctamente...`);
@@ -49,18 +63,12 @@ const onDelete = (grupo) => {
   });
 };
 
-// Computed de grupos
 const grupos = computed(() => grupoStore.grupos);
 
-// Filtros
-const programaAcademico = ref(null);
+const programaAcademico = ref('');
 const anio = ref(null);
 const periodo = ref(null);
-
-const programas = ref([
-  { label: "Auxiliar Técnico", value: "auxiliar" },
-  { label: "Operador Industrial", value: "operador" },
-]);
+const selec_id_programa = ref(null);
 
 const periodos = ref([
   { label: "2025-I", value: "2025-1" },
@@ -80,10 +88,8 @@ const filtrarPorSeleccion = () => {
     anio: anio.value,
     periodo: periodo.value,
   });
-  // Aquí podrías aplicar lógica de filtrado real si lo deseas.
 };
 
-// Tabla
 const {
   query,
   orderBy,
@@ -99,8 +105,8 @@ const {
   searchFields: ["nombre", "modulo.nombre_modulo", "docente.name"]
 });
 
+const onProgramaChange = () =>{}
 </script>
-
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
@@ -114,17 +120,15 @@ const {
         <!-- Filtros Superiores -->
         <div class="w-full border-cetpro-light dark:bg-gray-800 shadow-md border dark:border-gray-700 p-4 my-5">
           <div class="grid md:grid-cols-4 gap-4 items-center">
-            
             <!-- Programa Académico -->
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Programa Académico</label>
               <BaseSelectGrupo
-                v-model="programaAcademico"
-                :options="programas"
-                label="Programa Académico"
+                v-model="selec_id_programa"
+                :options="programasSelect"
+                label="name"
                 placeholder="Seleccione un programa"
-                @change="filtrarPorSeleccion"
-                :loading="false"
+                @change="onProgramaChange"
               />
             </div>
 
@@ -134,10 +138,9 @@ const {
               <BaseSelectGrupo
                 v-model="anio"
                 :options="anios"
-                label="Año"
+                label="label"
                 placeholder="Seleccione un año"
                 @change="filtrarPorSeleccion"
-                :loading="false"
               />
             </div>
 
@@ -147,10 +150,9 @@ const {
               <BaseSelectGrupo
                 v-model="periodo"
                 :options="periodos"
-                label="Periodo"
+                label="label"
                 placeholder="Seleccione un periodo"
                 @change="filtrarPorSeleccion"
-                :loading="false"
               />
             </div>
 
@@ -165,7 +167,6 @@ const {
             </div>
           </div>
         </div>
-
 
         <div class="flex-between flex-row-reverse mb-4">
           <SearchBar

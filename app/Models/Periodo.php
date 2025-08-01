@@ -18,7 +18,6 @@ class Periodo extends Model
 
     protected $fillable = [
         'id',
-        'anio',
         'nombre_periodo',
         'status',
     ];
@@ -44,11 +43,6 @@ class Periodo extends Model
     public function getStatusTextoAttribute()
     {
         return self::STATUS[$this->status] ?? 'Desconocido';
-    }
-
-    public function modulo()
-    {
-        return $this->hasMany(Modulo::class, 'id_periodo');
     }
 
     public function grupo()

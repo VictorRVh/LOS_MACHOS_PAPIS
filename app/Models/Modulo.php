@@ -22,7 +22,6 @@ class Modulo extends Model
         'creditos',
         'horas',
         'id_especialidad',
-        'id_periodo',
         'nro_capacidades'
     ];
 
@@ -35,12 +34,6 @@ class Modulo extends Model
                 $model->id = (string) Str::uuid();
             }
         });
-    }
-
-
-    public function periodo()
-    {
-        return $this->belongsTo(Periodo::class, 'id_periodo');
     }
 
     public function especialidadPrograma()

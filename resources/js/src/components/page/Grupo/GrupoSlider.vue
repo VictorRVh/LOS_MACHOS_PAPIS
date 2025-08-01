@@ -36,7 +36,7 @@ const { showToast } = useModalToast();
 
 if (!programaStore.programa.length) await programaStore.loadPrograma();
 const programas = ref(
-  programaStore.programa.programas.map(p => ({
+  programaStore?.programa?.programas?.map(p => ({
     id: p.id,
     name: p.nameCiclo,
   }))

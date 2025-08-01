@@ -25,7 +25,6 @@ class ModuloController extends Controller
             'creditos'           => 'required|integer|min:0',
             'horas'              => 'required|integer|min:0',
             'id_especialidad'    => 'required|exists:especialidad_programa,id',
-            'id_periodo'         => 'required|exists:periodo,id',
             'nro_capacidades'    => 'required|integer|min:0',
         ]);
 
@@ -37,7 +36,7 @@ class ModuloController extends Controller
     // Mostrar un módulo específico
     public function show($id)
     {
-        $registros = Modulo::with(['especialidadPrograma', 'periodo'])
+        $registros = Modulo::with(['especialidadPrograma'])
             ->where('id_especialidad', $id)
             ->get();
 
@@ -59,7 +58,6 @@ class ModuloController extends Controller
             'creditos'           => 'sometimes|integer|min:0',
             'horas'              => 'sometimes|integer|min:0',
             'id_especialidad'    => 'sometimes|exists:especialidad_programa,id',
-            'id_periodo'         => 'sometimes|exists:periodo,id',
             'nro_capacidades'    => 'sometimes|integer|min:0',
         ]);
 

@@ -26,6 +26,9 @@ return new class extends Migration
                 ->on('especialidad_programa')
                 ->onDelete('cascade');
 
+            $table->timestamps(); 
+
+
         });
     }
 

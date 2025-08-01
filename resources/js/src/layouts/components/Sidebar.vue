@@ -12,7 +12,8 @@ import {
   UserGroupIcon,
   RectangleStackIcon,
   IdentificationIcon,
-  TagIcon
+  TagIcon,
+  NewspaperIcon
 } from '@heroicons/vue/24/outline';
 
 const { hasPermission } = usePermissions();
@@ -24,8 +25,8 @@ const navLinks = [
     { name: 'Docentes', routeName: 'docente', icon: AcademicCapIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
     { name: 'Convenios', routeName: 'convenio', icon: PresentationChartLineIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
     { name: 'Periodo', routeName: 'periodo', icon: CalendarDaysIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
-    { name: 'Administrativos', routeName: 'administrativos', icon: BuildingOffice2Icon, permissions: ["todo-acceso-permisos","icono-permisos"]},
-    { name: 'Especialidad', routeName: 'especialidad', icon: SparklesIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
+    { name: 'Administrativos', routeName: 'administrativos', icon: NewspaperIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
+    { name: 'Especialidad', routeName: 'especialidad', icon: AcademicCapIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
     { name: 'Comisión', routeName: 'comision', icon: UserGroupIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
     { name: 'Programa', routeName: 'programa', icon: RectangleStackIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
     { name: 'Matricula', routeName: 'matricula', icon: IdentificationIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},

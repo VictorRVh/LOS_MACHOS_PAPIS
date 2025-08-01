@@ -1,19 +1,16 @@
 <script setup>
-
 import { inject, ref } from 'vue';
-import userMenu from './UserMenu.vue'
+import userMenu from './UserMenu.vue';
 import useHttpRequest from '../../composables/useHttpRequest';
 import useUserStore from '../../store/useUserStore';
 import useRoleStore from '../../store/useRoleStore';
 import usePermissionStore from '../../store/usePermissionStore';
 import useAppRouter from '../../composables/useAppRouter';
 import Breadcrumbs from '../../components/breadcrumbs/Breadcrumbs.vue';
-// ÍCONOS FINALES: Usuario, Mundo-Africa, Flecha-Izquierda
+import { ArrowLeftIcon, UserCircleIcon, GlobeEuropeAfricaIcon } from '@heroicons/vue/24/outline';
 
 const { isDarkMode, updateDarkMode } = inject('theme');
 const { index: logout } = useHttpRequest('/logout');
-
-
 const { pushToRoute } = useAppRouter();
 const userStore = useUserStore();
 const roleStore = useRoleStore();
@@ -25,7 +22,7 @@ const toggleMenu = () => {
     isMenuOpen.value = !isMenuOpen.value;
 };
 
-let RolUser = userStore?.user?.roles[0]?.name?.toUpperCase();
+let RolUser = userStore?.user?.roles?.[0]?.name?.toUpperCase() || 'USUARIO';
 
 const onLogout = async () => {
     const isLoggedOut = await logout();
@@ -37,63 +34,70 @@ const onLogout = async () => {
         await pushToRoute({ name: 'login' });
     }
 };
-
-
 </script>
 
 <template>
-
     <div class="bg-white dark:bg-gray-800 border-b-2 border-cetpro">
-
-        <!-- HEADER SUPERIOR: LOGO Y USUARIO -->
-        <header class="h-16 flex items-center justify-between px-4">
-            <!-- LADO IZQUIERDO: Flecha y Logo -->
+        <header class="h-16 flex items-center justify-between px-4 sm:px-6">
             <div class="flex items-center gap-4">
-                <button class="text-gray-600 hover:text-cetpro">
-                    <!-- CAMBIADO A LA FLECHA SIMPLE -->
-                    <ArrowLeftIcon class="h-7 w-7" />
+                <button @click="$router.back()" class="text-gray-500 dark:text-gray-400 hover:text-cetpro dark:hover:text-cetpro-light">
+                    <ArrowLeftIcon class="h-6 w-6" />
                 </button>
-                <img src="/img/insignia.png" alt="CETPRO Puno" class="h-12">
             </div>
 
-            <!-- LADO DERECHO: Usuario y Notificaciones -->
             <div class="flex items-center gap-4">
-                <span class="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full"> {{ RolUser }} </span>
+                <span class="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full hidden sm:block">
+                    {{ RolUser }}
+                </span>
 
-                <!-- La caja con el borde celestito a la izquierda -->
-                <div class="flex items-center gap-3 pl-4 border-l-2 border-cetpro">
-                    <span v-if="userStore.user" class="text-sm font-medium text-gray-700 dark:text-gray-200">
+                <div class="flex items-center gap-3 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                    <span v-if="userStore.user" class="text-sm font-medium text-gray-700 dark:text-gray-200 hidden md:block">
                         {{ userStore.user.name }}
                     </span>
-                    <div class="relative flex justify-end items-center gap-4">
-                        <!-- Botón que despliega el menú -->
-                        <button @click="toggleMenu">
-                            <UserCircleIcon class="h-10 w-10 text-gray-500" />
+                    
+                    <div class="relative">
+                        <button @click="toggleMenu" class="block h-10 w-10 overflow-hidden rounded-full focus:outline-none focus:ring-2 focus:ring-cetpro focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                            <img v-if="userStore.user?.avatar_url" :src="userStore.user.avatar_url" alt="Avatar de usuario" class="h-full w-full object-cover">
+                            <UserCircleIcon v-else class="h-10 w-10 text-gray-500" />
                         </button>
 
-                        <!-- Menú desplegable -->
-                        <Transition name="fade">
-                            <userMenu v-if="isMenuOpen" class="absolute right-0 top-12" :nombre="userStore?.user?.name"
-                                :apellido="userStore.user?.apellido" @logout="onLogout"
-                                @toggle-theme="updateDarkMode(!isDarkMode)" />
+                        <Transition
+                            enter-active-class="transition ease-out duration-100"
+                            enter-from-class="transform opacity-0 scale-95"
+                            enter-to-class="transform opacity-100 scale-100"
+                            leave-active-class="transition ease-in duration-75"
+                            leave-from-class="transform opacity-100 scale-100"
+                            leave-to-class="transform opacity-0 scale-95"
+                        >
+                            <userMenu
+                                v-if="isMenuOpen"
+                                class="absolute right-0 mt-2 z-50"
+                                :nombre="userStore?.user?.name"
+                                :apellido="userStore?.user?.apellido"
+                                :email="userStore?.user?.email"
+                                :is-dark-mode="isDarkMode"
+                                @logout="onLogout"
+                                @toggle-theme="updateDarkMode(!isDarkMode)"
+                                @close-menu="isMenuOpen = false"
+                            />
                         </Transition>
                     </div>
                 </div>
 
-                <!-- CAMBIADO AL MUNDO QUE PEDISTE, CON SU NOTIFICACIÓN -->
-                <button class="relative text-gray-500 hover:text-cetpro">
+                <button class="relative text-gray-500 dark:text-gray-400 hover:text-cetpro dark:hover:text-cetpro-light">
                     <GlobeEuropeAfricaIcon class="h-7 w-7" />
                     <span
-                        class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">5</span>
+                        class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white ring-2 ring-white dark:ring-gray-800">
+                        5
+                    </span>
                 </button>
             </div>
         </header>
 
-        <!-- BREADCRUMBS (La parte de abajo) -->
-        <div class="h-10 flex items-center px-4 border-t border-gray-200 dark:border-cc-21">
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+        <div class="h-10 flex items-center px-4 sm:px-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="text-sm text-gray-500 dark:text-gray-400">
                 <Breadcrumbs />
-            </p>
+            </div>
         </div>
     </div>
 </template>

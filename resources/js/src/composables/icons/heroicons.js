@@ -1,5 +1,5 @@
 // src/plugins/heroicons.js
-import { PaperClipIcon } from '@heroicons/vue/24/outline';
+import { NewspaperIcon, PaperClipIcon } from '@heroicons/vue/24/outline';
 import { defineAsyncComponent } from 'vue';
 
 // Importa los íconos en estilo outline
@@ -43,6 +43,7 @@ const icons = {
   AcademicCapIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/AcademicCapIcon')),
   SquaresPlusIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/SquaresPlusIcon')),
   RectangleGroupIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/RectangleGroupIcon')),
+  NewspaperIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/NewspaperIcon')),
   ///___________________________________
   
 };

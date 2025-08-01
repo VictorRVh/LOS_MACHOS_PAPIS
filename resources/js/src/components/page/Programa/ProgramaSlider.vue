@@ -1,90 +1,64 @@
 <script setup>
-import { computed, nextTick, ref, watch } from "vue";
-
+import { computed, ref, watch } from "vue";
 import useValidation from "../../../composables/useValidation";
-import useHttpRequest from "../../../composables/useHttpRequest";
 import useModalToast from "../../../composables/useModalToast";
-
 import * as yup from "yup";
-import Slider from "../../ui/Slider.vue";
 import FormInput from "../../ui/FormInput.vue";
 import FormLabelError from "../../ui/FormLabelError.vue";
 import Button from "../../ui/Button.vue";
 import AuthorizationFallback from "../AuthorizationFallback.vue";
-import BaseSelect from "../../ui/BaseSelect.vue";
-import useProgramaStore from "../../../store/Programa/useProgramaStore";
-import CheckBox from "../../ui/CheckBox.vue";
 import BaseSelectCiclo from "../../ui/BaseSelectCiclo.vue";
+import CheckBox from "../../ui/CheckBox.vue";
+import useProgramaStore from "../../../store/Programa/useProgramaStore";
+import { storeToRefs } from "pinia";
 
 const props = defineProps({
-    show: {
-        type: Boolean,
-        default: () => false,
-    },
-    programa: {
-        type: [Object, null],
-        default: () => null,
-    },
-    ciclo: {
-        type: Array,
-        default: () => []
-    }
+    show: Boolean,
+    programa: [Object, null],
+    ciclo: Array,
 });
 const emit = defineEmits(["hide"]);
 
 const programaStore = useProgramaStore();
-
-const { store: createPrograma, saving, update: updatePrograma, updating } = useHttpRequest(
-    "/programa_estudio"
-);
-const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
+const { runYupValidation } = useValidation();
+
+const { programaLoading } = storeToRefs(programaStore);
 
 const requiredPermissions = computed(() => {
-    if (!props.role?.id) return ["todo-acceso-roles", "crear-roles"];
-    else return ["todo-acceso-roles", "editar-roles"];
+    return props.programa?.id ? ["todo-acceso-roles", "editar-roles"] : ["todo-acceso-roles", "crear-roles"];
 });
 
 const title = computed(() =>
-    props.programa ? `Editar programa "${props.programa?.nombre_programa}"` : "Agregar nuevo rol"
+    props.programa ? `Editar programa "${props.programa?.nombre_programa}"` : "Agregar nuevo programa"
 );
 
-const initialFormData = () => {
-    return {
-        id_ciclo: null,
-        año: null,
-        numero_rd: null,
-        status: 0,
-        descripcion: null
-    };
-};
+const initialFormData = () => ({
+    id_ciclo: null,
+    año: null,
+    numero_rd: null,
+    status: 0,
+    descripcion: null,
+});
 
 const formData = ref(initialFormData());
 const formErrors = ref({});
-
 const isEditing = computed(() => !!props.programa?.id);
 
 const onCancelEdit = () => {
     formData.value = initialFormData();
     formErrors.value = {};
-    emit("hide"); // oculta el formulario
+    emit("hide");
 };
 
-watch(
-    () => props.programa,
-    (newRole) => {
-
-        if (props.show && newRole?.id) {
-
-            console.log(formData.value);
-            formData.value = Object.entries(initialFormData()).reduce((r, [key, val]) => {
-                if (newRole[key]) return { ...r, [key]: newRole[key] };
-                return { ...r, [key]: val };
-            }, {});
-        }
-    },
-    { immediate: true }
-);
+watch(() => props.programa, (newVal) => {
+    formErrors.value = {};
+    if (props.show && newVal?.id) {
+        formData.value = { ...initialFormData(), ...newVal };
+    } else {
+        formData.value = initialFormData();
+    }
+}, { immediate: true });
 
 const schema = yup.object().shape({
     id_ciclo: yup.string().nullable().required(),
@@ -95,18 +69,10 @@ const schema = yup.object().shape({
 });
 
 const onSubmit = async () => {
+    if (programaLoading.value) return;
 
-    console.log('entrado aqqui')
-
-    if (saving.value || updating.value) return;
-
-    let data = {
-        ...formData.value,
-    };
-
-    console.log('dedede', data)
-
-    data.status = parseInt(data.status);
+    let data = { ...formData.value };
+    data.status = data.status ? 1 : 0;
 
     const { validated, errors } = await runYupValidation(schema, data);
     if (!validated) {
@@ -115,21 +81,20 @@ const onSubmit = async () => {
     }
     formErrors.value = {};
 
-    const response = props.programa?.id
-        ? await updatePrograma(props.programa?.id, data)
-        : await createPrograma(data);
-
-    if (response?.id) {
-        showToast(`programa ${props.programa?.id ? "editado" : "creado"} exitosamente.`);
-        programaStore.loadPrograma();
-
-        console.log('props', props.programa)
-
-        if (!props.programa?.id) {
-            formData.value = initialFormData();
-            formErrors.value = {};
+    try {
+        if (isEditing.value) {
+            await programaStore.updatePrograma(props.programa.id, data);
+            showToast(`Programa editado exitosamente.`);
+        } else {
+            await programaStore.addPrograma(data);
+            showToast(`Programa creado exitosamente.`);
         }
+        
+        formData.value = initialFormData();
         emit("hide");
+
+    } catch (error) {
+        showToast("Ocurrió un error al guardar.", "error");
     }
 };
 </script>
@@ -138,7 +103,7 @@ const onSubmit = async () => {
     <AuthorizationFallback :permissions="requiredPermissions">
         <div class="mt-2 space-y-1.5 font-inter">
 
-            <FormLabelError label="Ciclo" required>
+            <FormLabelError label="Ciclo" required :error="formErrors?.id_ciclo">
                 <BaseSelectCiclo v-model="formData.id_ciclo" :options="ciclo" label="nombre_ciclo"
                     placeholder="Seleccione un ciclo" />
             </FormLabelError>
@@ -161,16 +126,14 @@ const onSubmit = async () => {
             <div class="w-full space-y-3">
 
                 <div class="flex gap-2 mt-1">
-                    <!-- Botón Guardar: ancho completo -->
-                    <Button :title="programa?.id ? 'Guardar Cambios' : 'Crear Programa'"
-                        :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
+                    <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Programa'"
+                        :loading-title="isEditing ? 'Guardando...' : 'Creando...'" :loading="programaLoading"
                         key="submit-btn" @click="onSubmit" class="!w-full" />
 
-                    <!-- Botón Cancelar: ancho flexible solo si se está editando -->
                     <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"
                         class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer px-4" />
                 </div>
             </div>
         </div>
     </AuthorizationFallback>
-</template>
+</template>y

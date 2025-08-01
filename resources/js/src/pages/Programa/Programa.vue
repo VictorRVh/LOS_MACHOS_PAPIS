@@ -10,33 +10,55 @@ import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
-import useHttpRequest from "../../composables/useHttpRequest";
+// import useHttpRequest from "../../composables/useHttpRequest"; // <-- YA NO ES NECESARIO
 import useProgramaStore from "../../store/Programa/useProgramaStore";
 import useCicloStore from "../../store/Ciclo/useCicloStore";
 import ProgramaSlider from "../../components/page/Programa/ProgramaSlider.vue";
 import { useRouter } from "vue-router";
+import { storeToRefs } from "pinia"; // Útil para mantener la reactividad en las variables de carga
 
 const router = useRouter();
 const programaStore = useProgramaStore();
 const cicloStore = useCicloStore();
 
-if (!programaStore.programa.length) await programaStore.loadPrograma();
-if (!cicloStore.ciclo.length) await cicloStore.loadCiclo();
+// Hacemos que la variable de carga sea reactiva también
+const { programaLoading } = storeToRefs(programaStore);
+
+// --- CORRECCIÓN 1: Carga inicial de datos ---
+// Revisamos el array interno 'programas'
+if (!programaStore.programa.programas.length) {
+  await programaStore.loadPrograma();
+}
+// La carga de ciclos está bien
+if (!cicloStore.ciclo.length) {
+  await cicloStore.loadCiclo();
+}
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
-const { destroy: deletePrograma, deleting } = useHttpRequest("/programa_estudio");
+// --- CORRECCIÓN 2: Eliminar la llamada directa a la API ---
+// const { destroy: deletePrograma, deleting } = useHttpRequest("/programa_estudio"); // <-- ELIMINAR ESTA LÍNEA
 
+// --- CORRECCIÓN 3: Reescribir la función onDelete ---
 const onDelete = (programa) => {
-  if (deleting.value) return;
+  // Usamos el 'loading' del store para evitar dobles clics
+  if (programaLoading.value) return;
 
-  showConfirmModal(null, async (confirmed) => {
+  showConfirmModal(`¿Seguro que quieres eliminar "${programa?.nameCiclo}"?`, async (confirmed) => {
     if (!confirmed) return;
    
-    const isDeleted = await deletePrograma(programa?.id);
-    if (isDeleted) {
-      showToast(`Programa "${programa?.nameCiclo}" eliminado exitosamente...`);
-      programaStore.loadPrograma();
+    try {
+      // Llamamos a la nueva función reactiva del store. ¡Eso es todo!
+      await programaStore.removePrograma(programa?.id);
+      
+      // El store ya actualizó la lista, solo mostramos la notificación.
+      showToast(`Programa "${programa?.nameCiclo}" eliminado exitosamente.`);
+
+      // YA NO es necesario llamar a programaStore.loadPrograma() de nuevo.
+
+    } catch (error) {
+      // Si el store da un error (ej: la API falla), lo mostramos.
+      showToast('Error al eliminar el programa.', 'error');
     }
   });
 };
@@ -48,7 +70,6 @@ const SeeMore = (programa) => {
   });
 };
 </script>
-
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
     <div class="flex justify-between items-center p-4">

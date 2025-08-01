@@ -22,10 +22,6 @@ const props = defineProps({
         type: [Object, null],
         default: () => null,
     },
-    periodo: {
-        type: Array,
-        default: () => []
-    },
     especialidad: {
         type: Array,
         default: () => []
@@ -54,7 +50,7 @@ const initialFormData = () => {
         horas: null,
         nro_capacidades: null,
         id_especialidad: props.especialidad,
-        id_periodo: null,
+  
         nro_capacidades: null,
     };
 };
@@ -95,7 +91,6 @@ const schema = yup.object().shape({
     creditos: yup.string().nullable().required(),
     horas: yup.string().nullable().required(),
     id_especialidad: yup.string().nullable().required(),
-    id_periodo: yup.string().nullable().required(),
     nro_capacidades: yup.string().nullable().required(),
 });
 
@@ -138,10 +133,6 @@ const onSubmit = async () => {
     <AuthorizationFallback :permissions="requiredPermissions">
         <div class="mt-2 space-y-1.5 font-inter">
 
-            <FormLabelError label="Numero de modulo" required>
-                <BaseSelectCiclo v-model="formData.id_periodo" :options="periodo" label="nombre_periodo"
-                    placeholder="Seleccione un periodo" />
-            </FormLabelError>
 
             <FormInput v-model="formData.numero_modulo" :focus="show" label="Numero de modulo"
                 :error="formErrors?.numero_modulo" required />

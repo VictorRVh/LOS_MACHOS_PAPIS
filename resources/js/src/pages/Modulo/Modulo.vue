@@ -14,10 +14,10 @@ import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import ModuloSlider from "../../components/page/Modulo/ModuloSlider.vue";
 import useModuloStore from "../../store/Modulos/useModulosStore";
-import usePeriodoStore from "../../store/Periodo/usePeriodoStore";
+
 
 const moduloStore = useModuloStore();
-const periodoStore = usePeriodoStore();
+
 
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
@@ -34,7 +34,7 @@ const props = defineProps({
 
 
 if (!moduloStore.modulo.length) await moduloStore.loadModuloById(props.idEspecialidadPrograma)
-if (!periodoStore.periodos.length) await periodoStore.loadPeriodos();
+
 
 
 const onDelete = (modulo) => {
@@ -69,7 +69,7 @@ const onDelete = (modulo) => {
           Asignar Especialidad
         </h3>
         <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
-        <ModuloSlider :show="slider" :modulo="sliderData" :periodo="periodoStore.periodos"
+        <ModuloSlider :show="slider" :modulo="sliderData" 
           :especialidad="props.idEspecialidadPrograma" @hide="hideSlider" />
       </div>
 

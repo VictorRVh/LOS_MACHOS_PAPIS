@@ -118,31 +118,32 @@ const onSubmit = async () => {
   }
 };
 
+let lastPeriodoValue = ""; // define esto fuera de la función, en tu <script>
+
 const onPeriodoInput = (e) => {
-  let val = e.target.value.toUpperCase();
+  let raw = e.target.value.toUpperCase();
+  let val = raw.replace(/[^0-9I]/g, "");
 
-  // Eliminar todo lo que no sea número o I
-  val = val.replace(/[^0-9I]/g, "");
-
-  // Mantener solo los primeros 4 dígitos numéricos
   const year = val.slice(0, 4).replace(/[^0-9]/g, "");
-
   let rest = val.slice(4).replace(/[^I]/g, "").slice(0, 2);
 
   let result = year;
 
-  // Si hay 4 números exactos, agregar el guion
-  if (year.length === 4) {
+  // Evita volver a insertar el guion si fue borrado manualmente
+  const guionEliminado = lastPeriodoValue.endsWith("-") && !raw.endsWith("-");
+
+  if (!guionEliminado && year.length === 4) {
     result += "-";
   }
 
-  // Si hay letras I o II, las agregamos
   if (rest.length > 0) {
     result += rest;
   }
 
   formData.value.nombre_periodo = result;
+  lastPeriodoValue = result;
 };
+
 </script>
 
 <template>

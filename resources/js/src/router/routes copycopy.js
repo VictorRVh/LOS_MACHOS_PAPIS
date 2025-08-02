@@ -17,7 +17,7 @@ export default [
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-usuarios', 'ver-usuarios'],
-            breadcrumb: [{ name: 'Inicio', to: { name: 'start' } }]
+            breadcrumb: [{ name: 'Inicio', to: { name: 'william' } }]
         },
     },
     {

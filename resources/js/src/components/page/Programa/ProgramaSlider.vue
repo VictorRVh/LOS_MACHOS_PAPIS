@@ -13,9 +13,9 @@ import useProgramaStore from "../../../store/Programa/useProgramaStore";
 import { storeToRefs } from "pinia";
 
 const props = defineProps({
-    show: Boolean,
-    programa: [Object, null],
-    ciclo: Array,
+  show: Boolean,
+  programa: [Object, null],
+  ciclo: Array,
 });
 const emit = defineEmits(["hide"]);
 
@@ -26,19 +26,23 @@ const { runYupValidation } = useValidation();
 const { programaLoading } = storeToRefs(programaStore);
 
 const requiredPermissions = computed(() => {
-    return props.programa?.id ? ["todo-acceso-roles", "editar-roles"] : ["todo-acceso-roles", "crear-roles"];
+  return props.programa?.id
+    ? ["todo-acceso-roles", "editar-roles"]
+    : ["todo-acceso-roles", "crear-roles"];
 });
 
 const title = computed(() =>
-    props.programa ? `Editar programa "${props.programa?.nombre_programa}"` : "Agregar nuevo programa"
+  props.programa
+    ? `Editar programa "${props.programa?.nombre_programa}"`
+    : "Agregar nuevo programa"
 );
 
 const initialFormData = () => ({
-    id_ciclo: null,
-    año: null,
-    numero_rd: null,
-    status: 0,
-    descripcion: null,
+  id_ciclo: null,
+  año: null,
+  numero_rd: null,
+  status: 0,
+  descripcion: null,
 });
 
 const formData = ref(initialFormData());
@@ -46,65 +50,146 @@ const formErrors = ref({});
 const isEditing = computed(() => !!props.programa?.id);
 
 const onCancelEdit = () => {
-    formData.value = initialFormData();
-    formErrors.value = {};
-    emit("hide");
+  formData.value = initialFormData();
+  formErrors.value = {};
+  emit("hide");
 };
 
-watch(() => props.programa, (newVal) => {
+watch(
+  () => props.programa,
+  (newVal) => {
     formErrors.value = {};
     if (props.show && newVal?.id) {
-        formData.value = { ...initialFormData(), ...newVal };
+      formData.value = { ...initialFormData(), ...newVal };
     } else {
-        formData.value = initialFormData();
+      formData.value = initialFormData();
     }
-}, { immediate: true });
+  },
+  { immediate: true }
+);
 
 const schema = yup.object().shape({
-    id_ciclo: yup.string().nullable().required(),
-    año: yup.string().nullable().required(),
-    numero_rd: yup.string().nullable().required(),
-    status: yup.bool().nullable().required(),
-    descripcion: yup.string().nullable().required(),
+  id_ciclo: yup.string().nullable().required(),
+  numero_rd: yup.string().nullable().required(),
+  status: yup.bool().nullable().required(),
+  descripcion: yup.string().nullable().required(),
+  año: yup
+    .string()
+    .required("El año es obligatorio.")
+    .test(
+      "formato-año",
+      "Formato inválido. Usa '2024' o '2024-2025' según el ciclo.",
+      function (value) {
+        const ciclo = props.ciclo.find(
+          (c) => c.id === formData.value.id_ciclo
+        );
+        const nombreCiclo = ciclo?.nombre_ciclo?.toLowerCase();
+
+        if (nombreCiclo?.includes("auxiliar")) {
+          return /^\d{4}$/.test(value); // Solo un año
+        }
+
+        if (nombreCiclo?.includes("técnico")) {
+          return /^\d{4}-\d{4}$/.test(value); // Rango de años
+        }
+
+        return true;
+      }
+    ),
 });
 
+
+const onCicloChange = () => {
+  formData.value.año = "";
+  formErrors.value.año = "";
+};
+const añoPlaceholder = computed(() => {
+  const ciclo = props.ciclo.find((c) => c.id === formData.value.id_ciclo);
+  const nombreCiclo = ciclo?.nombre_ciclo?.toLowerCase();
+
+  if (nombreCiclo?.includes("ciclo auxiliar técnico")) return "2024";
+  if (nombreCiclo?.includes("ciclo técnico")) return "2024-2025";
+  return "2024 o 2024-2025";
+});
+
+let lastAñoValue = ""; // fuera del handler
+
+const onAñoInput = (e) => {
+  let raw = e.target.value;
+  let val = raw.replace(/[^0-9]/g, ""); // Solo números
+
+  const ciclo = props.ciclo.find((c) => c.id === formData.value.id_ciclo);
+  const nombreCiclo = ciclo?.nombre_ciclo?.toLowerCase() || "";
+
+  if (nombreCiclo.includes("auxiliar")) {
+    // Solo 4 dígitos
+    val = val.slice(0, 4);
+    formData.value.año = val;
+    lastAñoValue = val;
+    return;
+  }
+
+  if (nombreCiclo.includes("técnico")) {
+    const year1 = val.slice(0, 4);
+    const year2 = val.slice(4, 8);
+
+    // Detectar si el usuario está borrando el guion
+    const isDeletingHyphen =
+      lastAñoValue.endsWith("-") && !raw.endsWith("-");
+
+    if (isDeletingHyphen) {
+      val = year1; // Dejarlo sin guion
+    } else if (year1.length === 4 && year2.length === 0) {
+      val = year1 + "-"; // Insertar guion automáticamente
+    } else if (year2.length > 0) {
+      val = `${year1}-${year2}`;
+    } else {
+      val = year1;
+    }
+
+    formData.value.año = val;
+    lastAñoValue = val;
+    return;
+  }
+
+  // Default
+  val = val.slice(0, 4);
+  formData.value.año = val;
+  lastAñoValue = val;
+};
+
+
 const onSubmit = async () => {
-    if (programaLoading.value) return;
+  formErrors.value = {};
+  const { isValid, errors } = await runYupValidation(schema, formData.value);
 
-    let data = { ...formData.value };
-    data.status = data.status ? 1 : 0;
+  if (!isValid) {
+    formErrors.value = errors;
+    return;
+  }
 
-    const { validated, errors } = await runYupValidation(schema, data);
-    if (!validated) {
-        formErrors.value = errors;
-        return;
+  try {
+    if (isEditing.value) {
+      await programaStore.updatePrograma(formData.value);
+      showToast("Programa actualizado correctamente", "success");
+    } else {
+      await programaStore.createPrograma(formData.value);
+      showToast("Programa creado correctamente", "success");
     }
-    formErrors.value = {};
-
-    try {
-        if (isEditing.value) {
-            await programaStore.updatePrograma(props.programa.id, data);
-            showToast(`Programa editado exitosamente.`);
-        } else {
-            await programaStore.addPrograma(data);
-            showToast(`Programa creado exitosamente.`);
-        }
-        
-        formData.value = initialFormData();
-        emit("hide");
-
-    } catch (error) {
-        showToast("Ocurrió un error al guardar.", "error");
-    }
+    onCancelEdit();
+  } catch (error) {
+    showToast("Ocurrió un error al guardar el programa", "error");
+  }
 };
 </script>
+
 
 <template>
     <AuthorizationFallback :permissions="requiredPermissions">
         <div class="mt-2 space-y-1.5 font-inter">
 
             <FormLabelError label="Ciclo" required :error="formErrors?.id_ciclo">
-                <BaseSelectCiclo v-model="formData.id_ciclo" :options="ciclo" label="nombre_ciclo"
+                <BaseSelectCiclo v-model="formData.id_ciclo" :options="ciclo" @change="onCicloChange" label="nombre_ciclo"
                     placeholder="Seleccione un ciclo" />
             </FormLabelError>
 
@@ -112,7 +197,15 @@ const onSubmit = async () => {
                 required />
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput v-model="formData.año" :focus="show" label="Año" :error="formErrors?.año" required />
+                <FormInput
+                    v-model="formData.año"
+                    label="Año"
+                    :error="formErrors?.año"
+                    required
+                    @input="onAñoInput"
+                    :placeholder="añoPlaceholder"
+                    />
+
                 <CheckBox v-model="formData.status" label="Estado"
                     class="mt-8 pl-4 flex justify-center items-centers" />
 

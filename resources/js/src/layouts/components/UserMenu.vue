@@ -1,10 +1,10 @@
 <script setup>
 import { onMounted, onUnmounted } from 'vue';
+import { RouterLink } from 'vue-router'; // Importar RouterLink
 import {
   ArrowLeftOnRectangleIcon,
   Cog6ToothIcon,
   SunIcon,
-  UserCircleIcon,
   MoonIcon
 } from '@heroicons/vue/24/outline';
 
@@ -75,14 +75,17 @@ onUnmounted(() => {
           <span>Cambiar a tema {{ isDarkMode ? 'claro' : 'oscuro' }}</span>
         </button>
 
-        <button
+        <!-- CAMBIADO A ROUTERLINK -->
+        <RouterLink
+          :to="{ name: 'cuenta.editar' }"
+          @click="$emit('close-menu')"
           class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
           role="menuitem"
           tabindex="-1"
         >
           <Cog6ToothIcon class="h-5 w-5" />
           <span>Configuración de cuenta</span>
-        </button>
+        </RouterLink>
       </div>
       
       <hr class="border-gray-200 dark:border-gray-700" />

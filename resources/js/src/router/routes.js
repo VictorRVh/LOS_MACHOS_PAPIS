@@ -78,4 +78,24 @@ export default [
     { path: '/especialidadPrograma/:id/editar', name: 'especialidadPrograma.editar', component: () => import('../pages/EspecialidadPrograma/EspecialidadPrograma.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], }, },
     { path: '/matricula', name: 'matricula', component: () => import('../pages/Estudiante/Estudiante.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula' } }] }, },
     { path: '/grupo', name: 'grupo', component: () => import('../pages/Grupo/Grupo.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], }, },
+    
+    // --- NUEVA RUTA INTEGRADA AQUÍ ---
+    { 
+        path: '/configuracion-cuenta', 
+        name: 'cuenta.editar', 
+        component: () => import('../pages/edit_date.vue'), 
+        meta: { 
+            layout: 'dashboard', 
+            breadcrumb: [{ text: 'Configuración de mi Cuenta' }] 
+        } 
+    },
+    { 
+        path: '/notificaciones', 
+        name: 'notificaciones.index', 
+        component: () => import('../pages/FullNotificaciones.vue'), 
+        meta: { 
+            layout: 'dashboard', 
+            breadcrumb: [{ text: 'Todas las Notificaciones' }] 
+        } 
+    },
 ];

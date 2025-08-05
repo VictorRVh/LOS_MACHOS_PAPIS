@@ -73,8 +73,6 @@ const useHttpRequest = (path = '') => {
 
     const update = async (id, data, callback = null) => {
         try {
-
-            console.log('esta entrado aca')
             updating.value = true;
             const response = await axios.patch(`${path}/${id}`, data);
             updating.value = false;

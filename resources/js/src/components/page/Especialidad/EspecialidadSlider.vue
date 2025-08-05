@@ -115,13 +115,10 @@ const onSubmit = async () => {
     showToast(`especialidad ${props.especialidad?.id ? "editado" : "creado"} exitosamente.`);
     especialidadStore.loadEspecialidad();
 
-    console.log(props.especialidad)
-
-    if (!props.especialidad?.id) {
-      formData.value = initialFormData();
-      formErrors.value = {};
-    }
+    formData.value = initialFormData();
+    formErrors.value = {};
     emit("hide");
+    
   }
 };
 </script>

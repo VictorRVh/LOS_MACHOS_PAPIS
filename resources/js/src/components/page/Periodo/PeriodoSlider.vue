@@ -110,10 +110,9 @@ const onSubmit = async () => {
 
     periodosStore.loadPeriodos();
 
-    if (!props.periodo?.id) {
-      formData.value = initialFormData();
-      formErrors.value = {};
-    }
+    formData.value = initialFormData();
+    formErrors.value = {};
+
     emit("hide");
   }
 };
@@ -129,7 +128,6 @@ const onPeriodoInput = (e) => {
 
   let result = year;
 
-  // Evita volver a insertar el guion si fue borrado manualmente
   const guionEliminado = lastPeriodoValue.endsWith("-") && !raw.endsWith("-");
 
   if (!guionEliminado && year.length === 4) {
@@ -148,54 +146,44 @@ const onPeriodoInput = (e) => {
 
 <template>
   <AuthorizationFallback :permissions="requiredPermissions">
-    <div class="mt-2 space-y-1.5 font-inter">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-        <FormInput
-          v-model="formData.nombre_periodo"
-          :focus="show"
-          label="Periodo"
-          :error="formErrors?.nombre_periodo"
-          required
-          placeholder="2024-I"
-          @input="onPeriodoInput"
-        />
-
-        <CheckBox
-          v-model="formData.status"
-          label="Estado"
-          class="mt-8 pl-4 flex justify-center items-centers"
-        />
-      </div>
+    <div class="mt-4 px-4 space-y-2 font-inter max-w-lg mx-auto">
       <FormInput
-        v-model="formData.descripcion"
+        v-model="formData.nombre_periodo"
         :focus="show"
-        label="Descripcion"
-        :error="formErrors?.descripcion"
+        label="Periodo"
+        :error="formErrors?.nombre_periodo"
+        required
+        placeholder="2024-I"
+        @input="onPeriodoInput"
       />
 
-      <div class="w-full space-y-3">
-        <div class="flex gap-2 mt-1">
-          <!-- Botón Guardar: ancho completo -->
+      <CheckBox
+        v-model="formData.status"
+        label="Estado"
+        class="flex items-center"
+      />
+
+      <div class="w-full space-y-2 pt-2">
+        <div class="flex flex-col md:flex-row gap-2">
           <Button
             :title="periodo?.id ? 'Guardar Cambios' : 'Crear Periodo'"
             :loading-title="periodo?.id ? 'Guardando...' : 'Creando...'"
             :loading="saving || updating"
             key="submit-btn"
             @click="onSubmit"
-            class="!w-full"
+            class="w-full"
           />
 
-          <!-- Botón Cancelar: ancho flexible solo si se está editando -->
           <Button
             v-if="isEditing"
             title="Cancelar"
             variant="outline"
             @click="onCancelEdit"
-            class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer px-4"
+            class="bg-red-500 text-white px-4 md:w-auto"
           />
         </div>
       </div>
     </div>
   </AuthorizationFallback>
 </template>
+

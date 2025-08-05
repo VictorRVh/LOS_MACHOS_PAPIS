@@ -13,7 +13,6 @@ import useSlider from "../../composables/useSlider";
 
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
-import { ref } from "vue";
 
 import periodoSlider from "../../components/page/Periodo/PeriodoSlider.vue";
 
@@ -23,9 +22,9 @@ const periodosStore = usePeriodosStore();
 
 if (!periodosStore.periodos.length) await periodosStore.loadPeriodos();
 
-const { slider, sliderData, showSlider, hideSlider } =  useSlider("role-crud");
+const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
-const { destroy:deletePeriodo, deleting } = useHttpRequest("/periodo");
+const { destroy: deletePeriodo, deleting } = useHttpRequest("/periodo");
 
 const onDelete = (periodo) => {
 
@@ -59,7 +58,7 @@ const onDelete = (periodo) => {
         <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
         <periodoSlider :show="slider" :periodo="sliderData" @hide="hideSlider" />
       </div>
-      
+
 
       <div class="w-full">
         <Table>
@@ -71,10 +70,18 @@ const onDelete = (periodo) => {
           </THead>
 
           <TBody>
-            <Tr v-for="(periodo,index) in periodosStore.periodos" :key="periodo.id">
-              <Td>{{ index +1 }}</Td>
-              <Td>{{ periodo?.nombre_periodo }}</Td> 
-               <Td>{{ periodo?.status }}</Td>
+            <Tr v-for="(periodo, index) in periodosStore.periodos" :key="periodo.id">
+              <Td>{{ index + 1 }}</Td>
+              <Td>{{ periodo?.nombre_periodo }}</Td>
+              <Td>
+                <span :class="periodo.status === 1
+                    ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
+                    : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
+                  " class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
+                  <span v-if="periodo.status === 1"> Activo ✓ </span>
+                  <span v-else="periodo.status === 0"> Inactivo X </span>
+                </span>
+              </Td>
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">
                   <EditButton @click="showSlider(true, periodo)" />

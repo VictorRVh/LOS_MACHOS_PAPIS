@@ -8,7 +8,6 @@ import Td from "../../components/table/Td.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
-import RoleSlider from "../../components/page/RoleSlider.vue";
 
 import useUserStore from "../../store/useUserStore";
 import useRoleStore from "../../store/useRoleStore";
@@ -16,8 +15,6 @@ import usePermissionStore from "../../store/usePermissionStore";
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
-import { ref } from "vue";
-import ModalRoles from "../../layouts/components/ModalRoles.vue";
 import ConvenioSlider from "../../components/page/ConvenioSlider.vue";
 import useConveniosStore from "../../store/Convenio/useConvenioStore";
 
@@ -76,8 +73,8 @@ const onDelete = (convenio) => {
           </THead>
 
           <TBody>
-            <Tr v-for="convenio in conveniosStore.convenios" :key="convenio.id">
-              <Td>{{ convenio?.id }}</Td>
+            <Tr v-for="(convenio, index) in conveniosStore.convenios" :key="convenio.id">
+              <Td>{{ index + 1 }}</Td>
               <Td>{{ convenio?.nombre_institucion }}</Td> 
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">

@@ -72,16 +72,15 @@ class ComisionesController extends Controller
     }
 
 
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         try {
             $validated = $request->validate([
-                'comisionId' => ['required', Rule::exists('comisiones', 'id')],
                 'titulo' => ['required', 'string', 'max:255'],
                 'descripcion' => ['nullable', 'string'],
             ]);
 
-            $comision = Comisiones::find($request->comisionId);
+            $comision = Comisiones::find($id);
             if (!$comision) {
                 throw new \Exception('Error|Comisión no encontrada--404', 13333);
             }
@@ -100,10 +99,10 @@ class ComisionesController extends Controller
         }
     }
 
-    public function destroy(Request $request)
+    public function destroy($id)
     {
         try {
-            $comision = Comisiones::find($request->comisionId);
+            $comision = Comisiones::find($id);
             if (!$comision) {
                 throw new \Exception('Error|Comisión no encontrada--404', 13333);
             }

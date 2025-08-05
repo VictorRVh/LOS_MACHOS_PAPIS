@@ -103,16 +103,38 @@ const onSubmit = async () => {
     ? await updateConvenio(props.convenio?.id, data)
     : await createConvenio(data);
 
+  // if (response?.id) {
+
+  //   console.log('entra al response', response)
+
+  //   showToast(`Convenio ${props.convenio?.id ? "editado" : "creado"} exitosamente.`);
+  //   roleStore.loadRoles();
+  //   userStore.loadUsers();
+  //   conveniosStore.loadConvenios();
+
+  //   console.log('antes de if ', props.convenio)
+
+  //   if (props.convenio?.id) {
+
+  //     console.log('entra al prop', props.convenio )
+
+  //     formData.value = initialFormData();
+  //     formErrors.value = {};
+  //   }
+  //   emit("hide");
+  // }
+
   if (response?.id) {
-    showToast(`Convenio ${props.convenio?.id ? "editado" : "creado"} exitosamente.`);
+    console.log('entra al response', response);
+
+    showToast(`Convenio ${isEditing ? "editado" : "creado"} exitosamente.`);
     roleStore.loadRoles();
     userStore.loadUsers();
     conveniosStore.loadConvenios();
 
-    if (!props.convenio?.id) {
-      formData.value = initialFormData();
-      formErrors.value = {};
-    }
+    formData.value = initialFormData();
+    formErrors.value = {};
+
     emit("hide");
   }
 };

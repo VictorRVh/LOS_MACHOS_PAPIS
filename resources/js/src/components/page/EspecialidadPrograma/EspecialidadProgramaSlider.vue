@@ -74,22 +74,22 @@ const onCancelEdit = () => {
 };
 
 watch(
-  () => props.especialidadPrograma,
-  (newRole) => {
-    if (props.show && newRole?.id) {
+    () => props.especialidadPrograma,
+    (newRole) => {
+        if (props.show && newRole?.id) {
 
-      const baseData = initialFormData();
+            const baseData = initialFormData();
 
-      formData.value = {
-        ...baseData,
-        ...Object.keys(baseData).reduce((acc, key) => {
-          if (newRole[key] !== undefined) acc[key] = newRole[key];
-          return acc;
-        }, {})
-      };
-    }
-  },
-  { immediate: true }
+            formData.value = {
+                ...baseData,
+                ...Object.keys(baseData).reduce((acc, key) => {
+                    if (newRole[key] !== undefined) acc[key] = newRole[key];
+                    return acc;
+                }, {})
+            };
+        }
+    },
+    { immediate: true }
 );
 
 const schema = yup.object().shape({
@@ -125,10 +125,8 @@ const onSubmit = async () => {
         showToast(`programa ${props.idPrograma ? "editado" : "creado"} exitosamente.`);
         especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma)
 
-        if (props.especialidadPrograma?.id) {
-            formData.value = initialFormData();
-            formErrors.value = {};
-        }
+        formData.value = initialFormData();
+        formErrors.value = {};
         emit("hide");
     }
 };
@@ -143,8 +141,8 @@ const onSubmit = async () => {
                     placeholder="Seleccione una especialidad" />
             </FormLabelError>
 
-            <FormInput v-model="formData.nro_modulos" :focus="show" label="Numero de modulos" :error="formErrors?.nro_modulos"
-                required />
+            <FormInput v-model="formData.nro_modulos" :focus="show" label="Numero de modulos"
+                :error="formErrors?.nro_modulos" required />
 
             <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput v-model="formData.año" :focus="show" label="Año" :error="formErrors?.año" required />

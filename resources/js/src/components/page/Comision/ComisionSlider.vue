@@ -73,7 +73,7 @@ watch(
   () => props.comision,
   (newComision) => {
     if (props.show && newComision?.id) {
-     
+
       formData.value = Object.entries(initialFormData()).reduce((r, [key, val]) => {
         if (newComision[key]) return { ...r, [key]: newComision[key] };
         return { ...r, [key]: val };
@@ -113,7 +113,7 @@ const onUsuarioSelect = (usuario) => {
 
   if (!formData.value.usuarios.find((u) => u.id === usuario.id)) {
     formData.value.usuarios = [usuarioConNombre, ...formData.value.usuarios];
-   // console.log("Usuarios seleccionados:", formData.value.usuarios);
+    // console.log("Usuarios seleccionados:", formData.value.usuarios);
   }
   selectedUsuario.value = null;
 };
@@ -135,6 +135,8 @@ const onSubmit = async () => {
     usuarios: formData.value.usuarios.map((u) => u.id), // solo IDs al backend
   };
 
+  console.log('data de comosion: ', data)
+
   const { validated, errors } = await runYupValidation(schema, data);
   if (!validated) {
     formErrors.value = errors;
@@ -151,10 +153,8 @@ const onSubmit = async () => {
     showToast(`Comisión ${props.comision?.id ? "editada" : "creada"} exitosamente.`);
     comisionesStore.loadComisiones();
 
-    if (!props.comision?.id) {
-      formData.value = initialFormData();
-      formErrors.value = {};
-    }
+    formData.value = initialFormData();
+    formErrors.value = {};
 
     emit("hide");
   }
@@ -170,56 +170,28 @@ const onCancelEdit = () => {
 <template>
   <AuthorizationFallback :permissions="requiredPermissions">
     <div class="mt-2 space-y-1.5 font-inter">
-      <FormInput
-        v-model="formData.titulo"
-        :focus="show"
-        label="Título de comisión"
-        :error="formErrors?.titulo"
-      />
+      <FormInput v-model="formData.titulo" :focus="show" label="Título de comisión" :error="formErrors?.titulo" />
       <!-- Select de usuarios -->
       <FormLabelError label="Añadir integrantes">
-        <BaseSelect
-          v-model="selectedUsuario"
-          :options="usuarioOptions"
-          label='nameCompleto'
-          placeholder="Seleccione un usuario"
-          @update:modelValue="onUsuarioSelect"
-        />
+        <BaseSelect v-model="selectedUsuario" :options="usuarioOptions" label='nameCompleto'
+          placeholder="Seleccione un usuario" @update:modelValue="onUsuarioSelect" />
       </FormLabelError>
 
       <div>
         <label class="text-sm font-semibold dark:text-slate-300 mb-1 block">
           Usuarios de la Comisión
         </label>
-        <SelectedChips
-          :items="formData.usuarios"
-          labelKey="nameCompleto"
-          @remove="onUsuarioRemove"
-        />
+        <SelectedChips :items="formData.usuarios" labelKey="nameCompleto" @remove="onUsuarioRemove" />
       </div>
 
-      <FormInput
-        v-model="formData.descripcion"
-        :focus="show"
-        label="Descripción"
-        :error="formErrors?.descripcion"
-      />
-      
+      <FormInput v-model="formData.descripcion" :focus="show" label="Descripción" :error="formErrors?.descripcion" />
+
       <div class="flex gap-2 mt-4">
-        <Button
-          :title="comision?.id ? 'Guardar Cambios' : 'Crear Comisión'"
-          :loading-title="comision?.id ? 'Guardando...' : 'Creando...'"
-          :loading="saving || updating"
-          @click="onSubmit"
-          class="!w-full"
-        />
-        <Button
-          v-if="isEditing"
-          title="Cancelar"
-          variant="outline"
-          @click="onCancelEdit"
-          class="bg-red-500 text-white hover:bg-red-600 px-4"
-        />
+        <Button :title="comision?.id ? 'Guardar Cambios' : 'Crear Comisión'"
+          :loading-title="comision?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating" @click="onSubmit"
+          class="!w-full" />
+        <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"
+          class="bg-red-500 text-white hover:bg-red-600 px-4" />
       </div>
     </div>
   </AuthorizationFallback>

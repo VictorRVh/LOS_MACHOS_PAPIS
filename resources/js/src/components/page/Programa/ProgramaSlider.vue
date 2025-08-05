@@ -163,70 +163,72 @@ const onSubmit = async () => {
   formErrors.value = {};
   const { isValid, errors } = await runYupValidation(schema, formData.value);
 
-  if (!isValid) {
-    formErrors.value = errors;
-    return;
-  }
+  // if (!isValid) {
+  //   formErrors.value = errors;
+  //   return;
+  // }
 
   try {
     if (isEditing.value) {
       await programaStore.updatePrograma(formData.value);
       showToast("Programa actualizado correctamente", "success");
     } else {
-      await programaStore.createPrograma(formData.value);
+      await programaStore.addPrograma(formData.value);
       showToast("Programa creado correctamente", "success");
     }
     onCancelEdit();
   } catch (error) {
-    showToast("Ocurrió un error al guardar el programa", "error");
+    console.error("Error al guardar el programa:", error);
+
+    // Intentar extraer el mensaje más específico posible
+    const message =
+      error?.response?.data?.message || // si viene de axios con backend
+      error?.message || // si es un error JS
+      "Ocurrió un error al guardar el programa"; // fallback
+
+    showToast(message, "error");
   }
+
 };
 </script>
 
 
 <template>
-    <AuthorizationFallback :permissions="requiredPermissions">
-        <div class="mt-2 space-y-1.5 font-inter">
+  <AuthorizationFallback :permissions="requiredPermissions">
+    <div class="mt-2 space-y-1.5 font-inter">
 
-            <FormLabelError label="Ciclo" required :error="formErrors?.id_ciclo">
-                <BaseSelectCiclo v-model="formData.id_ciclo" :options="ciclo" @change="onCicloChange" label="nombre_ciclo"
-                    placeholder="Seleccione un ciclo" />
-            </FormLabelError>
+      <FormLabelError label="Ciclo" required :error="formErrors?.id_ciclo">
+        <BaseSelectCiclo v-model="formData.id_ciclo" :options="ciclo" @change="onCicloChange" label="nombre_ciclo"
+          placeholder="Seleccione un ciclo" />
+      </FormLabelError>
 
-            <FormInput v-model="formData.numero_rd" :focus="show" label="Numero R.D." :error="formErrors?.numero_rd"
-                required />
+      <FormInput v-model="formData.numero_rd" :focus="show" label="Numero R.D." :error="formErrors?.numero_rd"
+        required />
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput
-                    v-model="formData.año"
-                    label="Año"
-                    :error="formErrors?.año"
-                    required
-                    @input="onAñoInput"
-                    :placeholder="añoPlaceholder"
-                    />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormInput v-model="formData.año" label="Año" :error="formErrors?.año" required @input="onAñoInput"
+          :placeholder="añoPlaceholder" />
 
-                <CheckBox v-model="formData.status" label="Estado"
-                    class="mt-8 pl-4 flex justify-center items-centers" />
+        <CheckBox v-model="formData.status" label="Estado" class="mt-8 pl-4 flex justify-center items-centers" />
 
-            </div>
+      </div>
 
 
-            <FormInput v-model="formData.descripcion" :focus="show" label="Descripcion" :error="formErrors?.descripcion"
-                required />
+      <FormInput v-model="formData.descripcion" :focus="show" label="Descripcion" :error="formErrors?.descripcion"
+        required />
 
 
-            <div class="w-full space-y-3">
+      <div class="w-full space-y-3">
 
-                <div class="flex gap-2 mt-1">
-                    <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Programa'"
-                        :loading-title="isEditing ? 'Guardando...' : 'Creando...'" :loading="programaLoading"
-                        key="submit-btn" @click="onSubmit" class="!w-full" />
+        <div class="flex gap-2 mt-1">
+          <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Programa'"
+            :loading-title="isEditing ? 'Guardando...' : 'Creando...'" :loading="programaLoading" key="submit-btn"
+            @click="onSubmit" class="!w-full" />
 
-                    <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"
-                        class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer px-4" />
-                </div>
-            </div>
+          <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"
+            class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer px-4" />
         </div>
-    </AuthorizationFallback>
+      </div>
+    </div>
+  </AuthorizationFallback>
 </template>y

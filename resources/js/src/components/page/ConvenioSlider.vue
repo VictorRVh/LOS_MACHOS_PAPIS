@@ -44,10 +44,6 @@ const requiredPermissions = computed(() => {
   else return ["todo-acceso-roles", "editar-roles"];
 });
 
-const title = computed(() =>
-  props.convenio ? `Editar convenio "${props.convenio?.nombre_institucion}"` : "Agregar nuevo rol"
-);
-
 const initialFormData = () => {
   return {
     nombre_institucion: null,
@@ -81,8 +77,8 @@ watch(
 );
 
 const schema = yup.object().shape({
-  nombre_institucion: yup.string().nullable().required(),
-  descripcion: yup.string().nullable().required(),
+  nombre_institucion: yup.string().nullable().required('El nombre del convenio es obligatorio.'),
+  descripcion: yup.string().nullable().required('La descrpcion es obligatoria'),
 });
 
 const onSubmit = async () => {

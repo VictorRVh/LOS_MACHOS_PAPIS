@@ -92,7 +92,7 @@ const permissionOptions = computed(() => {
 
 const selectedPermission = ref(null);
 const onPermissionSelect = (permission) => {
-  console.log("selec: ",permission)
+  console.log("selec: ", permission)
   formData.value = {
     ...formData.value,
     permissions: [permission].concat(formData.value.permissions),
@@ -121,7 +121,8 @@ const onAddAllPermissions = () => {
 };
 
 const schema = yup.object().shape({
-  name: yup.string().nullable().required(),
+  name: yup.string().nullable().required('El nombre del rol es obligatorio.'),
+  permissions: yup.array().min(1, "Debe seleccionar al menos un permiso para este rol."),
 });
 
 const onSubmit = async () => {
@@ -162,32 +163,17 @@ const onSubmit = async () => {
 <template>
   <AuthorizationFallback :permissions="requiredPermissions">
     <div class="mt-2 space-y-1.5 font-inter">
-      <FormInput
-        v-model="formData.name"
-        :focus="show"
-        label="Nombre del rol"
-        :error="formErrors?.name"
-        required
-      />
-      <FormLabelError label="Añadir permiso">
-        <BaseSelect
-          v-model="selectedPermission"
-          :options="permissionOptions"
-          label="name"
-          placeholder="Seleccione un permiso"
-          @update:modelValue="onPermissionSelect"
-        />
+      <FormInput v-model="formData.name" :focus="show" label="Nombre del rol" :error="formErrors?.name" required />
+      <FormLabelError label="Añadir permiso" :error="formErrors.permissions">
+        <BaseSelect v-model="selectedPermission" :options="permissionOptions" label="name"
+          placeholder="Seleccione un permiso" @update:modelValue="onPermissionSelect" />
       </FormLabelError>
       <div class="w-full space-y-3">
         <div class="flex-between gap-6">
-          <label class="text-sm font-semibold dark:text-slate-300"
-            >Permisos del Rol</label
-          >
-          <div
-            v-if="canShowAddAllPermissions"
+          <label class="text-sm font-semibold dark:text-slate-300">Permisos del Rol</label>
+          <div v-if="canShowAddAllPermissions"
             class="cursor-pointer text-sm font-bold text-sky-500 hover:underline dark:text-sky-400"
-            @click="onAddAllPermissions"
-          >
+            @click="onAddAllPermissions">
             Añadir todos los permisos
           </div>
         </div>
@@ -196,23 +182,13 @@ const onSubmit = async () => {
 
         <div class="flex gap-2 mt-1">
           <!-- Botón Guardar: ancho completo -->
-          <Button
-            :title="role?.id ? 'Guardar Cambios' : 'Crear Rol'"
-            :loading-title="role?.id ? 'Guardando...' : 'Creando...'"
-            :loading="saving || updating"
-            key="submit-btn"
-            @click="onSubmit"
-            class="!w-full"
-          />
+          <Button :title="role?.id ? 'Guardar Cambios' : 'Crear Rol'"
+            :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating" key="submit-btn"
+            @click="onSubmit" class="!w-full" />
 
           <!-- Botón Cancelar: ancho flexible solo si se está editando -->
-          <Button
-            v-if="isEditing"
-            title="Cancelar"
-            variant="outline"
-            @click="onCancelEdit"
-            class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer px-4"
-          />
+          <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"
+            class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer px-4" />
         </div>
       </div>
     </div>

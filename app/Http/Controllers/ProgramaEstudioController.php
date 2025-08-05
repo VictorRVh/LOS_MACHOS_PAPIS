@@ -57,7 +57,8 @@ class ProgramaEstudioController extends Controller
     {
         $request->validate([
             'id_ciclo'    => 'required|exists:ciclo_academico,id',
-            'año'         => 'required|integer|min:2000|max:2100',
+            // 'año'         => 'required|integer|min:2000|max:2100',
+            'año'         => 'required|string',
             'numero_rd'   => 'required|string|max:50',
             'status'      => 'required|integer|in:0,1,2,3',
             'descripcion' => 'nullable|string|max:255',
@@ -80,6 +81,7 @@ class ProgramaEstudioController extends Controller
         $request->validate([
             'id_ciclo'    => 'sometimes|required|exists:ciclo_academico,id',
             'año'         => 'sometimes|required|integer|min:2000|max:2100',
+            'año'         => 'sometimes|required|string',
             'numero_rd'   => 'sometimes|required|string|max:50',
             'status'      => 'sometimes|required|integer|in:0,1,2,3',
             'descripcion' => 'nullable|string|max:255',

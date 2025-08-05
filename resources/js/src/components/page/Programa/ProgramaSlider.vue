@@ -161,16 +161,17 @@ const onAñoInput = (e) => {
 
 const onSubmit = async () => {
   formErrors.value = {};
-  const { isValid, errors } = await runYupValidation(schema, formData.value);
+  const { validated, errors } = await runYupValidation(schema, formData.value);
 
-  // if (!isValid) {
-  //   formErrors.value = errors;
-  //   return;
-  // }
+  if (!validated) {
+    formErrors.value = errors;
+    return;
+  }
 
   try {
     if (isEditing.value) {
-      await programaStore.updatePrograma(formData.value);
+      console.log('editando', formData.value)
+      await programaStore.updatePrograma(formData.value.id, formData.value);
       showToast("Programa actualizado correctamente", "success");
     } else {
       await programaStore.addPrograma(formData.value);

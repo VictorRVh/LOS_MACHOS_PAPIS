@@ -53,12 +53,6 @@ const requiredPermissions = computed(() => {
     : ["todo-acceso-roles", "crear-roles"];
 });
 
-const title = computed(() =>
-  props.comision
-    ? `Editar comisión "${props.comision?.titulo}"`
-    : "Agregar nueva comisión"
-);
-
 const initialFormData = () => ({
   titulo: null,
   descripcion: null,
@@ -85,10 +79,7 @@ watch(
 
 // Validación Yup
 const schema = yup.object().shape({
-  titulo: yup
-    .string()
-    .required("El nombre de la comisión es obligatorio."),
-
+  titulo: yup.string().required("El nombre de la comisión es obligatorio."),
   descripcion: yup.string().nullable(),
   usuarios: yup.array().min(1, "Debe seleccionar al menos un usuario para la comisión."),
 });
@@ -113,7 +104,6 @@ const onUsuarioSelect = (usuario) => {
 
   if (!formData.value.usuarios.find((u) => u.id === usuario.id)) {
     formData.value.usuarios = [usuarioConNombre, ...formData.value.usuarios];
-    // console.log("Usuarios seleccionados:", formData.value.usuarios);
   }
   selectedUsuario.value = null;
 };
@@ -172,7 +162,7 @@ const onCancelEdit = () => {
     <div class="mt-2 space-y-1.5 font-inter">
       <FormInput v-model="formData.titulo" :focus="show" label="Título de comisión" :error="formErrors?.titulo" />
       <!-- Select de usuarios -->
-      <FormLabelError label="Añadir integrantes">
+      <FormLabelError label="Añadir integrantes" :error="formErrors.usuarios">
         <BaseSelect v-model="selectedUsuario" :options="usuarioOptions" label='nameCompleto'
           placeholder="Seleccione un usuario" @update:modelValue="onUsuarioSelect" />
       </FormLabelError>

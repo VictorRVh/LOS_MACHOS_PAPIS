@@ -90,8 +90,6 @@ const onSubmit = async () => {
     ? await updateUser(props.admin?.id, data)
     : await createUser(data);
 
-  console.log("administrativo: ", response);
-
   if (response?.data?.id) {
     showToast(`Datos ${props.admin?.administrativo ? "actualizado" : "agregado"} correctamente.`);
 

@@ -163,15 +163,15 @@ const onSubmit = async () => {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormInput v-model="formData.email" label="Email" />
-                    <FormInput v-model="formData.direccion" label="Dirección" />
+                    <FormInput v-model="formData.email" label="Email" :error="formErrors?.email" />
+                    <FormInput v-model="formData.direccion" label="Dirección" :error="formErrors?.direccion" />
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormInput v-model="formData.codigo_modular" label="Código Modular"
                         :error="formErrors?.codigo_modular" required />
                     <FormInput v-model="formData.especialidad" label="Especialidad" :error="formErrors?.especialidad"
                         required />
-                    <FormInput v-model="formData.rd_nombramiento" label="Resolusión Directorial"
+                    <FormInput v-model="formData.rd_nombramiento" label="Resolución Directorial"
                         :error="formErrors?.rd_nombramiento" required />
 
                 </div>
@@ -192,7 +192,7 @@ const onSubmit = async () => {
                     <template v-if="!docente?.id">
                         <FormInput v-model="formData.password" label="Contraseña" type="password"
                             :error="formErrors?.password" required />
-                        <FormInput v-model="formData.confirm_password" type="password" label="Confirmar Contraseña"
+                        <FormInput v-model="formData.confirm_password" type="password" label="Confirmar Contraseña" :error="formErrors?.confirm_password"
                             required />
                         <CheckBox v-model="formData.status" label="Estado"
                             class="mt-8 pl-4 flex justify-center items-centers" />

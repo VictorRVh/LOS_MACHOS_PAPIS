@@ -51,10 +51,6 @@ const requiredPermissions = computed(() => {
   else return ["todo-acceso-roles", "editar-roles"];
 });
 
-const title = computed(() =>
-  props.especialidad ? `Editar especialidad "${props.especialidad?.nombre_especialidad}"` : "Agregar nuevo rol"
-);
-
 const initialFormData = () => {
   return {
     nombre_especialidad: null,
@@ -88,8 +84,8 @@ watch(
 );
 
 const schema = yup.object().shape({
-  nombre_especialidad: yup.string().nullable().required(),
-  id_ciclo: yup.string().nullable().required(),
+  nombre_especialidad: yup.string().nullable().required("El nombre de la especialidad es obligatorio"),
+  id_ciclo: yup.string().nullable().required("Elegir el ciclo."),
 });
 
 
@@ -101,6 +97,7 @@ const onSubmit = async () => {
   };
 
   const { validated, errors } = await runYupValidation(schema, data);
+
   if (!validated) {
     formErrors.value = errors;
     return;
@@ -129,7 +126,7 @@ const onSubmit = async () => {
       <FormInput v-model="formData.nombre_especialidad" :focus="show" label="Nombre de la especialidad"
         :error="formErrors?.nombre_especialidad" required />
 
-      <FormLabelError label="Ciclo" required>
+      <FormLabelError label="Ciclo" :error="formErrors?.id_ciclo" required>
         <BaseSelectCiclo v-model="formData.id_ciclo" :options="ciclo" label="nombre_ciclo"
           placeholder="Seleccione un ciclo" />
       </FormLabelError>

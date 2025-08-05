@@ -40,7 +40,7 @@ const onDelete = (convenio) => {
 
     const isDeleted = await deleteConvenio(convenio?.id);
     if (isDeleted) {
-      showToast(`Rol "${convenio?.nombre_institucion}" eliminado exitosamente...`);
+      showToast(`Convenio "${convenio?.nombre_institucion}" eliminado exitosamente.`);
       conveniosStore.loadConvenios();
     }
   });

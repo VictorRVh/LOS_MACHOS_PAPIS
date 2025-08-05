@@ -129,8 +129,6 @@ const onSubmit = async () => {
         return;
     }
 
-    console.log(formData.value)
-
     formErrors.value = {};
     const fieldsToBeOmitted = ['confirm_password'];
     if (props.user?.id) fieldsToBeOmitted.push('password');

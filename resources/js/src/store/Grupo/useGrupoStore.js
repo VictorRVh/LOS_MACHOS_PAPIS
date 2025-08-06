@@ -41,6 +41,19 @@ const useGrupoStore = defineStore('grupo', () => {
     } = useHttpRequest('/gruposFiltrados');
 
 
+    const {
+        show: getAniosByCiclo,
+        // loading: moduloByEspecialidadLoading,
+        // initialLoading: moduloByEspecialidadFirstTimeLoading,
+    } = useHttpRequest('/aniosByCiclo');
+
+    const {
+        show: getPeriodoByAnio,
+        // loading: moduloByEspecialidadLoading,
+        // initialLoading: moduloByEspecialidadFirstTimeLoading,
+    } = useHttpRequest('/periodoByAnio');
+
+
     // Datos
     const grupos = ref([]);
     const especialidades = ref([]);
@@ -48,6 +61,9 @@ const useGrupoStore = defineStore('grupo', () => {
     const modulos = ref([]);
     const periodo = ref([]);
     const gruposFiltrados = ref([]);
+
+    const anios = ref([])
+    const periodoAnio = ref([])
 
     // Métodos
     const loadGrupos = async () => {
@@ -73,6 +89,16 @@ const useGrupoStore = defineStore('grupo', () => {
     const loadPeriodo = async (moduloId) => {
         const response = await getPeriodoPorModulo(moduloId);
         periodo.value = response;
+    };
+
+    const loadAnios = async (cicloId) => {
+        const response = await getAniosByCiclo(cicloId)
+        anios.value = response;
+    };
+
+    const loadPeriodoAnio = async (anio) => {
+        const response = await getPeriodoByAnio(anio)
+        periodoAnio.value = response;
     };
 
     const loadGruposFiltrados = async ({ id_programa, anio, id_periodo }) => {
@@ -127,6 +153,12 @@ const useGrupoStore = defineStore('grupo', () => {
 
         gruposFiltradosLoading,
         gruposFiltradosFirstTimeLoading,
+
+        loadAnios,
+        anios,
+
+        loadPeriodoAnio,
+        periodoAnio
 
     };
 });

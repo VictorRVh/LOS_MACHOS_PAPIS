@@ -18,6 +18,7 @@ import useValidation from '../../../composables/useValidation';
 import useHttpRequest from '../../../composables/useHttpRequest';
 import useUtils from '../../../composables/useUtils';
 import useModalToast from '../../../composables/useModalToast';
+import useCicloStore from '../../../store/Ciclo/useCicloStore';
 
 const props = defineProps({
     show: { type: Boolean, default: () => false },
@@ -29,6 +30,7 @@ const docenteStore = useDocenteStore();
 const programaStore = useProgramaStore();
 const grupoStore = useGrupoStore();
 const convenioStore = useConvenioStore();
+const cicloStore = useCicloStore();
 
 const { store: createGrupo, saving, update: updateGrupo, updating } = useHttpRequest('/grupo');
 const { runYupValidation } = useValidation();
@@ -45,6 +47,7 @@ const programas = ref(
 if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
 if (!docenteStore.docentes?.length) await docenteStore.loadDocentes();
 if (!docenteStore.docentesGrupo?.length) await docenteStore.loadDocentesGrupo();
+if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
 
 const title = computed(() =>
   props.grupo ? `Actualizar Docente "${props.grupo?.name}"` : 'Añadir Nuevo  Docente'

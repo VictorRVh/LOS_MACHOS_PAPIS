@@ -6,6 +6,8 @@ use App\Models\Docente;
 use App\Models\EspecialidadPrograma;
 use App\Models\Grupo;
 use App\Models\Modulo;
+use App\Models\Periodo;
+use App\Models\ProgramaEstudio;
 use Illuminate\Http\Request;
 
 class GrupoController extends Controller
@@ -209,5 +211,39 @@ class GrupoController extends Controller
             ->get();
 
         return response()->json($grupos);
+    }
+
+    // NUEVO FORMATO PARA FILTRO DE GRUPOS
+
+    public function getAniosPorCiclo($idCiclo)
+    {
+        $rangoAnios = ProgramaEstudio::where('id_ciclo', $idCiclo)
+            ->pluck('año')
+            ->filter()
+            ->flatMap(function ($rango) {
+                return explode('-', $rango);
+            })
+            ->unique()
+            ->sort()
+            ->values();
+
+        return response()->json($rangoAnios);
+    }
+
+    public function getPeriodosPorAnio($anio)
+    {
+        // Buscar programas que tengan ese año
+        $programaIds = ProgramaEstudio::where('año', $anio)
+            ->pluck('id');
+
+        // Buscar periodos asociados a esos programas (a través del grupo)
+        $periodoIds = Grupo::whereIn('id_programa', $programaIds)
+            ->pluck('id_periodo')
+            ->unique();
+
+        // Traer los periodos finales
+        $periodos = Periodo::whereIn('id', $periodoIds)->get();
+
+        return response()->json($periodos);
     }
 }

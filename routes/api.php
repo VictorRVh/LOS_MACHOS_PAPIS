@@ -466,6 +466,18 @@ Route::middleware('auth:sanctum')->group(function () {
         'gruposPorProgramaAnioPeriodo',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
+    // Rutas nuevas para filtro de grupo
+    Route::get('aniosByCiclo/{idCiclo}', [
+        \App\Http\Controllers\GrupoController::class,
+        'getAniosPorCiclo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+    Route::get('periodoByAnio/{idAnio}', [
+        \App\Http\Controllers\GrupoController::class,
+        'getAniosPorCiclo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+
     //RUTA PARA CAPACIDAD TERMINAL
     Route::get('capacidad_terminal', [
         \App\Http\Controllers\CapacidadTerminalController::class,

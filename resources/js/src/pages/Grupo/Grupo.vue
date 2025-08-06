@@ -25,25 +25,20 @@ import useGrupoStore from "../../store/Grupo/useGrupoStore";
 import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 
 import usePeriodoStore from "../../store/Periodo/usePeriodoStore";
+import useCicloStore from "../../store/Ciclo/useCicloStore";
+import BaseSelectCiclo from "../../components/ui/BaseSelectCiclo.vue";
 
 // Stores
 const grupoStore = useGrupoStore();
 const programaStore = useProgramaStore();
 const peridoStore = usePeriodoStore();
 
-if (!grupoStore.grupos?.length) await grupoStore.loadGrupos();
-if (!programaStore.programa?.length) await programaStore.loadPrograma();
+const cicloStore = useCicloStore();
 
+// if (!grupoStore.grupos?.length) await grupoStore.loadGrupos();
+if (!programaStore.programa?.length) await programaStore.loadPrograma();
 if (!peridoStore.periodos?.length) await peridoStore.loadPeriodos();
 
-console.log("perido grupo: ",peridoStore.periodos)
-
-const programasSelect = ref(
-  programaStore?.programa?.programas?.map(p => ({
-    id: p.id,
-    name: p.nameCiclo,
-  }))
-);
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("grupo-crud");
 const { showConfirmModal, showToast } = useModalToast();
@@ -66,21 +61,16 @@ const onDelete = (grupo) => {
 const grupos = computed(() => grupoStore.grupos);
 
 const programaAcademico = ref('');
-const anio = ref(null);
 const periodo = ref(null);
-const selec_id_programa = ref(null);
+const selectedCiclo = ref(null)
+const anios = ref([])
+
+const selectedAnio = ref(null)
 
 const periodos = ref([
   { label: "2025-I", value: "2025-1" },
   { label: "2025-II", value: "2025-2" },
 ]);
-
-const anios = ref(
-  Array.from({ length: 6 }, (_, i) => {
-    const year = new Date().getFullYear() - i;
-    return { label: `${year}`, value: year }; 
-  })
-);
 
 const filtrarPorSeleccion = () => {
   console.log("Filtrar por:", {
@@ -89,6 +79,25 @@ const filtrarPorSeleccion = () => {
     periodo: periodo.value,
   });
 };
+
+const onCicloChange = async () => {
+  if (selectedCiclo.value) {
+    await grupoStore.loadAnios(selectedCiclo.value);
+    console.log("Años cargados:", grupoStore.anios);
+  } else {
+    grupoStore.anios = [];
+  }
+};
+
+const onAnioChange = async () => {
+  if (selectedAnio.value) {
+    await grupoStore.loadPeriodoAnio(selectedAnio.value);
+    console.log("Periodos cargados:", grupoStore.periodos);
+  } else {
+    grupoStore.periodoAnio = [];
+  }
+};
+
 
 const {
   query,
@@ -105,7 +114,7 @@ const {
   searchFields: ["nombre", "modulo.nombre_modulo", "docente.name"]
 });
 
-const onProgramaChange = () =>{}
+const onProgramaChange = () => { }
 </script>
 
 <template>
@@ -122,46 +131,30 @@ const onProgramaChange = () =>{}
           <div class="grid md:grid-cols-4 gap-4 items-center">
             <!-- Programa Académico -->
             <div>
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Programa Académico</label>
-              <BaseSelectGrupo
-                v-model="selec_id_programa"
-                :options="programasSelect"
-                label="name"
-                placeholder="Seleccione un programa"
-                @change="onProgramaChange"
-              />
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Ciclo</label>
+
+              <BaseSelectGrupo v-model="selectedCiclo" :options="cicloStore.ciclo" label="nombre_ciclo"
+                placeholder="Seleccione un ciclo" @change="onCicloChange" />
+
             </div>
 
             <!-- Año -->
-            <div>
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Año</label>
-              <BaseSelectGrupo
-                v-model="anio"
-                :options="anios"
-                label="label"
-                placeholder="Seleccione un año"
-                @change="filtrarPorSeleccion"
-              />
-            </div>
+            <BaseSelectGrupo v-model="selectedAnio" :options="grupoStore.anios" label="label"
+              placeholder="Seleccione un año" />
+
+
 
             <!-- Periodo -->
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
-              <BaseSelectGrupo
-                v-model="periodo"
-                :options="periodos"
-                label="label"
-                placeholder="Seleccione un periodo"
-                @change="filtrarPorSeleccion"
-              />
+              <BaseSelectGrupo v-model="periodo" :options="grupoStore.periodoAnio"
+                label="nombre_periodo" placeholder="Seleccione un periodo" @change="filtrarPorSeleccion" />
             </div>
 
             <!-- Botón Filtrar -->
             <div class="flex items-end pt-5">
-              <button
-                @click="filtrarPorSeleccion"
-                class="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md w-full"
-              >
+              <button @click="filtrarPorSeleccion"
+                class="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md w-full">
                 Filtrar
               </button>
             </div>
@@ -169,21 +162,12 @@ const onProgramaChange = () =>{}
         </div>
 
         <div class="flex-between flex-row-reverse mb-4">
-          <SearchBar
-            :totalResultados="gruposOrdenados.length"
-            :campoOrden="'nombre'"
-            @search="filtrarGrupos"
-          />
+          <SearchBar :totalResultados="gruposOrdenados.length" :campoOrden="'nombre'" @search="filtrarGrupos" />
           <div class="font-inter text-md w-full">Lista de grupos</div>
         </div>
       </div>
 
-      <Table
-        :paginacion="true"
-        :current-page="pagina"
-        :total-pages="totalPaginas"
-        @changePage="pagina = $event"
-      >
+      <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
         <THead>
           <Th>N°</Th>
           <Th>Nombre</Th>
@@ -200,28 +184,22 @@ const onProgramaChange = () =>{}
             <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
             <Td>{{ grupo.nombre ?? 'Grupo' }}</Td>
             <Td>{{ grupo.modulo?.descripcion }}</Td>
-            <Td>{{ grupo.docente?.user?.name }} {{ grupo.docente?.user?.apellido_paterno }} {{ grupo.docente?.user?.apellido_materno }}</Td>
+            <Td>{{ grupo.docente?.user?.name }} {{ grupo.docente?.user?.apellido_paterno }} {{
+              grupo.docente?.user?.apellido_materno }}</Td>
             <Td>{{ grupo.periodo?.nombre_periodo }}</Td>
-            <Td>{{ grupo.created_at?.slice(0, 10) ?? '---'}}</Td>
+            <Td>{{ grupo.created_at?.slice(0, 10) ?? '---' }}</Td>
             <Td>
-              <span
-                :class="grupo.status === 1
-                  ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
-                  : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'"
-                class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1"
-              >
+              <span :class="grupo.status === 1
+                ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
+                : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'"
+                class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
                 <span v-if="grupo.status === 1">Activo ✓</span>
                 <span v-else>Inactivo X</span>
               </span>
             </Td>
             <Td class="text-center text-gray-600 dark:text-gray-200">
-              <MenuTable
-                :actions="{ view: true, edit: true, delete: true, download: false }"
-                entity-label="grupo"
-                @view="showSlider(true, grupo)"
-                @edit="showSlider(true, grupo)"
-                @delete="onDelete(grupo)"
-              />
+              <MenuTable :actions="{ view: true, edit: true, delete: true, download: false }" entity-label="grupo"
+                @view="showSlider(true, grupo)" @edit="showSlider(true, grupo)" @delete="onDelete(grupo)" />
             </Td>
           </Tr>
         </TBody>

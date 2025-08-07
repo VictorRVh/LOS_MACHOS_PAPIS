@@ -101,10 +101,10 @@ const useGrupoStore = defineStore('grupo', () => {
         periodoAnio.value = response;
     };
 
-    const loadGruposFiltrados = async ({ id_programa, anio, id_periodo }) => {
+    const loadGruposFiltrados = async ({ id_ciclo, anio, id_periodo }) => {
         try {
             const response = await getGruposFiltrados({
-                id_programa,
+                id_ciclo,
                 anio,
                 id_periodo,
             });

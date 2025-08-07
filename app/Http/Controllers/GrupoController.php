@@ -185,13 +185,17 @@ class GrupoController extends Controller
         return response()->json($docentes);
     }
 
-    public function gruposPorProgramaAnioPeriodo(Request $request)
+    public function gruposPorCicloAnioPeriodo(Request $request)
     {
         $request->validate([
-            'id_programa' => 'required|uuid',
-            'anio'        => 'required|string',
-            'id_periodo'  => 'required|uuid',
+            'id_ciclo'   => 'required|uuid',
+            'anio'       => 'required|string',
+            'id_periodo' => 'required|uuid',
         ]);
+
+        $programaIds = ProgramaEstudio::where('id_ciclo', $request->id_ciclo)
+            ->where('año', $request->anio)
+            ->pluck('id');
 
         $grupos = Grupo::with([
             'programaEstudio:id,año,numero_rd',
@@ -203,11 +207,8 @@ class GrupoController extends Controller
             'docente:id,user_id,codigo_modular',
             'docente.user:id,name,apellido_paterno,apellido_materno'
         ])
-            ->where('id_programa', $request->id_programa)
+            ->whereIn('id_programa', $programaIds)
             ->where('id_periodo', $request->id_periodo)
-            ->whereHas('programaEstudio', function ($query) use ($request) {
-                $query->where('año', $request->anio);
-            })
             ->get();
 
         return response()->json($grupos);
@@ -232,17 +233,8 @@ class GrupoController extends Controller
 
     public function getPeriodosPorAnio($anio)
     {
-        // Buscar programas que tengan ese año
-        $programaIds = ProgramaEstudio::where('año', $anio)
-            ->pluck('id');
-
-        // Buscar periodos asociados a esos programas (a través del grupo)
-        $periodoIds = Grupo::whereIn('id_programa', $programaIds)
-            ->pluck('id_periodo')
-            ->unique();
-
-        // Traer los periodos finales
-        $periodos = Periodo::whereIn('id', $periodoIds)->get();
+        // Filtrar por el nombre del periodo que comience con el año
+        $periodos = Periodo::where('nombre_periodo', 'LIKE', "{$anio}-%")->get();
 
         return response()->json($periodos);
     }

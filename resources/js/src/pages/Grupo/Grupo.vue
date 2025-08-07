@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 
 import SearchBar from "../../components/head_table/headSearch.vue";
 import Table from "../../components/table/Table.vue";
@@ -35,10 +35,9 @@ const peridoStore = usePeriodoStore();
 
 const cicloStore = useCicloStore();
 
-// if (!grupoStore.grupos?.length) await grupoStore.loadGrupos();
+if (!grupoStore.grupos?.length) await grupoStore.loadGrupos();
 if (!programaStore.programa?.length) await programaStore.loadPrograma();
 if (!peridoStore.periodos?.length) await peridoStore.loadPeriodos();
-
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("grupo-crud");
 const { showConfirmModal, showToast } = useModalToast();
@@ -58,27 +57,31 @@ const onDelete = (grupo) => {
   });
 };
 
-const grupos = computed(() => grupoStore.grupos);
-
-const programaAcademico = ref('');
-const periodo = ref(null);
+const grupos = ref([]);;
 const selectedCiclo = ref(null)
-const anios = ref([])
-
 const selectedAnio = ref(null)
+const selectedPeriodo = ref(null)
 
-const periodos = ref([
-  { label: "2025-I", value: "2025-1" },
-  { label: "2025-II", value: "2025-2" },
-]);
+onMounted(async () => {
+  await grupoStore.loadGrupos();
+  grupos.value = grupoStore.grupos
+});
 
-const filtrarPorSeleccion = () => {
-  console.log("Filtrar por:", {
-    programa: programaAcademico.value,
-    anio: anio.value,
-    periodo: periodo.value,
+const filtrarPorSeleccion = async () => {
+  if (!selectedCiclo.value || !selectedAnio.value || !selectedPeriodo.value) {
+    showToast('Seleccionar todos los filtros.')
+    return;
+  }
+
+  await grupoStore.loadGruposFiltrados({
+    id_ciclo: selectedCiclo.value,
+    anio: selectedAnio.value,
+    id_periodo: selectedPeriodo.value,
   });
+
+  grupos.value = grupoStore.gruposFiltrados;
 };
+
 
 const onCicloChange = async () => {
   if (selectedCiclo.value) {
@@ -114,7 +117,6 @@ const {
   searchFields: ["nombre", "modulo.nombre_modulo", "docente.name"]
 });
 
-const onProgramaChange = () => { }
 </script>
 
 <template>
@@ -139,16 +141,17 @@ const onProgramaChange = () => { }
             </div>
 
             <!-- Año -->
-            <BaseSelectGrupo v-model="selectedAnio" :options="grupoStore.anios" label="label"
-              placeholder="Seleccione un año" />
-
-
+            <div>
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
+              <BaseSelectGrupo v-model="selectedAnio" :options="grupoStore.anios" label="label"
+                placeholder="Seleccione un año" @change="onAnioChange" />
+            </div>
 
             <!-- Periodo -->
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
-              <BaseSelectGrupo v-model="periodo" :options="grupoStore.periodoAnio"
-                label="nombre_periodo" placeholder="Seleccione un periodo" @change="filtrarPorSeleccion" />
+              <BaseSelectGrupo v-model="selectedPeriodo" :options="grupoStore.periodoAnio" label="nombre_periodo"
+                placeholder="Seleccione un periodo" />
             </div>
 
             <!-- Botón Filtrar -->

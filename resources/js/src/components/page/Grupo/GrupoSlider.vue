@@ -16,9 +16,9 @@ import BaseSelectCiclo from '../../ui/BaseSelectCiclo.vue';
 
 import useValidation from '../../../composables/useValidation';
 import useHttpRequest from '../../../composables/useHttpRequest';
-import useUtils from '../../../composables/useUtils';
 import useModalToast from '../../../composables/useModalToast';
 import useCicloStore from '../../../store/Ciclo/useCicloStore';
+import usePeriodoStore from '../../../store/Periodo/usePeriodoStore'
 
 const props = defineProps({
     show: { type: Boolean, default: () => false },
@@ -31,6 +31,7 @@ const programaStore = useProgramaStore();
 const grupoStore = useGrupoStore();
 const convenioStore = useConvenioStore();
 const cicloStore = useCicloStore();
+const periodoStore = usePeriodoStore();
 
 const { store: createGrupo, saving, update: updateGrupo, updating } = useHttpRequest('/grupo');
 const { runYupValidation } = useValidation();
@@ -48,6 +49,7 @@ if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
 if (!docenteStore.docentes?.length) await docenteStore.loadDocentes();
 if (!docenteStore.docentesGrupo?.length) await docenteStore.loadDocentesGrupo();
 if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
+if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
 
 const title = computed(() =>
   props.grupo ? `Actualizar Docente "${props.grupo?.name}"` : 'Añadir Nuevo  Docente'
@@ -96,14 +98,6 @@ const onEspecialidadChange = async (especialidadId) => {
   formData.value.id_modulo = null;
   formData.value.id_periodo = null;
   await grupoStore.loadModulos(especialidadId);
-};
-
-const onModuloChange = async (moduloId) => {
-  formData.value.id_periodo = null;
-  await grupoStore.loadPeriodo(moduloId);
-  if (grupoStore.periodo.length > 0) {
-    formData.value.id_periodo = grupoStore.periodo[0].id;
-  }
 };
 
 const onSubmit = async () => {
@@ -173,13 +167,8 @@ const onSubmit = async () => {
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormLabelError label="Periodo" required>
-            <BaseSelectGrupo
-              v-model="formData.id_periodo"
-              :options="grupoStore.periodo"
-              label="nombre"
-              placeholder="Seleccione un periodo"
-              disabled
-            />
+            <BaseSelectCiclo v-model="formData.id_periodo" :options="periodoStore.periodos" label="nombre_periodo"
+          placeholder="Seleccione un ciclo" />
           </FormLabelError>
 
           <FormLabelError label="Convenio" required>

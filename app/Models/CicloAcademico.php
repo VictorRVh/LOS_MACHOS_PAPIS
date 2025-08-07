@@ -15,8 +15,12 @@ class CicloAcademico extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 'nombre_ciclo', 'descripcion'
+        'id',
+        'nombre_ciclo',
+        'descripcion'
     ];
+
+    protected $hidden = ['created_at', 'updated_at'];
 
     protected static function boot()
     {
@@ -40,4 +44,3 @@ class CicloAcademico extends Model
         return $this->hasMany(EspecialidadMadre::class, 'id_ciclo', 'id');
     }
 }
-

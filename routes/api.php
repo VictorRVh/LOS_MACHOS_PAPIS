@@ -463,7 +463,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // grupos filtrados
     Route::get('gruposFiltrados', [
         \App\Http\Controllers\GrupoController::class,
-        'gruposPorProgramaAnioPeriodo',
+        'gruposPorCicloAnioPeriodo',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
     // Rutas nuevas para filtro de grupo
@@ -474,7 +474,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('periodoByAnio/{idAnio}', [
         \App\Http\Controllers\GrupoController::class,
-        'getAniosPorCiclo',
+        'getPeriodosPorAnio',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
 

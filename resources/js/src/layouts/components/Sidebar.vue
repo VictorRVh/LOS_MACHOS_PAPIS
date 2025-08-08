@@ -29,7 +29,8 @@ const navLinks = [
     { name: 'Especialidad', routeName: 'especialidad', icon: AcademicCapIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
     { name: 'Comisión', routeName: 'comision', icon: UserGroupIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
     { name: 'Programa', routeName: 'programa', icon: RectangleStackIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
-    { name: 'Matricula', routeName: 'matricula', icon: IdentificationIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
+    // LÍNEA CORREGIDA: 'matricula' ahora es 'matricula.index'
+    { name: 'Matricula', routeName: 'matricula.index', icon: IdentificationIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
     { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
 ];
 

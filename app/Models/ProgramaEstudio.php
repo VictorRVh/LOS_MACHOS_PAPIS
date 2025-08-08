@@ -59,6 +59,6 @@ class ProgramaEstudio extends Model
 
     public function especialidadPrograma()
     {
-        return $this->hasMany(EspecialidadPrograma::class, 'id_programa');
+        return $this->hasMany(EspecialidadPrograma::class, 'id_programa', 'id');
     }
 }

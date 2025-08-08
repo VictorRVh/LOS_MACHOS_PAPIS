@@ -38,7 +38,7 @@ class EspecialidadPrograma extends Model
 
     public function especialidadMadre()
     {
-        return $this->belongsTo(EspecialidadMadre::class, 'id_especialidad');
+        return $this->belongsTo(EspecialidadMadre::class, 'id_especialidad', 'id');
     }
 
     public function programaEstudio()

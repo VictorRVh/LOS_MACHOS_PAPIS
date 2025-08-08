@@ -11,10 +11,27 @@ const useMatriculaStore = defineStore('matricula', () => {
         destroy: deleteMatricula,
         loading: matriculasLoading,
         initialLoading: matriculasFirstTimeLoading,
-    } = useHttpRequest('/matriculas'); // Asegúrate que la ruta del API sea correcta
+    } = useHttpRequest('/matricula'); // Asegúrate que la ruta del API sea correcta
+
+    const {
+        show: getProgramaEspecialidadByCiclo,
+        // loading: moduloByEspecialidadLoading,
+        // initialLoading: moduloByEspecialidadFirstTimeLoading,
+    } = useHttpRequest('/programaByCiclo');
+
+    const {
+        show: getGruposByEspecialidad,
+        // loading: moduloByEspecialidadLoading,
+        // initialLoading: moduloByEspecialidadFirstTimeLoading,
+    } = useHttpRequest('/grupoByEspecialidad');
 
     const matriculas = ref([]);
     const matriculaSeleccionada = ref(null);
+
+    const programaEspecialidad = ref([]);
+    const programaEspecialidadSeleccionado = ref(null);
+
+    const gruposDisponibles = ref([])
 
     const loadMatriculas = async () => {
         const response = await getMatriculas();
@@ -46,6 +63,18 @@ const useMatriculaStore = defineStore('matricula', () => {
         }
     };
 
+    const programaEspecialidadByCiclo = async (id) => {
+        const response = await getProgramaEspecialidadByCiclo(id);
+        console.log('respuesta de cicli selecionadp', response)
+        programaEspecialidad.value = response;
+    };
+
+    const gruposByEspecialidad = async (id) => {
+        const response = await getGruposByEspecialidad(id);
+        console.log('respuesta de la esp seleccionadad', response)
+        gruposDisponibles.value = response;
+    };
+
     return {
         matriculas,
         matriculaSeleccionada,
@@ -55,6 +84,12 @@ const useMatriculaStore = defineStore('matricula', () => {
         findMatricula,
         saveMatricula,
         removeMatricula,
+
+        programaEspecialidadByCiclo,
+        programaEspecialidad,
+
+        gruposByEspecialidad,
+        gruposDisponibles
     };
 });
 

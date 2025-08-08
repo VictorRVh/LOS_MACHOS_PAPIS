@@ -783,4 +783,38 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\ComisionUsuarioController::class,
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+
+    // API MATRICULA
+
+    Route::get('matricula', [
+        \App\Http\Controllers\MatriculaController::class,
+        'index',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+    Route::post('matricula', [
+        \App\Http\Controllers\MatriculaController::class,
+        'store',
+    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+
+    Route::patch('matricula/{id}', [
+        \App\Http\Controllers\MatriculaController::class,
+        'update',
+    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+
+    Route::delete('matricula/{id}', [
+        \App\Http\Controllers\MatriculaController::class,
+        'destroy',
+    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+
+    // programa por ciclo
+
+    Route::get('programaByCiclo/{idCiclo}', [
+        \App\Http\Controllers\MatriculaController::class,
+        'getProgramasPorCiclo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+    Route::get('grupoByEspecialidad/{idEspecialidad}', [
+        \App\Http\Controllers\MatriculaController::class,
+        'getGruposPorEspecialidad',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 });

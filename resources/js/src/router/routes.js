@@ -3,29 +3,29 @@ import useEspecialidadProgramaStore from '../store/EspecialidadPrograma/useEspec
 
 export default [
     { path: '/', name: 'login', component: () => import('../pages/Login.vue'), meta: { layout: 'full', permissions: [], }, },
-    { path: '/start', name: 'start', component: () => import('../pages/Start.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-usuarios', 'ver-usuarios'], breadcrumb: [{ text: 'Inicio', to: { name: 'start' } }] }, },
-    { path: '/groups', name: 'groups', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-usuarios', 'ver-usuarios'], }, },
-    { path: '/programs', name: 'programs', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-usuarios', 'ver-usuarios'], }, },
-    { path: '/califications', name: 'califications', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-usuarios', 'ver-usuarios'], }, },
-    { path: '/users', name: 'users', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-usuarios', 'ver-usuarios'], breadcrumb: [{ text: 'Usuarios', to: { name: 'users' } }] }, },
-    { path: '/users/crear', name: 'users.crear', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['crear-usuarios'], breadcrumb: [{ text: 'Usuarios', to: { name: 'users' } }, { text: 'Crear' }] } },
-    { path: '/roles', name: 'roles', component: () => import('../pages/Roles.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-roles', 'ver-roles'], breadcrumb: [{ text: 'Roles', to: { name: 'roles' } }] } },
-    { path: '/roles/crear', name: 'roles.crear', component: () => import('../pages/RolesCrear.vue'), meta: { layout: 'dashboard', breadcrumb: [{ text: 'Roles', to: { name: 'roles' } }, { text: 'Crear' }] } },
-    { path: '/roles/confirmar', name: 'roles.confirmar', component: () => import('../pages/Confirmar.vue'), meta: { layout: 'dashboard', breadcrumb: [{ text: 'Roles', to: { name: 'roles' } }, { text: 'Crear', to: { name: 'roles.crear' } }, { text: 'Confirmar' }] } },
-    { path: '/permissions', name: 'permissions', component: () => import('../pages/newPermission.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], breadcrumb: [{ text: 'Permisos', to: { name: 'permissions' } }] }, },
-    { path: '/docente', name: 'docente', component: () => import('../pages/Docente/Docente.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], breadcrumb: [{ text: 'Docentes', to: { name: 'docente' } }] }, },
-    { path: '/convenio', name: 'convenio', component: () => import('../pages/Convenio/Convenio.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], breadcrumb: [{ text: 'Convenios', to: { name: 'convenio' } }] }, },
-    { path: '/periodo', name: 'periodo', component: () => import('../pages/Periodo/Periodo.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], breadcrumb: [{ text: 'Periodos', to: { name: 'periodo' } }] }, },
-    { path: '/administrativos', name: 'administrativos', component: () => import('../pages/Administrativo/Administrativo.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], breadcrumb: [{ text: 'Administrativos', to: { name: 'administrativos' } }] }, },
-    { path: '/especialidad', name: 'especialidad', component: () => import('../pages/Especialidad/Especialidad.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], breadcrumb: [{ text: 'Especialidades', to: { name: 'especialidad' } }] }, },
-    { path: '/comision', name: 'comision', component: () => import('../pages/Comision/Comision.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comision' } }] }, },
+    { path: '/start', name: 'start', component: () => import('../pages/Start.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Inicio', to: { name: 'start' } }] }, },
+    { path: '/groups', name: 'groups', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
+    { path: '/programs', name: 'programs', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
+    { path: '/califications', name: 'califications', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
+    { path: '/users', name: 'users', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Usuarios', to: { name: 'users' } }] }, },
+    { path: '/users/crear', name: 'users.crear', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [ { text: 'Usuarios', to: { name: 'users' } }, { text: 'Crear' } ] } },
+    { path: '/roles', name: 'roles', component: () => import('../pages/Roles.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Roles', to: { name: 'roles' } }] } },
+    { path: '/roles/crear', name: 'roles.crear', component: () => import('../pages/RolesCrear.vue'), meta: { layout: 'dashboard', breadcrumb: [ { text: 'Roles', to: { name: 'roles' } }, { text: 'Crear' } ] } },
+    { path: '/roles/confirmar', name: 'roles.confirmar', component: () => import('../pages/Confirmar.vue'), meta: { layout: 'dashboard', breadcrumb: [ { text: 'Roles', to: { name: 'roles' } }, { text: 'Crear', to: { name: 'roles.crear' } }, { text: 'Confirmar' } ] } },
+    { path: '/permissions', name: 'permissions', component: () => import('../pages/newPermission.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Permisos', to: { name: 'permissions' } }] }, },
+    { path: '/docente', name: 'docente', component: () => import('../pages/Docente/Docente.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Docentes', to: { name: 'docente' } }] }, },
+    { path: '/convenio', name: 'convenio', component: () => import('../pages/Convenio/Convenio.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Convenios', to: { name: 'convenio' } }] }, },
+    { path: '/periodo', name: 'periodo', component: () => import('../pages/Periodo/Periodo.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Periodos', to: { name: 'periodo' } }] }, },
+    { path: '/administrativos', name: 'administrativos', component: () => import('../pages/Administrativo/Administrativo.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Administrativos', to: { name: 'administrativos' } }] }, },
+    { path: '/especialidad', name: 'especialidad', component: () => import('../pages/Especialidad/Especialidad.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Especialidades', to: { name: 'especialidad' } }] }, },
+    { path: '/comision', name: 'comision', component: () => import('../pages/Comision/Comision.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comision' } }] }, },
     {
         path: '/programa',
         name: 'programa',
         component: () => import('../pages/Programa/Programa.vue'),
         meta: {
             layout: 'dashboard',
-            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            permissions: ['todo-acceso-permisos'],
             breadcrumb: [{ text: 'Programas de Estudio', to: { name: 'programa' } }]
         },
     },
@@ -36,7 +36,7 @@ export default [
         props: true,
         meta: {
             layout: 'dashboard',
-            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            permissions: ['todo-acceso-permisos'],
             parent: 'programa',
             breadcrumb: async (route) => {
                 const programaStore = useProgramaStore();
@@ -55,7 +55,7 @@ export default [
         props: true,
         meta: {
             layout: 'dashboard',
-            permissions: ['todo-acceso-permisos', 'ver-permisos'],
+            permissions: ['todo-acceso-permisos'],
             parent: 'especialidadPrograma',
             breadcrumb: async (route) => {
                 const espProgramaStore = useEspecialidadProgramaStore();
@@ -73,29 +73,52 @@ export default [
             }
         },
     },
-    { path: '/programa/crear', name: 'programa.crear', component: () => import('../pages/Programa/Programa.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], breadcrumb: [{ text: 'Programas de Estudio', to: { name: 'programa' } }, { text: 'Crear' }] } },
-    { path: '/programa/editar/:id', name: 'programa.editar', component: () => import('../pages/Programa/Programa.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], breadcrumb: [{ text: 'Programas de Estudio', to: { name: 'programa' } }] }, },
-    { path: '/especialidadPrograma/:id/editar', name: 'especialidadPrograma.editar', component: () => import('../pages/EspecialidadPrograma/EspecialidadPrograma.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], }, },
-    { path: '/matricula', name: 'matricula', component: () => import('../pages/Estudiante/Estudiante.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula' } }] }, },
-    { path: '/grupo', name: 'grupo', component: () => import('../pages/Grupo/Grupo.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos', 'ver-permisos'], }, },
+    { path: '/programa/crear', name: 'programa.crear', component: () => import('../pages/Programa/Programa.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [ { text: 'Programas de Estudio', to: { name: 'programa' } }, { text: 'Crear' } ] } },
+    { path: '/programa/editar/:id', name: 'programa.editar', component: () => import('../pages/Programa/Programa.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Programas de Estudio', to: { name: 'programa' } }] }, },
+    { path: '/especialidadPrograma/:id/editar', name: 'especialidadPrograma.editar', component: () => import('../pages/EspecialidadPrograma/EspecialidadPrograma.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
 
-    // --- NUEVA RUTA INTEGRADA AQUÍ ---
+    // Matrícula
     {
-        path: '/configuracion-cuenta',
-        name: 'cuenta.editar',
-        component: () => import('../pages/edit_date.vue'),
+        path: '/matricula',
+        name: 'matricula.index',
+        component: () => import('../pages/Matricula/Matricula.vue'),
         meta: {
             layout: 'dashboard',
-            breadcrumb: [{ text: 'Configuración de mi Cuenta' }]
-        }
+            permissions: ['todo-acceso-permisos'],
+            breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }]
+        },
     },
     {
-        path: '/notificaciones',
-        name: 'notificaciones.index',
-        component: () => import('../pages/FullNotificaciones.vue'),
+        path: '/matricula/registrar',
+        name: 'matricula.registrar',
+        component: () => import('../pages/Matricula/MatriculaForm.vue'),
         meta: {
             layout: 'dashboard',
-            breadcrumb: [{ text: 'Todas las Notificaciones' }]
-        }
+            permissions: ['todo-acceso-permisos'],
+            breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }, { text: 'Registrar' }]
+        },
     },
+    {
+        path: '/matricula/grupo/:id',
+        name: 'matricula.grupo.detalle',
+        component: () => import('../pages/Matricula/GrupoDetalle.vue'),
+        props: true,
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos'],
+            parent: 'matricula.index',
+            breadcrumb: { text: 'Detalle de Grupo' }
+        },
+    },
+
+    // Grupo
+    { path: '/grupo', name: 'grupo', component: () => import('../pages/Grupo/Grupo.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
+
+    // Cuenta y notificaciones
+    { path: '/configuracion-cuenta', name: 'cuenta.editar', component: () => import('../pages/edit_date.vue'), meta: { layout: 'dashboard', breadcrumb: [{ text: 'Configuración de mi Cuenta' }] } },
+    { path: '/notificaciones', name: 'notificaciones.index', component: () => import('../pages/FullNotificaciones.vue'), meta: { layout: 'dashboard', breadcrumb: [{ text: 'Todas las Notificaciones' }] } },
+
+    // Asistencia biométrica
+    { path: '/mi-asistencia', name: 'biometrico.asistencia', component: () => import('../pages/Biometrico/AsistenciaBiometrica.vue'), meta: { layout: 'dashboard', breadcrumb: [{ text: 'Mi Asistencia Biométrica' }] } },
+    { path: '/mi-asistencia/:idAsignacion', name: 'biometrico.detalle', component: () => import('../pages/Biometrico/AsistenciaDetalle.vue'), props: true, meta: { layout: 'dashboard', parent: 'biometrico.asistencia', breadcrumb: { text: 'Detalle de Asistencia' } } },
 ];

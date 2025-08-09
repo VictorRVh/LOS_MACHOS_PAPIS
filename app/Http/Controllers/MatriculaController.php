@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Estudiante;
 use App\Models\Grupo;
 use App\Models\Matricula;
+use App\Models\Pago;
 use App\Models\ProgramaEstudio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,17 +29,74 @@ class MatriculaController extends Controller
     // POST /api/matriculas
     public function store(Request $request)
     {
-        $request->validate([
-            'id_grupo'      => 'required|uuid|exists:grupo,id',
-            'turno'         => 'required|string|max:10',
-            'id_estudiante' => 'required|uuid|exists:estudiante,id',
-            'id_pago'       => 'nullable|uuid|exists:pago,id',
-            'reserva'       => 'nullable|boolean'
-        ]);
+        DB::beginTransaction();
 
-        $matricula = Matricula::create($request->all());
+        try {
+            // 1️⃣ Crear estudiante
+            $estudiante = Estudiante::create([
+                'tipo_documento'       => $request->tipo_documento,
+                'nro_documento'        => $request->nro_documento,
+                'apellido_paterno'     => $request->apellido_paterno,
+                'apellido_materno'     => $request->apellido_materno,
+                'nombre'               => $request->nombre,
+                'sexo'                 => $request->sexo,
+                'fecha_nacimiento'     => $request->fecha_nacimiento,
+                'pais_nacimiento'      => $request->pais_nacimiento,
+                'departamento_nacimiento' => $request->departamento_nacimiento,
+                'provincia_nacimiento' => $request->provincia_nacimiento,
+                'distrito_nacimiento'  => $request->distrito_nacimiento,
+                'lugar_nacimiento'     => $request->lugar_nacimiento,
+                'direccion_residencia' => $request->direccion_residencia,
+                'correo'               => $request->correo,
+                'celular'              => $request->celular,
+                'estado_civil'         => $request->estado_civil,
+                'grado_instruccion'    => $request->grado_instruccion,
+                'trabaja'              => $request->trabaja,
+                'puesto_trabajo'       => $request->puesto_trabajo,
+                'carga_familiar'       => $request->carga_familiar,
+                'internet_casa'        => $request->internet_casa,
+                'operador_celular'     => $request->operador_celular,
+                'equipo_virtual'       => $request->equipo_virtual,
+                'discapacidad'         => $request->discapacidad,
+                'celular_referencia'   => $request->celular_referencia,
+                'parentesco_referencia' => $request->parentesco_referencia,
+                'lengua_originaria'    => $request->lengua_originaria
+            ]);
 
-        return response()->json(['message' => 'Matrícula registrada con éxito', 'data' => $matricula], 201);
+            // 2️⃣ Crear pago
+            $pago = Pago::create([
+                'condicion' => $request->condicion,
+                'nro_recibo' => $request->nro_recibo,
+                'aporte' => $request->aporte,
+                'status' => $request->status ?? 0
+            ]);
+
+            // 3️⃣ Crear matrícula
+            $matricula = Matricula::create([
+                'id_grupo' => $request->id_grupo ?? $request->grupo['value'], // desde el select
+                'turno' => $request->turno,
+                'id_estudiante' => $estudiante->id,
+                'id_pago' => $pago->id,
+                'reserva' => $request->reserva ?? 0
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Matrícula registrada con éxito',
+                'data' => [
+                    'matricula' => $matricula,
+                    'estudiante' => $estudiante,
+                    'pago' => $pago
+                ]
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Error al registrar matrícula',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // GET /api/matriculas/{id}
@@ -124,16 +183,16 @@ class MatriculaController extends Controller
                     'horas' => $grupo->modulo->horas ?? null,
                     'seccion' => $grupo->seccion,
                     'turno' => $grupo->turno,
-                    'duracion' => $grupo->fecha_inicio . ' a ' . $grupo->fecha_fin, 
+                    'duracion' => $grupo->fecha_inicio . ' a ' . $grupo->fecha_fin,
                     // 'convenio' => $grupo->convenio ?? null,
                     'convenio' => $grupo->convenio->nombre_institucion ?? null,
                     'docente' => $grupo->docente && $grupo->docente->user
-                    ? trim(
-                        $grupo->docente->user->apellido_paterno . ' ' .
-                        $grupo->docente->user->apellido_materno . ' ' .
-                        $grupo->docente->user->name
-                      )
-                    : null
+                        ? trim(
+                            $grupo->docente->user->apellido_paterno . ' ' .
+                                $grupo->docente->user->apellido_materno . ' ' .
+                                $grupo->docente->user->name
+                        )
+                        : null
                 ];
             });
 

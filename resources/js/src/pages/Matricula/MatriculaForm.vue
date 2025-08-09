@@ -12,6 +12,10 @@ import useCicloStore from '../../store/Ciclo/useCicloStore';
 import BaseSelectCiclo from '../../components/ui/BaseSelectCiclo.vue';
 import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 import BaseSelectGrupo from '../../components/ui/BaseSelectGrupo.vue';
+import useHttpRequest from '../../composables/useHttpRequest';
+
+
+const { store: createMatricula, saving, update: updateMatricula, updating } = useHttpRequest('/matricula');
 
 const router = useRouter();
 const { showToast } = useModalToast();
@@ -24,9 +28,45 @@ if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
 
 // --- SIMULACIÓN DE DATOS Y ESTADOS ---
 const buscandoDni = ref(false);
-const saving = ref(false);
 const formData = ref({
+
+    // Datos del grupo
     id_grupo: null,
+
+    // Datos del estudiante
+    tipo_documento: '',
+    nro_documento: '',
+    apellido_paterno: '',
+    apellido_materno: '',
+    nombre: '',
+    sexo: '',
+    fecha_nacimiento: '',
+    pais_nacimiento: '',
+    departamento_nacimiento: '',
+    provincia_nacimiento: '',
+    distrito_nacimiento: '',
+    lugar_nacimiento: '',
+    direccion_residencia: '',
+    correo: '',
+    celular: '',
+    estado_civil: '',
+    grado_instruccion: '',
+    trabaja: '',
+    puesto_trabajo: '',
+    carga_familiar: '',
+    internet_casa: '',
+    operador_celular: '',
+    equipo_virtual: '',
+    discapacidad: '',
+    celular_referencia: '',
+    parentesco_referencia: '',
+    lengua_originaria: '',
+
+    condicion: "",
+    nro_recibo: "",
+    aporte: "",
+    status: 0,
+
     id_ciclo: null,
     id_especialidad: null,
     convenio: null,
@@ -91,6 +131,8 @@ const onGrupoChange = (selected) => {
 
     if (!selected || !selected.data) return
 
+    formData.value.id_grupo = selected.data.id
+
     formData.value.convenio = selected.data.convenio
     formData.value.duracion = selected.data.duracion
     formData.value.horas = selected.data.horas
@@ -110,14 +152,39 @@ function buscarPorDNI() {
     }, 1000);
 }
 
-function onSubmit() {
-    saving.value = true;
-    setTimeout(() => {
-        showToast('Estudiante registrado y matriculado con éxito (simulado).');
-        saving.value = false;
-        router.push({ name: 'matricula.index' });
-    }, 1500);
-}
+const onSubmit = async () => {
+    // formErrors.value = {};
+    // const { isValid, errors } = await runYupValidation(schema, formData.value);
+
+    // if (!isValid) {
+    //     formErrors.value = errors;
+    //     return;
+    // }
+
+    try {
+        if (formData.value.id) {
+            // Modo edición
+            console.log('TODOS LOS DATOS PARA MATRICULLA', formData.value)
+
+            // await createMatricula(formData.value)
+            console.log("Grupo actualizado");
+
+        } else {
+            // Modo creación
+            // await axios.post("/api/grupos", formData.value);
+
+            await createMatricula(formData.value)
+
+            console.log('TODOS LOS DATOS PARA MATRICULLA', formData.value)
+
+            console.log("Grupo creado");
+        }
+    } catch (error) {
+        console.error("Error al guardar el grupo", error);
+    }
+};
+
+
 </script>
 
 <template>
@@ -167,7 +234,7 @@ function onSubmit() {
                         <div class="space-y-4">
                             <FormLabelError label="Tipo documento *">
                                 <vSelect v-model="formData.tipo_documento"
-                                    :options="['DNI - DOC. NACIONAL DE IDENTIDAD']" :clearable="false" />
+                                    :options="['DNI']" :clearable="false" />
                             </FormLabelError>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Num. documento

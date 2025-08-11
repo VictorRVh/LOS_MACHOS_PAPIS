@@ -62,10 +62,10 @@ const selectedCiclo = ref(null)
 const selectedAnio = ref(null)
 const selectedPeriodo = ref(null)
 
-onMounted(async () => {
-  await grupoStore.loadGrupos();
-  grupos.value = grupoStore.grupos
-});
+// onMounted(async () => {
+//   await grupoStore.loadGrupos();
+//   grupos.value = grupoStore.grupos
+// });
 
 const filtrarPorSeleccion = async () => {
   if (!selectedCiclo.value || !selectedAnio.value || !selectedPeriodo.value) {
@@ -186,7 +186,7 @@ const {
           <template v-for="(especialidad, espIndex) in grupos" :key="especialidad.especialidad.id">
             <!-- Fila de la especialidad -->
             <Tr class="bg-gray-100 dark:bg-gray-800 font-bold">
-              <Td colspan="8">{{ especialidad.especialidad.nombre }}</Td>
+              <Td colspan="8" class="uppercase">{{ especialidad.especialidad.nombre }}</Td>
             </Tr>
 
             <!-- Filas de módulos -->

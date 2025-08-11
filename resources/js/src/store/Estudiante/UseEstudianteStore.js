@@ -1,41 +1,22 @@
-import { ref } from 'vue';
 import { defineStore } from 'pinia';
-
-import useHttpRequest from '../../composables/useHttpRequest';
+import axios from 'axios';
 
 const useEstudianteStore = defineStore('estudiante', () => {
-    const {
-        index: getEstudiantes,
-        loading: estudiantesLoading,
-        initialLoading: estudiantesFirstTimeLoading,
-    } = useHttpRequest('/estudiante');
-
-    const estudiante = ref(null);
-    const estudiantes = ref([]);
-    const requiereCambioPassword = ref(false);
-
-    const setEstudiante = (authEstudiante) => {
-        estudiante.value = authEstudiante;
-    };
-
-    const setRequiereCambioPassword = (valor) => {
-        requiereCambioPassword.value = valor;
-    };
-
-    const loadEstudiantes = async () => {
-        const response = await getEstudiantes();
-        estudiantes.value = response;
+    const buscarPorDni = async (dni) => {
+        try {
+            const response = await axios.post('/api/buscar-dni', { dni });
+            if (response.data && response.data.success) {
+                return response.data;
+            }
+            return { success: false, message: response.data.message || 'DNI no encontrado' };
+        } catch (error) {
+            console.error("Error al consultar DNI:", error);
+            return { success: false, message: 'Error en la consulta de DNI.' };
+        }
     };
 
     return {
-        estudiante,
-        setEstudiante,
-        requiereCambioPassword,
-        setRequiereCambioPassword,
-        estudiantes,
-        estudiantesLoading,
-        estudiantesFirstTimeLoading,
-        loadEstudiantes,
+        buscarPorDni,
     };
 });
 

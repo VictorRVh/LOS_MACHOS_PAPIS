@@ -1,3 +1,5 @@
+// Archivo: resources/js/src/router/index.js (o como se llame tu archivo de rutas)
+
 import useProgramaStore from '../store/Programa/useProgramaStore';
 import useEspecialidadProgramaStore from '../store/EspecialidadPrograma/useEspecialidadProgramaStore';
 
@@ -77,7 +79,7 @@ export default [
     { path: '/programa/editar/:id', name: 'programa.editar', component: () => import('../pages/Programa/Programa.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Programas de Estudio', to: { name: 'programa' } }] }, },
     { path: '/especialidadPrograma/:id/editar', name: 'especialidadPrograma.editar', component: () => import('../pages/EspecialidadPrograma/EspecialidadPrograma.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
 
-    // Matrícula
+    // --- MÓDULO DE MATRÍCULA (ESTRUCTURA CORREGIDA) ---
     {
         path: '/matricula',
         name: 'matricula.index',
@@ -95,7 +97,17 @@ export default [
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos'],
-            breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }, { text: 'Registrar' }]
+            breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }, { text: 'Matricular Estudiante' }]
+        },
+    },
+    {
+        path: '/matricula/grupos',
+        name: 'matricula.grupos',
+        component: () => import('../pages/Matricula/ListaGrupos.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos'],
+            breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }, { text: 'Lista por Grupos' }]
         },
     },
     {
@@ -106,10 +118,21 @@ export default [
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos'],
-            parent: 'matricula.index',
+            parent: 'matricula.grupos', // Su padre es la lista de grupos
             breadcrumb: { text: 'Detalle de Grupo' }
         },
     },
+    {
+        path: '/matricula/reservas',
+        name: 'matricula.reservas',
+        component: () => import('../pages/Matricula/Reservas.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos'],
+            breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }, { text: 'Estudiantes con Reserva' }]
+        },
+    },
+    // --- FIN DEL MÓDULO DE MATRÍCULA ---
 
     // Grupo
     { path: '/grupo', name: 'grupo', component: () => import('../pages/Grupo/Grupo.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },

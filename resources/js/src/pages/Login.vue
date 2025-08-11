@@ -43,7 +43,7 @@ const onSignIn = async () => {
         userStore.setUser(response.user);
         // userStore.setRequiereCambioPassword(response.requiereCambioPassword); 
 
-        await pushToRoute({ name: 'users' }); 
+        await pushToRoute({ name: 'start' }); 
     }
 };
 

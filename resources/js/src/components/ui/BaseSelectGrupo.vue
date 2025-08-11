@@ -5,6 +5,7 @@ import 'vue-select/dist/vue-select.css';
 const props = defineProps({
   modelValue: [String, Number, Object, null],
   options: { type: Array, default: () => [] },
+  label: { type: String, default: 'name' },
   placeholder: { type: String, default: 'Seleccione una opción' },
   disabled: { type: Boolean, default: false },
 });
@@ -20,7 +21,7 @@ const updateValue = (val) => {
 <template>
   <v-select
     :options="options"
-    label="name"
+    :label="label"
     :reduce="option => option?.id ?? option"
     :modelValue="modelValue"
     @update:modelValue="updateValue"

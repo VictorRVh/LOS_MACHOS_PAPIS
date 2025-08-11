@@ -72,7 +72,7 @@ class EspecialidadMadreController extends Controller
 
         $especialidad->delete();
 
-        return response()->json(['message' => 'Especialidad eliminada']);
+        return response()->json(['message' => 'Especialidad eliminada'], 204);
     }
 
     public function getEspecialidadesPorCiclo($idCiclo)

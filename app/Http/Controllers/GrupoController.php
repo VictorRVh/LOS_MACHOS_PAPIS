@@ -193,10 +193,12 @@ class GrupoController extends Controller
             'id_periodo' => 'required|uuid',
         ]);
 
+        // Buscar IDs de programas (incluyendo rangos de año como 2025-2026)
         $programaIds = ProgramaEstudio::where('id_ciclo', $request->id_ciclo)
-            ->where('año', $request->anio)
+            ->where('año', 'like', '%' . $request->anio . '%')
             ->pluck('id');
 
+        // Cargar grupos y relaciones
         $grupos = Grupo::with([
             'programaEstudio:id,año,numero_rd',
             'especialidad:id,id_especialidad,id_programa',
@@ -211,8 +213,61 @@ class GrupoController extends Controller
             ->where('id_periodo', $request->id_periodo)
             ->get();
 
-        return response()->json($grupos);
+        // Agrupar por especialidad y mapear módulos con datos extra
+        $resultado = $grupos->groupBy('especialidad.id')->map(function ($items) {
+            return [
+                'especialidad' => [
+                    'id' => $items->first()->especialidad->id,
+                    'nombre' => $items->first()->especialidad->especialidadMadre->nombre_especialidad ?? null
+                ],
+                'modulos' => $items->map(function ($grupo) {
+                    return [
+                        'id_grupo'       => $grupo->id,
+                        'programa'       => [
+                            'id'     => $grupo->programaEstudio->id ?? null,
+                            'nombre' => $grupo->programaEstudio->numero_rd ?? null,
+                            'anio'   => $grupo->programaEstudio->año ?? null
+                        ],
+                        'especialidad'   => [
+                            'id'     => $grupo->especialidad->id ?? null,
+                            'nombre' => $grupo->especialidad->especialidadMadre->nombre_especialidad ?? null
+                        ],
+                        'modulo'         => [
+                            'id'           => $grupo->modulo->id ?? null,
+                            'numero'       => $grupo->modulo->numero_modulo ?? null,
+                            'descripcion'  => $grupo->modulo->descripcion ?? null
+                        ],
+                        'periodo'        => [
+                            'id'     => $grupo->periodo->id ?? null,
+                            'nombre' => $grupo->periodo->nombre_periodo ?? null
+                        ],
+                        'ciclo'          => [
+                            'id'     => $grupo->programaEstudio->id_ciclo ?? null
+                        ],
+                        'convenio'       => [
+                            'id'     => $grupo->convenio->id ?? null,
+                            'nombre' => $grupo->convenio->nombre_institucion ?? null
+                        ],
+                        'docente'        => [
+                            'id'     => $grupo->docente->id ?? null,
+                            'nombre' => $grupo->docente
+                                ? trim($grupo->docente->user->name . ' ' . $grupo->docente->user->apellido_paterno . ' ' . $grupo->docente->user->apellido_materno)
+                                : null
+                        ],
+                        'fecha_inicio'   => $grupo->fecha_inicio ?? null,
+                        'fecha_fin'      => $grupo->fecha_fin ?? null,
+                        'entrega_acta'   => $grupo->fecha_entrega_acta ?? null,
+                        'seccion'        => $grupo->seccion ?? null,
+                        'turno'          => $grupo->turno ?? null
+                    ];
+                })->sortBy('modulo.numero')->values()
+
+            ];
+        });
+
+        return response()->json($resultado->values());
     }
+
 
     // NUEVO FORMATO PARA FILTRO DE GRUPOS
 

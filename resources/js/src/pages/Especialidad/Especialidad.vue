@@ -35,8 +35,8 @@ const onDelete = (especialidad) => {
 
     const isDeleted = await deleteEspecialidad  (especialidad?.id);
     if (isDeleted) {
-      showToast(`Especialidad "${especialidad?.nombre_especialidad}" eliminado exitosamente...`);
-      especialidadStore.loadPeriodos();
+      showToast(`Especialidad "${especialidad?.nombre_especialidad}" eliminada exitosamente...`);
+      especialidadStore.loadEspecialidad();
 
     }
   });

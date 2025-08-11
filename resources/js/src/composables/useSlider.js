@@ -10,6 +10,9 @@ const useSlider = (sliderName = '', options = {}) => {
     const sliderData = ref(null);
 
     const showSlider = (name, data = null) => {
+
+        console.log('data del grupo: ', data)
+        console.log('data del name: ', name)
         slider.value = name;
         sliderData.value = data;
     };

@@ -21,8 +21,8 @@ import useCicloStore from '../../../store/Ciclo/useCicloStore';
 import usePeriodoStore from '../../../store/Periodo/usePeriodoStore'
 
 const props = defineProps({
-    show: { type: Boolean, default: () => false },
-    grupo: { type: [Object, null], default: () => null },
+  show: { type: Boolean, default: () => false },
+  grupo: { type: [Object, null], default: () => null },
 });
 const emit = defineEmits(['hide']);
 
@@ -52,7 +52,7 @@ if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
 if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
 
 const title = computed(() =>
-  props.grupo ? `Actualizar Docente "${props.grupo?.name}"` : 'Añadir Nuevo  Docente'
+  props.grupo ? `Actualizar grupo "${props.grupo?.name}"` : 'Crear nuevo grupo'
 );
 
 const initialFormData = () => ({
@@ -73,19 +73,52 @@ const initialFormData = () => ({
 const formData = ref(initialFormData());
 const formErrors = ref({});
 
-watch(() => props.show, () => {
-  if (props.show) {
-    if (props.grupo?.id) {
-      formData.value = Object.entries(initialFormData()).reduce(
-        (r, [key, val]) => ({ ...r, [key]: props.grupo[key] || val }),
-        {}
-      );
+watch(
+  () => props.show,
+  async (isShown) => {
+    if (!isShown) return;
+
+    if (props.grupo?.id_grupo) {
+      // 1) Asegurarnos que programas/convenios/docentes/períodos ya están cargados (si no, cargarlos)
+      if (!programaStore.programa.length) await programaStore.loadPrograma();
+      if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
+      if (!docenteStore.docentesGrupo?.length) await docenteStore.loadDocentesGrupo();
+      if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
+
+      // 2) Cargar las opciones dependientes en el orden correcto
+      const programaId = props.grupo.programa?.id || null;
+      const especialidadId = props.grupo.especialidad?.id || null;
+
+      if (programaId) {
+        await grupoStore.loadEspecialidades(programaId); // carga grupoStore.especialidades
+      }
+
+      if (especialidadId) {
+        await grupoStore.loadModulos(especialidadId); // carga grupoStore.modulos
+      }
+
+      // 3) Ahora setear formData (las options ya contienen los objetos)
+      formData.value = {
+        id_programa: programaId,
+        id_especialidad: especialidadId,
+        id_modulo: props.grupo.modulo?.id || null,
+        id_periodo: props.grupo.periodo?.id || null,
+        id_convenio: props.grupo.convenio?.id || null,
+        fecha_inicio: props.grupo.fecha_inicio || null,
+        fecha_fin: props.grupo.fecha_fin || null,
+        fecha_entrega_acta: props.grupo.entrega_acta ?? null,
+        seccion: props.grupo.seccion ?? null,
+        turno: props.grupo.turno ?? null,
+        id_docente: props.grupo.docente?.id || null,
+        status: props.grupo.status ?? 0
+      };
     } else {
       formData.value = initialFormData();
       formErrors.value = {};
     }
   }
-});
+);
+
 
 const onProgramaChange = async (programaId) => {
   formData.value.id_especialidad = null;
@@ -132,61 +165,38 @@ const onSubmit = async () => {
       <div class="mt-4 space-y-3">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormLabelError label="Programa" required>
-            <BaseSelectGrupo
-              v-model="formData.id_programa"
-              :options="programas"
-              label="name"
-              placeholder="Seleccione un programa"
-              @change="onProgramaChange"
-              :loading="grupoStore.especialidadByProgramLoading"
-            />
+            <BaseSelectGrupo v-model="formData.id_programa" :options="programas" label="name"
+              placeholder="Seleccione un programa" @change="onProgramaChange"
+              :loading="grupoStore.especialidadByProgramLoading" />
           </FormLabelError>
 
           <FormLabelError label="Especialidad" required>
-            <BaseSelectGrupo
-              v-model="formData.id_especialidad"
-              :options="grupoStore.especialidades"
-              label="nombre_especialidad"
-              placeholder="Seleccione una especialidad"
-              @change="onEspecialidadChange"
-              :loading="grupoStore.moduloByEspecialidadLoading"
-            />
+            <BaseSelectGrupo v-model="formData.id_especialidad" :options="grupoStore.especialidades"
+              label="nombre_especialidad" placeholder="Seleccione una especialidad" @change="onEspecialidadChange"
+              :loading="grupoStore.moduloByEspecialidadLoading" />
           </FormLabelError>
 
           <FormLabelError label="Módulos" required>
-            <BaseSelectGrupo
-              v-model="formData.id_modulo"
-              :options="grupoStore.modulos"
-              label="nombre_modulo"
-              placeholder="Seleccione un módulo"
-              @change="onModuloChange"
-              :loading="grupoStore.docenteperiodoByModuloLoading"
-            />
+            <BaseSelectGrupo v-model="formData.id_modulo" :options="grupoStore.modulos" label="nombre_modulo"
+              placeholder="Seleccione un módulo" @change="onModuloChange"
+              :loading="grupoStore.docenteperiodoByModuloLoading" />
           </FormLabelError>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormLabelError label="Periodo" required>
             <BaseSelectCiclo v-model="formData.id_periodo" :options="periodoStore.periodos" label="nombre_periodo"
-          placeholder="Seleccione un ciclo" />
+              placeholder="Seleccione un ciclo" />
           </FormLabelError>
 
           <FormLabelError label="Convenio" required>
-            <BaseSelectCiclo
-              v-model="formData.id_convenio"
-              :options="convenioStore.convenios"
-              label="nombre_institucion"
-              placeholder="Seleccione un convenio"
-            />
+            <BaseSelectCiclo v-model="formData.id_convenio" :options="convenioStore.convenios"
+              label="nombre_institucion" placeholder="Seleccione un convenio" />
           </FormLabelError>
 
           <FormLabelError label="Docente">
-            <BaseSelectCiclo
-              v-model="formData.id_docente"
-              :options="docenteStore.docentesGrupo"
-              label="nombre"
-              placeholder="Seleccione un docente"
-            />
+            <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentesGrupo" label="nombre"
+              placeholder="Seleccione un docente" />
           </FormLabelError>
         </div>
 
@@ -202,13 +212,9 @@ const onSubmit = async () => {
           <CheckBox v-model="formData.status" label="Habilitado" class="mt-8 pl-4 flex justify-center items-center" />
         </div>
 
-        <Button
-          :title="grupo?.id ? 'Guardar Cambios' : 'Crear Usuario'"
-          :loading-title="grupo?.id ? 'Guardando...' : 'Creando...'"
-          class="!mt-6 !w-full"
-          :loading="saving || updating"
-          @click="onSubmit"
-        />
+        <Button :title="grupo?.id ? 'Guardar Cambios' : 'Crear Grupo'"
+          :loading-title="grupo?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full" :loading="saving || updating"
+          @click="onSubmit" />
       </div>
     </AuthorizationFallback>
   </Slider>

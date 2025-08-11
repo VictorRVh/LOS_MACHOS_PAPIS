@@ -137,7 +137,7 @@ const onSubmit = async () => {
             <FormInput v-model="formData.numero_modulo" :focus="show" label="Numero de modulo"
                 :error="formErrors?.numero_modulo" required />
 
-            <FormInput v-model="formData.descripcion" :focus="show" label="Descripcion" :error="formErrors?.nro_modulos"
+            <FormInput v-model="formData.descripcion" :focus="show" label="Nombre del modulo" :error="formErrors?.nro_modulos"
                 required />
 
             <FormInput v-model="formData.creditos" :focus="show" label="Creditos" :error="formErrors?.nro_modulos"
@@ -152,7 +152,7 @@ const onSubmit = async () => {
 
                 <div class="flex gap-2 mt-1">
                     <!-- Botón Guardar: ancho completo -->
-                    <Button :title="modulo?.id ? 'Guardar Cambios' : 'Asignar especialidad'"
+                    <Button :title="modulo?.id ? 'Guardar Cambios' : 'Crear Modulo'"
                         :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
                         key="submit-btn" @click="onSubmit" class="!w-full" />
 

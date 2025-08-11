@@ -157,7 +157,7 @@ const {
             <!-- Botón Filtrar -->
             <div class="flex items-end pt-5">
               <button @click="filtrarPorSeleccion"
-                class="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md w-full">
+                class="bg-cetpro-light hover:bg-primary-dark text-white py-2 px-4 rounded-md w-full">
                 Filtrar
               </button>
             </div>
@@ -173,39 +173,40 @@ const {
       <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
         <THead>
           <Th>N°</Th>
-          <Th>Nombre</Th>
           <Th>Módulo</Th>
+          <Th>Sección</Th>
+          <Th>Turno</Th>
+          <Th>Convenio</Th>
+          <Th>Nro Est.</Th>
           <Th>Docente</Th>
-          <Th>Periodo</Th>
-          <Th>Fecha de Creación</Th>
-          <Th>Estado</Th>
           <Th class="text-center">Acción</Th>
         </THead>
 
         <TBody>
-          <Tr v-for="(grupo, index) in gruposPaginados" :key="grupo.id">
-            <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
-            <Td>{{ grupo.nombre ?? 'Grupo' }}</Td>
-            <Td>{{ grupo.modulo?.descripcion }}</Td>
-            <Td>{{ grupo.docente?.user?.name }} {{ grupo.docente?.user?.apellido_paterno }} {{
-              grupo.docente?.user?.apellido_materno }}</Td>
-            <Td>{{ grupo.periodo?.nombre_periodo }}</Td>
-            <Td>{{ grupo.created_at?.slice(0, 10) ?? '---' }}</Td>
-            <Td>
-              <span :class="grupo.status === 1
-                ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
-                : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'"
-                class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
-                <span v-if="grupo.status === 1">Activo ✓</span>
-                <span v-else>Inactivo X</span>
-              </span>
-            </Td>
-            <Td class="text-center text-gray-600 dark:text-gray-200">
-              <MenuTable :actions="{ view: true, edit: true, delete: true, download: false }" entity-label="grupo"
-                @view="showSlider(true, grupo)" @edit="showSlider(true, grupo)" @delete="onDelete(grupo)" />
-            </Td>
-          </Tr>
+          <template v-for="(especialidad, espIndex) in grupos" :key="especialidad.especialidad.id">
+            <!-- Fila de la especialidad -->
+            <Tr class="bg-gray-100 dark:bg-gray-800 font-bold">
+              <Td colspan="8">{{ especialidad.especialidad.nombre }}</Td>
+            </Tr>
+
+            <!-- Filas de módulos -->
+            <Tr v-for="(modulo, modIndex) in especialidad.modulos" :key="modulo.id_grupo">
+              <Td>{{ (pagina - 1) * itemsPorPagina + modIndex + 1 }}</Td>
+              <Td><strong>{{ modulo.modulo.numero }}:</strong> {{ modulo.modulo.descripcion }} </Td>
+              <Td>{{ modulo.seccion }}</Td>
+              <Td>{{ modulo.turno }}</Td>
+              <Td>{{ modulo.convenio.nombre }}</Td>
+              <Td>{{ Math.floor(Math.random() * 21) + 10 }}</Td>
+              <Td>{{ modulo.docente.nombre }}</Td>
+              <Td class="text-center">
+                <MenuTable :actions="{ view: true, edit: true, delete: true }" entity-label="grupo"
+                  @view="showSlider(true, modulo)" @edit="showSlider(true, modulo)"
+                  @delete="onDelete({ id: modulo.id_grupo })" />
+              </Td>
+            </Tr>
+          </template>
         </TBody>
+
       </Table>
     </div>
 

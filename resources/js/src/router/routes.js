@@ -6,8 +6,8 @@ import useEspecialidadProgramaStore from '../store/EspecialidadPrograma/useEspec
 export default [
     { path: '/', name: 'login', component: () => import('../pages/Login.vue'), meta: { layout: 'full', permissions: [], }, },
     { path: '/start', name: 'start', component: () => import('../pages/Start.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Inicio', to: { name: 'start' } }] }, },
-    { path: '/groups', name: 'groups', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
-    { path: '/programs', name: 'programs', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
+    { path: '/groups', name: 'groups',alias: ['/matricula'], component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
+    { path: '/programs', name: 'programs',alias: ['/matricula'], component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
     { path: '/califications', name: 'califications', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
     { path: '/users', name: 'users', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Usuarios', to: { name: 'users' } }] }, },
     { path: '/users/crear', name: 'users.crear', component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [ { text: 'Usuarios', to: { name: 'users' } }, { text: 'Crear' } ] } },

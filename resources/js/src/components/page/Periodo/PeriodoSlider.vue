@@ -1,17 +1,13 @@
 <script setup>
-import { computed, nextTick, ref, watch } from "vue";
-import Slider from "../../ui/Slider.vue";
+import { computed, ref, watch } from "vue";
 import FormInput from "../../ui/FormInput.vue";
 import FormLabelError from "../../ui/FormLabelError.vue";
-import VSelect from "vue-select";
 import Button from "../../ui/Button.vue";
 import AuthorizationFallback from "../../../components/page/AuthorizationFallback.vue";
 import CheckBox from "../../ui/CheckBox.vue";
-
 import useValidation from "../../../composables/useValidation";
 import useHttpRequest from "../../../composables/useHttpRequest";
 import useModalToast from "../../../composables/useModalToast";
-
 import * as yup from "yup";
 import usePeriodosStore from "../../../store/Periodo/usePeriodoStore";
 
@@ -28,53 +24,46 @@ const props = defineProps({
 const emit = defineEmits(["hide"]);
 
 const periodosStore = usePeriodosStore();
-
-const { store: createPeriodo, saving, update: updatePeriodo, updating } = useHttpRequest(
-  "/periodo"
-);
+const { store: createPeriodo, saving, update: updatePeriodo, updating } = useHttpRequest("/periodo");
 const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
-  if (!props.role?.id) return ["todo-acceso-roles", "crear-roles"];
-  else return ["todo-acceso-roles", "editar-roles"];
+  return props.periodo?.id
+    ? ["todo-acceso-roles", "editar-roles"]
+    : ["todo-acceso-roles", "crear-roles"];
 });
 
 const title = computed(() =>
   props.periodo
     ? `Editar Periodo "${props.periodo?.nombre_periodo}"`
-    : "Agregar nuevo rol"
+    : "Agregar nuevo periodo"
 );
 
-const initialFormData = () => {
-  return {
-
-    nombre_periodo: null,
-    descripcion: null,
-    status: 0,
-  };
-};
+const initialFormData = () => ({
+  nombre_periodo: null,
+  descripcion: null, // Si no usas descripción, puedes quitarlo
+  status: 0,
+});
 
 const formData = ref(initialFormData());
 const formErrors = ref({});
-
 const isEditing = computed(() => !!props.periodo?.id);
 
 const onCancelEdit = () => {
   formData.value = initialFormData();
   formErrors.value = {};
-  emit("hide"); // oculta el formulario
+  emit("hide");
 };
 
 watch(
   () => props.periodo,
   (newPeriodo) => {
+    formErrors.value = {}; // Limpia errores al cambiar
     if (props.show && newPeriodo?.id) {
-      console.log(formData.value);
-      formData.value = Object.entries(initialFormData()).reduce((r, [key, val]) => {
-        if (newPeriodo[key]) return { ...r, [key]: newPeriodo[key] };
-        return { ...r, [key]: val };
-      }, {});
+      formData.value = { ...initialFormData(), ...newPeriodo };
+    } else {
+      formData.value = initialFormData();
     }
   },
   { immediate: true }
@@ -84,64 +73,60 @@ const schema = yup.object().shape({
   nombre_periodo: yup
     .string()
     .required("El periodo es obligatorio.")
-    .matches(/^\d{4}-I{1,2}$/, "Formato inválido. Usa: 2024-I o 2024-II"),
+    .matches(/^\d{4}-(I|II)$/, "Formato inválido. Usa: 2024-I o 2024-II"),
+  status: yup.boolean().required(),
 });
 
 const onSubmit = async () => {
   if (saving.value || updating.value) return;
+  formErrors.value = {};
 
-  let data = {
-    ...formData.value,
-  };
-
-  const { validated, errors } = await runYupValidation(schema, data);
+  const { validated, errors } = await runYupValidation(schema, formData.value);
   if (!validated) {
     formErrors.value = errors;
     return;
   }
-  formErrors.value = {};
-
+  
   const response = props.periodo?.id
-    ? await updatePeriodo(props.periodo?.id, data)
-    : await createPeriodo(data);
+    ? await updatePeriodo(props.periodo?.id, formData.value)
+    : await createPeriodo(formData.value);
 
   if (response?.id) {
-    showToast(`Periodo ${props.periodo?.id ? "editado" : "creado"} exitosamente.`);
-
-    periodosStore.loadPeriodos();
-
-    formData.value = initialFormData();
-    formErrors.value = {};
-
-    emit("hide");
+    showToast(`Periodo ${props.periodo?.id ? "actualizado" : "creado"} exitosamente.`);
+    await periodosStore.loadPeriodos();
+    onCancelEdit();
   }
 };
 
-let lastPeriodoValue = ""; // define esto fuera de la función, en tu <script>
-
+// --- LÓGICA DE INPUT SIMPLIFICADA ---
 const onPeriodoInput = (e) => {
-  let raw = e.target.value.toUpperCase();
-  let val = raw.replace(/[^0-9I]/g, "");
+  let value = e.target.value.toUpperCase();
+  
+  // 1. Limpiar caracteres no válidos (solo permite números, guion e 'I')
+  value = value.replace(/[^0-9I-]/g, '');
 
-  const year = val.slice(0, 4).replace(/[^0-9]/g, "");
-  let rest = val.slice(4).replace(/[^I]/g, "").slice(0, 2);
-
-  let result = year;
-
-  const guionEliminado = lastPeriodoValue.endsWith("-") && !raw.endsWith("-");
-
-  if (!guionEliminado && year.length === 4) {
-    result += "-";
+  // 2. Limitar la longitud total
+  if (value.length > 7) {
+    value = value.slice(0, 7);
   }
 
-  if (rest.length > 0) {
-    result += rest;
+  // 3. Autocompletar el guion después de 4 números si no está presente
+  if (value.length === 4 && !value.includes('-')) {
+    value = value + '-';
+  }
+  
+  // 4. Asegurarse de que el semestre sea solo 'I' o 'II'
+  if (value.length > 5) {
+    const parts = value.split('-');
+    if (parts.length > 1) {
+        let semester = parts[1].replace(/[^I]/g, ''); // Solo permite 'I'
+        if (semester.length > 2) semester = semester.slice(0, 2); // Máximo 'II'
+        value = `${parts[0]}-${semester}`;
+    }
   }
 
-  formData.value.nombre_periodo = result;
-  lastPeriodoValue = result;
+  formData.value.nombre_periodo = value;
 };
-
 </script>
 
 <template>

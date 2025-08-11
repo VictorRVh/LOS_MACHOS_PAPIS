@@ -22,7 +22,6 @@ const emit = defineEmits(["hide"]);
 const programaStore = useProgramaStore();
 const { showToast } = useModalToast();
 const { runYupValidation } = useValidation();
-
 const { programaLoading } = storeToRefs(programaStore);
 
 const requiredPermissions = computed(() => {
@@ -39,7 +38,7 @@ const title = computed(() =>
 
 const initialFormData = () => ({
   id_ciclo: null,
-  año: null,
+  año: '',
   numero_rd: null,
   status: 0,
   descripcion: null,
@@ -68,96 +67,93 @@ watch(
   { immediate: true }
 );
 
-const schema = yup.object().shape({
-  id_ciclo: yup.string().nullable().required(),
-  numero_rd: yup.string().nullable().required(),
-  status: yup.bool().nullable().required(),
-  descripcion: yup.string().nullable().required(),
-  año: yup
-    .string()
-    .required("El año es obligatorio.")
-    .test(
-      "formato-año",
-      "Formato inválido. Usa '2024' o '2024-2025' según el ciclo.",
-      function (value) {
-        const ciclo = props.ciclo.find(
-          (c) => c.id === formData.value.id_ciclo
-        );
-        const nombreCiclo = ciclo?.nombre_ciclo?.toLowerCase();
+// --- LÓGICA DE VALIDACIÓN Y FORMATO (AHORA SÍ, LA BUENA) ---
 
-        if (nombreCiclo?.includes("auxiliar")) {
-          return /^\d{4}$/.test(value); // Solo un año
-        }
-
-        if (nombreCiclo?.includes("técnico")) {
-          return /^\d{4}-\d{4}$/.test(value); // Rango de años
-        }
-
-        return true;
-      }
-    ),
+const selectedCicloInfo = computed(() => {
+    if (!formData.value.id_ciclo || !props.ciclo) return null;
+    return props.ciclo.find(c => c.id === formData.value.id_ciclo);
 });
 
+const isAuxiliar = computed(() => {
+    return selectedCicloInfo.value?.nombre_ciclo?.toLowerCase().includes('auxiliar');
+});
+
+const isTecnico = computed(() => {
+    return selectedCicloInfo.value?.nombre_ciclo?.toLowerCase().includes('técnico');
+});
+
+const añoPlaceholder = computed(() => {
+  if (isAuxiliar.value) return "2024";
+  if (isTecnico.value) return "2024-2025";
+  return "Seleccione un ciclo";
+});
 
 const onCicloChange = () => {
   formData.value.año = "";
   formErrors.value.año = "";
 };
-const añoPlaceholder = computed(() => {
-  const ciclo = props.ciclo.find((c) => c.id === formData.value.id_ciclo);
-  const nombreCiclo = ciclo?.nombre_ciclo?.toLowerCase();
-
-  if (nombreCiclo?.includes("ciclo auxiliar técnico")) return "2024";
-  if (nombreCiclo?.includes("ciclo técnico")) return "2024-2025";
-  return "2024 o 2024-2025";
-});
-
-let lastAñoValue = ""; // fuera del handler
 
 const onAñoInput = (e) => {
-  let raw = e.target.value;
-  let val = raw.replace(/[^0-9]/g, ""); // Solo números
+  let value = e.target.value;
 
-  const ciclo = props.ciclo.find((c) => c.id === formData.value.id_ciclo);
-  const nombreCiclo = ciclo?.nombre_ciclo?.toLowerCase() || "";
-
-  if (nombreCiclo.includes("auxiliar")) {
-    // Solo 4 dígitos
-    val = val.slice(0, 4);
-    formData.value.año = val;
-    lastAñoValue = val;
+  if (isAuxiliar.value) {
+    formData.value.año = value.replace(/[^0-9]/g, '').slice(0, 4);
     return;
   }
 
-  if (nombreCiclo.includes("técnico")) {
-    const year1 = val.slice(0, 4);
-    const year2 = val.slice(4, 8);
+  if (isTecnico.value) {
+    const [year1_raw, year2_raw] = value.split('-');
+    
+    let year1 = (year1_raw || '').replace(/[^0-9]/g, '').slice(0, 4);
+    let year2 = (year2_raw || '').replace(/[^0-9]/g, '').slice(0, 4);
 
-    // Detectar si el usuario está borrando el guion
-    const isDeletingHyphen =
-      lastAñoValue.endsWith("-") && !raw.endsWith("-");
+    let result = year1;
 
-    if (isDeletingHyphen) {
-      val = year1; // Dejarlo sin guion
-    } else if (year1.length === 4 && year2.length === 0) {
-      val = year1 + "-"; // Insertar guion automáticamente
-    } else if (year2.length > 0) {
-      val = `${year1}-${year2}`;
-    } else {
-      val = year1;
+    // Si hay algo en el segundo año o si el usuario está escribiendo después del guion
+    if (year2_raw !== undefined) {
+      result += '-' + year2;
+    } 
+    // Si el primer año está completo y el usuario no está borrando, poner el guion
+    else if (year1.length === 4 && e.inputType !== 'deleteContentBackward') {
+      result += '-';
     }
-
-    formData.value.año = val;
-    lastAñoValue = val;
+    
+    formData.value.año = result;
     return;
   }
-
-  // Default
-  val = val.slice(0, 4);
-  formData.value.año = val;
-  lastAñoValue = val;
+  
+  formData.value.año = value.replace(/[^0-9]/g, '').slice(0, 4);
 };
 
+const schema = yup.object().shape({
+  id_ciclo: yup.string().nullable().required("El ciclo es obligatorio."),
+  numero_rd: yup.string().nullable().required("El N° de R.D. es obligatorio."),
+  status: yup.bool().required(),
+  descripcion: yup.string().nullable(),
+  año: yup.string()
+    .required("El año es obligatorio.")
+    .test(
+      "formato-año-valido",
+      function (value) {
+        if (!value) return this.createError({ message: "El año es obligatorio." });
+        
+        const cicloNombre = selectedCicloInfo.value?.nombre_ciclo?.toLowerCase() || '';
+        
+        if (cicloNombre.includes("auxiliar")) {
+            if (!/^\d{4}$/.test(value)) {
+                return this.createError({ message: "Formato inválido. Use '2024'." });
+            }
+        } else if (cicloNombre.includes("técnico")) {
+            if (!/^\d{4}-\d{4}$/.test(value)) {
+                return this.createError({ message: "Formato inválido. Use '2024-2025'." });
+            }
+        } else {
+            return this.createError({ message: "Seleccione un ciclo para validar el año." });
+        }
+        return true;
+      }
+    ),
+});
 
 const onSubmit = async () => {
   formErrors.value = {};
@@ -170,7 +166,6 @@ const onSubmit = async () => {
 
   try {
     if (isEditing.value) {
-      console.log('editando', formData.value)
       await programaStore.updatePrograma(formData.value.id, formData.value);
       showToast("Programa actualizado correctamente", "success");
     } else {
@@ -179,17 +174,9 @@ const onSubmit = async () => {
     }
     onCancelEdit();
   } catch (error) {
-    console.error("Error al guardar el programa:", error);
-
-    // Intentar extraer el mensaje más específico posible
-    const message =
-      error?.response?.data?.message || // si viene de axios con backend
-      error?.message || // si es un error JS
-      "Ocurrió un error al guardar el programa"; // fallback
-
+    const message = error?.response?.data?.message || "Ocurrió un error al guardar el programa";
     showToast(message, "error");
   }
-
 };
 </script>
 

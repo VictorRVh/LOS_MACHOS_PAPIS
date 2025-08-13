@@ -16,8 +16,8 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const formData = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
+    get: () => props.modelValue,
+    set: (value) => emit('update:modelValue', value),
 });
 
 const programaStore = useProgramaStore();
@@ -30,22 +30,32 @@ onMounted(() => {
 });
 
 const handleProgramaChange = (programaId) => {
+
     formData.value.id_especialidad = null;
     formData.value.id_grupo = null;
     resetGrupoData();
-    especialidadStore.especialidadCiclo = [];
+    especialidadStore.especialidadPrograma = [];
     if (programaId) {
-        especialidadStore.loadEspecialidadCiclo(programaId);
+        especialidadStore.loadEspecialidadPrograma(programaId);
     }
 };
 
-const handleEspecialidadChange = () => {
+const handleEspecialidadChange = (especialidadId) => {
+
+    console.log('entrando aca', especialidadId)
+
     formData.value.id_grupo = null;
+    especialidadStore.gruposDisponibles = [];
+    if (especialidadId) {
+        especialidadStore.loadGrupoEspecialidad(especialidadId);
+    }
     resetGrupoData();
 };
 
+console.log('grupos disp:', especialidadStore.gruposDisponibles)
+
 const handleGrupoChange = (grupoId) => {
-    const grupoSeleccionado = grupoStore.grupos.find(g => g.id === grupoId);
+    const grupoSeleccionado = especialidadStore.gruposDisponibles.find(g => g.id === grupoId);
     if (grupoSeleccionado) {
         formData.value.convenio = grupoSeleccionado.convenio || '';
         formData.value.duracion = grupoSeleccionado.duracion || '';
@@ -65,12 +75,6 @@ const resetGrupoData = () => {
     formData.value.seccion = '';
 };
 
-const gruposFiltrados = computed(() => {
-    if (!formData.value.id_especialidad || !grupoStore.grupos.length) {
-        return [];
-    }
-    return grupoStore.grupos.filter(grupo => grupo.id_especialidad == formData.value.id_especialidad);
-});
 </script>
 
 <template>
@@ -81,47 +85,31 @@ const gruposFiltrados = computed(() => {
         </h3>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <FormLabelError label="Programa de Estudio *">
-                <v-select 
-                    v-model="formData.id_programa" 
-                    :options="programaStore.programa.programas" 
-                    label="nameCiclo" 
-                    :reduce="programa => programa.id"
-                    placeholder="Seleccione Programa"
-                    @update:modelValue="handleProgramaChange"
-                />
+                <v-select v-model="formData.id_programa" :options="programaStore.programa.programas" label="nameCiclo"
+                    :reduce="programa => programa.id" placeholder="Seleccione Programa"
+                    @update:modelValue="handleProgramaChange" />
             </FormLabelError>
 
             <FormLabelError label="Especialidad *">
-                <v-select 
-                    v-model="formData.id_especialidad"
-                    :options="especialidadStore.especialidadCiclo"
-                    :disabled="!formData.id_programa"
-                    label="nombre_especialidad"
-                    :reduce="especialidad => especialidad.id"
-                    placeholder="Seleccione Especialidad"
-                    @update:modelValue="handleEspecialidadChange"
-                />
+                <v-select v-model="formData.id_especialidad" :options="especialidadStore.especialidadPrograma"
+                    :disabled="!formData.id_programa" label="nombre_especialidad"
+                    :reduce="especialidad => especialidad.id" placeholder="Seleccione Especialidad"
+                    @update:modelValue="handleEspecialidadChange" />
             </FormLabelError>
-            
+
             <FormLabelError label="Grupo *">
-                <v-select 
-                    v-model="formData.id_grupo" 
-                    :options="gruposFiltrados"
-                    :disabled="!formData.id_especialidad"
-                    label="nombre_grupo"
-                    :reduce="grupo => grupo.id"
-                    placeholder="Seleccionar Grupo"
-                    @update:modelValue="handleGrupoChange"
-                />
+                <v-select v-model="formData.id_grupo" :options="especialidadStore.gruposDisponibles"
+                    :disabled="!formData.id_especialidad" label="nombre_grupo" :reduce="grupo => grupo.id"
+                    placeholder="Seleccionar Grupo" @update:modelValue="handleGrupoChange" />
             </FormLabelError>
         </div>
 
         <div class="grid grid-cols-2 lg:grid-cols-5 gap-6 mt-6">
-            <FormInput v-model="formData.convenio" label="Convenio" disabled/>
-            <FormInput v-model="formData.duracion" label="Duración" disabled/>
-            <FormInput v-model="formData.horas" label="Horas" disabled/>
-            <FormInput v-model="formData.turno" label="Turno" disabled/>
-            <FormInput v-model="formData.seccion" label="Sección" disabled/>
+            <FormInput v-model="formData.convenio" label="Convenio" disabled />
+            <FormInput v-model="formData.duracion" label="Duración" disabled />
+            <FormInput v-model="formData.horas" label="Horas" disabled />
+            <FormInput v-model="formData.turno" label="Turno" disabled />
+            <FormInput v-model="formData.seccion" label="Sección" disabled />
         </div>
     </div>
 </template>

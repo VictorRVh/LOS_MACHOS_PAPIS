@@ -11,11 +11,14 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const formData = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
+    get: () => props.modelValue,
+    set: (value) => emit('update:modelValue', value),
 });
 
-const opcionesSexo = ['MASCULINO', 'FEMENINO'];
+const opcionesSexo = [
+    { label: 'Masculino', value: 'M' },
+    { label: 'Femenino', value: 'F' }
+];
 const opcionesEstadoCivil = ['SOLTERO(A)', 'CASADO(A)', 'VIUDO(A)', 'DIVORCIADO(A)', 'CONVIVIENTE'];
 </script>
 
@@ -27,31 +30,40 @@ const opcionesEstadoCivil = ['SOLTERO(A)', 'CASADO(A)', 'VIUDO(A)', 'DIVORCIADO(
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-            <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno *" />
-            <FormInput v-model="formData.apellido_materno" label="Apellido Materno *" />
-            <FormInput v-model="formData.nombre" label="Nombres *" />
-            
+
             <div class="grid grid-cols-2 gap-4">
                 <FormLabelError label="Tipo Doc. *">
-                     <BaseSelect v-model="formData.tipo_documento" :options="['DNI', 'CARNET EXT.']" />
+                    <BaseSelect v-model="formData.tipo_documento" :options="['DNI', 'CARNET EXT.']" />
                 </FormLabelError>
                 <FormInput v-model="formData.nro_documento" label="Nro Doc. *" />
             </div>
 
+            <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno *" />
+            <FormInput v-model="formData.apellido_materno" label="Apellido Materno *" />
+            <FormInput v-model="formData.nombre" label="Nombres *" />
+
+
             <FormLabelError label="Sexo *">
-                <BaseSelect v-model="formData.sexo" :options="opcionesSexo" placeholder="Seleccione sexo" />
+                <BaseSelect v-model="formData.sexo" :options="opcionesSexo" placeholder="Seleccione sexo" label="label"
+                    :reduce="option => option.value" />
             </FormLabelError>
             <FormInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento *" type="date" />
-            
+
+            <FormInput v-model="formData.pais_nacimiento" label="Pais de nacimiento" />
+            <FormInput v-model="formData.departamento_nacimiento" label="Departamento de nacimiento" />
+            <FormInput v-model="formData.provincia_nacimiento" label="Provincia de naicimiento *" />
+
             <FormInput v-model="formData.celular" label="Celular *" />
             <FormInput v-model="formData.correo" label="Correo Electrónico *" type="email" />
             <FormInput v-model="formData.direccion_residencia" label="Dirección de Residencia *" />
-            
+
             <FormLabelError label="Estado Civil *">
-                <BaseSelect v-model="formData.estado_civil" :options="opcionesEstadoCivil" placeholder="Seleccione estado"/>
+                <BaseSelect v-model="formData.estado_civil" :options="opcionesEstadoCivil"
+                    placeholder="Seleccione estado" />
             </FormLabelError>
             <FormInput v-model="formData.grado_instruccion" label="Grado de Instrucción" />
             <FormInput v-model="formData.lugar_nacimiento" label="Lugar de Nacimiento" />
+
         </div>
     </div>
 </template>

@@ -13,14 +13,22 @@ const useEspecialidadStore = defineStore('especialidadStore', () => {
 
   const {
     index: getEspecialidadCiclo,
-    show: getEspecialidadByCiclo,
+    show: getEspecialidadByPrograma,
     loading: loadingCiclo,
     initialLoading: initialCiclo,
-  } = useHttpRequest('/especialidad_ciclo');
+  } = useHttpRequest('/especialidadByPrograma');
+
+  const {
+    index: getGrupoEspecialidad,
+    show: getGrupoByEspecialidad,
+    loading: loadingGrupoEspecialidad,
+    initialLoading: initialGrupoEspecialidad,
+  } = useHttpRequest('/grupoByEspecialidad');
 
   // Estado
   const especialidad = ref([]);
-  const especialidadCiclo = ref([]);
+  const especialidadPrograma = ref([]);
+  const gruposDisponibles = ref([])
 
   // Estado de carga (puedes usar uno general o ambos separados si quieres más control)
   const especialidadLoading = ref(false);
@@ -35,20 +43,30 @@ const useEspecialidadStore = defineStore('especialidadStore', () => {
   };
 
   // Carga de especialidad por ciclo
-  const loadEspecialidadCiclo = async (id) => {
+  const loadEspecialidadPrograma = async (id) => {
     especialidadLoading.value = loadingCiclo.value;
     especialidadFirstTimeLoading.value = initialCiclo.value;
-    const res = await getEspecialidadByCiclo(id);
-    especialidadCiclo.value = res;
+    const res = await getEspecialidadByPrograma(id);
+    especialidadPrograma.value = res;
+  };
+
+  const loadGrupoEspecialidad = async (id) => {
+    // especialidadLoading.value = loadingCiclo.value;
+    // especialidadFirstTimeLoading.value = initialCiclo.value;
+    const res = await getGrupoByEspecialidad(id);
+    gruposDisponibles.value = res;
   };
 
   return {
     especialidad,
-    especialidadCiclo,
+    especialidadPrograma,
     loadEspecialidad,
-    loadEspecialidadCiclo,
+    loadEspecialidadPrograma,
     especialidadLoading,
     especialidadFirstTimeLoading,
+
+    loadGrupoEspecialidad,
+    gruposDisponibles
   };
 });
 

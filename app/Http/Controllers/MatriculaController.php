@@ -32,7 +32,7 @@ class MatriculaController extends Controller
         DB::beginTransaction();
 
         try {
-            // 1️⃣ Crear estudiante
+            // Crear estudiante
             $estudiante = Estudiante::create([
                 'tipo_documento'       => $request->tipo_documento,
                 'nro_documento'        => $request->nro_documento,
@@ -63,7 +63,7 @@ class MatriculaController extends Controller
                 'lengua_originaria'    => $request->lengua_originaria
             ]);
 
-            // 2️⃣ Crear pago
+            // Crear pago
             $pago = Pago::create([
                 'condicion' => $request->condicion,
                 'nro_recibo' => $request->nro_recibo,
@@ -71,9 +71,10 @@ class MatriculaController extends Controller
                 'status' => $request->status ?? 0
             ]);
 
-            // 3️⃣ Crear matrícula
+            // Crear matrícula
             $matricula = Matricula::create([
-                'id_grupo' => $request->id_grupo ?? $request->grupo['value'], // desde el select
+                // 'id_grupo' => $request->id_grupo ?? $request->grupo['value'], // desde el select
+                'id_grupo' => $request->id_grupo, // desde el select
                 'turno' => $request->turno,
                 'id_estudiante' => $estudiante->id,
                 'id_pago' => $pago->id,
@@ -149,50 +150,57 @@ class MatriculaController extends Controller
 
     // END POINTS PARA MATRICULA
 
-    public function getProgramasPorCiclo($idCiclo)
+    public function getEspecialidadesPorPrograma($idPrograma)
     {
-        $programas = ProgramaEstudio::with(['especialidadPrograma.especialidadMadre'])
-            ->where('id_ciclo', $idCiclo)
-            ->get()
-            ->map(function ($programa) {
-                return [
-                    'id_programa' => $programa->id,
-                    'año' => $programa->año,
-                    'especialidades' => $programa->especialidadPrograma->map(function ($espProg) {
-                        return [
-                            'id' => $espProg->id,
-                            'nombre_especialidad' => $espProg->especialidadMadre->nombre_especialidad
-                        ];
-                    })
-                ];
-            });
+        $programa = ProgramaEstudio::with(['especialidadPrograma.especialidadMadre'])
+            ->where('id', $idPrograma)
+            ->first();
 
-        return response()->json($programas);
+        if (!$programa) {
+            return response()->json(['message' => 'Programa no encontrado'], 404);
+        }
+
+        return response()->json([
+            'id_programa'   => $programa->id,
+            'año'           => $programa->año,
+            'especialidades' => $programa->especialidadPrograma->map(function ($espProg) {
+                return [
+                    'id_especialidad_programa' => $espProg->id,
+                    'id_especialidad'          => $espProg->id_especialidad,
+                    'nombre_especialidad'      => $espProg->especialidadMadre->nombre_especialidad
+                ];
+            })
+        ]);
     }
 
     public function getGruposPorEspecialidad($idEspecialidad)
     {
-        $grupos = Grupo::with(['periodo', 'modulo', 'docente.user'])
+        $grupos = Grupo::with(['periodo', 'modulo', 'docente.user', 'convenio'])
             ->where('id_especialidad', $idEspecialidad)
             ->get()
             ->map(function ($grupo) {
+                $periodo = $grupo->periodo->nombre_periodo ?? '';
+                $modulo = $grupo->modulo->descripcion ?? '';
+                $seccionTurno = trim($grupo->seccion . '-' . $grupo->turno);
+                $docente = $grupo->docente && $grupo->docente->user
+                    ? trim(
+                        $grupo->docente->user->apellido_paterno . ' ' .
+                            $grupo->docente->user->apellido_materno . ' ' .
+                            $grupo->docente->user->name
+                    )
+                    : '';
+
                 return [
                     'id' => $grupo->id,
-                    'periodo' => $grupo->periodo->nombre_periodo ?? null,
-                    'modulo' => $grupo->modulo->descripcion ?? null,
+                    'nombre_grupo' => "{$periodo} | {$modulo} | {$seccionTurno} | {$docente}",
+                    'periodo' => $periodo,
+                    'modulo' => $modulo,
                     'horas' => $grupo->modulo->horas ?? null,
                     'seccion' => $grupo->seccion,
                     'turno' => $grupo->turno,
                     'duracion' => $grupo->fecha_inicio . ' a ' . $grupo->fecha_fin,
-                    // 'convenio' => $grupo->convenio ?? null,
                     'convenio' => $grupo->convenio->nombre_institucion ?? null,
-                    'docente' => $grupo->docente && $grupo->docente->user
-                        ? trim(
-                            $grupo->docente->user->apellido_paterno . ' ' .
-                                $grupo->docente->user->apellido_materno . ' ' .
-                                $grupo->docente->user->name
-                        )
-                        : null
+                    'docente' => $docente
                 ];
             });
 

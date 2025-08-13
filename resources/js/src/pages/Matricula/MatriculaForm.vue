@@ -13,7 +13,7 @@ import Button from '../../components/ui/Button.vue';
 
 const router = useRouter();
 const { showToast } = useModalToast();
-const { post, saving } = useHttpRequest('/api/matriculas');
+const { store, saving } = useHttpRequest('/matricula');
 const programaStore = useProgramaStore();
 const grupoStore = useGrupoStore();
 
@@ -67,6 +67,8 @@ onMounted(async () => {
 });
 
 const nextStep = () => {
+    // console.log("Paso actual:", currentStep.value, "ID Grupo:", formData.value.id_grupo); 
+
     if (currentStep.value < 3) currentStep.value++;
 };
 
@@ -75,8 +77,11 @@ const prevStep = () => {
 };
 
 const onSubmit = async () => {
-    const response = await post(formData.value);
-    if (response?.id) {
+
+    console.log('llegada de datos de matricula: ', formData.value)
+
+    const response = await store(formData.value);
+    if (response.data.matricula.id) {
         showToast('¡Matrícula realizada con éxito!', 'success');
         router.push({ name: 'matricula.grupo.detalle', params: { id: formData.value.id_grupo } });
     } else {
@@ -89,24 +94,37 @@ const onSubmit = async () => {
     <div class="p-2 bg-gray-100 dark:bg-gray-900/50 font-inter">
         <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 ">Nueva Matrícula de Estudiante</h2>
 
-        <div v-if="isLoading" class="flex justify-center items-center min-h-[500px] bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+        <div v-if="isLoading"
+            class="flex justify-center items-center min-h-[500px] bg-white dark:bg-gray-800 rounded-lg shadow-xl">
             <p class="text-gray-500 dark:text-gray-400 text-lg">Cargando datos del formulario...</p>
         </div>
-        
+
         <div v-else>
-            <ol class="flex items-center w-full p-3 mb-2 space-x-2 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm dark:text-gray-400 sm:text-base dark:bg-gray-800 dark:border-gray-700 sm:p-4 sm:space-x-4">
+            <ol
+                class="flex items-center w-full p-3 mb-2 space-x-2 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm dark:text-gray-400 sm:text-base dark:bg-gray-800 dark:border-gray-700 sm:p-4 sm:space-x-4">
                 <li class="flex items-center" :class="{ 'text-blue-600 dark:text-blue-500': currentStep >= 1 }">
-                    <span class="flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full shrink-0" :class="{ 'border-blue-600 dark:border-blue-500': currentStep >= 1, 'border-gray-500 dark:border-gray-400': currentStep < 1 }">1</span>
+                    <span class="flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full shrink-0"
+                        :class="{ 'border-blue-600 dark:border-blue-500': currentStep >= 1, 'border-gray-500 dark:border-gray-400': currentStep < 1 }">1</span>
                     Datos <span class="hidden sm:inline-flex sm:ms-2">Académicos</span>
-                    <svg class="w-3 h-3 ms-2 sm:ms-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 12 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7 9 4-4-4-4M1 9l4-4-4-4"/></svg>
+                    <svg class="w-3 h-3 ms-2 sm:ms-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 12 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="m7 9 4-4-4-4M1 9l4-4-4-4" />
+                    </svg>
                 </li>
                 <li class="flex items-center" :class="{ 'text-blue-600 dark:text-blue-500': currentStep >= 2 }">
-                    <span class="flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full shrink-0" :class="{ 'border-blue-600 dark:border-blue-500': currentStep >= 2, 'border-gray-500 dark:border-gray-400': currentStep < 2 }">2</span>
+                    <span class="flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full shrink-0"
+                        :class="{ 'border-blue-600 dark:border-blue-500': currentStep >= 2, 'border-gray-500 dark:border-gray-400': currentStep < 2 }">2</span>
                     Datos del <span class="hidden sm:inline-flex sm:ms-2">Estudiante</span>
-                    <svg class="w-3 h-3 ms-2 sm:ms-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 12 10"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7 9 4-4-4-4M1 9l4-4-4-4"/></svg>
+                    <svg class="w-3 h-3 ms-2 sm:ms-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 12 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="m7 9 4-4-4-4M1 9l4-4-4-4" />
+                    </svg>
                 </li>
                 <li class="flex items-center" :class="{ 'text-blue-600 dark:text-blue-500': currentStep >= 3 }">
-                    <span class="flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full shrink-0" :class="{ 'border-blue-600 dark:border-blue-500': currentStep >= 3, 'border-gray-500 dark:border-gray-400': currentStep < 3 }">3</span>
+                    <span class="flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full shrink-0"
+                        :class="{ 'border-blue-600 dark:border-blue-500': currentStep >= 3, 'border-gray-500 dark:border-gray-400': currentStep < 3 }">3</span>
                     Pago y <span class="hidden sm:inline-flex sm:ms-2">Confirmación</span>
                 </li>
             </ol>
@@ -119,25 +137,12 @@ const onSubmit = async () => {
 
             <div class="flex justify-between ">
                 <div>
-                    <Button 
-                        v-if="currentStep > 1"
-                        variant="outline"
-                        @click="prevStep"
-                        title="Anterior"
-                    />
+                    <Button v-if="currentStep > 1" variant="outline" @click="prevStep" title="Anterior" />
                 </div>
                 <div>
-                    <Button 
-                        v-if="currentStep < 3"
-                        @click="nextStep"
-                        title="Siguiente"
-                    />
-                    <Button 
-                        v-if="currentStep === 3"
-                        @click="onSubmit"
-                        :loading="saving"
-                        title="Confirmar y Matricular"
-                    />
+                    <Button v-if="currentStep < 3" @click="nextStep" title="Siguiente" />
+                    <Button v-if="currentStep === 3" @click="onSubmit" :loading="saving"
+                        title="Confirmar y Matricular" />
                 </div>
             </div>
         </div>

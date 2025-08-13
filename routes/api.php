@@ -808,9 +808,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // programa por ciclo
 
-    Route::get('programaByCiclo/{idCiclo}', [
+    Route::get('especialidadByPrograma/{idPrograma}', [
         \App\Http\Controllers\MatriculaController::class,
-        'getProgramasPorCiclo',
+        'getEspecialidadesPorPrograma',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
     Route::get('grupoByEspecialidad/{idEspecialidad}', [

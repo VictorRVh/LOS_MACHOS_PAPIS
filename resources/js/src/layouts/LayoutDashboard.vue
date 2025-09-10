@@ -1,53 +1,47 @@
 <script setup>
-import {computed} from 'vue'
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { useLayoutStore } from '@/store/useLayoutStore';
 import Sidebar from './components/Sidebar.vue';
 import Header from './components/Header.vue';
 import PageLoader from './PageLoader.vue';
 import SuspenseFallback from './SuspenseFallback.vue';
-
+import SubSidebar from './components/SubSidebar.vue';
 import useUserStore from "../store/useUserStore";
-
 
 const userStore = useUserStore();
 const userPermissions = computed(
   () => userStore.user?.permissions.map(p => p.name) || []
 );
 
-// Función para verificar permisos
 const hasPermission = (itemPermissions) =>
   itemPermissions.some(perm => userPermissions.value.includes(perm));
 
-console.log("los permisos  de pepep",userPermissions.value)
-
-
 const layoutStore = useLayoutStore();
+const route = useRoute();
+
+const submenuLinks = computed(() => route.meta.submenu || []);
 </script>
 
 <template>
-    <div class="flex h-screen bg-gray-100 dark:bg-slate-600  dark:text-gray-100 font-sans">
-        <!-- 1. SIDEBAR LATERAL (AZUL) -->
+    <div class="flex h-screen bg-gray-100 dark:bg-slate-600 dark:text-gray-100 font-sans">
         <Sidebar />
+        
+        <transition name="slide-fade">
+            <SubSidebar v-if="submenuLinks.length > 0" :links="submenuLinks" />
+        </transition>
 
-        <!-- 2. ÁREA DE CONTENIDO PRINCIPAL -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- 2A. HEADER SUPERIOR (BLANCO) -->
             <Header />
-
-            <!-- PageLoader tipo barra de progreso -->
             <PageLoader :loading="layoutStore.isPageLoading" />
-
-            <!-- 2B. CONTENIDO DE LA PÁGINA (CON SCROLL) -->
-            <main class="flex-1 overflow-x-hidden overflow-hidden">
+            <main class="flex-1 overflow-y-auto">
                 <RouterView v-slot="{ Component }">
                     <Suspense
                         @pending="layoutStore.setPageLoading(true)"
                         @resolve="layoutStore.setPageLoading(false)"
                         @fallback="layoutStore.setPageLoading(false)"
                     >
-                        <!-- El componente de la página actual se renderiza aquí -->
                         <component :is="Component"></component>
-
                         <template #fallback>
                             <SuspenseFallback />
                         </template>
@@ -57,3 +51,17 @@ const layoutStore = useLayoutStore();
         </div>
     </div>
 </template>
+
+<style>
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+.slide-fade-leave-active {
+  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(-20px);
+  opacity: 0;
+}
+</style>

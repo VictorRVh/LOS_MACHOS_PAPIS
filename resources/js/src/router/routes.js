@@ -79,7 +79,6 @@ export default [
     { path: '/programa/editar/:id', name: 'programa.editar', component: () => import('../pages/Programa/Programa.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Programas de Estudio', to: { name: 'programa' } }] }, },
     { path: '/especialidadPrograma/:id/editar', name: 'especialidadPrograma.editar', component: () => import('../pages/EspecialidadPrograma/EspecialidadPrograma.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
 
-    // --- MÓDULO DE MATRÍCULA (ESTRUCTURA CORREGIDA) ---
     {
         path: '/matricula',
         name: 'matricula.index',
@@ -118,7 +117,7 @@ export default [
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos'],
-            parent: 'matricula.grupos', // Su padre es la lista de grupos
+            parent: 'matricula.grupos',
             breadcrumb: { text: 'Detalle de Grupo' }
         },
     },
@@ -132,16 +131,30 @@ export default [
             breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }, { text: 'Estudiantes con Reserva' }]
         },
     },
-    // --- FIN DEL MÓDULO DE MATRÍCULA ---
 
-    // Grupo
-    { path: '/grupo', name: 'grupo', component: () => import('../pages/Grupo/Grupo.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
+    {
+        path: '/grupo',
+        name: 'grupo',
+        component: () => import('../pages/Grupo/Grupo.vue'),
+        props: true,
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos'],
+            breadcrumb: [{ text: 'Grupos', to: { name: 'grupo' } }],
+            submenu: [
+                { text: 'Documentos', to: { name: 'grupo.documentos' } },
+                { text: 'Sesiones y asistencia', to: { name: 'grupo.asistencia' } },
+                { text: 'Calificaciones', to: { name: 'grupo.calificaciones' } },
+                { text: 'Prácticas', to: { name: 'grupo.practicas' } },
+                { text: 'Alumnos', to: { name: 'grupo.alumnos' } },
+                { text: 'Descargar', to: { name: 'grupo.descargar' } },
+            ]
+        },
+    },
 
-    // Cuenta y notificaciones
     { path: '/configuracion-cuenta', name: 'cuenta.editar', component: () => import('../pages/edit_date.vue'), meta: { layout: 'dashboard', breadcrumb: [{ text: 'Configuración de mi Cuenta' }] } },
     { path: '/notificaciones', name: 'notificaciones.index', component: () => import('../pages/FullNotificaciones.vue'), meta: { layout: 'dashboard', breadcrumb: [{ text: 'Todas las Notificaciones' }] } },
 
-    // Asistencia biométrica
     { path: '/mi-asistencia', name: 'biometrico.asistencia', component: () => import('../pages/Biometrico/AsistenciaBiometrica.vue'), meta: { layout: 'dashboard', breadcrumb: [{ text: 'Mi Asistencia Biométrica' }] } },
     { path: '/mi-asistencia/:idAsignacion', name: 'biometrico.detalle', component: () => import('../pages/Biometrico/AsistenciaDetalle.vue'), props: true, meta: { layout: 'dashboard', parent: 'biometrico.asistencia', breadcrumb: { text: 'Detalle de Asistencia' } } },
 ];

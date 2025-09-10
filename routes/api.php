@@ -477,6 +477,18 @@ Route::middleware('auth:sanctum')->group(function () {
         'getPeriodosPorAnio',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
+    // para filtros de lista de grupos
+
+    Route::get('periodoByCiclo/{cicloId}', [
+        \App\Http\Controllers\GrupoController::class,
+        'getPeriodosPorCiclo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+    // lista de grupos
+    Route::get('gruposMatricula', [
+        \App\Http\Controllers\GrupoController::class,
+        'getGruposPorCicloYPeriodo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
     //RUTA PARA CAPACIDAD TERMINAL
     Route::get('capacidad_terminal', [
@@ -806,6 +818,20 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|permissions-delete');
 
+
+    // Alumnos matriculados
+    Route::get('matricula/{grupoId}', [
+        \App\Http\Controllers\MatriculaController::class,
+        'getMatriculadosPorGrupo',
+    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+
+    Route::get('fichaMatricula/{estudianteId}', [
+        \App\Http\Controllers\MatriculaController::class,
+        'getFichaMatricula',
+    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+
+
+
     // programa por ciclo
 
     Route::get('especialidadByPrograma/{idPrograma}', [
@@ -817,4 +843,15 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\MatriculaController::class,
         'getGruposPorEspecialidad',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+
+    // RERPORTES
+
+
+
+
 });
+Route::get('reportes/nomina/grupo/{idGrupo}', [
+    \App\Http\Controllers\ReporteController::class,
+    'nominaMatriculasExcel',
+]);

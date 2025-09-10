@@ -40,7 +40,6 @@ const useGrupoStore = defineStore('grupo', () => {
         initialLoading: gruposFiltradosFirstTimeLoading,
     } = useHttpRequest('/gruposFiltrados');
 
-
     const {
         show: getAniosByCiclo,
         // loading: moduloByEspecialidadLoading,
@@ -53,6 +52,19 @@ const useGrupoStore = defineStore('grupo', () => {
         // initialLoading: moduloByEspecialidadFirstTimeLoading,
     } = useHttpRequest('/periodoByAnio');
 
+    // LISTA DE GRUPOS POR CICLO
+
+    const {
+        show: getPeriodoByCiclo,
+        // loading: moduloByEspecialidadLoading,
+        // initialLoading: moduloByEspecialidadFirstTimeLoading,
+    } = useHttpRequest('/periodoByCiclo');
+
+    const {
+        indexWithParams: getGruposByCicloPeriodo,
+        // loading: moduloByEspecialidadLoading,
+        // initialLoading: moduloByEspecialidadFirstTimeLoading,
+    } = useHttpRequest('/gruposMatricula');
 
     // Datos
     const grupos = ref([]);
@@ -64,6 +76,9 @@ const useGrupoStore = defineStore('grupo', () => {
 
     const anios = ref([])
     const periodoAnio = ref([])
+
+    const periodoCiclo = ref([])
+    const gruposCicloPeriodo = ref([])
 
     // Métodos
     const loadGrupos = async () => {
@@ -117,6 +132,22 @@ const useGrupoStore = defineStore('grupo', () => {
         }
     };
 
+    const loadPeriodoCiclo = async (ciclo) => {
+        const response = await getPeriodoByCiclo(ciclo)
+        periodoCiclo.value = response;
+    };
+
+    const loadGruposCicloPeriodo = async ({ id_ciclo, id_periodo }) => {
+
+        const response = await getGruposByCicloPeriodo({
+            id_ciclo,
+            id_periodo,
+        });
+
+        console.log('responde utilop', response)
+        gruposCicloPeriodo.value = response;
+    };
+
     return {
         // Datos
         grupos,
@@ -158,7 +189,13 @@ const useGrupoStore = defineStore('grupo', () => {
         anios,
 
         loadPeriodoAnio,
-        periodoAnio
+        periodoAnio,
+
+        loadPeriodoCiclo,
+        periodoCiclo,
+
+        loadGruposCicloPeriodo,
+        gruposCicloPeriodo
 
     };
 });

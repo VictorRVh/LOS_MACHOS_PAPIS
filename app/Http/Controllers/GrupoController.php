@@ -9,6 +9,7 @@ use App\Models\Modulo;
 use App\Models\Periodo;
 use App\Models\ProgramaEstudio;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GrupoController extends Controller
 {
@@ -292,5 +293,63 @@ class GrupoController extends Controller
         $periodos = Periodo::where('nombre_periodo', 'LIKE', "{$anio}-%")->get();
 
         return response()->json($periodos);
+    }
+
+
+    public function getPeriodosPorCiclo($cicloId)
+    {
+        // Obtener el campo año del programa para ese ciclo
+        $programa = DB::table('programa_estudio')
+            ->where('id_ciclo', $cicloId)
+            ->first();
+
+        if (!$programa) {
+            return collect(); // vacío si no existe
+        }
+
+        // Extraer los años (puede ser "2026" o "2026-2027")
+        $anios = explode('-', $programa->año);
+
+        // Buscar los periodos que empiecen con esos años
+        $periodos = DB::table('periodo')
+            ->where(function ($q) use ($anios) {
+                foreach ($anios as $anio) {
+                    $q->orWhere('nombre_periodo', 'like', $anio . '-%');
+                }
+            })
+            ->orderBy('nombre_periodo')
+            ->get();
+
+        return $periodos;
+    }
+
+    public function getGruposPorCicloYPeriodo(Request $request)
+    {
+
+        $cicloId = $request->id_ciclo;
+        $periodoId = $request->id_periodo;
+
+        $grupos = DB::table('grupo as g')
+            ->join('programa_estudio as pe', 'g.id_programa', '=', 'pe.id')
+            ->join('ciclo_academico as ca', 'pe.id_ciclo', '=', 'ca.id')
+            ->join('periodo as p', 'g.id_periodo', '=', 'p.id')
+            ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
+            ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
+            ->join('modulos as m', 'g.id_modulo', '=', 'm.id')
+            ->leftJoin('docente as d', 'g.id_docente', '=', 'd.id')
+            ->leftJoin('users as u', 'd.user_id', '=', 'u.id')
+            ->where('ca.id', $cicloId)
+            ->where('p.id', $periodoId)
+            ->select(
+                'g.id',
+                'em.nombre_especialidad as especialidad',
+                'm.descripcion as modulo',
+                'g.seccion',
+                'g.turno',
+                DB::raw("CONCAT(u.apellido_paterno, ' ', u.apellido_materno, ', ', u.name) as docente")
+            )
+            ->get();
+
+        return $grupos;
     }
 }

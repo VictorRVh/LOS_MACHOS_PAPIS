@@ -206,4 +206,57 @@ class MatriculaController extends Controller
 
         return response()->json($grupos);
     }
+
+    public function getMatriculadosPorGrupo($grupoId)
+    {
+        $matriculados = DB::table('matricula as m')
+            ->join('estudiante as e', 'm.id_estudiante', '=', 'e.id')
+            ->join('grupo as g', 'm.id_grupo', '=', 'g.id')
+            ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
+            ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
+            ->join('modulos as mo', 'g.id_modulo', '=', 'mo.id')
+            ->where('m.id_grupo', $grupoId)
+            ->select(
+                'm.id as id_matricula',
+                'e.id as id_estudiante',
+                DB::raw("CONCAT(e.apellido_paterno, ' ', e.apellido_materno, ', ', e.nombre) as estudiante"),
+                'e.nro_documento',
+                'e.sexo',
+                'e.fecha_nacimiento',
+                'm.turno',
+                'm.reserva',
+                'em.nombre_especialidad as especialidad',
+                'mo.descripcion as modulo'
+            )
+            ->get();
+
+        return response()->json($matriculados);
+    }
+
+    public function getFichaMatricula($estudianteId)
+    {
+        $ficha = DB::table('estudiante as e')
+            ->join('matricula as m', 'e.id', '=', 'm.id_estudiante')
+            ->join('grupo as g', 'm.id_grupo', '=', 'g.id')
+            ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
+            ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
+            ->join('modulos as mo', 'g.id_modulo', '=', 'mo.id')
+            ->join('periodo as p', 'g.id_periodo', '=', 'p.id')
+            ->where('e.id', $estudianteId)
+            ->select(
+                'e.id as id_estudiante',
+                DB::raw("CONCAT(e.apellido_paterno, ' ', e.apellido_materno, ', ', e.nombre) as estudiante"),
+                'e.nro_documento',
+                'e.sexo',
+                'e.fecha_nacimiento',
+                'm.id as id_matricula',
+                'm.turno',
+                'em.nombre_especialidad as especialidad',
+                'mo.descripcion as modulo',
+                'p.nombre_periodo as periodo'
+            )
+            ->first();
+
+        return response()->json($ficha);
+    }
 }

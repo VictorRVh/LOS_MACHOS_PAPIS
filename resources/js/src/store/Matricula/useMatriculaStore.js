@@ -3,13 +3,26 @@ import { defineStore } from 'pinia';
 import useHttpRequest from '../../composables/useHttpRequest';
 
 const useMatriculaStore = defineStore('matricula', () => {
-    const { get, loading } = useHttpRequest();
+
+    const {
+        show: getEstudiantesPorGrupo,
+        // loading: especialidadByProgramLoading,
+        // initialLoading: especialidadByProgramtesFirstTimeLoading,
+    } = useHttpRequest('/matricula');
+
+    const {
+        show: getFichaMatricula,
+        // loading: especialidadByProgramLoading,
+        // initialLoading: especialidadByProgramtesFirstTimeLoading,
+    } = useHttpRequest('/fichaMatricula');
 
     const grupos = ref([]);
     const matriculasEnGrupo = ref([]);
     const estudiantesConReserva = ref([]);
     const programasConEspecialidades = ref([]);
     const gruposDisponiblesParaMatricula = ref([]);
+    const estudiantesMatriculados = ref([]);
+    const datosMatricula = ref([]);
 
     const fetchGruposConMatriculados = async () => {
         grupos.value = await get('/api/grupos-con-matriculados');
@@ -41,18 +54,34 @@ const useMatriculaStore = defineStore('matricula', () => {
         if (response) gruposDisponiblesParaMatricula.value = response;
     };
 
+    const fetchEstudiantesPorGrupo = async (grupoId) => {
+        const response = await getEstudiantesPorGrupo(grupoId)
+        estudiantesMatriculados.value = response;
+    };
+
+    const fetchFichaMatricula = async (estudianteId) => {
+        const response = await getFichaMatricula(estudianteId)
+        datosMatricula.value = response;
+    };
+
     return {
         grupos,
         matriculasEnGrupo,
         estudiantesConReserva,
         programasConEspecialidades,
         gruposDisponiblesParaMatricula,
-        loading,
+        // loading,
         fetchGruposConMatriculados,
         fetchMatriculasPorGrupo,
         fetchEstudiantesConReserva,
         fetchProgramasPorCiclo,
         fetchGruposPorEspecialidad,
+
+        fetchEstudiantesPorGrupo,
+        estudiantesMatriculados,
+
+        fetchFichaMatricula,
+        datosMatricula
     };
 });
 

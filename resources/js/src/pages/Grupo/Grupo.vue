@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useRouter } from 'vue-router';
 
 import SearchBar from "../../components/head_table/headSearch.vue";
 import Table from "../../components/table/Table.vue";
@@ -29,6 +30,7 @@ import useCicloStore from "../../store/Ciclo/useCicloStore";
 import BaseSelectCiclo from "../../components/ui/BaseSelectCiclo.vue";
 
 // Stores
+const router = useRouter();
 const grupoStore = useGrupoStore();
 const programaStore = useProgramaStore();
 const peridoStore = usePeriodoStore();
@@ -56,7 +58,12 @@ const onDelete = (grupo) => {
     }
   });
 };
-
+const verGrupo = (grupo) => {
+  router.push({
+    name: 'grupo.documentos',
+    params: { id: grupo.id_grupo },
+  });
+};
 const grupos = ref([]);;
 const selectedCiclo = ref(null)
 const selectedAnio = ref(null)
@@ -200,7 +207,7 @@ const {
               <Td>{{ modulo.docente.nombre }}</Td>
               <Td class="text-center">
                 <MenuTable :actions="{ view: true, edit: true, delete: true }" entity-label="grupo"
-                  @view="showSlider(true, modulo)" @edit="showSlider(true, modulo)"
+                  @view="verGrupo(modulo)" @edit="showSlider(true, modulo)"
                   @delete="onDelete({ id: modulo.id_grupo })" />
               </Td>
             </Tr>

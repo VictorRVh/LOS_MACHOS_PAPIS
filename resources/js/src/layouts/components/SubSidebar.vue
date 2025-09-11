@@ -11,16 +11,10 @@ const props = defineProps({
 });
 
 const isOpen = ref(true);
-const activeLink = ref('');
 
-watch(() => props.links, (newLinks) => {
-  if (newLinks && newLinks.length > 0) {
-    if (!activeLink.value || !newLinks.some(l => l.text === activeLink.value)) {
-        activeLink.value = newLinks[0].text;
-    }
-    isOpen.value = true;
-  }
-}, { immediate: true, deep: true });
+watch(() => props.links, () => {
+  isOpen.value = true;
+}, { deep: true });
 </script>
 
 <template>
@@ -43,21 +37,18 @@ watch(() => props.links, (newLinks) => {
     </div>
 
     <nav class="flex-grow p-4 space-y-1 overflow-y-auto">
-      <a
+      <router-link
         v-for="link in links"
         :key="link.text"
-        href="#"
-        @click.prevent="activeLink = link.text"
+        :to="link.to"
         class="flex items-center w-full px-4 py-2.5 text-sm transition-all duration-150
                text-gray-600 dark:text-gray-300
                border-l-4 border-transparent
                hover:bg-gray-100 dark:hover:bg-slate-700"
-        :class="{
-          '!border-blue-500 bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold': activeLink === link.text
-        }"
+        active-class="!border-blue-500 bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold"
       >
         {{ link.text }}
-      </a>
+      </router-link>
     </nav>
   </aside>
 </template>

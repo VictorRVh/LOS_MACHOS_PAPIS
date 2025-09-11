@@ -10,23 +10,23 @@ import SubSidebar from './components/SubSidebar.vue';
 import useUserStore from "../store/useUserStore";
 
 const userStore = useUserStore();
-const userPermissions = computed(
-  () => userStore.user?.permissions.map(p => p.name) || []
-);
-
-const hasPermission = (itemPermissions) =>
-  itemPermissions.some(perm => userPermissions.value.includes(perm));
-
 const layoutStore = useLayoutStore();
 const route = useRoute();
 
-const submenuLinks = computed(() => route.meta.submenu || []);
+const submenuLinks = computed(() => {
+  const submenuMeta = route.meta.submenu;
+  if (!submenuMeta) return [];
+  if (typeof submenuMeta === 'function') {
+    return submenuMeta(route);
+  }
+  return submenuMeta;
+});
 </script>
 
 <template>
     <div class="flex h-screen bg-gray-100 dark:bg-slate-600 dark:text-gray-100 font-sans">
         <Sidebar />
-        
+
         <transition name="slide-fade">
             <SubSidebar v-if="submenuLinks.length > 0" :links="submenuLinks" />
         </transition>
@@ -34,7 +34,7 @@ const submenuLinks = computed(() => route.meta.submenu || []);
         <div class="flex-1 flex flex-col overflow-hidden">
             <Header />
             <PageLoader :loading="layoutStore.isPageLoading" />
-            <main class="flex-1 overflow-y-auto">
+            <main class="flex-1 overflow-y-auto p-6">
                 <RouterView v-slot="{ Component }">
                     <Suspense
                         @pending="layoutStore.setPageLoading(true)"

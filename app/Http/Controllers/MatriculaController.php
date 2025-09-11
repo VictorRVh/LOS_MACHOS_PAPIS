@@ -259,4 +259,54 @@ class MatriculaController extends Controller
 
         return response()->json($ficha);
     }
+
+    public function getMatriculadosPorGrupoExtendido($idGrupo)
+    {
+        // Datos de la especialidad, módulo y fechas
+        $infoGrupo = DB::table('grupo')
+            ->join('especialidad_programa', 'grupo.id_especialidad', '=', 'especialidad_programa.id')
+            ->join('especialidad_madre', 'especialidad_programa.id_especialidad', '=', 'especialidad_madre.id')
+            ->join('modulos', 'grupo.id_modulo', '=', 'modulos.id')
+            ->where('grupo.id', $idGrupo)
+            ->select(
+                'especialidad_madre.nombre_especialidad as especialidad',
+                'modulos.descripcion as modulo',
+                'modulos.horas as duracion',
+                'grupo.fecha_inicio',
+                'grupo.fecha_fin'
+            )
+            ->first();
+
+        // Datos de los estudiantes matriculados (ordenados por apellido_paterno)
+        $estudiantes = DB::table('matricula')
+            ->join('estudiante', 'matricula.id_estudiante', '=', 'estudiante.id')
+            ->leftJoin('pagos', 'matricula.id_pago', '=', 'pagos.id')
+            ->where('matricula.id_grupo', $idGrupo)
+            ->select(
+                DB::raw("CONCAT(estudiante.apellido_paterno, ' ', estudiante.apellido_materno, ', ', estudiante.nombre) as apellidos_nombres"),
+                'estudiante.sexo',
+                DB::raw("TIMESTAMPDIFF(YEAR, estudiante.fecha_nacimiento, CURDATE()) as edad"),
+                'matricula.turno as condicion',
+                'estudiante.nro_documento',
+                'estudiante.fecha_nacimiento',
+                'estudiante.lugar_nacimiento as lugar',
+                'estudiante.estado_civil',
+                'estudiante.grado_instruccion',
+                'estudiante.celular_personal as telefono',
+                'estudiante.correo_electronico',
+                'pagos.nro_recibo as nro_recibo',
+                'pagos.aporte'
+            )
+            ->orderBy('estudiante.apellido_paterno', 'asc')
+            ->get();
+
+        return response()->json([
+            'especialidad' => $infoGrupo->especialidad ?? null,
+            'modulo'       => $infoGrupo->modulo ?? null,
+            'duracion'     => $infoGrupo->duracion ?? null,
+            'fecha_inicio' => $infoGrupo->fecha_inicio ?? null,
+            'fecha_fin'    => $infoGrupo->fecha_fin ?? null,
+            'estudiantes'  => $estudiantes
+        ]);
+    }
 }

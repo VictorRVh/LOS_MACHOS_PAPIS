@@ -819,7 +819,7 @@ Route::middleware('auth:sanctum')->group(function () {
     ])->middleware('permission:todo-acceso-permisos|permissions-delete');
 
 
-    // Alumnos matriculados
+    // Alumnos matriculados (en modulo matricula)
     Route::get('matricula/{grupoId}', [
         \App\Http\Controllers\MatriculaController::class,
         'getMatriculadosPorGrupo',
@@ -830,6 +830,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'getFichaMatricula',
     ])->middleware('permission:todo-acceso-permisos|permissions-delete');
 
+
+    Route::get('matriculados/{grupoId}', [
+        \App\Http\Controllers\MatriculaController::class,
+        'getMatriculadosPorGrupoExtendido',
+    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
 
 
     // programa por ciclo

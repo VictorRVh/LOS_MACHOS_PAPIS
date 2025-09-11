@@ -16,6 +16,12 @@ const useMatriculaStore = defineStore('matricula', () => {
         // initialLoading: especialidadByProgramtesFirstTimeLoading,
     } = useHttpRequest('/fichaMatricula');
 
+    const {
+        show: getMatriculadosGrupo,
+        // loading: especialidadByProgramLoading,
+        // initialLoading: especialidadByProgramtesFirstTimeLoading,
+    } = useHttpRequest('/matriculados');
+
     const grupos = ref([]);
     const matriculasEnGrupo = ref([]);
     const estudiantesConReserva = ref([]);
@@ -23,6 +29,8 @@ const useMatriculaStore = defineStore('matricula', () => {
     const gruposDisponiblesParaMatricula = ref([]);
     const estudiantesMatriculados = ref([]);
     const datosMatricula = ref([]);
+
+    const matriculadosPorGrupo = ref([]);
 
     const fetchGruposConMatriculados = async () => {
         grupos.value = await get('/api/grupos-con-matriculados');
@@ -64,6 +72,12 @@ const useMatriculaStore = defineStore('matricula', () => {
         datosMatricula.value = response;
     };
 
+    const fetchMatriculadosPorGrupo = async (grupoId) => {
+        console.log('dmeidmei')
+        const response = await getMatriculadosGrupo(grupoId)
+        matriculadosPorGrupo.value = response;
+    };
+
     return {
         grupos,
         matriculasEnGrupo,
@@ -81,7 +95,10 @@ const useMatriculaStore = defineStore('matricula', () => {
         estudiantesMatriculados,
 
         fetchFichaMatricula,
-        datosMatricula
+        datosMatricula,
+
+        fetchMatriculadosPorGrupo,
+        matriculadosPorGrupo
     };
 });
 

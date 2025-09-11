@@ -35,9 +35,9 @@ if (!especialidadProgramaStore?.especialidadPrograma?.length) {
   await especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma);
 }
 
-if (!especialidadStore?.especialidadCiclo?.length||especialidadProgramaStore?.especialidadProgramaFiltrado?.ciclo) {
+if (!especialidadStore?.especialidadPrograma?.length||especialidadProgramaStore?.especialidadProgramaFiltrado?.ciclo) {
   const cicloId = especialidadProgramaStore.especialidadProgramaFiltrado?.ciclo?.id;
-  await especialidadStore.loadEspecialidadCiclo(cicloId);
+  await especialidadStore.loadEspecialidadPrograma(cicloId);
 }
 
 const especialidadesDisponibles = computed(() => {
@@ -45,7 +45,7 @@ const especialidadesDisponibles = computed(() => {
     (ep) => ep?.especialidad_madre.id
   );
 
-  return especialidadStore.especialidadCiclo?.especialidades?.filter(
+  return especialidadStore.especialidadPrograma?.especialidades?.filter(
     (especialidad) => !asignadas?.includes(especialidad?.id)
   ) || [];
 });

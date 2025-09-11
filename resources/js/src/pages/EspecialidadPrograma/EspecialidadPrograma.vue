@@ -37,7 +37,7 @@ if (!especialidadProgramaStore?.especialidadPrograma?.length) {
 
 if (!especialidadStore?.especialidadPrograma?.length||especialidadProgramaStore?.especialidadProgramaFiltrado?.ciclo) {
   const cicloId = especialidadProgramaStore.especialidadProgramaFiltrado?.ciclo?.id;
-  await especialidadStore.loadEspecialidadPrograma(cicloId);
+  await especialidadStore.loadEspecialidadCiclo(cicloId);
 }
 
 const especialidadesDisponibles = computed(() => {
@@ -45,7 +45,7 @@ const especialidadesDisponibles = computed(() => {
     (ep) => ep?.especialidad_madre.id
   );
 
-  return especialidadStore.especialidadPrograma?.especialidades?.filter(
+  return especialidadStore.especialidadCiclo?.especialidades?.filter(
     (especialidad) => !asignadas?.includes(especialidad?.id)
   ) || [];
 });

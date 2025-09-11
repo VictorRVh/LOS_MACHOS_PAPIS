@@ -32,6 +32,11 @@ const navLinks = [
     // LÍNEA CORREGIDA: 'matricula' ahora es 'matricula.index'
     { name: 'Matricula', routeName: 'matricula.index', icon: IdentificationIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
     { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-permisos","icono-permisos"]},
+
+    // PARA DOCENTES
+
+    { name: 'moduloAsignado', routeName: 'moduloAsignado', icon: AcademicCapIcon, permissions: ["ver-mis-modulos"]},
+
 ];
 
 </script>

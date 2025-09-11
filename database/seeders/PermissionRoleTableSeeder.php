@@ -29,6 +29,26 @@ class PermissionRoleTableSeeder extends Seeder
             ];
         }
 
+        $docentePermissions = [
+            'ver-perfil-docente',
+            'editar-perfil-docente',
+            'ver-mis-modulos',
+            'ver-estudiantes-asignados',
+        ];
+
+        // buscar IDs de los permisos creados en la tabla permissions
+        $permissionIds = DB::table('permissions')
+            ->whereIn('name', $docentePermissions)
+            ->pluck('id');
+
+        foreach ($permissionIds as $pid) {
+            $permissionRole[] = [
+                'role_id' => 6, // docente
+                'permission_id' => $pid,
+                'created_at' => now(),
+            ];
+        }
+
         DB::table('permission_role')->insert($permissionRole);
     }
 }

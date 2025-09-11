@@ -34,7 +34,14 @@ class PermissionTableSeeder extends Seeder
             'editar-permisos',
             'eliminar-permisos',
             'icono-permisos',
-            
+
+
+            // PERMISOS DE LOS DOCENTES
+            'ver-perfil-docente',
+            'editar-perfil-docente',
+            'ver-mis-modulos',
+            'ver-estudiantes-asignados',
+
         ];
 
         $permissions = array_map(function ($name) {

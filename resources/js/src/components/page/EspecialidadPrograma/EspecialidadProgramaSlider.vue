@@ -137,8 +137,8 @@ const onSubmit = async () => {
         <div class="mt-2 space-y-1.5 font-inter">
 
             <FormLabelError label="Especialidad" required>
-                <BaseSelectCiclo v-model="formData.id_especialidad" :options="especialidad" label="nombre_especialidad"
-                    placeholder="Seleccione una especialidad" />
+                <BaseSelectCiclo v-model="formData.id_especialidad" :options="especialidad"
+                    label="nombre_especialidad" placeholder="Seleccione una especialidad" />
             </FormLabelError>
 
             <FormInput v-model="formData.nro_modulos" :focus="show" label="Numero de modulos"

@@ -200,4 +200,42 @@ class DocenteController extends Controller
         $docente->delete();
         return response()->json(['message' => 'Docente eliminado correctamente']);
     }
+
+
+    public function getModulosAsignados()
+    {
+        $userId = auth()->id(); // ID del usuario logueado
+
+        return DB::table('grupo as g')
+            ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
+            ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
+            ->join('modulos as m', 'g.id_modulo', '=', 'm.id')
+            ->leftJoin('docente as d', 'g.id_docente', '=', 'd.id')
+            ->leftJoin('users as u', 'd.user_id', '=', 'u.id')
+            ->leftJoin('matricula as ma', 'ma.id_grupo', '=', 'g.id')
+            ->where('d.user_id', $userId) // 👈 seguridad: usa el id del user autenticado
+            ->select(
+                'em.nombre_especialidad as especialidad',
+                'm.numero_modulo as modulo',
+                DB::raw("CONCAT(u.name, ' ', u.apellido_paterno, ' ', u.apellido_materno) as docente"),
+                'g.fecha_inicio',
+                'g.fecha_fin',
+                'g.seccion',
+                'g.turno',
+                DB::raw('COUNT(ma.id) as matriculados')
+            )
+            ->groupBy(
+                'g.id',
+                'em.nombre_especialidad',
+                'm.numero_modulo',
+                'u.name',
+                'u.apellido_paterno',
+                'u.apellido_materno',
+                'g.fecha_inicio',
+                'g.fecha_fin',
+                'g.seccion',
+                'g.turno'
+            )
+            ->get();
+    }
 }

@@ -23,8 +23,17 @@ class NominaMatriculasExport
         $sheet = $spreadsheet->getActiveSheet();
 
         // 2. Obtener datos
+        // $matriculas = Matricula::where('id_grupo', $this->idGrupo)
+        //     ->with('estudiante')
+        //     ->get();
+
         $matriculas = Matricula::where('id_grupo', $this->idGrupo)
             ->with('estudiante')
+            ->join('estudiante as e', 'matricula.id_estudiante', '=', 'e.id')
+            ->orderBy('e.apellido_paterno', 'asc')
+            ->orderBy('e.apellido_materno', 'asc')
+            ->orderBy('e.nombre', 'asc')
+            ->select('matricula.*') // importante para evitar conflictos con columnas duplicadas
             ->get();
 
 
@@ -63,7 +72,7 @@ class NominaMatriculasExport
         foreach ($matriculas as $index => $matricula) {
             $est = $matricula->estudiante;
             // $sheet->setCellValue("B{$fila}", str_pad($index + 1, 2, '0', STR_PAD_LEFT));
-            $sheet->setCellValue("C{$fila}", $matricula->id);
+            $sheet->setCellValue("C{$fila}", $est->nro_documento);
             $sheet->setCellValue("F{$fila}", "{$est->apellido_paterno} {$est->apellido_materno}, {$est->nombre}");
             $sheet->setCellValue("K{$fila}", $est->sexo);
             $sheet->setCellValue("L{$fila}", $est->fecha_nacimiento ?? '');

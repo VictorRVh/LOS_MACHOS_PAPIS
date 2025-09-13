@@ -1,8 +1,8 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { inject } from 'vue';
 import { ChevronLeftIcon } from '@heroicons/vue/24/outline';
 
-const props = defineProps({
+defineProps({
   links: {
     type: Array,
     required: true,
@@ -10,16 +10,11 @@ const props = defineProps({
   },
 });
 
-const isOpen = ref(true);
-
-watch(() => props.links, () => {
-  isOpen.value = true;
-}, { deep: true });
+const { toggleSubSidebar } = inject('subSidebarState');
 </script>
 
 <template>
   <aside
-    v-if="isOpen"
     class="absolute top-0 left-24 z-30 h-full w-64
            bg-white dark:bg-slate-800
            border-r border-gray-200 dark:border-slate-700
@@ -28,7 +23,7 @@ watch(() => props.links, () => {
     <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700 flex-shrink-0">
       <h2 class="font-semibold text-gray-800 dark:text-gray-200">Menú de Grupo</h2>
       <button
-        @click="isOpen = false"
+        @click="toggleSubSidebar"
         class="p-2 text-gray-500 dark:text-gray-400
                hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
       >

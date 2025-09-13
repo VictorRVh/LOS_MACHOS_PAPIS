@@ -2,7 +2,6 @@
 
 import { defineStore } from 'pinia';
 
-// ¡¡LA PUTA CLAVE ESTÁ AQUÍ!! El "export const"
 export const useLayoutStore = defineStore('layout', {
     state: () => ({
         // Controla si el sidebar está colapsado o expandido

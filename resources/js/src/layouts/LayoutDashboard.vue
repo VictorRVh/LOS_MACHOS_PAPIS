@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, computed, provide } from 'vue';
 import { useRoute } from 'vue-router';
 import { useLayoutStore } from '@/store/useLayoutStore';
 import Sidebar from './components/Sidebar.vue';
@@ -12,6 +12,12 @@ import useUserStore from "../store/useUserStore";
 const userStore = useUserStore();
 const layoutStore = useLayoutStore();
 const route = useRoute();
+
+const isSubSidebarOpen = ref(true);
+const toggleSubSidebar = () => {
+  isSubSidebarOpen.value = !isSubSidebarOpen.value;
+};
+provide('subSidebarState', { isSubSidebarOpen, toggleSubSidebar });
 
 const submenuLinks = computed(() => {
   const submenuMeta = route.meta.submenu;
@@ -27,8 +33,15 @@ const submenuLinks = computed(() => {
     <div class="flex h-screen bg-gray-100 dark:bg-slate-600 dark:text-gray-100 font-sans">
         <Sidebar />
 
-        <transition name="slide-fade">
-            <SubSidebar v-if="submenuLinks.length > 0" :links="submenuLinks" />
+        <transition
+            enter-active-class="transition-all duration-300 ease-in-out"
+            enter-from-class="-translate-x-full opacity-0"
+            enter-to-class="translate-x-0 opacity-100"
+            leave-active-class="transition-all duration-200 ease-in-out"
+            leave-from-class="translate-x-0 opacity-100"
+            leave-to-class="-translate-x-full opacity-0"
+        >
+            <SubSidebar v-if="submenuLinks.length > 0 && isSubSidebarOpen" :links="submenuLinks" />
         </transition>
 
         <div class="flex-1 flex flex-col overflow-hidden">
@@ -51,17 +64,3 @@ const submenuLinks = computed(() => {
         </div>
     </div>
 </template>
-
-<style>
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-.slide-fade-leave-active {
-  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
-}
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(-20px);
-  opacity: 0;
-}
-</style>

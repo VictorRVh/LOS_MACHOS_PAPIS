@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { useRouter } from 'vue-router';
 
 import SearchBar from "../../components/head_table/headSearch.vue";
 
@@ -27,6 +28,7 @@ import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import ChangePasswordModal from "../../components/page/ChangePasswordModal.vue";
 
+const router = useRouter();
 const docenteStore = useDocenteStore();
 
 if (!docenteStore.modulosAsignados?.length) await docenteStore.loadModulosAsignados();
@@ -39,15 +41,27 @@ const showModal = ref(false);
 
 const modulos = computed(() => docenteStore.modulosAsignados);
 
-
+const verAlumnos = (modulo) => {
+  const grupoId = modulo.id_grupo || modulo.id;
+  if (!grupoId) {
+    console.error("No se encontró el ID del grupo en el objeto:", modulo);
+    showToast('Error: No se pudo encontrar el ID del grupo.', 'error');
+    return;
+  }
+  
+  router.push({
+    name: 'docente.modulo.alumnos',
+    params: { id: grupoId }
+  });
+};
 </script>
 
 <template>
-    <AuthorizationFallback :permissions="['ver-mis-modulos', 'ver-estudiantes-asignados']">
+    <AuthorizationFallback :permissions="['ver-mis-modulos']">
         <div class="w-full space-y-2 py-2 px-3">
             <div class="m-2">
                 <div class="flex-between">
-                    <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Modulos Asignados</h2>
+                    <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Módulos Asignados</h2>
                     <CreateButton @click="showSlider(true)" />
                 </div>
                 <div class="font-inter text-md w-full">Lista</div>
@@ -56,7 +70,7 @@ const modulos = computed(() => docenteStore.modulosAsignados);
                 <THead>
                     <Th>N°</Th>
                     <Th>Especialidad</Th>
-                    <Th>Modulo</Th>
+                    <Th>Módulo</Th>
                     <Th>Docente</Th>
                     <Th>Fecha de Inicio</Th>
                     <Th>Fecha de Fin</Th>
@@ -70,18 +84,20 @@ const modulos = computed(() => docenteStore.modulosAsignados);
                     <Tr v-for="(modulo, index) in modulos" :key="index">
                         <Td><span class="text-gray-800 dark:text-gray-300">{{ index + 1 }}</span></Td>
                         <Td>{{ modulo.especialidad }}</Td>
-                        <Td>{{ modulo.modulo }}</Td>
+                        <Td class="font-semibold">{{ modulo.modulo }}</Td>
                         <Td>{{ modulo.docente }}</Td>
                         <Td>{{ modulo.fecha_inicio }}</Td>
                         <Td>{{ modulo.fecha_fin }}</Td>
                         <Td>{{ modulo.seccion }}</Td>
                         <Td>{{ modulo.turno }}</Td>
                         <Td>{{ modulo.matriculados }}</Td>
-                        <Td class="text-center text-gray-600 dark:text-gray-200">
-                            <button>Nomina de matricula</button>
-                            <button>Capacidades Terminales</button>
-                            <button>Evaluaciones</button>
-                            <button>Practicas</button>
+                        <Td class="text-center">
+                            <MenuTable
+                                :actions="{ view: true, edit: false, delete: false }"
+                                view-label="Ver Alumnos"
+                                entity-label="Módulo"
+                                @view="verAlumnos(modulo)"
+                            />
                         </Td>
                     </Tr>
                 </TBody>

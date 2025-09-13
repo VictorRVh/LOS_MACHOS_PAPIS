@@ -212,6 +212,17 @@ export default [
             breadcrumb: [{ text: 'Grupos', to: { name: 'grupo' } }],
         }
     },
-
+     {
+        path: '/docente/modulo/:id/alumnos',
+        name: 'docente.modulo.alumnos',
+        component: () => import('../pages/Docente/DocenteAlumnosList.vue'),
+        props: true,
+        meta: {
+            layout: 'dashboard',
+            permissions: ['ver-estudiantes-asignados'],
+            parent: 'moduloAsignado',
+            breadcrumb: [{ text: 'Mis Módulos', to: { name: 'moduloAsignado' } }, { text: 'Lista de Alumnos' }]
+        }
+    },
 
 ];

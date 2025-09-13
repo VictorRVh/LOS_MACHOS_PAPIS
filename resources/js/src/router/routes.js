@@ -140,6 +140,7 @@ export default [
     },
     {
         path: '/grupo/:id',
+        name: 'grupo.detalle',
         component: () => import('../pages/Grupo/GrupoDetalle.vue'),
         props: true,
         redirect: route => ({ name: 'grupo.documentos', params: { id: route.params.id } }),
@@ -147,7 +148,7 @@ export default [
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos'],
             parent: 'grupo',
-            breadcrumb: { text: 'Detalle de Grupo' },
+            breadcrumb: (route) => ({ text: `Grupo ${route.params.id.substring(0, 8)}...` }),
             submenu: (route) => [
                 { text: 'Documentos', to: { name: 'grupo.documentos', params: { id: route.params.id } } },
                 { text: 'Sesiones y asistencia', to: { name: 'grupo.asistencia', params: { id: route.params.id } } },
@@ -162,31 +163,35 @@ export default [
                 name: 'grupo.documentos',
                 component: () => import('../pages/Grupo/GrupoDocumentos.vue'),
                 props: true,
+                meta: { parent: 'grupo.detalle', breadcrumb: { text: 'Documentos' } }
             },
-            // --- ESTO ES LO QUE ARREGLA EL ERROR ---
             {
                 path: 'asistencia',
                 name: 'grupo.asistencia',
-                component: () => import('../pages/Grupo/GrupoAsistencia.vue'), // Debes crear este archivo
+                component: () => import('../pages/Grupo/GrupoAsistencia.vue'),
                 props: true,
+                meta: { parent: 'grupo.detalle', breadcrumb: { text: 'Asistencia' } }
             },
             {
                 path: 'calificaciones',
                 name: 'grupo.calificaciones',
-                component: () => import('../pages/Grupo/GrupoCalificaciones.vue'), // Debes crear este archivo
+                component: () => import('../pages/Grupo/GrupoCalificaciones.vue'),
                 props: true,
+                meta: { parent: 'grupo.detalle', breadcrumb: { text: 'Calificaciones' } }
             },
             {
                 path: 'practicas',
                 name: 'grupo.practicas',
-                component: () => import('../pages/Grupo/GrupoPracticas.vue'), // Debes crear este archivo
+                component: () => import('../pages/Grupo/GrupoPracticas.vue'),
                 props: true,
+                meta: { parent: 'grupo.detalle', breadcrumb: { text: 'Prácticas' } }
             },
             {
                 path: 'alumnos',
                 name: 'grupo.alumnos',
-                component: () => import('../pages/Grupo/GrupoAlumnos.vue'), // Debes crear este archivo
+                component: () => import('../pages/Grupo/GrupoAlumnos.vue'),
                 props: true,
+                meta: { parent: 'grupo.detalle', breadcrumb: { text: 'Alumnos' } }
             },
         ]
     },
@@ -194,9 +199,6 @@ export default [
     { path: '/notificaciones', name: 'notificaciones.index', component: () => import('../pages/FullNotificaciones.vue'), meta: { layout: 'dashboard', breadcrumb: [{ text: 'Todas las Notificaciones' }] } },
     { path: '/mi-asistencia', name: 'biometrico.asistencia', component: () => import('../pages/Biometrico/AsistenciaBiometrica.vue'), meta: { layout: 'dashboard', breadcrumb: [{ text: 'Mi Asistencia Biométrica' }] } },
     { path: '/mi-asistencia/:idAsignacion', name: 'biometrico.detalle', component: () => import('../pages/Biometrico/AsistenciaDetalle.vue'), props: true, meta: { layout: 'dashboard', parent: 'biometrico.asistencia', breadcrumb: { text: 'Detalle de Asistencia' } } },
-
-    // PARA LOS DOCENTES
-
     {
         path: '/moduloAsignado',
         name: 'moduloAsignado',

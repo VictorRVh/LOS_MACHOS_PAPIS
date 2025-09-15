@@ -32,24 +32,24 @@ class DocenteController extends Controller
         // Validación de todos los datos
         $request->validate([
             // Campos del usuario
-            'name'              => 'required|string|max:255',
-            'usuario'           => 'required|string|max:50|unique:users,usuario',
-            'dni'               => 'required|string|max:8|unique:users,dni',
-            'apellido_paterno'  => 'required|string|max:100',
-            'apellido_materno'  => 'required|string|max:100',
-            'fecha_nacimiento'  => 'required|date',
-            'email'             => 'required|email|unique:users,email',
-            'telefono'          => 'nullable|string|max:15',
-            'direccion'         => 'nullable|string|max:255',
-            'password'          => 'required|string|min:6',
-            'status'            => 'required|integer|in:0,1,2,3',
+            'name' => 'required|string|max:255',
+            'usuario' => 'required|string|max:50|unique:users,usuario',
+            'dni' => 'required|string|max:8|unique:users,dni',
+            'apellido_paterno' => 'required|string|max:100',
+            'apellido_materno' => 'required|string|max:100',
+            'fecha_nacimiento' => 'required|date',
+            'email' => 'required|email|unique:users,email',
+            'telefono' => 'nullable|string|max:15',
+            'direccion' => 'nullable|string|max:255',
+            'password' => 'required|string|min:6',
+            'status' => 'required|integer|in:0,1,2,3',
 
             // Campos del docente
-            'codigo_modular'     => 'required|string|max:20',
-            'especialidad'       => 'required|string|max:100',
-            'condicion'          => 'required|string|max:50',
+            'codigo_modular' => 'required|string|max:20',
+            'especialidad' => 'required|string|max:100',
+            'condicion' => 'required|string|max:50',
             'escala_magisterial' => 'nullable|string|max:50',
-            'rd_nombramiento'    => 'nullable|string|max:50',
+            'rd_nombramiento' => 'nullable|string|max:50',
         ]);
 
         // Opcional: usar una transacción para que si falla algo, se revierta todo
@@ -58,27 +58,27 @@ class DocenteController extends Controller
         try {
             // 1. Crear el usuario
             $user = User::create([
-                'name'             => $request->name,
-                'usuario'          => $request->usuario,
-                'dni'              => $request->dni,
+                'name' => $request->name,
+                'usuario' => $request->usuario,
+                'dni' => $request->dni,
                 'apellido_paterno' => $request->apellido_paterno,
                 'apellido_materno' => $request->apellido_materno,
                 'fecha_nacimiento' => $request->fecha_nacimiento,
-                'email'            => $request->email,
-                'telefono'         => $request->telefono,
-                'direccion'        => $request->direccion,
-                'password'         => Hash::make($request->password),
-                'status'           => $request->status,
+                'email' => $request->email,
+                'telefono' => $request->telefono,
+                'direccion' => $request->direccion,
+                'password' => Hash::make($request->password),
+                'status' => $request->status,
             ]);
 
             // 2. Crear el registro docente con el ID del usuario recién creado
             $docente = Docente::create([
-                'user_id'           => $user->id,
-                'codigo_modular'    => $request->codigo_modular,
-                'especialidad'      => $request->especialidad,
-                'condicion'         => $request->condicion,
+                'user_id' => $user->id,
+                'codigo_modular' => $request->codigo_modular,
+                'especialidad' => $request->especialidad,
+                'condicion' => $request->condicion,
                 'escala_magisterial' => $request->escala_magisterial,
-                'rd_nombramiento'   => $request->rd_nombramiento,
+                'rd_nombramiento' => $request->rd_nombramiento,
             ]);
 
             // 3. (Opcional) asignar rol docente
@@ -116,60 +116,72 @@ class DocenteController extends Controller
     // Actualizar un docente
     public function update(Request $request, $id)
     {
-        $docente = Docente::find($id);
+        // 1. Buscar el usuario
+        $user = User::find($id);
 
-        if (!$docente) {
-            return response()->json(['message' => 'Docente no encontrado'], 404);
+        if (!$user) {
+            return response()->json(['message' => 'Usuario no encontrado'], 404);
         }
 
-        $user = $docente->user;
+        // 2. Buscar el docente por user_id
+        $docente = Docente::where('user_id', $user->id)->first();
+
+        // 3. Si no existe, crearlo
+        if (!$docente) {
+            $docente = Docente::create([
+                'user_id' => $user->id,
+                'codigo_modular' => '',
+                'especialidad' => '',
+                'condicion' => '',
+                'escala_magisterial' => '',
+                'rd_nombramiento' => '',
+            ]);
+        }
 
         DB::beginTransaction();
 
         try {
-            // Validación
+            // 4. Validación
             $request->validate([
-                // Datos de usuario
-                'name'              => 'required|string|max:255',
-                'usuario'           => 'required|string|max:50|unique:users,usuario,' . $user->id,
-                'dni'               => 'required|string|max:8|unique:users,dni,' . $user->id,
-                'apellido_paterno'  => 'required|string|max:100',
-                'apellido_materno'  => 'required|string|max:100',
-                'fecha_nacimiento'  => 'required|date',
-                'email'             => 'required|email|unique:users,email,' . $user->id,
-                'telefono'          => 'nullable|string|max:15',
-                'direccion'         => 'nullable|string|max:255',
-                'status'            => 'required|integer|in:0,1,2,3',
+                'name' => 'required|string|max:255',
+                'usuario' => 'required|string|max:50|unique:users,usuario,' . $user->id,
+                'dni' => 'required|string|max:8|unique:users,dni,' . $user->id,
+                'apellido_paterno' => 'required|string|max:100',
+                'apellido_materno' => 'required|string|max:100',
+                'fecha_nacimiento' => 'required|date',
+                'email' => 'required|email|unique:users,email,' . $user->id,
+                'telefono' => 'nullable|string|max:15',
+                'direccion' => 'nullable|string|max:255',
+                'status' => 'required|integer|in:0,1,2,3',
 
-                // Datos del docente
-                'codigo_modular'     => 'required|string|max:20',
-                'especialidad'       => 'required|string|max:100',
-                'condicion'          => 'required|string|max:50',
+                'codigo_modular' => 'required|string|max:20',
+                'especialidad' => 'required|string|max:100',
+                'condicion' => 'required|string|max:50',
                 'escala_magisterial' => 'nullable|string|max:50',
-                'rd_nombramiento'    => 'nullable|string|max:50',
+                'rd_nombramiento' => 'nullable|string|max:50',
             ]);
 
-            // Actualizar usuario
+            // 5. Actualizar usuario
             $user->update([
-                'name'             => $request->name,
-                'usuario'          => $request->usuario,
-                'dni'              => $request->dni,
+                'name' => $request->name,
+                'usuario' => $request->usuario,
+                'dni' => $request->dni,
                 'apellido_paterno' => $request->apellido_paterno,
                 'apellido_materno' => $request->apellido_materno,
                 'fecha_nacimiento' => $request->fecha_nacimiento,
-                'email'            => $request->email,
-                'telefono'         => $request->telefono,
-                'direccion'        => $request->direccion,
-                'status'           => $request->status,
+                'email' => $request->email,
+                'telefono' => $request->telefono,
+                'direccion' => $request->direccion,
+                'status' => $request->status,
             ]);
 
-            // Actualizar docente
+            // 6. Actualizar docente
             $docente->update([
-                'codigo_modular'     => $request->codigo_modular,
-                'especialidad'       => $request->especialidad,
-                'condicion'          => $request->condicion,
+                'codigo_modular' => $request->codigo_modular,
+                'especialidad' => $request->especialidad,
+                'condicion' => $request->condicion,
                 'escala_magisterial' => $request->escala_magisterial,
-                'rd_nombramiento'    => $request->rd_nombramiento,
+                'rd_nombramiento' => $request->rd_nombramiento,
             ]);
 
             DB::commit();
@@ -187,6 +199,7 @@ class DocenteController extends Controller
             ], 500);
         }
     }
+
 
     // Eliminar un docente
     public function destroy($id)

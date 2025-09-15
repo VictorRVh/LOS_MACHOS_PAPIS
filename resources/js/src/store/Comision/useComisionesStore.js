@@ -11,7 +11,7 @@ const useComisionesStore = defineStore('comisiones', () => {
     } = useHttpRequest('/comisiones');
 
     const comisiones = ref([]);
-    const loadComisiones = async () => {
+    const loadComisiones = async () => {c
         const res = await getComisiones();
         comisiones.value = res;
     };

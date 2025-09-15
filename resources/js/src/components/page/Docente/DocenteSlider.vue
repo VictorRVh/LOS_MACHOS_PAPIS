@@ -70,8 +70,9 @@ const formErrors = ref({});
 
 watch(() => props.show, () => {
     if (props.show) {
+        console.log('props de docente', props.docente?.id);
         if (props.docente?.id) {
-            console.log('props de docente', props.docente);
+            
 
             formData.value = Object.assign(
                 {},
@@ -128,7 +129,7 @@ const onSubmit = async () => {
     const fieldsToBeOmitted = ['confirm_password'];
     if (props.docente?.id) fieldsToBeOmitted.push('password');
     data = omitPropsFromObject(data, fieldsToBeOmitted);
-    const docenteId = props.docente?.docente?.id;
+    const docenteId = props.docente?.id;
     const response = docenteId ? await updateDocente(docenteId, data) : await createDocente(data);
     if (response?.user.id) {
         showToast(`Docente ${props.docente?.id ? 'actualizado' : 'creado'} correctamente.`);

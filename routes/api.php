@@ -490,6 +490,13 @@ Route::middleware('auth:sanctum')->group(function () {
         'getGruposPorCicloYPeriodo',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
+    // Lista de grupos disponibles para cambio de grupo
+    Route::get('gruposDisponibles', [
+        \App\Http\Controllers\GrupoController::class,
+        'gruposDisponibles',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+
     //RUTA PARA CAPACIDAD TERMINAL
     Route::get('capacidad_terminal', [
         \App\Http\Controllers\CapacidadTerminalController::class,
@@ -835,6 +842,19 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\MatriculaController::class,
         'getMatriculadosPorGrupoExtendido',
     ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+
+
+    // Cambio de matricula
+    Route::patch('cambiarMatricula', [
+        \App\Http\Controllers\MatriculaController::class,
+        'cambiarGrupo',
+    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+
+
+    Route::patch('cambiarMatricula/{idMatricula}', [
+        \App\Http\Controllers\MatriculaController::class,
+        'cambiarGrupo',
+    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
 
 
     // programa por ciclo

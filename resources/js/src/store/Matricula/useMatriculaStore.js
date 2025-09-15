@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import useHttpRequest from '../../composables/useHttpRequest';
+import axios from 'axios';
 
 const useMatriculaStore = defineStore('matricula', () => {
 
@@ -21,6 +22,12 @@ const useMatriculaStore = defineStore('matricula', () => {
         // loading: especialidadByProgramLoading,
         // initialLoading: especialidadByProgramtesFirstTimeLoading,
     } = useHttpRequest('/matriculados');
+
+    const {
+        update: updateMatricula,
+        // loading: especialidadByProgramLoading,
+        // initialLoading: especialidadByProgramtesFirstTimeLoading,
+    } = useHttpRequest('/cambiarMatricula');
 
     const grupos = ref([]);
     const matriculasEnGrupo = ref([]);
@@ -73,9 +80,23 @@ const useMatriculaStore = defineStore('matricula', () => {
     };
 
     const fetchMatriculadosPorGrupo = async (grupoId) => {
-        console.log('dmeidmei')
         const response = await getMatriculadosGrupo(grupoId)
         matriculadosPorGrupo.value = response;
+    };
+    const loadCambioMatricula = async (idsMatriculas, nuevoGrupoId) => {
+        console.log('cambiando matrículas:', idsMatriculas, nuevoGrupoId);
+        try {
+            // siempre mando array
+            const response = await axios.patch('/cambiarMatricula', {
+                ids: Array.isArray(idsMatriculas) ? idsMatriculas : [idsMatriculas],
+                id_grupo: nuevoGrupoId,
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error al cambiar grupo:', error.response?.data || error);
+            throw error;
+        }
     };
 
     return {
@@ -98,7 +119,9 @@ const useMatriculaStore = defineStore('matricula', () => {
         datosMatricula,
 
         fetchMatriculadosPorGrupo,
-        matriculadosPorGrupo
+        matriculadosPorGrupo,
+
+        loadCambioMatricula
     };
 });
 

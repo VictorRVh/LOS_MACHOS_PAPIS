@@ -273,7 +273,9 @@ class MatriculaController extends Controller
                 'modulos.descripcion as modulo',
                 'modulos.horas as duracion',
                 'grupo.fecha_inicio',
-                'grupo.fecha_fin'
+                'grupo.fecha_fin',
+                'grupo.id_periodo',
+                'grupo.id'
             )
             ->first();
 
@@ -283,10 +285,12 @@ class MatriculaController extends Controller
             ->leftJoin('pagos', 'matricula.id_pago', '=', 'pagos.id')
             ->where('matricula.id_grupo', $idGrupo)
             ->select(
+                'matricula.id as id_matricula',
                 DB::raw("CONCAT(estudiante.apellido_paterno, ' ', estudiante.apellido_materno, ', ', estudiante.nombre) as apellidos_nombres"),
                 'estudiante.sexo',
                 DB::raw("TIMESTAMPDIFF(YEAR, estudiante.fecha_nacimiento, CURDATE()) as edad"),
                 'matricula.turno as condicion',
+                'estudiante.id as id_estudiante',
                 'estudiante.nro_documento',
                 'estudiante.fecha_nacimiento',
                 'estudiante.lugar_nacimiento as lugar',
@@ -302,11 +306,32 @@ class MatriculaController extends Controller
 
         return response()->json([
             'especialidad' => $infoGrupo->especialidad ?? null,
+            'id_grupo' => $infoGrupo->id ?? null,
+            'id_periodo' => $infoGrupo->id_periodo ?? null,
             'modulo'       => $infoGrupo->modulo ?? null,
             'duracion'     => $infoGrupo->duracion ?? null,
             'fecha_inicio' => $infoGrupo->fecha_inicio ?? null,
             'fecha_fin'    => $infoGrupo->fecha_fin ?? null,
             'estudiantes'  => $estudiantes
+        ]);
+    }
+
+    // CAMBIO DE GRUPOS A ESTUDIANTES
+
+    public function cambiarGrupo(Request $request)
+    {
+        $request->validate([
+            'id_grupo' => 'required|uuid|exists:grupo,id',
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'uuid|exists:matricula,id',
+        ]);
+
+        Matricula::whereIn('id', $request->ids)
+            ->update(['id_grupo' => $request->id_grupo]);
+
+        return response()->json([
+            'message' => 'Grupo cambiado con éxito',
+            'ids' => $request->ids,
         ]);
     }
 }

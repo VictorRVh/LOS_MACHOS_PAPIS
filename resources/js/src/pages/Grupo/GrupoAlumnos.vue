@@ -1,6 +1,5 @@
 <script setup>
-import { onMounted, computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, computed, ref, watch } from 'vue';
 import Table from '../../components/table/Table.vue';
 import THead from '../../components/table/THead.vue';
 import TBody from '../../components/table/TBody.vue';
@@ -13,20 +12,22 @@ import { PencilSquareIcon, TrashIcon, ArchiveBoxIcon, DocumentArrowDownIcon, Arr
 import { generatePdfMatricula } from '../../pdf/fichaMatricula';
 import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 import axios from 'axios';
+import Slider from '../../components/ui/Slider.vue';
+import useGrupoStore from '../../store/Grupo/useGrupoStore';
+import useModalToast from '../../composables/useModalToast';
 
 const props = defineProps({
   id: { type: [String, Number], required: true },
 });
 
-const router = useRouter();
+const { showConfirmModal, showToast } = useModalToast();
 
 const matriculaStore = useMatriculaStore();
+const grupoStore = useGrupoStore();
 
 const matriculados = computed(() => matriculaStore.matriculadosPorGrupo)
 const loading = ref(false)
 const estudiantesSeleccionados = ref([]);
-const datosParaFicha = ref([]);
-
 
 const todosSeleccionados = computed({
   get: () => matriculados.value.length > 0 && estudiantesSeleccionados.value.length === matriculados.value.length,
@@ -43,76 +44,74 @@ onMounted(() => {
   }, 1000);
 });
 
-const editarMatricula = (matricula) => {
-  alert(`Simulación: Redirigiendo a editar matrícula con ID ${matricula.id}`);
-  router.push({ name: 'matricula.editar', params: { id: matricula.id } });
-};
+const showModal = ref(false);
+const nuevoGrupoId = ref("");
+const saving = ref(false);
 
-const eliminarMatricula = (matricula) => {
-  if (confirm(`Simulación: ¿Estás seguro de eliminar a ${matricula.estudiante.nombres}?`)) {
-    matriculados.value = matriculados.value.filter(m => m.id !== matricula.id);
-    alert('Estudiante eliminado de la lista (simulado).');
+watch(showModal, async (nuevoValor) => {
+  if (nuevoValor) {
+    console.log("params:", matriculados.value.id_periodo, matriculados.value.id_grupo)
+
+    await grupoStore.loadGruposDisponibles(
+      matriculados.value.id_periodo,
+      matriculados.value.id_grupo
+    )
+
+    console.log("gruposDisponibles:", grupoStore.gruposDisponibles)
   }
-};
+})
 
-const reservarMatricula = (matricula) => {
-  if (confirm(`Simulación: ¿Pasar a RESERVA a ${matricula.estudiante.nombres}?`)) {
-    matriculados.value = matriculados.value.filter(m => m.id !== matricula.id);
-    alert('Matrícula reservada. El estudiante ha sido quitado de esta lista (simulado).');
-  }
-};
 
-const exportarFicha = async (matricula) => {
-  try {
-    await matriculaStore.fetchFichaMatricula(matricula);
-
-    const datosMatricula = matriculaStore.datosMatricula;
-
-    if (datosMatricula) {
-      generatePdfMatricula(datosMatricula);
-    } else {
-      console.error('No se pudieron obtener los datos de la matrícula');
-    }
-  } catch (error) {
-    console.error('Error al exportar ficha:', error);
-  }
-};
-const cambiarGrupo = () => {
+const cambiarGrupo = async () => {
   if (estudiantesSeleccionados.value.length === 0) {
-    alert("Selecciona al menos un estudiante.");
-    return;
+    alert("Selecciona al menos un estudiante.")
+    return
   }
-  const nuevoGrupoId = prompt("Simulación: Ingresa el ID del nuevo grupo de destino:", "");
-  if (nuevoGrupoId && !isNaN(nuevoGrupoId)) {
-    saving.value = true;
-    setTimeout(() => {
-      matriculados.value = matriculados.value.filter(m => !estudiantesSeleccionados.value.includes(m.id));
-      estudiantesSeleccionados.value = [];
-      alert(`Estudiantes movidos al grupo ${nuevoGrupoId} (simulado).`);
-      saving.value = false;
-    }, 1500);
+  if (!nuevoGrupoId.value) {
+    alert("Selecciona un grupo destino.")
+    return
   }
-};
+
+  console.log(estudiantesSeleccionados.value, nuevoGrupoId.value)
+
+  saving.value = true
+  try {
+    await matriculaStore.loadCambioMatricula(estudiantesSeleccionados.value, nuevoGrupoId.value)
+
+    await matriculaStore.fetchMatriculadosPorGrupo(props.id)
+
+    estudiantesSeleccionados.value = []
+    nuevoGrupoId.value = ""
+    showModal.value = false
+    showToast("Cambio de grupo exitoso")
+
+  } catch (error) {
+    showToast("Error al cambiar grupo")
+  } finally {
+    saving.value = false
+  }
+}
+
 
 const descargarNomina = async (idGrupo) => {
-    try {
-        const response = await axios.get(
-            `/reportes/nomina/grupo/${idGrupo}`,
-            { responseType: "blob" }
-        );
+  try {
+    const response = await axios.get(
+      `/reportes/nomina/grupo/${idGrupo}`,
+      { responseType: "blob" }
+    );
 
-        console.log('respuesta excel: ', response)
+    console.log('respuesta excel: ', response)
 
-        // Descargar archivo
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "nomina.xlsx");
-        document.body.appendChild(link);
-        link.click();
-    } catch (error) {
-        console.error("Error descargando reporte:", error);
-    }
+    // Descargar archivo
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "nomina.xlsx");
+    document.body.appendChild(link);
+    link.click();
+  } catch (error) {
+    console.error("Error descargando reporte:", error);
+  }
 }
 
 </script>
@@ -125,15 +124,15 @@ const descargarNomina = async (idGrupo) => {
       </h2>
 
       <div class="flex justify-start mb-4 ml-2">
-        <Button title="Cambiar de Grupo Seleccionados" @click="cambiarGrupo"
-          :disabled="estudiantesSeleccionados.length === 0" :loading="saving" variant="secondary">
+        <Button title="Cambiar de Grupo Seleccionados" @click="showModal = true"
+          :disabled="estudiantesSeleccionados.length === 0" variant="secondary">
           <ArrowPathIcon class="h-5 w-5 mr-2" />
           Cambiar Grupo ({{ estudiantesSeleccionados.length }})
         </Button>
       </div>
 
       <div class="flex justify-start mb-4 ml-2">
-        <Button title="Descargar nomina"  @click="descargarNomina(props.id)" variant="secondary">
+        <Button title="Descargar nomina" @click="descargarNomina(props.id)" variant="secondary">
         </Button>
       </div>
 
@@ -164,7 +163,7 @@ const descargarNomina = async (idGrupo) => {
             class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
 
             <Td class="text-center">
-              <input type="checkbox" :value="estudiante.nro_documento" v-model="estudiantesSeleccionados"
+              <input type="checkbox" :value="estudiante.id_matricula" v-model="estudiantesSeleccionados"
                 class="rounded border-gray-300 text-cetpro focus:ring-cetpro-light" />
             </Td>
 
@@ -198,5 +197,35 @@ const descargarNomina = async (idGrupo) => {
 
     </div>
     <div v-else class="text-center p-8">Cargando información del grupo...</div>
+
+    <!-- MODAL  -->
+
+    <Slider :show="showModal" title="Cambiar Grupo" @hide="showModal = false">
+      <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+
+      <div class="mt-4 space-y-3">
+        <p class="text-gray-600 dark:text-gray-300">
+          Estás a punto de mover <strong>{{ estudiantesSeleccionados.length }}</strong> estudiantes.
+        </p>
+
+        <div class="grid grid-cols-1 gap-4">
+          <label class="font-medium">Selecciona el nuevo grupo</label>
+          <select v-model="nuevoGrupoId" class="border rounded p-2">
+            <option disabled value="">-- Selecciona Grupo --</option>
+            <option v-for="grupo in grupoStore.gruposDisponibles" :key="grupo.id" :value="grupo.id">
+              {{ grupo.nombre_grupo }}
+            </option>
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-6">
+          <Button title="Cancelar" variant="secondary" @click="showModal = false" />
+          <Button title="Confirmar" variant="primary" :disabled="!nuevoGrupoId || saving" :loading="saving"
+            @click="cambiarGrupo" />
+        </div>
+      </div>
+    </Slider>
+
+
   </AuthorizationFallback>
 </template>

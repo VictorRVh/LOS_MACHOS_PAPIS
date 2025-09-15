@@ -352,4 +352,46 @@ class GrupoController extends Controller
 
         return $grupos;
     }
+
+    public function gruposDisponibles(Request $request)
+    {
+        $idPeriodo = $request->input('periodo');
+        $idGrupoActual = $request->input('grupo'); // puede venir null si no lo mandas
+
+        $query = Grupo::with(['periodo', 'modulo', 'docente.user', 'convenio'])
+            ->where('id_periodo', $idPeriodo);
+
+        // excluir grupo actual si lo mandan
+        if (!empty($idGrupoActual)) {
+            $query->where('id', '!=', $idGrupoActual);
+        }
+
+        $grupos = $query->get()->map(function ($grupo) {
+            $periodo = $grupo->periodo->nombre_periodo ?? '';
+            $modulo = $grupo->modulo->descripcion ?? '';
+            $seccionTurno = trim($grupo->seccion . '-' . $grupo->turno);
+            $docente = $grupo->docente && $grupo->docente->user
+                ? trim(
+                    $grupo->docente->user->apellido_paterno . ' ' .
+                        $grupo->docente->user->apellido_materno . ' ' .
+                        $grupo->docente->user->name
+                )
+                : '';
+
+            return [
+                'id' => $grupo->id,
+                'nombre_grupo' => "{$periodo} | {$modulo} | {$seccionTurno} | {$docente}",
+                'periodo' => $periodo,
+                'modulo' => $modulo,
+                'horas' => $grupo->modulo->horas ?? null,
+                'seccion' => $grupo->seccion,
+                'turno' => $grupo->turno,
+                'duracion' => $grupo->fecha_inicio . ' a ' . $grupo->fecha_fin,
+                'convenio' => $grupo->convenio->nombre_institucion ?? null,
+                'docente' => $docente,
+            ];
+        });
+
+        return response()->json($grupos);
+    }
 }

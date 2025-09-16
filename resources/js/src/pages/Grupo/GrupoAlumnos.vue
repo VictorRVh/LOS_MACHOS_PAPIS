@@ -30,11 +30,16 @@ const loading = ref(false)
 const estudiantesSeleccionados = ref([]);
 
 const todosSeleccionados = computed({
-  get: () => matriculados.value.length > 0 && estudiantesSeleccionados.value.length === matriculados.value.length,
+  get: () => {
+    const estudiantes = matriculados.value?.estudiantes ?? []
+    return estudiantes.length > 0 && estudiantesSeleccionados.value.length === estudiantes.length
+  },
   set: (value) => {
-    estudiantesSeleccionados.value = value ? matriculados.value.map(m => m.id) : [];
+    const estudiantes = matriculados.value?.estudiantes ?? []
+    estudiantesSeleccionados.value = value ? estudiantes.map(e => e.id_matricula) : []
   }
-});
+})
+
 
 onMounted(() => {
   loading.value = true;

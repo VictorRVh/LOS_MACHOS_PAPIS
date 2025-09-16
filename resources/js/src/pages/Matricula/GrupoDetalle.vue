@@ -12,16 +12,29 @@ import AuthorizationFallback from '../../components/page/AuthorizationFallback.v
 import { PencilSquareIcon, TrashIcon, ArchiveBoxIcon, DocumentArrowDownIcon, ArrowPathIcon } from '@heroicons/vue/24/outline';
 import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 import { generatePdfMatricula } from '../../pdf/fichaMatricula';
+import useModalToast from '../../composables/useModalToast';
+import ConfirmModalReserva from '../../components/page/ConfirmModalReserva.vue';
 
 const props = defineProps({
     id: { type: [String, Number], required: true },
 });
 
+const { showConfirmModal, showToast } = useModalToast();
+
 const router = useRouter();
 
 const matriculaStore = useMatriculaStore();
 
-const matriculados = computed(() => matriculaStore.estudiantesMatriculados)
+onMounted(() => {
+    loading.value = true;
+    setTimeout(async () => {
+        await matriculaStore.fetchMatriculadosPorGrupo(props.id)
+        loading.value = false;
+    }, 1000);
+});
+
+// const matriculados = computed(() => matriculaStore.estudiantesMatriculados)
+const matriculados = computed(() => matriculaStore.matriculadosPorGrupo)
 const loading = ref(false)
 const estudiantesSeleccionados = ref([]);
 const datosParaFicha = ref([]);
@@ -32,14 +45,6 @@ const todosSeleccionados = computed({
     set: (value) => {
         estudiantesSeleccionados.value = value ? matriculados.value.map(m => m.id) : [];
     }
-});
-
-onMounted(() => {
-    loading.value = true;
-    setTimeout(async () => {
-        await matriculaStore.fetchEstudiantesPorGrupo(props.id)
-        loading.value = false;
-    }, 1000);
 });
 
 const editarMatricula = (matricula) => {
@@ -54,12 +59,42 @@ const eliminarMatricula = (matricula) => {
     }
 };
 
-const reservarMatricula = (matricula) => {
-    if (confirm(`Simulación: ¿Pasar a RESERVA a ${matricula.estudiante.nombres}?`)) {
-        matriculados.value = matriculados.value.filter(m => m.id !== matricula.id);
-        alert('Matrícula reservada. El estudiante ha sido quitado de esta lista (simulado).');
+// const reservarMatricula = async (matricula) => {
+
+//     console.log('RESERVA DE MATRICULA', matricula)
+
+//     if (confirm(`¿Pasar a RESERVA a ${matricula.estudiante.nombres}?`)) {
+//         try {
+//             await matriculaStore.loadReservaMatricula(matricula.id_matricula)
+
+//             await matriculaStore.fetchMatriculadosPorGrupo(props.id)
+//             // alert(response.data.message);
+//         } catch (error) {
+//             console.error(error);
+//             alert('Error al reservar la matrícula');
+//         }
+//     }
+// };
+
+const showModal = ref(false)
+const selectedMatricula = ref(null)
+
+const abrirModalReserva = (matricula) => {
+    selectedMatricula.value = matricula
+    showModal.value = true
+}
+
+const confirmarReserva = async () => {
+    try {
+        await matriculaStore.loadReservaMatricula(selectedMatricula.value.id_matricula)
+        await matriculaStore.fetchMatriculadosPorGrupo(props.id)
+    } catch (error) {
+        console.error(error)
+        alert('Error al reservar la matrícula')
+    } finally {
+        showModal.value = false
     }
-};
+}
 
 const exportarFicha = async (matricula) => {
     try {
@@ -98,11 +133,11 @@ const cambiarGrupo = () => {
     <AuthorizationFallback :permissions="['todo-acceso-permisos']">
         <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
             <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl m-2">
-                Estudiantes en:
+                Estudiantes en: {{ matriculados.especialidad }}
             </h2>
-            <!-- <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl m-2">
-                Estudiantes en: {{ matriculados[0].especialidad }}
-            </h2> -->
+            <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl m-2">
+                Modulo: {{ matriculados.modulo }}
+            </h2>
 
             <div class="flex justify-start mb-4 ml-2">
                 <Button title="Cambiar de Grupo Seleccionados" @click="cambiarGrupo"
@@ -125,14 +160,14 @@ const cambiarGrupo = () => {
                     <Th class="text-center">Acciones</Th>
                 </THead>
                 <TBody>
-                    <Tr v-for="(matricula, index) in matriculados" :key="matricula.id"
+                    <Tr v-for="(matricula, index) in matriculados.matriculados" :key="matricula.id"
                         class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <Td class="text-center">
                             <input type="checkbox" :value="matricula.id" v-model="estudiantesSeleccionados"
                                 class="rounded border-gray-300 text-cetpro focus:ring-cetpro-light" />
                         </Td>
                         <Td>{{ index + 1 }}</Td>
-                        <Td>{{ matricula.estudiante }} {{ matricula.estudiante.apellidos }}</Td>
+                        <Td>{{ matricula.estudiante }}</Td>
                         <Td>{{ matricula.nro_documento }}</Td>
                         <Td>{{ new Date(matricula.created_at).toLocaleDateString() }}</Td>
                         <Td class="text-center">
@@ -145,7 +180,7 @@ const cambiarGrupo = () => {
                                     class="p-1 text-red-500 hover:text-red-700">
                                     <TrashIcon class="h-5 w-5" />
                                 </button>
-                                <button @click="reservarMatricula(matricula)" title="Reservar Matrícula"
+                                <button @click="abrirModalReserva(matricula)" title="Reservar Matrícula"
                                     class="p-1 text-yellow-500 hover:text-yellow-700">
                                     <ArchiveBoxIcon class="h-5 w-5" />
                                 </button>
@@ -156,15 +191,20 @@ const cambiarGrupo = () => {
                             </div>
                         </Td>
                     </Tr>
-                    <Tr v-if="matriculados.length === 0 && !loading">
+                    <Tr v-if="matriculados.matriculados.length === 0 && !loading">
                         <Td colspan="6" class="text-center py-4">No hay estudiantes matriculados en este grupo.</Td>
                     </Tr>
+
                     <Tr v-if="loading">
                         <Td colspan="6" class="text-center py-4">Cargando estudiantes...</Td>
                     </Tr>
+
                 </TBody>
             </Table>
         </div>
         <div v-else class="text-center p-8">Cargando información del grupo...</div>
+
+        <ConfirmModalReserva :show="showModal" :estudiante="selectedMatricula" @close="showModal = false"
+            @confirm="confirmarReserva" />
     </AuthorizationFallback>
 </template>

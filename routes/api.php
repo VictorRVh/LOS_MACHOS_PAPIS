@@ -825,6 +825,18 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|permissions-delete');
 
+    //matricula Reserva
+
+    Route::patch('reservaMatricula/{id}', [
+        \App\Http\Controllers\MatriculaController::class,
+        'reservar',
+    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+
+    Route::get('listaReserva', [
+        \App\Http\Controllers\MatriculaController::class,
+        'matriculadosConReserva',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
 
     // Alumnos matriculados (en modulo matricula)
     Route::get('matricula/{grupoId}', [

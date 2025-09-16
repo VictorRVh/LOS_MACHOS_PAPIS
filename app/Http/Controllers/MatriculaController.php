@@ -209,13 +209,26 @@ class MatriculaController extends Controller
 
     public function getMatriculadosPorGrupo($grupoId)
     {
-        $matriculados = DB::table('matricula as m')
-            ->join('estudiante as e', 'm.id_estudiante', '=', 'e.id')
-            ->join('grupo as g', 'm.id_grupo', '=', 'g.id')
+        // Traer solo la info de especialidad y módulo
+        $infoGrupo = DB::table('grupo as g')
             ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
             ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
             ->join('modulos as mo', 'g.id_modulo', '=', 'mo.id')
+            ->where('g.id', $grupoId)
+            ->select(
+                'em.nombre_especialidad as especialidad',
+                'mo.descripcion as modulo'
+            )
+            ->first();
+
+        // Traer a los estudiantes matriculados en el grupo
+        $matriculados = DB::table('matricula as m')
+            ->join('estudiante as e', 'm.id_estudiante', '=', 'e.id')
             ->where('m.id_grupo', $grupoId)
+            ->where(function ($q) {
+                $q->whereNull('m.reserva')
+                    ->orWhere('m.reserva', 0);
+            })
             ->select(
                 'm.id as id_matricula',
                 'e.id as id_estudiante',
@@ -224,14 +237,20 @@ class MatriculaController extends Controller
                 'e.sexo',
                 'e.fecha_nacimiento',
                 'm.turno',
-                'm.reserva',
-                'em.nombre_especialidad as especialidad',
-                'mo.descripcion as modulo'
+                'm.reserva'
             )
+            ->orderBy('e.apellido_paterno', 'asc')
+            ->orderBy('e.apellido_materno', 'asc')
+            ->orderBy('e.nombre', 'asc')
             ->get();
 
-        return response()->json($matriculados);
+        return response()->json([
+            'especialidad' => $infoGrupo->especialidad,
+            'modulo' => $infoGrupo->modulo,
+            'matriculados' => $matriculados,
+        ]);
     }
+
 
     public function getFichaMatricula($estudianteId)
     {
@@ -279,11 +298,15 @@ class MatriculaController extends Controller
             )
             ->first();
 
-        // Datos de los estudiantes matriculados (ordenados por apellido_paterno)
+        // Datos de los estudiantes matriculados SIN reserva
         $estudiantes = DB::table('matricula')
             ->join('estudiante', 'matricula.id_estudiante', '=', 'estudiante.id')
             ->leftJoin('pagos', 'matricula.id_pago', '=', 'pagos.id')
             ->where('matricula.id_grupo', $idGrupo)
+            ->where(function ($q) {
+                $q->whereNull('matricula.reserva')
+                    ->orWhere('matricula.reserva', 0); // solo los SIN reserva
+            })
             ->select(
                 'matricula.id as id_matricula',
                 DB::raw("CONCAT(estudiante.apellido_paterno, ' ', estudiante.apellido_materno, ', ', estudiante.nombre) as apellidos_nombres"),
@@ -305,14 +328,14 @@ class MatriculaController extends Controller
             ->get();
 
         return response()->json([
-            'especialidad' => $infoGrupo->especialidad ?? null,
-            'id_grupo' => $infoGrupo->id ?? null,
-            'id_periodo' => $infoGrupo->id_periodo ?? null,
-            'modulo'       => $infoGrupo->modulo ?? null,
-            'duracion'     => $infoGrupo->duracion ?? null,
-            'fecha_inicio' => $infoGrupo->fecha_inicio ?? null,
-            'fecha_fin'    => $infoGrupo->fecha_fin ?? null,
-            'estudiantes'  => $estudiantes
+            'especialidad'  => $infoGrupo->especialidad ?? null,
+            'id_grupo'      => $infoGrupo->id ?? null,
+            'id_periodo'    => $infoGrupo->id_periodo ?? null,
+            'modulo'        => $infoGrupo->modulo ?? null,
+            'duracion'      => $infoGrupo->duracion ?? null,
+            'fecha_inicio'  => $infoGrupo->fecha_inicio ?? null,
+            'fecha_fin'     => $infoGrupo->fecha_fin ?? null,
+            'estudiantes'   => $estudiantes
         ]);
     }
 
@@ -332,6 +355,81 @@ class MatriculaController extends Controller
         return response()->json([
             'message' => 'Grupo cambiado con éxito',
             'ids' => $request->ids,
+        ]);
+    }
+
+    // RESERVA DE MATRICULA
+
+    public function reservar($id)
+    {
+        $matricula = Matricula::findOrFail($id);
+
+        // Alternar entre 0 y 1
+        $matricula->reserva = !$matricula->reserva;
+        $matricula->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $matricula->reserva ? 'Matrícula reservada.' : 'Reserva quitada.',
+            'data' => $matricula
+        ]);
+    }
+
+    // LISTA DE RESERVAS DE MATRICULA
+
+    public function matriculadosConReserva()
+    {
+        $infoGrupos = DB::table('grupo')
+            ->join('especialidad_programa', 'grupo.id_especialidad', '=', 'especialidad_programa.id')
+            ->join('especialidad_madre', 'especialidad_programa.id_especialidad', '=', 'especialidad_madre.id')
+            ->join('modulos', 'grupo.id_modulo', '=', 'modulos.id')
+            ->select(
+                'especialidad_madre.nombre_especialidad as especialidad',
+                'modulos.descripcion as modulo',
+                'modulos.horas as duracion',
+                'grupo.fecha_inicio',
+                'grupo.fecha_fin',
+                'grupo.id_periodo',
+                'grupo.id as id_grupo'
+            )
+            ->get();
+
+        // Datos de los estudiantes matriculados CON reserva (sin filtrar por grupo)
+        $estudiantes = DB::table('matricula')
+            ->join('estudiante', 'matricula.id_estudiante', '=', 'estudiante.id')
+            ->leftJoin('pagos', 'matricula.id_pago', '=', 'pagos.id')
+            ->join('grupo', 'matricula.id_grupo', '=', 'grupo.id')
+            ->join('especialidad_programa', 'grupo.id_especialidad', '=', 'especialidad_programa.id')
+            ->join('especialidad_madre', 'especialidad_programa.id_especialidad', '=', 'especialidad_madre.id')
+            ->join('modulos', 'grupo.id_modulo', '=', 'modulos.id')
+            ->where('matricula.reserva', 1) // solo los CON reserva
+            ->select(
+                'matricula.id as id_matricula',
+                DB::raw("CONCAT(estudiante.apellido_paterno, ' ', estudiante.apellido_materno, ', ', estudiante.nombre) as apellidos_nombres"),
+                'estudiante.sexo',
+                DB::raw("TIMESTAMPDIFF(YEAR, estudiante.fecha_nacimiento, CURDATE()) as edad"),
+                'matricula.turno as condicion',
+                'estudiante.id as id_estudiante',
+                'estudiante.nro_documento',
+                'estudiante.fecha_nacimiento',
+                'estudiante.lugar_nacimiento as lugar',
+                'estudiante.estado_civil',
+                'estudiante.grado_instruccion',
+                'estudiante.celular_personal as telefono',
+                'estudiante.correo_electronico',
+                'pagos.nro_recibo as nro_recibo',
+                'pagos.aporte',
+                'especialidad_madre.nombre_especialidad as especialidad',
+                'modulos.descripcion as modulo',
+                'grupo.fecha_inicio',
+                'grupo.fecha_fin'
+            )
+            ->orderBy('estudiante.apellido_paterno', 'asc')
+            ->get();
+
+        return response()->json([
+            'total'       => $estudiantes->count(),
+            'estudiantes' => $estudiantes
         ]);
     }
 }

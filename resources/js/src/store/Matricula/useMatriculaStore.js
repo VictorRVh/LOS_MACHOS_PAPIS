@@ -21,13 +21,25 @@ const useMatriculaStore = defineStore('matricula', () => {
         show: getMatriculadosGrupo,
         // loading: especialidadByProgramLoading,
         // initialLoading: especialidadByProgramtesFirstTimeLoading,
-    } = useHttpRequest('/matriculados');
+    } = useHttpRequest('/matricula');
 
     const {
         update: updateMatricula,
         // loading: especialidadByProgramLoading,
         // initialLoading: especialidadByProgramtesFirstTimeLoading,
     } = useHttpRequest('/cambiarMatricula');
+
+    const {
+        update: getReservaMatricula,
+        // loading: especialidadByProgramLoading,
+        // initialLoading: especialidadByProgramtesFirstTimeLoading,
+    } = useHttpRequest('/reservaMatricula');
+
+    const {
+        index: getListaReservaMatricula,
+        // loading: especialidadByProgramLoading,
+        // initialLoading: especialidadByProgramtesFirstTimeLoading,
+    } = useHttpRequest('/listaReserva');
 
     const grupos = ref([]);
     const matriculasEnGrupo = ref([]);
@@ -38,6 +50,8 @@ const useMatriculaStore = defineStore('matricula', () => {
     const datosMatricula = ref([]);
 
     const matriculadosPorGrupo = ref([]);
+
+    const matriculasReservadas = ref([]);
 
     const fetchGruposConMatriculados = async () => {
         grupos.value = await get('/api/grupos-con-matriculados');
@@ -83,6 +97,7 @@ const useMatriculaStore = defineStore('matricula', () => {
         const response = await getMatriculadosGrupo(grupoId)
         matriculadosPorGrupo.value = response;
     };
+
     const loadCambioMatricula = async (idsMatriculas, nuevoGrupoId) => {
         console.log('cambiando matrículas:', idsMatriculas, nuevoGrupoId);
         try {
@@ -99,6 +114,15 @@ const useMatriculaStore = defineStore('matricula', () => {
         }
     };
 
+    const loadReservaMatricula = async (idMatricula) => {
+        const response = await getReservaMatricula(idMatricula)
+    };
+
+
+    const loadListaReserva = async () => {
+        const response = await getListaReservaMatricula();
+        matriculasReservadas.value = response
+    };
     return {
         grupos,
         matriculasEnGrupo,
@@ -121,7 +145,12 @@ const useMatriculaStore = defineStore('matricula', () => {
         fetchMatriculadosPorGrupo,
         matriculadosPorGrupo,
 
-        loadCambioMatricula
+        loadCambioMatricula,
+
+        loadReservaMatricula,
+
+        loadListaReserva,
+        matriculasReservadas
     };
 });
 

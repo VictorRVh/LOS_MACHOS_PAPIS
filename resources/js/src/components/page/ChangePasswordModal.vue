@@ -6,23 +6,37 @@
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium">Nueva contraseña</label>
-          <input v-model="form.password" type="password" class="mt-1 w-full border px-3 py-2 rounded"
-            placeholder="Mínimo 6 caracteres" />
+          <input
+            v-model="form.password"
+            type="password"
+            class="mt-1 w-full border px-3 py-2 rounded"
+            placeholder="Mínimo 6 caracteres"
+          />
         </div>
 
         <div>
           <label class="block text-sm font-medium">Confirmar contraseña</label>
-          <input v-model="form.password_confirmation" type="password" class="mt-1 w-full border px-3 py-2 rounded" />
+          <input
+            v-model="form.password_confirmation"
+            type="password"
+            class="mt-1 w-full border px-3 py-2 rounded"
+          />
         </div>
 
         <div v-if="error" class="text-red-600 text-sm">{{ error }}</div>
       </div>
 
       <div class="flex justify-end mt-6 gap-2">
-        <button class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded" @click="closeModal">
+        <button
+          class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded"
+          @click="closeModal"
+        >
           Cancelar
         </button>
-        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" @click="onSubmit">
+        <button
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          @click="onSubmit"
+        >
           Cambiar contraseña
         </button>
       </div>
@@ -33,8 +47,10 @@
 <script setup>
 import { ref } from 'vue';
 import axios from 'axios';
+import useUserStore from '@/store/useUserStore';
 
 const emit = defineEmits(['close', 'success']);
+const userStore = useUserStore();
 
 const form = ref({
   password: '',
@@ -63,11 +79,12 @@ const onSubmit = async () => {
 
   try {
     await axios.post('/auth/reset_password', {
+      user_id: userStore.userIdTemporal, // 👈 importante: id temporal guardado desde el login
       nueva_password: form.value.password,
       nueva_password_confirmation: form.value.password_confirmation,
     });
 
-    emit('success');
+    emit('success', form.value.password); // 👈 enviamos la nueva contraseña al padre
     closeModal();
   } catch (err) {
     error.value = err.response?.data?.message || 'Ocurrió un error';

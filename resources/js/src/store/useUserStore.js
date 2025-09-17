@@ -11,6 +11,7 @@ const useUserStore = defineStore('users', () => {
     } = useHttpRequest('/users');
 
     const user = ref(null);
+    const userIdTemporal = ref(null);
     const users = ref([]);
     const requiereCambioPassword = ref(false);
 
@@ -21,6 +22,9 @@ const useUserStore = defineStore('users', () => {
     const setRequiereCambioPassword = (valor) => {
         requiereCambioPassword.value = valor;
     };
+    const setUserIdTemporal = (valor) =>{
+        userIdTemporal.value =valor;
+    }
 
     const loadUsers = async () => {
         const response = await getUsers();
@@ -31,7 +35,9 @@ const useUserStore = defineStore('users', () => {
         user,
         setUser,
         requiereCambioPassword,
+        userIdTemporal,
         setRequiereCambioPassword,
+        setUserIdTemporal,
         users,
         usersLoading,
         usersFirstTimeLoading,

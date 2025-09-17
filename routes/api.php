@@ -13,6 +13,10 @@ Route::get('auth/verify', [
     \App\Http\Controllers\AuthController::class,
     'verify',
 ]);
+Route::post('auth/reset_password', [
+        \App\Http\Controllers\AuthController::class,
+        'cambiarPasswordPrimeraVez',
+    ]);
 
 // Route::middleware('auth:sanctum')->group(function () {
 //     Route::get('logout', [\App\Http\Controllers\AuthController::class, 'logout']);
@@ -46,10 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //RUTA PARA CAMBIAR CONTRASEÑA
 
-    Route::post('auth/reset_password', [
-        \App\Http\Controllers\AuthController::class,
-        'cambiarPasswordPrimeraVez',
-    ]);
+    
 
     /**
      * ------------------------------------------------------------------------

@@ -3,8 +3,6 @@ import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 
 import SearchBar from "../components/head_table/headSearch.vue";
 
-import { storeToRefs } from "pinia";
-
 import Table from "../components/table/Table.vue";
 import THead from "../components/table/THead.vue";
 import TBody from "../components/table/TBody.vue";
@@ -25,7 +23,7 @@ import useSlider from "../composables/useSlider";
 import useModalToast from "../composables/useModalToast";
 import useHttpRequest from "../composables/useHttpRequest";
 import useTableData from "../composables/tabla/useTableData";
-import ChangePasswordModal from "../components/page/ChangePasswordModal.vue";
+
 
 const userStore = useUserStore();
 
@@ -35,21 +33,7 @@ const { slider, sliderData, showSlider, hideSlider } = useSlider("user-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteUser, deleting } = useHttpRequest("/users");
 
-const showModal = ref(false);
 
-const { requiereCambioPassword } = storeToRefs(userStore);
-
-onMounted(() => {
-  if (requiereCambioPassword.value) {
-    showModal.value = true;
-  }
-});
-
-
-const onPasswordChanged = () => {
-  showModal.value = false;
-  userStore.setRequiereCambioPassword(false);
-};
 
 const onDelete = (user) => {
   if (deleting.value) return;
@@ -171,5 +155,5 @@ const {
 
     <UserSlider :show="slider" :user="sliderData" @hide="hideSlider" />
   </AuthorizationFallback>
-  <!-- <ChangePasswordModal v-if="showModal" @success="onPasswordChanged" /> -->
+
 </template>

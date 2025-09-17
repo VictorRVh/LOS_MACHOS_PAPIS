@@ -25,46 +25,35 @@ class AuthController extends Controller
                 ->where('usuario', $credentials['usuario'])
                 ->first();
 
-            if (
-                !$user ||
-                !Hash::check($credentials['password'], $user->password)
-            ) {
-                throw new \Exception(
-                    'Error|Las credenciales no coinciden--403',
-                    13333
-                );
+            if (!$user || !Hash::check($credentials['password'], $user->password)) {
+                throw new \Exception('Error|Las credenciales no coinciden--403', 13333);
             }
-
 
             if ($user->status == 0) {
-                throw new \Exception(
-                    'Error|Este usuario está desactivado--403',
-                    13333
-                );
+                throw new \Exception('Error|Este usuario está desactivado--403', 13333);
             }
 
+            // Si no ha cambiado su contraseña, no iniciar sesión aún
+            if ($user->password_cambiada) {
+                return response()->json([
+                    'requiereCambioPassword' => true,
+                    'user_id' => $user->id,
+                ]);
+            }
+
+            // ✅ Si ya cambió su contraseña, iniciar sesión normalmente
             $request->session()->regenerate();
             Auth::loginUsingId($user->id, true);
 
             return response()->json([
-                'requiereCambioPassword' => !$user->password_cambiada,
+                'requiereCambioPassword' => false,
                 'user' => $this->extractPermissionsFromUser($user),
             ]);
-
-
-            // return response()->json([
-            //     'id' => $user->id,
-            //     'nombre' => $user->name,
-            //     'email' => $user->email,
-            //     'usuario' => $user->usuario,
-            //     'rol' => $user->rol,
-            //     'permisos' => $user->$roles->permissions
-            //     // agrega los campos que desees mostrar
-            // ]);
         } catch (\Exception $error) {
             return $this->errorResponse($error);
         }
     }
+
 
 
     public function verify()
@@ -95,15 +84,21 @@ class AuthController extends Controller
     {
         $request->validate([
             'nueva_password' => 'required|min:6|confirmed',
+            'user_id' => 'required|exists:users,id', // <-- validar que el user_id exista
         ]);
 
-        /** @var \App\Models\User $user */
+        // Buscar usuario por el ID enviado
+        $user = User::find($request->user_id);
 
-        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Usuario no encontrado'], 404);
+        }
+
         $user->password = Hash::make($request->nueva_password);
-        $user->password_cambiada = true;
+        $user->password_cambiada = false;
         $user->save();
 
         return response()->json(['message' => 'Contraseña actualizada con éxito']);
     }
+
 }

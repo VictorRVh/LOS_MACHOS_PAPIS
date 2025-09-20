@@ -132,12 +132,15 @@ const cambiarGrupo = () => {
 <template>
     <AuthorizationFallback :permissions="['todo-acceso-permisos']">
         <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
-            <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl m-2">
-                Estudiantes en: {{ matriculados.especialidad }}
-            </h2>
-            <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl m-2">
-                Modulo: {{ matriculados.modulo }}
-            </h2>
+            <div class="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                <h2 class="text-xl font-bold text-cetpro dark:text-cetpro-light mb-2">
+                    Especialidad: <span class="font-semibold text-gray-800 dark:text-gray-200">{{
+                        matriculados.especialidad }}</span>
+                </h2>
+                <p class="text-gray-700 dark:text-gray-300">
+                    Módulo: <span class="font-semibold">{{ matriculados.modulo }}</span>
+                </p>
+            </div>
 
             <div class="flex justify-start mb-4 ml-2">
                 <Button title="Cambiar de Grupo Seleccionados" @click="cambiarGrupo"
@@ -172,14 +175,14 @@ const cambiarGrupo = () => {
                         <Td>{{ new Date(matricula.created_at).toLocaleDateString() }}</Td>
                         <Td class="text-center">
                             <div class="flex justify-center items-center space-x-1">
-                                <button @click="editarMatricula(matricula)" title="Editar"
+                                <!-- <button @click="editarMatricula(matricula)" title="Editar"
                                     class="p-1 text-blue-500 hover:text-blue-700">
                                     <PencilSquareIcon class="h-5 w-5" />
                                 </button>
                                 <button @click="eliminarMatricula(matricula)" title="Eliminar"
                                     class="p-1 text-red-500 hover:text-red-700">
                                     <TrashIcon class="h-5 w-5" />
-                                </button>
+                                </button> -->
                                 <button @click="abrirModalReserva(matricula)" title="Reservar Matrícula"
                                     class="p-1 text-yellow-500 hover:text-yellow-700">
                                     <ArchiveBoxIcon class="h-5 w-5" />
@@ -191,7 +194,7 @@ const cambiarGrupo = () => {
                             </div>
                         </Td>
                     </Tr>
-                    <Tr v-if="matriculados.matriculados.length === 0 && !loading">
+                    <Tr v-if="matriculados?.matriculados?.length === 0 && !loading">
                         <Td colspan="6" class="text-center py-4">No hay estudiantes matriculados en este grupo.</Td>
                     </Tr>
 

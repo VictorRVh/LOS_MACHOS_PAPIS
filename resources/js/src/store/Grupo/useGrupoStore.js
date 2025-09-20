@@ -72,6 +72,12 @@ const useGrupoStore = defineStore('grupo', () => {
         // initialLoading: moduloByEspecialidadFirstTimeLoading,
     } = useHttpRequest('/gruposDisponibles');
 
+    const {
+        show: getInfoGrupo,
+        // loading: moduloByEspecialidadLoading,
+        // initialLoading: moduloByEspecialidadFirstTimeLoading,
+    } = useHttpRequest('/infoGrupo');
+
     // Datos
     const grupos = ref([]);
     const especialidades = ref([]);
@@ -87,6 +93,8 @@ const useGrupoStore = defineStore('grupo', () => {
     const gruposCicloPeriodo = ref([])
 
     const gruposDisponibles = ref([])
+
+    const infoGrupo = ref([])
 
     // Métodos
     const loadGrupos = async () => {
@@ -166,7 +174,10 @@ const useGrupoStore = defineStore('grupo', () => {
         }
     }
 
-
+    const loadInfoGrupo = async (grupo) => {
+        const response = await getInfoGrupo(grupo)
+        infoGrupo.value = response;
+    };
 
     return {
         // Datos
@@ -218,7 +229,10 @@ const useGrupoStore = defineStore('grupo', () => {
         gruposCicloPeriodo,
 
         loadGruposDisponibles,
-        gruposDisponibles
+        gruposDisponibles,
+
+        loadInfoGrupo,
+        infoGrupo
 
     };
 });

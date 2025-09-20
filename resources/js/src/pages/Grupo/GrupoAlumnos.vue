@@ -25,7 +25,7 @@ const { showConfirmModal, showToast } = useModalToast();
 const matriculaStore = useMatriculaStore();
 const grupoStore = useGrupoStore();
 
-const matriculados = computed(() => matriculaStore.matriculadosPorGrupo)
+const matriculados = computed(() => matriculaStore.matriculadosPorGrupoExtendido)
 const loading = ref(false)
 const estudiantesSeleccionados = ref([]);
 
@@ -44,7 +44,7 @@ const todosSeleccionados = computed({
 onMounted(() => {
   loading.value = true;
   setTimeout(async () => {
-    await matriculaStore.fetchMatriculadosPorGrupo(props.id)
+    await matriculaStore.fetchMatriculadosPorGrupoExtendido(props.id)
     loading.value = false;
   }, 1000);
 });

@@ -203,7 +203,7 @@ const {
               <Td>{{ modulo.seccion }}</Td>
               <Td>{{ modulo.turno }}</Td>
               <Td>{{ modulo.convenio.nombre }}</Td>
-              <Td>{{ Math.floor(Math.random() * 21) + 10 }}</Td>
+              <Td>{{ modulo.cantidad }}</Td>
               <Td>{{ modulo.docente.nombre }}</Td>
               <Td class="text-center">
                 <MenuTable :actions="{ view: true, edit: true, delete: true }" entity-label="grupo"

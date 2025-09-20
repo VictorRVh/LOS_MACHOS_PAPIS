@@ -18,7 +18,9 @@ const updateValue = (val) => {
 };
 </script>
 
-<template>
+<!-- SELECT ANTERIOR -->
+
+<!-- <template>
   <v-select
     :options="options"
     :label="label"
@@ -29,6 +31,33 @@ const updateValue = (val) => {
     :disabled="disabled"
     class="w-full"
   />
+</template> -->
+
+
+<template>
+  
+  <v-select
+    :options="options"
+    :label="label"
+    :reduce="option => option?.id ?? option"
+    :modelValue="modelValue"
+    @update:modelValue="updateValue"
+    :placeholder="placeholder"
+    :disabled="disabled"
+    class="w-full">
+
+     <!-- Slot para cuando no hay ninguna opción disponible -->
+    <template #no-options>
+      No hay opciones disponibles
+    </template>
+
+    <!-- Slot para cuando no se encuentra ninguna coincidencia -->
+    <template #no-options-found>
+      No se encontraron coincidencias
+    </template>
+
+  </v-select>
+
 </template>
 
 <style scoped>

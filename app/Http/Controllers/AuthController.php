@@ -33,15 +33,15 @@ class AuthController extends Controller
                 throw new \Exception('Error|Este usuario está desactivado--403', 13333);
             }
 
-            // Si no ha cambiado su contraseña, no iniciar sesión aún
-            if ($user->password_cambiada) {
+            // ACA ERA PE VICTOR PTMRE
+            if (!$user->password_cambiada) {
                 return response()->json([
                     'requiereCambioPassword' => true,
                     'user_id' => $user->id,
                 ]);
             }
 
-            // ✅ Si ya cambió su contraseña, iniciar sesión normalmente
+            // YA CAMBIÓ SU CONTRASEÑA E INICIA SESION
             $request->session()->regenerate();
             Auth::loginUsingId($user->id, true);
 
@@ -53,7 +53,6 @@ class AuthController extends Controller
             return $this->errorResponse($error);
         }
     }
-
 
 
     public function verify()
@@ -84,21 +83,22 @@ class AuthController extends Controller
     {
         $request->validate([
             'nueva_password' => 'required|min:6|confirmed',
-            'user_id' => 'required|exists:users,id', // <-- validar que el user_id exista
+            'user_id' => 'required|exists:users,id',
         ]);
 
-        // Buscar usuario por el ID enviado
-        $user = User::find($request->user_id);
-
-        if (!$user) {
-            return response()->json(['message' => 'Usuario no encontrado'], 404);
-        }
+        $user = User::findOrFail($request->user_id);
 
         $user->password = Hash::make($request->nueva_password);
-        $user->password_cambiada = false;
+        $user->password_cambiada = true; // PASSWORD CAMBIADA
         $user->save();
 
-        return response()->json(['message' => 'Contraseña actualizada con éxito']);
-    }
+        Auth::loginUsingId($user->id, true);
+        $request->session()->regenerate();
 
+        return response()->json([
+            'message' => 'Contraseña actualizada con éxito',
+            'requiereCambioPassword' => false, // PARA MOSTRAR EN EL FRONT
+            'user' => $this->extractPermissionsFromUser($user),
+        ]);
+    }
 }

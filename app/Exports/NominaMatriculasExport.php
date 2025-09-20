@@ -28,12 +28,13 @@ class NominaMatriculasExport
         //     ->get();
 
         $matriculas = Matricula::where('id_grupo', $this->idGrupo)
+            ->where('matricula.reserva', 0)
             ->with('estudiante')
             ->join('estudiante as e', 'matricula.id_estudiante', '=', 'e.id')
             ->orderBy('e.apellido_paterno', 'asc')
             ->orderBy('e.apellido_materno', 'asc')
             ->orderBy('e.nombre', 'asc')
-            ->select('matricula.*') // importante para evitar conflictos con columnas duplicadas
+            ->select('matricula.*') // importante para evitar conflictos
             ->get();
 
 

@@ -39,6 +39,8 @@ const onDelete = (programa) => {
   });
 };
 
+console.log('programas bread', programaStore?.programa?.programas)
+
 // Esta función ahora se llamará al hacer clic en la tarjeta
 const SeeMore = (programa) => {
   router.push({

@@ -52,7 +52,7 @@ if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
 if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
 
 const title = computed(() =>
-  props.grupo ? `Actualizar grupo "${props.grupo?.name}"` : 'Crear nuevo grupo'
+  props.grupo ? `Actualizar grupo "${props.grupo?.especialidad?.nombre} - ${props.grupo?.seccion}"` : 'Crear nuevo grupo'
 );
 
 const initialFormData = () => ({
@@ -79,6 +79,9 @@ watch(
     if (!isShown) return;
 
     if (props.grupo?.id_grupo) {
+
+      console.log('entrando aca', props.grupo)
+
       // 1) Asegurarnos que programas/convenios/docentes/períodos ya están cargados (si no, cargarlos)
       if (!programaStore.programa.length) await programaStore.loadPrograma();
       if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
@@ -140,15 +143,15 @@ const onSubmit = async () => {
     ...formData.value,
   };
 
-  const response = props.grupo?.id
-    ? await updateGrupo(props.grupo?.id, data)
+  const response = props.grupo?.id_grupo
+    ? await updateGrupo(props.grupo?.id_grupo, data)
     : await createGrupo(data);
 
   if (response?.data.id) {
-    showToast(`Grupo ${props.grupo?.id ? "editado" : "creado"} exitosamente.`);
+    showToast(`Grupo ${props.grupo?.id_grupo ? "editado" : "creado"} exitosamente.`);
     grupoStore.loadGrupos();
 
-    if (!props.grupo?.id) {
+    if (!props.grupo?.id_grupo) {
       formData.value = initialFormData();
       formErrors.value = {};
     }

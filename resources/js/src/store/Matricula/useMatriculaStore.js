@@ -24,6 +24,12 @@ const useMatriculaStore = defineStore('matricula', () => {
     } = useHttpRequest('/matricula');
 
     const {
+        show: getMatriculadosGrupoExtendido,
+        // loading: especialidadByProgramLoading,
+        // initialLoading: especialidadByProgramtesFirstTimeLoading,
+    } = useHttpRequest('/matriculados');
+
+    const {
         update: updateMatricula,
         // loading: especialidadByProgramLoading,
         // initialLoading: especialidadByProgramtesFirstTimeLoading,
@@ -50,6 +56,7 @@ const useMatriculaStore = defineStore('matricula', () => {
     const datosMatricula = ref([]);
 
     const matriculadosPorGrupo = ref([]);
+    const matriculadosPorGrupoExtendido = ref([]);
 
     const matriculasReservadas = ref([]);
 
@@ -97,6 +104,11 @@ const useMatriculaStore = defineStore('matricula', () => {
         const response = await getMatriculadosGrupo(grupoId)
         matriculadosPorGrupo.value = response;
     };
+
+    const fetchMatriculadosPorGrupoExtendido = async (grupoId) => {
+        const response = await getMatriculadosGrupoExtendido(grupoId)
+        matriculadosPorGrupoExtendido.value = response;
+    }
 
     const loadCambioMatricula = async (idsMatriculas, nuevoGrupoId) => {
         console.log('cambiando matrículas:', idsMatriculas, nuevoGrupoId);
@@ -150,7 +162,10 @@ const useMatriculaStore = defineStore('matricula', () => {
         loadReservaMatricula,
 
         loadListaReserva,
-        matriculasReservadas
+        matriculasReservadas,
+
+        fetchMatriculadosPorGrupoExtendido,
+        matriculadosPorGrupoExtendido
     };
 });
 

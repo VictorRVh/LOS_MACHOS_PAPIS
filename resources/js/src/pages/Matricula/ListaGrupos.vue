@@ -28,15 +28,6 @@ const loading = ref(true);
 const selectedCiclo = ref(null)
 const selectedPeriodo = ref(null)
 
-const datosFalsos = [
-    { id: 1, ciclo: 'Formación Auxiliar', periodo: '2024-I', nombre_grupo: 'Computación - Básico', turno: 'Mañana', docente: { name: 'Juan Carlos Pérez' } },
-    { id: 2, ciclo: 'Formación Media', periodo: '2024-I', nombre_grupo: 'Asistencia de Cocina - Intermedio', turno: 'Tarde', docente: { name: 'María Elena Rodríguez' } },
-    { id: 3, ciclo: 'Formación Superior', periodo: '2024-II', nombre_grupo: 'Peluquería - Avanzado', turno: 'Noche', docente: { name: 'Sofia Castillo Vega' } },
-    { id: 4, ciclo: 'Formación Auxiliar', periodo: '2024-II', nombre_grupo: 'Mecánica - Inyección', turno: 'Mañana', docente: { name: 'Luis Alberto Quispe' } },
-    { id: 5, ciclo: 'Formación Media', periodo: '2023-II', nombre_grupo: 'Contabilidad - Básico', turno: 'Tarde', docente: { name: 'Roberto Gómez Bolaños' } },
-    { id: 6, ciclo: 'Formación Auxiliar', periodo: '2024-I', nombre_grupo: 'Electrónica - Básico', turno: 'Noche', docente: { name: 'Ana María Hurtado' } },
-];
-
 onMounted(() => {
     setTimeout(() => {
         loading.value = false;

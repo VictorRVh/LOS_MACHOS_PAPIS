@@ -8,7 +8,8 @@
 
       <p class="text-gray-600 dark:text-gray-300">
         ¿Pasar a <strong>RESERVA</strong> a
-        <span class="font-medium">{{ estudiante?.estudiante?.nombres }}</span>?
+        <span class="font-medium">{{ estudiante?.estudiante }}</span>?
+        <!-- <span>{{ estudiante }}</span> -->
       </p>
 
       <div class="flex justify-end gap-3 mt-6">

@@ -31,6 +31,31 @@ class GrupoController extends Controller
         return response()->json($grupos);
     }
 
+    public function infoGrupo($id)
+    {
+        $grupo = Grupo::with([
+            'especialidad.especialidadMadre:id,nombre_especialidad',
+            'modulo:id,numero_modulo,descripcion',
+            'docente.user:id,name,apellido_paterno,apellido_materno',
+        ])
+            ->select('id', 'id_especialidad', 'id_modulo', 'id_docente', 'seccion', 'turno')
+            ->findOrFail($id);
+
+        return response()->json([
+            'id'           => $grupo->id,
+            'especialidad' => $grupo->especialidad?->especialidadMadre?->nombre_especialidad,
+            'modulo'       => $grupo->modulo
+                ? $grupo->modulo->numero_modulo . ': ' . $grupo->modulo->descripcion
+                : null,
+            'seccion'      => $grupo->seccion,
+            'turno'        => $grupo->turno,
+            'docente'      => $grupo->docente && $grupo->docente->user
+                ? $grupo->docente->user->name . ' '
+                . $grupo->docente->user->apellido_paterno . ' '
+                . $grupo->docente->user->apellido_materno
+                : null,
+        ]);
+    }
 
     // POST /api/grupos
     public function store(Request $request)
@@ -210,6 +235,9 @@ class GrupoController extends Controller
             'docente:id,user_id,codigo_modular',
             'docente.user:id,name,apellido_paterno,apellido_materno'
         ])
+            ->withCount(['matricula as matricula_count' => function ($query) {
+                $query->where('reserva', 0); // Solo contar los que NO son reserva
+            }])
             ->whereIn('id_programa', $programaIds)
             ->where('id_periodo', $request->id_periodo)
             ->get();
@@ -259,7 +287,8 @@ class GrupoController extends Controller
                         'fecha_fin'      => $grupo->fecha_fin ?? null,
                         'entrega_acta'   => $grupo->fecha_entrega_acta ?? null,
                         'seccion'        => $grupo->seccion ?? null,
-                        'turno'          => $grupo->turno ?? null
+                        'turno'          => $grupo->turno ?? null,
+                        'cantidad'       => $grupo->matricula_count
                     ];
                 })->sortBy('modulo.numero')->values()
 

@@ -883,11 +883,20 @@ Route::middleware('auth:sanctum')->group(function () {
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
 
-    // PARA 
+    // PARA DOCENTES MODULOS ASIGNADOS
     Route::get('modulosAsignados', [
         \App\Http\Controllers\DocenteController::class,
         'getModulosAsignados',
     ])->middleware('permission:ver-mis-modulos|ver-estudiantes-asignados');
+
+    // PARA LA INFO DEL GRUPO
+    Route::get('infoGrupo/{id}', [
+        \App\Http\Controllers\GrupoController::class,
+        'infoGrupo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+
+
 });
 Route::get('reportes/nomina/grupo/{idGrupo}', [
     \App\Http\Controllers\ReporteController::class,

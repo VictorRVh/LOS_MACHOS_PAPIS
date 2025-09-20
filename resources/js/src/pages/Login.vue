@@ -46,6 +46,9 @@ const onSignIn = async () => {
 
     if (response?.requiereCambioPassword) {
         // guardar user_id temporal para el cambio de contraseña
+
+        console.log('no requiere cambio de contraseña')
+
         userStore.setUserIdTemporal(response.user_id);
         lastUser.value = {
             usuario: formData.value.usuario,

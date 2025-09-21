@@ -31,7 +31,7 @@ const requiredPermissions = computed(() => {
 });
 
 const title = computed(() =>
-  props.programa
+  props.programa?.id
     ? `Editar programa "${props.programa?.nombre_programa}"`
     : "Agregar nuevo programa"
 );

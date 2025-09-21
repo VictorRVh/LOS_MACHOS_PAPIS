@@ -89,15 +89,14 @@ const handleAction = (action, programa) => {
           <!-- Contenido de la tarjeta con gap reducido -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3 flex-grow">
             <div class="flex flex-col">
-              <span class="text-xs text-gray-500 dark:text-gray-400">Periodo</span>
-              <p class="font-semibold text-sm text-gray-800 dark:text-gray-200">{{ programa.nombre_ciclo }} - {{ programa.año }}</p>
+              <span class="text-xs text-gray-500 dark:text-gray-400">Programa</span>
+              <p class="font-semibold text-sm text-gray-800 dark:text-gray-200">{{ programa.nameCiclo }}</p>
             </div>
             
             <div class="flex flex-col">
-              <span class="text-xs text-gray-500 dark:text-gray-400">Fecha de creación</span>
-              <p class="font-semibold text-sm text-gray-800 dark:text-gray-200">{{ new Date(programa.created_at).toLocaleDateString() || 'N/A' }}</p>
+              <span class="text-xs text-gray-500 dark:text-gray-400">Periodo</span>
+              <p class="font-semibold text-sm text-gray-800 dark:text-gray-200">{{ programa.año }}</p>
             </div>
-
             <div class="flex flex-col">
               <span class="text-xs text-gray-500 dark:text-gray-400">Resolución</span>
               <p class="font-semibold text-sm text-gray-800 dark:text-gray-200">RD {{ programa.numero_rd }}</p>

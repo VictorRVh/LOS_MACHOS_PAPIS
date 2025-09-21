@@ -13,6 +13,7 @@ import useConvenioStore from '../../../store/Convenio/useConvenioStore';
 
 import BaseSelectGrupo from '../../ui/BaseSelectGrupo.vue';
 import BaseSelectCiclo from '../../ui/BaseSelectCiclo.vue';
+import CheckBox from "../../ui/CheckBox.vue";
 
 import useValidation from '../../../composables/useValidation';
 import useHttpRequest from '../../../composables/useHttpRequest';
@@ -166,7 +167,7 @@ const onSubmit = async () => {
       <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
 
       <div class="mt-4 space-y-3">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormLabelError label="Programa" required>
             <BaseSelectGrupo v-model="formData.id_programa" :options="programas" label="name"
               placeholder="Seleccione un programa" @change="onProgramaChange"
@@ -179,29 +180,35 @@ const onSubmit = async () => {
               :loading="grupoStore.moduloByEspecialidadLoading" />
           </FormLabelError>
 
+          
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormLabelError label="Módulos" required>
             <BaseSelectGrupo v-model="formData.id_modulo" :options="grupoStore.modulos" label="nombre_modulo"
               placeholder="Seleccione un módulo" @change="onModuloChange"
               :loading="grupoStore.docenteperiodoByModuloLoading" />
           </FormLabelError>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormLabelError label="Periodo" required>
-            <BaseSelectCiclo v-model="formData.id_periodo" :options="periodoStore.periodos" label="nombre_periodo"
-              placeholder="Seleccione un ciclo" />
-          </FormLabelError>
+          
 
           <FormLabelError label="Convenio" required>
             <BaseSelectCiclo v-model="formData.id_convenio" :options="convenioStore.convenios"
               label="nombre_institucion" placeholder="Seleccione un convenio" />
+          </FormLabelError>
+          
+        </div>
+         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<FormLabelError label="Periodo" required>
+            <BaseSelectCiclo v-model="formData.id_periodo" :options="periodoStore.periodos" label="nombre_periodo"
+              placeholder="Seleccione un ciclo" />
           </FormLabelError>
 
           <FormLabelError label="Docente">
             <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentesGrupo" label="nombre"
               placeholder="Seleccione un docente" />
           </FormLabelError>
-        </div>
+         </div>
+        
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormInput v-model="formData.fecha_inicio" label="Fecha Inicio" type="date" />

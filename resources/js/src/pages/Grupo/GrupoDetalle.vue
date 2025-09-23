@@ -15,14 +15,14 @@ const grupoStore = useGrupoStore();
 const { isSubSidebarOpen, toggleSubSidebar } = inject('subSidebarState');
 const infoGrupo = ref([]);
 
-onMounted(() => {
+// onMounted(() => {
 
-  setTimeout(async () => {
-    await grupoStore.loadInfoGrupo(props.id);
-    infoGrupo.value = grupoStore.infoGrupo;
-  }, 1000);
+//   setTimeout(async () => {
+//     await grupoStore.loadInfoGrupo(props.id);
+//     infoGrupo.value = grupoStore.infoGrupo;
+//   }, 1000);
 
-});
+// });
 </script>
 
 <template>
@@ -38,12 +38,12 @@ onMounted(() => {
         </button>
       </transition>
 
-      <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 truncate">
+      <!-- <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 truncate">
         Grupo: {{ infoGrupo.especialidad }} 
       </h1>
       <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 truncate">
         seccion: {{ infoGrupo.seccion }}
-      </h2>
+      </h2> -->
 
     </div>
 

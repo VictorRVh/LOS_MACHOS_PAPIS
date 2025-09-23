@@ -33,13 +33,13 @@ import BaseSelectCiclo from "../../components/ui/BaseSelectCiclo.vue";
 const router = useRouter();
 const grupoStore = useGrupoStore();
 const programaStore = useProgramaStore();
-const peridoStore = usePeriodoStore();
+const pe   = usePeriodoStore();
 
 const cicloStore = useCicloStore();
 
-if (!grupoStore.grupos?.length) await grupoStore.loadGrupos();
-if (!programaStore.programa?.length) await programaStore.loadPrograma();
-if (!peridoStore.periodos?.length) await peridoStore.loadPeriodos();
+// if (!grupoStore.grupos?.length) await grupoStore.loadGrupos();
+// if (!programaStore.programa?.length) await programaStore.loadPrograma();
+// if (!peridoStore.periodos?.length) await peridoStore.loadPeriodos();
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("grupo-crud");
 const { showConfirmModal, showToast } = useModalToast();
@@ -74,6 +74,29 @@ const selectedPeriodo = ref(null)
 //   grupos.value = grupoStore.grupos
 // });
 
+const onCicloChange = async () => {
+  selectedAnio.value = null
+  selectedPeriodo.value = null
+
+  if (selectedCiclo.value) {
+    await grupoStore.loadAnios(selectedCiclo.value);
+  } else {
+    grupoStore.anios = [];
+  }
+};
+
+
+const onAnioChange = async () => {
+  selectedPeriodo.value = null
+
+  if (selectedAnio.value) {
+    await grupoStore.loadPeriodoAnio(selectedAnio.value);
+  } else {
+    grupoStore.periodoAnio = [];
+  }
+};
+
+
 const filtrarPorSeleccion = async () => {
   if (!selectedCiclo.value || !selectedAnio.value || !selectedPeriodo.value) {
     showToast('Seleccionar todos los filtros.')
@@ -89,24 +112,6 @@ const filtrarPorSeleccion = async () => {
   grupos.value = grupoStore.gruposFiltrados;
 };
 
-
-const onCicloChange = async () => {
-  if (selectedCiclo.value) {
-    await grupoStore.loadAnios(selectedCiclo.value);
-    console.log("Años cargados:", grupoStore.anios);
-  } else {
-    grupoStore.anios = [];
-  }
-};
-
-const onAnioChange = async () => {
-  if (selectedAnio.value) {
-    await grupoStore.loadPeriodoAnio(selectedAnio.value);
-    console.log("Periodos cargados:", grupoStore.periodos);
-  } else {
-    grupoStore.periodoAnio = [];
-  }
-};
 
 
 const {
@@ -151,14 +156,14 @@ const {
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
               <BaseSelectGrupo v-model="selectedAnio" :options="grupoStore.anios" label="label"
-                placeholder="Seleccione un año" @change="onAnioChange" />
+                placeholder="Seleccione un año" @change="onAnioChange" :disabled="!selectedCiclo" />
             </div>
 
             <!-- Periodo -->
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
               <BaseSelectGrupo v-model="selectedPeriodo" :options="grupoStore.periodoAnio" label="nombre_periodo"
-                placeholder="Seleccione un periodo" />
+                placeholder="Seleccione un periodo" :disabled="!selectedAnio" />
             </div>
 
             <!-- Botón Filtrar -->

@@ -1,5 +1,6 @@
 import useProgramaStore from '../store/Programa/useProgramaStore';
 import useEspecialidadProgramaStore from '../store/EspecialidadPrograma/useEspecialidadProgramaStore';
+import useGrupoStore from '../store/Grupo/useGrupoStore';
 
 export default [
     { path: '/', name: 'login', component: () => import('../pages/Login.vue'), meta: { layout: 'full', permissions: [], }, },
@@ -148,7 +149,19 @@ export default [
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos'],
             parent: 'grupo',
-            breadcrumb: (route) => ({ text: `Grupo ${route.params.id.substring(0, 8)}...` }),
+            breadcrumb: async (route) => {
+                const grupoStore = useGrupoStore();
+
+                if (!grupoStore.infoGrupo || grupoStore.infoGrupo.id !== route.params.id) {
+                    await grupoStore.loadInfoGrupo(route.params.id);
+                }
+
+                return {
+                    text: grupoStore.infoGrupo
+                        ? `${grupoStore.infoGrupo.especialidad} | ${grupoStore.infoGrupo.modulo} | ${grupoStore.infoGrupo.seccion}` 
+                        : 'Cargando grupo...',
+                };
+            },
             submenu: (route) => [
                 { text: 'Documentos', to: { name: 'grupo.documentos', params: { id: route.params.id } } },
                 { text: 'Sesiones y asistencia', to: { name: 'grupo.asistencia', params: { id: route.params.id } } },
@@ -214,7 +227,7 @@ export default [
             breadcrumb: [{ text: 'Grupos', to: { name: 'grupo' } }],
         }
     },
-     {
+    {
         path: '/docente/modulo/:id/alumnos',
         name: 'docente.modulo.alumnos',
         component: () => import('../pages/Docente/DocenteAlumnosList.vue'),

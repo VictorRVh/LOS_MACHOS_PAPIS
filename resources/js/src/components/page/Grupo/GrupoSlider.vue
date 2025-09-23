@@ -38,19 +38,12 @@ const { store: createGrupo, saving, update: updateGrupo, updating } = useHttpReq
 const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
-if (!programaStore.programa.length) await programaStore.loadPrograma();
-const programas = ref(
-  programaStore?.programa?.programas?.map(p => ({
-    id: p.id,
-    name: p.nameCiclo,
-  }))
-);
 
-if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
-if (!docenteStore.docentes?.length) await docenteStore.loadDocentes();
-if (!docenteStore.docentesGrupo?.length) await docenteStore.loadDocentesGrupo();
 if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
-if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
+// if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
+// if (!docenteStore.docentes?.length) await docenteStore.loadDocentes();
+// if (!docenteStore.docentesGrupo?.length) await docenteStore.loadDocentesGrupo();
+// if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
 
 const title = computed(() =>
   props.grupo ? `Actualizar grupo "${props.grupo?.especialidad?.nombre} - ${props.grupo?.seccion}"` : 'Crear nuevo grupo'
@@ -73,32 +66,39 @@ const initialFormData = () => ({
 
 const formData = ref(initialFormData());
 const formErrors = ref({});
+const programas = ref([]);
 
 watch(
   () => props.show,
   async (isShown) => {
     if (!isShown) return;
 
+    // PRIMERO CARGAMOS LOS PROGRAMAS AL ABRIR EL MODAL
+    if (!programaStore.programa.length) await programaStore.loadPrograma();
+
+    // DAMOS FORMATO PARA EL SELECT
+    programas.value = programaStore.programa.programas.map(p => ({
+      id: p.id,
+      name: p.nameCiclo
+    })) ?? [];
+
+    // 1) Asegurarnos que programas/convenios/docentes/períodos ya están cargados (si no, cargarlos)
+    if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
+    if (!docenteStore.docentesGrupo?.length) await docenteStore.loadDocentesGrupo();
+    if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
+
     if (props.grupo?.id_grupo) {
-
-      console.log('entrando aca', props.grupo)
-
-      // 1) Asegurarnos que programas/convenios/docentes/períodos ya están cargados (si no, cargarlos)
-      if (!programaStore.programa.length) await programaStore.loadPrograma();
-      if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
-      if (!docenteStore.docentesGrupo?.length) await docenteStore.loadDocentesGrupo();
-      if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
 
       // 2) Cargar las opciones dependientes en el orden correcto
       const programaId = props.grupo.programa?.id || null;
       const especialidadId = props.grupo.especialidad?.id || null;
 
       if (programaId) {
-        await grupoStore.loadEspecialidades(programaId); // carga grupoStore.especialidades
+        await grupoStore.loadEspecialidades(programaId); 
       }
 
       if (especialidadId) {
-        await grupoStore.loadModulos(especialidadId); // carga grupoStore.modulos
+        await grupoStore.loadModulos(especialidadId); 
       }
 
       // 3) Ahora setear formData (las options ya contienen los objetos)
@@ -171,13 +171,13 @@ const onSubmit = async () => {
           <FormLabelError label="Programa" required>
             <BaseSelectGrupo v-model="formData.id_programa" :options="programas" label="name"
               placeholder="Seleccione un programa" @change="onProgramaChange"
-              :loading="grupoStore.especialidadByProgramLoading" />
+              :loading="programaStore.programaFirstTimeLoading" />
           </FormLabelError>
 
           <FormLabelError label="Especialidad" required>
             <BaseSelectGrupo v-model="formData.id_especialidad" :options="grupoStore.especialidades"
               label="nombre_especialidad" placeholder="Seleccione una especialidad" @change="onEspecialidadChange"
-              :loading="grupoStore.moduloByEspecialidadLoading" />
+              :loading="grupoStore.especialidadByProgramLoading" :disabled="!formData.id_programa"/>
           </FormLabelError>
 
           
@@ -187,7 +187,7 @@ const onSubmit = async () => {
           <FormLabelError label="Módulos" required>
             <BaseSelectGrupo v-model="formData.id_modulo" :options="grupoStore.modulos" label="nombre_modulo"
               placeholder="Seleccione un módulo" @change="onModuloChange"
-              :loading="grupoStore.docenteperiodoByModuloLoading" />
+              :loading="grupoStore.moduloByEspecialidadLoading" :disabled="!formData.id_especialidad"/>
           </FormLabelError>
           
 

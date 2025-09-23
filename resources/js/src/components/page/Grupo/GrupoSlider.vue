@@ -79,7 +79,7 @@ watch(
     // DAMOS FORMATO PARA EL SELECT
     programas.value = programaStore.programa.programas.map(p => ({
       id: p.id,
-      name: p.nameCiclo
+      name: `${p.nameCiclo}  ${p.año}`,
     })) ?? [];
 
     // 1) Asegurarnos que programas/convenios/docentes/períodos ya están cargados (si no, cargarlos)
@@ -94,11 +94,11 @@ watch(
       const especialidadId = props.grupo.especialidad?.id || null;
 
       if (programaId) {
-        await grupoStore.loadEspecialidades(programaId); 
+        await grupoStore.loadEspecialidades(programaId);
       }
 
       if (especialidadId) {
-        await grupoStore.loadModulos(especialidadId); 
+        await grupoStore.loadModulos(especialidadId);
       }
 
       // 3) Ahora setear formData (las options ya contienen los objetos)
@@ -177,28 +177,28 @@ const onSubmit = async () => {
           <FormLabelError label="Especialidad" required>
             <BaseSelectGrupo v-model="formData.id_especialidad" :options="grupoStore.especialidades"
               label="nombre_especialidad" placeholder="Seleccione una especialidad" @change="onEspecialidadChange"
-              :loading="grupoStore.especialidadByProgramLoading" :disabled="!formData.id_programa"/>
+              :loading="grupoStore.especialidadByProgramLoading" :disabled="!formData.id_programa" />
           </FormLabelError>
 
-          
+
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormLabelError label="Módulos" required>
             <BaseSelectGrupo v-model="formData.id_modulo" :options="grupoStore.modulos" label="nombre_modulo"
               placeholder="Seleccione un módulo" @change="onModuloChange"
-              :loading="grupoStore.moduloByEspecialidadLoading" :disabled="!formData.id_especialidad"/>
+              :loading="grupoStore.moduloByEspecialidadLoading" :disabled="!formData.id_especialidad" />
           </FormLabelError>
-          
+
 
           <FormLabelError label="Convenio" required>
             <BaseSelectCiclo v-model="formData.id_convenio" :options="convenioStore.convenios"
               label="nombre_institucion" placeholder="Seleccione un convenio" />
           </FormLabelError>
-          
+
         </div>
-         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<FormLabelError label="Periodo" required>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormLabelError label="Periodo" required>
             <BaseSelectCiclo v-model="formData.id_periodo" :options="periodoStore.periodos" label="nombre_periodo"
               placeholder="Seleccione un ciclo" />
           </FormLabelError>
@@ -207,8 +207,8 @@ const onSubmit = async () => {
             <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentesGrupo" label="nombre"
               placeholder="Seleccione un docente" />
           </FormLabelError>
-         </div>
-        
+        </div>
+
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormInput v-model="formData.fecha_inicio" label="Fecha Inicio" type="date" />

@@ -44,8 +44,11 @@ class GrupoController extends Controller
         return response()->json([
             'id'           => $grupo->id,
             'especialidad' => $grupo->especialidad?->especialidadMadre?->nombre_especialidad,
+            // 'modulo'       => $grupo->modulo
+            //     ? $grupo->modulo->numero_modulo . ': ' . $grupo->modulo->descripcion
+            //     : null,
             'modulo'       => $grupo->modulo
-                ? $grupo->modulo->numero_modulo . ': ' . $grupo->modulo->descripcion
+                ? $grupo->modulo->descripcion
                 : null,
             'seccion'      => $grupo->seccion,
             'turno'        => $grupo->turno,
@@ -202,9 +205,9 @@ class GrupoController extends Controller
             ->map(function ($docente) {
                 return [
                     'id' => $docente->id,
-                    'nombre' => $docente->user->name,
-                    'apellido_paterno' => $docente->user->apellido_paterno,
-                    'apellido_materno' => $docente->user->apellido_materno,
+                    'nombre' => $docente->user->name . ' ' . $docente->user->apellido_paterno . ' ' . $docente->user->apellido_materno,
+                    // 'apellido_paterno' => $docente->user->apellido_paterno,
+                    // 'apellido_materno' => $docente->user->apellido_materno,
                 ];
             });
 

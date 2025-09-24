@@ -35,8 +35,9 @@ class ComisionesController extends Controller
     public function index_filter()
     {
         $usuariosSinComision = User::doesntHave('comisiones')
-            ->select('id', 'name', 'apellido_paterno', 'apellido_materno')
-            ->get();
+        ->where('status', 1) // 👈 Solo activos
+        ->select('id', 'name', 'apellido_paterno', 'apellido_materno')
+        ->get();
 
         $data = $usuariosSinComision->map(function ($usuario) {
             return [

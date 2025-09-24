@@ -14,23 +14,38 @@ class PeriodoController extends Controller
     {
         $periodos = Periodo::all()->map(function ($periodo) {
             return [
-                'id'             => $periodo->id,
-                'anio'            => $periodo->anio,
+                'id' => $periodo->id,
+                'anio' => $periodo->anio,
                 'nombre_periodo' => $periodo->nombre_periodo,
-                'status'         => $periodo->status,
-                'status_texto'   => $periodo->status_texto,
+                'status' => $periodo->status,
+                'status_texto' => $periodo->status_texto,
             ];
         });
 
         return response()->json($periodos);
     }
 
+    public function index_filter_status()
+    {
+        $periodos = Periodo::where('status', 1) // 👈 Solo activos
+            ->get()
+            ->map(function ($periodo) {
+                return [
+                    'id' => $periodo->id,
+                    'nombre_periodo' => $periodo->nombre_periodo,
+                ];
+            });
+
+        return response()->json($periodos);
+    }
+
+
     // Crear un nuevo periodo
     public function store(Request $request)
     {
         $request->validate([
             'nombre_periodo' => 'required|string|max:100',
-            'status'         => 'required|in:0,1,2,3',
+            'status' => 'required|in:0,1,2,3',
         ]);
 
         $periodo = Periodo::create($request->all());
@@ -47,10 +62,10 @@ class PeriodoController extends Controller
         }
 
         return response()->json([
-            'id'             => $periodo->id,
+            'id' => $periodo->id,
             'nombre_periodo' => $periodo->nombre_periodo,
-            'status'         => $periodo->status,
-            'status_texto'   => $periodo->status_texto,
+            'status' => $periodo->status,
+            'status_texto' => $periodo->status_texto,
         ]);
     }
 
@@ -65,7 +80,7 @@ class PeriodoController extends Controller
 
         $request->validate([
             'nombre_periodo' => 'sometimes|string|max:100',
-            'status'         => 'sometimes|in:0,1,2,3',
+            'status' => 'sometimes|in:0,1,2,3',
         ]);
 
         $periodo->update($request->all());

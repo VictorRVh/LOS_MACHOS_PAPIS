@@ -36,6 +36,40 @@ class ProgramaEstudioController extends Controller
             'programas' => $programasProcesados,
         ]);
     }
+    public function index_filter_status()
+    {
+        $programas = ProgramaEstudio::with('ciclo')
+            ->where('status', 1) // 👈 Solo programas activos
+            ->get();
+
+        if ($programas->isEmpty()) {
+            return response()->json(['message' => 'No hay programas de estudio activos'], 404);
+        }
+
+        // Procesar los programas: limpiar datos y agregar campo nameCiclo
+        $programasProcesados = $programas->map(function ($programa) {
+            $nuevoPrograma = $programa->toArray();
+
+            $nombreCiclo = $programa->ciclo->nombre_ciclo ?? 'Ciclo desconocido';
+            $nuevoPrograma['nameCiclo'] = $nombreCiclo.' '.$programa->año;
+
+            unset($nuevoPrograma['ciclo']);
+            unset($nuevoPrograma['año']);  
+            unset($nuevoPrograma['numero_rd']);
+            unset($nuevoPrograma['status']);
+            unset($nuevoPrograma['id_ciclo']);
+            unset($nuevoPrograma['descripcion']);
+            unset($nuevoPrograma['created_at']);
+            unset($nuevoPrograma['updated_at']);
+
+            return $nuevoPrograma;
+        });
+
+        return response()->json([
+            'programas' => $programasProcesados,
+        ]);
+    }
+
 
 
 
@@ -56,11 +90,11 @@ class ProgramaEstudioController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_ciclo'    => 'required|exists:ciclo_academico,id',
+            'id_ciclo' => 'required|exists:ciclo_academico,id',
             // 'año'         => 'required|integer|min:2000|max:2100',
-            'año'         => 'required|string',
-            'numero_rd'   => 'required|string|max:50',
-            'status'      => 'required|integer|in:0,1,2,3',
+            'año' => 'required|string',
+            'numero_rd' => 'required|string|max:50',
+            'status' => 'required|integer|in:0,1,2,3',
             'descripcion' => 'nullable|string|max:255',
         ]);
 
@@ -79,11 +113,11 @@ class ProgramaEstudioController extends Controller
         }
 
         $request->validate([
-            'id_ciclo'    => 'sometimes|required|exists:ciclo_academico,id',
-            'año'         => 'sometimes|required|integer|min:2000|max:2100',
-            'año'         => 'sometimes|required|string',
-            'numero_rd'   => 'sometimes|required|string|max:50',
-            'status'      => 'sometimes|required|integer|in:0,1,2,3',
+            'id_ciclo' => 'sometimes|required|exists:ciclo_academico,id',
+            'año' => 'sometimes|required|integer|min:2000|max:2100',
+            'año' => 'sometimes|required|string',
+            'numero_rd' => 'sometimes|required|string|max:50',
+            'status' => 'sometimes|required|integer|in:0,1,2,3',
             'descripcion' => 'nullable|string|max:255',
         ]);
 

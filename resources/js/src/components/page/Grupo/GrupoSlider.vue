@@ -7,7 +7,7 @@ import Button from '../../ui/Button.vue';
 import AuthorizationFallback from '../AuthorizationFallback.vue';
 
 import useDocenteStore from '../../../store/Docente/useDocenteStore';
-import useProgramaStore from '../../../store/Programa/useProgramaStore';
+import useProgramaStore from '../../../store/Programa/useProgramaStatusStore';
 import useGrupoStore from '../../../store/Grupo/useGrupoStore';
 import useConvenioStore from '../../../store/Convenio/useConvenioStore';
 
@@ -19,7 +19,7 @@ import useValidation from '../../../composables/useValidation';
 import useHttpRequest from '../../../composables/useHttpRequest';
 import useModalToast from '../../../composables/useModalToast';
 import useCicloStore from '../../../store/Ciclo/useCicloStore';
-import usePeriodoStore from '../../../store/Periodo/usePeriodoStore'
+import usePeriodoStore from '../../../store/Periodo/usePeriodoStatusStore'
 
 const props = defineProps({
   show: { type: Boolean, default: () => false },
@@ -77,9 +77,10 @@ watch(
     if (!programaStore.programa.length) await programaStore.loadPrograma();
 
     // DAMOS FORMATO PARA EL SELECT
+    console.log("verificamos- ", programaStore.programa.programas)
     programas.value = programaStore.programa.programas.map(p => ({
       id: p.id,
-      name: `${p.nameCiclo}  ${p.año}`,
+      name: p.nameCiclo,
     })) ?? [];
 
     // 1) Asegurarnos que programas/convenios/docentes/períodos ya están cargados (si no, cargarlos)
@@ -171,7 +172,7 @@ const onSubmit = async () => {
           <FormLabelError label="Programa" required>
             <BaseSelectGrupo v-model="formData.id_programa" :options="programas" label="name"
               placeholder="Seleccione un programa" @change="onProgramaChange"
-              :loading="programaStore.programaFirstTimeLoading" />
+              :loading="programaStore.programasFirstTimeLoading" />
           </FormLabelError>
 
           <FormLabelError label="Especialidad" required>

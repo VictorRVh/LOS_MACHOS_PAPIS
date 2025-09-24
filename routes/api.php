@@ -14,9 +14,9 @@ Route::get('auth/verify', [
     'verify',
 ]);
 Route::post('auth/reset_password', [
-        \App\Http\Controllers\AuthController::class,
-        'cambiarPasswordPrimeraVez',
-    ]);
+    \App\Http\Controllers\AuthController::class,
+    'cambiarPasswordPrimeraVez',
+]);
 
 // Route::middleware('auth:sanctum')->group(function () {
 //     Route::get('logout', [\App\Http\Controllers\AuthController::class, 'logout']);
@@ -50,7 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //RUTA PARA CAMBIAR CONTRASEÑA
 
-    
+
 
     /**
      * ------------------------------------------------------------------------
@@ -299,6 +299,12 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
+    Route::get('programa_estudio_status', [
+        \App\Http\Controllers\ProgramaEstudioController::class,
+        'index_filter_status',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
+
     Route::post('programa_estudio', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'store',
@@ -373,6 +379,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('periodo', [
         \App\Http\Controllers\PeriodoController::class,
         'index',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+        Route::get('periodo_filter_status', [
+        \App\Http\Controllers\PeriodoController::class,
+        'index_filter_status',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
     Route::post('periodo', [
@@ -723,7 +733,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\ComisionesController::class,
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
-        Route::get('comisiones_filter', [
+    Route::get('comisiones_filter', [
         \App\Http\Controllers\ComisionesController::class,
         'index_filter',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');

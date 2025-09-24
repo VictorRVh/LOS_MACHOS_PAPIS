@@ -123,7 +123,8 @@ class GrupoController extends Controller
             'fecha_entrega_acta'  => 'sometimes|nullable|date',
             'seccion'             => 'sometimes|string|max:10',
             'turno'               => 'sometimes|string|max:10',
-            'id_docente'          => 'sometimes|uuid|exists:docente,id',
+            // 'id_docente'          => 'sometimes|uuid|exists:docente,id',
+            'id_docente'          => 'nullable',
             'status'              => 'sometimes|integer|in:0,1,2,3'
         ]);
 
@@ -198,21 +199,34 @@ class GrupoController extends Controller
         ]);
     }
 
-    public function docentesPorGrupo()
+    public function docentesPorGrupo(Request $request)
     {
+        $request->validate([
+            'turno' => 'required|string',
+            'id_periodo' => 'required|string',
+        ]);
+
+        // Docentes ya ocupados en este turno y periodo
+        $ocupados = Grupo::where('turno', $request->turno)
+            ->where('id_periodo', $request->id_periodo)
+            ->pluck('id_docente');
+
+        // Traer docentes que no estén ocupados
         $docentes = Docente::with('user:id,name,apellido_paterno,apellido_materno')
+            ->whereNotIn('id', $ocupados)
             ->get()
             ->map(function ($docente) {
                 return [
                     'id' => $docente->id,
-                    'nombre' => $docente->user->name . ' ' . $docente->user->apellido_paterno . ' ' . $docente->user->apellido_materno,
-                    // 'apellido_paterno' => $docente->user->apellido_paterno,
-                    // 'apellido_materno' => $docente->user->apellido_materno,
+                    'nombre' => $docente->user->name . ' ' .
+                        $docente->user->apellido_paterno . ' ' .
+                        $docente->user->apellido_materno,
                 ];
             });
 
         return response()->json($docentes);
     }
+
 
     public function gruposPorCicloAnioPeriodo(Request $request)
     {

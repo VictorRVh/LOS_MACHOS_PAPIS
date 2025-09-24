@@ -42,21 +42,21 @@ const useGrupoStore = defineStore('grupo', () => {
 
     const {
         show: getAniosByCiclo,
-        // loading: moduloByEspecialidadLoading,
-        // initialLoading: moduloByEspecialidadFirstTimeLoading,
+        loading: aniosByCicloLoading,
+        initialLoading: aniosByCicloFirstTimeLoading,
     } = useHttpRequest('/aniosByCiclo');
 
     const {
         show: getPeriodoByAnio,
-        // loading: moduloByEspecialidadLoading,
-        // initialLoading: moduloByEspecialidadFirstTimeLoading,
+        loading: periodoByAnioLoading,
+        initialLoading: periodoByAnioFirstTimeLoading,
     } = useHttpRequest('/periodoByAnio');
 
     // LISTA DE GRUPOS POR CICLO
 
     const {
         show: getPeriodoByCiclo,
-        // loading: moduloByEspecialidadLoading,
+        loading: periodoByCicloLoading,
         // initialLoading: moduloByEspecialidadFirstTimeLoading,
     } = useHttpRequest('/periodoByCiclo');
 
@@ -218,12 +218,15 @@ const useGrupoStore = defineStore('grupo', () => {
 
         loadAnios,
         anios,
+        aniosByCicloLoading,
 
         loadPeriodoAnio,
         periodoAnio,
+        periodoByAnioLoading,
 
         loadPeriodoCiclo,
         periodoCiclo,
+        periodoByCicloLoading,
 
         loadGruposCicloPeriodo,
         gruposCicloPeriodo,

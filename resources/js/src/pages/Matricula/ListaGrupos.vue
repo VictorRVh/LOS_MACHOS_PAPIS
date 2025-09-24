@@ -48,6 +48,7 @@ const onCicloChange = async () => {
         await grupoStore.loadPeriodoCiclo(selectedCiclo.value);
         console.log("Ciclo cargados:", grupoStore.periodoCiclo);
     } else {
+        selectedPeriodo.value = null
         grupoStore.periodoCiclo = [];
     }
 };
@@ -117,13 +118,13 @@ const descargarNomina = async (idGrupo) => {
                         <div>
                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
                             <BaseSelectGrupo v-model="selectedPeriodo" :options="grupoStore.periodoCiclo"
-                                label="nombre_periodo" placeholder="Seleccione un periodo" />
+                                label="nombre_periodo" placeholder="Seleccione un periodo" :loading="grupoStore.periodoByCicloLoading" :disabled="!selectedCiclo"/>
                         </div>
                     </div>
 
                     <div class="flex items-end pt-5">
                         <button @click="filtrarPorSeleccion"
-                            class="bg-cetpro-light hover:bg-primary-dark text-white py-2 px-4 rounded-md w-full">
+                            class="bg-cetpro hover:bg-primary-dark text-white py-2 px-4 rounded-md w-full">
                             Filtrar
                         </button>
                     </div>

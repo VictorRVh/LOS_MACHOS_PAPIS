@@ -40,10 +40,6 @@ const { showToast } = useModalToast();
 
 
 if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
-// if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
-// if (!docenteStore.docentes?.length) await docenteStore.loadDocentes();
-// if (!docenteStore.docentesGrupo?.length) await docenteStore.loadDocentesGrupo();
-// if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
 
 const title = computed(() =>
   props.grupo ? `Actualizar grupo "${props.grupo?.especialidad?.nombre} - ${props.grupo?.seccion}"` : 'Crear nuevo grupo'
@@ -68,6 +64,12 @@ const formData = ref(initialFormData());
 const formErrors = ref({});
 const programas = ref([]);
 
+const turnos = [
+  { value: 'M', name: 'Mañana' },
+  { value: 'T', name: 'Tarde' },
+  { value: 'N', name: 'Noche' }
+];
+
 watch(
   () => props.show,
   async (isShown) => {
@@ -85,8 +87,8 @@ watch(
 
     // 1) Asegurarnos que programas/convenios/docentes/períodos ya están cargados (si no, cargarlos)
     if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
-    if (!docenteStore.docentesGrupo?.length) await docenteStore.loadDocentesGrupo();
-    if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
+    // if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
+    await periodoStore.loadPeriodos();
 
     if (props.grupo?.id_grupo) {
 
@@ -117,6 +119,15 @@ watch(
         id_docente: props.grupo.docente?.id || null,
         status: props.grupo.status ?? 0
       };
+
+      const docenteAsignado = props.grupo.docente;
+      if (
+        docenteAsignado &&
+        !docenteStore.docentesDisponibles.some(d => d.id === docenteAsignado.id)
+      ) {
+        docenteStore.docentesDisponibles.push(docenteAsignado);
+      }
+
     } else {
       formData.value = initialFormData();
       formErrors.value = {};
@@ -138,11 +149,33 @@ const onEspecialidadChange = async (especialidadId) => {
   await grupoStore.loadModulos(especialidadId);
 };
 
+
+const onTurnoChange = async () => {
+  await loadDocentesDisponibles();
+};
+
+const onPeriodoChange = async () => {
+  await loadDocentesDisponibles();
+};
+
+const loadDocentesDisponibles = async () => {
+  if (!formData.value.turno || !formData.value.id_periodo) return;
+
+  console.log('ENTRANDO ACA POR LA PUTA')
+
+  await docenteStore.loadDocentesDisponibles({
+    turno: formData.value.turno.value,
+    id_periodo: formData.value.id_periodo,
+  });
+};
+
+
 const onSubmit = async () => {
   if (saving.value || updating.value) return;
 
   let data = {
     ...formData.value,
+    turno: formData.value.turno?.value ?? formData.value.turno,
   };
 
   const response = props.grupo?.id_grupo
@@ -191,35 +224,40 @@ const onSubmit = async () => {
               :loading="grupoStore.moduloByEspecialidadLoading" :disabled="!formData.id_especialidad" />
           </FormLabelError>
 
+          <FormLabelError label="Periodo" required>
+            <BaseSelectGrupo v-model="formData.id_periodo" :options="periodoStore.periodos" label="nombre_periodo"
+              placeholder="Seleccione un ciclo" @change="onPeriodoChange" />
+          </FormLabelError>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <FormLabelError label="Turno" required>
+            <BaseSelectGrupo v-model="formData.turno" :options="turnos" placeholder="Seleccione un turno"
+              @change="onTurnoChange" />
+          </FormLabelError>
+
+          <FormLabelError label="Docente">
+            <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentesDisponibles" label="nombre"
+              placeholder="Seleccione un docente" :disabled="!formData.turno || !formData.id_periodo" />
+          </FormLabelError>
+        </div>
+
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
 
           <FormLabelError label="Convenio" required>
             <BaseSelectCiclo v-model="formData.id_convenio" :options="convenioStore.convenios"
               label="nombre_institucion" placeholder="Seleccione un convenio" />
           </FormLabelError>
-
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormLabelError label="Periodo" required>
-            <BaseSelectCiclo v-model="formData.id_periodo" :options="periodoStore.periodos" label="nombre_periodo"
-              placeholder="Seleccione un ciclo" />
-          </FormLabelError>
-
-          <FormLabelError label="Docente">
-            <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentesGrupo" label="nombre"
-              placeholder="Seleccione un docente" />
-          </FormLabelError>
-        </div>
-
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormInput v-model="formData.fecha_inicio" label="Fecha Inicio" type="date" />
           <FormInput v-model="formData.fecha_fin" label="Fecha Fin" type="date" />
-          <FormInput v-model="formData.fecha_entrega_acta" label="Entrega Acta" type="date" />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormInput v-model="formData.fecha_entrega_acta" label="Entrega Acta" type="date" />
           <FormInput v-model="formData.seccion" label="Sección" />
-          <FormInput v-model="formData.turno" label="Turno" />
           <CheckBox v-model="formData.status" label="Habilitado" class="mt-8 pl-4 flex justify-center items-center" />
         </div>
 

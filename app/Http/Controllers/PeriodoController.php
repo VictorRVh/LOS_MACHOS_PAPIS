@@ -15,7 +15,7 @@ class PeriodoController extends Controller
         $periodos = Periodo::all()->map(function ($periodo) {
             return [
                 'id' => $periodo->id,
-                'anio' => $periodo->anio,
+                // 'anio' => $periodo->anio,
                 'nombre_periodo' => $periodo->nombre_periodo,
                 'status' => $periodo->status,
                 'status_texto' => $periodo->status_texto,

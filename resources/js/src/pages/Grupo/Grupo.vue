@@ -33,7 +33,7 @@ import BaseSelectCiclo from "../../components/ui/BaseSelectCiclo.vue";
 const router = useRouter();
 const grupoStore = useGrupoStore();
 const programaStore = useProgramaStore();
-const pe   = usePeriodoStore();
+const pe = usePeriodoStore();
 
 const cicloStore = useCicloStore();
 
@@ -156,14 +156,16 @@ const {
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
               <BaseSelectGrupo v-model="selectedAnio" :options="grupoStore.anios" label="label"
-                placeholder="Seleccione un año" @change="onAnioChange" :disabled="!selectedCiclo" />
+                placeholder="Seleccione un año" @change="onAnioChange" :disabled="!selectedCiclo"
+                :loading="grupoStore.aniosByCicloLoading" />
             </div>
 
             <!-- Periodo -->
             <div>
               <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
               <BaseSelectGrupo v-model="selectedPeriodo" :options="grupoStore.periodoAnio" label="nombre_periodo"
-                placeholder="Seleccione un periodo" :disabled="!selectedAnio" />
+                placeholder="Seleccione un periodo" :disabled="!selectedAnio"
+                :loading="grupoStore.periodoByAnioLoading" />
             </div>
 
             <!-- Botón Filtrar -->
@@ -209,7 +211,11 @@ const {
               <Td>{{ modulo.turno }}</Td>
               <Td>{{ modulo.convenio.nombre }}</Td>
               <Td>{{ modulo.cantidad }}</Td>
-              <Td>{{ modulo.docente.nombre }}</Td>
+              <Td>
+                <span v-if="modulo.docente?.nombre">{{ modulo.docente.nombre }}</span>
+                <span v-else class="text-red-500 font-semibold">Docente no asignado</span>
+              </Td>
+
               <Td class="text-center">
                 <MenuTable :actions="{ view: true, edit: true, delete: true }" entity-label="grupo"
                   @view="verGrupo(modulo)" @edit="showSlider(true, modulo)"

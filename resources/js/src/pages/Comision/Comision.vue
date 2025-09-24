@@ -36,6 +36,7 @@ const onDelete = (comision) => {
     if (isDeleted) {
       showToast(`Comisión "${comision?.titulo}" eliminada exitosamente...`);
       comisionesStore.loadComisiones();
+      comisionesStore.loadComisionesUserFilter();
     }
   });
 };

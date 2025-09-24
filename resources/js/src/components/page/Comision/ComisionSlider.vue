@@ -43,8 +43,8 @@ const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
 onMounted(() => {
-  userStore.loadUsers();
-  console.log("sacar: ", userStore?.users);
+  comisionesStore.loadComisionesUserFilter();
+  //console.log("sacar: ", userStore?.users);
 });
 
 const requiredPermissions = computed(() => {
@@ -90,31 +90,28 @@ const selectedUsuario = ref(null);
 
 const usuarioOptions = computed(() => {
   const selectedIds = formData.value.usuarios.map((u) => u.id);
-  return userStore.users
+  return comisionesStore.users
     .filter((u) => !selectedIds.includes(u.id))
     .map((u) => ({
       ...u,
-      nameCompleto: `${u.name} ${u.apellido_paterno} ${u.apellido_materno} `, // o `${u.apellido_paterno} ${u.apellido_materno} ${u.name}`
+      nameCompleto: u.nameCompleto
     }));
 });
 
 const onUsuarioSelect = (usuario) => {
-  const nameCompleto = `${usuario.name} ${usuario.apellido_paterno} ${usuario.apellido_materno}`;
-  const usuarioConNombre = { ...usuario, nameCompleto };
-
   if (!formData.value.usuarios.find((u) => u.id === usuario.id)) {
-    formData.value.usuarios = [usuarioConNombre, ...formData.value.usuarios];
+    formData.value.usuarios = [usuario, ...formData.value.usuarios];
   }
   selectedUsuario.value = null;
 };
 
 const onUsuarioRemove = (usuario) => {
-  const updatedUsers = formData.value.usuarios.filter((fp) => fp?.id?.toString() !== usuario?.id?.toString());
   formData.value = {
     ...formData.value,
-    usuarios: updatedUsers,
+    usuarios: formData.value.usuarios.filter((fp) => fp.id !== usuario.id),
   };
 };
+
 
 // Envío de formulario
 const onSubmit = async () => {
@@ -142,7 +139,7 @@ const onSubmit = async () => {
   if (response?.id) {
     showToast(`Comisión ${props.comision?.id ? "editada" : "creada"} exitosamente.`);
     comisionesStore.loadComisiones();
-
+    comisionesStore.loadComisionesUserFilter(); // 🔥 refresca usuarios disponibles
     formData.value = initialFormData();
     formErrors.value = {};
 
@@ -163,9 +160,10 @@ const onCancelEdit = () => {
       <FormInput v-model="formData.titulo" :focus="show" label="Título de comisión" :error="formErrors?.titulo" />
       <!-- Select de usuarios -->
       <FormLabelError label="Añadir integrantes" :error="formErrors.usuarios">
-        <BaseSelect v-model="selectedUsuario" :options="usuarioOptions" label='nameCompleto'
-          placeholder="Seleccione un usuario" @update:modelValue="onUsuarioSelect" />
+        <BaseSelect v-model="selectedUsuario" :options="usuarioOptions" label="nameCompleto"
+          placeholder="Seleccione un usuario" @update:modelValue="onUsuarioSelect" :loading="comisionesStore.loading" />
       </FormLabelError>
+
 
       <div>
         <label class="text-sm font-semibold dark:text-slate-300 mb-1 block">

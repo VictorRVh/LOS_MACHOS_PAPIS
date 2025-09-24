@@ -155,7 +155,7 @@ const {
       </Table>
     </div>
 
-    <DocenteSlider :show="slider" :docente="sliderData" @hide="hideSlider" />
+    <DocenteSlider :show="slider" :docente="sliderData ?? null" @hide="hideSlider" />
   </AuthorizationFallback>
-  <ChangePasswordModal v-if="showModal" @success="onPasswordChanged" />
+  <!--<ChangePasswordModal v-if="showModal" @success="onPasswordChanged" />-->
 </template>

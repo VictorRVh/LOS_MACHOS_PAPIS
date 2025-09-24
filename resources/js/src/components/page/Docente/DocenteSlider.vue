@@ -181,7 +181,7 @@ const onSubmit = async () => {
 
                     <FormInput v-model="formData.condicion" label="Condición" :error="formErrors?.condicion" required />
                     <FormInput v-model="formData.escala_magisterial" label="Escala Magisterial"
-                        :error="formErrors?.escala_magisterial" required />
+                        :error="formErrors?.escala_magisterial" autocomplete="off" required />
                     <FormInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento" type="date"
                         :error="formErrors?.fecha_nacimiento" required />
                 </div>

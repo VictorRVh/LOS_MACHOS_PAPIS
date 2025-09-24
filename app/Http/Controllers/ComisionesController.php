@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comisiones;
+use App\Models\User;
 use App\Traits\Error;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -31,6 +32,22 @@ class ComisionesController extends Controller
 
         return response()->json($data);
     }
+    public function index_filter()
+    {
+        $usuariosSinComision = User::doesntHave('comisiones')
+            ->select('id', 'name', 'apellido_paterno', 'apellido_materno')
+            ->get();
+
+        $data = $usuariosSinComision->map(function ($usuario) {
+            return [
+                'id' => $usuario->id,
+                'nameCompleto' => $usuario->name . ' ' . $usuario->apellido_paterno . ' ' . $usuario->apellido_materno,
+            ];
+        });
+
+        return response()->json($data);
+    }
+
 
     public function store(Request $request)
     {
@@ -47,9 +64,11 @@ class ComisionesController extends Controller
             }
 
             // Cargar solo lo necesario de los usuarios
-            $comision->load(['usuarios' => function ($q) {
-                $q->select('users.id', 'users.name', 'users.apellido_paterno', 'users.apellido_materno');
-            }]);
+            $comision->load([
+                'usuarios' => function ($q) {
+                    $q->select('users.id', 'users.name', 'users.apellido_paterno', 'users.apellido_materno');
+                }
+            ]);
 
 
             // Formatear usuarios para mostrar nombre completo

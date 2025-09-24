@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('comisiones', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('titulo');
-            $table->string('descripcion');
+            $table->string('descripcion')->nullable();
             $table->timestamps();
         });
     }

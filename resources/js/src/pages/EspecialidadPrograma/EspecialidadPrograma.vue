@@ -107,6 +107,8 @@ const SeeMore = (especialidadPrograma) => {
             <Tr
               v-for="(especialidadPrograma, index) in especialidadProgramaStore?.especialidadProgramaFiltrado?.especialidad_programas"
               :key="especialidadPrograma.id"
+               @click="SeeMore(especialidadPrograma)"
+               class=" bg-white dark:bg-gray-800 rounded-lg shadow-md  border-l-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700/50"
             >
               <Td>{{ index + 1 }}</Td>
               <Td>{{ especialidadPrograma?.especialidad_madre?.nombre_especialidad }}</Td>
@@ -115,12 +117,7 @@ const SeeMore = (especialidadPrograma) => {
                 <div class="flex items-center justify-center gap-1">
                   <EditButton @click="showSlider(true, especialidadPrograma)" />
                   <DeleteButton @click="onDelete(especialidadPrograma)" />
-                  <div
-                    @click="SeeMore(especialidadPrograma)"
-                    class="text-blue-500 hover:text-blue-700 font-semibold cursor-pointer border-b-2 border-transparent hover:border-blue-500"
-                  >
-                    Módulos
-                  </div>
+                 
                 </div>
               </Td>
             </Tr>

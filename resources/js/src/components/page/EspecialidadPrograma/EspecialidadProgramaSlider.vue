@@ -93,10 +93,17 @@ watch(
 );
 
 const schema = yup.object().shape({
-    id_especialidad: yup.string().nullable().required(),
-    id_programa: yup.string().nullable().required(),
-    nro_modulos: yup.string().nullable().required(),
+    id_especialidad: yup.string().nullable().required("La especialidad es obligatoria"),
+    id_programa: yup.string().nullable().required("El programa es obligatorio"),
+    nro_modulos: yup
+        .number()
+        .typeError("Debe ser un número válido") // si escriben texto u otra cosa
+        .nullable()
+        .required("El número de módulos es obligatorio"), // si está vacío
+
 });
+
+
 
 
 
@@ -136,13 +143,13 @@ const onSubmit = async () => {
     <AuthorizationFallback :permissions="requiredPermissions">
         <div class="mt-2 space-y-1.5 font-inter">
 
-            <FormLabelError label="Especialidad" required>
-                <BaseSelectCiclo v-model="formData.id_especialidad" :options="especialidad"
-                    label="nombre_especialidad" placeholder="Seleccione una especialidad" />
+            <FormLabelError label="Especialidad" required :error="formErrors?.id_especialidad">
+                <BaseSelectCiclo v-model="formData.id_especialidad" :options="especialidad" label="nombre_especialidad"
+                    placeholder="Seleccione una especialidad" />
             </FormLabelError>
 
             <FormInput v-model="formData.nro_modulos" :focus="show" label="Numero de modulos"
-                :error="formErrors?.nro_modulos" required />
+                :error="formErrors?.nro_modulos" required type="number" />
 
             <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormInput v-model="formData.año" :focus="show" label="Año" :error="formErrors?.año" required />

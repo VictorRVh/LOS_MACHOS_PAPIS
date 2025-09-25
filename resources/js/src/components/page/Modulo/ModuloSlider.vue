@@ -50,7 +50,7 @@ const initialFormData = () => {
         horas: null,
         nro_capacidades: null,
         id_especialidad: props.especialidad,
-  
+
         nro_capacidades: null,
     };
 };
@@ -86,12 +86,17 @@ watch(
 );
 
 const schema = yup.object().shape({
-    numero_modulo: yup.string().nullable().required(),
-    decripcion: yup.string().nullable().required(),
-    creditos: yup.string().nullable().required(),
-    horas: yup.string().nullable().required(),
-    id_especialidad: yup.string().nullable().required(),
-    nro_capacidades: yup.string().nullable().required(),
+    numero_modulo: yup
+        .number()
+        .typeError("El número de módulo debe ser un valor numérico") 
+        .required("El número de módulo es obligatorio")              
+        .positive("El número de módulo debe ser positivo")           
+        .integer("El número de módulo debe ser un número entero"),  
+    descripcion: yup.string().required("El nombre de módulo es obligatoria"),
+    creditos: yup.number().required("Los créditos son obligatorios"),
+    horas: yup.number().required("Las horas son obligatorias"),
+    id_especialidad: yup.string().required("La especialidad es obligatoria"),
+    nro_capacidades: yup.number().required("El número de capacidades es obligatorio"),
 });
 
 const onSubmit = async () => {
@@ -102,14 +107,14 @@ const onSubmit = async () => {
         ...formData.value,
     };
 
-    // const { validated, errors } = await runYupValidation(schema, data);
-    // if (!validated) {
-    //     formErrors.value = errors;
-    //     return;
-    // }
-    // formErrors.value = {};
+    const { validated, errors } = await runYupValidation(schema, data);
+    if (!validated) {
+        formErrors.value = errors;
+        return;
+    }
+    formErrors.value = {};
 
-        console.log('modulo.id:', props.modulo?.id);
+    console.log('modulo.id:', props.modulo?.id);
 
 
     const response = props.modulo?.id
@@ -133,26 +138,29 @@ const onSubmit = async () => {
     <AuthorizationFallback :permissions="requiredPermissions">
         <div class="mt-2 space-y-1.5 font-inter">
 
+            <FormInput v-model="formData.descripcion" :focus="show" label="Nombre del módulo"
+                :error="formErrors?.descripcion" required  />
+                <FormInput v-model="formData.numero_modulo" :focus="show" label="Número de módulo"
+                    :error="formErrors?.numero_modulo" required  />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <FormInput v-model="formData.creditos" :focus="show" label="Créditos" :error="formErrors?.creditos"
+                    required type="number" />
+                    <FormInput v-model="formData.horas" :focus="show" label="Horas" :error="formErrors?.horas"
+                    required type="number" />
+            </div>
+               
 
-            <FormInput v-model="formData.numero_modulo" :focus="show" label="Numero de modulo"
-                :error="formErrors?.numero_modulo" required />
+                <FormInput v-model="formData.nro_capacidades" :focus="show" label="Número de capacidades"
+                    :error="formErrors?.nro_capacidades" required type="number" />
+      
 
-            <FormInput v-model="formData.descripcion" :focus="show" label="Nombre del modulo" :error="formErrors?.nro_modulos"
-                required />
-
-            <FormInput v-model="formData.creditos" :focus="show" label="Creditos" :error="formErrors?.nro_modulos"
-                required />
-
-            <FormInput v-model="formData.horas" :focus="show" label="Horas" :error="formErrors?.nro_modulos" required />
-
-            <FormInput v-model="formData.nro_capacidades" :focus="show" label="Numero de capacidades"
-                :error="formErrors?.nro_modulos" required />
 
             <div class="w-full space-y-3">
 
                 <div class="flex gap-2 mt-1">
                     <!-- Botón Guardar: ancho completo -->
-                    <Button :title="modulo?.id ? 'Guardar Cambios' : 'Crear Modulo'"
+                    <Button :title="modulo?.id ? 'Guardar Cambios' : 'Crear Módulo'"
                         :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
                         key="submit-btn" @click="onSubmit" class="!w-full" />
 

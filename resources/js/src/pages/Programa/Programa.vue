@@ -83,7 +83,7 @@ const handleAction = (action, programa) => {
           v-for="programa in programaStore?.programa?.programas" 
           :key="programa.id"
           @click="SeeMore(programa)"
-          class="relative flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 border-l-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
+          class="relative flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 border-l-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700/50"
           :class="[programa.status ? 'border-green-500' : 'border-red-500']"
         >
           <!-- Contenido de la tarjeta con gap reducido -->

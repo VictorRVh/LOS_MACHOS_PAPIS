@@ -48,7 +48,7 @@ const onDelete = (modulo) => {
 
     const isDeleted = await deletePrograma(modulo?.id);
     if (isDeleted) {
-      showToast(`Programa "${modulo?.nombre_modulo}" eliminado exitosamente...`);
+      showToast(`Modulo "${modulo?.nombre_modulo}" eliminado exitosamente...`);
       moduloStore.loadModuloById(props.idEspecialidadPrograma)
 
     }
@@ -59,14 +59,11 @@ const onDelete = (modulo) => {
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
-    <div class="flex justify-between items-center p-4">
-      <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Asignar especialidad</h2>
-      <!-- <CreateButton @click="showSlider(true)" /> -->
-    </div>
+
     <div class="flex  px-6">
       <div class="w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
         <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-          Asignar Especialidad
+          Asignar Módulo
         </h3>
         <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
         <ModuloSlider :show="slider" :modulo="sliderData" 
@@ -77,7 +74,7 @@ const onDelete = (modulo) => {
       <div class="w-full">
         <Table>
           <THead>
-            <Th>Id</Th>
+            <Th>N°</Th>
             <Th>Modulo</Th>
             <Th>Creditos</Th>
             <Th>Horas</Th>
@@ -86,7 +83,7 @@ const onDelete = (modulo) => {
 
           <TBody>
             <Tr v-for="(modulo, index) in moduloStore.moduloFiltrado" :key="modulo.id">
-              <Td>{{ index + 1 }}</Td>
+              <Td>{{ modulo?.numero_modulo}}</Td>
               <Td>{{ modulo?.descripcion }}</Td> 
               <Td>{{ modulo?.creditos }}</Td>
               <Td>{{ modulo?.horas }}</Td>

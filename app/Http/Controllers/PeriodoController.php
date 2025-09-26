@@ -12,10 +12,9 @@ class PeriodoController extends Controller
      */
     public function index()
     {
-        $periodos = Periodo::all()->map(function ($periodo) {
+        $periodos = Periodo::orderBy('created_at', 'desc')->get()->map(function ($periodo) {
             return [
                 'id' => $periodo->id,
-                // 'anio' => $periodo->anio,
                 'nombre_periodo' => $periodo->nombre_periodo,
                 'status' => $periodo->status,
                 'status_texto' => $periodo->status_texto,
@@ -24,7 +23,6 @@ class PeriodoController extends Controller
 
         return response()->json($periodos);
     }
-
     public function index_filter_status()
     {
         $periodos = Periodo::where('status', 1) // 👈 Solo activos

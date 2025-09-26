@@ -13,7 +13,9 @@ class EspecialidadMadreController extends Controller
      */
     public function index()
     {
-        $especialidades = EspecialidadMadre::with('cicloAcademico')->get();
+        $especialidades = EspecialidadMadre::with('cicloAcademico')
+        ->orderBy('created_at', 'desc')
+        ->get();
         return response()->json($especialidades);
     }
 

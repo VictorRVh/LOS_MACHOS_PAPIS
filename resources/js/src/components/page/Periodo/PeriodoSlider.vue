@@ -98,10 +98,9 @@ const onSubmit = async () => {
   }
 };
 
-// --- LÓGICA DE INPUT SIMPLIFICADA ---
 const onPeriodoInput = (e) => {
   let value = e.target.value.toUpperCase();
-  
+
   // 1. Limpiar caracteres no válidos (solo permite números, guion e 'I')
   value = value.replace(/[^0-9I-]/g, '');
 
@@ -110,23 +109,25 @@ const onPeriodoInput = (e) => {
     value = value.slice(0, 7);
   }
 
-  // 3. Autocompletar el guion después de 4 números si no está presente
-  if (value.length === 4 && !value.includes('-')) {
+  // 3. Insertar guion SOLO si aún no existe y el usuario ha escrito 4 dígitos
+  //    y no está borrando
+  if (/^\d{4}$/.test(value) && e.inputType !== 'deleteContentBackward') {
     value = value + '-';
   }
-  
-  // 4. Asegurarse de que el semestre sea solo 'I' o 'II'
-  if (value.length > 5) {
-    const parts = value.split('-');
-    if (parts.length > 1) {
-        let semester = parts[1].replace(/[^I]/g, ''); // Solo permite 'I'
-        if (semester.length > 2) semester = semester.slice(0, 2); // Máximo 'II'
-        value = `${parts[0]}-${semester}`;
-    }
+
+  // 4. Validar semestre (solo 'I' o 'II')
+  if (value.includes('-')) {
+    const [year, semester = ''] = value.split('-');
+
+    let cleanSemester = semester.replace(/[^I]/g, ''); // eliminar todo excepto "I"
+    if (cleanSemester.length > 2) cleanSemester = cleanSemester.slice(0, 2); // máximo "II"
+
+    value = `${year}-${cleanSemester}`;
   }
 
   formData.value.nombre_periodo = value;
 };
+
 </script>
 
 <template>

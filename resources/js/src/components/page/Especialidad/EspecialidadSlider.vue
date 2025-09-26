@@ -115,7 +115,7 @@ const onSubmit = async () => {
     formData.value = initialFormData();
     formErrors.value = {};
     emit("hide");
-    
+
   }
 };
 </script>
@@ -123,13 +123,14 @@ const onSubmit = async () => {
 <template>
   <AuthorizationFallback :permissions="requiredPermissions">
     <div class="mt-2 space-y-1.5 font-inter">
-      <FormInput v-model="formData.nombre_especialidad" :focus="show" label="Nombre de la especialidad"
-        :error="formErrors?.nombre_especialidad" required />
+
 
       <FormLabelError label="Ciclo" :error="formErrors?.id_ciclo" required>
         <BaseSelectCiclo v-model="formData.id_ciclo" :options="ciclo" label="nombre_ciclo"
           placeholder="Seleccione un ciclo" />
       </FormLabelError>
+      <FormInput v-model="formData.nombre_especialidad" :focus="show" label="Nombre de la especialidad"
+        :error="formErrors?.nombre_especialidad" required />
 
       <div class="w-full space-y-3">
 

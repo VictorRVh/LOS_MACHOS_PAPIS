@@ -78,7 +78,12 @@ watch(
 
 const schema = yup.object().shape({
   nombre_institucion: yup.string().nullable().required('El nombre del convenio es obligatorio.'),
-  descripcion: yup.string().nullable().required('La descrpcion es obligatoria'),
+    descripcion: yup
+    .string()
+    .nullable()          // permite null
+    .notRequired()       // no es obligatorio
+    .transform((val) => (val === '' ? null : val)) // opcional: trata '' como null
+    .max(255, 'La descripción no puede tener más de 255 caracteres')
 });
 
 const onSubmit = async () => {

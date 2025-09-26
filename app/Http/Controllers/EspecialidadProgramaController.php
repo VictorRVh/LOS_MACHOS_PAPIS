@@ -38,6 +38,9 @@ class EspecialidadProgramaController extends Controller
     {
         $programa = ProgramaEstudio::with([
             'ciclo:id,nombre_ciclo',
+            'especialidadPrograma' => function ($q) {
+                $q->orderBy('created_at', 'asc'); // 👈 ordena las especialidades por fecha de creación
+            },
             'especialidadPrograma.especialidadMadre:id,nombre_especialidad'
         ])->find($id);
 

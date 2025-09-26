@@ -14,7 +14,7 @@ import useModalToast from "../../../composables/useModalToast";
 
 import useComisionesStore from "../../../store/Comision/useComisionesStore";
 
-import useUserStore from "../../../store/useUserStore";
+
 
 import * as yup from "yup";
 
@@ -27,11 +27,15 @@ const props = defineProps({
     type: [Object, null],
     default: () => null,
   },
+usersFilter: { // 🔥 debería ser un ARRAY, no un objeto
+    type: Array,
+    default: () => [],
+  },
 });
 const emit = defineEmits(["hide"]);
 
 const comisionesStore = useComisionesStore();
-const userStore = useUserStore();
+
 
 const {
   store: createComision,
@@ -42,10 +46,6 @@ const {
 const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
-onMounted(() => {
-  comisionesStore.loadComisionesUserFilter();
-  //console.log("sacar: ", userStore?.users);
-});
 
 const requiredPermissions = computed(() => {
   return props.comision?.id
@@ -87,17 +87,6 @@ const schema = yup.object().shape({
 // Opciones para el select de usuarios
 const selectedUsuario = ref(null);
 
-
-const usuarioOptions = computed(() => {
-  const selectedIds = formData.value.usuarios.map((u) => u.id);
-  return comisionesStore.users
-    .filter((u) => !selectedIds.includes(u.id))
-    .map((u) => ({
-      ...u,
-      nameCompleto: u.nameCompleto
-    }));
-});
-
 const onUsuarioSelect = (usuario) => {
   if (!formData.value.usuarios.find((u) => u.id === usuario.id)) {
     formData.value.usuarios = [usuario, ...formData.value.usuarios];
@@ -111,6 +100,14 @@ const onUsuarioRemove = (usuario) => {
     usuarios: formData.value.usuarios.filter((fp) => fp.id !== usuario.id),
   };
 };
+
+// 🔥 Computed que filtra usuarios disponibles
+const usuariosDisponibles = computed(() => {
+  return props.usersFilter.filter(
+    (usuario) => !formData.value.usuarios.some((u) => u.id === usuario.id)
+  );
+});
+
 
 
 // Envío de formulario
@@ -139,7 +136,6 @@ const onSubmit = async () => {
   if (response?.id) {
     showToast(`Comisión ${props.comision?.id ? "editada" : "creada"} exitosamente.`);
     comisionesStore.loadComisiones();
-    comisionesStore.loadComisionesUserFilter(); // 🔥 refresca usuarios disponibles
     formData.value = initialFormData();
     formErrors.value = {};
 
@@ -160,7 +156,7 @@ const onCancelEdit = () => {
       <FormInput v-model="formData.titulo" :focus="show" label="Título de comisión" :error="formErrors?.titulo" />
       <!-- Select de usuarios -->
       <FormLabelError label="Añadir integrantes" :error="formErrors.usuarios">
-        <BaseSelect v-model="selectedUsuario" :options="usuarioOptions" label="nameCompleto"
+        <BaseSelect v-model="selectedUsuario" :options="usuariosDisponibles" label="nameCompleto"
           placeholder="Seleccione un usuario" @update:modelValue="onUsuarioSelect" :loading="comisionesStore.loading" />
       </FormLabelError>
 

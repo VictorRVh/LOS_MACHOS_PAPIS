@@ -1,4 +1,5 @@
 <script setup>
+import { ref, computed } from "vue";
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
 import TBody from "../../components/table/TBody.vue";
@@ -37,6 +38,40 @@ if (!moduloStore.modulo.length) await moduloStore.loadModuloById(props.idEspecia
 
 
 
+// Lista base de índices
+const indexModulos = [
+  {    id: "01",    name: "Módulo 01",  },
+  {    id: "02",    name: "Módulo 02",  },
+  {    id: "03",    name: "Módulo 03",  },
+  {    id: "04",    name: "Módulo 04",  },
+  {    id: "05",    name: "Módulo 05",  },
+  {    id: "06",    name: "Módulo 06",  },
+  {    id: "07",    name: "Módulo 07",  },
+  {    id: "08",    name: "Módulo 08",  },
+  {    id: "09",    name: "Módulo 09",  },
+  {    id: "10",    name: "Módulo 10",  }
+
+];
+
+const indicesArray = computed(() => {
+  // Mapea los módulos ya asignados
+  const asignadas = moduloStore.moduloFiltrado?.map(
+    (ep) => ep?.numero_modulo
+  ) || [];
+
+  // Si estoy editando
+  const currentId = sliderData.value?.numero_modulo;
+
+  return indexModulos.filter(
+    (indice) => !asignadas.includes(indice.id) || indice.id === currentId
+  );
+
+});
+
+console.log("los indices: ", indicesArray.value);
+// ["02", "04", "05", "06", "07", "08", "09", "10"]
+
+
 const onDelete = (modulo) => {
 
   console.log('eliminar modulo', modulo)
@@ -48,7 +83,7 @@ const onDelete = (modulo) => {
 
     const isDeleted = await deletePrograma(modulo?.id);
     if (isDeleted) {
-      showToast(`Modulo "${modulo?.nombre_modulo}" eliminado exitosamente...`);
+      showToast(`Modulo "${modulo?.descripcion}" eliminado exitosamente...`);
       moduloStore.loadModuloById(props.idEspecialidadPrograma)
 
     }
@@ -66,8 +101,8 @@ const onDelete = (modulo) => {
           Asignar Módulo
         </h3>
         <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
-        <ModuloSlider :show="slider" :modulo="sliderData" 
-          :especialidad="props.idEspecialidadPrograma" @hide="hideSlider" />
+        <ModuloSlider :show="slider" :modulo="sliderData" :especialidad="props.idEspecialidadPrograma"
+          :indexModulo="indicesArray" @hide="hideSlider" />
       </div>
 
 
@@ -83,8 +118,8 @@ const onDelete = (modulo) => {
 
           <TBody>
             <Tr v-for="(modulo, index) in moduloStore.moduloFiltrado" :key="modulo.id">
-              <Td>{{ modulo?.numero_modulo}}</Td>
-              <Td>{{ modulo?.descripcion }}</Td> 
+              <Td>{{ modulo?.numero_modulo }}</Td>
+              <Td>{{ modulo?.descripcion }}</Td>
               <Td>{{ modulo?.creditos }}</Td>
               <Td>{{ modulo?.horas }}</Td>
               <Td class="align-middle">
@@ -92,7 +127,6 @@ const onDelete = (modulo) => {
                   <EditButton @click="showSlider(true, modulo)" />
                   <DeleteButton @click="onDelete(modulo)" />
                 </div>
-
               </Td>
             </Tr>
           </TBody>

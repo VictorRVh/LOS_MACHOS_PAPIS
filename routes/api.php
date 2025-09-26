@@ -61,6 +61,10 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\UserController::class,
         'index',
     ])->middleware('permission:todo-acceso-usuarios|ver-usuarios');
+        Route::get('users_active', [
+        \App\Http\Controllers\UserController::class,
+        'index_filter_status',
+    ])->middleware('permission:todo-acceso-usuarios|ver-usuarios');
 
     Route::post('users', [
         \App\Http\Controllers\UserController::class,

@@ -1,4 +1,5 @@
 <script setup>
+import { computed, onMounted, ref, watch } from "vue";
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
 import TBody from "../../components/table/TBody.vue";
@@ -13,18 +14,42 @@ import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
 import ModalRoles from "../../layouts/components/ModalRoles.vue";
 import useHttpRequest from "../../composables/useHttpRequest";
-import { ref } from "vue";
+
 
 import comisionSlider from "../../components/page/Comision/ComisionSlider.vue";
 import useComisionesStore from "../../store/Comision/useComisionesStore";
+import useUserStatuStore from "../../store/User/useUserStatusStore";
 
 const comisionesStore = useComisionesStore();
+const useUserStore = useUserStatuStore();
 
 if (!comisionesStore.comisiones.length) await comisionesStore.loadComisiones();
+
+if (!useUserStore.users.length) await useUserStore.loadUsers();
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deletecomision, deleting } = useHttpRequest("/comisiones");
+
+
+
+const UsuariosDisponibles = computed(() => {
+  // todos los usuarios activos
+  const todosUsuarios = useUserStore?.users || [];
+
+  // todos los IDs de usuarios ya asignados a comisiones
+  const usuariosAsignados = comisionesStore?.comisiones
+    ?.flatMap(c => c.usuarios?.map(u => u.id)) || [];
+
+  // si estoy editando, mantener el usuario ya asignado
+  const currentUserIds = sliderData.value?.usuarios?.map(u => u.id) || [];
+
+  return todosUsuarios.filter(usuario =>
+    !usuariosAsignados.includes(usuario.id) || currentUserIds.includes(usuario.id)
+  );
+});
+
+
 
 const onDelete = (comision) => {
   if (deleting.value) return;
@@ -67,7 +92,7 @@ function showPermissionsModal(comision) {
           Agregar comisión
         </h3>
         <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
-        <comisionSlider :show="slider" :comision="sliderData" @hide="hideSlider" />
+        <comisionSlider :show="slider" :comision="sliderData" :users-filter="UsuariosDisponibles" @hide="hideSlider" />
       </div>
 
       <!-- Tabla de comisiones -->

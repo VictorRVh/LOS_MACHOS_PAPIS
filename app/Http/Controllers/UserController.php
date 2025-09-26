@@ -21,6 +21,22 @@ class UserController extends Controller
         );
         return response()->json($users);
     }
+    public function index_filter_status()
+    {
+        $usuariosSinComision = User::doesntHave('comisiones')
+            ->where('status', 1) // 👈 Solo activos
+            ->select('id', 'name', 'apellido_paterno', 'apellido_materno')
+            ->get();
+
+        $users = $usuariosSinComision->map(function ($usuario) {
+            return [
+                'id' => $usuario->id,
+                'nameCompleto' => $usuario->name . ' ' . $usuario->apellido_paterno . ' ' . $usuario->apellido_materno,
+            ];
+        });
+        return response()->json($users);
+    }
+
 
     public function store(Request $request)
     {

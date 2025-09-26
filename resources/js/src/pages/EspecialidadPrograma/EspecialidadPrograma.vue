@@ -43,12 +43,18 @@ if (!especialidadStore?.especialidadPrograma?.length||especialidadProgramaStore?
 const especialidadesDisponibles = computed(() => {
   const asignadas = especialidadProgramaStore?.especialidadProgramaFiltrado?.especialidad_programas?.map(
     (ep) => ep?.especialidad_madre.id
-  );
+  ) || [];
+
+  // especialidad actual si estamos editando
+  const currentId = sliderData.value?.especialidad_madre?.id;
+
+  //  console.log("prueba de editar: ",currentId)
 
   return especialidadStore.especialidadCiclo?.especialidades?.filter(
-    (especialidad) => !asignadas?.includes(especialidad?.id)
+    (especialidad) => !asignadas.includes(especialidad.id) || especialidad.id === currentId
   ) || [];
 });
+
 
 const onDelete = (especialidadPrograma) => {
   if (deleting.value) return;
@@ -115,8 +121,8 @@ const SeeMore = (especialidadPrograma) => {
               <Td>{{ especialidadPrograma?.nro_modulos }}</Td>
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">
-                  <EditButton @click="showSlider(true, especialidadPrograma)" />
-                  <DeleteButton @click="onDelete(especialidadPrograma)" />
+                  <EditButton @click.stop="showSlider(true, especialidadPrograma)" />
+                  <DeleteButton @click.stop="onDelete(especialidadPrograma)" />
                  
                 </div>
               </Td>

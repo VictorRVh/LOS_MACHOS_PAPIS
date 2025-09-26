@@ -12,20 +12,23 @@ class ModuloController extends Controller
      */
     public function index()
     {
-        $modulos = Modulo::with(['periodo', 'especialidadPrograma'])->get();
+        $modulos = Modulo::with(['periodo', 'especialidadPrograma'])
+            ->orderByRaw('CAST(numero_modulo AS UNSIGNED) ASC')
+            ->get();
         return response()->json($modulos);
     }
+
 
     // Crear un nuevo módulo
     public function store(Request $request)
     {
         $request->validate([
-            'numero_modulo'      => 'required|string|max:10',
-            'descripcion'        => 'nullable|string',
-            'creditos'           => 'required|integer|min:0',
-            'horas'              => 'required|integer|min:0',
-            'id_especialidad'    => 'required|exists:especialidad_programa,id',
-            'nro_capacidades'    => 'required|integer|min:0',
+            'numero_modulo' => 'required|string|max:10',
+            'descripcion' => 'nullable|string',
+            'creditos' => 'required|integer|min:0',
+            'horas' => 'required|integer|min:0',
+            'id_especialidad' => 'required|exists:especialidad_programa,id',
+            'nro_capacidades' => 'required|integer|min:0',
         ]);
 
         $modulo = Modulo::create($request->all());
@@ -38,6 +41,7 @@ class ModuloController extends Controller
     {
         $registros = Modulo::with(['especialidadPrograma'])
             ->where('id_especialidad', $id)
+            ->orderByRaw('CAST(numero_modulo AS UNSIGNED) ASC')
             ->get();
 
         if ($registros->isEmpty()) {
@@ -53,12 +57,12 @@ class ModuloController extends Controller
         $modulo = Modulo::findOrFail($id);
 
         $request->validate([
-            'numero_modulo'      => 'sometimes|string|max:10',
-            'descripcion'        => 'sometimes|nullable|string',
-            'creditos'           => 'sometimes|integer|min:0',
-            'horas'              => 'sometimes|integer|min:0',
-            'id_especialidad'    => 'sometimes|exists:especialidad_programa,id',
-            'nro_capacidades'    => 'sometimes|integer|min:0',
+            'numero_modulo' => 'sometimes|string|max:10',
+            'descripcion' => 'sometimes|nullable|string',
+            'creditos' => 'sometimes|integer|min:0',
+            'horas' => 'sometimes|integer|min:0',
+            'id_especialidad' => 'sometimes|exists:especialidad_programa,id',
+            'nro_capacidades' => 'sometimes|integer|min:0',
         ]);
 
         $modulo->update($request->all());

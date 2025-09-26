@@ -10,7 +10,8 @@ import FormInput from "../../ui/FormInput.vue";
 import FormLabelError from "../../ui/FormLabelError.vue";
 import Button from "../../ui/Button.vue";
 import AuthorizationFallback from "../AuthorizationFallback.vue";
-import BaseSelectCiclo from "../../ui/BaseSelectCiclo.vue";
+import BaseSelectModulo from "../../ui/BaseSelectCiclo.vue";
+
 import useModuloStore from "../../../store/Modulos/useModulosStore";
 
 const props = defineProps({
@@ -21,6 +22,10 @@ const props = defineProps({
     modulo: {
         type: [Object, null],
         default: () => null,
+    },
+    indexModulo: {
+       type: [Object, null],
+        default: () => null, 
     },
     especialidad: {
         type: Array,
@@ -140,8 +145,14 @@ const onSubmit = async () => {
 
             <FormInput v-model="formData.descripcion" :focus="show" label="Nombre del módulo"
                 :error="formErrors?.descripcion" required  />
-                <FormInput v-model="formData.numero_modulo" :focus="show" label="Número de módulo"
-                    :error="formErrors?.numero_modulo" required  />
+            
+
+                    <FormLabelError label="Número de módulo" required :error="formErrors?.numero_modulo">
+                                <BaseSelectModulo v-model="formData.numero_modulo" :options="props.indexModulo" label="name"
+                                  placeholder="Seleccione un módulo" 
+                           />
+                            </FormLabelError>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 <FormInput v-model="formData.creditos" :focus="show" label="Créditos" :error="formErrors?.creditos"

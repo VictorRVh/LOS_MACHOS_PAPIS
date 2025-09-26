@@ -120,13 +120,7 @@ watch(
         status: props.grupo.status ?? 0
       };
 
-      const docenteAsignado = props.grupo.docente;
-      if (
-        docenteAsignado &&
-        !docenteStore.docentesDisponibles.some(d => d.id === docenteAsignado.id)
-      ) {
-        docenteStore.docentesDisponibles.push(docenteAsignado);
-      }
+      await loadDocentesDisponibles();
 
     } else {
       formData.value = initialFormData();
@@ -161,11 +155,13 @@ const onPeriodoChange = async () => {
 const loadDocentesDisponibles = async () => {
   if (!formData.value.turno || !formData.value.id_periodo) return;
 
-  console.log('ENTRANDO ACA POR LA PUTA')
-
   await docenteStore.loadDocentesDisponibles({
-    turno: formData.value.turno.value,
+    turno: typeof formData.value.turno === "object" 
+      ? formData.value.turno.value 
+      : formData.value.turno,
     id_periodo: formData.value.id_periodo,
+    id_grupo: props.grupo?.id_grupo ?? null,
+
   });
 };
 
@@ -239,7 +235,7 @@ const onSubmit = async () => {
 
           <FormLabelError label="Docente">
             <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentesDisponibles" label="nombre"
-              placeholder="Seleccione un docente" :disabled="!formData.turno || !formData.id_periodo" />
+              placeholder="Seleccione un docente" :disabled="!formData.turno || !formData.id_periodo" :loading="docenteStore.docentesDisponiblesLoading"/>
           </FormLabelError>
         </div>
 
@@ -261,8 +257,8 @@ const onSubmit = async () => {
           <CheckBox v-model="formData.status" label="Habilitado" class="mt-8 pl-4 flex justify-center items-center" />
         </div>
 
-        <Button :title="grupo?.id ? 'Guardar Cambios' : 'Crear Grupo'"
-          :loading-title="grupo?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full" :loading="saving || updating"
+        <Button :title="grupo?.id_grupo ? 'Guardar Cambios' : 'Crear Grupo'"
+          :loading-title="grupo?.id_grupo ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full" :loading="saving || updating"
           @click="onSubmit" />
       </div>
     </AuthorizationFallback>

@@ -204,25 +204,46 @@ class GrupoController extends Controller
         $request->validate([
             'turno' => 'required|string',
             'id_periodo' => 'required|string',
+            'id_grupo' => 'nullable|string',
         ]);
 
-        // Docentes ya ocupados en este turno y periodo
+
+
+        // Docentes ocupados en este turno y periodo (excluyendo el grupo actual si existe)
         $ocupados = Grupo::where('turno', $request->turno)
             ->where('id_periodo', $request->id_periodo)
+            ->when($request->id_grupo, function ($query) use ($request) {
+                $query->where('id', '!=', $request->id_grupo);
+            })
             ->pluck('id_docente');
 
         // Traer docentes que no estén ocupados
         $docentes = Docente::with('user:id,name,apellido_paterno,apellido_materno')
             ->whereNotIn('id', $ocupados)
-            ->get()
-            ->map(function ($docente) {
-                return [
-                    'id' => $docente->id,
-                    'nombre' => $docente->user->name . ' ' .
-                        $docente->user->apellido_paterno . ' ' .
-                        $docente->user->apellido_materno,
-                ];
-            });
+            ->get();
+
+        if ($request->id_grupo) {
+            $grupoActual = Grupo::with('docente.user')->find($request->id_grupo);
+
+            if ($grupoActual && $grupoActual->docente) {
+                // Solo agregamos al docente si el turno y periodo son los mismos del grupo actual
+                if ($grupoActual->turno === $request->turno && $grupoActual->id_periodo === $request->id_periodo) {
+                    if (!$docentes->contains('id', $grupoActual->docente->id)) {
+                        $docentes->push($grupoActual->docente);
+                    }
+                }
+            }
+        }
+
+        // Mapear formato
+        $docentes = $docentes->map(function ($docente) {
+            return [
+                'id' => $docente->id,
+                'nombre' => $docente->user->name . ' ' .
+                    $docente->user->apellido_paterno . ' ' .
+                    $docente->user->apellido_materno,
+            ];
+        });
 
         return response()->json($docentes);
     }

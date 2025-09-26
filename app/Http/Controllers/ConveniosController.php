@@ -21,7 +21,7 @@ class ConveniosController extends Controller
     {
         $request->validate([
             'nombre_institucion' => 'required|string|max:255',
-            'descripcion' => 'required|string|max:255',
+            'descripcion' => 'nullable|string|max:255',
         ]);
 
         $convenio = Convenios::create($request->all());

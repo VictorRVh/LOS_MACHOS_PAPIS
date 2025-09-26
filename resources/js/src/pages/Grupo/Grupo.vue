@@ -154,7 +154,7 @@ const {
 
             <!-- Año -->
             <div>
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Periodo</label>
+              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Año</label>
               <BaseSelectGrupo v-model="selectedAnio" :options="grupoStore.anios" label="label"
                 placeholder="Seleccione un año" @change="onAnioChange" :disabled="!selectedCiclo"
                 :loading="grupoStore.aniosByCicloLoading" />
@@ -171,7 +171,7 @@ const {
             <!-- Botón Filtrar -->
             <div class="flex items-end pt-5">
               <button @click="filtrarPorSeleccion"
-                class="bg-cetpro-light hover:bg-primary-dark text-white py-2 px-4 rounded-md w-full">
+                class="bg-cetpro hover:bg-primary-dark text-white py-2 px-4 rounded-md w-full">
                 Filtrar
               </button>
             </div>

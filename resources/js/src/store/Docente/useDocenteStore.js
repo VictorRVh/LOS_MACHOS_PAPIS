@@ -23,6 +23,7 @@ const useDocenteStore = defineStore('docentes', () => {
     const {
         indexWithParams: getDocentesDisponibles,
         // show: getModulosAsignados,
+        loading: docentesDisponiblesLoading,
     } = useHttpRequest('/docenteGrupo');
 
     const docente = ref(null);
@@ -57,11 +58,12 @@ const useDocenteStore = defineStore('docentes', () => {
         modulosAsignados.value = response;
     }
 
-    const loadDocentesDisponibles = async ({ turno, id_periodo }) => {
+    const loadDocentesDisponibles = async ({ turno, id_periodo, id_grupo }) => {
 
         const response = await getDocentesDisponibles({
             turno,
             id_periodo,
+            id_grupo
         });
 
         docentesDisponibles.value = response;
@@ -81,6 +83,7 @@ const useDocenteStore = defineStore('docentes', () => {
 
         loadDocentesDisponibles,
         docentesDisponibles,
+        docentesDisponiblesLoading,
 
         loadModulosAsignados,
         modulosAsignados

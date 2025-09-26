@@ -47,7 +47,7 @@ const submenuLinks = computed(() => {
         <div class="flex-1 flex flex-col overflow-hidden">
             <Header />
             <PageLoader :loading="layoutStore.isPageLoading" />
-            <main class="flex-1 overflow-y-auto p-6">
+            <main class="flex-1 overflow-y-auto">
                 <RouterView v-slot="{ Component }">
                     <Suspense
                         @pending="layoutStore.setPageLoading(true)"

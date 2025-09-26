@@ -12,7 +12,9 @@ class ProgramaEstudioController extends Controller
      */
     public function index()
     {
-        $programas = ProgramaEstudio::with('ciclo')->get();
+        $programas = ProgramaEstudio::with('ciclo')
+            ->orderBy('created_at', 'desc') // 👈 ordena por fecha de creación (más recientes primero)
+            ->get();
 
         if ($programas->isEmpty()) {
             return response()->json(['message' => 'No hay programas de estudio disponibles'], 404);
@@ -51,10 +53,10 @@ class ProgramaEstudioController extends Controller
             $nuevoPrograma = $programa->toArray();
 
             $nombreCiclo = $programa->ciclo->nombre_ciclo ?? 'Ciclo desconocido';
-            $nuevoPrograma['nameCiclo'] = $nombreCiclo.' '.$programa->año;
+            $nuevoPrograma['nameCiclo'] = $nombreCiclo . ' ' . $programa->año;
 
             unset($nuevoPrograma['ciclo']);
-            unset($nuevoPrograma['año']);  
+            unset($nuevoPrograma['año']);
             unset($nuevoPrograma['numero_rd']);
             unset($nuevoPrograma['status']);
             unset($nuevoPrograma['id_ciclo']);

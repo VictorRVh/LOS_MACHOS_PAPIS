@@ -54,6 +54,10 @@ const props = defineProps({
         type: Boolean,
         default: () => false,
     },
+        uppercase: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const emit = defineEmits(['update:modelValue', 'focus', 'blur']);
@@ -106,6 +110,7 @@ const disableKeys = (event, keys = ['e', 'E', '+', '-']) => {
             :class="[
                 disabled ? 'cursor-not-allowed' : '',
                 inputClass ? inputClass : '',
+                uppercase ? 'uppercase' : '',
             ]"
             :disabled="disabled"
             @keydown="onKeydown"

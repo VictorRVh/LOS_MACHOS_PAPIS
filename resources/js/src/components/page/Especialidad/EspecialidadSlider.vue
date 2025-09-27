@@ -130,7 +130,7 @@ const onSubmit = async () => {
           placeholder="Seleccione un ciclo" />
       </FormLabelError>
       <FormInput v-model="formData.nombre_especialidad" :focus="show" label="Nombre de la especialidad"
-        :error="formErrors?.nombre_especialidad" required />
+        :error="formErrors?.nombre_especialidad" required :uppercase="true"/>
 
       <div class="w-full space-y-3">
 

@@ -95,7 +95,8 @@ const schema = yup.object().shape({
     apellido_paterno: yup.string().nullable().required("El apellido paterno es requerido."),
     apellido_materno: yup.string().nullable().required("El apellido materno es requerido."),
     usuario: yup.string().nullable().required("El usuario es requerido."),
-    dni: yup.string().nullable().required("El dni es requerido."),
+     dni: yup.string().nullable().required("El DNI es requerido.").matches(/^[0-9]+$/, "El DNI solo debe contener números.")
+        .length(8, "El DNI debe tener exactamente 8 dígitos."),
     email: yup.string().email("Debe ser un email válido.").nullable().required("El email es requerido."),
     fecha_nacimiento: yup.date().nullable().required("La fecha de nacimiento es requerida."),
     telefono: yup.string().nullable().required("El teléfono es requerido."),
@@ -149,11 +150,11 @@ const onSubmit = async () => {
             <div class="mt-4 space-y-3">
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormInput v-model="formData.name" label="Nombres" :error="formErrors?.name" required />
+                    <FormInput v-model="formData.name" label="Nombres" :error="formErrors?.name" required :uppercase="true" />
                     <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno"
-                        :error="formErrors?.apellido_paterno" required />
+                        :error="formErrors?.apellido_paterno" required :uppercase="true" />
                     <FormInput v-model="formData.apellido_materno" label="Apellido Materno"
-                        :error="formErrors?.apellido_materno" required />
+                        :error="formErrors?.apellido_materno" required :uppercase="true" />
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

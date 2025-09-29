@@ -53,7 +53,7 @@ const useProgramaStore = defineStore('programa_estudio', () => {
                 programaCreado.nameCiclo = `${nombreDelCiclo} - ${programaCreado.año}`;
                 
                 if (programa.value?.programas) {
-                    programa.value.programas.push(programaCreado);
+                    programa.value.programas.unshift(programaCreado);
                 }
             }
             

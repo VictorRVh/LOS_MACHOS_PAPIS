@@ -20,6 +20,7 @@ import useHttpRequest from '../../../composables/useHttpRequest';
 import useModalToast from '../../../composables/useModalToast';
 import useCicloStore from '../../../store/Ciclo/useCicloStore';
 import usePeriodoStore from '../../../store/Periodo/usePeriodoStatusStore'
+import * as yup from "yup";
 
 const props = defineProps({
   show: { type: Boolean, default: () => false },
@@ -156,14 +157,41 @@ const loadDocentesDisponibles = async () => {
   if (!formData.value.turno || !formData.value.id_periodo) return;
 
   await docenteStore.loadDocentesDisponibles({
-    turno: typeof formData.value.turno === "object" 
-      ? formData.value.turno.value 
+    turno: typeof formData.value.turno === "object"
+      ? formData.value.turno.value
       : formData.value.turno,
     id_periodo: formData.value.id_periodo,
     id_grupo: props.grupo?.id_grupo ?? null,
 
   });
 };
+
+
+const schema = yup.object({
+  // id_programa: yup.string().required("El programa es obligatorio"),
+  // id_especialidad: yup.string().required("La especialidad es obligatoria"),
+  // id_modulo: yup.string().required("El módulo es obligatorio"),
+  // id_periodo: yup.string().required("El periodo es obligatorio"),
+  // turno: yup.string().required("El turno es obligatorio"),
+  // id_convenio: yup.string().required("El convenio es obligatorio"),
+
+  fecha_inicio: yup
+    .date()
+    .required("La fecha de inicio es obligatoria"),
+
+  fecha_fin: yup
+    .date()
+    .required("La fecha de fin es obligatoria")
+    .min(yup.ref("fecha_inicio"), "La fecha de fin no puede ser antes de la fecha de inicio"),
+
+  fecha_entrega_acta: yup
+    .date()
+    .required("La fecha de entrega del acta es obligatoria")
+    .min(yup.ref("fecha_fin"), "La entrega del acta debe ser después de la fecha de fin"),
+
+  // seccion: yup.string().nullable(),
+  // status: yup.boolean(),
+});
 
 
 const onSubmit = async () => {
@@ -173,6 +201,16 @@ const onSubmit = async () => {
     ...formData.value,
     turno: formData.value.turno?.value ?? formData.value.turno,
   };
+
+  const { validated, errors } = await runYupValidation(schema, data);
+
+  console.log('errores', errors)
+
+  if (!validated) {
+    formErrors.value = errors;
+    return;
+  }
+  formErrors.value = {};
 
   const response = props.grupo?.id_grupo
     ? await updateGrupo(props.grupo?.id_grupo, data)
@@ -235,7 +273,8 @@ const onSubmit = async () => {
 
           <FormLabelError label="Docente">
             <BaseSelectCiclo v-model="formData.id_docente" :options="docenteStore.docentesDisponibles" label="nombre"
-              placeholder="Seleccione un docente" :disabled="!formData.turno || !formData.id_periodo" :loading="docenteStore.docentesDisponiblesLoading"/>
+              placeholder="Seleccione un docente" :disabled="!formData.turno || !formData.id_periodo"
+              :loading="docenteStore.docentesDisponiblesLoading" />
           </FormLabelError>
         </div>
 
@@ -247,19 +286,21 @@ const onSubmit = async () => {
             <BaseSelectCiclo v-model="formData.id_convenio" :options="convenioStore.convenios"
               label="nombre_institucion" placeholder="Seleccione un convenio" />
           </FormLabelError>
-          <FormInput v-model="formData.fecha_inicio" label="Fecha Inicio" type="date" />
-          <FormInput v-model="formData.fecha_fin" label="Fecha Fin" type="date" />
+          
+          
+          <FormInput v-model="formData.fecha_inicio" label="Fecha Inicio" type="date" :error="formErrors?.fecha_inicio" />
+          <FormInput v-model="formData.fecha_fin" label="Fecha Fin" type="date" :error="formErrors?.fecha_fin" />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormInput v-model="formData.fecha_entrega_acta" label="Entrega Acta" type="date" />
+          <FormInput v-model="formData.fecha_entrega_acta" label="Entrega Acta" type="date" :error="formErrors?.fecha_entrega_acta" />
           <FormInput v-model="formData.seccion" label="Sección" />
           <CheckBox v-model="formData.status" label="Habilitado" class="mt-8 pl-4 flex justify-center items-center" />
         </div>
 
         <Button :title="grupo?.id_grupo ? 'Guardar Cambios' : 'Crear Grupo'"
-          :loading-title="grupo?.id_grupo ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full" :loading="saving || updating"
-          @click="onSubmit" />
+          :loading-title="grupo?.id_grupo ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
+          :loading="saving || updating" @click="onSubmit" />
       </div>
     </AuthorizationFallback>
   </Slider>

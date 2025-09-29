@@ -45,9 +45,9 @@ class DocenteController extends Controller
             'status' => 'required|integer|in:0,1,2,3',
 
             // Campos del docente
-            'codigo_modular' => 'required|string|max:20',
+            'codigo_modular' => 'nullable|string|max:20',
             'especialidad' => 'required|string|max:100',
-            'condicion' => 'required|string|max:50',
+            'condicion' => 'nullable|string|max:50',
             'escala_magisterial' => 'nullable|string|max:50',
             'rd_nombramiento' => 'nullable|string|max:50',
         ]);

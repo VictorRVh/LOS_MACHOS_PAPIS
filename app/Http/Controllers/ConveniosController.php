@@ -13,8 +13,12 @@ class ConveniosController extends Controller
     // Mostrar todos los convenios
     public function index()
     {
-        return response()->json(Convenios::all(), 200);
+        return response()->json(
+            Convenios::latest()->get(),
+            200
+        );
     }
+
 
     // Crear un nuevo convenio
     public function store(Request $request)

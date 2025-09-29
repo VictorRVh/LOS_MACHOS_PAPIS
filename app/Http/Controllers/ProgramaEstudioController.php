@@ -13,8 +13,8 @@ class ProgramaEstudioController extends Controller
     public function index()
     {
         $programas = ProgramaEstudio::with('ciclo')
-            ->orderBy('created_at', 'desc') // 👈 ordena por fecha de creación (más recientes primero)
-            ->get();
+    ->latest() // equivale a orderBy('created_at', 'desc')
+    ->get();
 
         if ($programas->isEmpty()) {
             return response()->json(['message' => 'No hay programas de estudio disponibles'], 404);

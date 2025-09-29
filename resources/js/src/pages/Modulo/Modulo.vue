@@ -93,7 +93,7 @@ const onDelete = (modulo) => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
+  <AuthorizationFallback :permissions="['todo-acceso-modulos', 'ver-modulos']">
 
     <div class="flex  px-6">
       <div class="w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">

@@ -45,7 +45,7 @@ const onDelete = (especialidad) => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
+  <AuthorizationFallback :permissions="['todo-acceso-especialidades', 'ver-especialidades']">
     <div class="flex justify-between items-center p-4">
       <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Especialidad</h2>
       <!-- <CreateButton @click="showSlider(true)" /> -->

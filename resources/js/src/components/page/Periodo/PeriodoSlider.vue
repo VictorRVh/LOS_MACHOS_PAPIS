@@ -30,8 +30,8 @@ const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
   return props.periodo?.id
-    ? ["todo-acceso-roles", "editar-roles"]
-    : ["todo-acceso-roles", "crear-roles"];
+    ? ["todo-acceso-periodos", "editar-periodos"]
+    : ["todo-acceso-periodos", "crear-periodos"];
 });
 
 const title = computed(() =>

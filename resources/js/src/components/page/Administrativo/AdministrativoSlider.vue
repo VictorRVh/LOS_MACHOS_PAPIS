@@ -33,8 +33,8 @@ const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
-  if (!props.admin?.id) return ["todo-acceso-usuarios", "crear-usuarios"];
-  else return ["todo-acceso-usuarios", "editar-usuarios"];
+  if (!props.admin?.id) return ["todo-acceso-administrativos", "crear-administrativos"];
+  else return ["todo-acceso-administrativos", "editar-administrativos"];
 });
 
 const title = computed(() =>

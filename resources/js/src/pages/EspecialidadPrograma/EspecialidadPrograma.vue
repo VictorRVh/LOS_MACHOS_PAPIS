@@ -79,7 +79,7 @@ const SeeMore = (especialidadPrograma) => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
+  <AuthorizationFallback :permissions="['todo-acceso-programa-especialidades', 'ver-programa-especialidades']">
     <div class="flex justify-between items-center p-4">
       <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Asignar especialidad</h2>
     </div>

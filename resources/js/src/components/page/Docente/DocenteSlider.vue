@@ -38,8 +38,8 @@ const { showToast } = useModalToast()
 
 
 const requiredPermissions = computed(() => {
-    if (!props.docente?.id) return ['todo-acceso-usuarios', 'crear-usuarios'];
-    else return ['todo-acceso-usuarios', 'editar-usuarios'];
+    if (!props.docente?.id) return ['todo-acceso-docentes', 'crear-docentes'];
+    else return ['todo-acceso-docentes', 'editar-docentes'];
 });
 
 const title = computed(() => (props.docente ? `Actualizar Docente "${props.docente?.name}"` : 'Añadir Nuevo  Docente'));

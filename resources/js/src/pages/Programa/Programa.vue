@@ -62,7 +62,7 @@ const handleAction = (action, programa) => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
+  <AuthorizationFallback :permissions="['todo-acceso-programas', 'ver-programas']">
     <div class="flex justify-between items-center p-4">
       <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Programa de estudio</h2>
     </div>

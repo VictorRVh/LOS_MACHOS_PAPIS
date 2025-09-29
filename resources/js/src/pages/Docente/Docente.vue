@@ -79,7 +79,7 @@ const {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-usuarios', 'ver-usuarios']">
+  <AuthorizationFallback :permissions="['todo-acceso-docentes', 'ver-docentes']">
     <div class="w-full space-y-2 py-2 px-3">
       <div class="m-2">
         <div class="flex-between">

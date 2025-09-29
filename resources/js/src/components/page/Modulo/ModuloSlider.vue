@@ -43,8 +43,8 @@ const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
-    if (!props.role?.id) return ["todo-acceso-roles", "crear-roles"];
-    else return ["todo-acceso-roles", "editar-roles"];
+    if (!props.role?.id) return ["todo-acceso-modulos", "crear-modulos"];
+    else return ["todo-acceso-modulos", "editar-modulos"];
 });
 
 const initialFormData = () => {

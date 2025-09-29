@@ -119,17 +119,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('permissions', [
         \App\Http\Controllers\PermissionController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('permissions/{permissionId}', [
         \App\Http\Controllers\PermissionController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('permissions/{permissionId}', [
         \App\Http\Controllers\PermissionController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA DE PAGOS
@@ -141,39 +141,39 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('pago', [
         \App\Http\Controllers\PagoController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('pago/{pagoId}', [
         \App\Http\Controllers\PagoController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('pago/{pagoId}', [
         \App\Http\Controllers\PagoController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTAS DE CONVENIOS
     Route::get('convenio', [
         \App\Http\Controllers\ConveniosController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-convenios|ver-convenios');
 
     Route::post('convenio', [
         \App\Http\Controllers\ConveniosController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-convenios|crear-convenios');
 
     Route::patch('convenio/{id}', [
         \App\Http\Controllers\ConveniosController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-convenios|editar-convenios');
 
     Route::delete('convenio/{convenioId}', [
         \App\Http\Controllers\ConveniosController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-convenios|eliminar-convenios');
 
 
     //RUTA DE ESTUDIANTE
@@ -185,23 +185,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('estudiante', [
         \App\Http\Controllers\EstudianteController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('estudiante/{id}', [
         \App\Http\Controllers\EstudianteController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('estudiante/{id}', [
         \App\Http\Controllers\EstudianteController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
     //BUSCAR DNI
     Route::post('buscar-dni', [
         \App\Http\Controllers\EstudianteController::class,
         'buscar',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     //RUTA PARA CILCLO ACADEMICO
@@ -213,17 +213,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('ciclo_academico', [
         \App\Http\Controllers\CicloAcademicoController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('ciclo_academico/{id}', [
         \App\Http\Controllers\CicloAcademicoController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('ciclo_academico/{id}', [
         \App\Http\Controllers\CicloAcademicoController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA CALENDARIO-ADMIN
@@ -235,17 +235,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('calendario_admin', [
         \App\Http\Controllers\CalendarioAdminController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('calendario_admin/{id}', [
         \App\Http\Controllers\CalendarioAdminController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('calendario_admin/{id}', [
         \App\Http\Controllers\CalendarioAdminController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA ENTREGA_DOCENTE_ADMIN
@@ -257,126 +257,126 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('entrega_docente_admin', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('entrega_docente_admin/{id}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('entrega_docente_admin/{id}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA ESPECIALIDAD_MADRE
     Route::get('especialidad_madre', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-especialidades|ver-especialidades');
 
     Route::get('especialidad_ciclo/{id_ciclo}', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'getEspecialidadesPorCiclo',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-especialidades|ver-especialidades');
 
     Route::post('especialidad_madre', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-especialidades|crear-especialidades');
 
     Route::patch('especialidad_madre/{id}', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-especialidades|editar-especialidades');
 
     Route::delete('especialidad_madre/{id}', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-especialidades|eliminar-especialidades');
 
 
     // RUTA PARA PROGRAMA_ESTUDIO
     Route::get('programa_estudio', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-programas|ver-programas');
 
     Route::get('programa_estudio_status', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'index_filter_status',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-programas|ver-programas');
 
 
     Route::post('programa_estudio', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-programas|crear-programas');
 
     Route::patch('programa_estudio/{id}', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-programas|editar-programas');
 
     Route::delete('programa_estudio/{id}', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-programas|eliminar-programas');
 
 
     // RUTA PARA ESPECIALIDAD_PROGRAMA
     Route::get('especialidad_programa', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programa-especialidades');
 
     Route::get('especialidad_programa/{id}', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'show',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programa-especialidades');
 
     Route::get('especialidad_programa/{id}/modulos', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'getRelacionadosPorEspecialidadPrograma',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programa-especialidades');
 
     Route::post('especialidad_programa', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-programa-especialidades|crear-programa-especialidades');
 
     Route::patch('especialidad_programa/{id}', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-programa-especialidades|editar-programa-especialidades');
 
     Route::delete('especialidad_programa/{id}', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-programa-especialidades|eliminar-programa-especialidades');
 
 
     // RUTA PARA DOCENTE
     Route::get('docente', [
         \App\Http\Controllers\DocenteController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-docentes|ver-docentes');
 
     Route::post('docente', [
         \App\Http\Controllers\DocenteController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-docentes|crear-docentes');
 
     Route::patch('docente/{id}', [
         \App\Http\Controllers\DocenteController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-docentes|editar-docentes');
 
     Route::delete('docente/{id}', [
         \App\Http\Controllers\DocenteController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-docentes|eliminar-docente');
 
 
     // RUTA PARA PERIODO
@@ -392,44 +392,44 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('periodo', [
         \App\Http\Controllers\PeriodoController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('periodo/{id}', [
         \App\Http\Controllers\PeriodoController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('periodo/{id}', [
         \App\Http\Controllers\PeriodoController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA MODULO
     Route::get('modulo', [
         \App\Http\Controllers\ModuloController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-modulos|ver-modulos');
 
     Route::get('modulo/{id}', [
         \App\Http\Controllers\ModuloController::class,
         'show',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-modulos|ver-modulos');
 
     Route::post('modulo', [
         \App\Http\Controllers\ModuloController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-modulos|crear-modulos');
 
     Route::patch('modulo/{id}', [
         \App\Http\Controllers\ModuloController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-modulos|editar-modulos');
 
     Route::delete('modulo/{id}', [
         \App\Http\Controllers\ModuloController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-modulos|eliminar-modulos');
 
 
     // RUTA PARA GRUPO
@@ -441,17 +441,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('grupo', [
         \App\Http\Controllers\GrupoController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('grupo/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('grupo/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
     // Rutas para el formulario
     Route::get('especialidadByPrograma/{id}', [
@@ -521,17 +521,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('capacidad_terminal', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('capacidad_terminal/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('capacidad_terminal/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA NOTA DE CAPACIDAD TERMINAL
@@ -543,17 +543,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('nota_capacidad_terminal', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('nota_capacidad_terminal/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('nota_capacidad_terminal/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA EXPERIENCIA FORMATIVA
@@ -565,17 +565,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('experiencia_formativa', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('experiencia_formativa/{id}', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('experiencia_formativa/{id}', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA NOTA DE EXPERIENCIA FORMATIVA
@@ -587,17 +587,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('nota_experiencia_formativa', [
         \App\Http\Controllers\NotaExperienciaFormativaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('nota_experiencia_formativa/{id}', [
         \App\Http\Controllers\NotaExperienciaFormativaController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('nota_experiencia_formativa/{id}', [
         \App\Http\Controllers\NotaExperienciaFormativaController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA ENTREGAS DOCENTE
@@ -609,17 +609,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('entrega_docente', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('entrega_docente/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('entrega_docente/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA SESIONES
@@ -631,17 +631,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('sesiones', [
         \App\Http\Controllers\SesionesController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('sesiones/{id}', [
         \App\Http\Controllers\SesionesController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('sesiones/{id}', [
         \App\Http\Controllers\SesionesController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA ASISTENCIA
@@ -653,17 +653,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('asistencia', [
         \App\Http\Controllers\AsistenciaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('asistencia/{id}', [
         \App\Http\Controllers\AsistenciaController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('asistencia/{id}', [
         \App\Http\Controllers\AsistenciaController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA ENTREGAS REALIZADAS
@@ -675,17 +675,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('entregas_realizadas', [
         \App\Http\Controllers\EntregasRealizadasController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('entregas_realizadas/{id}', [
         \App\Http\Controllers\EntregasRealizadasController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('entregas_realizadas/{id}', [
         \App\Http\Controllers\EntregasRealizadasController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     //RUTA PARA EGRESADOS
@@ -697,65 +697,65 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('egresados', [
         \App\Http\Controllers\EgresadosController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('egresados/{id}', [
         \App\Http\Controllers\EgresadosController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('egresados/{id}', [
         \App\Http\Controllers\EgresadosController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // RUTA PARA PERSONAL ADMINISTRATIVO
     Route::get('personal_administrativo', [
         \App\Http\Controllers\PersonalAdministrativoController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-administrativos|ver-administrativos');
 
     Route::post('personal_administrativo', [
         \App\Http\Controllers\PersonalAdministrativoController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-administrativos|crear-administrativos');
 
     Route::patch('personal_administrativo/{id}', [
         \App\Http\Controllers\PersonalAdministrativoController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-administrativos|editar-administrativos');
 
     Route::delete('personal_administrativo/{id}', [
         \App\Http\Controllers\PersonalAdministrativoController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-administrativos|eliminar-administrativos');
 
 
     //RUTA PARA COMISIONES
     Route::get('comisiones', [
         \App\Http\Controllers\ComisionesController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-comisiones|ver-comisiones');
     Route::get('comisiones_filter', [
         \App\Http\Controllers\ComisionesController::class,
         'index_filter',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-comisiones|ver-comisiones');
 
     Route::post('comisiones', [
         \App\Http\Controllers\ComisionesController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-comisiones|crear-comisiones');
 
     Route::patch('comisiones/{id}', [
         \App\Http\Controllers\ComisionesController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-comisiones|editar-comisiones');
 
     Route::delete('comisiones/{id}', [
         \App\Http\Controllers\ComisionesController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-comisiones|eliminar-comisiones');
 
 
     //RUTA PARA NOTIFICACIONES
@@ -767,17 +767,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('notificaciones', [
         \App\Http\Controllers\NotificacionesController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('notificaciones/{id}', [
         \App\Http\Controllers\NotificacionesController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('notificaciones/{id}', [
         \App\Http\Controllers\NotificacionesController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
     //RUTA PARA ACTIVIDADES RECIENTES
     Route::get('actividades_recientes', [
@@ -788,17 +788,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('actividades_recientes', [
         \App\Http\Controllers\ActividadesRecientesController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('actividades_recientes/{id}', [
         \App\Http\Controllers\ActividadesRecientesController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('actividades_recientes/{id}', [
         \App\Http\Controllers\ActividadesRecientesController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
     // RUTA COMISION USUARIO
 
@@ -810,17 +810,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('comision_usuario', [
         \App\Http\Controllers\ComisionUsuarioController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('comision_usuario/{id}', [
         \App\Http\Controllers\ComisionUsuarioController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('comision_usuario/{id}', [
         \App\Http\Controllers\ComisionUsuarioController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
     // API MATRICULA
 
@@ -832,24 +832,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('matricula', [
         \App\Http\Controllers\MatriculaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|permissions-create');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
 
     Route::patch('matricula/{id}', [
         \App\Http\Controllers\MatriculaController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::delete('matricula/{id}', [
         \App\Http\Controllers\MatriculaController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
     //matricula Reserva
 
     Route::patch('reservaMatricula/{id}', [
         \App\Http\Controllers\MatriculaController::class,
         'reservar',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
     Route::get('listaReserva', [
         \App\Http\Controllers\MatriculaController::class,
@@ -861,31 +861,31 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('matricula/{grupoId}', [
         \App\Http\Controllers\MatriculaController::class,
         'getMatriculadosPorGrupo',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
     Route::get('fichaMatricula/{estudianteId}', [
         \App\Http\Controllers\MatriculaController::class,
         'getFichaMatricula',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     Route::get('matriculados/{grupoId}', [
         \App\Http\Controllers\MatriculaController::class,
         'getMatriculadosPorGrupoExtendido',
-    ])->middleware('permission:todo-acceso-permisos|permissions-delete');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
     // Cambio de matricula
     Route::patch('cambiarMatricula', [
         \App\Http\Controllers\MatriculaController::class,
         'cambiarGrupo',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
 
     Route::patch('cambiarMatricula/{idMatricula}', [
         \App\Http\Controllers\MatriculaController::class,
         'cambiarGrupo',
-    ])->middleware('permission:todo-acceso-permisos|permissions-edit');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
 
     // programa por ciclo

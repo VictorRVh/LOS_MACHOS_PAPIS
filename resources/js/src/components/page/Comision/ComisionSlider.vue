@@ -49,8 +49,8 @@ const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
   return props.comision?.id
-    ? ["todo-acceso-roles", "editar-roles"]
-    : ["todo-acceso-roles", "crear-roles"];
+    ? ["todo-acceso-comisiones", "editar-comisiones"]
+    : ["todo-acceso-comisiones", "crear-comisiones"];
 });
 
 const initialFormData = () => ({

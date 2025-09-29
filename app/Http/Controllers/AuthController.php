@@ -92,8 +92,8 @@ class AuthController extends Controller
         $user->password_cambiada = true; // PASSWORD CAMBIADA
         $user->save();
 
-        Auth::loginUsingId($user->id, true);
-        $request->session()->regenerate();
+       // Auth::loginUsingId($user->id, true);
+       // $request->session()->regenerate();
 
         return response()->json([
             'message' => 'Contraseña actualizada con éxito',

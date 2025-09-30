@@ -6,6 +6,7 @@ import useAppRouter from '../../composables/useAppRouter';
 import useUserStore from '../../store/useUserStore';
 import useHttpRequest from '../../composables/useHttpRequest';
 import Breadcrumbs from '../../components/breadcrumbs/Breadcrumbs.vue';
+import { useLayoutStore } from '@/store/useLayoutStore';
 import { 
     ArrowLeftIcon, 
     BellIcon,
@@ -13,12 +14,14 @@ import {
     MoonIcon,
     UserPlusIcon,
     KeyIcon,
-    AcademicCapIcon
+    AcademicCapIcon,
+    Bars3Icon
 } from '@heroicons/vue/24/outline';
 
 const { isDarkMode, updateDarkMode } = inject('theme');
 const { pushToRoute } = useAppRouter();
 const userStore = useUserStore();
+const layoutStore = useLayoutStore();
 const { index: logout } = useHttpRequest('/logout');
 
 const isUserMenuOpen = ref(false);
@@ -100,9 +103,14 @@ const onLogout = async () => {
 <template>
     <div class="bg-white dark:bg-gray-800 border-b-2 border-cetpro transition-colors duration-300">
         <div class="flex h-16 items-center justify-between px-4 sm:px-6">
-            <h1 class="text-xl font-bold text-cetpro dark:text-gray-100 tracking-wide">
-                CETPRO - Puno
-            </h1>
+            <div class="flex items-center gap-4">
+                <button @click.prevent="layoutStore.toggleSidebarMobile" class="p-2 text-gray-500 rounded-full lg:hidden hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <Bars3Icon class="w-6 h-6" />
+                </button>
+                <h1 class="text-xl font-bold text-cetpro dark:text-gray-100 tracking-wide">
+                    CETPRO - Puno
+                </h1>
+            </div>
             <div class="flex items-center gap-4">
                 <span class="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full hidden lg:block">
                     {{ RolUser }}

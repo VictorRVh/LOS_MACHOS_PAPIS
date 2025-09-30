@@ -1,5 +1,5 @@
 <template>
-  <nav v-if="items.length > 0" class="flex px-4 py-2 bg-white dark:bg-slate-700 border-b border-t border-gray-200 dark:border-slate-600" aria-label="Breadcrumb">
+  <nav v-if="items.length > 0" class="flex px-4 py-2 bg-white dark:bg-slate-700  dark:border-slate-600" aria-label="Breadcrumb">
     <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
       <li class="inline-flex items-center">
         <a @click.prevent="goHome" href="#" class="cursor-pointer inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">

@@ -78,8 +78,9 @@ watch(() => props.show, () => {
             );
         } else {
             formData.value = initialFormData();
-            formErrors.value = {};
+            
         }
+        formErrors.value = {};
     }
 });
 

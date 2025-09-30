@@ -72,6 +72,7 @@ watch(
         if (newComision[key]) return { ...r, [key]: newComision[key] };
         return { ...r, [key]: val };
       }, {});
+      formErrors.value = {};
     }
   },
   { immediate: true }

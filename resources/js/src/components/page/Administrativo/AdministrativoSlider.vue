@@ -64,8 +64,8 @@ watch(
         );
       } else {
         formData.value = initialFormData();
-        formErrors.value = {};
       }
+      formErrors.value = {};
     }
   }
 );

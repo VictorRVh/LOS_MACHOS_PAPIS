@@ -86,7 +86,8 @@ watch(
                     if (newRole[key] !== undefined) acc[key] = newRole[key];
                     return acc;
                 }, {})
-            };
+                
+            }; formErrors.value = {};
         }
     },
     { immediate: true }

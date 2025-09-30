@@ -71,6 +71,7 @@ watch(
         if (newRole[key]) return { ...r, [key]: newRole[key] };
         return { ...r, [key]: val };
       }, {});
+      formErrors.value = {};
     }
   },
   { immediate: true }

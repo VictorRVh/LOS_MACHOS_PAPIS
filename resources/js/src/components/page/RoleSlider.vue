@@ -76,6 +76,7 @@ watch(
         if (newRole[key]) return { ...r, [key]: newRole[key] };
         return { ...r, [key]: val };
       }, {});
+      formErrors.value = {};
     }
   },
   { immediate: true }
@@ -151,10 +152,10 @@ const onSubmit = async () => {
     roleStore.loadRoles();
     userStore.loadUsers();
 
-    if (!props.role?.id) {
-      formData.value = initialFormData();
-      formErrors.value = {};
-    }
+    
+    formData.value = initialFormData();
+    formErrors.value = {};
+    
     emit("hide");
   }
 };

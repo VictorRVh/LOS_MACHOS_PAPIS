@@ -65,6 +65,7 @@ watch(
     } else {
       formData.value = initialFormData();
     }
+    formErrors.value = {};
   },
   { immediate: true }
 );

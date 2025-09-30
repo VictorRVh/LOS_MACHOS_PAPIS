@@ -222,8 +222,8 @@ const onSubmit = async () => {
 
     if (!props.grupo?.id_grupo) {
       formData.value = initialFormData();
-      formErrors.value = {};
     }
+    formErrors.value = {};
     emit("hide");
   }
 };

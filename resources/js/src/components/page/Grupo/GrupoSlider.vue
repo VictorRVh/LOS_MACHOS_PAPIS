@@ -231,7 +231,7 @@ const onSubmit = async () => {
 
 <template>
   <Slider :show="show" :title="title" @hide="emit('hide')">
-    <AuthorizationFallback :permissions="['todo-acceso-usuarios', grupo?.id ? 'editar-usuarios' : 'crear-usuarios']">
+    <AuthorizationFallback :permissions="['todo-acceso-grupos', grupo?.id ? 'editar-grupos' : 'crear-grupos']">
       <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
 
       <div class="mt-4 space-y-3">

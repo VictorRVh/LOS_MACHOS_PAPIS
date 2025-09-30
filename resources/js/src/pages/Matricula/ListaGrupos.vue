@@ -97,7 +97,7 @@ const descargarNomina = async (idGrupo) => {
 </script>
 
 <template>
-    <AuthorizationFallback :permissions="['todo-acceso-permisos']">
+    <AuthorizationFallback :permissions="['todo-acceso-permisos', 'ver-permisos']">
         <div class="w-full space-y-4 py-2 px-3">
             <div class="flex justify-between items-center m-2">
                 <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Gestión de Matrícula por Grupos</h2>

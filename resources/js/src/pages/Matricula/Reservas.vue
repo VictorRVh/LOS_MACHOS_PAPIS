@@ -30,7 +30,7 @@ const estudiantesConReserva = computed(() => {
     return matriculaStore.matriculasReservadas?.estudiantes ?? []
 })
 
-console.log('estudiantes con Reserva', estudiantesConReserva.value)
+// console.log('estudiantes con Reserva', estudiantesConReserva.value)
 
 const gruposUnicos = computed(() => {
     const grupos = estudiantesConReserva.value.map(reserva => reserva.grupo.nombre_grupo);

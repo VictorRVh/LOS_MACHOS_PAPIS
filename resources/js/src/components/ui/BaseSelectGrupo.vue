@@ -37,7 +37,7 @@ const updateValue = (val) => {
 <template>
   
   <v-select
-    :options="options"
+    :options="options || []"
     :label="label"
     :reduce="option => option?.id ?? option"
     :modelValue="modelValue"

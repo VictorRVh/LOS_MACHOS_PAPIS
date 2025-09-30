@@ -105,6 +105,23 @@ class PermissionTableSeeder extends Seeder
             'eliminar-programas',
             'icono-programas',
 
+            
+
+            'todo-acceso-grupos',
+            'ver-grupos',
+            'crear-grupos',
+            'editar-grupos',
+            'eliminar-grupos',
+            'icono-grupos',
+
+            'todo-acceso-matriculas',
+            'ver-matriculas',
+            'crear-matriculas',
+            'editar-matriculas',
+            'eliminar-matriculas',
+            'icono-matriculas',
+
+
             'ver-perfil-docente',
             'editar-perfil-docente',
             'ver-mis-modulos',

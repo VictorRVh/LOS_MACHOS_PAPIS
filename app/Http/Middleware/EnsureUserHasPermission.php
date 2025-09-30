@@ -41,7 +41,7 @@ class EnsureUserHasPermission
         if (!count(array_intersect($userPermissions, $requiredPermissions))) {
             return response()->json(
                 [
-                    'message' => 'Permission not granted.',
+                    'message' => 'Permiso no concedido.',
                     'permissions' => $requiredPermissions,
                 ],
                 401

@@ -154,11 +154,11 @@ const useHttpRequest = (path = '') => {
             if (
                 showUnauthorizedToast &&
                 error.response.status === 401 &&
-                error.response.data?.message === 'Permission not granted.'
+                error.response.data?.message === 'Permiso no concedido.'
             ) {
                 showToast(
                     `${error.response.data?.message}${error.response.data?.permissions?.length
-                        ? `\r\nRequired permissions: ${error.response.data?.permissions.join(
+                        ? `\r\nPermisos requeridos: ${error.response.data?.permissions.join(
                             ' or ',
                         )}`
                         : ''

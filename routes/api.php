@@ -383,26 +383,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('periodo', [
         \App\Http\Controllers\PeriodoController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-periodos|ver-periodos');
         Route::get('periodo_filter_status', [
         \App\Http\Controllers\PeriodoController::class,
         'index_filter_status',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-periodos|ver-periodos');
 
     Route::post('periodo', [
         \App\Http\Controllers\PeriodoController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:todo-acceso-eriodos|crear-periodos');
 
     Route::patch('periodo/{id}', [
         \App\Http\Controllers\PeriodoController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
+    ])->middleware('permission:todo-acceso-periodos|editar-periodos');
 
     Route::delete('periodo/{id}', [
         \App\Http\Controllers\PeriodoController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-periodos');
 
 
     // RUTA PARA MODULO
@@ -436,38 +436,38 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('grupo', [
         \App\Http\Controllers\GrupoController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
 
     Route::post('grupo', [
         \App\Http\Controllers\GrupoController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:todo-acceso-grupos|crear-grupos');
 
     Route::patch('grupo/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
+    ])->middleware('permission:todo-acceso-grupos|editar-grupos');
 
     Route::delete('grupo/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-acceso-grupos|eliminar-grupos');
 
     // Rutas para el formulario
     Route::get('especialidadByPrograma/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'getEspecialidadesPorPrograma',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:ver-programas');
 
     Route::get('moduloByEspecialidad/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'getModulosPorEspecialidad',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:ver-programa-especialidades');
 
     Route::get('periodoByModulo/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'getPeriodoPorModulo',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:ver-periodos');
 
     // grupo-docente
     Route::get('docenteGrupo', [

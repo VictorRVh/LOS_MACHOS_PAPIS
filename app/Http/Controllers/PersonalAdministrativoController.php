@@ -26,8 +26,8 @@ class PersonalAdministrativoController extends Controller
                 'id' => $usuario->id,
                 'name' => $usuario->name,
                 'apellido_paterno' => $usuario->apellido_paterno,
-                'apellido_materno' =>  $usuario->apellido_materno,
-                'dni' =>  $usuario->dni,
+                'apellido_materno' => $usuario->apellido_materno,
+                'dni' => $usuario->dni,
                 'correo' => $usuario->email,
                 'roles' => $usuario->roles->pluck('name'),
                 'administrativo' => $usuario->personalAdministrativo
@@ -61,15 +61,15 @@ class PersonalAdministrativoController extends Controller
     {
         $request->validate([
             'id_usuario' => 'required|exists:users,id',
-            'turno'      => 'string|max:100',
-            'local'      => 'string|max:100',
+            'turno' => 'string|max:100',
+            'local' => 'string|max:100',
         ]);
 
         $item = PersonalAdministrativo::create($request->all());
 
         return response()->json([
             'message' => 'Datos del personal creado correctamente',
-            'data'    => $item
+            'data' => $item
         ], 201);
     }
 
@@ -79,9 +79,9 @@ class PersonalAdministrativoController extends Controller
         $item = PersonalAdministrativo::find($id);
 
         $request->validate([
-            'id_usuario' => 'sometimes|exists:users,id',
-            'turno'      => 'sometimes|nullable|string|max:100',
-            'local'      => 'sometimes|nullable|string|max:100',
+            'id_usuario' => 'required|exists:users,id',
+            'turno' => 'nullable|string|max:100|required_without:local',
+            'local' => 'nullable|string|max:100|required_without:turno',
         ]);
 
 
@@ -94,7 +94,7 @@ class PersonalAdministrativoController extends Controller
 
             return response()->json([
                 'message' => 'Datos del personal creado porque no existía',
-                'data'    => $item
+                'data' => $item
             ], 201);
         }
 
@@ -104,7 +104,7 @@ class PersonalAdministrativoController extends Controller
 
         return response()->json([
             'message' => 'Datos del personal actualizado correctamente',
-            'data'    => $item
+            'data' => $item
         ]);
     }
 

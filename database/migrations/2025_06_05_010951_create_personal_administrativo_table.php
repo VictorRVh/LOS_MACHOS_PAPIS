@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('personal_administrativo', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->unsignedBigInteger('id_usuario');
-            $table->string('turno');
-            $table->string('local');
+            $table->string('turno')->nullable();
+            $table->string('local')->nullable();
 
             $table->foreign('id_usuario')
                   ->references('id')->on('users')

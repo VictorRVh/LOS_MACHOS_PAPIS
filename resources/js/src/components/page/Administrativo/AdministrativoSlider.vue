@@ -16,7 +16,9 @@ import useModalToast from "../../../composables/useModalToast";
 import * as yup from "yup";
 import SelectedChips from "../../ui/selectedChips.vue";
 import CheckBox from "../../ui/CheckBox.vue";
-import BaseSelect from "../../ui/BaseSelect.vue";
+
+import BaseSelectGrupo from '../../ui/BaseSelectGrupo.vue';
+
 
 const props = defineProps({
   show: { type: Boolean, default: () => false },
@@ -52,6 +54,13 @@ const initialFormData = () => ({
 const formData = ref(initialFormData());
 const formErrors = ref({});
 
+const turnos = [
+  { value: 'MAÑANA', name: 'MAÑANA' },
+  { value: 'TARDE', name: 'TARDE' },
+  { value: 'NOCHE', name: 'NOCHE' }
+];
+
+
 watch(
   () => props.show,
   () => {
@@ -71,13 +80,32 @@ watch(
 );
 
 const schema = yup.object().shape({
-  turno: yup.string(),
-  local: yup.string(),
+  turno: yup.string().nullable(),
+  local: yup.string().nullable(),
+}).test({
+  name: "turno-o-local",
+  message: "Debe ingresar al menos un turno o un local",
+  test(value, ctx) {
+    const hasTurno = value.turno && value.turno.trim() !== "";
+    const hasLocal = value.local && value.local.trim() !== "";
+    if (!hasTurno && !hasLocal) {
+      // asigna el error a "turno" en vez de _error
+      return ctx.createError({ path: "turno" });
+    }
+    return true;
+  }
 });
+
+
+
 
 const onSubmit = async () => {
   if (saving.value || updating.value) return;
-  let data = { ...formData.value };
+  let data = {
+    ...formData.value,
+    turno: formData.value.turno?.value || null, // 👈 aquí
+  };
+
   const { validated, errors } = await runYupValidation(schema, data);
   if (!validated) {
     formErrors.value = errors;
@@ -106,24 +134,17 @@ const onSubmit = async () => {
 
       <div class="mt-4 space-y-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormInput
-            :model-value="formData.turno"
-            label="Turno"
-            :error="formErrors?.turno"
-            @update:modelValue="(val) => (formData.turno = val.toUpperCase())"
-          />
+
+          <FormLabelError label="Turno" required :error="formErrors?.turno">
+            <BaseSelectGrupo v-model="formData.turno" :options="turnos" la placeholder="Seleccione un turno" />
+          </FormLabelError>
 
           <FormInput v-model="formData.local" label="Local" :error="formErrors?.local" />
         </div>
 
-        <Button
-          :title="admin?.administrativo ? 'Guardar Cambios' : 'Agregar Datos'"
-          key="submit-btn"
-          :loading-title="admin?.administrativo ? 'Guardando...' : 'Agregando...'"
-          class="!mt-6 !w-full"
-          :loading="saving || updating"
-          @click="onSubmit"
-        />
+        <Button :title="admin?.administrativo ? 'Guardar Cambios' : 'Agregar Datos'" key="submit-btn"
+          :loading-title="admin?.administrativo ? 'Guardando...' : 'Agregando...'" class="!mt-6 !w-full"
+          :loading="saving || updating" @click="onSubmit" />
       </div>
     </AuthorizationFallback>
   </Slider>

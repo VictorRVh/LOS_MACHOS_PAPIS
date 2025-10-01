@@ -13,8 +13,8 @@ import Button from '@/components/ui/Button.vue';
 
 // 1. STORES Y COMPOSABLES
 const userStore = useUserStore();
-const { update: updateUser, updating: profileUpdating } = useHttpRequest('/users');
-const { update: updatePassword, updating: passwordUpdating } = useHttpRequest('/update-password'); // Asumiendo endpoint diferente
+const { update: updateUser, updating: profileUpdating } = useHttpRequest('/users-update');
+const { update: updatePassword, updating: passwordUpdating } = useHttpRequest('/users-update-password'); // Asumiendo endpoint diferente
 const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 

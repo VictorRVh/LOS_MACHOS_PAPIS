@@ -129,7 +129,7 @@ const toggleEspecialidad = (id) => {
         <CreateButton @click="showSlider(true)" text="Agregar Nuevo" />
       </header>
 
-      <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-white-200 dark:border-gray-700">
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
           <div>
             <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Ciclo</label>

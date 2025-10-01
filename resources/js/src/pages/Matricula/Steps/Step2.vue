@@ -76,8 +76,16 @@ watch(() => formData.value.distrito_nacimiento, (newDist) => {
             <FormInput v-model="formData.nombre" label="Nombres *" :error-message="errors.nombre" />
             
             <FormLabelError label="Sexo *" :error-message="errors.sexo">
-                <v-select v-model="formData.sexo" :options="opcionesSexo" label="name" placeholder="Seleccione sexo" :clearable="false"/>
+                <v-select
+                    v-model="formData.sexo"
+                    :options="opcionesSexo"
+                    label="name"
+                    :reduce="opcion => opcion.value"
+                    placeholder="Seleccione sexo"
+                    :clearable="false"
+                />
             </FormLabelError>
+
 
             <FormLabelError label="Fecha de Nacimiento *" :error-message="errors.fecha_nacimiento">
                  <FormInput v-model="formData.fecha_nacimiento" type="date" />

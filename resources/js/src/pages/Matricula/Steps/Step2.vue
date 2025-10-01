@@ -6,7 +6,7 @@ import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
 import { UserCircleIcon } from '@heroicons/vue/24/outline';
 import ubigeo from '../../../utils/ubigeo';
-
+import BaseSelect from '../../../components/ui/BaseSelect.vue';
 const props = defineProps({
     modelValue: { type: Object, required: true },
     errors: { type: Object, default: () => ({}) }
@@ -65,7 +65,12 @@ watch(() => formData.value.distrito_nacimiento, (newDist) => {
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-            <FormInput v-model="formData.nro_documento" label="N° DNI *" :error-message="errors.nro_documento" maxlength="8" />
+           <div class="grid grid-cols-2 gap-4">
+                <FormLabelError label="Tipo Doc. *">
+                    <BaseSelect v-model="formData.tipo_documento" :options="['DNI', 'CARNET EXT.']" />
+                </FormLabelError>
+                <FormInput v-model="formData.nro_documento" label="Nro Doc. *" />
+            </div>
             <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno *" :error-message="errors.apellido_paterno" />
             <FormInput v-model="formData.apellido_materno" label="Apellido Materno *" :error-message="errors.apellido_materno" />
             <FormInput v-model="formData.nombre" label="Nombres *" :error-message="errors.nombre" />

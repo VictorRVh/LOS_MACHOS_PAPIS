@@ -10,6 +10,7 @@ import Step1 from './Steps/Step1.vue';
 import Step2 from './Steps/Step2.vue';
 import Step3 from './Steps/Step3.vue';
 import Button from '../../components/ui/Button.vue';
+import * as yup from "yup";
 
 const router = useRouter();
 const { showToast } = useModalToast();

@@ -8,6 +8,7 @@ import { Bars3Icon, InformationCircleIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     modelValue: { type: Object, required: true },
+    nameGrupo: {type: String,}
 });
 const emit = defineEmits(['update:modelValue']);
 
@@ -48,16 +49,16 @@ const formData = computed({
 
                 <ul class="mt-4 text-sm space-y-2 pl-9">
                     <li>
-                        <span class="font-semibold text-gray-700 dark:text-gray-300">Estudiante:</span> 
-                        <span class="text-gray-600 dark:text-gray-400">{{ formData.nombre }} {{ formData.apellido_paterno }} {{ formData.apellido_materno }}</span>
+                        <span class="font-semibold text-gray-700 dark:text-gray-300">Estudiante: </span> 
+                        <span class="text-gray-600 dark:text-gray-400">  {{ formData.nombre }} {{ formData.apellido_paterno }} {{ formData.apellido_materno }}</span>
                     </li>
                     <li>
-                        <span class="font-semibold text-gray-700 dark:text-gray-300">DNI:</span> 
-                        <span class="text-gray-600 dark:text-gray-400">{{ formData.nro_documento }}</span>
+                        <span class="font-semibold text-gray-700 dark:text-gray-300">DNI: </span> 
+                        <span class="text-gray-600 dark:text-gray-400">  {{ formData.nro_documento }}</span>
                     </li>
                     <li>
-                        <span class="font-semibold text-gray-700 dark:text-gray-300">Grupo ID:</span> 
-                        <span class="text-gray-600 dark:text-gray-400">{{ formData.id_grupo || 'No seleccionado' }}</span>
+                        <span class="font-semibold text-gray-700 dark:text-gray-300">Detalles de grupo: </span> 
+                        <span class="text-gray-600 dark:text-gray-400">  {{ props.nameGrupo || 'No seleccionado' }}</span>
                     </li>
                 </ul>
             </div>

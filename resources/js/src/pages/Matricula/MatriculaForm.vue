@@ -3,8 +3,8 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import useHttpRequest from '../../composables/useHttpRequest';
 import useModalToast from '../../composables/useModalToast';
-import useProgramaStore from '../../store/Programa/useProgramaStore';
-import useGrupoStore from '../../store/Grupo/useGrupoStore';
+import useProgramaStore from '../../store/Programa/useProgramaStatusStore';
+
 
 import Step1 from './Steps/Step1.vue';
 import Step2 from './Steps/Step2.vue';
@@ -15,10 +15,12 @@ const router = useRouter();
 const { showToast } = useModalToast();
 const { store, saving } = useHttpRequest('/matricula');
 const programaStore = useProgramaStore();
-const grupoStore = useGrupoStore();
+
 
 const isLoading = ref(true);
 const currentStep = ref(1);
+
+const nameGrupo = ref("");
 
 const formData = ref({
     id_programa: null,
@@ -57,7 +59,7 @@ onMounted(async () => {
     try {
         await Promise.all([
             programaStore.loadPrograma(),
-            grupoStore.loadGrupos()
+          
         ]);
     } catch (error) {
         showToast("No se pudieron cargar los datos necesarios.", "error");
@@ -130,9 +132,10 @@ const onSubmit = async () => {
             </ol>
 
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-h-[450px]">
-                <Step1 v-show="currentStep === 1" v-model="formData" />
+   
+                <Step1 v-show="currentStep === 1" v-model="formData" :programas="programaStore.programa.programas" :nameGrupo="nameGrupo" @cambiarVariable="nameGrupo = $event" />
                 <Step2 v-show="currentStep === 2" v-model="formData" />
-                <Step3 v-show="currentStep === 3" v-model="formData" />
+                <Step3 v-show="currentStep === 3" v-model="formData" :nameGrupo="nameGrupo"  />
             </div>
 
             <div class="flex justify-between ">

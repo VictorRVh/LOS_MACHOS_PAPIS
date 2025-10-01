@@ -7,6 +7,7 @@ import useValidation from '../composables/useValidation';
 import useAppRouter from '../composables/useAppRouter';
 import useUserStore from '../store/useUserStore';
 import { string, object } from 'yup';
+import axios from 'axios';
 
 const { store: login, saving: loggingIn } = useHttpRequest('/login');
 const { runYupValidation } = useValidation();
@@ -42,6 +43,7 @@ const onSignIn = async () => {
         return;
     }
     formErrors.value = {};
+    await axios.get('/sanctum/csrf-cookie');
     const response = await login(data);
     if (response?.requiereCambioPassword) {
         userStore.setUserIdTemporal(response.user_id);
@@ -57,6 +59,7 @@ const onSignIn = async () => {
 };
 
 const onPasswordChanged = async (newPassword) => {
+    await axios.get('/sanctum/csrf-cookie');
     formData.value.password = newPassword;
     const response = await login({
         usuario: lastUser.value.usuario,

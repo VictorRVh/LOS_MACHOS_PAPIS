@@ -18,7 +18,7 @@ const formData = computed({
     set: (value) => emit('update:modelValue', value),
 });
 
-const opcionesSexo = ['Masculino', 'Femenino'];
+const opcionesSexo = [{name:'Masculino',value:"M"}, {name:'Femenino',value:"F"},{name:'Otro',value:"O"}];
 const opcionesEstadoCivil = ['SOLTERO(A)', 'CASADO(A)', 'VIUDO(A)', 'DIVORCIADO(A)', 'CONVIVIENTE'];
 
 const departamentos = ref(ubigeo.map(dep => dep.departamento));
@@ -76,7 +76,7 @@ watch(() => formData.value.distrito_nacimiento, (newDist) => {
             <FormInput v-model="formData.nombre" label="Nombres *" :error-message="errors.nombre" />
             
             <FormLabelError label="Sexo *" :error-message="errors.sexo">
-                <v-select v-model="formData.sexo" :options="opcionesSexo" placeholder="Seleccione sexo" :clearable="false"/>
+                <v-select v-model="formData.sexo" :options="opcionesSexo" label="name" placeholder="Seleccione sexo" :clearable="false"/>
             </FormLabelError>
 
             <FormLabelError label="Fecha de Nacimiento *" :error-message="errors.fecha_nacimiento">

@@ -81,6 +81,16 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-usuarios|users-delete');
 
+    Route::patch('users-update-password/{id}', [
+        \App\Http\Controllers\UserController::class,
+        'updatePassword',
+    ])->middleware('permission:todo-acceso-usuarios|crear-usuarios');
+
+    Route::patch('users-update/{id}', [
+        \App\Http\Controllers\UserController::class,
+        'updateProfile',
+    ])->middleware('permission:todo-acceso-usuarios|crear-usuarios');
+
     /**
      * ------------------------------------------------------------------------
      * roles routes

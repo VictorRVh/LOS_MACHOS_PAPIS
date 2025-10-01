@@ -154,6 +154,45 @@ class UserController extends Controller
         }
     }
 
+    public function updateProfile(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'apellido_paterno' => ['required', 'string', 'max:255'],
+                'apellido_materno' => ['nullable', 'string', 'max:255'],
+                'dni' => [
+                    'nullable',
+                    'string',
+                    Rule::unique('users', 'dni')->ignore($id),
+                ],
+                'email' => [
+                    'required',
+                    'email',
+                    Rule::unique('users', 'email')->ignore($id),
+                ],
+                'telefono' => ['nullable', 'string', 'max:20'],
+                'direccion' => ['nullable', 'string', 'max:255'],
+                'fecha_nacimiento' => ['nullable', 'date'],
+            ]);
+
+            $user = User::find($id);
+            if (!$user) {
+                return response()->json(['message' => 'Usuario no encontrado'], 404);
+            }
+
+            $user->update($validated);
+
+            return response()->json($this->extractPermissionsFromUser($user));
+
+
+            // return response()->json($user);
+        } catch (\Exception $error) {
+            return $this->errorResponse($error);
+        }
+    }
+
+
     public function destroy(Request $request)
     {
         try {
@@ -173,6 +212,34 @@ class UserController extends Controller
             $user->delete();
 
             return response()->json([], 204);
+        } catch (\Exception $error) {
+            return $this->errorResponse($error);
+        }
+    }
+
+    public function updatePassword(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'current_password' => ['required'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
+            ]);
+
+            $user = User::find($id);
+            if (!$user) {
+                return response()->json(['message' => 'Usuario no encontrado'], 404);
+            }
+
+            // Validar contraseña actual
+            if (!Hash::check($validated['current_password'], $user->password)) {
+                throw new \Exception('Error|La contraseña actual no coincide.--403', 13333);
+            }
+
+            // Actualizar contraseña
+            $user->password = Hash::make($validated['password']);
+            $user->save();
+
+            return response()->json(['message' => 'Contraseña actualizada correctamente']);
         } catch (\Exception $error) {
             return $this->errorResponse($error);
         }

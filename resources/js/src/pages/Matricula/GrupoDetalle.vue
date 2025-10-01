@@ -130,7 +130,7 @@ const cambiarGrupo = () => {
 
 </script>
 <template>
-    <AuthorizationFallback :permissions="['todo-acceso-permisos']">
+    <AuthorizationFallback :permissions="['todo-acceso-grupo', 'ver-grupos']">
         <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
             <div class="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 shadow-md">
                 <h2 class="text-xl font-bold text-cetpro dark:text-cetpro-light mb-2">

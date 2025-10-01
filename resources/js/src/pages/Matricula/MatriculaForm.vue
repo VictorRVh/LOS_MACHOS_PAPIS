@@ -68,6 +68,30 @@ onMounted(async () => {
     }
 });
 
+const stepSchemas = {
+    1: yup.object({
+        id_programa: yup.string().required('Debe seleccionar un programa'),
+        id_especialidad: yup.string().required('Debe seleccionar una especialidad'),
+        id_grupo: yup.string().required('Debe seleccionar un grupo'),
+    }),
+    2: yup.object({
+        tipo_documento: yup.string().required('Tipo de documento es requerido'),
+        nro_documento: yup.string().required('N° de documento es requerido'),
+        apellido_paterno: yup.string().required('Apellido paterno es requerido'),
+        apellido_materno: yup.string().required('Apellido materno es requerido'),
+        nombre: yup.string().required('El nombre es requerido'),
+        sexo: yup.string().required('El sexo es requerido'),
+        fecha_nacimiento: yup.date()
+            .required('Fecha de nacimiento es requerida')
+            .max(new Date(new Date().setFullYear(new Date().getFullYear() - 12)), 'El estudiante debe ser mayor de 12 años')
+            .min(new Date(new Date().setFullYear(new Date().getFullYear() - 100)), 'La edad no puede ser mayor a 100 años'),
+        celular: yup.string().required('Celular es requerido'),
+        correo: yup.string().email('Debe ser un correo válido').notRequired(),
+        direccion_residencia: yup.string().required('La dirección es requerida'),
+        estado_civil: yup.string().required('Estado civil es requerido'),
+    }),
+};
+
 const nextStep = () => {
     // console.log("Paso actual:", currentStep.value, "ID Grupo:", formData.value.id_grupo); 
 
@@ -133,8 +157,8 @@ const onSubmit = async () => {
 
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-h-[450px]">
    
-                <Step1 v-show="currentStep === 1" v-model="formData" :programas="programaStore.programa.programas" :nameGrupo="nameGrupo" @cambiarVariable="nameGrupo = $event" />
-                <Step2 v-show="currentStep === 2" v-model="formData" />
+                <Step1 v-show="currentStep === 1" v-model="formData" :programas="programaStore.programa.programas" :nameGrupo="nameGrupo" @cambiarVariable="nameGrupo = $event" :errors="formErrors" />
+                <Step2 v-show="currentStep === 2" v-model="formData":errors="formErrors" />
                 <Step3 v-show="currentStep === 3" v-model="formData" :nameGrupo="nameGrupo"  />
             </div>
 

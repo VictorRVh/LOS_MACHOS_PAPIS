@@ -107,7 +107,7 @@ const updateTooltipPos = (event) => {
         </div>
 
         <div class="lg:col-span-2 space-y-4">
-          <div class="flex items-center space-x-2 bg-white dark:bg-gray-900 p-2 rounded-lg shadow-sm">
+          <div class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
             <button
               @click="filtroCiclo = 'Ciclo Técnico'"
               :class="['w-full py-2 px-4 rounded-md text-sm font-semibold transition-colors', 
@@ -126,13 +126,16 @@ const updateTooltipPos = (event) => {
             <div 
               v-for="programa in programasFiltrados" 
               :key="programa.id"
-              @mouseover="showTooltip"
-              @mouseleave="hideTooltip"
-              class="bg-white dark:bg-gray-800 rounded-lg shadow-md border-l-4 flex items-center transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+              class="bg-white dark:bg-gray-800 rounded-lg shadow-md border-l-4 flex"
               :class="[programa.status ? 'border-green-500' : 'border-red-500']"
             >
-              <div @click="seeMore(programa)" class="flex-grow p-3 cursor-pointer">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div 
+                @click="seeMore(programa)"
+                @mouseover="showTooltip"
+                @mouseleave="hideTooltip"
+                class="flex-grow p-3 cursor-pointer rounded-l-md transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 items-center h-full">
                   <div class="flex flex-col">
                     <span class="text-xs text-gray-500 dark:text-gray-400">Programa</span>
                     <p class="font-semibold text-sm text-gray-800 dark:text-gray-200">{{ programa.nameCiclo }}</p>

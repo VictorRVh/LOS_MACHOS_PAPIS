@@ -7,6 +7,12 @@ import 'vue-select/dist/vue-select.css';
 import { UserCircleIcon } from '@heroicons/vue/24/outline';
 import ubigeo from '../../../utils/ubigeo';
 import BaseSelect from '../../../components/ui/BaseSelect.vue';
+import axios from 'axios';
+import useModalToast from '../../../composables/useModalToast';
+
+
+const { showConfirmModal, showToast } = useModalToast();
+
 const props = defineProps({
     modelValue: { type: Object, required: true },
     errors: { type: Object, default: () => ({}) }
@@ -18,7 +24,7 @@ const formData = computed({
     set: (value) => emit('update:modelValue', value),
 });
 
-const opcionesSexo = [{name:'Masculino',value:"M"}, {name:'Femenino',value:"F"},{name:'Otro',value:"O"}];
+const opcionesSexo = [{ name: 'Masculino', value: "M" }, { name: 'Femenino', value: "F" }, { name: 'Otro', value: "O" }];
 const opcionesEstadoCivil = ['SOLTERO(A)', 'CASADO(A)', 'VIUDO(A)', 'DIVORCIADO(A)', 'CONVIVIENTE'];
 
 const departamentos = ref(ubigeo.map(dep => dep.departamento));
@@ -26,35 +32,71 @@ const provincias = ref([]);
 const distritos = ref([]);
 const mostrarOtroDistrito = ref(false);
 
-watch(() => formData.value.departamento_nacimiento, (newDep) => {
-    formData.value.provincia_nacimiento = null;
-    formData.value.distrito_nacimiento = null;
-    provincias.value = [];
-    distritos.value = [];
-    mostrarOtroDistrito.value = false;
-    if (newDep) {
-        const depData = ubigeo.find(d => d.departamento === newDep);
-        provincias.value = depData ? depData.provincias.map(p => p.provincia) : [];
-    }
-});
 
-watch(() => formData.value.provincia_nacimiento, (newProv) => {
-    formData.value.distrito_nacimiento = null;
-    distritos.value = [];
-    mostrarOtroDistrito.value = false;
-    if (newProv && formData.value.departamento_nacimiento) {
-        const depData = ubigeo.find(d => d.departamento === formData.value.departamento_nacimiento);
-        const provData = depData ? depData.provincias.find(p => p.provincia === newProv) : null;
-        distritos.value = provData ? [...provData.distritos, 'OTRO'] : [];
-    }
-});
+const buscarDNI = async () => {
+    const dni = formData.value.nro_documento;
 
-watch(() => formData.value.distrito_nacimiento, (newDist) => {
-    mostrarOtroDistrito.value = newDist === 'OTRO';
-    if(newDist !== 'OTRO') {
-        formData.value.lugar_nacimiento = '';
+    if (!dni || dni.length !== 8) {
+        showToast("⚠️ Debes ingresar un DNI válido de 8 dígitos");
+        return;
     }
-});
+
+    try {
+        const { data } = await axios.post("buscar-dni", { dni });
+
+        if (data.success) {
+            const d = data.data;
+
+            formData.value.apellido_paterno = d.apellido_paterno ?? "";
+            formData.value.apellido_materno = d.apellido_materno ?? "";
+            formData.value.nombre = d.nombres ?? "";
+            formData.value.direccion_residencia = d.direccion ?? "";
+
+            formData.value.departamento_nacimiento = d.departamento ?? "";
+            formData.value.provincia_nacimiento = d.provincia ?? "";
+            formData.value.distrito_nacimiento = d.distrito ?? "";
+
+            showToast("✅ Datos encontrados y autocompletados");
+        } else {
+            showToast("⚠️ No se encontró información para este DNI");
+        }
+    } catch (error) {
+        console.error(error);
+        showToast("❌ Error en la búsqueda del DNI");
+    }
+};
+
+
+// watch(() => formData.value.departamento_nacimiento, (newDep) => {
+//     formData.value.provincia_nacimiento = null;
+//     formData.value.distrito_nacimiento = null;
+//     provincias.value = [];
+//     distritos.value = [];
+//     mostrarOtroDistrito.value = false;
+//     if (newDep) {
+//         const depData = ubigeo.find(d => d.departamento === newDep);
+//         provincias.value = depData ? depData.provincias.map(p => p.provincia) : [];
+//     }
+// });
+
+// watch(() => formData.value.provincia_nacimiento, (newProv) => {
+//     formData.value.distrito_nacimiento = null;
+//     distritos.value = [];
+//     mostrarOtroDistrito.value = false;
+//     if (newProv && formData.value.departamento_nacimiento) {
+//         const depData = ubigeo.find(d => d.departamento === formData.value.departamento_nacimiento);
+//         const provData = depData ? depData.provincias.find(p => p.provincia === newProv) : null;
+//         distritos.value = provData ? [...provData.distritos, 'OTRO'] : [];
+//     }
+// });
+
+// watch(() => formData.value.distrito_nacimiento, (newDist) => {
+//     mostrarOtroDistrito.value = newDist === 'OTRO';
+//     if(newDist !== 'OTRO') {
+//         formData.value.lugar_nacimiento = '';
+//     }
+// });
+
 </script>
 
 <template>
@@ -65,53 +107,61 @@ watch(() => formData.value.distrito_nacimiento, (newDist) => {
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-           <div class="grid grid-cols-2 gap-4">
-                <FormLabelError label="Tipo Doc. *">
-                    <BaseSelect v-model="formData.tipo_documento" :options="['DNI', 'CARNET EXT.']" />
+            <div class="grid grid-cols-2 gap-4">
+                <FormLabelError label="Tipo Doc. " required>
+                    <BaseSelect v-model="formData.tipo_documento" :options="['DNI', 'CARNET EXT.']" class="W-28" />
                 </FormLabelError>
-                <FormInput v-model="formData.nro_documento" label="Nro Doc. *" />
+
+                <div class="flex gap-2">
+                    <FormInput v-model="formData.nro_documento" label="Nro Doc. *" />
+                    <button type="button" @click="buscarDNI"
+                        class="px-2 py-0 bg-cetpro text-white rounded-lg hover:bg-cetpro-light transition">
+                        Buscar
+                    </button>
+                </div>
             </div>
-            <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno *" :error-message="errors.apellido_paterno" />
-            <FormInput v-model="formData.apellido_materno" label="Apellido Materno *" :error-message="errors.apellido_materno" />
+            <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno *"
+                :error-message="errors.apellido_paterno" />
+            <FormInput v-model="formData.apellido_materno" label="Apellido Materno *"
+                :error-message="errors.apellido_materno" />
             <FormInput v-model="formData.nombre" label="Nombres *" :error-message="errors.nombre" />
-            
+
             <FormLabelError label="Sexo *" :error-message="errors.sexo">
-                <v-select
-                    v-model="formData.sexo"
-                    :options="opcionesSexo"
-                    label="name"
-                    :reduce="opcion => opcion.value"
-                    placeholder="Seleccione sexo"
-                    :clearable="false"
-                />
+                <v-select v-model="formData.sexo" :options="opcionesSexo" label="name" :reduce="opcion => opcion.value"
+                    placeholder="Seleccione sexo" :clearable="false" />
             </FormLabelError>
 
 
             <FormLabelError label="Fecha de Nacimiento *" :error-message="errors.fecha_nacimiento">
-                 <FormInput v-model="formData.fecha_nacimiento" type="date" />
+                <FormInput v-model="formData.fecha_nacimiento" type="date" />
             </FormLabelError>
 
             <FormLabelError label="Departamento de Nacimiento *" :error-message="errors.departamento_nacimiento">
-                <v-select v-model="formData.departamento_nacimiento" :options="departamentos" placeholder="Buscar departamento..." />
+                <v-select v-model="formData.departamento_nacimiento" :options="departamentos"
+                    placeholder="Buscar departamento..." />
             </FormLabelError>
 
             <FormLabelError label="Provincia de Nacimiento *" :error-message="errors.provincia_nacimiento">
-                <v-select v-model="formData.provincia_nacimiento" :options="provincias" placeholder="Buscar provincia..." :disabled="!formData.departamento_nacimiento" />
+                <v-select v-model="formData.provincia_nacimiento" :options="provincias"
+                    placeholder="Buscar provincia..." :disabled="!formData.departamento_nacimiento" />
             </FormLabelError>
 
             <FormLabelError label="Distrito de Nacimiento *" :error-message="errors.distrito_nacimiento">
-                <v-select v-model="formData.distrito_nacimiento" :options="distritos" placeholder="Buscar distrito..." :disabled="!formData.provincia_nacimiento" />
+                <v-select v-model="formData.distrito_nacimiento" :options="distritos" placeholder="Buscar distrito..."
+                    :disabled="!formData.provincia_nacimiento" />
             </FormLabelError>
 
             <FormInput v-if="mostrarOtroDistrito" v-model="formData.lugar_nacimiento" label="Especifique otro lugar" />
-            
+
             <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
-                 <FormInput v-model="formData.celular" label="Celular *" :error-message="errors.celular" maxlength="9" />
+                <FormInput v-model="formData.celular" label="Celular *" :error-message="errors.celular" maxlength="9" />
                 <FormInput v-model="formData.correo" label="Correo Electrónico (Opcional)" type="email" />
-                <FormInput v-model="formData.direccion_residencia" label="Dirección de Residencia *" :error-message="errors.direccion_residencia" />
+                <FormInput v-model="formData.direccion_residencia" label="Dirección de Residencia *"
+                    :error-message="errors.direccion_residencia" />
 
                 <FormLabelError label="Estado Civil *" :error-message="errors.estado_civil">
-                    <v-select v-model="formData.estado_civil" :options="opcionesEstadoCivil" placeholder="Seleccione estado" />
+                    <v-select v-model="formData.estado_civil" :options="opcionesEstadoCivil"
+                        placeholder="Seleccione estado" />
                 </FormLabelError>
 
                 <FormInput v-model="formData.grado_instruccion" label="Grado de Instrucción" />

@@ -143,12 +143,18 @@ class EstudianteController extends Controller
             return response()->json(['error' => 'DNI inválido'], 422);
         }
 
-        $response = Http::post('https://api.consultasperu.com/api/v1/query', [
-            'token' => 'dec72d9ad1fb5d75afebfe184ae63de34b98230be262c7d29db38d1f63c1b753',
-            'type_document' => 'dni',
-            'document_number' => $dni,
-        ]);
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzOTE3MSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnN1bHRvciJ9.MUQqU8axqigAZZXN-TOWTmSVrFsrQIXpujPPvgPDqBU'
+            ])->get("https://api.factiliza.com/v1/dni/info/{$dni}");
 
-        return $response->json();
+            if ($response->failed()) {
+                return response()->json(['error' => 'No se pudo consultar el DNI'], 500);
+            }
+
+            return $response->json();
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error en la consulta', 'message' => $e->getMessage()], 500);
+        }
     }
 }

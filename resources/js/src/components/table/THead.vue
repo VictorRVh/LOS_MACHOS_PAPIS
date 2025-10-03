@@ -1,5 +1,7 @@
 <template>
-  <thead class="text-xs uppercase bg-[#DBEAFE] dark:bg-gray-700 dark:text-gray-300 text-center sticky top-0 z-10">
-    <slot></slot>
+  <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
+    <tr>
+      <slot></slot>
+    </tr>
   </thead>
 </template>

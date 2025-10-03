@@ -1,49 +1,55 @@
-<template>
-  <div class="m-2 font-inter h-full">
-    <div
-      class="relative shadow-md sm:rounded-lg md:max-h-[330px] xl:max-h-[700px] overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
-    >
-      <table
-        class="table-auto border-collapse border border-plomo-700 dark:border-slate-700 w-full text-[13px] text-center text-gray-200 dark:text-gray-400"
-      >
-        <slot></slot>
-      </table>
-    </div>
-
-    <!-- PAGINACIÓN SOLO SI SE ACTIVA -->
-    <div
-      v-if="paginacion"
-      class="flex justify-end mt-2 space-x-1 text-sm "
-    >
-      <button
-        class="px-3 py-1 bg-gray-800 text-white dark:bg-gray-700 hover:gray-700 rounded disabled:opacity-60"
-        :disabled="currentPage === 1"
-        @click="$emit('changePage', currentPage - 1)"
-      >
-        ← Anterior
-      </button>
-
-      <span class="px-3 py-1">{{ currentPage }} / {{ totalPages }}</span>
-
-      <button
-        class="px-3 py-1 bg-gray-800 text-white dark:bg-gray-700 hover:gray-700 rounded disabled:opacity-60"
-        :disabled="currentPage === totalPages"
-        @click="$emit('changePage', currentPage + 1)"
-      >
-        Siguiente →
-      </button>
-    </div>
-  </div>
-</template>
-
-
 <script setup>
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/solid';
+
 defineProps({
-  currentPage: Number,
-  totalPages: Number,
+  currentPage: { type: Number, default: 1 },
+  totalPages: { type: Number, default: 1 },
   paginacion: {
     type: Boolean,
     default: false
   }
-})
+});
+
+defineEmits(['changePage']);
 </script>
+
+<template>
+  <div class="w-full">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+          <slot></slot>
+        </table>
+      </div>
+    </div>
+
+    <div
+      v-if="paginacion && totalPages > 1"
+      class="flex items-center justify-between mt-4 px-2"
+    >
+      <span class="text-sm text-gray-700 dark:text-gray-300">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+
+      <div class="inline-flex items-center -space-x-px">
+        <button
+          @click="$emit('changePage', currentPage - 1)"
+          :disabled="currentPage === 1"
+          class="px-3 py-2 leading-tight text-gray-500 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <span class="sr-only">Anterior</span>
+          <ChevronLeftIcon class="h-4 w-4" />
+        </button>
+        
+        <button
+          @click="$emit('changePage', currentPage + 1)"
+          :disabled="currentPage === totalPages"
+          class="px-3 py-2 leading-tight text-gray-500 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <span class="sr-only">Siguiente</span>
+          <ChevronRightIcon class="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  </div>
+</template>

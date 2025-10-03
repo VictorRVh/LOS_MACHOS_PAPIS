@@ -27,6 +27,7 @@
         "jspdf": "^3.0.2",
         "jspdf-autotable": "^5.0.2",
         "pinia": "^2.3.1",
+        "three": "^0.180.0",
         "tiny-emitter": "^2.1.0",
         "uuid": "^9.0.1",
         "vue-loader": "^17.3.1",

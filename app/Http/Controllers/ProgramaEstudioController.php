@@ -25,7 +25,7 @@ class ProgramaEstudioController extends Controller
             $nuevoPrograma = $programa->toArray();
 
             $nombreCiclo = $programa->ciclo->nombre_ciclo ?? 'Ciclo desconocido';
-            $nuevoPrograma['nameCiclo'] = $nombreCiclo;
+            $nuevoPrograma['nameCiclo'] = $nombreCiclo . ' ' . $programa->año;
 
             unset($nuevoPrograma['ciclo']);
             unset($nuevoPrograma['created_at']);

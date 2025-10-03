@@ -211,7 +211,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('buscar-dni', [
         \App\Http\Controllers\EstudianteController::class,
         'buscar',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
 
 
     //RUTA PARA CILCLO ACADEMICO

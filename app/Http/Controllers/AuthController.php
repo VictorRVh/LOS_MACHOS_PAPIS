@@ -88,6 +88,12 @@ class AuthController extends Controller
 
         $user = User::findOrFail($request->user_id);
 
+        if (Hash::check($request->nueva_password, $user->password)) {
+            return response()->json([
+                'message' => 'La nueva contraseña no puede ser igual a la anterior',
+            ], 422);
+        }
+
         $user->password = Hash::make($request->nueva_password);
         $user->password_cambiada = true; // PASSWORD CAMBIADA
         $user->save();

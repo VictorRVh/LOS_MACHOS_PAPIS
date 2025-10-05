@@ -17,7 +17,7 @@ import usePermissionStore from "../store/usePermissionStore";
 import useSlider from "../composables/useSlider";
 import useModalToast from "../composables/useModalToast";
 import useHttpRequest from "../composables/useHttpRequest";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import ModalRoles from "../layouts/components/ModalRoles.vue";
 
 const userStore = useUserStore();
@@ -53,16 +53,34 @@ function showPermissionsModal(role) {
   selectedRole.value = role;
   showModal.value = true;
 }
+
+const groupedPermissions = computed(() => {
+  if (!selectedRole.value?.permissions) return {};
+  const groups = {};
+  selectedRole.value.permissions.forEach(permission => {
+    const resource = permission.name.split('-').pop();
+    if (!groups[resource]) {
+      groups[resource] = [];
+    }
+    groups[resource].push(permission);
+  });
+  return Object.keys(groups).sort().reduce(
+    (obj, key) => { 
+      obj[key] = groups[key]; 
+      return obj;
+    }, 
+    {}
+  );
+});
 </script>
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
     <div class="flex justify-between items-center p-4">
       <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Roles</h2>
-      <!-- <CreateButton @click="showSlider(true)" /> -->
     </div>
-    <div class="flex  px-6">
-      <div class="w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+    <div class="flex flex-col lg:flex-row px-6 gap-6">
+      <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
         <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
           Agregar Rol
         </h3>
@@ -70,8 +88,7 @@ function showPermissionsModal(role) {
         <RoleSlider :show="slider" :role="sliderData" @hide="hideSlider" />
       </div>
       
-
-      <div class="w-full">
+      <div class="w-full lg:w-2/3">
         <Table>
           <THead>
             <Th>Id</Th>
@@ -93,7 +110,7 @@ function showPermissionsModal(role) {
                       : 'justify-center',
                   ]"
                 >
-                  <ul class="text-sm text-gray-700  w-30 list-none">
+                  <ul class="text-sm text-gray-700 dark:text-gray-300 w-30 list-none">
                     <li
                       v-for="(permission, index) in role.permissions.slice(0, 1)"
                       :key="permission.id"
@@ -104,7 +121,7 @@ function showPermissionsModal(role) {
                   <button
                     v-if="role.permissions.length > 1"
                     @click="showPermissionsModal(role)"
-                    class="bg-blue-100 text-blue-700 px-2 py-0.5 text-xs rounded hover:bg-blue-200 transition"
+                    class="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2 py-0.5 text-xs rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition"
                   >
                     Ver más ({{ role.permissions.length }})
                   </button>
@@ -121,27 +138,38 @@ function showPermissionsModal(role) {
         </Table>
       </div>
 
-      <!-- Modal para ver permisos -->
-      <ModalRoles v-if="showModal" @close="showModal = false" class="font-inter">
+      <ModalRoles v-if="showModal" @close="showModal = false" size="5xl">
         <template #title>
-          Permisos del Rol: <span class="uppercase">{{ selectedRole?.name }}</span>
+          Permisos del Rol: <span class="uppercase font-bold text-cetpro dark:text-cetpro-light">{{ selectedRole?.name }}</span>
         </template>
 
         <template #body>
-          <ul class="ml-4 space-y-1 ">
-            <li class="" v-for="permission in selectedRole?.permissions" :key="permission.id">
-              {{ permission.name }}
-            </li>
-          </ul>
+          <div class="max-h-[65vh] overflow-y-auto p-1 pr-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4">
+              <div v-for="(permissions, resourceName) in groupedPermissions" :key="resourceName" class="break-inside-avoid">
+                <h4 class="font-semibold text-gray-800 dark:text-gray-200 capitalize border-b border-gray-200 dark:border-gray-700 pb-2 mb-3">
+                  {{ resourceName.replace(/_/g, ' ') }}
+                </h4>
+                <ul class="space-y-1.5">
+                  <li v-for="permission in permissions" :key="permission.id" class="flex items-start text-sm text-gray-600 dark:text-gray-400">
+                    <span class="text-cetpro dark:text-cetpro-light mr-2 mt-1">&#9679;</span>
+                    <span class="flex-1">{{ permission.name }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </template>
 
         <template #footer>
-          <button
-            @click="showModal = false"
-            class="px-3 py-1 text-sm bg-cetpro text-white rounded hover:bg-cetpro-dark"
-          >
-            Cerrar
-          </button>
+          <div class="flex justify-end border-t border-gray-200 dark:border-gray-700 pt-4">
+            <button
+              @click="showModal = false"
+              class="px-4 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-700 dark:hover:bg-gray-600"
+            >
+              Cerrar
+            </button>
+          </div>
         </template>
       </ModalRoles>
     </div>

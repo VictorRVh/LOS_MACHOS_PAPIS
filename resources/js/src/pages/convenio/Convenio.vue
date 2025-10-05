@@ -52,10 +52,11 @@ const onDelete = (convenio) => {
   <AuthorizationFallback :permissions="['todo-acceso-convenios', 'ver-convenios']">
     <div class="flex justify-between items-center p-4">
       <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Convenios</h2>
-      <!-- <CreateButton @click="showSlider(true)" /> -->
     </div>
-    <div class="flex  px-6">
-      <div class="w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+
+    <div class="flex flex-col lg:flex-row px-6 gap-6">
+
+      <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
         <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
           Agregar Convenio
         </h3>
@@ -63,8 +64,7 @@ const onDelete = (convenio) => {
         <ConvenioSlider :show="slider" :convenio="sliderData" @hide="hideSlider" />
       </div>
       
-
-      <div class="w-full">
+      <div class="w-full lg:w-2/3">
         <Table>
           <THead>
             <Th>Id</Th>

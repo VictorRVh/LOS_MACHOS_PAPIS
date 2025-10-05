@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from 'vue-router';
+import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
+
 import { ChevronDownIcon } from '@heroicons/vue/24/solid';
 
 import SearchBar from "../../components/head_table/headSearch.vue";
@@ -22,6 +24,7 @@ import useGrupoStore from "../../store/Grupo/useGrupoStore";
 import useCicloStore from "../../store/Ciclo/useCicloStore";
 
 const router = useRouter();
+const breadcrumb = useBreadcrumbStore();
 const grupoStore = useGrupoStore();
 const cicloStore = useCicloStore();
 const { slider, sliderData, showSlider, hideSlider } = useSlider("grupo-crud");
@@ -29,29 +32,14 @@ const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteGrupo, deleting } = useHttpRequest("/grupo");
 
 const grupos = ref([]);
-const isLoading = ref(true);
+
 const selectedCiclo = ref(null);
 const selectedAnio = ref(null);
 const selectedPeriodo = ref(null);
 const openEspecialidades = ref(new Set());
 
-const fetchInitialData = async () => {
-  isLoading.value = true;
-  try {
-    await Promise.all([
-      grupoStore.loadGrupos(),
-      cicloStore.loadCiclos(),
-    ]);
-    grupos.value = grupoStore.grupos;
-  } catch (error) {
-    console.error("Fallo al cargar datos iniciales:", error);
-    showToast("Error al cargar los datos. Por favor, intente de nuevo.", "error");
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-onMounted(fetchInitialData);
+//if (!grupoStore.grupos.length) await grupoStore.loadGrupos();
+if (!cicloStore.ciclo.length) await cicloStore.loadCiclo();
 
 const onCicloChange = async () => {
   selectedAnio.value = null;
@@ -77,7 +65,7 @@ const filtrarPorSeleccion = async () => {
     showToast('Debes seleccionar todos los filtros para buscar.', 'warning');
     return;
   }
-  isLoading.value = true;
+
   await grupoStore.loadGruposFiltrados({
     id_ciclo: selectedCiclo.value,
     anio: selectedAnio.value,
@@ -85,7 +73,7 @@ const filtrarPorSeleccion = async () => {
   });
   grupos.value = grupoStore.gruposFiltrados;
   openEspecialidades.value = new Set(grupos.value.map(g => g.especialidad.id));
-  isLoading.value = false;
+
 };
 
 const verGrupo = (grupo) => {
@@ -93,6 +81,8 @@ const verGrupo = (grupo) => {
     name: 'grupo.detalle',
     params: { id: grupo.id_grupo },
   });
+ // breadcrumb.setTextItem("los peludos",grupo.id_grupo);
+
 };
 
 const onDelete = (grupo) => {
@@ -167,7 +157,14 @@ const toggleEspecialidad = (id) => {
         <div v-else>
           <Table v-if="grupos.length > 0">
             <THead class="hidden">
-              <Th>N°</Th><Th>Módulo</Th><Th>Sección</Th><Th>Turno</Th><Th>Convenio</Th><Th>Nro Est.</Th><Th>Docente</Th><Th>Acciones</Th>
+              <Th>N°</Th>
+              <Th>Módulo</Th>
+              <Th>Sección</Th>
+              <Th>Turno</Th>
+              <Th>Convenio</Th>
+              <Th>Nro Est.</Th>
+              <Th>Docente</Th>
+              <Th>Acciones</Th>
             </THead>
             <TBody>
               <template v-for="(especialidad) in grupos" :key="especialidad.especialidad.id">
@@ -176,54 +173,58 @@ const toggleEspecialidad = (id) => {
                   <td colspan="8" class="px-4 py-3 font-bold uppercase tracking-wider text-sm">
                     <div class="flex items-center justify-between text-cetpro-text">
                       <span>{{ especialidad.especialidad.nombre }}</span>
-                      <ChevronDownIcon :class="['h-6 w-6 text-cetpro-text transition-transform duration-300', { 'rotate-180': openEspecialidades.has(especialidad.especialidad.id) }]" />
+                      <ChevronDownIcon
+                        :class="['h-6 w-6 text-cetpro-text transition-transform duration-300', { 'rotate-180': openEspecialidades.has(especialidad.especialidad.id) }]" />
                     </div>
                   </td>
                 </tr>
                 <tr v-if="openEspecialidades.has(especialidad.especialidad.id)" class="bg-white dark:bg-gray-800">
                   <td colspan="8" class="p-0">
                     <TransitionGroup name="list" tag="table" class="w-full">
-                      <Tr v-for="(modulo, modIndex) in especialidad.modulos" :key="modulo.id_grupo" class="border-t-0">
-                        <Td class="text-center w-12">{{ modIndex + 1 }}</Td>
-                        <Td>
-                          <span class="font-semibold text-gray-500 dark:text-gray-400">Nombre: </span>
-                          <span>{{ modulo.modulo.numero }}: {{ modulo.modulo.descripcion }}</span>
-                        </Td>
-                        <Td class="w-32">
-                          <span class="font-semibold text-gray-500 dark:text-gray-400">Sección: </span>
-                          <span>{{ modulo.seccion }}</span>
-                        </Td>
-                        <Td class="w-28">
-                           <span class="font-semibold text-gray-500 dark:text-gray-400">Turno: </span>
-                           <span>{{ modulo.turno }}</span>
-                        </Td>
-                        <Td class="w-48">
-                           <span class="font-semibold text-gray-500 dark:text-gray-400">Convenio: </span>
-                           <span>{{ modulo.convenio.nombre }}</span>
-                        </Td>
-                        <Td class="w-40">
-                           <span class="font-semibold text-gray-500 dark:text-gray-400">Nro. Estudiantes: </span>
-                           <span>{{ modulo.cantidad }}</span>
-                        </Td>
-                        <Td class="min-w-[250px]">
-                          <span class="font-semibold text-gray-500 dark:text-gray-400">Docente: </span>
-                          <span v-if="modulo.docente?.nombre">{{ modulo.docente.nombre }} {{ modulo.docente.apellido_paterno }}</span>
-                          <span v-else class="text-red-500 font-semibold italic text-xs">No asignado</span>
-                        </Td>
-                        <Td class="text-center w-28">
-                          <MenuTable :actions="{ view: true, edit: true, delete: true }" entity-label="grupo"
-                            @view="verGrupo(modulo)" @edit="showSlider(true, modulo)" @delete="onDelete(modulo)" />
-                        </Td>
-                      </Tr>
-                    </TransitionGroup>
-                  </td>
+                <Tr v-for="(modulo, modIndex) in especialidad.modulos" :key="modulo.id_grupo" class="border-t-0">
+                  <Td class="text-center w-12">{{ modIndex + 1 }}</Td>
+                  <Td>
+                    <span class="font-semibold text-gray-500 dark:text-gray-400">Nombre: </span>
+                    <span>{{ modulo.modulo.numero }}: {{ modulo.modulo.descripcion }}</span>
+                  </Td>
+                  <Td class="w-32">
+                    <span class="font-semibold text-gray-500 dark:text-gray-400">Sección: </span>
+                    <span>{{ modulo.seccion }}</span>
+                  </Td>
+                  <Td class="w-28">
+                    <span class="font-semibold text-gray-500 dark:text-gray-400">Turno: </span>
+                    <span>{{ modulo.turno }}</span>
+                  </Td>
+                  <Td class="w-48">
+                    <span class="font-semibold text-gray-500 dark:text-gray-400">Convenio: </span>
+                    <span>{{ modulo.convenio.nombre }}</span>
+                  </Td>
+                  <Td class="w-40">
+                    <span class="font-semibold text-gray-500 dark:text-gray-400">Nro. Estudiantes: </span>
+                    <span>{{ modulo.cantidad }}</span>
+                  </Td>
+                  <Td class="min-w-[250px]">
+                    <span class="font-semibold text-gray-500 dark:text-gray-400">Docente: </span>
+                    <span v-if="modulo.docente?.nombre">{{ modulo.docente.nombre }} {{ modulo.docente.apellido_paterno
+                      }}</span>
+                    <span v-else class="text-red-500 font-semibold italic text-xs">No asignado</span>
+                  </Td>
+                  <Td class="text-center w-28">
+                    <MenuTable :actions="{ view: true, edit: true, delete: true }" entity-label="grupo"
+                      @view="verGrupo(modulo)" @edit="showSlider(true, modulo)" @delete="onDelete(modulo)" />
+                  </Td>
+                </Tr>
+                </TransitionGroup>
+                </td>
                 </tr>
               </template>
             </TBody>
           </Table>
           <div v-else class="text-center py-12">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+              aria-hidden="true">
+              <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
             </svg>
             <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">No se encontraron grupos</h3>
             <p class="mt-1 text-sm text-gray-500">Intenta con otros filtros o crea un nuevo grupo para empezar.</p>
@@ -240,11 +241,13 @@ const toggleEspecialidad = (id) => {
 .list-leave-active {
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
+
 .list-enter-from,
 .list-leave-to {
   opacity: 0;
   transform: translateY(-20px);
 }
+
 .list-leave-active {
   position: absolute;
 }

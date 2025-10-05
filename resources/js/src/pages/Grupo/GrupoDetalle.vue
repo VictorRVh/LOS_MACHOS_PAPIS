@@ -2,8 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import useGrupoStore from '../../store/Grupo/useGrupoStore';
-
-console.log("--- DEBUG: Componente GrupoDetalle.vue INICIADO ---");
+import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 
 const route = useRoute();
 const grupoStore = useGrupoStore();
@@ -11,8 +10,8 @@ const infoGrupo = ref(null);
 const isLoading = ref(true);
 const errorAlCargar = ref(false);
 const groupId = route.params.id;
+const breadcrumb = useBreadcrumbStore();
 
-console.log(`--- DEBUG: ID del grupo recibido de la URL: ${groupId} ---`);
 
 const navLinks = [
   { text: 'Documentos', to: { name: 'grupo.documentos', params: { id: groupId } } },
@@ -24,7 +23,7 @@ const navLinks = [
 
 const tituloPrincipal = computed(() => {
   if (!infoGrupo.value) return 'Grupo';
-  return `Gestión: ${infoGrupo.value.especialidad}`;
+  return `Especialidad: ${infoGrupo.value.especialidad}`;
 });
 
 const subTitulo = computed(() => {
@@ -33,22 +32,25 @@ const subTitulo = computed(() => {
 });
 
 onMounted(async () => {
-  console.log("--- DEBUG: onMounted() disparado. ¡Vamos a buscar los datos! ---");
+
   isLoading.value = true;
   errorAlCargar.value = false;
-  
+ 
   try {
-    console.log(`--- DEBUG: Llamando a grupoStore.loadInfoGrupo con el ID: ${groupId} ---`);
+   
     await grupoStore.loadInfoGrupo(groupId);
     infoGrupo.value = grupoStore.infoGrupo;
-    console.log("--- DEBUG: ¡ÉXITO! Datos recibidos del store:", infoGrupo.value);
+  
+      breadcrumb.setTextItemAuto("Pepito", groupId, "grupo");
+
+    
   } catch (error) {
-    console.error("--- DEBUG: ¡LA CAGÓ! ERROR AL CARGAR LA INFO DEL GRUPO. MIRA ABAJO: ---");
+    
     console.error(error);
     errorAlCargar.value = true;
   } finally {
     isLoading.value = false;
-    console.log("--- DEBUG: Carga finalizada (con o sin error). ---");
+  
   }
 });
 </script>
@@ -65,10 +67,10 @@ onMounted(async () => {
         <p class="text-red-600 dark:text-red-400">No se pudo cargar la información del grupo. Revisa la consola (F12) para ver el error. Probablemente tu sesión expiró.</p>
     </header>
 
-    <header v-else class="mb-4">
-      <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200 truncate">
+    <header v-else class="mb-2">
+      <h2 class="text-base sm:text-lg  font-bold text-gray-600 dark:text-gray-200 truncate">
         {{ tituloPrincipal }}
-      </h1>
+      </h2>
       <p class="text-md sm:text-lg text-gray-500 dark:text-gray-400">
         {{ subTitulo }}
       </p>

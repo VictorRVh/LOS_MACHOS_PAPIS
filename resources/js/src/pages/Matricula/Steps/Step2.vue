@@ -34,35 +34,66 @@ const mostrarOtroDistrito = ref(false);
 
 
 const buscarDNI = async () => {
-    const dni = formData.value.nro_documento;
+    const tipo = formData.value.tipo_documento;
+    const numero = formData.value.nro_documento;
 
-    if (!dni || dni.length !== 8) {
-        showToast("⚠️ Debes ingresar un DNI válido de 8 dígitos");
+    if (!tipo) {
+        showToast("Debe seleccionar un tipo de documento");
+        return;
+    }
+
+    if (!numero) {
+        showToast("Debe ingresar un número de documento");
+        return;
+    }
+
+    if (tipo === "DNI" && numero.length !== 8) {
+        showToast("El DNI debe tener 8 dígitos");
+        return;
+    }
+
+    if (tipo === "CARNET EXT." && numero.length < 9) {
+        showToast("El Carnet de Extranjería debe tener al menos 9 caracteres");
         return;
     }
 
     try {
-        const { data } = await axios.post("buscar-dni", { dni });
+        const { data } = await axios.post("buscar-documento", {
+            tipo_documento: tipo,
+            dni: numero,
+        });
 
-        if (data.success) {
-            const d = data.data;
-
-            formData.value.apellido_paterno = d.apellido_paterno ?? "";
-            formData.value.apellido_materno = d.apellido_materno ?? "";
-            formData.value.nombre = d.nombres ?? "";
-            formData.value.direccion_residencia = d.direccion ?? "";
-
-            formData.value.departamento_nacimiento = d.departamento ?? "";
-            formData.value.provincia_nacimiento = d.provincia ?? "";
-            formData.value.distrito_nacimiento = d.distrito ?? "";
-
-            showToast("✅ Datos encontrados y autocompletados");
-        } else {
-            showToast("⚠️ No se encontró información para este DNI");
+        if (data.error) {
+            showToast(data.error);
+            return;
         }
+
+        const d = data.data ?? data;
+
+        // Para comprobar si los datos vienen de FACTILIZA
+        const esFactiliza = !!d.nombres;
+
+        formData.value.apellido_paterno = d.apellido_paterno ?? "";
+        formData.value.apellido_materno = d.apellido_materno ?? "";
+        formData.value.nombre = esFactiliza ? d.nombres ?? "" : d.nombre ?? "";
+        formData.value.direccion_residencia = esFactiliza
+            ? d.direccion ?? ""
+            : d.direccion_residencia ?? "";
+        formData.value.departamento_nacimiento = esFactiliza
+            ? d.departamento ?? ""
+            : d.departamento_nacimiento ?? "";
+        formData.value.provincia_nacimiento = esFactiliza
+            ? d.provincia ?? ""
+            : d.provincia_nacimiento ?? "";
+        formData.value.distrito_nacimiento = esFactiliza
+            ? d.distrito ?? ""
+            : d.distrito_nacimiento ?? "";
+        formData.value.pais_nacimiento = d.pais_nacimiento ?? "PERÚ";
+
+        showToast("Datos encontrados correctamente");
     } catch (error) {
         console.error(error);
-        showToast("❌ Error en la búsqueda del DNI");
+        showToast("Error al buscar el documento");
     }
 };
 

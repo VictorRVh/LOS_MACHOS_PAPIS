@@ -208,7 +208,7 @@ Route::middleware('auth:sanctum')->group(function () {
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
     //BUSCAR DNI
-    Route::post('buscar-dni', [
+    Route::post('buscar-documento', [
         \App\Http\Controllers\EstudianteController::class,
         'buscar',
     ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');

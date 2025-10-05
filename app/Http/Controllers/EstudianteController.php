@@ -135,26 +135,96 @@ class EstudianteController extends Controller
         return response()->json(null, 204);
     }
 
+    // public function buscar(Request $request)
+    // {
+    //     $tipo = $request->input('tipo_documento'); // 'DNI' o 'CARNET EXT.'
+    //     $numero = $request->input('dni'); // o 'nro_documento'
+
+    //     if (empty($numero)) {
+    //         return response()->json(['error' => 'Debe ingresar un número de documento'], 422);
+    //     }
+
+    //     // Validar formato según tipo de documento
+    //     if ($tipo === 'DNI' && strlen($numero) !== 8) {
+    //         return response()->json(['error' => 'DNI inválido'], 422);
+    //     }
+
+    //     if ($tipo === 'CARNET EXT.' && strlen($numero) < 9) {
+    //         return response()->json(['error' => 'Carnet de extranjería inválido'], 422);
+    //     }
+
+    //     try {
+    //         // Determinar URL según el tipo
+    //         $endpoint = $tipo === 'DNI'
+    //             ? "https://api.factiliza.com/v1/dni/info/{$numero}"
+    //             : "https://api.factiliza.com/v1/cee/info/{$numero}";
+
+    //         $response = Http::withHeaders([
+    //             'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzOTE3MSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnN1bHRvciJ9.MUQqU8axqigAZZXN-TOWTmSVrFsrQIXpujPPvgPDqBU'
+    //         ])->get($endpoint);
+
+    //         if ($response->failed()) {
+    //             return response()->json(['error' => 'No se pudo consultar el documento'], 500);
+    //         }
+
+    //         return $response->json();
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'error' => 'Error en la consulta',
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     public function buscar(Request $request)
     {
-        $dni = $request->input('dni');
+        $tipo = $request->input('tipo_documento');
+        $numero = $request->input('dni');
 
-        if (strlen($dni) !== 8) {
+        if (empty($numero)) {
+            return response()->json(['error' => 'Debe ingresar un número de documento'], 422);
+        }
+
+        // Validaciones básicas
+        if ($tipo === 'DNI' && strlen($numero) !== 8) {
             return response()->json(['error' => 'DNI inválido'], 422);
         }
 
+        if ($tipo === 'CARNET EXT.' && strlen($numero) < 9) {
+            return response()->json(['error' => 'Carnet de extranjería inválido'], 422);
+        }
+
+        // Buscamos al estudiante en nuestra base de datos
+        $estudiante = Estudiante::where('nro_documento', $numero)->first();
+
+        if ($estudiante) {
+            return response()->json([
+                'success' => true,
+                'source' => 'database',
+                'data' => $estudiante
+            ]);
+        }
+
+        // Si el estudiante no existe en nuestra BD, consultamos al FACTILIZA
         try {
+            $endpoint = $tipo === 'DNI'
+                ? "https://api.factiliza.com/v1/dni/info/{$numero}"
+                : "https://api.factiliza.com/v1/cee/info/{$numero}";
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzOTE3MSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnN1bHRvciJ9.MUQqU8axqigAZZXN-TOWTmSVrFsrQIXpujPPvgPDqBU'
-            ])->get("https://api.factiliza.com/v1/dni/info/{$dni}");
+            ])->get($endpoint);
 
             if ($response->failed()) {
-                return response()->json(['error' => 'No se pudo consultar el DNI'], 500);
+                return response()->json(['error' => 'No se pudo consultar el documento'], 500);
             }
 
             return $response->json();
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error en la consulta', 'message' => $e->getMessage()], 500);
+            return response()->json([
+                'error' => 'Error en la consulta',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }

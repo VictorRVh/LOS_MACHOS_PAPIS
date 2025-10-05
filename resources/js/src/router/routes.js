@@ -2,6 +2,10 @@ import useProgramaStore from '../store/Programa/useProgramaStore';
 import useEspecialidadProgramaStore from '../store/EspecialidadPrograma/useEspecialidadProgramaStore';
 import useGrupoStore from '../store/Grupo/useGrupoStore';
 
+import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
+
+
+
 export default [
     { path: '/', name: 'login', component: () => import('../pages/Login.vue'), meta: { layout: 'full', permissions: [], }, },
     { path: '/start', name: 'start', component: () => import('../pages/Start.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Inicio', to: { name: 'start' } }] }, },
@@ -40,13 +44,13 @@ export default [
             permissions: ['todo-acceso-permisos'],
             parent: 'programa',
             breadcrumb: async (route) => {
-                const programaStore = useProgramaStore();
-                const programa = await programaStore.findProgramaById(route.params.idPrograma);
+                const breadcrumbStore = useBreadcrumbStore();
+                let item = await breadcrumbStore.findTextById(route.params.idPrograma);
                 return {
-                    text: programa?.nameCiclo || 'Cargando programa...',
+                    text: item.name,
                     to: { name: 'especialidadPrograma', params: { idPrograma: route.params.idPrograma } }
                 };
-            }
+            },
         },
     },
     {
@@ -150,16 +154,12 @@ export default [
             permissions: ['todo-acceso-permisos'],
             parent: 'grupo',
             breadcrumb: async (route) => {
-                const grupoStore = useGrupoStore();
-
-                if (!grupoStore.infoGrupo || grupoStore.infoGrupo.id !== route.params.id) {
-                    await grupoStore.loadInfoGrupo(route.params.id);
-                }
-
+                const breadcrumbStore = useBreadcrumbStore();
+                // Intentamos buscar el item en el store por id
+                let item = await breadcrumbStore.findTextById(route.params.id);
                 return {
-                    text: grupoStore.infoGrupo
-                        ? `${grupoStore.infoGrupo.especialidad} | ${grupoStore.infoGrupo.modulo} | ${grupoStore.infoGrupo.seccion}` 
-                        : 'Cargando grupo...',
+                    text: item?.name,
+                    to: { name: route?.name, params: { id: item?.id } }, // mantiene la misma ruta
                 };
             },
             submenu: (route) => [

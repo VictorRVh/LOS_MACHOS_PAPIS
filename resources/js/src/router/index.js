@@ -9,7 +9,9 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
+
     const breadcrumbStore = useBreadcrumbStore();
+
     if (to.name) {
         const finalCrumbs = [];
         const allRoutes = router.getRoutes();
@@ -22,7 +24,24 @@ router.beforeEach(async (to, from, next) => {
                 if (typeof breadcrumbMeta === 'function') {
                     const result = await breadcrumbMeta({ params: paramsForParent });
                     const crumb = result.crumb ? result.crumb : result;
-                    finalCrumbs.unshift(crumb);
+
+                    // Si ya existe en itemsText, usamos el mismo objeto para mantener orden
+                    const existing = await breadcrumbStore.findTextById(paramsForParent.id);
+                    // Si ya existe, usamos el mismo objeto
+                    if (existing) {
+                        finalCrumbs.unshift(existing);
+                    } else {
+                        const newCrumb = {
+                            text: crumb.text,
+                            id: paramsForParent.id,
+                            to: to.fullPath,   // 👈 así puedes volver al nivel
+                            parent: currentRouteRecord.meta?.parent
+                        };
+                        finalCrumbs.unshift(newCrumb);
+                        breadcrumbStore.setTextItemAuto(newCrumb.text, newCrumb.id, newCrumb.parent);
+                    }
+
+
                     if (result.parentParams) {
                         paramsForParent = result.parentParams;
                     }
@@ -34,11 +53,14 @@ router.beforeEach(async (to, from, next) => {
                     finalCrumbs.unshift(...staticCrumbs);
                 }
             }
+
             const parentName = currentRouteRecord.meta?.parent;
             currentRouteRecord = parentName ? allRoutes.find(r => r.name === parentName) : null;
         }
+
         breadcrumbStore.setBase(finalCrumbs);
     }
+
 
     const { isUserAuthenticated } = useAuth();
     if (from.name === to.name) {
@@ -54,7 +76,7 @@ router.beforeEach(async (to, from, next) => {
             return next({ name: 'login' });
         }
     }
-    
+
     return next();
 });
 

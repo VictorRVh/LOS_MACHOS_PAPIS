@@ -13,7 +13,6 @@ const useCicloStore = defineStore('ciclo_academico', () => {
     const ciclo = ref([]);
     const loadCiclo = async () => {
         const res = await getCiclo();
-        console.log('response ciclo vic', res)
         ciclo.value = res;
     };
 

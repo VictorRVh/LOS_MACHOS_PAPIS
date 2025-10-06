@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Modulo;
 use Illuminate\Http\Request;
-
+use App\Models\EspecialidadPrograma;
 class ModuloController extends Controller
 {
     /**
@@ -39,19 +39,38 @@ class ModuloController extends Controller
     // Mostrar un módulo específico
     public function show($id)
     {
+        // Buscar los módulos asociados
         $registros = Modulo::with(['especialidadPrograma'])
             ->where('id_especialidad', $id)
             ->orderByRaw('CAST(numero_modulo AS UNSIGNED) ASC')
             ->get();
 
+        // Si NO hay módulos, igual buscamos la especialidad_programa
         if ($registros->isEmpty()) {
-            return response()->json(['message' => 'Sin módulos dentro de la especialidad'], 404);
+            $especialidadPrograma = EspecialidadPrograma::where('id', $id)->first();
+
+            if (!$especialidadPrograma) {
+                return response()->json(['message' => 'No se encontró la especialidad asociada'], 404);
+            }
+
+            // Limpiar los campos no deseados
+            $especialidadPrograma = collect($especialidadPrograma)->only([
+                'id',
+                'id_especialidad',
+                'id_programa',
+                'nro_modulos',
+            ]);
+
+            // Devolver sin módulos
+            return response()->json([
+                'especialidad_programa' => $especialidadPrograma,
+                'modulos' => [], // vacío pero consistente
+            ]);
         }
 
-        // Tomar el padre del primer módulo
+        // Si SÍ hay módulos
         $especialidadPrograma = $registros->first()->especialidadPrograma;
 
-        // Limpiar los campos no deseados
         if ($especialidadPrograma) {
             $especialidadPrograma = collect($especialidadPrograma)->only([
                 'id',
@@ -61,7 +80,6 @@ class ModuloController extends Controller
             ]);
         }
 
-        // Quitar la relación repetida en cada módulo
         $modulos = $registros->map(function ($modulo) {
             return [
                 'id' => $modulo->id,
@@ -78,6 +96,7 @@ class ModuloController extends Controller
             'modulos' => $modulos,
         ]);
     }
+
 
 
     // Actualizar un módulo

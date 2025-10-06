@@ -40,9 +40,8 @@ onMounted(async () => {
    
     await grupoStore.loadInfoGrupo(groupId);
     infoGrupo.value = grupoStore.infoGrupo;  
-    console.log(infoGrupo.value);
-    breadcrumb.setTextItemAuto("Pepito", groupId, "grupo");
-
+    console.log("mostrar datos: ",infoGrupo.value);
+    breadcrumb.setTextItemAuto(`${infoGrupo?.value?.especialidad} | M: ${infoGrupo?.value?.modulo} | Grupo: ${infoGrupo?.value?.seccion}`, groupId, "grupo");
   } catch (error) {
     
     console.error(error);

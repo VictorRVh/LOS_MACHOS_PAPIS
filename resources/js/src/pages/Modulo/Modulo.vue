@@ -16,10 +16,7 @@ import useHttpRequest from "../../composables/useHttpRequest";
 import ModuloSlider from "../../components/page/Modulo/ModuloSlider.vue";
 import useModuloStore from "../../store/Modulos/useModulosStore";
 
-
 const moduloStore = useModuloStore();
-
-
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
@@ -33,44 +30,35 @@ const props = defineProps({
 
 });
 
+if (!moduloStore?.moduloFiltrado?.length) await moduloStore.loadModuloById(props.idEspecialidadPrograma)
 
-if (!moduloStore.modulo.length) await moduloStore.loadModuloById(props.idEspecialidadPrograma)
+// Generar los módulos dinámicamente
+const indexModulos = ref([]);
 
+const cantidad = Number(moduloStore?.moduloFiltrado?.especialidad_programa?.nro_modulos || 0);
 
-
-// Lista base de índices
-const indexModulos = [
-  {    id: "01",    name: "Módulo 01",  },
-  {    id: "02",    name: "Módulo 02",  },
-  {    id: "03",    name: "Módulo 03",  },
-  {    id: "04",    name: "Módulo 04",  },
-  {    id: "05",    name: "Módulo 05",  },
-  {    id: "06",    name: "Módulo 06",  },
-  {    id: "07",    name: "Módulo 07",  },
-  {    id: "08",    name: "Módulo 08",  },
-  {    id: "09",    name: "Módulo 09",  },
-  {    id: "10",    name: "Módulo 10",  }
-
-];
+for (let i = 1; i <= cantidad; i++) {
+  const id = i.toString().padStart(2, "0");
+  indexModulos.value.push({
+    id,
+    name: `Módulo ${id}`,
+  });
+}
 
 const indicesArray = computed(() => {
   // Mapea los módulos ya asignados
-  const asignadas = moduloStore.moduloFiltrado?.map(
+  const asignadas = moduloStore.moduloFiltrado?.modulos.map(
     (ep) => ep?.numero_modulo
   ) || [];
 
   // Si estoy editando
   const currentId = sliderData.value?.numero_modulo;
 
-  return indexModulos.filter(
+  return indexModulos.value.filter(
     (indice) => !asignadas.includes(indice.id) || indice.id === currentId
   );
 
 });
-
-console.log("los indices: ", indicesArray.value);
-// ["02", "04", "05", "06", "07", "08", "09", "10"]
-
 
 const onDelete = (modulo) => {
 
@@ -117,7 +105,7 @@ const onDelete = (modulo) => {
           </THead>
 
           <TBody>
-            <Tr v-for="(modulo, index) in moduloStore.moduloFiltrado" :key="modulo.id">
+            <Tr v-for="(modulo, index) in moduloStore.moduloFiltrado?.modulos" :key="modulo.id">
               <Td>{{ modulo?.numero_modulo }}</Td>
               <Td>{{ modulo?.descripcion }}</Td>
               <Td>{{ modulo?.creditos }}</Td>

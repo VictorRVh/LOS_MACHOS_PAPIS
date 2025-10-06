@@ -21,7 +21,7 @@ const useModuloStore = defineStore('modulo', () => {
 
     const loadModuloById = async (id) => {
         const res = await getModuloById(id);
-        console.log('respuesta del show', res)
+        //console.log('respuesta del show', res)
         moduloFiltrado.value = res;
     };
 

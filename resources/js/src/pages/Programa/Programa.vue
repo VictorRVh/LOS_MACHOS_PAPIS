@@ -16,12 +16,9 @@ const cicloStore = useCicloStore();
 
 const { programaLoading } = storeToRefs(programaStore);
 
-(async () => {
-    await programaStore.loadPrograma();
-    if (!cicloStore.ciclo.length) {
-        await cicloStore.loadCiclo();
-    }
-})();
+
+if (!programaStore.programa.length) await programaStore.loadPrograma();
+if (!cicloStore?.ciclo?.length) await cicloStore.loadCiclo();
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();

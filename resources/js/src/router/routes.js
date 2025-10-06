@@ -45,10 +45,10 @@ export default [
             parent: 'programa',
             breadcrumb: async (route) => {
                 const breadcrumbStore = useBreadcrumbStore();
-                let item = await breadcrumbStore.findTextById(route.params.idPrograma);
+                let item = await breadcrumbStore.findTextById(route?.params?.idPrograma);
                 return {
-                    text: item.name,
-                    to: { name: 'especialidadPrograma', params: { idPrograma: route.params.idPrograma } }
+                    text: item?.name,
+                    to: { name: 'especialidadPrograma', params: { idPrograma: route?.params?.idPrograma } }
                 };
             },
         },
@@ -80,14 +80,19 @@ export default [
     },
     { path: '/programa/crear', name: 'programa.crear', component: () => import('../pages/Programa/Programa.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Programas de Estudio', to: { name: 'programa' } }, { text: 'Crear' }] } },
     { path: '/programa/editar/:id', name: 'programa.editar', component: () => import('../pages/Programa/Programa.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Programas de Estudio', to: { name: 'programa' } }] }, },
-    { path: '/especialidadPrograma/:id/editar', name: 'especialidadPrograma.editar', component: () => import('../pages/EspecialidadPrograma/EspecialidadPrograma.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
+    { path: '/especialidadPrograma/:id/editar', 
+        name: 'especialidadPrograma.editar', 
+        parent: 'programa.crear',
+        component: () => import('../pages/EspecialidadPrograma/EspecialidadPrograma.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
     {
         path: '/matricula',
         name: 'matricula.index',
+        
         component: () => import('../pages/Matricula/Matricula.vue'),
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos'],
+            parent: 'grupo',
             breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }]
         },
     },

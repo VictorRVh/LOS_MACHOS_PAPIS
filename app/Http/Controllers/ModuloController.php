@@ -45,11 +45,40 @@ class ModuloController extends Controller
             ->get();
 
         if ($registros->isEmpty()) {
-            return response()->json(['message' => 'Sin modulos dentro de la especialidad'], 404);
+            return response()->json(['message' => 'Sin módulos dentro de la especialidad'], 404);
         }
 
-        return response()->json($registros);
+        // Tomar el padre del primer módulo
+        $especialidadPrograma = $registros->first()->especialidadPrograma;
+
+        // Limpiar los campos no deseados
+        if ($especialidadPrograma) {
+            $especialidadPrograma = collect($especialidadPrograma)->only([
+                'id',
+                'id_especialidad',
+                'id_programa',
+                'nro_modulos',
+            ]);
+        }
+
+        // Quitar la relación repetida en cada módulo
+        $modulos = $registros->map(function ($modulo) {
+            return [
+                'id' => $modulo->id,
+                'numero_modulo' => $modulo->numero_modulo,
+                'descripcion' => $modulo->descripcion,
+                'creditos' => $modulo->creditos,
+                'horas' => $modulo->horas,
+                'nro_capacidades' => $modulo->nro_capacidades,
+            ];
+        });
+
+        return response()->json([
+            'especialidad_programa' => $especialidadPrograma,
+            'modulos' => $modulos,
+        ]);
     }
+
 
     // Actualizar un módulo
     public function update(Request $request, $id)

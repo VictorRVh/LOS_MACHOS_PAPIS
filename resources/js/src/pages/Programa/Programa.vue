@@ -16,7 +16,6 @@ const cicloStore = useCicloStore();
 
 const { programaLoading } = storeToRefs(programaStore);
 
-
 if (!programaStore.programa.length) await programaStore.loadPrograma();
 if (!cicloStore?.ciclo?.length) await cicloStore.loadCiclo();
 

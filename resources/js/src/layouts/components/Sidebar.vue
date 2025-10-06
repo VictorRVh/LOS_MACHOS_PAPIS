@@ -10,19 +10,19 @@ const { hasPermission } = usePermissions();
 const layoutStore = useLayoutStore();
 
 const navLinks = [
-    { name: 'Usuarios', routeName: 'users', icon: UsersIcon, permissions: ["todo-acceso-usuarios", "ver-usuarios"]},
-    { name: 'Roles', routeName: 'roles', icon: ShieldCheckIcon, permissions: ["todo-acceso-roles", "ver-roles"]},
-    { name: 'Permisos', routeName: 'permissions', icon: KeyIcon, permissions: ["todo-acceso-permisos", "ver-permisos"]},
-    { name: 'Docentes', routeName: 'docente', icon: AcademicCapIcon, permissions: ["todo-acceso-docentes", "ver-docentes"]},
-    { name: 'Convenios', routeName: 'convenio', icon: PresentationChartLineIcon, permissions: ["todo-acceso-convenios", "ver-convenios"]},
+    { name: 'Usuarios', routeName: 'users', icon: UsersIcon, permissions: ["todo-acceso-usuarios", "icon-usuarios"]},
+    { name: 'Roles', routeName: 'roles', icon: ShieldCheckIcon, permissions: ["todo-acceso-roles", "icon-roles"]},
+    { name: 'Permisos', routeName: 'permissions', icon: KeyIcon, permissions: ["todo-acceso-permisos", "icon-permisos"]},
+    { name: 'Docentes', routeName: 'docente', icon: AcademicCapIcon, permissions: ["todo-acceso-docentes", "icon-docentes"]},
+    { name: 'Convenios', routeName: 'convenio', icon: PresentationChartLineIcon, permissions: ["todo-acceso-convenios", "icon-convenios"]},
     { name: 'Periodo', routeName: 'periodo', icon: CalendarDaysIcon, permissions: ["todo-acceso-periodos", "icono-periodos"]},
-    { name: 'Administrativos', routeName: 'administrativos', icon: NewspaperIcon, permissions: ["todo-acceso-administrativos", "ver-administrativos"]},
-    { name: 'Especialidad', routeName: 'especialidad', icon: AcademicCapIcon, permissions: ["todo-acceso-especialidades", "ver-especialidades"]},
-    { name: 'Comisión', routeName: 'comision', icon: UserGroupIcon, permissions: ["todo-acceso-comisiones", "ver-comisiones"]},
-    { name: 'Programa', routeName: 'programa', icon: RectangleStackIcon, permissions: ["todo-acceso-programas", "ver-programas"]},
-    { name: 'Doc. Curricular', routeName: 'documentos', icon: DocumentDuplicateIcon, permissions: ['ver-programacion-entregas'] }, // Usaremos un permiso específico
-    { name: 'Matricula', routeName: 'matricula.index', icon: IdentificationIcon, permissions: ["todo-acceso-permisos", "ver-permisos"]},
-    { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-permisos", "ver-permisos"]},
+    { name: 'Administrativos', routeName: 'administrativos', icon: NewspaperIcon, permissions: ["todo-acceso-administrativos", "icon-administrativos"]},
+    { name: 'Especialidad', routeName: 'especialidad', icon: AcademicCapIcon, permissions: ["todo-acceso-especialidades", "icon-especialidades"]},
+    { name: 'Comisión', routeName: 'comision', icon: UserGroupIcon, permissions: ["todo-acceso-comisiones", "icon-comisiones"]},
+    { name: 'Programa', routeName: 'programa', icon: RectangleStackIcon, permissions: ["todo-acceso-programas", "icon-programas"]},
+    { name: 'Doc. Curricular', routeName: 'documentos', icon: DocumentDuplicateIcon, permissions: ['icon-programacion-entregas'] }, // Usaremos un permiso específico
+    { name: 'Matricula', routeName: 'matricula.index', icon: IdentificationIcon, permissions: ["todo-acceso-matriculas", "icon-matriculas"]},
+    { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-grupos", "icon-grupos"]},
     { name: 'Mis Módulos', routeName: 'moduloAsignado', icon: AcademicCapIcon, permissions: ["ver-mis-modulos", "ver-estudiantes-asignados"]},
 ];
 </script>

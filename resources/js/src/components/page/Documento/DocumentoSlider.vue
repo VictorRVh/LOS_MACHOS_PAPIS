@@ -1,141 +1,146 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import Slider from '../../ui/Slider.vue';
 import FormInput from '../../ui/FormInput.vue';
 import Button from '../../ui/Button.vue';
 import CheckBox from '../../ui/CheckBox.vue';
 import BaseSelect from '../../ui/BaseSelect.vue';
 import useDocumentoStore from '../../../store/Documento/useDocumentoStore';
-import useValidation from '../../../composables/useValidation';
+
+// <-- ¡CAMBIO CLAVE AQUÍ! Usamos el store que filtra por estado.
+import usePeriodoStatusStore from '../../../store/Periodo/usePeriodoStatusStore';
 import useHttpRequest from '../../../composables/useHttpRequest';
 import useModalToast from '../../../composables/useModalToast';
-import * as yup from 'yup';
+import { XCircleIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
     show: { type: Boolean, default: false },
     documento: { type: [Object, null], default: null },
-    periodoSeleccionado: { type: String, default: null },
 });
 const emit = defineEmits(['hide']);
 
 const documentoStore = useDocumentoStore();
-const { store: createEntrega, saving, update: updateEntrega, updating } = useHttpRequest('/entregas-admin');
-const { runYupValidation } = useValidation();
+const periodoStore = usePeriodoStatusStore();
+// Renombramos 'periodos' a 'periodosActivos' para que el resto del código no se rompa.
+const { periodos: periodosActivos } = storeToRefs(periodoStore);
+
+const { store: createEntrega, saving } = useHttpRequest('/entregas-admin');
+const { destroy: deleteDocumento } = useHttpRequest('/entregas-admin-documento');
 const { showToast } = useModalToast();
 
 const title = computed(() => (props.documento ? `Editar Programación` : 'Nueva Programación de Entrega'));
 
 const initialFormData = () => ({
-    id_periodo: props.periodoSeleccionado,
+    id_periodo: null,
     tipo_entrega: '',
     descripcion: '',
     fecha_inicio: '',
     fecha_fin: '',
-    status: true,
-    documento_plantilla: null,
+    status: false,
+    archivos: [],
 });
 
 const formData = ref(initialFormData());
-const formErrors = ref({});
+const existingFiles = ref([]);
+const filesToUpload = ref([]);
 const fileInput = ref(null);
 
 watch(() => props.show, () => {
     if (props.show) {
-        formErrors.value = {};
+        filesToUpload.value = [];
         if (fileInput.value) fileInput.value.value = '';
-        
+
         if (props.documento?.id) {
-            formData.value = {
-                ...props.documento,
-                status: !!props.documento.status,
-                documento_plantilla: null,
-            };
+            formData.value = { ...props.documento, status: !!props.documento.status, archivos: [] };
+            existingFiles.value = [...props.documento.documentos];
         } else {
             formData.value = initialFormData();
+            existingFiles.value = [];
         }
     }
-});
-
-const schema = yup.object().shape({
-    id_periodo: yup.string().required("Debe seleccionar un periodo."),
-    tipo_entrega: yup.string().required("El tipo de entrega es requerido."),
-    fecha_inicio: yup.date().required("La fecha de inicio es requerida."),
-    fecha_fin: yup.date().required("La fecha de fin es requerida.").min(yup.ref('fecha_inicio'), "La fecha fin debe ser posterior a la de inicio."),
-    documento_plantilla: yup.mixed().nullable().test('fileSize', 'El archivo no debe superar los 15MB', value => !value || (value && value.size <= 15 * 1024 * 1024)),
 });
 
 const handleFileChange = (event) => {
-    formData.value.documento_plantilla = event.target.files[0] || null;
+    filesToUpload.value = [...event.target.files];
+};
+
+const removeFileToUpload = (index) => {
+    filesToUpload.value.splice(index, 1);
+};
+
+const removeExistingFile = async (file, index) => {
+    await deleteDocumento(file.id);
+    existingFiles.value.splice(index, 1);
+    showToast('Documento eliminado.');
 };
 
 const onSubmit = async () => {
-    if (saving.value || updating.value) return;
-
-    const { validated, errors } = await runYupValidation(schema, formData.value);
-    if (!validated) {
-        formErrors.value = errors;
-        return;
-    }
-    formErrors.value = {};
+    if (saving.value) return;
 
     const payload = new FormData();
     Object.keys(formData.value).forEach(key => {
-        let value = formData.value[key];
-        if (key === 'status') value = value ? 1 : 0;
-        if (value !== null && value !== undefined) {
-             payload.append(key, value);
+        if (key !== 'archivos') {
+            let value = formData.value[key];
+            if (key === 'status') value = value ? 1 : 0;
+            if (value !== null) payload.append(key, value);
         }
     });
 
-    if (props.documento?.id) {
-        payload.append('_method', 'POST'); // Laravel trata FormData como POST, _method lo convierte a PUT/PATCH
-         const response = await updateEntrega(`${props.documento.id}`, payload, { headers: { 'Content-Type': 'multipart/form-data' } });
-         if (response.id) {
-            showToast(`Programación actualizada correctamente.`);
-            documentoStore.loadDocumentos(props.periodoSeleccionado);
-            emit('hide');
-        }
-    } else {
-        const response = await createEntrega(payload, { headers: { 'Content-Type': 'multipart/form-data' } });
-         if (response.id) {
-            showToast(`Programación creada correctamente.`);
-            documentoStore.loadDocumentos(props.periodoSeleccionado);
-            emit('hide');
-        }
+    filesToUpload.value.forEach(file => {
+        payload.append('archivos[]', file);
+    });
+
+    const response = await createEntrega(payload, { headers: { 'Content-Type': 'multipart/form-data' } });
+    if (response.id) {
+        documentoStore.addProgramacion(response);
+        showToast('Programación creada exitosamente.');
+        emit('hide');
     }
 };
 </script>
 
 <template>
     <Slider :show="show" :title="title" @hide="emit('hide')">
-        <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
         <div class="mt-4 space-y-4">
-            <FormInput v-model="formData.tipo_entrega" label="Título o Tipo de Entrega" :error="formErrors?.tipo_entrega" required />
-            
+            <div>
+                <label class="form-label required">Periodo Académico</label>
+                <!-- Este select ahora usa la lista correcta de periodos ACTIVOS -->
+                <BaseSelect v-model="formData.id_periodo" :options="periodosActivos" label="nombre_periodo" value-prop="id" placeholder="Seleccione un Periodo" />
+            </div>
+            <FormInput v-model="formData.tipo_entrega" label="Título o Tipo de Entrega" required />
             <div>
                 <label class="form-label">Descripción</label>
                 <textarea v-model="formData.descripcion" rows="3" class="form-input" placeholder="Ej: Subir el sílabo mensual en formato PDF."></textarea>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio" type="date" :error="formErrors?.fecha_inicio" required />
-                <FormInput v-model="formData.fecha_fin" label="Fecha de Fin" type="date" :error="formErrors?.fecha_fin" required />
+                <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio" type="date" required />
+                <FormInput v-model="formData.fecha_fin" label="Fecha de Fin" type="date" required />
             </div>
-
-             <div>
-                <label class="form-label">Plantilla o Documento Guía (Opcional)</label>
-                <input type="file" ref="fileInput" @change="handleFileChange" class="form-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                <span v-if="formErrors?.documento_plantilla" class="text-sm text-red-500">{{ formErrors.documento_plantilla }}</span>
-                <p v-if="documento?.id && documento.documento_plantilla_url" class="text-xs text-gray-500 mt-1">
-                    Ya existe un archivo. Reemplácelo subiendo uno nuevo. <a :href="documento.documento_plantilla_url" target="_blank" class="text-blue-500 hover:underline">Ver actual</a>
-                </p>
+            <div>
+                <label class="form-label">Adjuntar Documentos Guía</label>
+                <input type="file" multiple ref="fileInput" @change="handleFileChange" class="form-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                <div v-if="filesToUpload.length > 0" class="mt-2 space-y-1">
+                    <div v-for="(file, index) in filesToUpload" :key="index" class="flex items-center justify-between bg-gray-100 p-1 rounded">
+                        <span class="text-xs text-gray-700">{{ file.name }}</span>
+                        <button @click="removeFileToUpload(index)" class="text-red-500 hover:text-red-700">
+                            <XCircleIcon class="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+                 <div v-if="existingFiles.length > 0" class="mt-2 space-y-1">
+                    <p class="text-xs font-semibold">Archivos existentes:</p>
+                    <div v-for="(file, index) in existingFiles" :key="file.id" class="flex items-center justify-between bg-gray-100 p-1 rounded">
+                        <a :href="file.url" target="_blank" class="text-xs text-blue-600 hover:underline">{{ file.nombre_original }}</a>
+                        <button @click="removeExistingFile(file, index)" class="text-red-500 hover:text-red-700">
+                            <XCircleIcon class="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
             </div>
-
-            <CheckBox v-model="formData.status" label="Habilitar programación para los docentes" class="mt-4" />
-
-            <Button :title="documento?.id ? 'Guardar Cambios' : 'Crear Programación'"
-                :loading-title="documento?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
-                :loading="saving || updating" @click="onSubmit" />
+            <CheckBox v-model="formData.status" label="Publicar esta programación para los docentes" class="mt-4" />
+             <p class="text-xs text-gray-500">Al desmarcar esto, la programación quedará como borrador y no será visible para los docentes.</p>
+            <Button title="Crear Programación" loading-title="Creando..." class="!mt-6 !w-full" :loading="saving" @click="onSubmit" />
         </div>
     </Slider>
 </template>

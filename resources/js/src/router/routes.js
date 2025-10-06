@@ -254,5 +254,16 @@ export default [
             breadcrumb: [{ text: 'Gestión de Documentos', to: { name: 'documentos' } }],
         }
     },
+    {
+    path: '/programacion/:id',
+    name: 'programacion.detalle',
+    component: () => import('../pages/Documento/ProgramacionDetalle.vue'),
+    props: true,
+    meta: {
+        layout: 'dashboard',
+        parent: 'documentos', 
+        breadcrumb: { text: 'Estado de Entregas por Grupo' }
+    }
+},
 
 ];

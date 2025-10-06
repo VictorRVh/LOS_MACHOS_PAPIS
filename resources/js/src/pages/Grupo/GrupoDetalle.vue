@@ -39,11 +39,10 @@ onMounted(async () => {
   try {
    
     await grupoStore.loadInfoGrupo(groupId);
-    infoGrupo.value = grupoStore.infoGrupo;
-  
-      breadcrumb.setTextItemAuto("Pepito", groupId, "grupo");
+    infoGrupo.value = grupoStore.infoGrupo;  
+    console.log(infoGrupo.value);
+    breadcrumb.setTextItemAuto("Pepito", groupId, "grupo");
 
-    
   } catch (error) {
     
     console.error(error);

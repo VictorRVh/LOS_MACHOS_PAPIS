@@ -3,12 +3,12 @@ import { ref } from 'vue';
 import axios from '../../utils/axios';
 
 const useDocumentoStore = defineStore('documento', () => {
-    const documentos = ref([]);
+    const programaciones = ref([]);
     const loading = ref(false);
 
-    const loadDocumentos = async (idPeriodo) => {
+    const loadProgramaciones = async (idPeriodo) => {
         if (!idPeriodo) {
-            documentos.value = [];
+            programaciones.value = [];
             return;
         }
         loading.value = true;
@@ -16,20 +16,20 @@ const useDocumentoStore = defineStore('documento', () => {
             const response = await axios.get('/entregas-admin', {
                 params: { id_periodo: idPeriodo }
             });
-            documentos.value = response.data;
+            programaciones.value = response.data;
         } catch (error) {
-            console.error('Error al cargar la programación de entregas:', error);
-            documentos.value = [];
+            console.error('Error al cargar las programaciones:', error);
+            programaciones.value = [];
         } finally {
             loading.value = false;
         }
     };
-
-    return {
-        documentos,
-        loading,
-        loadDocumentos,
+    
+    const addProgramacion = (programacion) => {
+        programaciones.value.unshift(programacion);
     };
+
+    return { programaciones, loading, loadProgramaciones, addProgramacion };
 });
 
 export default useDocumentoStore;

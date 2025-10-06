@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch, onMounted } from "vue";
+import { useRouter } from "vue-router"; // <-- IMPORTANTE: Añadir router
 import { storeToRefs } from "pinia";
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
@@ -12,13 +13,12 @@ import CreateButton from "../../components/ui/CreateButton.vue";
 import BaseSelect from "../../components/ui/BaseSelect.vue";
 import DocumentoSlider from '../../components/page/Documento/DocumentoSlider.vue';
 
-// <-- ¡CAMBIO CLAVE AQUÍ! Usamos el store que filtra por estado.
 import usePeriodoStatusStore from "../../store/Periodo/usePeriodoStatusStore";
 import useDocumentoStore from "../../store/Documento/useDocumentoStore";
 import useSlider from "../../composables/useSlider";
 
+const router = useRouter(); // <-- IMPORTANTE: Inicializar router
 const periodoStore = usePeriodoStatusStore();
-// Renombramos 'periodos' a 'periodosActivos' para que el resto del código no se rompa.
 const { periodos: periodosActivos } = storeToRefs(periodoStore);
 if (!periodoStore.periodos.length) await periodoStore.loadPeriodos();
 
@@ -40,6 +40,7 @@ watch(selectedPeriodo, (newPeriodoId) => {
 const { slider, sliderData, showSlider, hideSlider } = useSlider("programacion-crud");
 
 const getProgramacionStatus = (doc) => {
+    if (!doc.fecha_inicio) return { text: 'Sin Fecha', class: 'bg-gray-100 text-gray-600' };
     const ahora = new Date();
     const inicio = new Date(doc.fecha_inicio);
     const fin = new Date(doc.fecha_fin);
@@ -50,9 +51,20 @@ const getProgramacionStatus = (doc) => {
     return { text: 'Finalizado', class: 'bg-red-100 text-red-600' };
 };
 
+// <-- ¡CORRECCIÓN DEL BUG!
 const formatFecha = (fecha) => {
+    if (!fecha) return 'N/A'; // Si la fecha es nula, no intentes formatearla
     const date = new Date(fecha + 'T00:00:00');
+    if (isNaN(date)) return 'Fecha inválida'; // Verificación extra
     return date.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
+// <-- ¡NUEVA FUNCIÓN! Para ir al detalle
+const verDetalleEntrega = (programacion) => {
+    router.push({
+        name: 'programacion.detalle',
+        params: { id: programacion.id },
+    });
 };
 </script>
 
@@ -64,7 +76,6 @@ const formatFecha = (fecha) => {
                 <CreateButton @click="showSlider(true)" title="Nueva Programación" :disabled="!selectedPeriodo"/>
             </div>
             <div class="flex-between my-5">
-                <!-- Este select ahora usa la lista correcta de periodos ACTIVOS -->
                 <BaseSelect v-model="selectedPeriodo" :options="periodosActivos" label="nombre_periodo" value-prop="id" placeholder="Seleccione un Periodo" class="w-72" />
             </div>
         </div>
@@ -81,7 +92,8 @@ const formatFecha = (fecha) => {
                 <Tr v-if="loading"><Td colspan="6" class="text-center">Cargando...</Td></Tr>
                 <Tr v-else-if="!selectedPeriodo"><Td colspan="6" class="text-center">Seleccione un periodo para empezar.</Td></Tr>
                 <Tr v-else-if="programaciones.length === 0"><Td colspan="6" class="text-center">No hay programaciones para este periodo. ¡Crea una!</Td></Tr>
-                <Tr v-for="prog in programaciones" :key="prog.id">
+                <!-- ¡CAMBIOS AQUÍ para hacer la fila clickeable! -->
+                <Tr v-for="prog in programaciones" :key="prog.id" @click="verDetalleEntrega(prog)" class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700" title="Click para ver el estado de entrega por grupo">
                     <Td>
                         <p class="font-semibold text-gray-800">{{ prog.tipo_entrega }}</p>
                         <p class="text-xs text-gray-500 max-w-xs">{{ prog.descripcion }}</p>
@@ -98,7 +110,7 @@ const formatFecha = (fecha) => {
                         <span v-else class="px-2 py-1 text-xs rounded-md font-semibold text-gray-600 bg-gray-100">Borrador</span>
                     </Td>
                     <Td class="text-center">
-                       <MenuTable :actions="{ edit: true, delete: true }" @edit="showSlider(true, prog)" />
+                       <MenuTable :actions="{ edit: true, delete: true }" @edit.stop="showSlider(true, prog)" @delete.stop="onDelete(prog)" />
                     </Td>
                 </Tr>
             </TBody>

@@ -3,7 +3,7 @@ import { useLayoutStore } from '@/store/useLayoutStore';
 import usePermissions from '@/composables/usePermissions';
 import {
   UsersIcon, ShieldCheckIcon, KeyIcon, AcademicCapIcon, PresentationChartLineIcon,
-  CalendarDaysIcon, NewspaperIcon, UserGroupIcon, RectangleStackIcon, IdentificationIcon, TagIcon, XMarkIcon
+  CalendarDaysIcon, NewspaperIcon, UserGroupIcon, RectangleStackIcon, IdentificationIcon, TagIcon, XMarkIcon, DocumentDuplicateIcon
 } from '@heroicons/vue/24/outline';
 
 const { hasPermission } = usePermissions();
@@ -20,6 +20,7 @@ const navLinks = [
     { name: 'Especialidad', routeName: 'especialidad', icon: AcademicCapIcon, permissions: ["todo-acceso-especialidades", "ver-especialidades"]},
     { name: 'Comisión', routeName: 'comision', icon: UserGroupIcon, permissions: ["todo-acceso-comisiones", "ver-comisiones"]},
     { name: 'Programa', routeName: 'programa', icon: RectangleStackIcon, permissions: ["todo-acceso-programas", "ver-programas"]},
+    { name: 'Doc. Curricular', routeName: 'documentos', icon: DocumentDuplicateIcon, permissions: ['ver-programacion-entregas'] }, // Usaremos un permiso específico
     { name: 'Matricula', routeName: 'matricula.index', icon: IdentificationIcon, permissions: ["todo-acceso-permisos", "ver-permisos"]},
     { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-permisos", "ver-permisos"]},
     { name: 'Mis Módulos', routeName: 'moduloAsignado', icon: AcademicCapIcon, permissions: ["ver-mis-modulos", "ver-estudiantes-asignados"]},
@@ -28,7 +29,6 @@ const navLinks = [
 
 <template>
     <div>
-        <!-- Sidebar para Escritorio -->
         <aside
             class="bg-cetpro dark:bg-gray-800 text-cetpro-text hidden lg:flex flex-col shrink-0 h-screen transition-all duration-300 ease-in-out"
             :class="layoutStore.isSidebarCollapsed ? 'w-25' : 'w-38'"
@@ -46,7 +46,8 @@ const navLinks = [
             <nav class="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
                 <ul class="py-0">
                     <li v-for="link in navLinks" :key="link.name">
-                        <RouterLink v-if="hasPermission(link.permissions)" :to="{ name: link.routeName }" v-slot="{ isActive }" class="relative flex flex-col items-center justify-center w-full h-[60px] transition-colors text-cetpro-text/80 hover:bg-cetpro-light hover:text-white group" :class="{ '!bg-cetpro-dark !text-white': isActive }">
+                       
+                        <RouterLink v-if="link.routeName === 'documentos' || hasPermission(link.permissions)" :to="{ name: link.routeName }" v-slot="{ isActive }" class="relative flex flex-col items-center justify-center w-full h-[60px] transition-colors text-cetpro-text/80 hover:bg-cetpro-light hover:text-white group" :class="{ '!bg-cetpro-dark !text-white': isActive }">
                             <span v-if="isActive" class="absolute left-0 top-0 h-full w-1 bg-white rounded-r-full"></span>
                             <component :is="link.icon" class="h-7 w-7 shrink-0" />
                             <span v-if="!layoutStore.isSidebarCollapsed" class="mt-0 text-xs font-medium whitespace-nowrap">{{ link.name }}</span>
@@ -70,7 +71,8 @@ const navLinks = [
             <nav class="flex-1 overflow-y-auto custom-scrollbar">
                 <ul class="py-4">
                     <li v-for="link in navLinks" :key="link.name">
-                        <RouterLink v-if="hasPermission(link.permissions)" :to="{ name: link.routeName }" v-slot="{ isActive }" @click="layoutStore.toggleSidebarMobile" class="flex items-center px-6 py-3 text-cetpro-text/80 hover:bg-cetpro-light hover:text-white" :class="{ '!bg-cetpro-dark !text-white font-semibold': isActive }">
+                         <!-- Y AQUÍ TAMBIÉN -->
+                        <RouterLink v-if="link.routeName === 'documentos' || hasPermission(link.permissions)" :to="{ name: link.routeName }" v-slot="{ isActive }" @click="layoutStore.toggleSidebarMobile" class="flex items-center px-6 py-3 text-cetpro-text/80 hover:bg-cetpro-light hover:text-white" :class="{ '!bg-cetpro-dark !text-white font-semibold': isActive }">
                             <component :is="link.icon" class="h-6 w-6 mr-4" />
                             <span>{{ link.name }}</span>
                         </RouterLink>

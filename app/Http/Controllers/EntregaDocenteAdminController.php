@@ -106,4 +106,36 @@ class EntregaDocenteAdminController extends Controller
 
         return response()->json(null, 204);
     }
+
+
+    // API DE PROGRAMACIOND DEL COORDINADOR
+    public function indexByPeriodo($id_periodo)
+    {
+        try {
+            $periodo = Periodo::findOrFail($id_periodo);
+
+            $programaciones = EntregaDocenteAdmin::where('id_periodo', $id_periodo)
+                ->orderBy('created_at', 'desc')
+                ->get([
+                    'id',
+                    'tipo_entrega',
+                    'fecha_inicio',
+                    'fecha_fin',
+                    'status',
+                    'mostrar',
+                    'created_at',
+                ]);
+
+            return response()->json([
+                'periodo' => $periodo->nombre_periodo,
+                'total_programaciones' => $programaciones->count(),
+                'programaciones' => $programaciones,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al obtener las programaciones',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

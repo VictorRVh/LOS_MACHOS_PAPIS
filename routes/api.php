@@ -264,6 +264,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
+    Route::get('programacion_admin/{id_periodo}', [
+        \App\Http\Controllers\EntregaDocenteAdminController::class,
+        'indexByPeriodo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
     Route::post('entrega_docente_admin', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'store',

@@ -16,6 +16,7 @@ import DocumentoSlider from '../../components/page/Documento/DocumentoSlider.vue
 import usePeriodoStatusStore from "../../store/Periodo/usePeriodoStatusStore";
 import useDocumentoStore from "../../store/Documento/useDocumentoStore";
 import useSlider from "../../composables/useSlider";
+import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 
 const router = useRouter(); // <-- IMPORTANTE: Inicializar router
 const periodoStore = usePeriodoStatusStore();
@@ -25,16 +26,16 @@ if (!periodoStore.periodos.length) await periodoStore.loadPeriodos();
 const selectedPeriodo = ref(periodosActivos.value[0]?.id || null);
 
 const documentoStore = useDocumentoStore();
-const { programaciones, loading } = storeToRefs(documentoStore);
+const { programacionAdmin, loading } = storeToRefs(documentoStore);
 
 onMounted(() => {
     if (selectedPeriodo.value) {
-        documentoStore.loadProgramaciones(selectedPeriodo.value);
+        documentoStore.loadgetProgramacionAdminByPerido(selectedPeriodo.value);
     }
 });
 
 watch(selectedPeriodo, (newPeriodoId) => {
-    documentoStore.loadProgramaciones(newPeriodoId);
+    documentoStore.loadgetProgramacionAdminByPerido(newPeriodoId);
 });
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("programacion-crud");
@@ -66,6 +67,9 @@ const verDetalleEntrega = (programacion) => {
         params: { id: programacion.id },
     });
 };
+
+console.log('datos', programacionAdmin.value.programaciones)
+
 </script>
 
 <template>
@@ -76,7 +80,7 @@ const verDetalleEntrega = (programacion) => {
                 <CreateButton @click="showSlider(true)" title="Nueva Programación" :disabled="!selectedPeriodo"/>
             </div>
             <div class="flex-between my-5">
-                <BaseSelect v-model="selectedPeriodo" :options="periodosActivos" label="nombre_periodo" value-prop="id" placeholder="Seleccione un Periodo" class="w-72" />
+                <BaseSelectGrupo v-model="selectedPeriodo" :options="periodosActivos" label="nombre_periodo" value-prop="id" placeholder="Seleccione un Periodo" class="w-72" />
             </div>
         </div>
         <Table>
@@ -91,9 +95,9 @@ const verDetalleEntrega = (programacion) => {
             <TBody>
                 <Tr v-if="loading"><Td colspan="6" class="text-center">Cargando...</Td></Tr>
                 <Tr v-else-if="!selectedPeriodo"><Td colspan="6" class="text-center">Seleccione un periodo para empezar.</Td></Tr>
-                <Tr v-else-if="programaciones.length === 0"><Td colspan="6" class="text-center">No hay programaciones para este periodo. ¡Crea una!</Td></Tr>
+                <Tr v-else-if="programaciones?.length === 0"><Td colspan="6" class="text-center">No hay programaciones para este periodo. ¡Crea una!</Td></Tr>
                 <!-- ¡CAMBIOS AQUÍ para hacer la fila clickeable! -->
-                <Tr v-for="prog in programaciones" :key="prog.id" @click="verDetalleEntrega(prog)" class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700" title="Click para ver el estado de entrega por grupo">
+                <Tr v-for="prog in programacionAdmin.programaciones" :key="prog.id" @click="verDetalleEntrega(prog)" class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700" title="Click para ver el estado de entrega por grupo">
                     <Td>
                         <p class="font-semibold text-gray-800">{{ prog.tipo_entrega }}</p>
                         <p class="text-xs text-gray-500 max-w-xs">{{ prog.descripcion }}</p>

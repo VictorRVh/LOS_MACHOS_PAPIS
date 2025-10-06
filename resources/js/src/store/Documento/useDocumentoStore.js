@@ -1,35 +1,28 @@
-import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import axios from '../../utils/axios';
+import { defineStore } from 'pinia';
 
-const useDocumentoStore = defineStore('documento', () => {
-    const programaciones = ref([]);
-    const loading = ref(false);
+import useHttpRequest from '../../composables/useHttpRequest';
 
-    const loadProgramaciones = async (idPeriodo) => {
-        if (!idPeriodo) {
-            programaciones.value = [];
-            return;
-        }
-        loading.value = true;
-        try {
-            const response = await axios.get('/entregas-admin', {
-                params: { id_periodo: idPeriodo }
-            });
-            programaciones.value = response.data;
-        } catch (error) {
-            console.error('Error al cargar las programaciones:', error);
-            programaciones.value = [];
-        } finally {
-            loading.value = false;
-        }
-    };
-    
-    const addProgramacion = (programacion) => {
-        programaciones.value.unshift(programacion);
+const useProgramacionAdmintore = defineStore('programacion_admin', () => {
+    const {
+        index: getProgramacionAdmin,
+        show: getProgramacionAdminByPerido,
+        loading: ProgramacionAdminLoading,
+        initialLoading: ProgramacionAdminFirstTimeLoading,
+    } = useHttpRequest('/programacion_admin');
+
+    const programacionAdmin = ref([]);
+    const loadgetProgramacionAdminByPerido = async (id) => {
+        const res = await getProgramacionAdminByPerido(id);
+        programacionAdmin.value = res;
     };
 
-    return { programaciones, loading, loadProgramaciones, addProgramacion };
+    return {
+        programacionAdmin,
+        loadgetProgramacionAdminByPerido,
+        ProgramacionAdminLoading,
+        ProgramacionAdminFirstTimeLoading,
+    };
 });
 
-export default useDocumentoStore;
+export default useProgramacionAdmintore;

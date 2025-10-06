@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EntregaDocente;
 use App\Models\EntregaDocenteAdmin;
+use App\Models\Grupo;
+use App\Models\Periodo;
 use Illuminate\Http\Request;
 
 class EntregaDocenteAdminController extends Controller
@@ -20,15 +23,55 @@ class EntregaDocenteAdminController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tipo_entrega' => 'required|string|max:100',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'status' => 'required|integer|in:0,1,2,3',
+            'tipo_entrega'    => 'required|string|max:255',
+            'fecha_inicio'    => 'required|date',
+            'fecha_fin'       => 'required|date|after_or_equal:fecha_inicio',
+            'id_periodo'      => 'required|exists:periodo,id',
+            'mostrar'         => 'nullable|boolean',
+            'observavcion'    => 'nullable|string',
         ]);
 
-        $entrega = EntregaDocenteAdmin::create($request->all());
+        // Buscar el periodo
+        $periodo = Periodo::findOrFail($request->id_periodo);
 
-        return response()->json($entrega, 201);
+        // Crear el registro principal (programación del admin)
+        $adminEntrega = EntregaDocenteAdmin::create([
+            'id_periodo'    => $periodo->id,
+            'tipo_entrega'  => $request->tipo_entrega,
+            'fecha_inicio'  => $request->fecha_inicio,
+            'fecha_fin'     => $request->fecha_fin,
+            'status'        => 1,
+            'mostrar' => $request->mostrar ?? false,
+        ]);
+
+        // Obtener todos los grupos del periodo
+        $grupos = Grupo::where('id_periodo', $periodo->id)->get();
+
+        if ($grupos->isEmpty()) {
+            return response()->json([
+                'message' => 'No se encontraron grupos para el periodo ' . $periodo->nombre_periodo,
+            ], 404);
+        }
+
+        // Crear entregas individuales para cada grupo
+        foreach ($grupos as $grupo) {
+            EntregaDocente::create([
+                'id_grupo'        => $grupo->id,
+                'fecha_inicio'    => $request->fecha_inicio,
+                'fecha_fin'       => $request->fecha_fin,
+                'estado'          => 1,
+                'id_admin'        => $adminEntrega->id,
+                'documento_admin' => $request->tipo_entrega,
+                'observacion'     => $request->observacion ?? '',
+            ]);
+        }
+
+        // Respuesta
+        return response()->json([
+            'message'          => 'Entrega programada para todos los grupos del periodo ' . $periodo->nombre_periodo,
+            'cantidad_grupos'  => $grupos->count(),
+            'entrega_admin_id' => $adminEntrega->id,
+        ]);
     }
 
     // Mostrar uno por ID

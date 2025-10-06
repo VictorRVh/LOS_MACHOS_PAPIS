@@ -19,7 +19,9 @@ class EntregaDocenteAdmin extends Model
         'tipo_entrega',
         'fecha_inicio',
         'fecha_fin',
-        'status'
+        'status',
+        'id_periodo',
+        'mostrar'
     ];
 
     protected $appends = ['status_texto'];
@@ -49,6 +51,6 @@ class EntregaDocenteAdmin extends Model
 
     public function entregaDocente()
     {
-        return $this->hasMany(entregaDocente::class, 'id_admin');
+        return $this->hasMany(EntregaDocente::class, 'id_admin');
     }
 }

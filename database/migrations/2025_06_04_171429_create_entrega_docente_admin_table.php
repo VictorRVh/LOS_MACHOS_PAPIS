@@ -19,6 +19,11 @@ return new class extends Migration
             $table->date('fecha_fin')->nullable();
             $table->tinyInteger('status')->default(0);
 
+            $table->uuid('id_periodo');
+            $table->foreign('id_periodo')->references('id')->on('periodo')->onDelete('cascade');
+
+            $table->boolean('mostrar')->default(0);
+
             $table->timestamps();
         });
     }

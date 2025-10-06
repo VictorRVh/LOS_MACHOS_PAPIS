@@ -44,7 +44,7 @@ class EntregaDocente extends Model
 
     public function entregaDocenteAdmin()
     {
-        return $this->belongsTo(entregaDocenteAdmin::class, 'id_admin');
+        return $this->belongsTo(EntregaDocenteAdmin::class, 'id_admin');
     }
 
     public function entregaRealizada()

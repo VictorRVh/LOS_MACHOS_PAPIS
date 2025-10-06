@@ -13,6 +13,7 @@ import usePeriodoStatusStore from '../../../store/Periodo/usePeriodoStatusStore'
 import useHttpRequest from '../../../composables/useHttpRequest';
 import useModalToast from '../../../composables/useModalToast';
 import { XCircleIcon } from '@heroicons/vue/24/solid';
+import BaseSelectGrupo from '../../ui/BaseSelectGrupo.vue';
 
 const props = defineProps({
     show: { type: Boolean, default: false },
@@ -25,7 +26,7 @@ const periodoStore = usePeriodoStatusStore();
 // Renombramos 'periodos' a 'periodosActivos' para que el resto del código no se rompa.
 const { periodos: periodosActivos } = storeToRefs(periodoStore);
 
-const { store: createEntrega, saving } = useHttpRequest('/entregas-admin');
+const { store: createEntrega, saving } = useHttpRequest('/entrega_docente_admin');
 const { destroy: deleteDocumento } = useHttpRequest('/entregas-admin-documento');
 const { showToast } = useModalToast();
 
@@ -37,7 +38,7 @@ const initialFormData = () => ({
     descripcion: '',
     fecha_inicio: '',
     fecha_fin: '',
-    status: false,
+    status: true,
     archivos: [],
 });
 
@@ -106,7 +107,9 @@ const onSubmit = async () => {
             <div>
                 <label class="form-label required">Periodo Académico</label>
                 <!-- Este select ahora usa la lista correcta de periodos ACTIVOS -->
-                <BaseSelect v-model="formData.id_periodo" :options="periodosActivos" label="nombre_periodo" value-prop="id" placeholder="Seleccione un Periodo" />
+                <!-- <BaseSelect v-model="formData.id_periodo" :options="periodosActivos" label="nombre_periodo" value-prop="id" placeholder="Seleccione un Periodo" /> -->
+                <BaseSelectGrupo v-model="formData.id_periodo" :options="periodoStore.periodos" label="nombre_periodo"
+              placeholder="Seleccione un periodo"/>
             </div>
             <FormInput v-model="formData.tipo_entrega" label="Título o Tipo de Entrega" required />
             <div>

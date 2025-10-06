@@ -267,7 +267,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('entrega_docente_admin', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
     Route::patch('entrega_docente_admin/{id}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,

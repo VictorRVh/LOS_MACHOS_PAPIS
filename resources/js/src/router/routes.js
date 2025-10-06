@@ -239,5 +239,15 @@ export default [
             breadcrumb: [{ text: 'Mis Módulos', to: { name: 'moduloAsignado' } }, { text: 'Lista de Alumnos' }]
         }
     },
+    {
+        path: '/documentos',
+        name: 'documentos',
+        component: () => import('../pages/Documento/Documento.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos'], 
+            breadcrumb: [{ text: 'Gestión de Documentos', to: { name: 'documentos' } }],
+        }
+    },
 
 ];

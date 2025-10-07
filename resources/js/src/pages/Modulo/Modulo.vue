@@ -15,8 +15,12 @@ import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import ModuloSlider from "../../components/page/Modulo/ModuloSlider.vue";
 import useModuloStore from "../../store/Modulos/useModulosStore";
+import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
+
 
 const moduloStore = useModuloStore();
+const breadcrumb = useBreadcrumbStore();
+
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
@@ -30,7 +34,23 @@ const props = defineProps({
 
 });
 
-if (!moduloStore?.moduloFiltrado?.length) await moduloStore.loadModuloById(props.idEspecialidadPrograma)
+onMounted(async () => {
+  // Cargar módulos del programa actual
+  if (!moduloStore?.moduloFiltrado?.length) {
+    await moduloStore.loadModuloById(props.idEspecialidadPrograma);
+  }
+
+  const nombreEsp =
+    moduloStore?.moduloFiltrado?.especialidad_programa?.especialidad_madre
+      ?.nombre_especialidad || "Especialidad sin nombre";
+
+  breadcrumb.setTextItemAuto(
+    `Especialidad: ${nombreEsp}`,
+    props.idEspecialidadPrograma,
+    "especialidadPrograma"
+  );
+});
+
 
 // Generar los módulos dinámicamente
 const indexModulos = ref([]);
@@ -62,7 +82,7 @@ const indicesArray = computed(() => {
 
 const onDelete = (modulo) => {
 
-  console.log('eliminar modulo', modulo)
+  //console.log('eliminar modulo', modulo)
 
   if (deleting.value) return;
 

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed,onMounted } from 'vue';
 import { useRouter } from "vue-router";
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
@@ -16,6 +16,7 @@ import useHttpRequest from "../../composables/useHttpRequest";
 import useEspecialidadStore from "../../store/Especialidad/useEspecialidadStore";
 import useEspecialidadProgramaStore from "../../store/EspecialidadPrograma/useEspecialidadProgramaStore";
 import EspecialidadProgramaSlider from "../../components/page/EspecialidadPrograma/EspecialidadProgramaSlider.vue";
+import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 
 const props = defineProps({
   idPrograma: {
@@ -26,25 +27,33 @@ const props = defineProps({
 
 const especialidadStore = useEspecialidadStore();
 const especialidadProgramaStore = useEspecialidadProgramaStore();
+const breadcrumb = useBreadcrumbStore();
+
 const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deletePrograma, deleting } = useHttpRequest("/especialidad_programa");
 const router = useRouter();
 
-if (!especialidadProgramaStore?.especialidadPrograma?.length) {
-  await especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma);
-}
 
-if (!especialidadStore?.especialidadPrograma?.length||especialidadProgramaStore?.especialidadProgramaFiltrado?.ciclo) {
-  const cicloId = especialidadProgramaStore.especialidadProgramaFiltrado?.ciclo?.id;
-  await especialidadStore.loadEspecialidadCiclo(cicloId);
-}
+
+
+onMounted(async () => {
+  await especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma);
+
+  const ciclo = especialidadProgramaStore.especialidadProgramaFiltrado?.ciclo;
+  const programaNombre = ciclo?.nombre_ciclo || "Ciclo sin nombre";
+  if (ciclo?.id) {
+    await especialidadStore.loadEspecialidadCiclo(ciclo.id);
+  }
+  breadcrumb.setTextItemAuto(programaNombre, props.idPrograma, "programa");
+});
+
+
 
 const especialidadesDisponibles = computed(() => {
   const asignadas = especialidadProgramaStore?.especialidadProgramaFiltrado?.especialidad_programas?.map(
     (ep) => ep?.especialidad_madre.id
   ) || [];
-
   // especialidad actual si estamos editando
   const currentId = sliderData.value?.especialidad_madre?.id;
 

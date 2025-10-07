@@ -26,14 +26,23 @@ router.beforeEach(async (to, from, next) => {
                     const crumb = result.crumb ? result.crumb : result;
 
                     // Si ya existe en itemsText, usamos el mismo objeto para mantener orden
-                    const existing = await breadcrumbStore.findTextById(paramsForParent.id);
+                    // ✅ Soporte para distintos tipos de parámetros de id
+                    const idKey = Object.keys(paramsForParent).find(k =>
+                        k.toLowerCase().includes('id')
+                    );
+                    const idValue = paramsForParent[idKey];
+
+                    // Buscar en el store usando el id correcto
+                    const existing = idValue
+                        ? await breadcrumbStore.findTextById(idValue)
+                        : null;
                     // Si ya existe, usamos el mismo objeto
                     if (existing) {
                         finalCrumbs.unshift(existing);
                     } else {
                         const newCrumb = {
                             text: crumb.text,
-                            id: paramsForParent.id,
+                            id: idValue,
                             to: to.fullPath,   // 👈 así puedes volver al nivel
                             parent: currentRouteRecord.meta?.parent
                         };

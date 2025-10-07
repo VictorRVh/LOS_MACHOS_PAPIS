@@ -47,10 +47,11 @@ export default [
                 const breadcrumbStore = useBreadcrumbStore();
                 let item = await breadcrumbStore.findTextById(route?.params?.idPrograma);
                 return {
-                    text: item?.name,
-                    to: { name: 'especialidadPrograma', params: { idPrograma: route?.params?.idPrograma } }
+                    text: item?.name || 'Cargando...',
+                    to: { name: route?.name, params:{idPrograma: item?.id}}
                 };
             },
+            
         },
     },
     {
@@ -63,31 +64,19 @@ export default [
             permissions: ['todo-acceso-permisos'],
             parent: 'especialidadPrograma',
             breadcrumb: async (route) => {
-                const espProgramaStore = useEspecialidadProgramaStore();
-                await espProgramaStore.loadEspecialidadProgramaById(route.params.idPrograma);
-                const espPrograma = espProgramaStore.especialidadProgramaFiltrado?.especialidad_programas?.find(
-                    ep => ep.id == route.params.idEspecialidadPrograma
-                );
+                const breadcrumbStore = useBreadcrumbStore();
+                let item = await breadcrumbStore.findTextById(route?.params?.idEspecialidadPrograma);
                 return {
-                    crumb: {
-                        text: 'Especialidad: ' + (espPrograma?.especialidad_madre?.nombre_especialidad || 'Cargando...'),
-                        to: { name: 'modulo', params: route.params }
-                    },
-                    parentParams: { idPrograma: route.params.idPrograma }
+                    text: item?.name || 'Cargando...',
+                    to: { name: route?.name, params:{idEspecialidadPrograma: item?.id}}
                 };
             }
         },
     },
-    { path: '/programa/crear', name: 'programa.crear', component: () => import('../pages/Programa/Programa.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Programas de Estudio', to: { name: 'programa' } }, { text: 'Crear' }] } },
-    { path: '/programa/editar/:id', name: 'programa.editar', component: () => import('../pages/Programa/Programa.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Programas de Estudio', to: { name: 'programa' } }] }, },
-    { path: '/especialidadPrograma/:id/editar', 
-        name: 'especialidadPrograma.editar', 
-        parent: 'programa.crear',
-        component: () => import('../pages/EspecialidadPrograma/EspecialidadPrograma.vue'), props: true, meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
     {
         path: '/matricula',
         name: 'matricula.index',
-        
+
         component: () => import('../pages/Matricula/Matricula.vue'),
         meta: {
             layout: 'dashboard',
@@ -250,20 +239,20 @@ export default [
         component: () => import('../pages/Documento/Documento.vue'),
         meta: {
             layout: 'dashboard',
-            permissions: ['todo-acceso-permisos'], 
+            permissions: ['todo-acceso-permisos'],
             breadcrumb: [{ text: 'Gestión de Documentos', to: { name: 'documentos' } }],
         }
     },
     {
-    path: '/programacion/:id',
-    name: 'programacion.detalle',
-    component: () => import('../pages/Documento/ProgramacionDetalle.vue'),
-    props: true,
-    meta: {
-        layout: 'dashboard',
-        parent: 'documentos', 
-        breadcrumb: { text: 'Estado de Entregas por Grupo' }
-    }
-},
+        path: '/programacion/:id',
+        name: 'programacion.detalle',
+        component: () => import('../pages/Documento/ProgramacionDetalle.vue'),
+        props: true,
+        meta: {
+            layout: 'dashboard',
+            parent: 'documentos',
+            breadcrumb: { text: 'Estado de Entregas por Grupo' }
+        }
+    },
 
 ];

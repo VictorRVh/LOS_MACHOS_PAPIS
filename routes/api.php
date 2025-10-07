@@ -262,27 +262,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('entrega_docente_admin', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-documento-programado|ver-documento-programado');
 
     Route::get('programacion_admin/{id_periodo}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'indexByPeriodo',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-documento-programado|ver-documento-programado');
 
     Route::post('entrega_docente_admin', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-documento-programado|crear-documento-programado');
 
     Route::patch('entrega_docente_admin/{id}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
+    ])->middleware('permission:todo-documento-programado|editar-documento-programado');
 
     Route::delete('entrega_docente_admin/{id}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-documento-programado|eliminar-documento-programado');
 
 
     // RUTA PARA ESPECIALIDAD_MADRE

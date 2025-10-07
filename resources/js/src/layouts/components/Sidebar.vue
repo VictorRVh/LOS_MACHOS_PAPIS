@@ -20,7 +20,7 @@ const navLinks = [
     { name: 'Especialidad', routeName: 'especialidad', icon: AcademicCapIcon, permissions: ["todo-acceso-especialidades", "icono-especialidades"]},
     { name: 'Comisión', routeName: 'comision', icon: UserGroupIcon, permissions: ["todo-acceso-comisiones", "icono-comisiones"]},
     { name: 'Programa', routeName: 'programa', icon: RectangleStackIcon, permissions: ["todo-acceso-programas", "icono-programas"]},
-    { name: 'Doc. Curricular', routeName: 'documentos', icon: DocumentDuplicateIcon, permissions: ['icono-programacion-entregas'] }, // Usaremos un permiso específico
+    { name: 'Doc. Curricular', routeName: 'documentos', icon: DocumentDuplicateIcon, permissions: ["todo-acceso-permisos", "icono-permisos"] }, // Usaremos un permiso específico
     { name: 'Matricula', routeName: 'matricula.index', icon: IdentificationIcon, permissions: ["todo-acceso-matriculas", "icono-matriculas"]},
     { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-grupos", "icono-grupos"]},
     { name: 'Mis Módulos', routeName: 'moduloAsignado', icon: AcademicCapIcon, permissions: ["ver-mis-modulos", "ver-estudiantes-asignados"]},
@@ -47,7 +47,7 @@ const navLinks = [
                 <ul class="py-0">
                     <li v-for="link in navLinks" :key="link.name">
                        
-                        <RouterLink v-if="link.routeName === 'documentos' || hasPermission(link.permissions)" :to="{ name: link.routeName }" v-slot="{ isActive }" class="relative flex flex-col items-center justify-center w-full h-[60px] transition-colors text-cetpro-text/80 hover:bg-cetpro-light hover:text-white group" :class="{ '!bg-cetpro-dark !text-white': isActive }">
+                        <RouterLink v-if="link.routeName === 'start' || hasPermission(link.permissions)" :to="{ name: link.routeName }" v-slot="{ isActive }" class="relative flex flex-col items-center justify-center w-full h-[60px] transition-colors text-cetpro-text/80 hover:bg-cetpro-light hover:text-white group" :class="{ '!bg-cetpro-dark !text-white': isActive }">
                             <span v-if="isActive" class="absolute left-0 top-0 h-full w-1 bg-white rounded-r-full"></span>
                             <component :is="link.icon" class="h-7 w-7 shrink-0" />
                             <span v-if="!layoutStore.isSidebarCollapsed" class="mt-0 text-xs font-medium whitespace-nowrap">{{ link.name }}</span>

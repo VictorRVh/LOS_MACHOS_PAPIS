@@ -15,7 +15,7 @@ class PermissionRoleTableSeeder extends Seeder
     {
         $permissionRole = [];
 
-        for ($i = 1; $i <= 78; $i++) {
+        for ($i = 1; $i <= 84; $i++) {
             $permissionRole[] = [
                 'role_id' => 1,
                 'permission_id' => $i,

@@ -121,6 +121,12 @@ class PermissionTableSeeder extends Seeder
             'eliminar-matriculas',
             'icono-matriculas',
 
+            'todo-documento-programado',
+            'ver-documento-programado',
+            'crear-documento-programado',
+            'editar-documento-programado',
+            'eliminar-documento-programado',
+            'icono-documento-programado',
 
             'ver-perfil-docente',
             'editar-perfil-docente',

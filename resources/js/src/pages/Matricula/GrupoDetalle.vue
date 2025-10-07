@@ -39,14 +39,6 @@ const loading = ref(false)
 const estudiantesSeleccionados = ref([]);
 const datosParaFicha = ref([]);
 
-
-const todosSeleccionados = computed({
-    get: () => matriculados.value.length > 0 && estudiantesSeleccionados.value.length === matriculados.value.length,
-    set: (value) => {
-        estudiantesSeleccionados.value = value ? matriculados.value.map(m => m.id) : [];
-    }
-});
-
 const editarMatricula = (matricula) => {
     alert(`Simulación: Redirigiendo a editar matrícula con ID ${matricula.id}`);
     router.push({ name: 'matricula.editar', params: { id: matricula.id } });
@@ -111,22 +103,6 @@ const exportarFicha = async (matricula) => {
         console.error('Error al exportar ficha:', error);
     }
 };
-const cambiarGrupo = () => {
-    if (estudiantesSeleccionados.value.length === 0) {
-        alert("Selecciona al menos un estudiante.");
-        return;
-    }
-    const nuevoGrupoId = prompt("Simulación: Ingresa el ID del nuevo grupo de destino:", "");
-    if (nuevoGrupoId && !isNaN(nuevoGrupoId)) {
-        saving.value = true;
-        setTimeout(() => {
-            matriculados.value = matriculados.value.filter(m => !estudiantesSeleccionados.value.includes(m.id));
-            estudiantesSeleccionados.value = [];
-            alert(`Estudiantes movidos al grupo ${nuevoGrupoId} (simulado).`);
-            saving.value = false;
-        }, 1500);
-    }
-};
 
 </script>
 <template>
@@ -142,20 +118,16 @@ const cambiarGrupo = () => {
                 </p>
             </div>
 
-            <div class="flex justify-start mb-4 ml-2">
+            <!-- <div class="flex justify-start mb-4 ml-2">
                 <Button title="Cambiar de Grupo Seleccionados" @click="cambiarGrupo"
                     :disabled="estudiantesSeleccionados.length === 0" :loading="saving" variant="secondary">
                     <ArrowPathIcon class="h-5 w-5 mr-2" />
                     Cambiar Grupo ({{ estudiantesSeleccionados.length }})
                 </Button>
-            </div>
+            </div> -->
 
             <Table>
                 <THead>
-                    <Th class="w-10 text-center">
-                        <input type="checkbox" v-model="todosSeleccionados"
-                            class="rounded border-gray-300 text-cetpro focus:ring-cetpro-light" />
-                    </Th>
                     <Th>N°</Th>
                     <Th>Estudiante</Th>
                     <Th>DNI</Th>
@@ -165,10 +137,7 @@ const cambiarGrupo = () => {
                 <TBody>
                     <Tr v-for="(matricula, index) in matriculados.matriculados" :key="matricula.id"
                         class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <Td class="text-center">
-                            <input type="checkbox" :value="matricula.id" v-model="estudiantesSeleccionados"
-                                class="rounded border-gray-300 text-cetpro focus:ring-cetpro-light" />
-                        </Td>
+
                         <Td>{{ index + 1 }}</Td>
                         <Td>{{ matricula.estudiante }}</Td>
                         <Td>{{ matricula.nro_documento }}</Td>

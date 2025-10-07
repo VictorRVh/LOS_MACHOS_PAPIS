@@ -105,7 +105,7 @@ const descargarNomina = async (idGrupo) => {
       { responseType: "blob" }
     );
 
-    console.log('respuesta excel: ', response)
+    // console.log('respuesta excel: ', response)
 
     // Descargar archivo
     const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -121,7 +121,7 @@ const descargarNomina = async (idGrupo) => {
 
 </script>
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-permisos']">
+  <AuthorizationFallback :permissions="['todo-acceso-grupos']">
     <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
       <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl m-2">
         Especialidad: {{ matriculados.especialidad }}

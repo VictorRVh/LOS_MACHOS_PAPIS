@@ -24,14 +24,14 @@ const useEspecialidadStore = defineStore('especialidadStore', () => {
   const {
     index: getEspecialidadCiclo,
     show: getEspecialidadByPrograma,
-    loading: loadingCiclo,
+    loading: especialidadByCicloLoading,
     initialLoading: initialCiclo,
   } = useHttpRequest('/especialidadByPrograma');
 
   const {
     index: getGrupoEspecialidad,
     show: getGrupoByEspecialidad,
-    loading: loadingGrupoEspecialidad,
+    loading: grupoByEspecialidadLoading,
     initialLoading: initialGrupoEspecialidad,
   } = useHttpRequest('/grupoByEspecialidad');
 
@@ -56,8 +56,6 @@ const useEspecialidadStore = defineStore('especialidadStore', () => {
 
   // Carga de especialidad por ciclo
   const loadEspecialidadPrograma = async (id) => {
-    especialidadLoading.value = loadingCiclo.value;
-    especialidadFirstTimeLoading.value = initialCiclo.value;
     const res = await getEspecialidadByPrograma(id);
     especialidadPrograma.value = res;
   };
@@ -88,7 +86,10 @@ const useEspecialidadStore = defineStore('especialidadStore', () => {
     gruposDisponibles,
 
     loadEspecialidadCiclo,
-    especialidadCiclo
+    especialidadCiclo,
+
+    especialidadByCicloLoading,
+    grupoByEspecialidadLoading
   };
 });
 

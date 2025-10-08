@@ -9,68 +9,69 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-
     const breadcrumbStore = useBreadcrumbStore();
 
     if (to?.name) {
         const finalCrumbs = [];
         const allRoutes = router.getRoutes();
-        let currentRouteRecord = allRoutes.find(r => r?.name === to?.name);
-        let paramsForParent = { ...to?.params };
+        let current = allRoutes.find(r => r?.name === to.name);
+        let paramsForParent = { ...to.params };
 
-        while (currentRouteRecord) {
-            const breadcrumbMeta = currentRouteRecord?.meta?.breadcrumb;
-            if (breadcrumbMeta) {
-                if (typeof breadcrumbMeta === 'function') {
-                    const result = await breadcrumbMeta({ params: paramsForParent });
-                    const crumb = result.crumb ? result.crumb : result;
+        const buildChain = [];
 
-                    // Si ya existe en itemsText, usamos el mismo objeto para mantener orden
-                    // ✅ Soporte para distintos tipos de parámetros de id
-                    const idKey = Object.keys(paramsForParent).find(k =>
-                        k.toLowerCase().includes('id')
-                    );
-                    const idValue = paramsForParent[idKey];
-
-                    // Buscar en el store usando el id correcto
-                    const existing = idValue
-                        ? await breadcrumbStore.findTextById(idValue)
-                        : null;
-                    // Si ya existe, usamos el mismo objeto
-                    if (existing) {
-                        finalCrumbs.unshift(existing);
-                    } else {
-                        const newCrumb = {
-                            text: crumb.text,
-                            id: idValue,
-                            to: to.fullPath,   // 👈 así puedes volver al nivel
-                            parent: currentRouteRecord.meta?.parent
-                        };
-                        finalCrumbs.unshift(newCrumb);
-                        breadcrumbStore.setTextItemAuto(newCrumb?.text, newCrumb?.id, newCrumb?.parent);
-                    }
-
-
-                    if (result?.parentParams) {
-                        paramsForParent = result?.parentParams;
-                    }
-                } else {
-                    const staticCrumbs = (Array.isArray(breadcrumbMeta) ? breadcrumbMeta : [breadcrumbMeta]).map(item => ({
-                        text: item?.name || item?.text,
-                        to: item?.to,
-                    }));
-                    finalCrumbs.unshift(...staticCrumbs);
-                }
-            }
-
-            const parentName = currentRouteRecord.meta?.parent;
-            currentRouteRecord = parentName ? allRoutes.find(r => r?.name === parentName) : null;
+        // 🔹 recorre hacia arriba (hijo → padre)
+        while (current) {
+            buildChain.unshift(current);
+            const parentName = current.meta?.parent;
+            if (!parentName) break;
+            current = allRoutes.find(r => r.name === parentName);
         }
 
-        breadcrumbStore.setBase(finalCrumbs);
+        // 🔹 recorre ahora padre → hijo (orden correcto)
+        for (const routeRecord of buildChain) {
+            const breadcrumbMeta = routeRecord.meta?.breadcrumb;
+
+            if (!breadcrumbMeta) continue;
+
+            if (typeof breadcrumbMeta === 'function') {
+                const result = await breadcrumbMeta({ params: paramsForParent });
+                const crumb = result.crumb || result;
+
+                const idKey = Object.keys(paramsForParent).find(k => k.toLowerCase().includes('id'));
+                const idValue = idKey ? paramsForParent[idKey] : null;
+
+                const existing = idValue ? await breadcrumbStore.findTextById(idValue) : null;
+
+                const newCrumb = {
+                    text: crumb.text,
+                    id: idValue,
+                    to: crumb.to || { name: routeRecord.name, params: to.params },
+                };
+
+                finalCrumbs.push(existing || newCrumb);
+
+                if (!existing)
+                    breadcrumbStore.setTextItemAuto(newCrumb.text, newCrumb.id, routeRecord.meta?.parent);
+
+                if (result?.parentParams)
+                    paramsForParent = result.parentParams;
+            } else {
+                const staticCrumbs = (Array.isArray(breadcrumbMeta) ? breadcrumbMeta : [breadcrumbMeta]);
+                finalCrumbs.push(...staticCrumbs);
+            }
+        }
+
+        const uniqueCrumbs = finalCrumbs.filter(
+            (item, index, self) =>
+                index === self.findIndex(
+                    (t) => t.text === item.text || (t.id && t.id === item.id)
+                )
+        );
+
+        breadcrumbStore.setBase(uniqueCrumbs);
     }
 
-
+    // 👇 autenticación (no tocar)
     const { isUserAuthenticated } = useAuth();
     if (from.name === to?.name) {
         return next();

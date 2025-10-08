@@ -39,32 +39,40 @@ class ModuloController extends Controller
     // Mostrar un módulo específico
     public function show($id)
     {
-        // Buscar los módulos asociados
-        $registros = Modulo::with(['especialidadPrograma'])
+        // Buscar los módulos con todas las relaciones necesarias
+        $registros = Modulo::with([
+            'especialidadPrograma.programaEstudio:id,año,id_ciclo',
+            'especialidadPrograma.programaEstudio.ciclo:id,nombre_ciclo',
+            'especialidadPrograma.especialidadMadre:id,nombre_especialidad'
+        ])
             ->where('id_especialidad', $id)
             ->orderByRaw('CAST(numero_modulo AS UNSIGNED) ASC')
             ->get();
 
         // Si NO hay módulos, igual buscamos la especialidad_programa
         if ($registros->isEmpty()) {
-            $especialidadPrograma = EspecialidadPrograma::where('id', $id)->first();
+            $especialidadPrograma = EspecialidadPrograma::with([
+                'programaEstudio:id,año,id_ciclo',
+                'programaEstudio.ciclo:id,nombre_ciclo',
+                'especialidadMadre:id,nombre_especialidad'
+            ])->find($id);
 
             if (!$especialidadPrograma) {
                 return response()->json(['message' => 'No se encontró la especialidad asociada'], 404);
             }
 
-            // Limpiar los campos no deseados
-            $especialidadPrograma = collect($especialidadPrograma)->only([
-                'id',
-                'id_especialidad',
-                'id_programa',
-                'nro_modulos',
-            ]);
-
-            // Devolver sin módulos
+            // Devolver sin módulos, pero con los nombres jerárquicos
             return response()->json([
-                'especialidad_programa' => $especialidadPrograma,
-                'modulos' => [], // vacío pero consistente
+                'especialidad_programa' => [
+                    'id' => $especialidadPrograma->id,
+                    'id_especialidad' => $especialidadPrograma->id_especialidad,
+                    'id_programa' => $especialidadPrograma->id_programa,
+                    'nro_modulos' => $especialidadPrograma->nro_modulos,
+                    'anio' => $especialidadPrograma->programaEstudio?->año,
+                    'nombre_ciclo' => $especialidadPrograma->programaEstudio?->ciclo?->nombre_ciclo,
+                    'nombre_especialidad' => $especialidadPrograma->especialidadMadre?->nombre_especialidad,
+                ],
+                'modulos' => [],
             ]);
         }
 
@@ -72,14 +80,19 @@ class ModuloController extends Controller
         $especialidadPrograma = $registros->first()->especialidadPrograma;
 
         if ($especialidadPrograma) {
-            $especialidadPrograma = collect($especialidadPrograma)->only([
-                'id',
-                'id_especialidad',
-                'id_programa',
-                'nro_modulos',
-            ]);
+            $especialidadPrograma = [
+                'id' => $especialidadPrograma->id,
+                'id_especialidad' => $especialidadPrograma->id_especialidad,
+                'id_programa' => $especialidadPrograma->id_programa,
+                'nro_modulos' => $especialidadPrograma->nro_modulos,
+                'anio' => $especialidadPrograma->programaEstudio?->año,
+                'nombre_ciclo' => $especialidadPrograma->programaEstudio?->ciclo?->nombre_ciclo,
+
+                'nombre_especialidad' => $especialidadPrograma->especialidadMadre?->nombre_especialidad,
+            ];
         }
 
+        // Armar los módulos
         $modulos = $registros->map(function ($modulo) {
             return [
                 'id' => $modulo->id,
@@ -91,13 +104,12 @@ class ModuloController extends Controller
             ];
         });
 
+        // Respuesta final
         return response()->json([
             'especialidad_programa' => $especialidadPrograma,
             'modulos' => $modulos,
         ]);
     }
-
-
 
     // Actualizar un módulo
     public function update(Request $request, $id)

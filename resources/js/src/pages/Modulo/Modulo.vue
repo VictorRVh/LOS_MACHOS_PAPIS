@@ -34,23 +34,24 @@ const props = defineProps({
 
 });
 
-onMounted(async () => {
-  // Cargar módulos del programa actual
-  if (!moduloStore?.moduloFiltrado?.length) {
-    await moduloStore.loadModuloById(props.idEspecialidadPrograma);
-  }
+if (!moduloStore?.moduloFiltrado?.length) await moduloStore.loadModuloById(props.idEspecialidadPrograma)
 
-  const nombreEsp =
-    moduloStore?.moduloFiltrado?.especialidad_programa?.especialidad_madre
-      ?.nombre_especialidad || "Especialidad sin nombre";
-
+const idPrograma = moduloStore?.moduloFiltrado?.especialidad_programa?.id_programa;
+  // 👇 1. Primero registras el programa (padre)
   breadcrumb.setTextItemAuto(
-    `Especialidad: ${nombreEsp}`,
-    props.idEspecialidadPrograma,
-    "especialidadPrograma"
+     `${moduloStore?.moduloFiltrado?.especialidad_programa?.nombre_ciclo ||''} ${moduloStore?.moduloFiltrado?.especialidad_programa?.anio ||''} `,
+    idPrograma,
+    'programa',
+    { name: 'especialidadPrograma', params: { idPrograma } }
   );
-});
 
+  // 👇 2. Luego la especialidad (hijo)
+  breadcrumb.setTextItemAuto(
+    `Especialidad ${moduloStore?.moduloFiltrado?.especialidad_programa?.nombre_especialidad ||''} | Módulos`,
+    props.idEspecialidadPrograma,
+    'especialidadPrograma',
+    { name: 'modulo', params: { idEspecialidadPrograma: props.idEspecialidadPrograma } }
+  );
 
 // Generar los módulos dinámicamente
 const indexModulos = ref([]);

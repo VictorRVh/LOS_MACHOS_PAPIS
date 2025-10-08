@@ -7,7 +7,7 @@ import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 const route = useRoute();
 const grupoStore = useGrupoStore();
 const infoGrupo = ref(null);
-const isLoading = ref(true);
+
 const errorAlCargar = ref(false);
 const groupId = route.params.id;
 const breadcrumb = useBreadcrumbStore();
@@ -31,26 +31,20 @@ const subTitulo = computed(() => {
   return `Módulo ${infoGrupo.value.modulo_numero} | Sección ${infoGrupo.value.seccion}`;
 });
 
-onMounted(async () => {
+if (!grupoStore?.infoGrupo?.length) await grupoStore.loadInfoGrupo(groupId);
 
-  isLoading.value = true;
-  errorAlCargar.value = false;
- 
-  try {
-   
-    await grupoStore.loadInfoGrupo(groupId);
-    infoGrupo.value = grupoStore.infoGrupo;  
-    console.log("mostrar datos: ",infoGrupo.value);
-    breadcrumb.setTextItemAuto(`${infoGrupo?.value?.especialidad} | M: ${infoGrupo?.value?.modulo} | Grupo: ${infoGrupo?.value?.seccion}`, groupId, "grupo");
-  } catch (error) {
-    
-    console.error(error);
-    errorAlCargar.value = true;
-  } finally {
-    isLoading.value = false;
-  
-  }
-});
+
+infoGrupo.value = grupoStore.infoGrupo;
+//console.log("mostrar datos: ",infoGrupo.value);
+
+breadcrumb.setTextItemAuto(`${infoGrupo?.value?.especialidad} | M: 
+    ${infoGrupo?.value?.modulo} | Grupo: ${infoGrupo?.value?.seccion}`,
+  groupId, "grupo",
+  { name: 'grupo.detalle', params: { groupId } }
+);
+
+
+
 </script>
 
 <template>
@@ -60,9 +54,11 @@ onMounted(async () => {
       <div class="h-6 w-1/2 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
     </header>
 
-    <header v-else-if="errorAlCargar" class="mb-4 p-4 bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-600 rounded-md">
-        <h1 class="text-2xl font-bold text-red-700 dark:text-red-300">Error de Carga</h1>
-        <p class="text-red-600 dark:text-red-400">No se pudo cargar la información del grupo. Revisa la consola (F12) para ver el error. Probablemente tu sesión expiró.</p>
+    <header v-else-if="errorAlCargar"
+      class="mb-4 p-4 bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-600 rounded-md">
+      <h1 class="text-2xl font-bold text-red-700 dark:text-red-300">Error de Carga</h1>
+      <p class="text-red-600 dark:text-red-400">No se pudo cargar la información del grupo. Revisa la consola (F12) para
+        ver el error. Probablemente tu sesión expiró.</p>
     </header>
 
     <header v-else class="mb-2">
@@ -77,13 +73,9 @@ onMounted(async () => {
     <nav class="relative">
       <div class="overflow-x-auto whitespace-nowrap pb-2 custom-scrollbar-nav">
         <div class="flex space-x-1 sm:space-x-2 border-b border-gray-200 dark:border-gray-700">
-          <router-link
-            v-for="link in navLinks"
-            :key="link.text"
-            :to="link.to"
+          <router-link v-for="link in navLinks" :key="link.text" :to="link.to"
             class="px-3 sm:px-4 py-3 text-sm font-medium border-b-2 text-gray-500 dark:text-gray-400 border-transparent hover:text-cetpro-dark hover:border-cetpro-light dark:hover:text-cetpro-light transition-colors duration-200"
-            active-class="!text-cetpro !dark:text-cetpro-light !border-cetpro font-semibold"
-          >
+            active-class="!text-cetpro !dark:text-cetpro-light !border-cetpro font-semibold">
             {{ link.text }}
           </router-link>
         </div>
@@ -97,8 +89,20 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.custom-scrollbar-nav::-webkit-scrollbar { height: 4px; }
-.custom-scrollbar-nav::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar-nav::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 20px; }
-.dark .custom-scrollbar-nav::-webkit-scrollbar-thumb { background-color: #4b5563; }
+.custom-scrollbar-nav::-webkit-scrollbar {
+  height: 4px;
+}
+
+.custom-scrollbar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar-nav::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 20px;
+}
+
+.dark .custom-scrollbar-nav::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+}
 </style>

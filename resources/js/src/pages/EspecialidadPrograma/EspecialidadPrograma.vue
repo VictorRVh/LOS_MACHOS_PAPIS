@@ -46,6 +46,12 @@ onMounted(async () => {
     await especialidadStore.loadEspecialidadCiclo(ciclo.id);
   }
   breadcrumb.setTextItemAuto(programaNombre, props.idPrograma, "programa");
+    breadcrumb.setTextItemAuto(
+    ` ${programaNombre ||''}`,
+    props.idPrograma,
+    'programa',
+    { name: 'especialidadPrograma', params: { idPrograma: props.idPrograma } }
+  );
 });
 
 

@@ -42,35 +42,34 @@ export default [
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos'],
-            parent: 'programa',
+            parent: 'programa', // ✅ correcto
             breadcrumb: async (route) => {
                 const breadcrumbStore = useBreadcrumbStore();
-                let item = await breadcrumbStore.findTextById(route?.params?.idPrograma);
+                const item = await breadcrumbStore.findTextById(route.params.idPrograma);
                 return {
-                    text: item?.name || 'Cargando...',
-                    to: { name: route?.name, params:{idPrograma: item?.id}}
+                    text: item?.text || 'Cargando...',
+                    to: { name: 'especialidadPrograma', params: { idPrograma: route.params.idPrograma } }
                 };
             },
-            
         },
     },
     {
-        path: '/modulo/:idPrograma/:idEspecialidadPrograma',
+        path: '/modulo/:idEspecialidadPrograma',
         name: 'modulo',
         component: () => import('../pages/Modulo/Modulo.vue'),
         props: true,
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos'],
-            parent: 'especialidadPrograma',
+            parent: 'especialidadPrograma', // ✅ correcto
             breadcrumb: async (route) => {
                 const breadcrumbStore = useBreadcrumbStore();
-                let item = await breadcrumbStore.findTextById(route?.params?.idEspecialidadPrograma);
+                const item = await breadcrumbStore.findTextById(route.params.idEspecialidadPrograma);
                 return {
-                    text: item?.name || 'Cargando...',
-                    to: { name: route?.name, params:{idEspecialidadPrograma: item?.id}}
+                    text: item?.text || 'Módulos',
+                    to: { name: 'modulo', params: { idEspecialidadPrograma: route.params.idEspecialidadPrograma } },
                 };
-            }
+            },
         },
     },
     {
@@ -152,7 +151,7 @@ export default [
                 // Intentamos buscar el item en el store por id
                 let item = await breadcrumbStore.findTextById(route.params.id);
                 return {
-                    text: item?.name,
+                    text: item?.name || "Cargando..",
                     to: { name: route?.name, params: { id: item?.id } }, // mantiene la misma ruta
                 };
             },

@@ -28,6 +28,7 @@ const icons = {
   DocumentArrowDownIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/DocumentArrowDownIcon')), 
   // DownloadIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/DownloadIcon')),
   BookOpenIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/BookOpenIcon')),
+  Bars3Icon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/Bars3Icon')),
   // Agrega más íconos aquí según sea necesario
 
   ShieldCheckIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/ShieldCheckIcon')), 
@@ -56,7 +57,7 @@ const icons = {
   ArrowUpRightIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/ArrowUpRightIcon')),
   ClipboardDocumentCheckIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/ClipboardDocumentCheckIcon')),
   UserPlusIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/UserPlusIcon')),
-  InformationCircleIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/UserPlusIcon')),
+  InformationCircleIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/InformationCircleIcon')),
   ///___________________________________
 
 };

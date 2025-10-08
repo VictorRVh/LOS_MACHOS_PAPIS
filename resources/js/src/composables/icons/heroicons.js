@@ -25,8 +25,8 @@ const icons = {
   PaperClipIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/PaperClipIcon')),
   NewspaperIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/NewspaperIcon')), 
   DocumentIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/DocumentIcon')), 
-  DocumentArrowDownIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/DocumentArrowDownIcon')), 
-  DownloadIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/DownloadIcon')),
+  //DocumentArrowDownIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/DocumentArrowDownIcon')), 
+  //DownloadIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/DownloadIcon')),
   // BookOpenIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/BookOpenIcon')),
   // Agrega más íconos aquí según sea necesario
 

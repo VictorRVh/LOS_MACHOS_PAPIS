@@ -9,7 +9,7 @@ import Th from '../../components/table/Th.vue';
 import Td from '../../components/table/Td.vue';
 import Button from '../../components/ui/Button.vue';
 import AuthorizationFallback from '../../components/page/AuthorizationFallback.vue';
-import { PencilSquareIcon, TrashIcon, ArchiveBoxIcon, DocumentArrowDownIcon, ArrowPathIcon } from '@heroicons/vue/24/outline';
+
 import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 import { generatePdfMatricula } from '../../pdf/fichaMatricula';
 import useModalToast from '../../composables/useModalToast';

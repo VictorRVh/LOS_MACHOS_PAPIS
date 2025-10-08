@@ -1,6 +1,5 @@
 <script setup>
 import { useRouter } from 'vue-router';
-import { UserGroupIcon, ClipboardDocumentCheckIcon, UserPlusIcon } from '@heroicons/vue/24/outline';
 
 const router = useRouter();
 </script>

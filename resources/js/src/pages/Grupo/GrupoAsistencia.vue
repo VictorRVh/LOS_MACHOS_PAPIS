@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { EyeIcon, DocumentTextIcon, ArrowUpRightIcon } from '@heroicons/vue/24/outline';
+
 import useTableData from '../../composables/tabla/useTableData';
 
 import SearchBar from '../../components/head_table/headSearch.vue';

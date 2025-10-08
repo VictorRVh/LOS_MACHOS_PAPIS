@@ -12,7 +12,6 @@ const errorAlCargar = ref(false);
 const groupId = route.params.id;
 const breadcrumb = useBreadcrumbStore();
 
-
 const navLinks = [
   { text: 'Documentos', to: { name: 'grupo.documentos', params: { id: groupId } } },
   { text: 'Sesiones y asistencia', to: { name: 'grupo.asistencia', params: { id: groupId } } },

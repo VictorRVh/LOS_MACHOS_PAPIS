@@ -2,9 +2,6 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from 'vue-router';
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
-
-import { ChevronDownIcon } from '@heroicons/vue/24/solid';
-
 import SearchBar from "../../components/head_table/headSearch.vue";
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";

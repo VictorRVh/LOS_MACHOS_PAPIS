@@ -8,6 +8,8 @@ import Th from '../../components/table/Th.vue';
 import Td from '../../components/table/Td.vue';
 import FormInput from '../../components/ui/FormInput.vue';
 import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
+// src/plugins/heroicons.js
+
 
 const matriculaStore = useMatriculaStore();
 
@@ -124,7 +126,7 @@ const goToPage = (page) => {
                         <div class="flex items-center justify-center space-x-2">
                             <button @click="descargarReserva(reserva)"
                                 class="flex items-center gap-1 px-2 py-1.5 rounded-sm text-xsm shadow-google bg-blue-500 active:bg-blue-500 dark:bg-blue-800 active:dark:bg-blue-900 text-white dark:text-blue-200 hover:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer transition duration-150">
-                                <DownloadIcon class="w-4 h-4" />
+                                <DocumentArrowDownIcon class="w-4 h-4" />
                                 <span>Descargar</span>
                             </button>
                             <button @click="eliminarReserva(reserva)"

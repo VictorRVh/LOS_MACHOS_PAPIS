@@ -22,21 +22,21 @@ const formData = computed({
 
 const especialidadStore = useEspecialidadStore();
 
-const handleProgramaChange = (programaId) => { 
-    formData.value.id_especialidad = null; 
-    formData.value.id_grupo = null; 
-    resetGrupoData();
-     especialidadStore.especialidadPrograma = [];
-      if (programaId) { especialidadStore.loadEspecialidadPrograma(programaId); }
-     }; 
+const handleProgramaChange = (programaId) => {
+  formData.value.id_especialidad = null;
+  formData.value.id_grupo = null;
+  resetGrupoData();
+  especialidadStore.especialidadPrograma = [];
+  if (programaId) { especialidadStore.loadEspecialidadPrograma(programaId); }
+};
 
-     const handleEspecialidadChange = (especialidadId) => { 
-        console.log('entrando aca', especialidadId) 
-        formData.value.id_grupo = null;
-         especialidadStore.gruposDisponibles = [];
-          if (especialidadId) { especialidadStore.loadGrupoEspecialidad(especialidadId); }
-           resetGrupoData();
-     };
+const handleEspecialidadChange = (especialidadId) => {
+  console.log('entrando aca', especialidadId)
+  formData.value.id_grupo = null;
+  especialidadStore.gruposDisponibles = [];
+  if (especialidadId) { especialidadStore.loadGrupoEspecialidad(especialidadId); }
+  resetGrupoData();
+};
 
 const handleGrupoChange = (grupoId) => {
   const grupoSeleccionado = especialidadStore.gruposDisponibles.find(g => g.id === grupoId);
@@ -75,34 +75,22 @@ const resetGrupoData = () => {
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Programa -->
       <FormLabelError label="Programa de Estudio *">
-        <v-select v-model="formData.id_programa"
-                  :options="programas"
-                  label="nameCiclo"
-                  :reduce="p => p.id"
-                  placeholder="Seleccione Programa"
-                  @update:modelValue="handleProgramaChange" />
+        <v-select v-model="formData.id_programa" :options="programas" label="nameCiclo" :reduce="p => p.id"
+          placeholder="Seleccione Programa" @update:modelValue="handleProgramaChange" />
       </FormLabelError>
 
       <!-- Especialidad -->
       <FormLabelError label="Especialidad *">
-        <v-select v-model="formData.id_especialidad"
-                  :options="especialidadStore.especialidadPrograma"
-                  :disabled="!formData.id_programa"
-                  label="nombre_especialidad"
-                  :reduce="e => e.id"
-                  placeholder="Seleccione Especialidad"
-                  @update:modelValue="handleEspecialidadChange" />
+        <v-select v-model="formData.id_especialidad" :options="especialidadStore.especialidadPrograma"
+          :disabled="!formData.id_programa" label="nombre_especialidad" :reduce="e => e.id"
+          placeholder="Seleccione Especialidad" @update:modelValue="handleEspecialidadChange" :loading="especialidadStore.especialidadByCicloLoading" />
       </FormLabelError>
 
       <!-- Grupo -->
       <FormLabelError label="Grupo *">
-        <v-select v-model="formData.id_grupo"
-                  :options="especialidadStore.gruposDisponibles"
-                  :disabled="!formData.id_especialidad"
-                  label="nombre_grupo"
-                  :reduce="g => g.id"
-                  placeholder="Seleccionar Grupo"
-                  @update:modelValue="handleGrupoChange" />
+        <v-select v-model="formData.id_grupo" :options="especialidadStore.gruposDisponibles"
+          :disabled="!formData.id_especialidad" label="nombre_grupo" :reduce="g => g.id" placeholder="Seleccionar Grupo"
+          @update:modelValue="handleGrupoChange" :loading="especialidadStore.grupoByEspecialidadLoading" />
       </FormLabelError>
     </div>
 

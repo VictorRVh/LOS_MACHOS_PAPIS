@@ -26,7 +26,7 @@ const icons = {
   NewspaperIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/NewspaperIcon')), 
   DocumentIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/DocumentIcon')), 
   DocumentArrowDownIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/DocumentArrowDownIcon')), 
-  DownloadIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/ArrowDownTrayIcon')),
+  DownloadIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/DownloadIcon')),
   // BookOpenIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/BookOpenIcon')),
   // Agrega más íconos aquí según sea necesario
 
@@ -45,8 +45,20 @@ const icons = {
   SquaresPlusIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/SquaresPlusIcon')),
   RectangleGroupIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/RectangleGroupIcon')),
   NewspaperIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/NewspaperIcon')),
+  ClockIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/ClockIcon')),
+  CheckCircleIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/CheckCircleIcon')),
+  ArrowUpTrayIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/ArrowUpTrayIcon')),
+  ChevronDownIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/ChevronDownIcon')),
+  ArchiveBoxIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/ArchiveBoxIcon')),
+  ArrowPathIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/ArrowPathIcon')),
+  EyeIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/EyeIcon')),
+  DocumentTextIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/DocumentTextIcon')),
+  ArrowUpRightIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/ArrowUpRightIcon')),
+  ClipboardDocumentCheckIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/ClipboardDocumentCheckIcon')),
+  UserPlusIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/UserPlusIcon')),
+  InformationCircleIcon: defineAsyncComponent( () => import('@heroicons/vue/24/outline/UserPlusIcon')),
   ///___________________________________
-  
+
 };
 
 // Registra los íconos como componentes globales

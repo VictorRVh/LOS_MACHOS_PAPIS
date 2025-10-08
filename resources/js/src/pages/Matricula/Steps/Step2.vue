@@ -9,9 +9,14 @@ import ubigeo from '../../../utils/ubigeo';
 import BaseSelect from '../../../components/ui/BaseSelect.vue';
 import axios from 'axios';
 import useModalToast from '../../../composables/useModalToast';
+import useMatriculaStore from '../../../store/Matricula/useMatriculaStore';
+import useHttpRequest from '../../../composables/useHttpRequest';
 
 
 const { showConfirmModal, showToast } = useModalToast();
+const { store: busquedaDni, saving, update: updateModulo, updating } = useHttpRequest(
+    "/buscar-documento"
+);
 
 const props = defineProps({
     modelValue: { type: Object, required: true },
@@ -58,17 +63,20 @@ const buscarDNI = async () => {
     }
 
     try {
-        const { data } = await axios.post("buscar-documento", {
+
+        const response = await busquedaDni({
             tipo_documento: tipo,
             dni: numero,
         });
 
-        if (data.error) {
-            showToast(data.error);
+        console.log('busqueda dni', response)
+
+        if (response.error) {
+            showToast(response.error);
             return;
         }
 
-        const d = data.data ?? data;
+        const d = response.data ?? data;
 
         // Para comprobar si los datos vienen de FACTILIZA
         const esFactiliza = !!d.nombres;
@@ -131,7 +139,22 @@ const buscarDNI = async () => {
 </script>
 
 <template>
-    <div>
+    <div class="relative">
+
+        <transition name="fade">
+            <div v-if="saving"
+                class="absolute inset-0 bg-white/70 dark:bg-gray-900/70 flex flex-col items-center justify-center z-50 backdrop-blur-sm">
+                <svg class="animate-spin h-10 w-10 text-cetpro mb-3" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <p class="text-gray-700 dark:text-gray-200 font-semibold text-lg">
+                    Buscando documento...
+                </p>
+            </div>
+        </transition>
+
         <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white mb-6">
             <UserCircleIcon class="h-6 w-6" />
             DATOS PERSONALES DEL ESTUDIANTE
@@ -143,13 +166,20 @@ const buscarDNI = async () => {
                     <BaseSelect v-model="formData.tipo_documento" :options="['DNI', 'CARNET EXT.']" class="W-28" />
                 </FormLabelError>
 
-                <div class="flex gap-2">
+                <div class="flex gap-2 items-end">
                     <FormInput v-model="formData.nro_documento" label="Nro Doc. *" />
-                    <button type="button" @click="buscarDNI"
-                        class="px-2 py-0 bg-cetpro text-white rounded-lg hover:bg-cetpro-light transition">
-                        Buscar
+                    <button type="button" @click="buscarDNI" :disabled="saving"
+                        class="px-4 py-2.5 bg-cetpro text-white rounded-lg hover:bg-cetpro-light transition flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed">
+                        <span v-if="!saving">Buscar</span>
+                        <svg v-else class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
                     </button>
                 </div>
+
             </div>
             <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno *"
                 :error-message="errors.apellido_paterno" />

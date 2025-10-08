@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { EyeIcon, ArrowDownTrayIcon, ChevronDownIcon, UserGroupIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
+
 import Table from '../../components/table/Table.vue';
 import THead from '../../components/table/THead.vue';
 import TBody from '../../components/table/TBody.vue';

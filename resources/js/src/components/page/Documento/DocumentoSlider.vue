@@ -1,32 +1,43 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
-import { storeToRefs } from 'pinia';
-import Slider from '../../ui/Slider.vue';
-import FormInput from '../../ui/FormInput.vue';
-import Button from '../../ui/Button.vue';
-import CheckBox from '../../ui/CheckBox.vue';
-import BaseSelectGrupo from '../../ui/BaseSelectGrupo.vue';
-import usePeriodoStatusStore from '../../../store/Periodo/usePeriodoStatusStore';
-import useHttpRequest from '../../../composables/useHttpRequest';
-import useModalToast from '../../../composables/useModalToast';
+import { ref, watch } from "vue";
+import * as yup from "yup";
+
+import FormInput from "../../ui/FormInput.vue";
+import CheckBox from "../../ui/CheckBox.vue";
+import Button from "../../ui/Button.vue";
+import BaseSelectGrupo from "../../ui/BaseSelectGrupo.vue";
+
+import useModalToast from "../../../composables/useModalToast";
+import useValidation from "../../../composables/useValidation";
+import useHttpRequest from "../../../composables/useHttpRequest";
 
 const props = defineProps({
-    show: { type: Boolean, default: false },
-    documento: { type: [Object, null], default: null },
+  programacionToEdit: {
+    type: Object,
+    default: null,
+  },
+  periodos: {
+    type: Array,
+    required: true,
+  },
+  selectedPeriodoId: {
+    type: [String, Number],
+    required: true,
+  },
 });
-const emit = defineEmits(['hide', 'saved']);
 
-const periodoStore = usePeriodoStatusStore();
-const { periodos } = storeToRefs(periodoStore);
+const emit = defineEmits(['form-submitted', 'cancel-edit']);
 
-const { store: createEntrega, update: updateEntrega, saving, updating } = useHttpRequest('/entrega_docente_admin');
 const { showToast } = useModalToast();
+const { runYupValidation } = useValidation();
+const { store, update, saving, updating } = useHttpRequest('/entrega_docente_admin');
 
-const title = computed(() => (props.documento?.id ? `Editar Programación` : 'Nueva Programación de Entrega'));
-const isEditing = computed(() => !!props.documento?.id);
+const isEditing = ref(false);
+const formErrors = ref({});
 
 const initialFormData = () => ({
-    id_periodo_academico: null,
+    id: null,
+    id_periodo: props.selectedPeriodoId,
     tipo_entrega: '',
     descripcion: '',
     fecha_inicio: '',
@@ -36,65 +47,96 @@ const initialFormData = () => ({
 
 const formData = ref(initialFormData());
 
-watch(() => props.show, () => {
-    if (props.show) {
-        if (props.documento?.id) {
-            formData.value = { 
-                ...props.documento, 
-                status: !!props.documento.status,
-                id_periodo_academico: props.documento.id_periodo_academico
-            };
-        } else {
-            formData.value = initialFormData();
-        }
+const schema = yup.object().shape({
+    id_periodo: yup.string().required('El periodo es requerido.'),
+    tipo_entrega: yup.string().required('El título es requerido.'),
+    fecha_inicio: yup.date().required('La fecha de inicio es requerida.'),
+    fecha_fin: yup.date().required('La fecha de fin es requerida.').min(yup.ref('fecha_inicio'), 'La fecha de fin no puede ser anterior a la de inicio.'),
+});
+
+watch(() => props.programacionToEdit, (newVal) => {
+    if (newVal) {
+        formData.value = { ...newVal, id_periodo: newVal.id_periodo_academico };
+        isEditing.value = true;
+        formErrors.value = {};
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        resetForm();
+    }
+}, { deep: true });
+
+watch(() => props.selectedPeriodoId, (newPeriodoId) => {
+    if (!isEditing.value) {
+        formData.value.id_periodo = newPeriodoId;
     }
 });
 
+
+const resetForm = () => {
+    formData.value = initialFormData();
+    isEditing.value = false;
+    formErrors.value = {};
+    emit('cancel-edit');
+}
+
 const onSubmit = async () => {
-    try {
-        if (isEditing.value) {
-            await updateEntrega(formData.value.id, formData.value);
-            showToast('Programación actualizada exitosamente.');
-        } else {
-            await createEntrega(formData.value);
-            showToast('Programación creada exitosamente.');
-        }
-        emit('saved');
-        emit('hide');
-    } catch (error) {
-        showToast('Error al guardar la programación.', 'error');
+    const { validated, errors } = await runYupValidation(schema, formData.value);
+    if (!validated) {
+        formErrors.value = errors;
+        return;
     }
-};
+    try {
+        let response;
+        if (isEditing.value) {
+            response = await update(formData.value.id, formData.value);
+        } else {
+            response = await store(formData.value);
+        }
+        if (response) {
+            showToast(`Programación ${isEditing.value ? 'actualizada' : 'creada'} con éxito.`, 'success');
+            emit('form-submitted');
+        }
+    } catch (error) {
+        showToast('Ocurrió un error al guardar.', 'error');
+    }
+}
 </script>
 
 <template>
-    <Slider :show="show" :title="title" @hide="emit('hide')">
-        <div class="mt-4 space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 h-fit sticky top-6">
+        <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
+            {{ isEditing ? 'Editar Programación' : 'Nueva Programación' }}
+        </h3>
+        <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+        <form @submit.prevent="onSubmit" class="space-y-4">
             <div>
-                <label class="form-label required">Periodo Académico</label>
-                <BaseSelectGrupo v-model="formData.id_periodo_academico" :options="periodos" label="nombre_periodo"
-              placeholder="Seleccione un periodo" :reduce="p => p.id"/>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Periodo Académico</label>
+                <BaseSelectGrupo 
+                  v-model="formData.id_periodo" 
+                  :options="periodos" 
+                  label="nombre_periodo" 
+                  value-prop="id" 
+                  placeholder="Seleccione un Periodo"
+                  :disabled="true"
+                />
             </div>
-            <FormInput v-model="formData.tipo_entrega" label="Título o Tipo de Entrega" required />
-            <div>
-                <label class="form-label">Descripción</label>
-                <textarea v-model="formData.descripcion" rows="3" class="form-input" placeholder="Ej: Subir el sílabo mensual en formato PDF."></textarea>
+            <FormInput v-model="formData.tipo_entrega" label="Título o Tipo de Entrega *" :error-message="formErrors.tipo_entrega" placeholder="Ej: Sílabo mensual"/>
+            <FormInput v-model="formData.descripcion" label="Descripción" :error-message="formErrors.descripcion" />
+            <div class="grid grid-cols-2 gap-4">
+                 <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio *" type="date" :error-message="formErrors.fecha_inicio" />
+                 <FormInput v-model="formData.fecha_fin" label="Fecha de Fin *" type="date" :error-message="formErrors.fecha_fin" />
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio" type="date" required />
-                <FormInput v-model="formData.fecha_fin" label="Fecha de Fin" type="date" required />
+            <div class="flex items-center space-x-3 pt-2">
+                 <CheckBox v-model="formData.status" />
+                 <div>
+                     <label class="font-medium text-gray-800 dark:text-gray-200">Publicar para docentes</label>
+                     <p class="text-xs text-gray-500 dark:text-gray-400">Al desmarcar, quedará como borrador.</p>
+                 </div>
             </div>
-
-            <CheckBox v-model="formData.status" label="Publicar esta programación para los docentes" class="mt-4" />
-            <p class="text-xs text-gray-500">Al desmarcar esto, la programación quedará como borrador y no será visible para los docentes.</p>
-            
-            <Button 
-                :title="isEditing ? 'Guardar Cambios' : 'Crear Programación'" 
-                :loading-title="saving ? 'Creando...' : 'Guardando...'" 
-                class="!mt-6 !w-full" 
-                :loading="saving || updating" 
-                @click="onSubmit" 
-            />
-        </div>
-    </Slider>
+            <div class="flex gap-2 pt-2">
+                <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Programación'" type="submit" :loading="saving || updating" class="w-full" />
+                <Button v-if="isEditing" title="Cancelar" variant="outline" @click="resetForm" />
+            </div>
+        </form>
+    </div>
 </template>

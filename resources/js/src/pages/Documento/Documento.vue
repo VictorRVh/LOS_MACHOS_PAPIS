@@ -65,7 +65,9 @@ const fetchProgramaciones = async (periodoId) => {
     }
     const response = await indexWithParams({ id_periodo: periodoId });
     programaciones.value = response || [];
+    console.log("lista de porgramacion: ",programaciones.value)
 };
+
 
 onMounted(() => {
     fetchProgramaciones(selectedPeriodo.value);
@@ -148,8 +150,6 @@ const onDelete = (prog) => {
     });
 }
 
-const showTooltip = () => { tooltip.value.visible = true; };
-const hideTooltip = () => { tooltip.value.visible = false; };
 const updateTooltipPos = (event) => {
   if (tooltip.value.visible) {
     tooltip.value.x = event.clientX + 15;
@@ -201,26 +201,25 @@ const updateTooltipPos = (event) => {
             <div class="lg:col-span-2">
                 <Table>
                     <THead>
-                        <Tr>
+                        
                             <Th>Título / Descripción</Th>
                             <Th>Plazo de Entrega</Th>
                             <Th>Estado</Th>
                             <Th>Publicación</Th>
                             <Th class="text-center">Acciones</Th>
-                        </Tr>
+                        
                     </THead>
                     <TBody>
                         <Tr v-if="loading"><Td colspan="5" class="text-center py-10">Cargando...</Td></Tr>
                         <Tr v-else-if="!selectedPeriodo"><Td colspan="5" class="text-center py-12">Seleccione un periodo para empezar.</Td></Tr>
                         <Tr v-else-if="!programaciones.length"><Td colspan="5" class="text-center py-12">No hay programaciones para este periodo.</Td></Tr>
                         <Tr v-else v-for="prog in programaciones" :key="prog.id" 
-                            @mouseover="showTooltip"
-                            @mouseleave="hideTooltip">
-                            <Td @click="verDetalleEntrega(prog)" class="cursor-pointer">
+                            >
+                            <Td>
                                 <p class="font-semibold text-gray-800 dark:text-gray-200 hover:text-cetpro dark:hover:text-cetpro-light">{{ prog.tipo_entrega }}</p>
-                                <p class="text-xs text-gray-500 max-w-xs truncate">{{ prog.descripcion }}</p>
+                                
                             </Td>
-                            <Td class="font-mono text-xs">{{ formatFecha(prog.fecha_inicio) }} - {{ formatFecha(prog.fecha_fin) }}</Td>
+                            <Td class="font-mono text-xs">{{ prog.fecha_inicio }} - {{prog.fecha_fin }}</Td>
                             <Td>
                                 <span :class="getProgramacionStatus(prog).class" class="px-2 py-1 text-xs rounded-full font-semibold">
                                     {{ getProgramacionStatus(prog).text }}

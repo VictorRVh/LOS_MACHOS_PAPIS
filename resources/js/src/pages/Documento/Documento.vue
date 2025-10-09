@@ -12,6 +12,7 @@ import Td from "../../components/table/Td.vue";
 import MenuTable from "../../components/table/MenuTable.vue";
 import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 import DocumentoSlider from "../../components/page/Documento/DocumentoSlider.vue";
+import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 
 import usePeriodoStatusStore from "../../store/Periodo/usePeriodoStatusStore";
 import useModalToast from "../../composables/useModalToast";
@@ -93,68 +94,70 @@ const onDelete = (prog) => {
 </script>
 
 <template>
-    <div class="p-4 md:p-6 space-y-6">
-        <header class="flex justify-between items-start">
-            <div>
-              <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Programación de Entregas</h1>
-              <p class="text-gray-500 dark:text-gray-400 mt-1">Crea y gestiona los plazos de entrega de documentos para los docentes.</p>
-            </div>
-            <div class="w-64">
-                <BaseSelectGrupo v-model="selectedPeriodo" :options="periodosActivos" label="nombre_periodo" value-prop="id" placeholder="Seleccione un Periodo" />
-            </div>
-        </header>
+    <AuthorizationFallback :permissions="['todo-documento-programado', 'ver-documento-programado']">
+        <div class="p-4 md:p-6 space-y-6">
+            <header class="flex justify-between items-start">
+                <div>
+                  <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Programación de Entregas</h1>
+                  <p class="text-gray-500 dark:text-gray-400 mt-1">Crea y gestiona los plazos de entrega de documentos para los docentes.</p>
+                </div>
+                <div class="w-64">
+                    <BaseSelectGrupo v-model="selectedPeriodo" :options="periodosActivos" label="nombre_periodo" value-prop="id" placeholder="Seleccione un Periodo" />
+                </div>
+            </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-1">
-                <DocumentoSlider 
-                    :programacion-to-edit="programacionParaEditar"
-                    :periodos="periodosActivos"
-                    :selected-periodo-id="selectedPeriodo"
-                    @form-submitted="handleFormSubmitted"
-                    @cancel-edit="resetEditingState"
-                />
-            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <DocumentoSlider 
+                        :programacion-to-edit="programacionParaEditar"
+                        :periodos="periodosActivos"
+                        :selected-periodo-id="selectedPeriodo"
+                        @form-submitted="handleFormSubmitted"
+                        @cancel-edit="resetEditingState"
+                    />
+                </div>
 
-            <div class="lg:col-span-2">
-                <Table>
-                    <THead>
-                        <Th>Título / Descripción</Th>
-                        <Th>Plazo de Entrega</Th>
-                        <Th>Estado</Th>
-                        <Th>Publicación</Th>
-                        <Th class="text-center">Acciones</Th>
-                    </THead>
-                    <TBody>
-                        <Tr v-if="loading"><Td colspan="5" class="text-center py-10">Cargando...</Td></Tr>
-                        <Tr v-else-if="!selectedPeriodo"><Td colspan="5" class="text-center py-12">Seleccione un periodo para empezar.</Td></Tr>
-                        <Tr v-else-if="!programaciones.length"><Td colspan="5" class="text-center py-12">No hay programaciones para este periodo.</Td></Tr>
-                        <Tr v-else v-for="prog in programaciones" :key="prog.id">
-                            <Td>
-                                <p class="font-semibold text-gray-800 dark:text-gray-200 hover:text-cetpro dark:hover:text-cetpro-light">{{ prog.tipo_entrega }}</p>
-                            </Td>
-                            <Td class="font-mono text-xs">{{ prog.fecha_inicio }} - {{prog.fecha_fin }}</Td>
-                            <Td>
-                                <span :class="getProgramacionStatus(prog).class" class="px-2 py-1 text-xs rounded-full font-semibold">
-                                    {{ getProgramacionStatus(prog).text }}
-                                </span>
-                            </Td>
-                            <Td>
-                                <span v-if="prog.status" class="px-2 py-1 text-xs rounded-full font-semibold text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300">Publicado</span>
-                                <span v-else class="px-2 py-1 text-xs rounded-full font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300">Borrador</span>
-                            </Td>
-                            <Td class="text-center">
-                               <MenuTable 
-                                 :actions="{ view: true, edit: true, delete: true }"
-                                 entity-label="entrega"
-                                 @view="verDetalleEntrega(prog)"
-                                 @edit="editProgramacion(prog)"
-                                 @delete="onDelete(prog)"
-                               />
-                            </Td>
-                        </Tr>
-                    </TBody>
-                </Table>
+                <div class="lg:col-span-2">
+                    <Table>
+                        <THead>
+                            <Th>Título / Descripción</Th>
+                            <Th>Plazo de Entrega</Th>
+                            <Th>Estado</Th>
+                            <Th>Publicación</Th>
+                            <Th class="text-center">Acciones</Th>
+                        </THead>
+                        <TBody>
+                            <Tr v-if="loading"><Td colspan="5" class="text-center py-10">Cargando...</Td></Tr>
+                            <Tr v-else-if="!selectedPeriodo"><Td colspan="5" class="text-center py-12">Seleccione un periodo para empezar.</Td></Tr>
+                            <Tr v-else-if="!programaciones.length"><Td colspan="5" class="text-center py-12">No hay programaciones para este periodo.</Td></Tr>
+                            <Tr v-else v-for="prog in programaciones" :key="prog.id">
+                                <Td>
+                                    <p class="font-semibold text-gray-800 dark:text-gray-200 hover:text-cetpro dark:hover:text-cetpro-light">{{ prog.tipo_entrega }}</p>
+                                </Td>
+                                <Td class="font-mono text-xs">{{ prog.fecha_inicio }} - {{prog.fecha_fin }}</Td>
+                                <Td>
+                                    <span :class="getProgramacionStatus(prog).class" class="px-2 py-1 text-xs rounded-full font-semibold">
+                                        {{ getProgramacionStatus(prog).text }}
+                                    </span>
+                                </Td>
+                                <Td>
+                                    <span v-if="prog.status" class="px-2 py-1 text-xs rounded-full font-semibold text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300">Publicado</span>
+                                    <span v-else class="px-2 py-1 text-xs rounded-full font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300">Borrador</span>
+                                </Td>
+                                <Td class="text-center">
+                                   <MenuTable 
+                                     :actions="{ view: true, edit: true, delete: true }"
+                                     entity-label="entrega"
+                                     @view="verDetalleEntrega(prog)"
+                                     @edit="editProgramacion(prog)"
+                                     @delete="onDelete(prog)"
+                                   />
+                                </Td>
+                            </Tr>
+                        </TBody>
+                    </Table>
+                </div>
             </div>
         </div>
-    </div>
+    </AuthorizationFallback>
 </template>

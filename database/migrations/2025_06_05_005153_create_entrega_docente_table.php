@@ -22,12 +22,16 @@ return new class extends Migration
             $table->string('observacion');
 
             $table->foreign('id_grupo')
-                  ->references('id')->on('grupo')
-                  ->onDelete('cascade');
+                ->references('id')->on('grupo')
+                ->onDelete('cascade');
 
             $table->foreign('id_admin')
-                  ->references('id')->on('entrega_docente_admin')
-                  ->onDelete('cascade');
+                ->references('id')->on('entrega_docente_admin')
+                ->onDelete('cascade');
+
+            $table->date('fecha_aplazada')->nullable();
+            $table->string('dias_aplazados', 10)->nullable();
+
             $table->timestamps();
         });
     }

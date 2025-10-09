@@ -284,6 +284,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-documento-programado|eliminar-documento-programado');
 
+    Route::get('lista_programacion/{id_admin}', [
+        \App\Http\Controllers\EntregaDocenteAdminController::class,
+        'subidasPorProgramacion',
+    ])->middleware('permission:todo-documento-programado|ver-documento-programado');
+
 
     // RUTA PARA ESPECIALIDAD_MADRE
     Route::get('especialidad_madre', [

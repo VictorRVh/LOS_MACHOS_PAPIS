@@ -138,4 +138,66 @@ class EntregaDocenteAdminController extends Controller
             ], 500);
         }
     }
+
+
+    public function subidasPorProgramacion($id_admin)
+    {
+
+        // Obtener programación general
+        $programacion = EntregaDocenteAdmin::findOrFail($id_admin);
+
+        // Obtener subidas con relaciones
+        $subidas = EntregaDocente::with([
+            'grupo:id,seccion,turno,id_docente,id_modulo,id_especialidad',
+            'grupo.docente:id,user_id',
+            'grupo.docente.user:id,name,apellido_paterno,apellido_materno',
+            'grupo.modulo:id,descripcion',
+            'grupo.especialidad:id,id_especialidad',
+            'grupo.especialidad.especialidadMadre:id,nombre_especialidad',
+        ])
+            ->where('id_admin', $id_admin)
+            ->get();
+
+        // Transformar resultado
+        $gruposProgramados = $subidas->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'id_grupo' => $item->id_grupo,
+                'fecha_inicio' => $item->fecha_inicio,
+                'fecha_fin' => $item->fecha_fin,
+                'estado' => $item->estado,
+                'documento_admin' => $item->documento_admin,
+                'observacion' => $item->observacion,
+                'created_at' => $item->created_at,
+                'grupo_detalle' => [
+                    'id' => $item->grupo->id,
+                    'nombre_especialidad' =>
+                    $item->grupo->especialidad->especialidadMadre->nombre_especialidad ?? '',
+                    'nombre_modulo' =>
+                    $item->grupo->modulo->descripcion ?? '',
+                    'nombre_docente' => $item->grupo->docente && $item->grupo->docente->user
+                        ? $item->grupo->docente->user->name . ' ' .
+                        $item->grupo->docente->user->apellido_paterno . ' ' .
+                        $item->grupo->docente->user->apellido_materno
+                        : '',
+                    'seccion' => $item->grupo->seccion,
+                    'turno' => $item->grupo->turno,
+                ]
+            ];
+        });
+
+        return response()->json([
+            'total_programados' => $gruposProgramados->count(),
+            'programacion' => [
+                'id' => $programacion->id,
+                'tipo_entrega' => $programacion->tipo_entrega,
+                'fecha_inicio' => $programacion->fecha_inicio,
+                'fecha_fin' => $programacion->fecha_fin,
+                'status' => $programacion->status,
+                'id_periodo' => $programacion->id_periodo,
+                'mostrar' => $programacion->mostrar,
+            ],
+            'grupos_programados' => $gruposProgramados
+        ]);
+    }
 }

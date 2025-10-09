@@ -38,7 +38,7 @@ const formErrors = ref({});
 
 const initialFormData = () => ({
     id: null,
-    id_periodo: props.selectedPeriodoId,
+    id_periodo: '',
     tipo_entrega: '',
     descripcion: '',
     fecha_inicio: '',
@@ -126,7 +126,7 @@ const onSubmit = async () => {
                   label="nombre_periodo" 
                   value-prop="id" 
                   placeholder="Seleccione un Periodo"
-                  :disabled="true"
+                 
                 />
             </div>
             <FormInput v-model="formData.tipo_entrega" label="Título o Tipo de Entrega *" :error-message="formErrors.tipo_entrega" placeholder="Ej: Sílabo mensual"/>

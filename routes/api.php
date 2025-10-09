@@ -262,33 +262,32 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('entrega_docente_admin', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'index',
-    ])->middleware('permission:todo-documento-programado|ver-documento-programado');
+    ])->middleware('permission:todo-acceso-documento-programado|ver-documento-programado');
 
     Route::get('programacion_admin/{id_periodo}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'indexByPeriodo',
-    ])->middleware('permission:todo-documento-programado|ver-documento-programado');
+    ])->middleware('permission:todo-acceso-documento-programado|ver-documento-programado');
 
     Route::post('entrega_docente_admin', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'store',
-    ])->middleware('permission:todo-documento-programado|crear-documento-programado');
+    ])->middleware('permission:todo-acceso-documento-programado|crear-documento-programado');
 
     Route::patch('entrega_docente_admin/{id}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'update',
-    ])->middleware('permission:todo-documento-programado|editar-documento-programado');
+    ])->middleware('permission:todo-acceso-documento-programado|editar-documento-programado');
 
     Route::delete('entrega_docente_admin/{id}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'destroy',
-    ])->middleware('permission:todo-documento-programado|eliminar-documento-programado');
+    ])->middleware('permission:todo-acceso-documento-programado|eliminar-documento-programado');
 
     Route::get('lista_programacion/{id_admin}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'subidasPorProgramacion',
-    ])->middleware('permission:todo-documento-programado|ver-documento-programado');
-
+    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
 
     // RUTA PARA ESPECIALIDAD_MADRE
     Route::get('especialidad_madre', [

@@ -8,7 +8,6 @@ useTheme();
 
 <template>
     <LayoutRenderer />
-
     <!-- confirm modal -->
     <ConfirmModal />
 </template>

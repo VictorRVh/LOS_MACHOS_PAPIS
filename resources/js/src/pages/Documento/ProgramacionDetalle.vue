@@ -5,8 +5,10 @@ import useModalToast from '../../composables/useModalToast';
 import useProgramacionSubidosStore from "../../store/Documento/useDocumentoSubidoStore";
 
 const props = defineProps({
-    id: { type: String, required: true }
+    id: { type: String,
+         required: true }
 });
+
 
 const programacionSubidosList = useProgramacionSubidosStore();
 
@@ -19,7 +21,7 @@ const openMenuId = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = 6;
 
-if (!programacionSubidosList?.programacionSubidos?.length) await programacionSubidosList.loadgetProgramacionSubidos();
+if (!programacionSubidosList?.programacionSubidos?.length) await programacionSubidosList.loadgetProgramacionSubidos(props.id);
 
 console.log("datos porgrmacin: ",programacionSubidosList?.programacionSubidos)
 

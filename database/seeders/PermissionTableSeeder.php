@@ -97,6 +97,8 @@ class PermissionTableSeeder extends Seeder
             'eliminar-programa-especialidades',
             'icono-programa-especialidades',
 
+            //
+            
             // PERMISOS DE PROGRAMAS
             'todo-acceso-programas',
             'ver-programas',
@@ -120,13 +122,23 @@ class PermissionTableSeeder extends Seeder
             'editar-matriculas',
             'eliminar-matriculas',
             'icono-matriculas',
-
-            'todo-documento-programado',
+            
+            // PERMISOS DE DE PROGRAMACION ADMIN 
+            'todo-acceso-documento-programado',
             'ver-documento-programado',
             'crear-documento-programado',
             'editar-documento-programado',
             'eliminar-documento-programado',
             'icono-documento-programado',
+            
+             // PERMISOS DE DE PROGRAMACION PARA DOCENTES
+            'todo-acceso-programacion-documentos-subidos',
+            'ver-programacion-documentos-subidos',
+            'crear-programacion-documentos-subidos',
+            'editar-programacion-documentos-subidos',
+            'eliminar-programacion-documentos-subidos',
+            'icono-programacion-documentos-subidos',
+            
 
             'ver-perfil-docente',
             'editar-perfil-docente',

@@ -10,6 +10,7 @@ import BaseSelectGrupo from "../../ui/BaseSelectGrupo.vue";
 import useModalToast from "../../../composables/useModalToast";
 import useValidation from "../../../composables/useValidation";
 import useHttpRequest from "../../../composables/useHttpRequest";
+import AuthorizationFallback from "../../../components/page/AuthorizationFallback.vue";
 
 const props = defineProps({
   programacionToEdit: {
@@ -52,6 +53,12 @@ const schema = yup.object().shape({
     tipo_entrega: yup.string().required('El título es requerido.'),
     fecha_inicio: yup.date().required('La fecha de inicio es requerida.'),
     fecha_fin: yup.date().required('La fecha de fin es requerida.').min(yup.ref('fecha_inicio'), 'La fecha de fin no puede ser anterior a la de inicio.'),
+});
+
+const requiredPermissions = computed(() => {
+  return props.comision?.id
+    ? ["todo-acceso-documento-programado", "editar-documento-programado"]
+    : ["todo-acceso-documento-programado", "crear-documento-programado"];
 });
 
 watch(() => props.programacionToEdit, (newVal) => {
@@ -103,6 +110,8 @@ const onSubmit = async () => {
 </script>
 
 <template>
+    <AuthorizationFallback :permissions="requiredPermissions">
+   
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 h-fit sticky top-6">
         <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
             {{ isEditing ? 'Editar Programación' : 'Nueva Programación' }}
@@ -139,4 +148,5 @@ const onSubmit = async () => {
             </div>
         </form>
     </div>
+     </AuthorizationFallback>
 </template>

@@ -2,10 +2,13 @@
 import { ref, onMounted, computed } from 'vue';
 import { ClockIcon, CheckCircleIcon, ExclamationTriangleIcon, EllipsisVerticalIcon, CalendarDaysIcon, DocumentArrowUpIcon, ChatBubbleBottomCenterTextIcon } from '@heroicons/vue/24/outline';
 import useModalToast from '../../composables/useModalToast';
+import useProgramacionSubidosStore from "../../store/Documento/useDocumentoSubidoStore";
 
 const props = defineProps({
     id: { type: String, required: true }
 });
+
+const programacionSubidosList = useProgramacionSubidosStore();
 
 const { showToast, showConfirmModal, showPromptModal } = useModalToast();
 const loading = ref(true);
@@ -15,6 +18,10 @@ const openMenuId = ref(null);
 
 const currentPage = ref(1);
 const itemsPerPage = 6;
+
+if (!programacionSubidosList?.programacionSubidos?.length) await programacionSubidosList.loadgetProgramacionSubidos();
+
+console.log("datos porgrmacin: ",programacionSubidosList?.programacionSubidos)
 
 const paginatedGrupos = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;

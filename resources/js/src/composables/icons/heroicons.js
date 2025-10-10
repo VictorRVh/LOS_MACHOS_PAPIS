@@ -59,6 +59,10 @@ const icons = {
   CalendarIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/CalendarIcon')),
   ClockIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/ClockIcon')),
   CheckCircleIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/CheckCircleIcon')),
+  ExclamationTriangleIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/ExclamationTriangleIcon')),
+  CalendarDaysIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/CalendarDaysIcon')),
+  DocumentArrowUpIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/DocumentArrowUpIcon')),
+  ChatBubbleBottomCenterTextIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/ChatBubbleBottomCenterTextIcon')),
 };
 
 export function registerHeroIcons(app) {

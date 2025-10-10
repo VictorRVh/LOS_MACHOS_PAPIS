@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 
 import useHttpRequest from '../../composables/useHttpRequest';
 
-const useProgramacionAdmintore = defineStore('programacion_admin', () => {
+const useProgramacionAdmintore = defineStore('programacion_admin_c', () => {
     const {
         index: getProgramacionAdmin,
         show: getProgramacionAdminByPerido,
@@ -22,7 +22,9 @@ const useProgramacionAdmintore = defineStore('programacion_admin', () => {
 
 
     const loadgetProgramacionAdminByPerido = async (id) => {
+        console.log("gola al id: ",id)
         const res = await getProgramacionAdminByPerido(id);
+        console.log("gola al otodo",res)
         programacionAdmin.value = res;
     };
 

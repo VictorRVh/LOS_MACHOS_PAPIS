@@ -1,7 +1,6 @@
 <script setup>
-import { ref, watch, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { storeToRefs } from "pinia";
 
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
@@ -17,147 +16,200 @@ import AuthorizationFallback from "../../components/page/AuthorizationFallback.v
 import usePeriodoStatusStore from "../../store/Periodo/usePeriodoStatusStore";
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
+import useProgramacionAdmintore from "../../store/Documento/useDocumentoStore";
 
 const router = useRouter();
 const periodoStore = usePeriodoStatusStore();
-const { periodos: periodosActivos } = storeToRefs(periodoStore);
-if (!periodoStore.periodos.length) await periodoStore.loadPeriodos();
+const documentoProgramado = useProgramacionAdmintore();
 
 const { showToast, showConfirmModal } = useModalToast();
-const { indexWithParams, destroy, loading } = useHttpRequest('/entrega_docente_admin');
+const { destroy, loading } = useHttpRequest("/entrega_docente_admin");
 
+// 🔹 Estados
+const selectedPeriodo = ref(null);
 const programaciones = ref([]);
-const selectedPeriodo = ref(periodosActivos.value[0]?.id || null);
 const programacionParaEditar = ref(null);
 
+// 🔹 Función para traer programaciones por periodo
 const fetchProgramaciones = async (periodoId) => {
-    if (!periodoId) {
-        programaciones.value = [];
-        return;
+  await documentoProgramado.loadgetProgramacionAdminByPerido(periodoId);
+  programaciones.value = documentoProgramado.programacionAdmin?.programaciones || [];
+};
+
+// 🔹 Cargar periodos al iniciar
+onMounted(async () => {
+  try {
+    if (!periodoStore.periodos.length) {
+      await periodoStore.loadPeriodos();
     }
-    const response = await indexWithParams({ id_periodo: periodoId });
-    programaciones.value = response || [];
+
+    // Tomamos el último periodo disponible
+    const ultimoPeriodo = periodoStore.periodos.at(-1);
+    if (ultimoPeriodo) {
+      selectedPeriodo.value = ultimoPeriodo.id;
+      await fetchProgramaciones(selectedPeriodo.value);
+    }
+  } catch (error) {
+    console.error("Error al cargar periodos o programaciones:", error);
+  }
+});
+
+// 🔹 Cuando cambia el select
+const cambiarLista = async (nuevoPeriodo) => {
+  if (!nuevoPeriodo) return;
+  await fetchProgramaciones(nuevoPeriodo);
 };
 
-onMounted(() => {
-    fetchProgramaciones(selectedPeriodo.value);
-});
-
-watch(selectedPeriodo, (newPeriodoId) => {
-    fetchProgramaciones(newPeriodoId);
-    resetEditingState();
-});
-
+// 🔹 Estado visual de cada programación
 const getProgramacionStatus = (doc) => {
-    if (!doc.fecha_inicio) return { text: 'Sin Fecha', class: 'bg-gray-100 text-gray-600' };
-    const ahora = new Date();
-    const inicio = new Date(doc.fecha_inicio);
-    const fin = new Date(doc.fecha_fin);
-    fin.setHours(23, 59, 59);
-    if (ahora < inicio) return { text: 'Programado', class: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' };
-    if (ahora >= inicio && ahora <= fin) return { text: 'Vigente', class: 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300' };
-    return { text: 'Finalizado', class: 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300' };
+  if (!doc.fecha_inicio)
+    return { text: "Sin Fecha", class: "bg-gray-100 text-gray-600" };
+
+  const ahora = new Date();
+  const inicio = new Date(doc.fecha_inicio);
+  const fin = new Date(doc.fecha_fin);
+  fin.setHours(23, 59, 59);
+
+  if (ahora < inicio)
+    return {
+      text: "Programado",
+      class: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+    };
+  if (ahora >= inicio && ahora <= fin)
+    return {
+      text: "Vigente",
+      class: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
+    };
+  return {
+    text: "Finalizado",
+    class: "bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300",
+  };
 };
 
+// 🔹 Acciones
 const verDetalleEntrega = (programacion) => {
-    router.push({ name: 'programacion.detalle', params: { id: programacion.id } });
+  router.push({ name: "programacion.detalle", params: { id: programacion.id } });
 };
 
 const editProgramacion = (prog) => {
-    programacionParaEditar.value = prog;
-}
+  programacionParaEditar.value = prog;
+};
 
 const resetEditingState = () => {
-    programacionParaEditar.value = null;
-}
+  programacionParaEditar.value = null;
+};
 
-const handleFormSubmitted = () => {
-    fetchProgramaciones(selectedPeriodo.value);
-    resetEditingState();
-}
+const handleFormSubmitted = async () => {
+  await fetchProgramaciones(selectedPeriodo.value);
+  resetEditingState();
+};
 
 const onDelete = (prog) => {
-    showConfirmModal('¿Seguro que quieres eliminar esta programación?', async (confirmed) => {
-        if (!confirmed) return;
-        try {
-            await destroy(prog.id);
-            await fetchProgramaciones(selectedPeriodo.value);
-            showToast('Programación eliminada.', 'success');
-            if(programacionParaEditar.value?.id === prog.id) {
-                resetEditingState();
-            }
-        } catch (error) {
-            showToast('Error al eliminar.', 'error');
-        }
-    });
-}
+  showConfirmModal("¿Seguro que quieres eliminar esta programación?", async (confirmed) => {
+    if (!confirmed) return;
+    try {
+      await destroy(prog.id);
+      await fetchProgramaciones(selectedPeriodo.value);
+      showToast("Programación eliminada.", "success");
+      if (programacionParaEditar.value?.id === prog.id) resetEditingState();
+    } catch (error) {
+      showToast("Error al eliminar.", "error");
+    }
+  });
+};
 </script>
 
+
 <template>
-    <AuthorizationFallback :permissions="['todo-documento-programado', 'ver-documento-programado']">
-        <div class="p-4 md:p-6 space-y-6">
-            <header class="flex justify-between items-start">
-                <div>
-                  <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Programación de Entregas</h1>
-                  <p class="text-gray-500 dark:text-gray-400 mt-1">Crea y gestiona los plazos de entrega de documentos para los docentes.</p>
-                </div>
-                <div class="w-64">
-                    <BaseSelectGrupo v-model="selectedPeriodo" :options="periodosActivos" label="nombre_periodo" value-prop="id" placeholder="Seleccione un Periodo" />
-                </div>
-            </header>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-1">
-                    <DocumentoSlider 
-                        :programacion-to-edit="programacionParaEditar"
-                        :periodos="periodosActivos"
-                        :selected-periodo-id="selectedPeriodo"
-                        @form-submitted="handleFormSubmitted"
-                        @cancel-edit="resetEditingState"
-                    />
-                </div>
-
-                <div class="lg:col-span-2">
-                    <Table>
-                        <THead>
-                            <Th>Título / Descripción</Th>
-                            <Th>Plazo de Entrega</Th>
-                            <Th>Estado</Th>
-                            <Th>Publicación</Th>
-                            <Th class="text-center">Acciones</Th>
-                        </THead>
-                        <TBody>
-                            <Tr v-if="loading"><Td colspan="5" class="text-center py-10">Cargando...</Td></Tr>
-                            <Tr v-else-if="!selectedPeriodo"><Td colspan="5" class="text-center py-12">Seleccione un periodo para empezar.</Td></Tr>
-                            <Tr v-else-if="!programaciones.length"><Td colspan="5" class="text-center py-12">No hay programaciones para este periodo.</Td></Tr>
-                            <Tr v-else v-for="prog in programaciones" :key="prog.id">
-                                <Td>
-                                    <p class="font-semibold text-gray-800 dark:text-gray-200 hover:text-cetpro dark:hover:text-cetpro-light">{{ prog.tipo_entrega }}</p>
-                                </Td>
-                                <Td class="font-mono text-xs">{{ prog.fecha_inicio }} - {{prog.fecha_fin }}</Td>
-                                <Td>
-                                    <span :class="getProgramacionStatus(prog).class" class="px-2 py-1 text-xs rounded-full font-semibold">
-                                        {{ getProgramacionStatus(prog).text }}
-                                    </span>
-                                </Td>
-                                <Td>
-                                    <span v-if="prog.status" class="px-2 py-1 text-xs rounded-full font-semibold text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300">Publicado</span>
-                                    <span v-else class="px-2 py-1 text-xs rounded-full font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300">Borrador</span>
-                                </Td>
-                                <Td class="text-center">
-                                   <MenuTable 
-                                     :actions="{ view: true, edit: true, delete: true }"
-                                     entity-label="entrega"
-                                     @view="verDetalleEntrega(prog)"
-                                     @edit="editProgramacion(prog)"
-                                     @delete="onDelete(prog)"
-                                   />
-                                </Td>
-                            </Tr>
-                        </TBody>
-                    </Table>
-                </div>
-            </div>
+  <AuthorizationFallback :permissions="['todo-documento-programado', 'ver-documento-programado']">
+    <div class="p-4 md:p-6 space-y-6">
+      <header class="flex justify-between items-start">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">
+            Programación de Entregas
+          </h1>
+          <p class="text-gray-500 dark:text-gray-400 mt-1">
+            Crea y gestiona los plazos de entrega de documentos para los docentes.
+          </p>
         </div>
-    </AuthorizationFallback>
+        <div class="w-64">
+          <BaseSelectGrupo
+            v-model="selectedPeriodo"
+            @onchange="cambiarLista"
+            :options="periodoStore?.periodos"
+            label="nombre_periodo"
+            value-prop="id"
+            placeholder="Seleccione un Periodo"
+          />
+        </div>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-1">
+          <DocumentoSlider
+            :programacion-to-edit="programacionParaEditar"
+            :periodos="periodoStore?.periodos"
+            :selected-periodo-id="selectedPeriodo"
+            @form-submitted="handleFormSubmitted"
+            @cancel-edit="resetEditingState"
+          />
+        </div>
+
+        <div class="lg:col-span-2">
+          <Table>
+            <THead>
+              <Th>Título / Descripción</Th>
+              <Th>Plazo de Entrega</Th>
+              <Th>Estado</Th>
+              <Th>Publicación</Th>
+              <Th class="text-center">Acciones</Th>
+            </THead>
+            <TBody>
+              <Tr v-if="loading">
+                <Td colspan="5" class="text-center py-10">Cargando...</Td>
+              </Tr>
+              <Tr v-else-if="!selectedPeriodo">
+                <Td colspan="5" class="text-center py-12">Seleccione un periodo para empezar.</Td>
+              </Tr>
+              <Tr v-else-if="!programaciones.length">
+                <Td colspan="5" class="text-center py-12">No hay programaciones para este periodo.</Td>
+              </Tr>
+              <Tr v-else v-for="prog in programaciones" :key="prog.id">
+                <Td>
+                  <p class="font-semibold text-gray-800 dark:text-gray-200 hover:text-cetpro dark:hover:text-cetpro-light">
+                    {{ prog.tipo_entrega }}
+                  </p>
+                </Td>
+                <Td class="font-mono text-xs">{{ prog.fecha_inicio }} - {{ prog.fecha_fin }}</Td>
+                <Td>
+                  <span :class="getProgramacionStatus(prog).class" class="px-2 py-1 text-xs rounded-full font-semibold">
+                    {{ getProgramacionStatus(prog).text }}
+                  </span>
+                </Td>
+                <Td>
+                  <span
+                    v-if="prog.status"
+                    class="px-2 py-1 text-xs rounded-full font-semibold text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300"
+                    >Publicado</span>
+                  <span
+                    v-else
+                    class="px-2 py-1 text-xs rounded-full font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300"
+                    >Borrador</span>
+                </Td>
+                <Td class="text-center">
+                  <MenuTable
+                    :actions="{ view: true, edit: true, delete: true }"
+                    entity-label="entrega"
+                    @view="verDetalleEntrega(prog)"
+                    @edit="editProgramacion(prog)"
+                    @delete="onDelete(prog)"
+                  />
+                </Td>
+              </Tr>
+            </TBody>
+          </Table>
+        </div>
+      </div>
+    </div>
+  </AuthorizationFallback>
 </template>

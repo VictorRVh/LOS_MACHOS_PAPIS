@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import Table from "../../components/table/Table.vue";
@@ -55,10 +55,10 @@ onMounted(async () => {
 });
 
 // 🔹 Cuando cambia el select
-const cambiarLista = async (nuevoPeriodo) => {
-  if (!nuevoPeriodo) return;
+watch(selectedPeriodo, async (nuevoPeriodo, anterior) => {
+  if (!nuevoPeriodo || nuevoPeriodo === anterior) return;
   await fetchProgramaciones(nuevoPeriodo);
-};
+});
 
 // 🔹 Estado visual de cada programación
 const getProgramacionStatus = (doc) => {
@@ -133,26 +133,17 @@ const onDelete = (prog) => {
           </p>
         </div>
         <div class="w-64">
-          <BaseSelectGrupo
-            v-model="selectedPeriodo"
-            @onchange="cambiarLista"
-            :options="periodoStore?.periodos"
-            label="nombre_periodo"
-            value-prop="id"
-            placeholder="Seleccione un Periodo"
-          />
+          <BaseSelectGrupo v-model="selectedPeriodo" :options="periodoStore?.periodos" label="nombre_periodo"
+            value-prop="id" placeholder="Seleccione un Periodo" />
+
         </div>
       </header>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-1">
-          <DocumentoSlider
-            :programacion-to-edit="programacionParaEditar"
-            :periodos="periodoStore?.periodos"
-            :selected-periodo-id="selectedPeriodo"
-            @form-submitted="handleFormSubmitted"
-            @cancel-edit="resetEditingState"
-          />
+          <DocumentoSlider :programacion-to-edit="programacionParaEditar" :periodos="periodoStore?.periodos"
+            :selected-periodo-id="selectedPeriodo" @form-submitted="handleFormSubmitted"
+            @cancel-edit="resetEditingState" />
         </div>
 
         <div class="lg:col-span-2">
@@ -176,7 +167,8 @@ const onDelete = (prog) => {
               </Tr>
               <Tr v-else v-for="prog in programaciones" :key="prog.id">
                 <Td>
-                  <p class="font-semibold text-gray-800 dark:text-gray-200 hover:text-cetpro dark:hover:text-cetpro-light">
+                  <p
+                    class="font-semibold text-gray-800 dark:text-gray-200 hover:text-cetpro dark:hover:text-cetpro-light">
                     {{ prog.tipo_entrega }}
                   </p>
                 </Td>
@@ -187,23 +179,14 @@ const onDelete = (prog) => {
                   </span>
                 </Td>
                 <Td>
-                  <span
-                    v-if="prog.status"
-                    class="px-2 py-1 text-xs rounded-full font-semibold text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300"
-                    >Publicado</span>
-                  <span
-                    v-else
-                    class="px-2 py-1 text-xs rounded-full font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300"
-                    >Borrador</span>
+                  <span v-if="prog.status"
+                    class="px-2 py-1 text-xs rounded-full font-semibold text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300">Publicado</span>
+                  <span v-else
+                    class="px-2 py-1 text-xs rounded-full font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300">Borrador</span>
                 </Td>
                 <Td class="text-center">
-                  <MenuTable
-                    :actions="{ view: true, edit: true, delete: true }"
-                    entity-label="entrega"
-                    @view="verDetalleEntrega(prog)"
-                    @edit="editProgramacion(prog)"
-                    @delete="onDelete(prog)"
-                  />
+                  <MenuTable :actions="{ view: true, edit: true, delete: true }" entity-label="entrega"
+                    @view="verDetalleEntrega(prog)" @edit="editProgramacion(prog)" @delete="onDelete(prog)" />
                 </Td>
               </Tr>
             </TBody>

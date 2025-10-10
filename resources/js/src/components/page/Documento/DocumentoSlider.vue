@@ -11,6 +11,7 @@ import useModalToast from "../../../composables/useModalToast";
 import useValidation from "../../../composables/useValidation";
 import useHttpRequest from "../../../composables/useHttpRequest";
 import AuthorizationFallback from "../../../components/page/AuthorizationFallback.vue";
+import useProgramacionSubidostore from "../../../store/Documento/useDocumentoSubidoStore";
 
 const props = defineProps({
   programacionToEdit: {
@@ -35,6 +36,7 @@ const { store, update, saving, updating } = useHttpRequest('/entrega_docente_adm
 
 const isEditing = ref(false);
 const formErrors = ref({});
+const programacionDocumento = useProgramacionSubidostore();
 
 const initialFormData = () => ({
     id: null,
@@ -43,7 +45,7 @@ const initialFormData = () => ({
     descripcion: '',
     fecha_inicio: '',
     fecha_fin: '',
-    status: true,
+    estado: true,
 });
 
 const formData = ref(initialFormData());
@@ -72,11 +74,7 @@ watch(() => props.programacionToEdit, (newVal) => {
     }
 }, { deep: true });
 
-watch(() => props.selectedPeriodoId, (newPeriodoId) => {
-    if (!isEditing.value) {
-        formData.value.id_periodo = newPeriodoId;
-    }
-});
+
 
 
 const resetForm = () => {
@@ -102,6 +100,7 @@ const onSubmit = async () => {
         if (response) {
             showToast(`Programación ${isEditing.value ? 'actualizada' : 'creada'} con éxito.`, 'success');
             emit('form-submitted');
+            await programacionDocumento.loadgetProgramacionAdminByPerido(selectedPeriodoId);
         }
     } catch (error) {
         showToast('Ocurrió un error al guardar.', 'error');

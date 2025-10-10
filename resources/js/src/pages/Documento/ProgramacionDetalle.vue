@@ -1,14 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import {
-  ClockIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  EllipsisVerticalIcon,
-  CalendarDaysIcon,
-  DocumentArrowUpIcon,
-  ChatBubbleBottomCenterTextIcon
-} from '@heroicons/vue/24/outline';
+
 
 import useModalToast from '../../composables/useModalToast';
 import useProgramacionSubidostore from "../../store/Documento/useDocumentoSubidoStore";
@@ -66,15 +58,7 @@ const changePage = (page) => {
   currentPage.value = page;
 };
 
-// 🔹 Utilidades
-const formatFecha = (fecha) => {
-  if (!fecha) return 'N/A';
-  return new Date(fecha).toLocaleDateString('es-PE', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit'
-  });
-};
+
 
 const toggleMenu = (grupoId) => {
   openMenuId.value = openMenuId.value === grupoId ? null : grupoId;

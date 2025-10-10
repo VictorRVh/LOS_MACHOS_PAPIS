@@ -287,7 +287,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('lista_programacion/{id_admin}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'subidasPorProgramacion',
-    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
+    ])->middleware('permission:todo-acceso-especialidades|ver-especialidades');
+
+    Route::get('programacion_grupo/{id_grupo}', [
+        \App\Http\Controllers\EntregaDocenteAdminController::class,
+        'programacionesPorGrupo',
+    ])->middleware('permission:todo-acceso-especialidades|ver-especialidades');
 
     // RUTA PARA ESPECIALIDAD_MADRE
     Route::get('especialidad_madre', [

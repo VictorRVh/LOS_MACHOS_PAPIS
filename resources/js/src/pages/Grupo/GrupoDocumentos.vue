@@ -8,6 +8,7 @@ import useSlider from '../../composables/useSlider';
 import SearchBar from '../../components/head_table/headSearch.vue';
 import CreateButton from '../../components/ui/CreateButton.vue';
 import GrupoDocumentoSlider from '../../components/page/Grupo/GrupoDocumentoSlider.vue';
+import useProgramacionAdmintore from '../../store/Documento/useDocumentoStore';
 
 const props = defineProps({
   id: {
@@ -16,9 +17,25 @@ const props = defineProps({
   },
 });
 
-const router = useRouter();
-const documentos = ref([]);
+
 const { slider, sliderData, showSlider, hideSlider } = useSlider();
+
+const documentoStore = useProgramacionAdmintore();
+
+const documentos = ref([]);
+const isLoading = ref(true);
+
+onMounted(async () => {
+  try {
+    await documentoStore.loadGetProgramacionByGrupo(props.id)
+
+    console.log('respuesta en el onmounted: ', documentoStore.programacionPorGrupo);
+    documentos.value = documentoStore.programacionPorGrupo.programaciones;
+  } finally {
+    isLoading.value = false;
+  }
+});
+
 
 const {
   paginados: documentosPaginados,
@@ -30,18 +47,8 @@ const {
 });
 
 const refreshDocumentos = () => {
-    console.log('Recargando lista de documentos...');
+  console.log('Recargando lista de documentos...');
 };
-
-onMounted(() => {
-  documentos.value = [
-    { id: 1, titulo: 'Sílabo', descripcion: 'Plan de estudios detallado.' },
-    { id: 2, titulo: 'Sesiones de Clase', descripcion: 'Material y planificación de cada sesión.' },
-    { id: 3, titulo: 'Capacidades Terminales', descripcion: 'Objetivos y competencias del módulo.' },
-    { id: 4, titulo: 'Registro de Asistencia', descripcion: 'Control de asistencia de alumnos.' },
-    { id: 5, titulo: 'Registro de Evaluaciones', descripcion: 'Calificaciones y notas de los alumnos.' },
-  ];
-});
 
 const abrirCarpeta = (doc) => {
   console.log('Navegando a la carpeta del documento:', doc.id);
@@ -59,43 +66,40 @@ const abrirCarpeta = (doc) => {
       <div class="flex items-center gap-4">
         <SearchBar :totalResultados="documentosOrdenados.length" @search="filtrarDocumentos" />
         <CreateButton @click="showSlider(true)">
-            Agregar Nuevo
+          Agregar Nuevo
         </CreateButton>
       </div>
     </div>
-    
-    <div v-if="documentosPaginados.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <div v-for="doc in documentosPaginados" :key="doc.id" 
-           @click="abrirCarpeta(doc)"
-           class="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 hover:border-cetpro/50">
-        
-        <div class="flex justify-between items-start">
-            <FolderIcon class="h-12 w-12 text-cetpro dark:text-cetpro-light transition-colors duration-300" />
-            <ArrowUpRightIcon class="h-6 w-6 text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+    <div v-if="documentosPaginados.length > 0"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div v-for="doc in documentosPaginados" :key="doc.id" @click="abrirCarpeta(doc)"
+        class="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 hover:border-cetpro/50">
+
+        <div class="flex justify-between items-start">  
+          <FolderIcon class="h-12 w-12 text-cetpro dark:text-cetpro-light transition-colors duration-300" />
+          <ArrowUpRightIcon
+            class="h-6 w-6 text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
         <div class="mt-4">
-            <h4 class="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300 group-hover:text-cetpro-dark dark:group-hover:text-cetpro-light">
-                {{ doc.titulo }}
-            </h4>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 h-10">
-                {{ doc.descripcion }}
-            </p>
+          <h4
+            class="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300 group-hover:text-cetpro-dark dark:group-hover:text-cetpro-light">
+            {{ doc.documento_admin }}
+          </h4>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 h-10">
+            {{ doc.descripcion }}
+          </p>
         </div>
       </div>
     </div>
 
     <div v-else class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-        <FolderIcon class="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600" />
-        <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">No se encontraron documentos</h3>
-        <p class="mt-1 text-sm text-gray-500">Intenta con otra búsqueda o agrega un nuevo tipo de documento.</p>
+      <FolderIcon class="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600" />
+      <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">No se encontraron documentos</h3>
+      <p class="mt-1 text-sm text-gray-500">Intenta con otra búsqueda o agrega un nuevo tipo de documento.</p>
     </div>
   </div>
-  
-  <GrupoDocumentoSlider 
-    :show="slider"
-    :documento-data="sliderData"
-    @hide="hideSlider"
-    @submitted="refreshDocumentos"
-  />
+
+  <GrupoDocumentoSlider :show="slider" :documento-data="sliderData" @hide="hideSlider" @submitted="refreshDocumentos" />
 </template>

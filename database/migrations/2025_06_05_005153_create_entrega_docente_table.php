@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('fecha_fin');
             $table->boolean('estado');
             $table->uuid('id_admin');
-            $table->string('documento_admin');
+            $table->string('documento_admin')->nullable();;
             $table->string('observacion');
 
             $table->foreign('id_grupo')

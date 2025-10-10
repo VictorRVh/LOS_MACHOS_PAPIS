@@ -40,7 +40,7 @@ class EntregaDocenteAdminController extends Controller
             'tipo_entrega'  => $request->tipo_entrega,
             'fecha_inicio'  => $request->fecha_inicio,
             'fecha_fin'     => $request->fecha_fin,
-            'status'        => 1,
+            'status'        => EntregaDocenteAdmin::STATUS_PENDIENTE,
             'mostrar' => $request->mostrar ?? false,
         ]);
 
@@ -57,11 +57,11 @@ class EntregaDocenteAdminController extends Controller
         foreach ($grupos as $grupo) {
             EntregaDocente::create([
                 'id_grupo'        => $grupo->id,
-                'fecha_inicio'    => $request->fecha_inicio,
-                'fecha_fin'       => $request->fecha_fin,
-                'estado'          => 1,
+                'fecha_inicio'    => $adminEntrega->fecha_inicio,
+                'fecha_fin'       => $adminEntrega->fecha_fin,
+                'estado'          => $adminEntrega->status,
                 'id_admin'        => $adminEntrega->id,
-                'documento_admin' => $request->tipo_entrega,
+                // 'documento_admin' => $request->tipo_entrega, // ESTO PUEDE VENIR DEL REQUEST
                 'observacion'     => $request->observacion ?? '',
             ]);
         }
@@ -125,6 +125,12 @@ class EntregaDocenteAdminController extends Controller
                     'mostrar',
                     'created_at',
                 ]);
+
+            // CONSULTA PARA VER PROGRAMACIONES ACTIVAS PENDIENTES ETC
+
+            // foreach ($programaciones as $programacion) {
+            //     $programacion->actualizarEstado();
+            // }
 
             return response()->json([
                 'periodo' => $periodo->nombre_periodo,
@@ -198,6 +204,35 @@ class EntregaDocenteAdminController extends Controller
                 'mostrar' => $programacion->mostrar,
             ],
             'grupos_programados' => $gruposProgramados
+        ]);
+    }
+
+
+    public function programacionesPorGrupo($id_grupo)
+    {
+        $programaciones = EntregaDocente::with([
+            'entregaDocenteAdmin:id,tipo_entrega,fecha_inicio,fecha_fin,status',
+        ])
+            ->where('id_grupo', $id_grupo)
+            ->get();
+
+        return response()->json([
+            'total' => $programaciones->count(),
+            'programaciones' => $programaciones->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'fecha_inicio' => $item->fecha_inicio,
+                    'fecha_fin' => $item->fecha_fin,
+                    'estado' => $item->estado,
+                    'documento_admin' => $item->documento_admin,
+                    'observacion' => $item->observacion,
+                    'programacion_general' => $item->entregaDocenteAdmin ? [
+                        'id' => $item->entregaDocenteAdmin->id,
+                        'tipo_entrega' => $item->entregaDocenteAdmin->tipo_entrega,
+                        'status' => $item->entregaDocenteAdmin->status,
+                    ] : null // <-- Previene el error si no hay admin
+                ];
+            })
         ]);
     }
 }

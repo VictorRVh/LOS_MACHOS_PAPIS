@@ -100,8 +100,8 @@ const handleAction = (action, grupo) => {
           {{ programacion.tipo_entrega }}
         </h1>
         <p class="text-gray-500 dark:text-gray-400 mt-1">
-          <span class="font-semibold">Inicio:</span> {{ formatFecha(programacion.fecha_inicio) }} |
-          <span class="font-semibold">Fin:</span> {{ formatFecha(programacion.fecha_fin) }}
+          <span class="font-semibold">Inicio:</span> {{ programacion.fecha_inicio }} |
+          <span class="font-semibold">Fin:</span> {{ programacion.fecha_fin }}
         </p>
       </header>
 
@@ -204,7 +204,7 @@ const handleAction = (action, grupo) => {
               </span>
             </div>
             <span class="text-xs text-gray-500 dark:text-gray-400">
-              {{ formatFecha(grupo.created_at) }}
+              {{ grupo.created_at }}
             </span>
           </div>
         </div>

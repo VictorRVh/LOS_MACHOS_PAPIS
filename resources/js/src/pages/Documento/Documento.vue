@@ -60,31 +60,55 @@ watch(selectedPeriodo, async (nuevoPeriodo, anterior) => {
   await fetchProgramaciones(nuevoPeriodo);
 });
 
-// 🔹 Estado visual de cada programación
+// 🔹 Estado visual de cada programación según su status numérico
+// 🔹 Estado visual de cada programación según su status numérico o texto
 const getProgramacionStatus = (doc) => {
-  if (!doc.fecha_inicio)
-    return { text: "Sin Fecha", class: "bg-gray-100 text-gray-600" };
+  // Algunos backends devuelven status = 0 o status_texto = 'Pendiente'
+  const status = Number(doc.status); // aseguramos que sea número
+  const texto = doc.status_texto?.toLowerCase() || "";
 
-  const ahora = new Date();
-  const inicio = new Date(doc.fecha_inicio);
-  const fin = new Date(doc.fecha_fin);
-  fin.setHours(23, 59, 59);
+  if (status === 0 || texto.includes("pendiente")) {
+    return {
+      text: "Pendiente",
+      class: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
+    };
+  }
 
-  if (ahora < inicio)
-    return {
-      text: "Programado",
-      class: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-    };
-  if (ahora >= inicio && ahora <= fin)
-    return {
-      text: "Vigente",
-      class: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
-    };
-  return {
-    text: "Finalizado",
-    class: "bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300",
-  };
+  switch (status) {
+    case 1:
+      return {
+        text: "Activo",
+        class: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
+      };
+    case 2:
+      return {
+        text: "Desactivo",
+        class: "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300",
+      };
+    case 3:
+      return {
+        text: "Anulado",
+        class: "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
+      };
+    case 4:
+      return {
+        text: "Finalizado",
+        class: "bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300",
+      };
+    case 5:
+      return {
+        text: "Completado",
+        class: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+      };
+    default:
+      return {
+        text: "Desconocido",
+        class: "bg-gray-100 text-gray-500",
+      };
+  }
 };
+
+
 
 // 🔹 Acciones
 const verDetalleEntrega = (programacion) => {
@@ -177,9 +201,10 @@ const onDelete = (prog) => {
                   <span :class="getProgramacionStatus(prog).class" class="px-2 py-1 text-xs rounded-full font-semibold">
                     {{ getProgramacionStatus(prog).text }}
                   </span>
+
                 </Td>
                 <Td>
-                  <span v-if="prog.status"
+                  <span v-if="prog.mostrar"
                     class="px-2 py-1 text-xs rounded-full font-semibold text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300">Publicado</span>
                   <span v-else
                     class="px-2 py-1 text-xs rounded-full font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300">Borrador</span>

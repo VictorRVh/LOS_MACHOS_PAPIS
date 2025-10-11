@@ -16,31 +16,43 @@ class ActualizarEstadoEntregas extends Command
 
     public function handle()
     {
-        $hoy = Carbon::today();
+        $hoy = Carbon::now('America/Lima')->startOfMinute();
 
-        // Obtener todas las programaciones
         $programaciones = EntregaDocenteAdmin::all();
 
         foreach ($programaciones as $programacion) {
 
             $estadoAnterior = $programacion->status;
 
-            if ($hoy->lt($programacion->fecha_inicio)) {
-                $programacion->status = EntregaDocenteAdmin::STATUS_PENDIENTE;
-            } elseif ($hoy->between($programacion->fecha_inicio, $programacion->fecha_fin)) {
-                $programacion->status = EntregaDocenteAdmin::STATUS_ACTIVO;
-            } elseif ($hoy->gt($programacion->fecha_fin)) {
-                $programacion->status = EntregaDocenteAdmin::STATUS_FINALIZADO;
+            $inicio = Carbon::parse($programacion->fecha_inicio)->timezone('America/Lima')->startOfMinute();
+            $fin = Carbon::parse($programacion->fecha_fin)->timezone('America/Lima')->endOfMinute();
+
+            if ($hoy->lt($inicio)) {
+                $nuevoEstado = EntregaDocenteAdmin::STATUS_PENDIENTE;
+            } elseif ($hoy->between($inicio, $fin)) {
+                $nuevoEstado = EntregaDocenteAdmin::STATUS_ACTIVO;
+            } else {
+                $nuevoEstado = EntregaDocenteAdmin::STATUS_FINALIZADO;
             }
 
-            // Solo guardar si cambió
-            if ($programacion->status !== $estadoAnterior) {
+            if ($nuevoEstado !== $estadoAnterior) {
+                $programacion->status = $nuevoEstado;
                 $programacion->save();
 
-                // REPERCUTIR CAMBIO EN LOS HIJOS
                 EntregaDocente::where('id_admin', $programacion->id)
-                    ->update(['estado' => $programacion->status]);
+                    ->update(['estado' => $nuevoEstado]);
             }
+
+            // DEBUG
+            $this->info('-----------------------');
+            $this->info('Hora actual: ' . $hoy);
+            $this->info('Inicio: ' . $inicio);
+            $this->info('Fin: ' . $fin);
+            $this->info('Comparación: ');
+            $this->info('hoy < inicio ? ' . ($hoy->lt($inicio) ? 'SI' : 'NO'));
+            $this->info('hoy between ? ' . ($hoy->between($inicio, $fin) ? 'SI' : 'NO'));
+            $this->info('hoy > fin ? ' . ($hoy->gt($fin) ? 'SI' : 'NO'));
+            $this->info('-----------------------');
         }
 
         $this->info('Estados actualizados correctamente.');

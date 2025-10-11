@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
 
             $table->string('tipo_entrega', 255);
-            $table->date('fecha_inicio')->nullable();
-            $table->date('fecha_fin')->nullable();
+            $table->dateTime('fecha_inicio')->nullable();
+            $table->dateTime('fecha_fin')->nullable();
             $table->tinyInteger('status')->default(0);
 
             $table->uuid('id_periodo');

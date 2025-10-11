@@ -85,10 +85,10 @@ const abrirCarpeta = (doc) => {
         <div class="mt-4">
           <h4
             class="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300 group-hover:text-cetpro-dark dark:group-hover:text-cetpro-light">
-            {{ doc.documento_admin }}
+            {{ doc.programacion_general.tipo_entrega }}
           </h4>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 h-10">
-            {{ doc.descripcion }}
+            {{ doc.descripcion }} dedoemdoe
           </p>
         </div>
       </div>

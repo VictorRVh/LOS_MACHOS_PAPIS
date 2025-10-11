@@ -42,10 +42,9 @@ const initialFormData = () => ({
     id: null,
     id_periodo: '',
     tipo_entrega: '',
-    descripcion: '',
     fecha_inicio: '',
     fecha_fin: '',
-    estado: true,
+    mostrar: 0,
 });
 
 const formData = ref(initialFormData());
@@ -129,13 +128,13 @@ const onSubmit = async () => {
                 />
             </div>
             <FormInput v-model="formData.tipo_entrega" label="Título o Tipo de Entrega *" :error-message="formErrors.tipo_entrega" placeholder="Ej: Sílabo mensual"/>
-            <FormInput v-model="formData.descripcion" label="Descripción" :error-message="formErrors.descripcion" />
+            
             <div class="grid grid-cols-2 gap-4">
                  <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio *" type="date" :error-message="formErrors.fecha_inicio" />
                  <FormInput v-model="formData.fecha_fin" label="Fecha de Fin *" type="date" :error-message="formErrors.fecha_fin" />
             </div>
             <div class="flex items-center space-x-3 pt-2">
-                 <CheckBox v-model="formData.status" />
+                 <CheckBox v-model="formData.mostrar" />
                  <div>
                      <label class="font-medium text-gray-800 dark:text-gray-200">Publicar para docentes</label>
                      <p class="text-xs text-gray-500 dark:text-gray-400">Al desmarcar, quedará como borrador.</p>

@@ -24,6 +24,11 @@ class EntregaDocenteAdmin extends Model
         'mostrar'
     ];
 
+    protected $casts = [
+        'fecha_inicio' => 'datetime',
+        'fecha_fin' => 'datetime',
+    ];
+
     protected $appends = ['status_texto'];
 
     protected static function boot()
@@ -68,24 +73,60 @@ class EntregaDocenteAdmin extends Model
     | HELPERS: Verificar estado (lectura)
     |--------------------------------------------------------------------------
     */
-    public function isPendiente(): bool     { return $this->status === self::STATUS_PENDIENTE; }
-    public function isActivo(): bool        { return $this->status === self::STATUS_ACTIVO; }
-    public function isDesactivado(): bool   { return $this->status === self::STATUS_DESACTIVO; }
-    public function isAnulado(): bool       { return $this->status === self::STATUS_ANULADO; }
-    public function isFinalizado(): bool    { return $this->status === self::STATUS_FINALIZADO; }
-    public function isCompletado(): bool    { return $this->status === self::STATUS_COMPLETADO; }
+    public function isPendiente(): bool
+    {
+        return $this->status === self::STATUS_PENDIENTE;
+    }
+    public function isActivo(): bool
+    {
+        return $this->status === self::STATUS_ACTIVO;
+    }
+    public function isDesactivado(): bool
+    {
+        return $this->status === self::STATUS_DESACTIVO;
+    }
+    public function isAnulado(): bool
+    {
+        return $this->status === self::STATUS_ANULADO;
+    }
+    public function isFinalizado(): bool
+    {
+        return $this->status === self::STATUS_FINALIZADO;
+    }
+    public function isCompletado(): bool
+    {
+        return $this->status === self::STATUS_COMPLETADO;
+    }
 
     /*
     |--------------------------------------------------------------------------
     | HELPERS: Cambiar estado (escritura)
     |--------------------------------------------------------------------------
     */
-    public function setPendiente()   { return $this->update(['status' => self::STATUS_PENDIENTE]); }
-    public function setActivo()      { return $this->update(['status' => self::STATUS_ACTIVO]); }
-    public function setDesactivado() { return $this->update(['status' => self::STATUS_DESACTIVO]); }
-    public function setAnulado()     { return $this->update(['status' => self::STATUS_ANULADO]); }
-    public function setFinalizado()  { return $this->update(['status' => self::STATUS_FINALIZADO]); }
-    public function setCompletado()  { return $this->update(['status' => self::STATUS_COMPLETADO]); }
+    public function setPendiente()
+    {
+        return $this->update(['status' => self::STATUS_PENDIENTE]);
+    }
+    public function setActivo()
+    {
+        return $this->update(['status' => self::STATUS_ACTIVO]);
+    }
+    public function setDesactivado()
+    {
+        return $this->update(['status' => self::STATUS_DESACTIVO]);
+    }
+    public function setAnulado()
+    {
+        return $this->update(['status' => self::STATUS_ANULADO]);
+    }
+    public function setFinalizado()
+    {
+        return $this->update(['status' => self::STATUS_FINALIZADO]);
+    }
+    public function setCompletado()
+    {
+        return $this->update(['status' => self::STATUS_COMPLETADO]);
+    }
 
 
     public function actualizarEstado()
@@ -105,6 +146,4 @@ class EntregaDocenteAdmin extends Model
             $this->save();
         }
     }
-
-
 }

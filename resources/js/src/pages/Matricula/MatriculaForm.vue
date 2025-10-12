@@ -118,7 +118,7 @@ const onSubmit = async () => {
 </script>
 
 <template>
-    <div class="p-2 bg-gray-100 dark:bg-gray-900/50 font-inter">
+    <div class="p-2 bg-white dark:bg-gray-900/50 font-inter">
         <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 ">Nueva Matrícula de Estudiante</h2>
 
         <div v-if="isLoading"

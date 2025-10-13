@@ -439,7 +439,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('periodo/{id}', [
         \App\Http\Controllers\PeriodoController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-periodos');
+    ])->middleware('permission:todo-acceso-periodos|eliminar-periodos');
 
 
     // RUTA PARA MODULO
@@ -637,26 +637,7 @@ Route::middleware('auth:sanctum')->group(function () {
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
-    // RUTA PARA ENTREGAS DOCENTE
-    Route::get('entrega_docente', [
-        \App\Http\Controllers\EntregaDocenteController::class,
-        'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
-
-    Route::post('entrega_docente', [
-        \App\Http\Controllers\EntregaDocenteController::class,
-        'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
-
-    Route::patch('entrega_docente/{id}', [
-        \App\Http\Controllers\EntregaDocenteController::class,
-        'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
-
-    Route::delete('entrega_docente/{id}', [
-        \App\Http\Controllers\EntregaDocenteController::class,
-        'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+  
 
 
     // RUTA PARA SESIONES

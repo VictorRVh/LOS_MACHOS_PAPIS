@@ -289,15 +289,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\EntregaDocenteController::class,
         'subidasPorProgramacion',
     ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
-    Route::get('programacion_admin/{id_periodo}', [
-        \App\Http\Controllers\EntregaDocenteController::class,
-        'indexByPeriodo',
-    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-documento-programado');
-    Route::post('entrega_docente', [
-        \App\Http\Controllers\EntregaDocenteController::class,
-        'store',
-    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|crear-programacion-documentos-subidos');
-
+    
     Route::patch('entrega_docente/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'update',

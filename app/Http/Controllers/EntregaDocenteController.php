@@ -115,24 +115,27 @@ class EntregaDocenteController extends Controller
         if (!$entrega) {
             return response()->json(['message' => 'Entrega no encontrada'], 404);
         }
-
         $validated = $request->validate([
             'dias_aplazados' => 'nullable|string|max:255',
             'documento_admin' => 'nullable|string|max:255',
+            'descripcion' => 'nullable|string|max:255',
             'observacion' => 'nullable|string|max:255',
         ]);
 
-        // Actualizar con los datos validados + fecha y estado fijo
-        $entrega->update(array_merge($validated, [
-            'fecha_aplazada' => now(), // fecha actual
-            'estado' => 1,             // se marca como entregado
-        ]));
+        // Si se envía "dias_aplazados", agregamos la fecha y estado
+        if (!empty($validated['dias_aplazados'])) {
+            $validated['fecha_aplazada'] = now(); // fecha actual de Lima
+            $validated['estado'] = 1;
+        }
+
+        $entrega->update($validated);
 
         return response()->json([
             'message' => 'Entrega actualizada con éxito',
             'data' => $entrega
         ]);
     }
+
 
     // DELETE /api/entrega_docente/{id}
     public function destroy($id)

@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-
-
+import { ClockIcon, CheckCircleIcon, ExclamationTriangleIcon, EllipsisVerticalIcon, CalendarDaysIcon, PencilSquareIcon } from '@heroicons/vue/24/outline';
 import useModalToast from '../../composables/useModalToast';
 import useProgramacionSubidostore from "../../store/Documento/useDocumentoSubidoStore";
+import Slider from '../../components/ui/Slider.vue';
+import DocumentoItemsSlider from '../../components/page/Documento/documetoItemsSlider.vue';
+import DocumentoPlazo from '../../components/page/Documento/DocumentoPlazo.vue';
 
 const props = defineProps({
   id: {
@@ -12,23 +14,25 @@ const props = defineProps({
   }
 });
 
-const { showToast, showPromptModal } = useModalToast();
+const { showToast } = useModalToast();
 const programacionStore = useProgramacionSubidostore();
 
 const loading = ref(true);
 const programacion = ref(null);
 const gruposProgramados = ref([]);
 const openMenuId = ref(null);
+const selectedGrupo = ref(null);
+
+const showItemsSlider = ref(false);
+const showPlazoSlider = ref(false);
 
 const currentPage = ref(1);
 const itemsPerPage = 6;
 
-// 🔹 Cargar los datos desde el store real
 onMounted(async () => {
   loading.value = true;
   try {
     await programacionStore.loadgetProgramacionSubidos(props.id);
-
     const data = programacionStore.programacionSubidos;
     if (data && data.programacion) {
       programacion.value = data.programacion;
@@ -44,7 +48,6 @@ onMounted(async () => {
   }
 });
 
-// 🔹 Computed para paginación
 const paginatedGrupos = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
@@ -58,42 +61,27 @@ const changePage = (page) => {
   currentPage.value = page;
 };
 
-
-
 const toggleMenu = (grupoId) => {
   openMenuId.value = openMenuId.value === grupoId ? null : grupoId;
 };
 
-const habilitarEntrega = (grupo) => {
-  showPromptModal({
-    title: `Habilitar Plazo para Grupo ${grupo.grupo_detalle.seccion}`,
-    text: 'Seleccione los días de prórroga (1-5):',
-    inputType: 'select',
-    inputOptions: { '1': '1 día', '2': '2 días', '3': '3 días', '4': '4 días', '5': '5 días' },
-    confirmButtonText: 'Habilitar',
-  }, (days) => {
-    if (days) {
-      showToast(`Plazo extendido por ${days} día(s) para el grupo ${grupo.grupo_detalle.seccion}.`, 'success');
-    }
-  });
+const openItemsModal = (grupo) => {
+    selectedGrupo.value = grupo;
+    showItemsSlider.value = true;
+    openMenuId.value = null;
 };
 
-const handleAction = (action, grupo) => {
-  openMenuId.value = null;
-  if (action === 'Habilitar Entrega') {
-    habilitarEntrega(grupo);
-  } else {
-    showToast(`Acción '${action}' en grupo ${grupo.grupo_detalle.seccion}.`, 'info');
-  }
+const openPlazoModal = (grupo) => {
+    selectedGrupo.value = grupo;
+    showPlazoSlider.value = true;
+    openMenuId.value = null;
 };
 </script>
 
 <template>
   <div class="p-4 md:p-6 space-y-6">
-    <!-- LOADING -->
     <div v-if="loading" class="text-center py-20 text-gray-600 dark:text-gray-300">Cargando datos...</div>
 
-    <!-- DATOS DE PROGRAMACIÓN -->
     <div v-else-if="programacion">
       <header class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">
@@ -105,20 +93,16 @@ const handleAction = (action, grupo) => {
         </p>
       </header>
 
-      <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
-        <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-300">
-          Estado de entrega por grupo
-        </h2>
-      </div>
+      <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-4">
+        Estado de entrega por grupo
+      </h2>
 
-      <!-- LISTA DE GRUPOS -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           v-for="grupo in paginatedGrupos"
           :key="grupo.id"
           class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col transition-shadow"
         >
-          <!-- ENCABEZADO DEL GRUPO -->
           <div class="p-4 border-b dark:border-gray-700 flex justify-between items-start">
             <div>
               <p class="text-sm font-bold text-cetpro dark:text-cetpro-light uppercase truncate">
@@ -139,7 +123,6 @@ const handleAction = (action, grupo) => {
                 <EllipsisVerticalIcon class="h-5 w-5" />
               </button>
 
-              <!-- MENÚ DE OPCIONES -->
               <transition name="fade">
                 <div
                   v-if="openMenuId === grupo.id"
@@ -147,31 +130,16 @@ const handleAction = (action, grupo) => {
                 >
                   <ul class="py-1 text-sm text-gray-700 dark:text-gray-200">
                     <li>
-                      <a
-                        href="#"
-                        @click.prevent=""
-                        class="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      >
-                        <DocumentArrowUpIcon class="h-5 w-5" /> Subir Formato/Guía
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        @click.prevent=""
-                        class="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      >
-                        <ChatBubbleBottomCenterTextIcon class="h-5 w-5" /> Agregar Observación
+                      <a href="#" @click.prevent="openItemsModal(grupo)" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <PencilSquareIcon class="h-5 w-5"/>
+                        <span>Subir/Observar Entrega</span>
                       </a>
                     </li>
                     <li><hr class="my-1 dark:border-gray-700" /></li>
                     <li>
-                      <a
-                        href="#"
-                        @click.prevent="handleAction('Habilitar Entrega', grupo)"
-                        class="flex items-center gap-3 px-4 py-2 text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      >
-                        <CalendarDaysIcon class="h-5 w-5" /> Habilitar Plazo Extra
+                      <a href="#" @click.prevent="openPlazoModal(grupo)" class="flex items-center gap-3 px-4 py-2 text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <CalendarDaysIcon class="h-5 w-5" />
+                        <span>Habilitar Plazo Extra</span>
                       </a>
                     </li>
                   </ul>
@@ -180,7 +148,6 @@ const handleAction = (action, grupo) => {
             </div>
           </div>
 
-          <!-- DETALLE DEL GRUPO -->
           <div class="p-4 flex-grow">
             <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
               {{ grupo.grupo_detalle.nombre_docente }}
@@ -193,10 +160,7 @@ const handleAction = (action, grupo) => {
             </p>
           </div>
 
-          <!-- ESTADO -->
-          <div
-            class="p-4 bg-gray-50 dark:bg-gray-800/50 border-t dark:border-gray-700 flex items-center justify-between"
-          >
+          <div class="p-4 bg-gray-50 dark:bg-gray-800/50 border-t dark:border-gray-700 flex items-center justify-between">
             <div class="flex items-center gap-2" :class="grupo.estado ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
               <component :is="grupo.estado ? CheckCircleIcon : ClockIcon" class="h-5 w-5" />
               <span class="text-sm font-semibold">
@@ -210,7 +174,6 @@ const handleAction = (action, grupo) => {
         </div>
       </div>
 
-      <!-- PAGINACIÓN -->
       <div v-if="totalPages > 1" class="flex items-center justify-center pt-6">
         <nav class="inline-flex -space-x-px rounded-md shadow-sm">
           <button
@@ -234,7 +197,6 @@ const handleAction = (action, grupo) => {
       </div>
     </div>
 
-    <!-- SIN DATOS -->
     <div v-else class="text-center py-20">
       <ExclamationTriangleIcon class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
@@ -242,8 +204,15 @@ const handleAction = (action, grupo) => {
       </h3>
     </div>
 
-    <!-- CIERRE DE MENÚ AL HACER CLICK FUERA -->
     <div v-if="openMenuId" @click.stop="openMenuId = null" class="fixed inset-0 z-10"></div>
+
+    <Slider :show="showItemsSlider" @hide="showItemsSlider = false" title="Subir Formato y Agregar Observación">
+        <DocumentoItemsSlider v-if="selectedGrupo" :grupo="selectedGrupo" />
+    </Slider>
+    
+    <Slider :show="showPlazoSlider" @hide="showPlazoSlider = false" title="Habilitar Plazo Extra de Entrega">
+        <DocumentoPlazo v-if="selectedGrupo" :grupo="selectedGrupo" />
+    </Slider>
   </div>
 </template>
 

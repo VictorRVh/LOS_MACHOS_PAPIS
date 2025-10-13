@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use Carbon\Carbon;
+use App\Models\EntregaDocenteAdmin;
 
 use App\Models\EntregaDocente;
 use Illuminate\Http\Request;
@@ -27,16 +29,75 @@ class EntregaDocenteController extends Controller
 
         return response()->json($entrega);
     }
+    public function subidasPorProgramacion($id_admin)
+    {
+
+        // Obtener programación general
+        $programacion = EntregaDocenteAdmin::findOrFail($id_admin);
+
+        // Obtener subidas con relaciones
+        $subidas = EntregaDocente::with([
+            'grupo:id,seccion,turno,id_docente,id_modulo,id_especialidad',
+            'grupo.docente:id,user_id',
+            'grupo.docente.user:id,name,apellido_paterno,apellido_materno',
+            'grupo.modulo:id,descripcion',
+            'grupo.especialidad:id,id_especialidad',
+            'grupo.especialidad.especialidadMadre:id,nombre_especialidad',
+        ])
+            ->where('id_admin', $id_admin)
+            ->get();
+
+        // Transformar resultado
+        $gruposProgramados = $subidas->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'id_grupo' => $item->id_grupo,
+                'fecha_inicio' => Carbon::parse($item->fecha_inicio)->format('d/m/Y H:i'),
+                'fecha_fin' => Carbon::parse($item->fecha_fin)->format('d/m/Y H:i'),
+                'estado' => $item->estado,
+                'documento_admin' => $item->documento_admin,
+                'observacion' => $item->observacion,
+                'created_at' => $item->created_at,
+                'grupo_detalle' => [
+                    'id' => $item->grupo->id,
+                    'nombre_especialidad' =>
+                        $item->grupo->especialidad->especialidadMadre->nombre_especialidad ?? '',
+                    'nombre_modulo' =>
+                        $item->grupo->modulo->descripcion ?? '',
+                    'nombre_docente' => $item->grupo->docente && $item->grupo->docente->user
+                        ? $item->grupo->docente->user->name . ' ' .
+                        $item->grupo->docente->user->apellido_paterno . ' ' .
+                        $item->grupo->docente->user->apellido_materno
+                        : '',
+                    'seccion' => $item->grupo->seccion,
+                    'turno' => $item->grupo->turno,
+                ]
+            ];
+        });
+
+        return response()->json([
+            'total_programados' => $gruposProgramados->count(),
+            'programacion' => [
+                'id' => $programacion->id,
+                'fecha_inicio' => Carbon::parse($programacion->fecha_inicio)->format('d/m/Y H:i'),
+                'fecha_fin' => Carbon::parse($programacion->fecha_fin)->format('d/m/Y H:i'),
+                'status' => $programacion->status,
+                'id_periodo' => $programacion->id_periodo,
+                'mostrar' => $programacion->mostrar,
+            ],
+            'grupos_programados' => $gruposProgramados
+        ]);
+    }
 
     // POST /api/entrega_docente
     public function store(Request $request)
     {
         $request->validate([
-            'id_grupo'        => 'required|uuid|exists:grupo,id',
-            'fecha_inicio'    => 'required|date',
-            'fecha_fin'       => 'required|date|after_or_equal:fecha_inicio',
-            'estado'          => 'required|string|max:100',
-            'id_admin'        => 'required|uuid|exists:entrega_docente_admin,id',
+            'id_grupo' => 'required|uuid|exists:grupo,id',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'estado' => 'required|string|max:100',
+            'id_admin' => 'required|uuid|exists:entrega_docente_admin,id',
             'documento_admin' => 'required|string|max:255',
             'observacion' => 'required|string|max:255',
         ]);
@@ -55,19 +116,22 @@ class EntregaDocenteController extends Controller
             return response()->json(['message' => 'Entrega no encontrada'], 404);
         }
 
-        $request->validate([
-            'id_grupo'        => 'sometimes|uuid|exists:grupo,id',
-            'fecha_inicio'    => 'sometimes|date',
-            'fecha_fin'       => 'sometimes|date|after_or_equal:fecha_inicio',
-            'estado'          => 'sometimes|string|max:100',
-            'id_admin'        => 'sometimes|uuid|exists:entrega_docente_admin,id',
-            'documento_admin' => 'sometimes|string|max:255',
-            'observacion' => 'sometimes|string|max:255',
+        $validated = $request->validate([
+            'dias_aplazados' => 'nullable|string|max:255',
+            'documento_admin' => 'nullable|string|max:255',
+            'observacion' => 'nullable|string|max:255',
         ]);
 
-        $entrega->update($request->all());
+        // Actualizar con los datos validados + fecha y estado fijo
+        $entrega->update(array_merge($validated, [
+            'fecha_aplazada' => now(), // fecha actual
+            'estado' => 1,             // se marca como entregado
+        ]));
 
-        return response()->json(['message' => 'Entrega actualizada con éxito', 'data' => $entrega]);
+        return response()->json([
+            'message' => 'Entrega actualizada con éxito',
+            'data' => $entrega
+        ]);
     }
 
     // DELETE /api/entrega_docente/{id}

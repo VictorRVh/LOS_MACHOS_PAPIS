@@ -284,10 +284,30 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-documento-programado|eliminar-documento-programado');
 
+    /// ENTREGA DOCENTE
     Route::get('lista_programacion/{id_admin}', [
-        \App\Http\Controllers\EntregaDocenteAdminController::class,
+        \App\Http\Controllers\EntregaDocenteController::class,
         'subidasPorProgramacion',
-    ])->middleware('permission:todo-acceso-especialidades|ver-especialidades');
+    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
+    Route::get('programacion_admin/{id_periodo}', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'indexByPeriodo',
+    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-documento-programado');
+    Route::post('entrega_docente', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'store',
+    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|crear-programacion-documentos-subidos');
+
+    Route::patch('entrega_docente/{id}', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'update',
+    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|editar-programacion-documentos-subidos');
+
+    Route::delete('entrega_docente/{id}', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'destroy',
+    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|eliminar-programacion-documentos-subidos');
+
 
     Route::get('programacion_grupo/{id_grupo}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,

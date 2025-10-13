@@ -97,6 +97,7 @@ const onSubmit = async () => {
 
   if (response?.id) {
      formData.value = initialFormData();
+        formErrors.value = {};
     showToast(`Periodo ${props.periodo?.id ? "actualizado" : "creado"} exitosamente.`);
     await periodosStore.loadPeriodos();
     await ListStatusPerido.loadPeriodos();

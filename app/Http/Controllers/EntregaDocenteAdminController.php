@@ -7,6 +7,7 @@ use App\Models\EntregaDocenteAdmin;
 use App\Models\Grupo;
 use App\Models\Periodo;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class EntregaDocenteAdminController extends Controller
 {
@@ -109,41 +110,48 @@ class EntregaDocenteAdminController extends Controller
 
 
     // API DE PROGRAMACIOND DEL COORDINADOR
-    public function indexByPeriodo($id_periodo)
-    {
-        try {
-            $periodo = Periodo::findOrFail($id_periodo);
+   public function indexByPeriodo($id_periodo)
+{
+    try {
+        $periodo = Periodo::findOrFail($id_periodo);
 
-            $programaciones = EntregaDocenteAdmin::where('id_periodo', $id_periodo)
-                ->orderBy('created_at', 'desc')
-                ->get([
-                    'id',
-                    'tipo_entrega',
-                    'fecha_inicio',
-                    'fecha_fin',
-                    'status',
-                    'mostrar',
-                    'created_at',
-                ]);
-
-            // CONSULTA PARA VER PROGRAMACIONES ACTIVAS PENDIENTES ETC
-
-            // foreach ($programaciones as $programacion) {
-            //     $programacion->actualizarEstado();
-            // }
-
-            return response()->json([
-                'periodo' => $periodo->nombre_periodo,
-                'total_programaciones' => $programaciones->count(),
-                'programaciones' => $programaciones,
+        $programaciones = EntregaDocenteAdmin::where('id_periodo', $id_periodo)
+            ->orderBy('created_at', 'desc')
+            ->get([
+                'id',
+                'tipo_entrega',
+                'fecha_inicio',
+                'fecha_fin',
+                'status',
+                'mostrar',
+                'created_at',
             ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error al obtener las programaciones',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+
+        $programacionesFormateadas = $programaciones->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'tipo_entrega' => $item->tipo_entrega,
+                'fecha_inicio' => Carbon::parse($item->fecha_inicio)->setTimezone('America/Lima')->format('d/m/Y H:i'),
+                'fecha_fin' => Carbon::parse($item->fecha_fin)->setTimezone('America/Lima')->format('d/m/Y H:i'),
+                'status' => $item->status,
+                'mostrar' => $item->mostrar,
+                'created_at' => Carbon::parse($item->created_at)->setTimezone('America/Lima')->format('d/m/Y H:i:s'),
+            ];
+        });
+
+        return response()->json([
+            'periodo' => $periodo->nombre_periodo,
+            'total_programaciones' => $programacionesFormateadas->count(),
+            'programaciones' => $programacionesFormateadas,
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Error al obtener las programaciones',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
 
     public function subidasPorProgramacion($id_admin)
@@ -169,8 +177,8 @@ class EntregaDocenteAdminController extends Controller
             return [
                 'id' => $item->id,
                 'id_grupo' => $item->id_grupo,
-                'fecha_inicio' => $item->fecha_inicio,
-                'fecha_fin' => $item->fecha_fin,
+                'fecha_inicio' => Carbon::parse($item->fecha_inicio)->format('d/m/Y H:i'),
+                'fecha_fin' => Carbon::parse($item->fecha_fin)->format('d/m/Y H:i'),
                 'estado' => $item->estado,
                 'documento_admin' => $item->documento_admin,
                 'observacion' => $item->observacion,
@@ -196,9 +204,8 @@ class EntregaDocenteAdminController extends Controller
             'total_programados' => $gruposProgramados->count(),
             'programacion' => [
                 'id' => $programacion->id,
-                'tipo_entrega' => $programacion->tipo_entrega,
-                'fecha_inicio' => $programacion->fecha_inicio,
-                'fecha_fin' => $programacion->fecha_fin,
+                'fecha_inicio' => Carbon::parse($programacion->fecha_inicio)->format('d/m/Y H:i'),
+                'fecha_fin' => Carbon::parse($programacion->fecha_fin)->format('d/m/Y H:i'),
                 'status' => $programacion->status,
                 'id_periodo' => $programacion->id_periodo,
                 'mostrar' => $programacion->mostrar,

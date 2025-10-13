@@ -204,6 +204,7 @@ const onSubmit = async () => {
 
 
                 <Button :title="docente?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
+                    :disabled="saving || updating"
                     :loading-title="docente?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
                     :loading="saving || updating" @click="onSubmit" />
             </div>

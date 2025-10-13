@@ -139,6 +139,8 @@ const onSubmit = async () => {
     const response = props.user?.id ? await updateUser(props.user?.id, data) : await createUser(data);
     if (response?.id) {
         showToast(`Usuario ${props.user?.id ? 'actualizado' : 'creado'} correctamente.`);
+        formData.value = initialFormData();
+        formErrors.value = {};
         userStore.loadUsers();
         emit('hide');
     }
@@ -200,7 +202,9 @@ const onSubmit = async () => {
 
                 <Button :title="user?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
                     :loading-title="user?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
-                    :loading="saving || updating" @click="onSubmit" />
+                    :loading="saving || updating" @click="onSubmit"
+                    :disabled="saving || updating"
+                     />
             </div>
         </AuthorizationFallback>
     </Slider>

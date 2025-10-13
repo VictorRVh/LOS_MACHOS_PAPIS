@@ -300,6 +300,7 @@ const onSubmit = async () => {
 
         <Button :title="grupo?.id_grupo ? 'Guardar Cambios' : 'Crear Grupo'"
           :loading-title="grupo?.id_grupo ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
+          :disabled="saving || updating"
           :loading="saving || updating" @click="onSubmit" />
       </div>
     </AuthorizationFallback>

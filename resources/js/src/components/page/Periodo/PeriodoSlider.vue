@@ -156,6 +156,7 @@ const onPeriodoInput = (e) => {
             :title="periodo?.id ? 'Guardar Cambios' : 'Crear Periodo'"
             :loading-title="periodo?.id ? 'Guardando...' : 'Creando...'"
             :loading="saving || updating"
+            :disabled="saving || updating"
             key="submit-btn"
             @click="onSubmit"
             class="w-full"

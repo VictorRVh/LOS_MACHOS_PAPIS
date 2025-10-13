@@ -9,14 +9,13 @@ import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
 import useProgramaStore from "../../store/Programa/useProgramaStore";
 import useCicloStore from "../../store/Ciclo/useCicloStore";
+import useHttpRequest from "../../composables/useHttpRequest";
 
 const router = useRouter();
 const programaStore = useProgramaStore();
 const cicloStore = useCicloStore();
 
-const { programaLoading } = storeToRefs(programaStore);
-
-if (!programaStore?.programa?.length) await programaStore.loadProgramas();
+if (!programaStore?.programas?.length) await programaStore.loadProgramas();
 if (!cicloStore?.ciclo?.length) await cicloStore.loadCiclo();
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
@@ -26,8 +25,8 @@ const { destroy: deletePrograma, deleting } = useHttpRequest("/programa_estudio"
 const filtroCiclo = ref('Ciclo Técnico');
 
 const programasFiltrados = computed(() => {
-  if (!programaStore.programa.programas) return [];
-  return programaStore.programa.programas.filter(p => p.nameCiclo === filtroCiclo.value);
+  if (!programaStore.programas.programas) return [];
+  return programaStore.programas.programas.filter(p => p.nameCiclo === filtroCiclo.value);
 });
 
 const handleProgramaGuardado = (programaGuardado) => {

@@ -24,8 +24,8 @@ const props = defineProps({
         default: () => null,
     },
     indexModulo: {
-       type: [Object, null],
-        default: () => null, 
+        type: [Object, null],
+        default: () => null,
     },
     especialidad: {
         type: Array,
@@ -93,10 +93,10 @@ watch(
 const schema = yup.object().shape({
     numero_modulo: yup
         .number()
-        .typeError("El número de módulo debe ser un valor numérico") 
-        .required("El número de módulo es obligatorio")              
-        .positive("El número de módulo debe ser positivo")           
-        .integer("El número de módulo debe ser un número entero"),  
+        .typeError("El número de módulo debe ser un valor numérico")
+        .required("El número de módulo es obligatorio")
+        .positive("El número de módulo debe ser positivo")
+        .integer("El número de módulo debe ser un número entero"),
     descripcion: yup.string().required("El nombre de módulo es obligatoria"),
     creditos: yup.number().required("Los créditos son obligatorios"),
     horas: yup.number().required("Las horas son obligatorias"),
@@ -129,11 +129,9 @@ const onSubmit = async () => {
     if (response?.id) {
         showToast(`Modulo ${props.modulo?.id ? "editado" : "creado"} exitosamente.`);
         moduloStore.loadModuloById(props.especialidad)
+        formData.value = initialFormData();
+        formErrors.value = {};
 
-        if (!props.modulo?.id) {
-            formData.value = initialFormData();
-            formErrors.value = {};
-        }
         emit("hide");
     }
 };
@@ -144,27 +142,26 @@ const onSubmit = async () => {
         <div class="mt-2 space-y-1.5 font-inter">
 
             <FormInput v-model="formData.descripcion" :focus="show" label="Nombre del módulo"
-                :error="formErrors?.descripcion" required  />
-            
+                :error="formErrors?.descripcion" required />
 
-                    <FormLabelError label="Número de módulo" required :error="formErrors?.numero_modulo">
-                                <BaseSelectModulo v-model="formData.numero_modulo" :options="props.indexModulo" label="name"
-                                  placeholder="Seleccione un módulo" 
-                           />
-                            </FormLabelError>
+
+            <FormLabelError label="Número de módulo" required :error="formErrors?.numero_modulo">
+                <BaseSelectModulo v-model="formData.numero_modulo" :options="props.indexModulo" label="name"
+                    placeholder="Seleccione un módulo" />
+            </FormLabelError>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
+
                 <FormInput v-model="formData.creditos" :focus="show" label="Créditos" :error="formErrors?.creditos"
                     required type="number" />
-                    <FormInput v-model="formData.horas" :focus="show" label="Horas" :error="formErrors?.horas"
-                    required type="number" />
+                <FormInput v-model="formData.horas" :focus="show" label="Horas" :error="formErrors?.horas" required
+                    type="number" />
             </div>
-               
 
-                <FormInput v-model="formData.nro_capacidades" :focus="show" label="Número de capacidades"
-                    :error="formErrors?.nro_capacidades" required type="number" />
-      
+
+            <FormInput v-model="formData.nro_capacidades" :focus="show" label="Número de capacidades"
+                :error="formErrors?.nro_capacidades" required type="number" />
+
 
 
             <div class="w-full space-y-3">
@@ -172,7 +169,9 @@ const onSubmit = async () => {
                 <div class="flex gap-2 mt-1">
                     <!-- Botón Guardar: ancho completo -->
                     <Button :title="modulo?.id ? 'Guardar Cambios' : 'Crear Módulo'"
-                        :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
+                        :loading-title="role?.id ? 'Guardando...' : 'Creando...'"
+                        :disabled="saving || updating"
+                         :loading="saving || updating"
                         key="submit-btn" @click="onSubmit" class="!w-full" />
 
                     <!-- Botón Cancelar: ancho flexible solo si se está editando -->

@@ -173,6 +173,7 @@ const onSubmit = async () => {
                 <div>
                     <Button v-if="currentStep < 3" @click="nextStep" title="Siguiente" />
                     <Button v-if="currentStep === 3" @click="onSubmit" :loading="saving"
+                    :disabled="saving || updating"
                         title="Confirmar y Matricular" />
                 </div>
             </div>

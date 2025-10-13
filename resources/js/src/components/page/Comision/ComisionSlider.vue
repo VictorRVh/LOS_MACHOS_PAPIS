@@ -173,6 +173,7 @@ const onCancelEdit = () => {
 
       <div class="flex gap-2 mt-4">
         <Button :title="comision?.id ? 'Guardar Cambios' : 'Crear Comisión'"
+        :disabled="saving || updating"
           :loading-title="comision?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating" @click="onSubmit"
           class="!w-full" />
         <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"

@@ -164,6 +164,7 @@ const onSubmit = async () => {
                 <div class="flex gap-2 mt-1">
                     <!-- Botón Guardar: ancho completo -->
                     <Button :title="especialidadPrograma?.id ? 'Guardar Cambios' : 'Asignar especialidad'"
+                    :disabled="saving || updating"
                         :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
                         key="submit-btn" @click="onSubmit" class="!w-full" />
 

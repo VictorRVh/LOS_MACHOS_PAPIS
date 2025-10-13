@@ -10,7 +10,7 @@ import useHttpRequest from "../../../composables/useHttpRequest";
 import useModalToast from "../../../composables/useModalToast";
 import * as yup from "yup";
 import usePeriodosStore from "../../../store/Periodo/usePeriodoStore";
-
+import usePeriodosStatus from '../../../store/Periodo/usePeriodoStatusStore'
 const props = defineProps({
   show: {
     type: Boolean,
@@ -24,6 +24,7 @@ const props = defineProps({
 const emit = defineEmits(["hide"]);
 
 const periodosStore = usePeriodosStore();
+const ListStatusPerido = usePeriodosStatus();
 const { store: createPeriodo, saving, update: updatePeriodo, updating } = useHttpRequest("/periodo");
 const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
@@ -87,14 +88,18 @@ const onSubmit = async () => {
     formErrors.value = errors;
     return;
   }
-  
+
+ 
+
   const response = props.periodo?.id
     ? await updatePeriodo(props.periodo?.id, formData.value)
     : await createPeriodo(formData.value);
 
   if (response?.id) {
+     formData.value = initialFormData();
     showToast(`Periodo ${props.periodo?.id ? "actualizado" : "creado"} exitosamente.`);
     await periodosStore.loadPeriodos();
+    await ListStatusPerido.loadPeriodos();
     onCancelEdit();
   }
 };

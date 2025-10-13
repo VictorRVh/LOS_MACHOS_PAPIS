@@ -163,7 +163,9 @@ const onSubmit = async () => {
                  </div>
             </div>
             <div class="flex gap-2 pt-2">
-                <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Programación'" type="submit" :loading="saving || updating" class="w-full" />
+                <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Programación'" type="submit"
+                 :loading="saving || updating" class="w-full"
+                 :disabled="saving || updating" />
                 <Button v-if="isEditing" title="Cancelar" variant="outline" @click="resetForm" />
             </div>
         </form>

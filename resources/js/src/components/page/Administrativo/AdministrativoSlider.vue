@@ -120,7 +120,7 @@ const onSubmit = async () => {
 
   if (response?.data?.id) {
     showToast(`Datos ${props.admin?.administrativo ? "actualizado" : "agregado"} correctamente.`);
-
+formData.value = initialFormData();
     adminStore.loadUsers();
     emit("hide");
   }

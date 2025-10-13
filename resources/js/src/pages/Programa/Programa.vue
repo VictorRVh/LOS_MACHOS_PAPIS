@@ -16,11 +16,12 @@ const cicloStore = useCicloStore();
 
 const { programaLoading } = storeToRefs(programaStore);
 
-if (!programaStore.programa.length) await programaStore.loadPrograma();
+if (!programaStore?.programa?.length) await programaStore.loadProgramas();
 if (!cicloStore?.ciclo?.length) await cicloStore.loadCiclo();
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
+const { destroy: deletePrograma, deleting } = useHttpRequest("/programa_estudio");
 
 const filtroCiclo = ref('Ciclo Técnico');
 
@@ -41,13 +42,17 @@ const onDelete = async (programa) => {
   showConfirmModal(`¿Seguro que quieres eliminar "${programa?.nameCiclo} - ${programa?.año}"?`, async (confirmed) => {
     if (!confirmed) return;
     try {
-      await programaStore.removePrograma(programa.id);
+      await deletePrograma(programa.id);
+      programaStore.loadProgramas()
       showToast(`Programa eliminado exitosamente.`);
+
     } catch (error) {
       showToast('Error al eliminar el programa.', 'error');
     }
   });
 };
+
+
 
 const seeMore = (programa) => {
   router.push({

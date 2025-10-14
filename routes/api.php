@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GoogleDriveController;
 
 /**
  * ------------------------------------------------------------------------
@@ -931,7 +932,12 @@ Route::middleware('auth:sanctum')->group(function () {
         'infoGrupo',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 });
+
+
 Route::get('reportes/nomina/grupo/{idGrupo}', [
     \App\Http\Controllers\ReporteController::class,
     'nominaMatriculasExcel',
 ]);
+
+//P PAL GUGUL :
+Route::get('/drive/files', [GoogleDriveController::class, 'listFiles'])->middleware('auth:sanctum');

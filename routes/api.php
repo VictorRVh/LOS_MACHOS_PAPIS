@@ -940,4 +940,9 @@ Route::get('reportes/nomina/grupo/{idGrupo}', [
 ]);
 
 //P PAL GUGUL :
-Route::get('/drive/files', [GoogleDriveController::class, 'listFiles'])->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/drive/files', [GoogleDriveController::class, 'listFiles']);
+    Route::post('/drive/folder', [GoogleDriveController::class, 'createFolder']);
+    Route::post('/drive/upload', [GoogleDriveController::class, 'uploadFile']);
+    Route::delete('/drive/file/{fileId}', [GoogleDriveController::class, 'deleteFile']);
+});

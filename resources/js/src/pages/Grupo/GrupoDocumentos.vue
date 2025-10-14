@@ -1,125 +1,184 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { FolderIcon, ArrowUpRightIcon, ArrowPathIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
+import { ref, onMounted, computed } from 'vue';
+import { FolderIcon, DocumentIcon, ArrowUpRightIcon, ArrowPathIcon, ExclamationTriangleIcon, ArrowUturnLeftIcon, HomeIcon, ChevronRightIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import axios from '../../utils/axios';
-import useSlider from '../../composables/useSlider';
 import useModalToast from '../../composables/useModalToast';
 
-import CreateButton from '../../components/ui/CreateButton.vue';
-import GrupoDocumentoSlider from '../../components/page/Grupo/GrupoDocumentoSlider.vue';
-
-const props = defineProps({
-  id: { type: String, required: true },
-});
-
-const { slider, sliderData, showSlider, hideSlider } = useSlider();
-const { showToast } = useModalToast();
-
-const carpetas = ref([]);
+// --- ESTADO ---
+const items = ref([]); // Archivos y carpetas
 const isLoading = ref(true);
 const error = ref(null);
+const breadcrumbs = ref([]);
+// --- ¡¡¡AQUÍ ESTÁ EL CAMBIO!!! ---
+const rootFolderId = ref('1QzkLSshtODVGAYdWH2Vm3ZKBYjJHZsri'); // ID REAL DE TU CARPETA
+const currentFolderId = ref(null);
+const { showToast } = useModalToast();
 
-const fetchDriveFolders = async () => {
+// --- LÓGICA DE NAVEGACIÓN ---
+const fetchItems = async (folderId, folderName = 'Inicio') => {
   isLoading.value = true;
   error.value = null;
+  currentFolderId.value = folderId;
+
   try {
-    const { data } = await axios.get('/drive/files');
-    carpetas.value = data;
+    const { data } = await axios.get('/drive/files', {
+      params: { folderId: folderId }
+    });
+    items.value = data;
     
-    if (data.length > 0) {
-        showToast('Carpetas de Drive cargadas.', 'success');
+    // Actualizar breadcrumbs
+    if (folderId === rootFolderId.value) {
+      breadcrumbs.value = [{ id: folderId, name: 'Sistema CETPRO' }];
+    } else {
+        const index = breadcrumbs.value.findIndex(b => b.id === folderId);
+        if (index !== -1) {
+            breadcrumbs.value.splice(index + 1);
+        } else {
+            breadcrumbs.value.push({ id: folderId, name: folderName });
+        }
     }
 
   } catch (err) {
-    console.error("Error al cargar carpetas de Google Drive:", err);
-    if (err.response && err.response.status === 401) {
-        error.value = "No se pudo conectar con Google Drive. Por favor, conecta tu cuenta para continuar.";
-    } else {
-        error.value = "Ocurrió un error inesperado al intentar cargar los archivos de Google Drive.";
-    }
+    console.error("Error al cargar archivos de Google Drive:", err);
+    error.value = "Ocurrió un error inesperado al cargar los archivos.";
     showToast(error.value, 'error');
   } finally {
     isLoading.value = false;
   }
 };
 
-onMounted(fetchDriveFolders);
-
-const abrirCarpetaEnDrive = (carpeta) => {
-  if (carpeta.webViewLink) {
-    window.open(carpeta.webViewLink, '_blank');
+const openItem = (item) => {
+  if (item.mimeType === 'application/vnd.google-apps.folder') {
+    fetchItems(item.id, item.name);
   } else {
-    showToast('Esta carpeta no tiene un enlace para visualizar.', 'warning');
+    if (item.webViewLink) {
+      window.open(item.webViewLink, '_blank');
+    } else {
+      showToast('Este archivo no tiene un enlace para visualizar.', 'warning');
+    }
   }
 };
 
-const handleSubmitted = () => {
-    hideSlider();
-    fetchDriveFolders();
+const goToBreadcrumb = (index) => {
+  const folder = breadcrumbs.value[index];
+  fetchItems(folder.id, folder.name);
+};
+
+const goUp = () => {
+    if (breadcrumbs.value.length > 1) {
+        const parentIndex = breadcrumbs.value.length - 2;
+        goToBreadcrumb(parentIndex);
+    }
+};
+
+const isFolder = (item) => item.mimeType === 'application/vnd.google-apps.folder';
+
+onMounted(() => {
+    fetchItems(rootFolderId.value, 'Sistema CETPRO');
+});
+
+// --- LÓGICA DE ACCIONES (CREAR, BORRAR, SUBIR) ---
+
+const createNewFolder = async () => {
+    const folderName = prompt("Nombre de la nueva carpeta:");
+    if (!folderName) return;
+
+    try {
+        await axios.post('/drive/folder', {
+            folderName: folderName,
+            parentFolderId: currentFolderId.value
+        });
+        showToast('Carpeta creada con éxito.', 'success');
+        fetchItems(currentFolderId.value);
+    } catch (err) {
+        showToast('Error al crear la carpeta.', 'error');
+    }
 }
+
+const deleteItem = async (item) => {
+    if (!confirm(`¿Estás seguro de que quieres eliminar "${item.name}"? Esta acción no se puede deshacer.`)) {
+        return;
+    }
+    try {
+        await axios.delete(`/drive/file/${item.id}`);
+        showToast('Elemento eliminado con éxito.', 'success');
+        items.value = items.value.filter(i => i.id !== item.id); // Eliminar de la vista al instante
+    } catch (err) {
+        showToast('Error al eliminar el elemento.', 'error');
+    }
+}
+
+const onFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('parentFolderId', currentFolderId.value);
+
+    try {
+        isLoading.value = true;
+        await axios.post('/drive/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        showToast('Archivo subido con éxito.', 'success');
+        fetchItems(currentFolderId.value);
+    } catch (err) {
+        showToast('Error al subir el archivo.', 'error');
+    } finally {
+        isLoading.value = false;
+        event.target.value = null;
+    }
+};
+
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="flex justify-between items-center">
-      <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300">
-        Archivos de Google Drive
-      </h3>
-      <div class="flex items-center gap-4">
-        <button @click="fetchDriveFolders" :disabled="isLoading" class="p-2 text-gray-500 hover:text-cetpro dark:hover:text-cetpro-light rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed" title="Refrescar carpetas">
-            <ArrowPathIcon class="h-5 w-5" :class="{'animate-spin': isLoading}" />
-        </button>
-        <CreateButton @click="showSlider(true)">
-          Crear Carpeta
-        </CreateButton>
-      </div>
-    </div>
+  <div class="space-y-4">
+    <!-- Barra de Acciones y Navegación -->
+    <div class="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-700">
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+            <button @click="goToBreadcrumb(0)" class="hover:text-cetpro">
+                <HomeIcon class="h-5 w-5"/>
+            </button>
+            <template v-for="(crumb, index) in breadcrumbs.slice(1)" :key="crumb.id">
+                <ChevronRightIcon class="h-5 w-5 mx-1 text-gray-400"/>
+                <button @click="goToBreadcrumb(index + 1)" class="hover:text-cetpro truncate" :title="crumb.name">
+                    {{ crumb.name }}
+                </button>
+            </template>
+        </nav>
 
-    <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <div v-for="i in 4" :key="i" class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 animate-pulse">
-            <div class="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
-            <div class="mt-4 h-6 w-3/4 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
+        <!-- Botones de Acción -->
+        <div class="flex items-center gap-2">
+            <button v-if="breadcrumbs.length > 1" @click="goUp" title="Subir un nivel" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                <ArrowUturnLeftIcon class="h-5 w-5"/>
+            </button>
+            <button @click="$refs.fileInput.click()" title="Subir archivo" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3.75 3.75M12 9.75l3.75 3.75M17.25 12a4.5 4.5 0 01-9 0 4.5 4.5 0 019 0z" /></svg>
+            </button>
+            <input type="file" @change="onFileChange" ref="fileInput" class="hidden"/>
+            <button @click="createNewFolder" title="Crear carpeta" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+            </button>
         </div>
     </div>
-
-    <div v-else-if="error" class="text-center py-16 bg-red-50 dark:bg-red-900/20 rounded-lg shadow-md border border-red-200 dark:border-red-700">
-      <ExclamationTriangleIcon class="mx-auto h-16 w-16 text-red-400 dark:text-red-500" />
-      <h3 class="mt-2 text-lg font-semibold text-red-800 dark:text-red-200">Error de Conexión</h3>
-      <p class="mt-1 text-sm text-red-600 dark:text-red-400 max-w-md mx-auto">{{ error }}</p>
-      <a href="http://127.0.0.1:8000/google/redirect" class="mt-4 inline-block bg-cetpro hover:bg-cetpro-dark text-white font-bold py-2 px-4 rounded">
-        Conectar con Google Drive
-      </a>
-    </div>
-
-    <div v-else-if="carpetas.length > 0"
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <div v-for="carpeta in carpetas" :key="carpeta.id" @click="abrirCarpetaEnDrive(carpeta)"
-        class="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 hover:border-cetpro/50">
-
-        <div class="flex justify-between items-start">  
-          <FolderIcon class="h-12 w-12 text-cetpro dark:text-cetpro-light transition-colors duration-300" />
-          <ArrowUpRightIcon
-            class="h-6 w-6 text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    
+    <!-- Contenido -->
+    <div v-if="isLoading" class="text-center p-8">Cargando...</div>
+    <div v-else-if="error" class="text-center p-8 text-red-500">{{ error }}</div>
+    <div v-else-if="items.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div v-for="item in items" :key="item.id" class="group relative">
+            <div @click="openItem(item)" class="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 aspect-square">
+                <component :is="isFolder(item) ? FolderIcon : DocumentIcon" class="h-16 w-16 mb-2" :class="isFolder(item) ? 'text-cetpro' : 'text-gray-500'"/>
+                <p class="text-center text-sm font-medium text-gray-800 dark:text-gray-200 truncate w-full" :title="item.name">{{ item.name }}</p>
+            </div>
+            <button @click="deleteItem(item)" class="absolute top-1 right-1 p-1 bg-white dark:bg-gray-800 rounded-full text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                <TrashIcon class="h-4 w-4"/>
+            </button>
         </div>
-
-        <div class="mt-4">
-          <h4
-            class="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300 group-hover:text-cetpro-dark dark:group-hover:text-cetpro-light truncate"
-            :title="carpeta.name"
-          >
-            {{ carpeta.name }}
-          </h4>
-        </div>
-      </div>
     </div>
-
-    <div v-else class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <img src="https://www.google.com/drive/static/images/drive/restore/empty_trash.svg" alt="Drive Vacío" class="mx-auto h-32 w-32">
-      <h3 class="mt-4 text-lg font-semibold text-gray-800 dark:text-gray-200">Un lugar para todos tus archivos</h3>
-      <p class="mt-1 text-sm text-gray-500">Tu Google Drive está vacío. Usa el botón "Crear Carpeta" para empezar.</p>
-    </div>
+    <div v-else class="text-center p-8 text-gray-500">Esta carpeta está vacía.</div>
   </div>
-
-  <GrupoDocumentoSlider :show="slider" :documento-data="sliderData" @hide="hideSlider" @submitted="handleSubmitted" />
 </template>

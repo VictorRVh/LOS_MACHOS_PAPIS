@@ -7,12 +7,8 @@
     "require": {
         "php": "^8.1",
         "barryvdh/laravel-dompdf": "^3.1",
-<<<<<<< HEAD
         "google/apiclient": "2.18",
         "google/apiclient-services": "*",
-=======
-        "google/apiclient": "^2.18",
->>>>>>> f21616ed8f8d66cd4d89dc0ef5b3e3b9381ec86d
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",

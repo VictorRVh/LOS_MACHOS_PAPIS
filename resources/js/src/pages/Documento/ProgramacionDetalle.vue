@@ -135,13 +135,15 @@ const openPlazoModal = (grupo) => {
                         <span>Subir/Observar Entrega</span>
                       </a>
                     </li>
-                    <li><hr class="my-1 dark:border-gray-700" /></li>
-                    <li>
-                      <a href="#" @click.prevent="openPlazoModal(grupo)" class="flex items-center gap-3 px-4 py-2 text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-800">
-                        <CalendarDaysIcon class="h-5 w-5" />
-                        <span>Habilitar Plazo Extra</span>
-                      </a>
-                    </li>
+                    <template v-if="grupo.estado === 4">
+                      <li><hr class="my-1 dark:border-gray-700" /></li>
+                      <li>
+                        <a href="#" @click.prevent="openPlazoModal(grupo)" class="flex items-center gap-3 px-4 py-2 text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                          <CalendarDaysIcon class="h-5 w-5" />
+                          <span>Habilitar Plazo Extra</span>
+                        </a>
+                      </li>
+                    </template>
                   </ul>
                 </div>
               </transition>

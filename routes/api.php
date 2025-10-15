@@ -939,10 +939,11 @@ Route::get('reportes/nomina/grupo/{idGrupo}', [
     'nominaMatriculasExcel',
 ]);
 
-//P PAL GUGUL :
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/drive/files', [GoogleDriveController::class, 'listFiles']);
-    Route::post('/drive/folder', [GoogleDriveController::class, 'createFolder']);
-    Route::post('/drive/upload', [GoogleDriveController::class, 'uploadFile']);
-    Route::delete('/drive/file/{fileId}', [GoogleDriveController::class, 'deleteFile']);
+Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
+    Route::get('/files', [GoogleDriveController::class, 'listFiles']);
+    Route::post('/folder', [GoogleDriveController::class, 'createFolder']);
+    Route::post('/upload', [GoogleDriveController::class, 'uploadFile']);
+    Route::patch('/file/{fileId}/rename', [GoogleDriveController::class, 'renameFile']);
+    Route::patch('/file/{fileId}/move', [GoogleDriveController::class, 'moveFile']);
+    Route::delete('/file/{fileId}', [GoogleDriveController::class, 'deleteFile']);
 });

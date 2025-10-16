@@ -110,63 +110,63 @@ class EntregaDocenteAdminController extends Controller
 
 
     // API DE PROGRAMACIOND DEL COORDINADOR
-   public function indexByPeriodo($id_periodo)
-{
-    try {
-        $periodo = Periodo::findOrFail($id_periodo);
+    public function indexByPeriodo($id_periodo)
+    {
+        try {
+            $periodo = Periodo::findOrFail($id_periodo);
 
-        $programaciones = EntregaDocenteAdmin::where('id_periodo', $id_periodo)
-            ->orderBy('created_at', 'desc')
-            ->get([
-                'id',
-                'tipo_entrega',
-                'fecha_inicio',
-                'fecha_fin',
-                'status',
-                'mostrar',
-                'created_at',
+            $programaciones = EntregaDocenteAdmin::where('id_periodo', $id_periodo)
+                ->orderBy('created_at', 'desc')
+                ->get([
+                    'id',
+                    'tipo_entrega',
+                    'fecha_inicio',
+                    'fecha_fin',
+                    'status',
+                    'mostrar',
+                    'created_at',
+                ]);
+
+            $programacionesFormateadas = $programaciones->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'tipo_entrega' => $item->tipo_entrega,
+                    'fecha_inicio' => Carbon::parse($item->fecha_inicio)->setTimezone('America/Lima')->format('d/m/Y H:i'),
+                    'fecha_fin' => Carbon::parse($item->fecha_fin)->setTimezone('America/Lima')->format('d/m/Y H:i'),
+                    'status' => $item->status,
+                    'mostrar' => $item->mostrar,
+                    'created_at' => Carbon::parse($item->created_at)->setTimezone('America/Lima')->format('d/m/Y H:i:s'),
+                ];
+            });
+
+            return response()->json([
+                'periodo' => $periodo->nombre_periodo,
+                'total_programaciones' => $programacionesFormateadas->count(),
+                'programaciones' => $programacionesFormateadas,
             ]);
-
-        $programacionesFormateadas = $programaciones->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'tipo_entrega' => $item->tipo_entrega,
-                'fecha_inicio' => Carbon::parse($item->fecha_inicio)->setTimezone('America/Lima')->format('d/m/Y H:i'),
-                'fecha_fin' => Carbon::parse($item->fecha_fin)->setTimezone('America/Lima')->format('d/m/Y H:i'),
-                'status' => $item->status,
-                'mostrar' => $item->mostrar,
-                'created_at' => Carbon::parse($item->created_at)->setTimezone('America/Lima')->format('d/m/Y H:i:s'),
-            ];
-        });
-
-        return response()->json([
-            'periodo' => $periodo->nombre_periodo,
-            'total_programaciones' => $programacionesFormateadas->count(),
-            'programaciones' => $programacionesFormateadas,
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Error al obtener las programaciones',
-            'error' => $e->getMessage(),
-        ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al obtener las programaciones',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-}
-
-
-
-
 
     public function programacionesPorGrupo($id_grupo)
     {
         $programaciones = EntregaDocente::with([
             'entregaDocenteAdmin:id,tipo_entrega,fecha_inicio,fecha_fin,status',
+            'grupo.carpetaDrive'
         ])
             ->where('id_grupo', $id_grupo)
             ->get();
 
+        // Obtener drive_folder_id del grupo (solo uno, todos tienen el mismo)
+        $driveFolderId = $programaciones->first()?->grupo?->carpetaDrive?->drive_folder_id;
+
         return response()->json([
             'total' => $programaciones->count(),
+            'drive_folder_id' => $driveFolderId,
             'programaciones' => $programaciones->map(function ($item) {
                 return [
                     'id' => $item->id,
@@ -179,7 +179,7 @@ class EntregaDocenteAdminController extends Controller
                         'id' => $item->entregaDocenteAdmin->id,
                         'tipo_entrega' => $item->entregaDocenteAdmin->tipo_entrega,
                         'status' => $item->entregaDocenteAdmin->status,
-                    ] : null // <-- Previene el error si no hay admin
+                    ] : null
                 ];
             })
         ]);

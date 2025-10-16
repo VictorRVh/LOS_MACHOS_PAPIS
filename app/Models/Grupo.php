@@ -117,4 +117,9 @@ class Grupo extends Model
     {
         return $this->hasMany(Egresados::class, 'id_grupo');
     }
+
+    public function carpetaDrive()
+    {
+        return $this->hasOne(CarpetasGrupoDrive::class, 'id_grupo');
+    }
 }

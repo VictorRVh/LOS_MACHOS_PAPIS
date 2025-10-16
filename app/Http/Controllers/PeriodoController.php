@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CarpetasPeriodoDrive;
 use App\Models\Periodo;
 use Illuminate\Http\Request;
 
@@ -46,9 +47,43 @@ class PeriodoController extends Controller
             'status' => 'required|in:0,1,2,3',
         ]);
 
-        $periodo = Periodo::create($request->all());
+        // 1️⃣ Crear el periodo en la BD
+        $periodo = Periodo::create($request->only(['nombre_periodo', 'status']));
+
+        try {
+            // 2️⃣ Carpeta madre fija en Google Drive
+            $parentFolderId = '0AB477u4EnjP6Uk9PVA';
+
+            $driveController = new GoogleDriveController();
+
+            $folderRequest = new Request([
+                'folderName' => $periodo->nombre_periodo,
+                'parentFolderId' => $parentFolderId,
+            ]);
+
+            $response = $driveController->createFolder($folderRequest);
+
+            if ($response->status() === 201) {
+                $data = $response->getData();
+
+                $periodo->save();
+
+                // 4️⃣ Guardar también en carpetas_periodo_drive
+                CarpetasPeriodoDrive::create([
+                    'id_periodo'     => $periodo->id,
+                    'drive_folder_id' => $data->id,
+                    'nombre_carpeta' => $periodo->nombre_periodo,
+                ]);
+            } else {
+                \Log::error('❌ Error creando carpeta del periodo: ' . $response->getContent());
+            }
+        } catch (\Exception $e) {
+            \Log::error('⚠️ Error al crear carpeta del periodo en Drive: ' . $e->getMessage());
+        }
+
         return response()->json($periodo, 201);
     }
+
 
     // Mostrar un periodo específico
     public function show($id)

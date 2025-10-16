@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CarpetasGrupoDrive;
+use App\Models\CarpetasPeriodoDrive;
 use App\Models\Docente;
 use App\Models\EspecialidadPrograma;
 use App\Models\Grupo;
@@ -74,14 +76,58 @@ class GrupoController extends Controller
             'fecha_entrega_acta'  => 'nullable|date|after:fecha_fin',
             'seccion'             => 'required|string|max:10',
             'turno'               => 'required|string|max:10',
-            // 'id_docente'          => 'required|uuid|exists:docente,id',
             'id_docente'          => 'nullable',
             'status'              => 'required|integer|in:0,1,2,3'
         ]);
 
+        // 1️⃣ Crear el grupo
         $grupo = Grupo::create($request->all());
 
-        return response()->json(['message' => 'Grupo creado con éxito', 'data' => $grupo], 201);
+        try {
+            // 2️⃣ Buscar la carpeta del período (madre)
+            $carpetaPeriodo = CarpetasPeriodoDrive::where('id_periodo', $request->id_periodo)->first();
+
+            // dd($carpetaPeriodo);
+
+            if (!$carpetaPeriodo) {
+                \Log::warning("No existe carpeta de periodo para id_periodo: " . $request->id_periodo);
+                return response()->json([
+                    'message' => 'Grupo creado, pero no existe carpeta del periodo para crear subcarpeta',
+                    'data' => $grupo
+                ], 201);
+            }
+
+            // 3️⃣ Definir nombre de la subcarpeta del grupo
+            $folderName = 'Grupo_' . $request->seccion . '_' . $request->turno;
+
+            // 4️⃣ Crear subcarpeta en Google Drive
+            $driveController = new GoogleDriveController();
+            $response = $driveController->createFolder(new Request([
+                'folderName' => $folderName,
+                'parentFolderId' => $carpetaPeriodo->drive_folder_id,
+            ]));
+
+            if ($response->status() === 201) {
+                $data = $response->getData();
+                $driveFolderId = $data->id ?? null;
+
+                // 5️⃣ Guardar registro en carpetas_grupo_drive
+                CarpetasGrupoDrive::create([
+                    'id_grupo' => $grupo->id,
+                    'drive_folder_id' => $driveFolderId,
+                    'nombre_carpeta' => $folderName,
+                ]);
+            } else {
+                \Log::error('Error creando subcarpeta de grupo en Drive: ' . $response->getContent());
+            }
+        } catch (\Exception $e) {
+            \Log::error('Excepción creando carpeta de grupo en Drive: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'message' => 'Grupo creado con éxito',
+            'data' => $grupo
+        ], 201);
     }
 
     // GET /api/grupos/{id}

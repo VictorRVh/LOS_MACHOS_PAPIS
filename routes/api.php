@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\CarpetasGrupoDriveController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoogleDriveController;
+use App\Models\CarpetasPeriodoDrive;
 
 /**
  * ------------------------------------------------------------------------
@@ -947,3 +949,5 @@ Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
     Route::patch('/file/{fileId}/move', [GoogleDriveController::class, 'moveFile']);
     Route::delete('/file/{fileId}', [GoogleDriveController::class, 'deleteFile']);
 });
+
+Route::post('/carpetas-grupo/crear/{id_grupo}', [CarpetasGrupoDriveController::class, 'crearCarpetaGrupo']);

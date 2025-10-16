@@ -116,6 +116,8 @@ const onSubmit = async () => {
       showToast(`Programación ${isEditing.value ? 'actualizada' : 'creada'} con éxito.`, 'success');
       emit('form-submitted');
       await programacionDocumento.loadgetProgramacionAdminByPerido(selectedPeriodoId);
+
+      resetForm();
     }
   } catch (error) {
     showToast('Ocurrió un error al guardar.', 'error');

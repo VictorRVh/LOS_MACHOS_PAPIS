@@ -37,7 +37,7 @@ const handleProgramaGuardado = (programaGuardado) => {
 };
 
 const onDelete = async (programa) => {
-  if (programaLoading.value) return;
+  if (deleting.value) return;
   showConfirmModal(`¿Seguro que quieres eliminar "${programa?.nameCiclo} - ${programa?.año}"?`, async (confirmed) => {
     if (!confirmed) return;
     try {
@@ -170,7 +170,7 @@ const updateTooltipPos = (event) => {
               </div>
             </div>
 
-            <div v-if="!programasFiltrados.length && !programaLoading" class="text-center py-10 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <div v-if="!programasFiltrados.length && !deleting" class="text-center py-10 bg-white dark:bg-gray-800 rounded-lg shadow-md">
               <p class="text-gray-500 dark:text-gray-400">No hay programas para mostrar en esta categoría.</p>
             </div>
           </div>

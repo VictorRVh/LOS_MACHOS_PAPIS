@@ -22,9 +22,7 @@ const useProgramacionAdmintore = defineStore('programacion_admin_c', () => {
 
 
     const loadgetProgramacionAdminByPerido = async (id) => {
-        console.log("gola al id: ",id)
         const res = await getProgramacionAdminByPerido(id);
-        console.log("gola al otodo",res)
         programacionAdmin.value = res;
     };
 

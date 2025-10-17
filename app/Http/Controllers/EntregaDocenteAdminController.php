@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CarpetasEntregaDrive;
 use App\Models\EntregaDocente;
 use App\Models\EntregaDocenteAdmin;
 use App\Models\Grupo;
@@ -80,16 +81,16 @@ class EntregaDocenteAdminController extends Controller
 
                 if ($response->status() === 201) {
                     $data = $response->getData();
-                    // $folderId = $data->id ?? null;
+                    $folderId = $data->id ?? null;
 
                     // 3. Registrar en tabla de carpetas de entrega (si quieres)
                     // Por ejemplo:
-                    // CarpetasEntregaDrive::create([
-                    //     'id_entrega_admin' => $adminEntrega->id,
-                    //     'id_grupo' => $grupo->id,
-                    //     'drive_folder_id' => $folderId,
-                    //     'nombre_carpeta' => $folderName
-                    // ]);
+                    CarpetasEntregaDrive::create([
+                        'id_entrega_admin' => $adminEntrega->id,
+                        'id_grupo' => $grupo->id,
+                        'drive_folder_id' => $folderId,
+                        'nombre_carpeta' => $folderName
+                    ]);
                 } else {
                     \Log::error('Error creando carpeta de tipo_entrega en Drive: ' . $response->getContent());
                 }
@@ -131,11 +132,31 @@ class EntregaDocenteAdminController extends Controller
     // Eliminar
     public function destroy($id)
     {
-        $entrega = EntregaDocenteAdmin::findOrFail($id);
+        // 1. Obtener la programación con sus carpetas
+        $entrega = EntregaDocenteAdmin::with('carpetas')->find($id);
+
+        if (!$entrega) {
+            return response()->json(['message' => 'Entrega no encontrada'], 404);
+        }
+
+        $driveController = new GoogleDriveController();
+
+        // 2. Eliminar las carpetas en Drive
+        foreach ($entrega->carpetas as $carpeta) {
+            if ($carpeta->drive_folder_id) {
+                $response = $driveController->deleteFile($carpeta->drive_folder_id);
+
+                if ($response->status() !== 200 && $response->status() !== 204) {
+                    \Log::error('No se pudo eliminar carpeta en Drive: ' . $carpeta->drive_folder_id);
+                }
+            }
+        }
+
         $entrega->delete();
 
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Entrega y carpetas eliminadas correctamente'], 204);
     }
+
 
 
     // API DE PROGRAMACIOND DEL COORDINADOR
@@ -257,5 +278,4 @@ class EntregaDocenteAdminController extends Controller
             'subcarpetas' => $resultado
         ]);
     }
-
 }

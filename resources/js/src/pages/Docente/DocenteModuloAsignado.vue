@@ -50,7 +50,7 @@ const verAlumnos = (modulo) => {
   }
   
   router.push({
-    name: 'docente.modulo.alumnos',
+    name: 'docente.modulo.detalle',
     params: { id: grupoId }
   });
 };

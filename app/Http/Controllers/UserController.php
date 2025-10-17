@@ -15,16 +15,18 @@ class UserController extends Controller
     use Error, Helpers;
     public function index(Request $request)
     {
-        $users = User::with('roles.permissions')->get();
+        $users = User::with('roles.permissions')->where('is_deleted', 0)->get();
         $users = $users->map(
             fn($user) => $this->extractPermissionsFromUser($user)
         );
         return response()->json($users);
     }
+    
     public function index_filter_status()
     {
         $usuariosSinComision = User::doesntHave('comisiones')
-            ->where('status', 1) // 👈 Solo activos
+            ->where('status', 1) 
+            ->where('is_deleted', 0)
             ->select('id', 'name', 'apellido_paterno', 'apellido_materno')
             ->get();
 
@@ -209,7 +211,8 @@ class UserController extends Controller
                 );
             }
 
-            $user->delete();
+            $user->is_deleted = 1;
+            $user->save();
 
             return response()->json([], 204);
         } catch (\Exception $error) {

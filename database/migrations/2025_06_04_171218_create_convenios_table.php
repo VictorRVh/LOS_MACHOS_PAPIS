@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('convenios', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('nombre_institucion')->nullable(); 
-            $table->string('descripcion')->nullable(); 
+            $table->string('nombre_institucion')->nullable();
+            $table->string('descripcion')->nullable();
+            $table->boolean('is_deleted')->default(0);
             $table->timestamps();
         });
     }

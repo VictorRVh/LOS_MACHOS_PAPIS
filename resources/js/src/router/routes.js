@@ -220,6 +220,7 @@ export default [
             breadcrumb: [{ text: 'Grupos', to: { name: 'grupo' } }],
         }
     },
+    ////////////// DOCENTE SUS MODULOS 
     {
         path: '/docente/modulo/:id/alumnos',
         name: 'docente.modulo.alumnos',
@@ -232,6 +233,38 @@ export default [
             breadcrumb: [{ text: 'Mis Módulos', to: { name: 'moduloAsignado' } }, { text: 'Lista de Alumnos' }]
         }
     },
+    {
+        path: '/docente/modulo/:id/documentos',
+        name: 'docente.modulo.detalle',
+        component: () => import('../pages/Docente/DocenteModuloDetalle.vue'),
+        props: true,
+        meta: {
+            layout: 'dashboard',
+            permissions: ['ver-estudiantes-asignados'],
+            parent: 'moduloAsignado',
+            breadcrumb: [{ text: 'Mis Módulos', to: { name: 'moduloAsignado' } }, { text: 'Lista de Alumnos' }]
+        },
+        children: [
+            {
+                path: 'documentos',
+                name: 'docente.modulo.detalle.documentos',
+                component: () => import('../pages/Docente/DocenteModuloDetalleDocumento.vue'),
+                props: true,
+                meta: {
+                    parent: 'docente.modulo.detalle',
+                    breadcrumb: {
+                        text: 'Documentos',
+                        to: (route) => ({
+                            name: 'docente.modulo.detalle.documentos',
+                            params: { id: route.params.id }
+                        })
+                    }
+                }
+
+            },
+        ]
+    },
+    ///////////////////////////////
     {
         path: '/documentos',
         name: 'documentos',

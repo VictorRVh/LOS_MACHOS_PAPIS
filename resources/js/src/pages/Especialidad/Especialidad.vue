@@ -33,8 +33,10 @@ const onDelete = (especialidad) => {
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
 
-    const isDeleted = await deleteEspecialidad  (especialidad?.id);
+    const isDeleted = await deleteEspecialidad(especialidad?.id);
+
     if (isDeleted) {
+      console.log('eliminadno ')
       showToast(`Especialidad "${especialidad?.nombre_especialidad}" eliminada exitosamente...`);
       especialidadStore.loadEspecialidad();
 

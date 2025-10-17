@@ -307,7 +307,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('programacion_grupo/{id_grupo}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'programacionesPorGrupo',
-    ])->middleware('permission:todo-acceso-especialidades|ver-especialidades');
+    ])->middleware('permission:todo-acceso-especialidades|ver-mis-modulos');
 
     // RUTA PARA ESPECIALIDAD_MADRE
     Route::get('especialidad_madre', [

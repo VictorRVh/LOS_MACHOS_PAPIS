@@ -24,6 +24,8 @@ return new class extends Migration
 
             $table->boolean('mostrar')->default(0);
 
+            $table->boolean('is_deleted')->default(0);
+
             $table->timestamps();
         });
     }

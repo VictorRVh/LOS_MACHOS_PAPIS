@@ -21,7 +21,8 @@ class EntregaDocenteAdmin extends Model
         'fecha_fin',
         'status',
         'id_periodo',
-        'mostrar'
+        'mostrar',
+        'is_deleted'
     ];
 
     protected $casts = [
@@ -66,6 +67,11 @@ class EntregaDocenteAdmin extends Model
     public function entregaDocente()
     {
         return $this->hasMany(EntregaDocente::class, 'id_admin');
+    }
+
+    public function carpetas()
+    {
+        return $this->hasMany(CarpetasEntregaDrive::class, 'id_entrega_admin');
     }
 
     /*

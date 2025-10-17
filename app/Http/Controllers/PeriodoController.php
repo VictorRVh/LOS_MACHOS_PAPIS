@@ -13,20 +13,26 @@ class PeriodoController extends Controller
      */
     public function index()
     {
-        $periodos = Periodo::orderBy('created_at', 'desc')->get()->map(function ($periodo) {
-            return [
-                'id' => $periodo->id,
-                'nombre_periodo' => $periodo->nombre_periodo,
-                'status' => $periodo->status,
-                'status_texto' => $periodo->status_texto,
-            ];
-        });
+        $periodos = Periodo::where('is_deleted', 0)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($periodo) {
+                return [
+                    'id' => $periodo->id,
+                    'nombre_periodo' => $periodo->nombre_periodo,
+                    'status' => $periodo->status,
+                    'status_texto' => $periodo->status_texto,
+                ];
+            });
 
         return response()->json($periodos);
     }
+
+
     public function index_filter_status()
     {
-        $periodos = Periodo::where('status', 1) // 👈 Solo activos
+        $periodos = Periodo::where('status', 1)
+            ->where('is_deleted', 0)
             ->get()
             ->map(function ($periodo) {
                 return [
@@ -37,7 +43,6 @@ class PeriodoController extends Controller
 
         return response()->json($periodos);
     }
-
 
     // Crear un nuevo periodo
     public function store(Request $request)
@@ -123,13 +128,15 @@ class PeriodoController extends Controller
     // Eliminar un periodo
     public function destroy($id)
     {
-        $periodo = Periodo::find($id);
+        $periodo = Periodo::findOrFail($id);
 
-        if (!$periodo) {
-            return response()->json(['message' => 'Periodo no encontrado'], 404);
-        }
+        // Cambiar estado a Anulado (3)
+        $periodo->is_deleted = 1;
+        $periodo->save();
 
-        $periodo->delete();
-        return response()->json(['message' => 'Periodo eliminado correctamente'], 204);
+        return response()->json([
+            'message' => 'Periodo anulado correctamente (no eliminado físicamente).',
+            'data' => $periodo
+        ]);
     }
 }

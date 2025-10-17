@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('nombre_periodo');
             $table->tinyInteger('status')->default(0);
+            $table->boolean('is_deleted')->default(0);
             $table->timestamps();
         });
     }

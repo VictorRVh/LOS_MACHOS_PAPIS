@@ -6,15 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class CarpetasGrupoDrive extends Model
+class CarpetasEntregaDrive extends Model
 {
     use HasFactory;
 
-    protected $table = 'carpetas_grupo_drive';
+    protected $table = 'carpetas_entrega_drive';
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
+        'id_entrega_admin',
         'id_grupo',
         'drive_folder_id',
         'nombre_carpeta',
@@ -33,5 +34,10 @@ class CarpetasGrupoDrive extends Model
     public function grupo()
     {
         return $this->belongsTo(Grupo::class, 'id_grupo');
+    }
+
+    public function entregaAdmin()
+    {
+        return $this->belongsTo(EntregaDocenteAdmin::class, 'id_entrega_admin');
     }
 }

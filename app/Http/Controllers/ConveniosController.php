@@ -14,7 +14,9 @@ class ConveniosController extends Controller
     public function index()
     {
         return response()->json(
-            Convenios::latest()->get(),
+            Convenios::latest()
+                ->where('is_deleted', 0)
+                ->get(),
             200
         );
     }
@@ -68,7 +70,9 @@ class ConveniosController extends Controller
             return response()->json(['message' => 'Convenio no encontrado'], 404);
         }
 
-        $convenio->delete();
+        $convenio->is_deleted = 1;
+        $convenio->save();
+
         return response()->json(['message' => 'Convenio eliminado'], 204);
     }
 }

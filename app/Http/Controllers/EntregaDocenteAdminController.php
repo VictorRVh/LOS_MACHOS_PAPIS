@@ -197,42 +197,65 @@ class EntregaDocenteAdminController extends Controller
             ], 404);
         }
 
-        // 1. Obtener el ID de la carpeta del grupo en Drive
+        // 1️⃣ Carpeta raíz del grupo
         $driveFolderId = $programaciones->first()->grupo->carpetaDrive->drive_folder_id ?? null;
 
-        // 2. Listar archivos/carpetas dentro del drive_folder_id usando GoogleDriveController
-        $driveController = new GoogleDriveController();
-
-        $subcarpetas = [];
-        if ($driveFolderId) {
-            $requestList = new Request(['folderId' => $driveFolderId]);
-            $responseDrive = $driveController->listFiles($requestList);
-
-            if ($responseDrive->status() === 200) {
-                $subcarpetas = json_decode($responseDrive->getContent());
-            }
+        if (!$driveFolderId) {
+            return response()->json([
+                'error' => 'Este grupo no tiene carpeta asignada en Drive.'
+            ], 400);
         }
 
-        // 3. Armar la respuesta final
+        // 2️⃣ Obtener subcarpetas dentro del folder raíz
+        $driveController = new GoogleDriveController();
+        $carpetasDrive = $driveController->listFiles($driveFolderId);
+
+        // 3️⃣ Para cada carpeta, buscar si coincide con alguna programación (por tipo_entrega)
+        $resultado = [];
+        foreach ($carpetasDrive as $carpeta) {
+            if ($carpeta->mimeType !== 'application/vnd.google-apps.folder') {
+                continue; // solo carpetas
+            }
+
+            // Buscar programación con tipo_entrega parecido al nombre de la carpeta
+            $programacion = $programaciones->first(function ($p) use ($carpeta) {
+                return stripos($carpeta->name, $p->entregaDocenteAdmin->tipo_entrega) !== false;
+            });
+
+            // Obtener archivos dentro de esa subcarpeta
+            $archivos = $driveController->listFiles($carpeta->id);
+
+            $resultado[] = [
+                'id' => $carpeta->id,
+                'nombre' => $carpeta->name,
+                'webViewLink' => $carpeta->webViewLink ?? null,
+                'programacion' => $programacion ? [
+                    'id' => $programacion->id,
+                    'fecha_inicio' => $programacion->entregaDocenteAdmin->fecha_inicio,
+                    'fecha_fin' => $programacion->entregaDocenteAdmin->fecha_fin,
+                    'tipo_entrega' => $programacion->entregaDocenteAdmin->tipo_entrega,
+                    'status' => $programacion->entregaDocenteAdmin->status,
+                ] : null,
+                'archivos' => collect($archivos)->map(function ($file) {
+                    return [
+                        'id' => $file->id,
+                        'nombre' => $file->name,
+                        'mimeType' => $file->mimeType,
+                        'webViewLink' => $file->webViewLink,
+                    ];
+                }),
+            ];
+        }
+
+        // 4️⃣ Respuesta final
         return response()->json([
             'total' => $programaciones->count(),
-            'drive_folder_id' => $driveFolderId,
-            'carpetas_drive' => $subcarpetas, 
-            'programaciones' => $programaciones->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'fecha_inicio' => $item->fecha_inicio,
-                    'fecha_fin' => $item->fecha_fin,
-                    'estado' => $item->estado,
-                    'documento_admin' => $item->documento_admin,
-                    'observacion' => $item->observacion,
-                    'programacion_general' => $item->entregaDocenteAdmin ? [
-                        'id' => $item->entregaDocenteAdmin->id,
-                        'tipo_entrega' => $item->entregaDocenteAdmin->tipo_entrega,
-                        'status' => $item->entregaDocenteAdmin->status,
-                    ] : null
-                ];
-            })
+            'carpeta_raiz' => [
+                'id' => $driveFolderId,
+                'nombre' => 'Carpeta raíz del grupo',
+            ],
+            'subcarpetas' => $resultado
         ]);
     }
+
 }

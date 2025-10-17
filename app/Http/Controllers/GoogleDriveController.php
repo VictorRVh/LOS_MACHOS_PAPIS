@@ -24,21 +24,30 @@ class GoogleDriveController extends Controller
             $client = new Google_Client();
             $client->setAuthConfig($keyFilePath);
             $client->setScopes([Google_Service_Drive::DRIVE]);
-            
-            $this->driveService = new Google_Service_Drive($client);
 
+            $this->driveService = new Google_Service_Drive($client);
         } catch (Exception $e) {
             Log::error('Error al inicializar Google Drive Service: ' . $e->getMessage());
             abort(500, 'Error de configuración del servicio de Google Drive.');
         }
     }
 
-    public function listFiles(Request $request)
+    /**
+     * Lista los archivos o carpetas dentro de un folderId
+     */
+    public function listFiles($folderId = null)
     {
-        $folderId = $request->query('folderId');
-        if (!$folderId) return response()->json(['error' => 'Se requiere un ID de carpeta.'], 400);
-        
+        // Permitir recibir folderId como parámetro o desde Request
+        if ($folderId instanceof Request) {
+            $folderId = $folderId->query('folderId');
+        }
+
+        if (!$folderId) {
+            return response()->json(['error' => 'Se requiere un ID de carpeta.'], 400);
+        }
+
         $query = "'{$folderId}' in parents and trashed = false";
+
         try {
             $files = $this->driveService->files->listFiles([
                 'q' => $query,
@@ -48,11 +57,16 @@ class GoogleDriveController extends Controller
                 'supportsAllDrives' => true,
                 'includeItemsFromAllDrives' => true
             ]);
-            return response()->json($files->getFiles());
+
+            return $files->getFiles();
         } catch (Exception $e) {
-            return response()->json(['error' => 'Error al listar archivos: ' . $e->getMessage()], 500);
+            Log::error('Error al listar archivos: ' . $e->getMessage());
+            return [];
         }
     }
+
+    // (Los otros métodos: createFolder, renameFile, deleteFile, uploadFile se quedan igual)
+
 
     public function createFolder(Request $request)
     {

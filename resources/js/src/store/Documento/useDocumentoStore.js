@@ -39,7 +39,8 @@ const useProgramacionAdmintore = defineStore('programacion_admin_c', () => {
 
         loadGetProgramacionByGrupo,
         programacionPorGrupo,
-        ProgramacionByGrupoLoading
+        ProgramacionByGrupoLoading,
+        ProgramacionByGrupoFirstTimeLoading
     };
 });
 

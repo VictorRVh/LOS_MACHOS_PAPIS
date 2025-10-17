@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('nombre_especialidad');
             $table->uuid('id_ciclo');
 
+            // $table->tinyInteger('status')->default(0);
+            $table->boolean('is_deleted')->default(0);
+
             $table->foreign('id_ciclo')->references('id')->on('ciclo_academico')->onDelete('cascade');
             $table->timestamps();
         });

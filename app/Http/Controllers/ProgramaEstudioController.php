@@ -13,8 +13,9 @@ class ProgramaEstudioController extends Controller
     public function index()
     {
         $programas = ProgramaEstudio::with('ciclo')
-    ->latest() // equivale a orderBy('created_at', 'desc')
-    ->get();
+            ->where('is_deleted', 0)
+            ->latest()
+            ->get();
 
         if ($programas->isEmpty()) {
             return response()->json(['message' => 'No hay programas de estudio disponibles'], 404);
@@ -38,10 +39,12 @@ class ProgramaEstudioController extends Controller
             'programas' => $programasProcesados,
         ]);
     }
+
     public function index_filter_status()
     {
         $programas = ProgramaEstudio::with('ciclo')
-            ->where('status', 1) // 👈 Solo programas activos
+            ->where('status', 1)
+            ->where('is_deleted', 0)
             ->get();
 
         if ($programas->isEmpty()) {
@@ -71,10 +74,6 @@ class ProgramaEstudioController extends Controller
             'programas' => $programasProcesados,
         ]);
     }
-
-
-
-
 
     // Mostrar uno por ID
     public function show($id)
@@ -137,8 +136,9 @@ class ProgramaEstudioController extends Controller
             return response()->json(['message' => 'Programa de estudio no encontrado'], 404);
         }
 
-        $programa->delete();
+        $programa->is_deleted = 1;
+        $programa->save();
 
-        return response()->json(['message' => 'Programa eliminado correctamente'], 204);
+        return response()->json(['message' => 'Programa eliminado correctamente'], 200);
     }
 }

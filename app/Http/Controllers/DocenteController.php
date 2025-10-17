@@ -226,8 +226,9 @@ class DocenteController extends Controller
             ->leftJoin('docente as d', 'g.id_docente', '=', 'd.id')
             ->leftJoin('users as u', 'd.user_id', '=', 'u.id')
             ->leftJoin('matricula as ma', 'ma.id_grupo', '=', 'g.id')
-            ->where('d.user_id', $userId) // 👈 seguridad: usa el id del user autenticado
+            ->where('d.user_id', $userId)
             ->select(
+                'g.id as id_grupo',     // ✅ Agregado
                 'em.nombre_especialidad as especialidad',
                 'm.numero_modulo as modulo',
                 DB::raw("CONCAT(u.name, ' ', u.apellido_paterno, ' ', u.apellido_materno) as docente"),

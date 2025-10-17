@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('año');
             $table->string('numero_rd')->nullable();
             $table->tinyInteger('status')->default(0);
+            $table->boolean('is_deleted')->default(0);
             $table->text('descripcion')->nullable();
 
             $table->foreign('id_ciclo')

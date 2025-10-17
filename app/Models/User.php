@@ -29,6 +29,7 @@ class User extends Authenticatable
         'direccion',
         'password',
         'status',
+        'is_deleted'
     ];
     /**
      * The attributes that should be hidden for serialization.

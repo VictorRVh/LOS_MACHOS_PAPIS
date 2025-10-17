@@ -21,6 +21,7 @@ class ProgramaEstudio extends Model
         'año',
         'numero_rd',
         'status',
+        'is_deleted',   
         'descripcion',
     ];
 

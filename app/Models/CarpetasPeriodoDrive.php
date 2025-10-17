@@ -15,7 +15,6 @@ class CarpetasPeriodoDrive extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id',
         'id_periodo',
         'drive_folder_id',
         'nombre_carpeta',

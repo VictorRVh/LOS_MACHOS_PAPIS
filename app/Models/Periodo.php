@@ -13,13 +13,13 @@ class Periodo extends Model
 
     public $incrementing = false;
     protected $keyType = 'string';
-
     protected $table = 'periodo';
 
     protected $fillable = [
         'id',
         'nombre_periodo',
         'status',
+        'is_deleted'
     ];
 
     protected $hidden = ['created_at', 'updated_at'];

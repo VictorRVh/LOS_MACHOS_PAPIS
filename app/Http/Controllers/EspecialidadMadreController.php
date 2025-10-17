@@ -14,10 +14,13 @@ class EspecialidadMadreController extends Controller
     public function index()
     {
         $especialidades = EspecialidadMadre::with('cicloAcademico')
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->where('is_deleted', 0)    // Solo las activas
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return response()->json($especialidades);
     }
+
 
     // Mostrar uno por ID
     public function show($id)
@@ -72,10 +75,12 @@ class EspecialidadMadreController extends Controller
             return response()->json(['message' => 'Especialidad no encontrada'], 404);
         }
 
-        $especialidad->delete();
+        $especialidad->is_deleted = 1;
+        $especialidad->save();
 
         return response()->json(['message' => 'Especialidad eliminada'], 204);
     }
+
 
     public function getEspecialidadesPorCiclo($idCiclo)
     {

@@ -86,7 +86,7 @@ class EntregaDocenteAdminController extends Controller
                     // 3. Registrar en tabla de carpetas de entrega (si quieres)
                     // Por ejemplo:
                     CarpetasEntregaDrive::create([
-                        'id_entrega_admin' => $entregaDocente->id,
+                        'id_entrega_docente' => $entregaDocente->id,
                         'id_grupo' => $grupo->id,
                         'drive_folder_id' => $folderId,
                         'nombre_carpeta' => $folderName

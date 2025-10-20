@@ -15,7 +15,7 @@ class CarpetasEntregaDrive extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id_entrega_admin',
+        'id_entrega_docente',
         'id_grupo',
         'drive_folder_id',
         'nombre_carpeta',
@@ -36,8 +36,8 @@ class CarpetasEntregaDrive extends Model
         return $this->belongsTo(Grupo::class, 'id_grupo');
     }
 
-    public function entregaAdmin()
+    public function entregaDocente()
     {
-        return $this->belongsTo(EntregaDocenteAdmin::class, 'id_entrega_admin');
+        return $this->belongsTo(EntregaDocente::class, 'id_entrega_docente');
     }
 }

@@ -60,7 +60,7 @@ class EntregaDocenteAdminController extends Controller
         foreach ($grupos as $grupo) {
 
             //  1. Crear entrega individual
-            EntregaDocente::create([
+            $entregaDocente = EntregaDocente::create([
                 'id_grupo'        => $grupo->id,
                 'fecha_inicio'    => $adminEntrega->fecha_inicio,
                 'fecha_fin'       => $adminEntrega->fecha_fin,
@@ -86,7 +86,7 @@ class EntregaDocenteAdminController extends Controller
                     // 3. Registrar en tabla de carpetas de entrega (si quieres)
                     // Por ejemplo:
                     CarpetasEntregaDrive::create([
-                        'id_entrega_admin' => $adminEntrega->id,
+                        'id_entrega_admin' => $entregaDocente->id,
                         'id_grupo' => $grupo->id,
                         'drive_folder_id' => $folderId,
                         'nombre_carpeta' => $folderName

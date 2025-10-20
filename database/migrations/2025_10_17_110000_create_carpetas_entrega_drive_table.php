@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('carpetas_entrega_drive', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->uuid('id_entrega_admin');
-            $table->foreign('id_entrega_admin')
+            $table->uuid('id_entrega_docente');
+            $table->foreign('id_entrega_docente')
                 ->references('id')
-                ->on('entrega_docente_admin')
+                ->on('entrega_docente')
                 ->onDelete('cascade');
 
             // Grupo al que pertenece la carpeta

@@ -64,16 +64,6 @@ class EntregaDocenteAdmin extends Model
         return self::STATUS[$this->status] ?? 'Desconocido';
     }
 
-    public function entregaDocente()
-    {
-        return $this->hasMany(EntregaDocente::class, 'id_admin');
-    }
-
-    public function carpetas()
-    {
-        return $this->hasMany(CarpetasEntregaDrive::class, 'id_entrega_admin');
-    }
-
     /*
     |--------------------------------------------------------------------------
     | HELPERS: Verificar estado (lectura)

@@ -58,4 +58,9 @@ class EntregaDocente extends Model
     {
         return $this->hasMany(Sesiones::class, 'id_entrega');
     }
+
+    public function carpetas()
+    {
+        return $this->hasMany(CarpetasEntregaDrive::class, 'id_entrega_docente');
+    }
 }

@@ -63,6 +63,8 @@ const icons = {
   CalendarDaysIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/CalendarDaysIcon')),
   DocumentArrowUpIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/DocumentArrowUpIcon')),
   ChatBubbleBottomCenterTextIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/ChatBubbleBottomCenterTextIcon')),
+  XCircleIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/XCircleIcon')),
+
 };
 
 export function registerHeroIcons(app) {

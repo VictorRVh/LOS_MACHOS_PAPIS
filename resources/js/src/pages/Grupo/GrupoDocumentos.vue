@@ -76,7 +76,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-grupos', 'ver-grupos']">
+  <AuthorizationFallback :permissions="['todo-acceso-grupos', 'ver-grupos', 'ver-mis-modulos']">
     <div class="p-4 md:p-6 space-y-6">
       <!-- Header -->
       <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

@@ -7,18 +7,15 @@ import useProgramacionAdmintore from '../../store/Documento/useDocumentoStore'
 import { useIconoArchivo } from '../../store/Documento/useIconoArchivoStore'
 import axios from 'axios'
 import useModalToast from '../../composables/useModalToast'
-import useHttpRequest from '../../composables/useHttpRequest'
 
 const props = defineProps({
   id: { type: String, required: true },
 })
 
-const { store: uploadArchivo, loading: uploadLoading } = useHttpRequest('/drive/upload')
 const { showConfirmModal, showToast } = useModalToast();
 
-
 const documentoStore = useProgramacionAdmintore();
-const { iconoArchivo } = useIconoArchivo();
+const { iconoArchivo } = useIconoArchivo()
 
 const carpetas = ref([])
 const searchQuery = ref('')
@@ -51,17 +48,15 @@ const toggleCarpeta = (id) => {
 }
 
 const filtrarCarpetas = () => {
-  const query = (searchQuery.value || '').toLowerCase();
+  const query = searchQuery.value.toLowerCase()
+  return carpetas.value.filter(
+    (c) =>
+      c.nombre.toLowerCase().includes(query) ||
+      (c.programacion?.tipo_entrega?.toLowerCase().includes(query))
+  )
+}
 
-  return carpetas.value.filter((c) => {
-    const nombre = (c.nombre || '').toLowerCase();
-    const tipoEntrega = (c.programacion?.tipo_entrega || '').toLowerCase();
-
-    return nombre.includes(query) || tipoEntrega.includes(query);
-  });
-};
-
-
+// 🧩 Formatear fecha
 const formatFecha = (fecha) => {
   if (!fecha) return ''
   return new Date(fecha).toLocaleDateString('es-PE', {
@@ -99,28 +94,20 @@ const subirArchivo = async () => {
     formData.append('file', archivo.value);
     formData.append('parentFolderId', carpetaSeleccionada.value.id);
 
-    let response = null;
+    const response = await axios.post('/drive/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
 
-    try {
-      response = await uploadArchivo(formData);
-      // console.log('Archivo subido:', response);
-
-      carpetas.value.push(response);
-    } catch (err) {
-      console.error('Error al subir archivo:', err);
-      return;
-    }
-
+    // ✅ Actualizar la carpeta local con el nuevo archivo
     const carpetaIndex = carpetas.value.findIndex(c => c.id === carpetaSeleccionada.value.id);
     if (carpetaIndex !== -1) {
-      // asegúrate de que exista archivos
-      if (!Array.isArray(carpetas.value[carpetaIndex].archivos)) {
-        carpetas.value[carpetaIndex].archivos = [];
-      }
       carpetas.value[carpetaIndex].archivos.push(response.data);
     }
 
+    // Recargar datos del store (opcional, si quieres mantener sincronizado)
     await documentoStore.loadGetProgramacionByGrupo(props.id);
+
+    // Actualizar las carpetas con los datos frescos
     const data = documentoStore.programacionPorGrupo;
     if (data && typeof data === 'object') {
       carpetas.value = data.subcarpetas || [];
@@ -131,10 +118,9 @@ const subirArchivo = async () => {
     console.error('Error al subir archivo:', error);
     alert('Error al subir el archivo. Por favor intenta nuevamente.');
   }
-};
+}
 
 const eliminarArchivo = async (carpeta, archivo) => {
-
 
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
@@ -163,7 +149,7 @@ const eliminarArchivo = async (carpeta, archivo) => {
     <!-- Encabezado -->
     <div class="flex justify-between items-center">
       <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200">
-        Documentos en Google Drive
+        Documentos en Google Drive ewncuiewchoee
       </h3>
       <SearchBar :totalResultados="carpetas.length" @search="searchQuery = $event" />
     </div>

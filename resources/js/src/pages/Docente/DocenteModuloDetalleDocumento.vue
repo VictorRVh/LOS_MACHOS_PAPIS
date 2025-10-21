@@ -8,14 +8,22 @@ import { useIconoArchivo } from '../../store/Documento/useIconoArchivoStore'
 import axios from 'axios'
 import useModalToast from '../../composables/useModalToast'
 import useHttpRequest from '../../composables/useHttpRequest'
+import useTableData from "../../composables/tabla/useTableData";
+import AuthorizationFallback from '../../components/page/AuthorizationFallback.vue'
+import Table from '../../components/table/Table.vue'
+import THead from '../../components/table/THead.vue'
+import TBody from '../../components/table/TBody.vue'
+import Tr from '../../components/table/Tr.vue'
+import Th from '../../components/table/Th.vue'
+import Td from '../../components/table/Td.vue'
+import FormInputFile from "../../components/ui/FormFileInput.vue";
 
 const props = defineProps({
   id: { type: String, required: true },
 })
 
-const { store: uploadArchivo, loading: uploadLoading } = useHttpRequest('/drive/upload')
+const { store: uploadArchivo, saving: uploadLoading } = useHttpRequest('/drive/upload')
 const { showConfirmModal, showToast } = useModalToast();
-
 
 const documentoStore = useProgramacionAdmintore();
 const { iconoArchivo } = useIconoArchivo();
@@ -50,18 +58,6 @@ const toggleCarpeta = (id) => {
   carpetasAbiertas.value[id] = !carpetasAbiertas.value[id]
 }
 
-const filtrarCarpetas = () => {
-  const query = (searchQuery.value || '').toLowerCase();
-
-  return carpetas.value.filter((c) => {
-    const nombre = (c.nombre || '').toLowerCase();
-    const tipoEntrega = (c.programacion?.tipo_entrega || '').toLowerCase();
-
-    return nombre.includes(query) || tipoEntrega.includes(query);
-  });
-};
-
-
 const formatFecha = (fecha) => {
   if (!fecha) return ''
   return new Date(fecha).toLocaleDateString('es-PE', {
@@ -90,7 +86,7 @@ const handleFileUpload = (event) => {
 
 const subirArchivo = async () => {
   if (!archivo.value) {
-    console.warn('No hay archivo seleccionado');
+    showToast('No hay archivo seleccionado.', 'warning');
     return;
   }
 
@@ -99,27 +95,28 @@ const subirArchivo = async () => {
     formData.append('file', archivo.value);
     formData.append('parentFolderId', carpetaSeleccionada.value.id);
 
-    let response = null;
+    // Subir archivo
+    const response = await uploadArchivo(formData);
 
-    try {
-      response = await uploadArchivo(formData);
-      // console.log('Archivo subido:', response);
-
-      carpetas.value.push(response);
-    } catch (err) {
-      console.error('Error al subir archivo:', err);
-      return;
-    }
-
+    // Actualizar la carpeta seleccionada con el nuevo archivo
     const carpetaIndex = carpetas.value.findIndex(c => c.id === carpetaSeleccionada.value.id);
+
     if (carpetaIndex !== -1) {
-      // asegúrate de que exista archivos
+      // Inicializar array de archivos si no existe
       if (!Array.isArray(carpetas.value[carpetaIndex].archivos)) {
         carpetas.value[carpetaIndex].archivos = [];
       }
-      carpetas.value[carpetaIndex].archivos.push(response.data);
+
+      // Agregar response directamente (es el archivo de Google Drive)
+      carpetas.value[carpetaIndex].archivos.push(response);
+
+      showToast('Archivo subido exitosamente', 'success');
+    } else {
+      console.error('No se encontró la carpeta seleccionada');
+      showToast('Error: carpeta no encontrada', 'error');
     }
 
+    // Recargar datos actualizados
     await documentoStore.loadGetProgramacionByGrupo(props.id);
     const data = documentoStore.programacionPorGrupo;
     if (data && typeof data === 'object') {
@@ -133,8 +130,13 @@ const subirArchivo = async () => {
   }
 };
 
-const eliminarArchivo = async (carpeta, archivo) => {
+const recargarDocumentos = async () => {
+  isRecargando.value = true
+  await cargarCarpetas()
+  isRecargando.value = false
+}
 
+const eliminarArchivo = async (carpeta, archivo) => {
 
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
@@ -156,145 +158,202 @@ const eliminarArchivo = async (carpeta, archivo) => {
   });
 }
 
+const {
+  query,
+  orderBy,
+  orderDirection,
+  pagina,
+  itemsPorPagina,
+  paginados: carpetasPaginadas,
+  totalPaginas,
+  ordenados: carpetasOrdenadas,
+  filtrar: filtrarCarpetas
+} = useTableData(carpetas, {
+  defaultOrderBy: "nombre",
+  searchFields: ["nombre"]
+})
+
+
 </script>
 
 <template>
-  <div class="space-y-6">
-    <!-- Encabezado -->
-    <div class="flex justify-between items-center">
-      <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200">
-        Documentos en Google Drive
-      </h3>
-      <SearchBar :totalResultados="carpetas.length" @search="searchQuery = $event" />
-    </div>
+  <AuthorizationFallback :permissions="['todo-acceso-grupos', 'ver-grupos', 'ver-mis-modulos']">
 
-    <!-- Cargando -->
-    <div v-if="documentoStore.ProgramacionByGrupoLoading"
-      class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <FolderIcon class="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600" />
-      <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
-        Cargando carpetas...
-      </h3>
-    </div>
+    <div class="p-4 md:p-6 space-y-6">
+      <!-- Header -->
+      <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">
+          Documentos en Google Drive
+        </h1>
 
-    <div v-else-if="errorCarga"
-      class="text-center py-16 bg-red-50 dark:bg-red-900/20 rounded-lg shadow-md border border-red-200 dark:border-red-800">
-      <FolderIcon class="mx-auto h-16 w-16 text-red-400 dark:text-red-500" />
-      <h3 class="mt-2 text-lg font-semibold text-red-700 dark:text-red-400">
-        Error al cargar documentos
-      </h3>
-      <p class="text-sm text-red-600 dark:text-red-500 mt-1">
-        No se pudieron obtener los documentos del grupo
-      </p>
-    </div>
+        <div class="flex items-center gap-3">
+          <SearchBar v-if="!documentoStore.ProgramacionByGrupoLoading && carpetas.length > 0"
+            :totalResultados="carpetasOrdenadas.length" :campoOrden="'nombre'" @search="filtrarCarpetas" />
 
-    <!-- Sin carpetas 👈 Nuevo bloque -->
-    <div v-else-if="carpetas.length === 0" class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <FolderIcon class="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600" />
-      <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
-        No hay carpetas disponibles
-      </h3>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-        Aún no se han creado carpetas para este grupo
-      </p>
-    </div>
 
-    <!-- Carpetas -->
-    <div v-else>
-      <div v-for="carpeta in filtrarCarpetas()" :key="carpeta.id"
-        class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-        <!-- Título -->
-        <div class="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
-          @click="toggleCarpeta(carpeta.id)">
-          <!-- IZQUIERDA -->
-          <div class="flex items-center gap-2">
-            <FolderIcon class="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            <div>
-              <p class="font-semibold text-gray-800 dark:text-gray-100 leading-tight">
-                {{ carpeta.nombre }}
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-1">
-                <CalendarIcon class="h-4 w-4" />
-                {{ formatFecha(carpeta.programacion?.fecha_inicio) }} -
-                {{ formatFecha(carpeta.programacion?.fecha_fin) }}
-              </p>
+          <button @click="recargarDocumentos"
+            class="bg-cetpro hover:bg-cetpro-dark text-cetpro-text px-3 py-2 rounded-md flex items-center gap-2 transition-colors duration-300"
+            :disabled="isRecargando">
+            <svg class="w-5 h-5 animate-spin" v-if="isRecargando" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span v-else>Recargar</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Loading -->
+      <div v-if="documentoStore.ProgramacionByGrupoLoading"
+        class=" dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 text-center py-16">
+        <FolderIcon class="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600" />
+        <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
+          Cargando carpetas...
+        </h3>
+      </div>
+
+      <!-- Carpetas -->
+      <div v-else class=" dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event"
+          v-if="carpetasPaginadas?.length > 0">
+          <THead class="hidden">
+            <Th>Carpeta</Th>
+            <Th>Periodo</Th>
+            <Th>Archivos</Th>
+          </THead>
+
+          <TBody>
+            <template v-for="carpeta in carpetasPaginadas" :key="carpeta.id">
+
+              <!-- Fila principal -->
+              <Tr @click="toggleCarpeta(carpeta.id)"
+                class="dark:bg-cetpro-dark hover:bg-cetpro-dark dark:hover:bg-cetpro cursor-pointer transition-colors duration-200 border-b border-white dark:border-cetpro">
+                <Td colspan="3" class=" bg-cetpro  px-4 py-3 font-bold uppercase tracking-wider text-sm">
+                  <div class="flex items-center justify-between text-cetpro-text">
+                    <div class="flex items-center gap-2">
+                      <FolderIcon class="h-6 w-6 text-cetpro-text " />
+                      <div>
+                        <span>{{ carpeta.nombre }}</span>
+                        <p class="text-xs text-gray-100 dark:text-gray-300 flex items-center gap-1 mt-1">
+                          <CalendarIcon class="h-4 w-4" />
+                          {{ formatFecha(carpeta.programacion?.fecha_inicio) }} -
+                          {{ formatFecha(carpeta.programacion?.fecha_fin) }}
+                        </p>
+                      </div>
+                      <button @click.stop="abrirModalSubir(carpeta)"
+                        class="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white" title="Agregar documento">
+                        <PlusIcon class="h-5 w-5" />
+                      </button>
+                    </div>
+
+                    <ChevronDownIcon :class="[
+                      'h-6 w-6 text-cetpro-text transition-transform duration-300',
+                      { 'rotate-180': carpetasAbiertas[carpeta.id] }
+                    ]" />
+
+                  </div>
+
+                </Td>
+
+              </Tr>
+
+              <!-- Fila expandida -->
+              <Tr v-if="carpetasAbiertas[carpeta.id]" class="bg-white dark:bg-gray-800 border-t-0">
+                <Td colspan="3" class="p-0">
+                  <TransitionGroup name="list" tag="div" class=" grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div v-for="archivo in carpeta.archivos" :key="archivo.id"
+                      class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition">
+                      <div class="flex items-center gap-2 overflow-hidden">
+                        <img :src="iconoArchivo(archivo.mimeType)" alt="icon" class="h-5 w-5 flex-shrink-0" />
+                        <span class="text-gray-700 dark:text-gray-200 text-sm truncate max-w-[180px]"
+                          :title="archivo.nombre">
+                          {{ archivo.nombre }}
+                        </span>
+                      </div>
+
+                      <div class="flex items-center gap-2 flex-shrink-0">
+                        <a :href="archivo.webViewLink" target="_blank" title="Ver archivo"
+                          class="text-gray-500 hover:text-blue-600 dark:hover:text-blue-400">
+                          <EyeIcon class="h-5 w-5" />
+                        </a>
+                        <a :href="archivo.webViewLink" target="_blank" download title="Descargar"
+                          class="text-gray-500 hover:text-green-600 dark:hover:text-green-400">
+                          <ArrowDownTrayIcon class="h-5 w-5" />
+                        </a>
+                        <button title="Eliminar" @click="eliminarArchivo(carpeta, archivo)"
+                          class="text-gray-500 hover:text-red-600 dark:hover:text-red-400">
+                          <TrashIcon class="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div v-if="carpeta.archivos.length === 0"
+                      class="text-center text-gray-500 dark:text-gray-400 col-span-full py-3">
+                      No hay archivos en esta carpeta.
+                    </div>
+                  </TransitionGroup>
+                </Td>
+              </Tr>
+            </template>
+          </TBody>
+        </Table>
+
+        <!-- No hay carpetas -->
+        <div v-else class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            aria-hidden="true">
+            <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
+          </svg>
+          <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
+            No se encontraron carpetas
+          </h3>
+          <p class="mt-1 text-sm text-gray-500">
+            Intenta con otro grupo o periodo.
+          </p>
+        </div>
+
+
+        <div v-if="showUploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+              Subir archivo a: {{ carpetaSeleccionada?.nombre }}
+            </h2>
+
+            <!-- Input del archivo -->
+            <FormInputFile v-model="archivo" :multiple="false" class="mb-4" />
+
+            <div class="flex justify-end gap-2">
+              <!-- Botón Cancelar -->
+              <button @click="cerrarModal"
+                class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50"
+                :disabled="uploadLoading">
+                Cancelar
+              </button>
+
+              <!-- Botón Subir con loading -->
+              <button @click="subirArchivo"
+                class="px-4 py-2 bg-cetpro text-white rounded hover:bg-cetpro-dark flex items-center justify-center gap-2 disabled:opacity-50"
+                :disabled="uploadLoading">
+                <template v-if="uploadLoading">
+                  <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                  Subiendo...
+                </template>
+                <template v-else>Subir</template>
+              </button>
             </div>
-          </div>
-
-          <!-- DERECHA -->
-          <div class="flex items-center gap-2">
-            <button @click.stop="abrirModalSubir(carpeta)"
-              class="p-1 rounded-full bg-blue-600 hover:bg-blue-700 text-white" title="Agregar documento">
-              <PlusIcon class="h-5 w-5" />
-            </button>
-
-            <ChevronUpIcon class="h-5 w-5 text-gray-400 transition-transform"
-              :class="{ 'rotate-180': !carpetasAbiertas[carpeta.id] }" />
           </div>
         </div>
 
 
-        <!-- Archivos -->
-        <transition name="fade">
-          <div v-if="carpetasAbiertas[carpeta.id]" class="px-6 pb-3 flex flex-wrap gap-2">
-            <!-- Archivos individuales -->
-            <div v-for="archivo in carpeta.archivos" :key="archivo.id"
-              class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition w-auto"
-              style="min-width: 250px; max-width: 100%;">
-              <div class="flex items-center gap-2 overflow-hidden">
-                <img :src="iconoArchivo(archivo.mimeType)" alt="icon" class="h-5 w-5 flex-shrink-0" />
-                <span class="text-gray-700 dark:text-gray-200 text-sm truncate max-w-[180px]" :title="archivo.nombre">
-                  {{ archivo.nombre }}
-                </span>
-              </div>
-
-              <div class="flex items-center gap-2 flex-shrink-0">
-                <a :href="archivo.webViewLink" target="_blank" title="Ver archivo"
-                  class="text-gray-500 hover:text-blue-600 dark:hover:text-blue-400">
-                  <EyeIcon class="h-4 w-4" />
-                </a>
-                <a :href="archivo.webViewLink" target="_blank" download title="Descargar"
-                  class="text-gray-500 hover:text-green-600 dark:hover:text-green-400">
-                  <ArrowDownTrayIcon class="h-4 w-4" />
-                </a>
-                <button title="Eliminar" @click="eliminarArchivo(carpeta, archivo)"
-                  class="text-gray-500 hover:text-red-600 dark:hover:text-red-400">
-                  <TrashIcon class="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            <!-- Sin archivos -->
-            <div v-if="carpeta.archivos.length === 0" class="text-center text-gray-500 dark:text-gray-400 w-full py-3">
-              No hay archivos en esta carpeta.
-            </div>
-          </div>
-        </transition>
       </div>
-
-      <div v-if="showUploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
-          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-            Subir archivo a: {{ carpetaSeleccionada?.nombre }}
-          </h2>
-
-          <!-- Aquí va el input de archivo -->
-          <input type="file" class="mb-4" @change="handleFileUpload">
-
-          <div class="flex justify-end gap-2">
-            <button @click="cerrarModal" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
-              Cancelar
-            </button>
-            <button @click="subirArchivo" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Subir
-            </button>
-          </div>
-        </div>
-      </div>
-
     </div>
-  </div>
+  </AuthorizationFallback>
 </template>
 
 <style scoped>

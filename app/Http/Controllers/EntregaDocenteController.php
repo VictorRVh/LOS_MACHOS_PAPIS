@@ -7,6 +7,8 @@ use App\Models\EntregaDocenteAdmin;
 use App\Models\EntregaDocente;
 use Illuminate\Http\Request;
 
+use App\Models\CarpetasEntregaDrive;
+
 class EntregaDocenteController extends Controller
 {
     /**
@@ -115,27 +117,53 @@ class EntregaDocenteController extends Controller
         if (!$entrega) {
             return response()->json(['message' => 'Entrega no encontrada'], 404);
         }
-        $validated = $request->validate([
-            'dias_aplazados' => 'nullable|string|max:255',
-            'documento_admin' => 'nullable|string|max:255',
+
+        // 🧾 Validación
+        $request->validate([
+            'documento_admin' => 'nullable|file|max:10240', // solo un archivo
             'descripcion' => 'nullable|string|max:255',
             'observacion' => 'nullable|string|max:255',
+            'dias_aplazadas' => 'nullable|string|max:255',
         ]);
 
-        // Si se envía "dias_aplazados", agregamos la fecha y estado
-        if (!empty($validated['dias_aplazados'])) {
-            $validated['fecha_aplazada'] = now(); // fecha actual de Lima
-            $validated['estado'] = 1;
+        // 🗂️ Subida de archivo (si se envía)
+        if ($request->hasFile('documento_admin')) {
+            $carpeta = CarpetasEntregaDrive::where('id_entrega_docente', $id)->first();
+
+            if (!$carpeta) {
+                return response()->json(['message' => 'No existe carpeta vinculada a esta entrega'], 404);
+            }
+
+            $parentFolderId = $carpeta->drive_folder_id;
+            $googleDrive = new GoogleDriveController();
+
+            // 🚀 Subir solo un archivo
+            $archivo = $request->file('documento_admin');
+            $tempReq = new Request([
+                'file' => $archivo,
+                'parentFolderId' => $parentFolderId,
+            ]);
+
+            $googleDrive->uploadFile($tempReq);
         }
 
-        $entrega->update($validated);
+        // 🧩 Actualiza los demás campos
+        $data = $request->only(['descripcion', 'observacion', 'dias_aplazadas']);
+
+        // ⚙️ Si se aplazan días, actualizar automáticamente el estado
+        if ($request->filled('dias_aplazadas')) {
+            $data['fecha_aplazada'] = now();
+            $data['estado'] = 1;
+        }
+
+        // 💾 Guardar cambios
+        $entrega->update($data);
 
         return response()->json([
             'message' => 'Entrega actualizada con éxito',
-            'data' => $entrega
+            'data' => $entrega,
         ]);
     }
-
 
     // DELETE /api/entrega_docente/{id}
     public function destroy($id)

@@ -932,7 +932,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('infoGrupo/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'infoGrupo',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
 });
 
 

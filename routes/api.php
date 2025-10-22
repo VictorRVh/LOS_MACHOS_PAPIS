@@ -293,7 +293,7 @@ Route::middleware('auth:sanctum')->group(function () {
         'subidasPorProgramacion',
     ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
     
-    Route::patch('entrega_docente/{id}', [
+    Route::post('entrega_docente/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'update',
     ])->middleware('permission:todo-acceso-programacion-documentos-subidos|editar-programacion-documentos-subidos');

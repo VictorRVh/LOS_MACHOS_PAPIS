@@ -45,6 +45,7 @@ class EntregaDocenteController extends Controller
             'grupo.modulo:id,descripcion',
             'grupo.especialidad:id,id_especialidad',
             'grupo.especialidad.especialidadMadre:id,nombre_especialidad',
+            'carpeta:id,drive_folder_id,id_entrega_docente', // 👈 Agrega esto
         ])
             ->where('id_admin', $id_admin)
             ->get();
@@ -59,7 +60,11 @@ class EntregaDocenteController extends Controller
                 'estado' => $item->estado,
                 'documento_admin' => $item->documento_admin,
                 'observacion' => $item->observacion,
-                'created_at' => $item->created_at,
+                // 'created_at' => $item->created_at,
+
+                // 👇 Aquí se devuelven las carpetas asociadas
+                'carpetas_drive' => optional($item->carpeta)->drive_folder_id,
+
                 'grupo_detalle' => [
                     'id' => $item->grupo->id,
                     'nombre_especialidad' =>
@@ -76,6 +81,7 @@ class EntregaDocenteController extends Controller
                 ]
             ];
         });
+
 
         return response()->json([
             'total_programados' => $gruposProgramados->count(),
@@ -125,7 +131,11 @@ class EntregaDocenteController extends Controller
             'observacion' => 'nullable|string|max:255',
             'dias_aplazadas' => 'nullable|string|max:255',
         ]);
+        \Log::info('Archivo recibido:', [
+            'documento_admin' => $request->file('documento_admin')
+        ]);
 
+        // 🗂️ Subida de archivo (si se envía)
         // 🗂️ Subida de archivo (si se envía)
         if ($request->hasFile('documento_admin')) {
             $carpeta = CarpetasEntregaDrive::where('id_entrega_docente', $id)->first();
@@ -137,14 +147,10 @@ class EntregaDocenteController extends Controller
             $parentFolderId = $carpeta->drive_folder_id;
             $googleDrive = new GoogleDriveController();
 
-            // 🚀 Subir solo un archivo
             $archivo = $request->file('documento_admin');
-            $tempReq = new Request([
-                'file' => $archivo,
-                'parentFolderId' => $parentFolderId,
-            ]);
 
-            $googleDrive->uploadFile($tempReq);
+            // Llamada directa a uploadFile, pasándole UploadedFile y folderId
+            $googleDrive->uploadFileDirect($archivo, $parentFolderId);
         }
 
         // 🧩 Actualiza los demás campos

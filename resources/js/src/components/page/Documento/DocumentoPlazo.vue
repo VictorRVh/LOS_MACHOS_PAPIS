@@ -1,14 +1,14 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import * as yup from "yup";
-
+import Slider from "../../ui/Slider.vue";
+import FormInput from "../../ui/FormInput.vue";
 import Button from "../../ui/Button.vue";
 import AuthorizationFallback from "../../page/AuthorizationFallback.vue";
-import FormInput from "../../ui/FormInput.vue";
-
 import useModalToast from "../../../composables/useModalToast";
 import useValidation from "../../../composables/useValidation";
 import useHttpRequest from "../../../composables/useHttpRequest";
+import useProgramacionSubidostore from "../../../store/Documento/useDocumentoSubidoStore";
 
 const props = defineProps({
     grupo: {
@@ -19,44 +19,52 @@ const props = defineProps({
         type: Boolean,
         required: true,
     },
+    load: {
+         type: String,
+        required: true,
+    }
 });
 
-const emit = defineEmits(["hide"]);
-
-const title = `Actualizar programación para el grupo: ${props.grupo?.grupo_detalle?.nombre_especialidad} - Sección ${props.grupo?.grupo_detalle?.seccion}`
-
+const emit = defineEmits(["hided"]);
 const { showToast } = useModalToast();
 const { runYupValidation } = useValidation();
 const { update, updating } = useHttpRequest("/entrega_docente");
+const programacionStore = useProgramacionSubidostore();
 
 const formErrors = ref({});
-
 const formData = ref({
-    observacion: props.grupo?.observacion || "",
+    observacion: "",
     dias_aplazados: null,
 });
 
-// 🧾 Opciones de días
-const diasOptions = [
-    { label: "1 día", value: "1" },
-    { label: "2 días", value: "2" },
-    { label: "3 días", value: "3" },
-    { label: "4 días", value: "4" },
-    { label: "5 días", value: "5" },
-];
+// 📡 Watch: cada vez que cambia el grupo, recarga el formulario
+watch(
+    () => props.grupo,
+    (nuevoGrupo) => {
+        if (nuevoGrupo) {
+            formData.value = {
+                observacion: nuevoGrupo.observacion || "",
+                dias_aplazados: nuevoGrupo.dias_aplazados || null,
+            };
+        }
+    },
+    { immediate: true }
+);
 
-// 📅 Verificar si la fecha final ya pasó
+// 📅 Si la fecha final ya pasó
 const fechaFinalPasada = computed(() => {
     if (!props.grupo?.fecha_final) return false;
     return new Date(props.grupo.fecha_final) < new Date();
 });
 
-// ✅ Validación dinámica
+// 🧾 Validación Yup
 const schema = computed(() =>
     yup.object().shape({
         observacion: yup.string().nullable().max(255),
         ...(fechaFinalPasada.value && {
-            dias_aplazados: yup.string().required("Debe seleccionar los días de prórroga."),
+            dias_aplazados: yup
+                .string()
+                .required("Debe seleccionar los días de prórroga."),
         }),
     })
 );
@@ -66,6 +74,15 @@ const requiredPermissions = computed(() => [
     "editar-programacion-documentos-subidos",
 ]);
 
+const diasOptions = [
+    { label: "1 día", value: "1" },
+    { label: "2 días", value: "2" },
+    { label: "3 días", value: "3" },
+    { label: "4 días", value: "4" },
+    { label: "5 días", value: "5" },
+];
+
+// 🚀 Actualizar programación
 const onSubmit = async () => {
     if (updating.value) return;
 
@@ -81,16 +98,22 @@ const onSubmit = async () => {
         const response = await update(props.grupo.id, formData.value);
         if (response) {
             showToast("Datos actualizados correctamente.", "success");
-            emit("hide");
+            emit("hided");
+
+            // ✅ Refresca con el ID de la programación (no del grupo
+        await programacionStore.loadgetProgramacionSubidos(props.load);
+            
         }
     } catch (error) {
+        console.error(error);
         showToast("Error al actualizar.", "error");
     }
 };
 </script>
 
+
 <template>
-    <Slider :show="show" :title="title" @hide="emit('hide')">
+    <Slider :show="show" :title="title" @hide="emit('hided')">
         <AuthorizationFallback :permissions="requiredPermissions">
             <!-- OBSERVACIÓN -->
             <FormInput v-model="formData.observacion" label="Observación (Opcional)"

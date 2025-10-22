@@ -126,35 +126,12 @@ class EntregaDocenteController extends Controller
 
         // 🧾 Validación
         $request->validate([
-            'documento_admin' => 'nullable|file|max:10240', // solo un archivo
-            'descripcion' => 'nullable|string|max:255',
             'observacion' => 'nullable|string|max:255',
             'dias_aplazadas' => 'nullable|string|max:255',
         ]);
-        \Log::info('Archivo recibido:', [
-            'documento_admin' => $request->file('documento_admin')
-        ]);
-
-        // 🗂️ Subida de archivo (si se envía)
-        // 🗂️ Subida de archivo (si se envía)
-        if ($request->hasFile('documento_admin')) {
-            $carpeta = CarpetasEntregaDrive::where('id_entrega_docente', $id)->first();
-
-            if (!$carpeta) {
-                return response()->json(['message' => 'No existe carpeta vinculada a esta entrega'], 404);
-            }
-
-            $parentFolderId = $carpeta->drive_folder_id;
-            $googleDrive = new GoogleDriveController();
-
-            $archivo = $request->file('documento_admin');
-
-            // Llamada directa a uploadFile, pasándole UploadedFile y folderId
-            $googleDrive->uploadFileDirect($archivo, $parentFolderId);
-        }
 
         // 🧩 Actualiza los demás campos
-        $data = $request->only(['descripcion', 'observacion', 'dias_aplazadas']);
+        $data = $request->only([ 'observacion', 'dias_aplazadas']);
 
         // ⚙️ Si se aplazan días, actualizar automáticamente el estado
         if ($request->filled('dias_aplazadas')) {
@@ -167,7 +144,7 @@ class EntregaDocenteController extends Controller
 
         return response()->json([
             'message' => 'Entrega actualizada con éxito',
-            'data' => $entrega,
+            'programacion' => $entrega,
         ]);
     }
 

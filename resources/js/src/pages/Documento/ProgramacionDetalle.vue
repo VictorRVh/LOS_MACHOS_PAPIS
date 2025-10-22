@@ -23,27 +23,20 @@ const gruposProgramados = ref([]);
 const openMenuId = ref(null);
 const selectedGrupo = ref(null);
 
-const showItemsSlider = ref(false);
-const showPlazoSlider = ref(false);
 
 const currentPage = ref(1);
 const itemsPerPage = 6;
 
-onMounted(async () => {
-  try {
-    await programacionStore.loadgetProgramacionSubidos(props.id);
-    const data = programacionStore.programacionSubidos;
-    if (data && data.programacion) {
-      programacion.value = data.programacion;
-      gruposProgramados.value = data.grupos_programados || [];
-    } else {
-      showToast("No se encontró información de la programación.", "error");
-    }
-  } catch (error) {
-    console.error(error);
-    showToast("Error al cargar la programación.", "error");
-  } 
-});
+if (!programacionStore?.programacionSubidos?.length) await programacionStore.loadgetProgramacionSubidos(props.id);
+
+const data = programacionStore.programacionSubidos;
+if (data && data.programacion) {
+  programacion.value = data.programacion;
+  gruposProgramados.value = data.grupos_programados || [];
+} else {
+  showToast("No se encontró información de la programación.", "error");
+}
+
 
 const paginatedGrupos = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
@@ -62,22 +55,31 @@ const toggleMenu = (grupoId) => {
   openMenuId.value = openMenuId.value === grupoId ? null : grupoId;
 };
 
+const selectedGrupoItems = ref(null);
+const selectedGrupoPlazo = ref(null);
+const showItemsSlider = ref(false);
+const showPlazoSlider = ref(false);
+
 const openItemsModal = (grupo) => {
-    selectedGrupo.value = grupo;
-    showItemsSlider.value = true;
-    openMenuId.value = null;
+    console.log("aequi",grupo)
+  selectedGrupoPlazo.value = grupo;
+  showItemsSlider.value = true;
+  openMenuId.value = null;
 };
 
 const openPlazoModal = (grupo) => {
-    selectedGrupo.value = grupo;
-    showPlazoSlider.value = true;
-    openMenuId.value = null;
+  console.log("aequi",grupo)
+  selectedGrupoPlazo.value = grupo;
+  showPlazoSlider.value = true;
+  openMenuId.value = null;
 };
+
 </script>
 
 <template>
   <div class="p-4 md:p-6 space-y-6">
-    <div v-if="programacionStore?.programacionSubidosLoading" class="text-center py-20 text-gray-600 dark:text-gray-300">Cargando datos...</div>
+    <div v-if="programacionStore?.programacionSubidosLoading"
+      class="text-center py-20 text-gray-600 dark:text-gray-300">Cargando datos...</div>
 
     <div v-else-if="programacion">
       <header class="mb-8">
@@ -95,11 +97,8 @@ const openPlazoModal = (grupo) => {
       </h2>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
-          v-for="grupo in paginatedGrupos"
-          :key="grupo.id"
-          class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col transition-shadow"
-        >
+        <div v-for="grupo in programacionStore?.programacionSubidos?.grupos_programados" :key="grupo.id"
+          class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col transition-shadow">
           <div class="p-4 border-b dark:border-gray-700 flex justify-between items-start">
             <div>
               <p class="text-sm font-bold text-cetpro dark:text-cetpro-light uppercase truncate">
@@ -113,35 +112,34 @@ const openPlazoModal = (grupo) => {
             </div>
 
             <div class="relative">
-              <button
-                @click.stop="toggleMenu(grupo.id)"
-                class="p-1 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
+              <button @click.stop="toggleMenu(grupo.id)"
+                class="p-1 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                 <EllipsisVerticalIcon class="h-5 w-5" />
               </button>
 
               <transition name="fade">
-                <div
-                  v-if="openMenuId === grupo.id"
-                  class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-md shadow-lg z-20 border border-gray-200 dark:border-gray-700"
-                >
+                <div v-if="openMenuId === grupo.id"
+                  class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-md shadow-lg z-20 border border-gray-200 dark:border-gray-700">
                   <ul class="py-1 text-sm text-gray-700 dark:text-gray-200">
                     <li>
-                      <a href="#" @click.prevent="openItemsModal(grupo)" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-                        <PencilSquareIcon class="h-5 w-5"/>
+                      <a href="#" @click.prevent="openItemsModal(grupo)"
+                        class="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <PencilSquareIcon class="h-5 w-5" />
                         <span>Subir documento</span>
                       </a>
                     </li>
-                    
-                      <li><hr class="my-1 dark:border-gray-700" /></li>
-                      <li>
-                        <a href="#" @click.prevent="openPlazoModal(grupo)" class="flex items-center gap-3 px-4 py-2 text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-800">
-                          <CalendarDaysIcon class="h-5 w-5" />
-                          <span v-if="grupo.estado !== 4" >Observación</span>
-                          <span v-if="grupo.estado === 4" >Habilitar Plazo Extra</span>
-                        </a>
-                      </li>
-                    
+
+                    <li>
+                      <hr class="my-1 dark:border-gray-700" />
+                    </li>
+                    <li>
+                      <a href="#" @click.prevent="openPlazoModal(grupo)"
+                        class="flex items-center gap-3 px-4 py-2 text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <CalendarDaysIcon class="h-5 w-5" />
+                        <span v-if="grupo.estado !== 4">Observación</span>
+                        <span v-if="grupo.estado === 4">Habilitar Plazo Extra</span>
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </transition>
@@ -160,8 +158,10 @@ const openPlazoModal = (grupo) => {
             </p>
           </div>
 
-          <div class="p-4 bg-gray-50 dark:bg-gray-800/50 border-t dark:border-gray-700 flex items-center justify-between">
-            <div class="flex items-center gap-2" :class="grupo.estado ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+          <div
+            class="p-4 bg-gray-50 dark:bg-gray-800/50 border-t dark:border-gray-700 flex items-center justify-between">
+            <div class="flex items-center gap-2"
+              :class="grupo.estado ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
               <component :is="grupo.estado ? CheckCircleIcon : ClockIcon" class="h-5 w-5" />
               <span class="text-sm font-semibold">
                 {{ grupo.estado ? 'Entregado' : 'Pendiente' }}
@@ -176,21 +176,16 @@ const openPlazoModal = (grupo) => {
 
       <div v-if="totalPages > 1" class="flex items-center justify-center pt-6">
         <nav class="inline-flex -space-x-px rounded-md shadow-sm">
-          <button
-            @click="changePage(currentPage - 1)"
-            :disabled="currentPage === 1"
-            class="relative inline-flex items-center rounded-l-md px-3 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
-          >
+          <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
+            class="relative inline-flex items-center rounded-l-md px-3 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
             Anterior
           </button>
-          <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ring-1 ring-inset ring-gray-300">
+          <span
+            class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ring-1 ring-inset ring-gray-300">
             Página {{ currentPage }} de {{ totalPages }}
           </span>
-          <button
-            @click="changePage(currentPage + 1)"
-            :disabled="currentPage === totalPages"
-            class="relative inline-flex items-center rounded-r-md px-3 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
-          >
+          <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages"
+            class="relative inline-flex items-center rounded-r-md px-3 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
             Siguiente
           </button>
         </nav>
@@ -206,13 +201,15 @@ const openPlazoModal = (grupo) => {
 
     <div v-if="openMenuId" @click.stop="openMenuId = null" class="fixed inset-0 z-10"></div>
 
-    <DocumentoItemsSlider :show="showItemsSlider" @hide="showItemsSlider = false"
-         v-if="selectedGrupo" :grupo="selectedGrupo" />
-    
-    
-    <DocumentoPlazo :show="showPlazoSlider" @hide="showPlazoSlider = false" 
-        v-if="selectedGrupo" :grupo="selectedGrupo" />
-    
+    <!-- Slider 1: Subir documentos -->
+    <DocumentoItemsSlider v-show="showItemsSlider" :show="showItemsSlider" @hide="showItemsSlider = false"
+      :grupo="selectedGrupoPlazo" />
+
+    <!-- Slider 2: Observaciones / plazo -->
+    <DocumentoPlazo v-show="showPlazoSlider" :show="showPlazoSlider" @hided="showPlazoSlider = false"
+      :grupo="selectedGrupoPlazo" :load="programacionStore?.programacionSubidos?.programacion?.id"/>
+
+
   </div>
 </template>
 
@@ -221,6 +218,7 @@ const openPlazoModal = (grupo) => {
 .fade-leave-active {
   transition: opacity 0.15s ease-out, transform 0.15s ease-out;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

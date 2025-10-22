@@ -17,7 +17,7 @@ const props = defineProps({
 const { showToast } = useModalToast();
 const programacionStore = useProgramacionSubidostore();
 
-const loading = ref(true);
+
 const programacion = ref(null);
 const gruposProgramados = ref([]);
 const openMenuId = ref(null);
@@ -30,7 +30,6 @@ const currentPage = ref(1);
 const itemsPerPage = 6;
 
 onMounted(async () => {
-  loading.value = true;
   try {
     await programacionStore.loadgetProgramacionSubidos(props.id);
     const data = programacionStore.programacionSubidos;
@@ -43,9 +42,7 @@ onMounted(async () => {
   } catch (error) {
     console.error(error);
     showToast("Error al cargar la programación.", "error");
-  } finally {
-    loading.value = false;
-  }
+  } 
 });
 
 const paginatedGrupos = computed(() => {
@@ -80,7 +77,7 @@ const openPlazoModal = (grupo) => {
 
 <template>
   <div class="p-4 md:p-6 space-y-6">
-    <div v-if="loading" class="text-center py-20 text-gray-600 dark:text-gray-300">Cargando datos...</div>
+    <div v-if="programacionStore?.programacionSubidosLoading" class="text-center py-20 text-gray-600 dark:text-gray-300">Cargando datos...</div>
 
     <div v-else-if="programacion">
       <header class="mb-8">
@@ -132,18 +129,19 @@ const openPlazoModal = (grupo) => {
                     <li>
                       <a href="#" @click.prevent="openItemsModal(grupo)" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
                         <PencilSquareIcon class="h-5 w-5"/>
-                        <span>Subir/Observar Entrega</span>
+                        <span>Subir documento</span>
                       </a>
                     </li>
-                    <template v-if="grupo.estado === 4">
+                    
                       <li><hr class="my-1 dark:border-gray-700" /></li>
                       <li>
                         <a href="#" @click.prevent="openPlazoModal(grupo)" class="flex items-center gap-3 px-4 py-2 text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-800">
                           <CalendarDaysIcon class="h-5 w-5" />
-                          <span>Habilitar Plazo Extra</span>
+                          <span v-if="grupo.estado !== 4" >Observación</span>
+                          <span v-if="grupo.estado === 4" >Habilitar Plazo Extra</span>
                         </a>
                       </li>
-                    </template>
+                    
                   </ul>
                 </div>
               </transition>
@@ -208,13 +206,13 @@ const openPlazoModal = (grupo) => {
 
     <div v-if="openMenuId" @click.stop="openMenuId = null" class="fixed inset-0 z-10"></div>
 
-    <Slider :show="showItemsSlider" @hide="showItemsSlider = false" title="Subir Formato y Agregar Observación">
-        <DocumentoItemsSlider v-if="selectedGrupo" :grupo="selectedGrupo" />
-    </Slider>
+    <DocumentoItemsSlider :show="showItemsSlider" @hide="showItemsSlider = false"
+         v-if="selectedGrupo" :grupo="selectedGrupo" />
     
-    <Slider :show="showPlazoSlider" @hide="showPlazoSlider = false" title="Habilitar Plazo Extra de Entrega">
-        <DocumentoPlazo v-if="selectedGrupo" :grupo="selectedGrupo" />
-    </Slider>
+    
+    <DocumentoPlazo :show="showPlazoSlider" @hide="showPlazoSlider = false" 
+        v-if="selectedGrupo" :grupo="selectedGrupo" />
+    
   </div>
 </template>
 

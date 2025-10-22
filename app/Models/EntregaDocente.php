@@ -63,4 +63,10 @@ class EntregaDocente extends Model
     {
         return $this->hasMany(CarpetasEntregaDrive::class, 'id_entrega_docente');
     }
+    public function carpeta()
+    {
+        return $this->hasOne(CarpetasEntregaDrive::class, 'id_entrega_docente');
+    }
+
+
 }

@@ -942,7 +942,7 @@ Route::get('reportes/nomina/grupo/{idGrupo}', [
 ]);
 
 Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
-    Route::get('/files', [GoogleDriveController::class, 'listFiles']);
+    Route::get('/files/{fileId}', [GoogleDriveController::class, 'listFilesNew']);
     Route::post('/folder', [GoogleDriveController::class, 'createFolder']);
     Route::post('/upload', [GoogleDriveController::class, 'uploadFile']);
     Route::patch('/file/{fileId}/rename', [GoogleDriveController::class, 'renameFile']);

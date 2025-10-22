@@ -65,7 +65,65 @@ class GoogleDriveController extends Controller
         }
     }
 
-    // (Los otros métodos: createFolder, renameFile, deleteFile, uploadFile se quedan igual)
+    public function listFilesNew($folderId)
+    {
+        if (!$folderId) {
+            return response()->json(['error' => 'Se requiere un ID de carpeta.'], 400);
+        }
+
+        $query = "'{$folderId}' in parents and trashed = false";
+
+        try {
+            $files = $this->driveService->files->listFiles([
+                'q' => $query,
+                'pageSize' => 100,
+                'fields' => 'files(id, name, mimeType, webViewLink, modifiedTime, size)',
+                'orderBy' => 'folder desc, name',
+                'supportsAllDrives' => true,
+                'includeItemsFromAllDrives' => true
+            ]);
+
+            // Convertir el resultado de Google a un array limpio
+            $cleanFiles = collect($files->getFiles())->map(function ($file) {
+                return [
+                    'id' => $file->getId(),
+                    'name' => $file->getName(),
+                    'mimeType' => $file->getMimeType(),
+                    'webViewLink' => $file->getWebViewLink(),
+                    'modifiedTime' => $file->getModifiedTime(),
+                    'size' => $file->getSize(),
+                ];
+            });
+
+            return response()->json($cleanFiles, 200);
+
+        } catch (Exception $e) {
+            Log::error('Error al listar archivos: ' . $e->getMessage());
+            return response()->json(['error' => 'No se pudo listar los archivos.'], 500);
+        }
+    }
+
+    public function downloadFile($fileId)
+    {
+        try {
+            $file = $this->driveService->files->get($fileId, [
+                'fields' => 'name, mimeType',
+                'supportsAllDrives' => true
+            ]);
+
+            $response = $this->driveService->files->get($fileId, [
+                'alt' => 'media',
+                'supportsAllDrives' => true
+            ]);
+
+            return response($response->getBody()->getContents(), 200)
+                ->header('Content-Type', $file->getMimeType())
+                ->header('Content-Disposition', 'attachment; filename="' . $file->getName() . '"');
+        } catch (Exception $e) {
+            Log::error('Error al descargar archivo: ' . $e->getMessage());
+            return response()->json(['error' => 'No se pudo descargar el archivo.'], 500);
+        }
+    }
 
 
     public function createFolder(Request $request)

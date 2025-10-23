@@ -17,11 +17,13 @@ class EntregaDocenteAdmin extends Model
     protected $fillable = [
         'id',
         'tipo_entrega',
+        'nombre_entrega',
         'fecha_inicio',
         'fecha_fin',
         'status',
         'id_periodo',
         'mostrar',
+        'sub_grupos',
         'is_deleted'
     ];
 

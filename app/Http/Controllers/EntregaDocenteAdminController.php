@@ -26,10 +26,12 @@ class EntregaDocenteAdminController extends Controller
     {
         $request->validate([
             'tipo_entrega'    => 'required|string|max:255',
+            'nombre_entrega'  => 'required|string|max:255',
             'fecha_inicio'    => 'required|date',
             'fecha_fin'       => 'required|date|after_or_equal:fecha_inicio',
             'id_periodo'      => 'required|exists:periodo,id',
             'mostrar'         => 'nullable|boolean',
+            'sub_grupos'      => 'nullable|boolean',
             'observavcion'    => 'nullable|string',
         ]);
 
@@ -119,9 +121,12 @@ class EntregaDocenteAdminController extends Controller
 
         $request->validate([
             'tipo_entrega' => 'sometimes|string|max:100',
+            'nombre_entrega' => 'sometimes|string|max:100',
             'fecha_inicio' => 'sometimes|date',
             'fecha_fin' => 'sometimes|date|after_or_equal:fecha_inicio',
             'status' => 'sometimes|integer|in:0,1,2,3',
+            'mostrar' => 'sometimes|boolean',
+            'sub_grupos' => 'sometimes|boolean',
         ]);
 
         $entrega->update($request->all());

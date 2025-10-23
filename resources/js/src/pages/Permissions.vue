@@ -18,7 +18,7 @@ import usePermissionStore from '../store/usePermissionStore';
 import useSlider from '../composables/useSlider';
 import useModalToast from '../composables/useModalToast';
 import useHttpRequest from '../composables/useHttpRequest';
-import useAuth from '../composables/useAuth';
+//import useAuth from '../composables/useAuth';
 
 const userStore = useUserStore();
 const roleStore = useRoleStore();
@@ -31,7 +31,7 @@ const { slider, sliderData, showSlider, hideSlider } =
     useSlider('permission-crud');
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deletePermission, deleting } = useHttpRequest('/permissions');
-const { isUserAuthenticated } = useAuth();
+//const { isUserAuthenticated } = useAuth();
 
 const onDelete = (permission) => {
     if (deleting.value) return;
@@ -47,7 +47,7 @@ const onDelete = (permission) => {
             permissionStore.loadPermissions();
             userStore.loadUsers();
             roleStore.loadRoles();
-            isUserAuthenticated();
+           // isUserAuthenticated();
         }
     });
 };

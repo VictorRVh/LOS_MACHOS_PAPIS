@@ -106,4 +106,4 @@ const onLogout = async () => {
         </div>
     </div>
 </template>
-../store/useAuthUserStore
+

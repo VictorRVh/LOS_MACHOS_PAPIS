@@ -71,7 +71,7 @@ router.beforeEach(async (to, from, next) => {
         breadcrumbStore.setBase(uniqueCrumbs);
     }
 
-    // 👇 autenticación (no tocar)
+    
     const { isUserAuthenticated } = useAuth();
     if (from.name === to?.name) {
         return next();
@@ -82,9 +82,9 @@ router.beforeEach(async (to, from, next) => {
             return next({ name: 'start' });
         }
     } else {
-        if (to?.name !== 'login') {
-            return next({ name: 'login' });
-        }
+        // if (to?.name !== 'login') {
+        //     return next({ name: 'login' });
+        // }
     }
 
     return next();

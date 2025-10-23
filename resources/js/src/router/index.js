@@ -82,9 +82,9 @@ router.beforeEach(async (to, from, next) => {
             return next({ name: 'start' });
         }
     } else {
-        // if (to?.name !== 'login') {
-        //     return next({ name: 'login' });
-        // }
+        if (to?.name !== 'login') {
+            return next({ name: 'login' });
+        }
     }
 
     return next();

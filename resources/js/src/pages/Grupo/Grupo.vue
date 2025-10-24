@@ -254,6 +254,7 @@ const {
                           @view="verGrupo(modulo)"
                           @edit="showSlider(true, modulo)"
                           @delete="onDelete(modulo)"
+                          entity-label="grupo"
                         />
                       </Td>
                     </Tr>

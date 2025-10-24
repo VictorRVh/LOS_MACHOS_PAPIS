@@ -22,6 +22,7 @@ const useProgramacionSubidostore = defineStore('lista_programacion', () => {
         loadgetProgramacionSubidos,
         programacionSubidosLoading,
         programacionSubidosFirstTimeLoading,
+        
     };
 });
 

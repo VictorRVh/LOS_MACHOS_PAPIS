@@ -42,6 +42,7 @@ class EntregaDocenteAdminController extends Controller
         $adminEntrega = EntregaDocenteAdmin::create([
             'id_periodo'    => $periodo->id,
             'tipo_entrega'  => $request->tipo_entrega,
+            'nombre_entrega'  => $request->nombre_entrega,
             'fecha_inicio'  => $request->fecha_inicio,
             'fecha_fin'     => $request->fecha_fin,
             'status'        => EntregaDocenteAdmin::STATUS_PENDIENTE,
@@ -74,7 +75,7 @@ class EntregaDocenteAdminController extends Controller
             // 2. Crear carpeta en Drive para este tipo de entrega
             if ($grupo->carpetaDrive && $grupo->carpetaDrive->drive_folder_id) {
 
-                $folderName = strtoupper($request->tipo_entrega); // Ej: "ACTA FINAL", "ASISTENCIA", etc.
+                $folderName = strtoupper($request->nombre_entrega); // Ej: "ACTA FINAL", "ASISTENCIA", etc.
 
                 $response = $driveController->createFolder(new Request([
                     'folderName'     => $folderName,

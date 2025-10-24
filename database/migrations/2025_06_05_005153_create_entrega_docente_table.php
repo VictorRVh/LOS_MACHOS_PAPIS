@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('entrega_docente', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('id_grupo');
-            $table->date('fecha_inicio');
-            $table->date('fecha_fin');
+            $table->dateTime('fecha_inicio')->nullable();
+            $table->dateTime('fecha_fin')->nullable();
             $table->boolean('estado');
             $table->uuid('id_admin');
             $table->string('documento_admin')->nullable();;

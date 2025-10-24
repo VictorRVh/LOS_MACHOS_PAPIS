@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('entrega_docente_admin', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->tinyInteger('tipo_entrega', 255);
+            $table->tinyInteger('tipo_entrega');
             $table->string('nombre_entrega', 255);
             $table->dateTime('fecha_inicio')->nullable();
             $table->dateTime('fecha_fin')->nullable();

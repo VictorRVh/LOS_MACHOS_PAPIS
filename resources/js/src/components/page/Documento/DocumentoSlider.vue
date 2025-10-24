@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch,computed } from "vue";
+import { ref, watch, computed } from "vue";
 import * as yup from "yup";
 
 import FormInput from "../../ui/FormInput.vue";
@@ -28,36 +28,50 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['form-submitted', 'cancel-edit']);
+const emit = defineEmits(["form-submitted", "cancel-edit"]);
 
 const { showToast } = useModalToast();
 const { runYupValidation } = useValidation();
-const { store, update, saving, updating } = useHttpRequest('/entrega_docente_admin');
+const { store, update, saving, updating } = useHttpRequest("/entrega_docente_admin");
 
 const isEditing = ref(false);
 const formErrors = ref({});
 const programacionDocumento = useProgramacionSubidostore();
 
 const initialFormData = () => ({
-    id: null,
-    id_periodo: '',
-    tipo_entrega: '',
-    fecha_inicio: '',
-    fecha_fin: '',
-    hora_inicio: '',
-    hora_fin:'',
-    mostrar: 0,
+  id_periodo: "",
+  nombre_entrega: "",
+  tipo_entrega: "",
+  fecha_inicio: "",
+  fecha_fin: "",
+  mostrar: 0,
+  sub_grupos: 0,
 });
 
 const formData = ref(initialFormData());
 
+// ✅ Opciones estáticas + "Otro"
+const tiposEntrega = [
+  { id: "1", nombre: "Subida de notas" },
+  { id: "2", nombre: "Subida de sesiones" },
+  { id: "3", nombre: "Subida de sílabo" },
+  { id: "4", nombre: "Subida de materiales" },
+  { id: "99", nombre: "Otro" },
+];
+
 const schema = yup.object().shape({
-    id_periodo: yup.string().required('El periodo es requerido.'),
-    tipo_entrega: yup.string().required('El título es requerido.'),
-    fecha_inicio: yup.date().required('La fecha de inicio es requerida.'),
-    fecha_fin: yup.date().required('La fecha de fin es requerida.').min(yup.ref('fecha_inicio'), 'La fecha de fin no puede ser anterior a la de inicio.'),
-      hora_inicio: yup.string().required('La hora de inicio es requerida.'),
-  hora_fin: yup.string().required('La hora de fin es requerida.'),
+  id_periodo: yup.string().required("El periodo es requerido."),
+  tipo_entrega: yup.string().required("El tipo de entrega es requerido."),
+  fecha_inicio: yup.date().required("La fecha de inicio es requerida."),
+  fecha_fin: yup
+    .date()
+    .required("La fecha de fin es requerida.")
+    .min(yup.ref("fecha_inicio"), "La fecha de fin no puede ser anterior a la de inicio."),
+  // Si el tipo es "Otro", nombre_entrega es obligatorio
+  nombre_entrega: yup.string().when("tipo_entrega", {
+    is: (val) => val == "99",
+    then: (schema) => schema.required("Debe ingresar el nombre de la entrega."),
+  }),
 });
 
 const requiredPermissions = computed(() => {
@@ -66,111 +80,149 @@ const requiredPermissions = computed(() => {
     : ["todo-acceso-documento-programado", "crear-documento-programado"];
 });
 
-watch(() => props.programacionToEdit, (newVal) => {
+// 🧩 Watch para llenar datos si se edita
+watch(
+  () => props.programacionToEdit,
+  (newVal) => {
     if (newVal) {
-        formData.value = { ...newVal, id_periodo: newVal.id_periodo_academico };
-        isEditing.value = true;
-        formErrors.value = {};
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      formData.value = {
+        ...newVal,
+        id_periodo: newVal.id_periodo_academico,
+      };
+      isEditing.value = true;
+      formErrors.value = {};
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-        resetForm();
+      resetForm();
     }
-}, { deep: true });
+  },
+  { deep: true }
+);
 
-
-
-
+// 🧹 Reset
 const resetForm = () => {
-    formData.value = initialFormData();
-    isEditing.value = false;
-    formErrors.value = {};
-    emit('cancel-edit');
-}
+  formData.value = initialFormData();
+  isEditing.value = false;
+  formErrors.value = {};
+  emit("cancel-edit");
+};
 
+// ✅ Cuando cambia el tipo de entrega
+watch(
+  () => formData.value.tipo_entrega,
+  (val) => {
+    if (val == "99") {
+      // Otro → dejar nombre_entrega vacío para que lo escriba
+      formData.value.nombre_entrega = "";
+    } else {
+      // Valor normal → asignar el nombre automáticamente
+      const tipo = tiposEntrega.find((t) => t.id === val);
+      formData.value.nombre_entrega = tipo ? tipo.nombre : "";
+    }
+  }
+);
+
+// 📨 Enviar formulario
 const onSubmit = async () => {
-  const { validated, errors } = await runYupValidation(schema, formData.value);
+  const data = { ...formData.value };
+
+  const { validated, errors } = await runYupValidation(schema, data);
   if (!validated) {
     formErrors.value = errors;
     return;
   }
-
-  // 🕓 Combinar fecha + hora en formato ISO
-  const inicioISO = new Date(`${formData.value.fecha_inicio}T${formData.value.hora_inicio}:00Z`).toISOString();
-  const finISO = new Date(`${formData.value.fecha_fin}T${formData.value.hora_fin}:00Z`).toISOString();
-
-  const payload = {
-    ...formData.value,
-    fecha_inicio: inicioISO,
-    fecha_fin: finISO,
-  };
+  formErrors.value = {};
 
   try {
     let response;
     if (isEditing.value) {
-      response = await update(payload.id, payload);
+      response = await update(props?.programacionToEdit?.id, data);
     } else {
-      response = await store(payload);
+      response = await store(data);
     }
 
     if (response) {
-      showToast(`Programación ${isEditing.value ? 'actualizada' : 'creada'} con éxito.`, 'success');
-      emit('form-submitted');
-      await programacionDocumento.loadgetProgramacionAdminByPerido(selectedPeriodoId);
-
+      showToast(`Programación ${isEditing.value ? "actualizada" : "creada"} con éxito.`, "success");
+      emit("form-submitted");
+      await programacionDocumento.loadgetProgramacionSubidos(props.selectedPeriodoId);
       resetForm();
     }
   } catch (error) {
-    showToast('Ocurrió un error al guardar.', 'error');
+    showToast("Ocurrió un error al guardar.", "error");
   }
 };
-
 </script>
 
 <template>
-    <AuthorizationFallback :permissions="requiredPermissions">
-   
+  <AuthorizationFallback :permissions="requiredPermissions">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 h-fit sticky top-6">
-        <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-            {{ isEditing ? 'Editar Programación' : 'Nueva Programación' }}
-        </h3>
-        <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
-        <form @submit.prevent="onSubmit" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Periodo Académico</label>
-                <BaseSelectGrupo 
-                  v-model="formData.id_periodo" 
-                  :options="periodos" 
-                  label="nombre_periodo" 
-                  value-prop="id" 
-                  placeholder="Seleccione un Periodo"
-                 
-                />
-            </div>
-            <FormInput v-model="formData.tipo_entrega" label="Título o Tipo de Entrega *" :error-message="formErrors.tipo_entrega" placeholder="Ej: Sílabo mensual"/>
-            
-            <div class="grid grid-cols-2 gap-4">
-                 <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio *" type="date" :error-message="formErrors.fecha_inicio" />
-                 <FormInput v-model="formData.fecha_fin" label="Fecha de Fin *" type="date" :error-message="formErrors.fecha_fin" />
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                 <FormInput v-model="formData.hora_inicio" label="Fecha de Inicio *" type="time" :error-message="formErrors.hora_inicio" />
-                 <FormInput v-model="formData.hora_fin" label="Fecha de Fin *" type="time" :error-message="formErrors.hora_fin" />
-            </div>
+      <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
+        {{ isEditing ? "Editar Programación" : "Nueva Programación" }}
+      </h3>
+      <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
 
-            <div class="flex items-center space-x-3 pt-2">
-                 <CheckBox v-model="formData.mostrar" />
-                 <div>
-                     <label class="font-medium text-gray-800 dark:text-gray-200">Publicar para docentes</label>
-                     <p class="text-xs text-gray-500 dark:text-gray-400">Al desmarcar, quedará como borrador.</p>
-                 </div>
-            </div>
-            <div class="flex gap-2 pt-2">
-                <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Programación'" type="submit"
-                 :loading="saving || updating" class="w-full"
-                 :disabled="saving || updating" />
-                <Button v-if="isEditing" title="Cancelar" variant="outline" @click="resetForm" />
-            </div>
-        </form>
+      <form @submit.prevent="onSubmit" class="space-y-4">
+        <!-- Periodo -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Periodo Académico</label>
+          <BaseSelectGrupo
+            v-model="formData.id_periodo"
+            :options="periodos"
+            label="nombre_periodo"
+            value-prop="id"
+            placeholder="Seleccione un Periodo"
+          />
+        </div>
+
+        <!-- ✅ Tipo de entrega -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Entrega *</label>
+          <BaseSelectGrupo
+            v-model="formData.tipo_entrega"
+            :options="tiposEntrega"
+            label="nombre"
+            value-prop="id"
+            placeholder="Seleccione tipo de entrega"
+            :error-message="formErrors.tipo_entrega"
+          />
+        </div>
+
+        <!-- 👇 Campo dinámico si elige “Otro” -->
+        <div v-if="formData.tipo_entrega == '99'">
+          <FormInput
+            v-model="formData.nombre_entrega"
+            label="Nombre de la Entrega *"
+            placeholder="Ej: Subida de proyectos, Entrega final, etc."
+            :error-message="formErrors.nombre_entrega"
+          />
+        </div>
+
+        <!-- Fechas -->
+        <div class="grid grid-cols-2 gap-4">
+          <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio *" type="date" :error-message="formErrors.fecha_inicio" />
+          <FormInput v-model="formData.fecha_fin" label="Fecha de Fin *" type="date" :error-message="formErrors.fecha_fin" />
+        </div>
+
+        <!-- Publicar -->
+        <div class="flex items-center space-x-3 pt-2">
+          <CheckBox v-model="formData.mostrar" />
+          <div>
+            <label class="font-medium text-gray-800 dark:text-gray-200">Publicar para docentes</label>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Al desmarcar, quedará como borrador.</p>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex gap-2 pt-2">
+          <Button
+            :title="isEditing ? 'Guardar Cambios' : 'Crear Programación'"
+            type="submit"
+            :loading="saving || updating"
+            class="w-full"
+          />
+          <Button v-if="isEditing" title="Cancelar" variant="outline" @click="resetForm" />
+        </div>
+      </form>
     </div>
-     </AuthorizationFallback>
+  </AuthorizationFallback>
 </template>

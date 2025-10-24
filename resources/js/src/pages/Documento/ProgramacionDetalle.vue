@@ -6,6 +6,8 @@ import useProgramacionSubidostore from "../../store/Documento/useDocumentoSubido
 import Slider from '../../components/ui/Slider.vue';
 import DocumentoItemsSlider from '../../components/page/Documento/documetoItemsSlider.vue';
 import DocumentoPlazo from '../../components/page/Documento/DocumentoPlazo.vue';
+import MenuTable from "../../components/table/MenuTable.vue";
+import useHttpRequest from "../../composables/useHttpRequest";
 
 const props = defineProps({
   id: {
@@ -14,9 +16,10 @@ const props = defineProps({
   }
 });
 
-const { showToast } = useModalToast();
+const { showConfirmModal, showToast } = useModalToast();
 const programacionStore = useProgramacionSubidostore();
 
+const { destroy: eliminarPorgramacion } = useHttpRequest("entrega_docente"); // <- DELETE /drive/file/{id}
 
 const programacion = ref(null);
 const gruposProgramados = ref([]);
@@ -61,18 +64,51 @@ const showItemsSlider = ref(false);
 const showPlazoSlider = ref(false);
 
 const openItemsModal = (grupo) => {
-    console.log("aequi",grupo)
+  console.log("aequi", grupo)
   selectedGrupoPlazo.value = grupo;
   showItemsSlider.value = true;
   openMenuId.value = null;
 };
 
 const openPlazoModal = (grupo) => {
-  console.log("aequi",grupo)
+  console.log("aequi", grupo)
   selectedGrupoPlazo.value = grupo;
   showPlazoSlider.value = true;
   openMenuId.value = null;
 };
+
+// 📴 Desactivar grupo
+const desactivarGrupo = async (grupo) => {
+  // Mostrar modal de confirmación reutilizable
+  showConfirmModal(
+    {
+      title: "Confirmar Acción", // opcional, si tu modal lo usa
+      message: `¿Seguro que deseas desactivar el grupo "${grupo.grupo_detalle.nombre_modulo}"?`,
+      actionButton: {
+        class: "bg-orange-600 hover:bg-orange-700",
+        text: "Desactivar",
+      },
+      returnButton: {
+        class: "bg-gray-100 hover:bg-gray-200",
+        text: "Volver",
+      },
+    },
+    async (confirmed) => {
+      if (!confirmed) return;
+
+      try {
+        await eliminarPorgramacion(grupo.id);
+        await programacionStore.loadgetProgramacionSubidos(props.id);
+        showToast("Grupo desactivado con éxito.", "success");
+      } catch (error) {
+        console.error("❌ Error al desactivar grupo:", error);
+        showToast("No se pudo desactivar el grupo. Intenta nuevamente.", "error");
+      }
+    }
+  );
+
+};
+
 
 </script>
 
@@ -111,39 +147,13 @@ const openPlazoModal = (grupo) => {
               </p>
             </div>
 
-            <div class="relative">
-              <button @click.stop="toggleMenu(grupo.id)"
-                class="p-1 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                <EllipsisVerticalIcon class="h-5 w-5" />
-              </button>
+            <MenuTable :actions="{ edit: true, custom1: true, deactivate: true }" :labels="{
+              edit: 'Subir documento',
+              custom1: grupo.estado === 4 ? 'Habilitar plazo extra' : 'Observación',
+              deactivate: 'Desactivar grupo',
+            }" entityLabel="" @edit="() => openItemsModal(grupo)" @custom1="() => openPlazoModal(grupo)"
+              @deactivate="() => desactivarGrupo(grupo)" />
 
-              <transition name="fade">
-                <div v-if="openMenuId === grupo.id"
-                  class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-md shadow-lg z-20 border border-gray-200 dark:border-gray-700">
-                  <ul class="py-1 text-sm text-gray-700 dark:text-gray-200">
-                    <li>
-                      <a href="#" @click.prevent="openItemsModal(grupo)"
-                        class="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-                        <PencilSquareIcon class="h-5 w-5" />
-                        <span>Subir documento</span>
-                      </a>
-                    </li>
-
-                    <li>
-                      <hr class="my-1 dark:border-gray-700" />
-                    </li>
-                    <li>
-                      <a href="#" @click.prevent="openPlazoModal(grupo)"
-                        class="flex items-center gap-3 px-4 py-2 text-yellow-600 dark:text-yellow-400 hover:bg-gray-100 dark:hover:bg-gray-800">
-                        <CalendarDaysIcon class="h-5 w-5" />
-                        <span v-if="grupo.estado !== 4">Observación</span>
-                        <span v-if="grupo.estado === 4">Habilitar Plazo Extra</span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </transition>
-            </div>
           </div>
 
           <div class="p-4 flex-grow">
@@ -207,7 +217,7 @@ const openPlazoModal = (grupo) => {
 
     <!-- Slider 2: Observaciones / plazo -->
     <DocumentoPlazo v-show="showPlazoSlider" :show="showPlazoSlider" @hided="showPlazoSlider = false"
-      :grupo="selectedGrupoPlazo" :load="programacionStore?.programacionSubidos?.programacion?.id"/>
+      :grupo="selectedGrupoPlazo" :load="programacionStore?.programacionSubidos?.programacion?.id" />
 
 
   </div>

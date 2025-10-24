@@ -142,13 +142,7 @@ const {
               </span>
             </Td>
             <Td class="text-center text-gray-600 dark:text-gray-200">
-              <MenuTable
-                :actions="{ view: true, edit: true, delete: true, download: false }"
-                entity-label="docente"
-                @view="verGrupo(docente)"
-                @edit="showSlider(true, docente)"
-                @delete="onDelete(docente)"
-              />
+             
             </Td>
           </Tr>
         </TBody>

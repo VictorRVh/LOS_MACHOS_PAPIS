@@ -39,7 +39,6 @@ const formErrors = ref({});
 const programacionDocumento = useProgramacionSubidostore();
 
 const initialFormData = () => ({
-  id: null,
   id_periodo: "",
   nombre_entrega: "",
   tipo_entrega: "",
@@ -53,11 +52,11 @@ const formData = ref(initialFormData());
 
 // ✅ Opciones estáticas + "Otro"
 const tiposEntrega = [
-  { id: 1, nombre: "Subida de notas" },
-  { id: 2, nombre: "Subida de sesiones" },
-  { id: 3, nombre: "Subida de sílabo" },
-  { id: 4, nombre: "Subida de materiales" },
-  { id: 99, nombre: "Otro" },
+  { id: "1", nombre: "Subida de notas" },
+  { id: "2", nombre: "Subida de sesiones" },
+  { id: "3", nombre: "Subida de sílabo" },
+  { id: "4", nombre: "Subida de materiales" },
+  { id: "99", nombre: "Otro" },
 ];
 
 const schema = yup.object().shape({
@@ -70,7 +69,7 @@ const schema = yup.object().shape({
     .min(yup.ref("fecha_inicio"), "La fecha de fin no puede ser anterior a la de inicio."),
   // Si el tipo es "Otro", nombre_entrega es obligatorio
   nombre_entrega: yup.string().when("tipo_entrega", {
-    is: (val) => val == 99,
+    is: (val) => val == "99",
     then: (schema) => schema.required("Debe ingresar el nombre de la entrega."),
   }),
 });
@@ -112,7 +111,7 @@ const resetForm = () => {
 watch(
   () => formData.value.tipo_entrega,
   (val) => {
-    if (val == 99) {
+    if (val == "99") {
       // Otro → dejar nombre_entrega vacío para que lo escriba
       formData.value.nombre_entrega = "";
     } else {
@@ -145,7 +144,7 @@ const onSubmit = async () => {
     if (response) {
       showToast(`Programación ${isEditing.value ? "actualizada" : "creada"} con éxito.`, "success");
       emit("form-submitted");
-      await programacionDocumento.loadgetProgramacionAdminByPerido(props.selectedPeriodoId);
+      await programacionDocumento.loadgetProgramacionSubidos(props.selectedPeriodoId);
       resetForm();
     }
   } catch (error) {
@@ -189,7 +188,7 @@ const onSubmit = async () => {
         </div>
 
         <!-- 👇 Campo dinámico si elige “Otro” -->
-        <div v-if="formData.tipo_entrega == 99">
+        <div v-if="formData.tipo_entrega == '99'">
           <FormInput
             v-model="formData.nombre_entrega"
             label="Nombre de la Entrega *"

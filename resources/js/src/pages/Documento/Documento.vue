@@ -141,6 +141,10 @@ const onDelete = (prog) => {
     }
   });
 };
+
+const createSubGrupos = (prog) => {
+
+}
 </script>
 
 
@@ -210,9 +214,13 @@ const onDelete = (prog) => {
                     class="px-2 py-1 text-xs rounded-full font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300">Borrador</span>
                 </Td>
                 <Td class="text-center">
-                  <MenuTable :actions="{ view: true, edit: true, delete: true }" entity-label="entrega"
-                    @view="verDetalleEntrega(prog)" @edit="editProgramacion(prog)" @delete="onDelete(prog)" />
+                  <MenuTable :actions="{ view: true, edit: true, custom1: true, delete: true }"
+                    :labels="{ custom1: 'Sub Programaciones' }"
+                    entity-label="entrega" @view="verDetalleEntrega(prog)" @edit="editProgramacion(prog)"
+                    @delete="onDelete(prog)" @custom1="() => createSubGrupos(prog)" />
+
                 </Td>
+
               </Tr>
             </TBody>
           </Table>

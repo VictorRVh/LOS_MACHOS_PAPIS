@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('documento_admin')->nullable();;
             $table->string('observacion');
 
+            $table->boolean('cumplio')->default(0);
+
             $table->foreign('id_grupo')
                 ->references('id')->on('grupo')
                 ->onDelete('cascade');

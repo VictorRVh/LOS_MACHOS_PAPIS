@@ -176,6 +176,7 @@ class EntregaDocenteAdminController extends Controller
                 ->get([
                     'id',
                     'tipo_entrega',
+                    'nombre_entrega',
                     'fecha_inicio',
                     'fecha_fin',
                     'status',
@@ -187,6 +188,7 @@ class EntregaDocenteAdminController extends Controller
                 return [
                     'id' => $item->id,
                     'tipo_entrega' => $item->tipo_entrega,
+                    'nombre_entrega' => $item->nombre_entrega,
                     'fecha_inicio' => Carbon::parse($item->fecha_inicio)->setTimezone('America/Lima')->format('d/m/Y H:i'),
                     'fecha_fin' => Carbon::parse($item->fecha_fin)->setTimezone('America/Lima')->format('d/m/Y H:i'),
                     'status' => $item->status,
@@ -211,7 +213,7 @@ class EntregaDocenteAdminController extends Controller
     public function programacionesPorGrupo($id_grupo)
     {
         $programaciones = EntregaDocente::with([
-            'entregaDocenteAdmin:id,tipo_entrega,fecha_inicio,fecha_fin,status',
+            'entregaDocenteAdmin:id,nombre_entrega,fecha_inicio,fecha_fin,status',
             'grupo.carpetaDrive'
         ])
             ->where('id_grupo', $id_grupo)
@@ -246,7 +248,7 @@ class EntregaDocenteAdminController extends Controller
 
             // Buscar programación con tipo_entrega parecido al nombre de la carpeta
             $programacion = $programaciones->first(function ($p) use ($carpeta) {
-                return stripos($carpeta->name, $p->entregaDocenteAdmin->tipo_entrega) !== false;
+                return stripos($carpeta->name, $p->entregaDocenteAdmin->nombre_entrega) !== false;
             });
 
             // Obtener archivos dentro de esa subcarpeta
@@ -260,6 +262,7 @@ class EntregaDocenteAdminController extends Controller
                     'id' => $programacion->id,
                     'fecha_inicio' => $programacion->entregaDocenteAdmin->fecha_inicio,
                     'fecha_fin' => $programacion->entregaDocenteAdmin->fecha_fin,
+                    'nombre_entrega' => $programacion->entregaDocenteAdmin->nombre_entrega,
                     'tipo_entrega' => $programacion->entregaDocenteAdmin->tipo_entrega,
                     'status' => $programacion->entregaDocenteAdmin->status,
                 ] : null,

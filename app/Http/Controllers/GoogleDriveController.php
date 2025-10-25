@@ -224,13 +224,13 @@ class GoogleDriveController extends Controller
                 // throw new \Exception('Error|Comisión no encontrada--404', 13333);
             }
 
-            if ($ahora->lt($inicio)) {
-                return response()->json(['error' => 'La entrega aún no ha iniciado.'], 403);
-            }
+            // if ($ahora->lt($inicio)) {
+            //     return response()->json(['error' => 'La entrega aún no ha iniciado.'], 403);
+            // }
 
-            if ($ahora->gt($fin)) {
-                return response()->json(['error' => 'El plazo para subir documentos ha finalizado.'], 403);
-            }
+            // if ($ahora->gt($fin)) {
+            //     return response()->json(['error' => 'El plazo para subir documentos ha finalizado.'], 403);
+            // }
 
             // Si pasa la validación, proceder con la subida
             $file = $request->file('file');
@@ -246,6 +246,11 @@ class GoogleDriveController extends Controller
                 'uploadType' => 'multipart',
                 'fields' => 'id, name',
                 'supportsAllDrives' => true,
+            ]);
+
+            $entrega->update([
+                'cumplio' => 1,
+                // 'documento_admin' => $uploadedFile->id, // opcional
             ]);
 
             return response()->json($uploadedFile, 201);

@@ -24,6 +24,7 @@ class EntregaDocente extends Model
         'id_admin',
         'documento_admin',
         'observacion',
+        'cumplio',
         'fecha_aplazada',
         'dias_aplazadas'
     ];

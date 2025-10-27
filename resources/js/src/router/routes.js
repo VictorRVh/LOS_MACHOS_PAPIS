@@ -220,48 +220,18 @@ export default [
             breadcrumb: [{ text: 'Grupos', to: { name: 'grupo' } }],
         }
     },
-    ////////////// DOCENTE SUS MODULOS 
     {
-        path: '/docente/modulo/:id',
-        name: 'docente.modulo.detalle',
-        component: () => import('../pages/Docente/DocenteModuloDetalle.vue'),
+        path: '/docente/modulo/:id/alumnos',
+        name: 'docente.modulo.alumnos',
+        component: () => import('../pages/Docente/DocenteAlumnosList.vue'),
         props: true,
-        redirect: route => ({ name: 'docente.modulo.detalle.documentos', params: { id: route.params.id } }),
         meta: {
             layout: 'dashboard',
             permissions: ['ver-estudiantes-asignados'],
             parent: 'moduloAsignado',
-            breadcrumb: [{ text: 'Mis Módulos', to: { name: 'moduloAsignado' } }],
-            submenu: (route) => [
-                { text: 'Documentos', to: { name: 'docente.modulo.detalle.documentos', params: { id: route.params.id } } },
-                { text: 'Documentos', to: { name: 'docente.modulo.detalle.asistencia', params: { id: route.params.id } } },
-            ],
-        },
-        children: [
-            {
-                path: 'documentos',
-                name: 'docente.modulo.detalle.documentos',
-                component: () => import('../pages/Docente/DocenteModuloDetalleDocumento.vue'),
-                props: route => ({ id: route.params.id }),
-                meta: {
-                    parent: 'docente.modulo.detalle',
-                    breadcrumb: { text: 'Documentos' },
-                },
-            },
-            {
-                path: 'asistencia',
-                name: 'docente.modulo.detalle.asistencia',
-                component: () => import('../pages/Docente/DocenteModuloDetalleAsistencia.vue'),
-                props: true,
-                meta: {
-                    parent: 'docente.modulo.detalle',
-                    breadcrumb: { text: 'Asistencia' },
-                },
-            },
-        ],
+            breadcrumb: [{ text: 'Mis Módulos', to: { name: 'moduloAsignado' } }, { text: 'Lista de Alumnos' }]
+        }
     },
-
-    ///////////////////////////////
     {
         path: '/documentos',
         name: 'documentos',
@@ -281,6 +251,27 @@ export default [
             layout: 'dashboard',
             parent: 'documentos',
             breadcrumb: { text: 'Estado de Entregas por Grupo' }
+        }
+    },
+    {
+        path: '/notificaciones',
+        name: 'notificaciones.index',
+        component: () => import('../pages/Notificacion.vue'), 
+        meta: {
+            layout: 'dashboard',
+            permissions: [], 
+            breadcrumb: [{ text: 'Todas las Notificaciones', to: { name: 'notificaciones.index' } }]
+        }
+    },
+    {
+        path: '/docente/grupos/:id/sesiones',
+        name: 'docente.grupo.sesiones',
+        component: () => import('../pages/SesionesDocente/GrupoSesiones.vue'),
+        props: true,
+        meta: {
+            layout: 'dashboard',
+            permissions: [],
+            breadcrumb: [{ text: 'Mis Grupos' }, { text: 'Programación de Sesiones' }]
         }
     },
 

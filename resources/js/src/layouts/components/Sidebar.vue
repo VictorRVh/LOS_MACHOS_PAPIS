@@ -3,7 +3,8 @@ import { useLayoutStore } from '@/store/useLayoutStore';
 import usePermissions from '@/composables/usePermissions';
 import {
   UsersIcon, ShieldCheckIcon, KeyIcon, AcademicCapIcon, PresentationChartLineIcon,
-  CalendarDaysIcon, NewspaperIcon, UserGroupIcon, RectangleStackIcon, IdentificationIcon, TagIcon, XMarkIcon, DocumentDuplicateIcon
+  CalendarDaysIcon, NewspaperIcon, UserGroupIcon, RectangleStackIcon, IdentificationIcon, TagIcon, XMarkIcon, DocumentDuplicateIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/vue/24/outline';
 
 const { hasPermission } = usePermissions();
@@ -20,11 +21,20 @@ const navLinks = [
     { name: 'Especialidad', routeName: 'especialidad', icon: AcademicCapIcon, permissions: ["todo-acceso-especialidades", "icono-especialidades"]},
     { name: 'Comisión', routeName: 'comision', icon: UserGroupIcon, permissions: ["todo-acceso-comisiones", "icono-comisiones"]},
     { name: 'Programa', routeName: 'programa', icon: RectangleStackIcon, permissions: ["todo-acceso-programas", "icono-programas"]},
-    { name: 'Doc. Curricular', routeName: 'documentos', icon: DocumentDuplicateIcon, permissions: ["todo-documento-programado", "icono-periodos"] }, // Usaremos un permiso específico
+    { name: 'Doc. Curricular', routeName: 'documentos', icon: DocumentDuplicateIcon, permissions: ["todo-documento-programado", "icono-periodos"] },
     { name: 'Matricula', routeName: 'matricula.index', icon: IdentificationIcon, permissions: ["todo-acceso-matriculas", "icono-matriculas"]},
     { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-grupos", "icono-grupos"]},
     { name: 'Mis Módulos', routeName: 'moduloAsignado', icon: AcademicCapIcon, permissions: ["ver-mis-modulos", "ver-estudiantes-asignados"]},
+    { name: 'Mis Sesiones', routeName: 'docente.grupo.sesiones', icon: ClipboardDocumentListIcon, permissions: [] },
 ];
+
+const checkVisibility = (link) => {
+    if (!link.permissions || link.permissions.length === 0) {
+        return true;
+    }
+    return hasPermission(link.permissions);
+};
+
 </script>
 
 <template>
@@ -46,8 +56,7 @@ const navLinks = [
             <nav class="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
                 <ul class="py-0">
                     <li v-for="link in navLinks" :key="link.name">
-                       
-                        <RouterLink v-if="link.routeName === 'start' || hasPermission(link.permissions)" :to="{ name: link.routeName }" v-slot="{ isActive }" class="relative flex flex-col items-center justify-center w-full h-[60px] transition-colors text-cetpro-text/80 hover:bg-cetpro-light hover:text-white group" :class="{ '!bg-cetpro-dark !text-white': isActive }">
+                        <RouterLink v-if="checkVisibility(link)" :to="link.routeName === 'docente.grupo.sesiones' ? { name: link.routeName, params: { id: 'default' } } : { name: link.routeName }" v-slot="{ isActive }" class="relative flex flex-col items-center justify-center w-full h-[60px] transition-colors text-cetpro-text/80 hover:bg-cetpro-light hover:text-white group" :class="{ '!bg-cetpro-dark !text-white': isActive }">
                             <span v-if="isActive" class="absolute left-0 top-0 h-full w-1 bg-white rounded-r-full"></span>
                             <component :is="link.icon" class="h-7 w-7 shrink-0" />
                             <span v-if="!layoutStore.isSidebarCollapsed" class="mt-0 text-xs font-medium whitespace-nowrap">{{ link.name }}</span>
@@ -58,7 +67,6 @@ const navLinks = [
             </nav>
         </aside>
 
-        <!-- Sidebar para Móvil -->
         <aside class="fixed inset-y-0 left-0 z-40 w-64 bg-cetpro dark:bg-gray-800 text-cetpro-text flex-col shrink-0 transition-transform duration-300 ease-in-out lg:hidden" :class="layoutStore.isSidebarOpenMobile ? 'translate-x-0' : '-translate-x-full'">
             <div class="h-20 flex items-center justify-between border-b border-cetpro-dark/50 px-4">
                 <RouterLink :to="{ name: 'start' }">
@@ -71,8 +79,7 @@ const navLinks = [
             <nav class="flex-1 overflow-y-auto custom-scrollbar">
                 <ul class="py-4">
                     <li v-for="link in navLinks" :key="link.name">
-                         <!-- Y AQUÍ TAMBIÉN -->
-                        <RouterLink v-if="link.routeName === 'documentos' || hasPermission(link.permissions)" :to="{ name: link.routeName }" v-slot="{ isActive }" @click="layoutStore.toggleSidebarMobile" class="flex items-center px-6 py-3 text-cetpro-text/80 hover:bg-cetpro-light hover:text-white" :class="{ '!bg-cetpro-dark !text-white font-semibold': isActive }">
+                        <RouterLink v-if="checkVisibility(link)" :to="link.routeName === 'docente.grupo.sesiones' ? { name: link.routeName, params: { id: 'default' } } : { name: link.routeName }" v-slot="{ isActive }" @click="layoutStore.toggleSidebarMobile" class="flex items-center px-6 py-3 text-cetpro-text/80 hover:bg-cetpro-light hover:text-white" :class="{ '!bg-cetpro-dark !text-white font-semibold': isActive }">
                             <component :is="link.icon" class="h-6 w-6 mr-4" />
                             <span>{{ link.name }}</span>
                         </RouterLink>

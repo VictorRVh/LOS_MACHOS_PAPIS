@@ -197,7 +197,7 @@ const createSubGrupos = (prog) => {
                 <Td>
                   <p
                     class="font-semibold text-gray-800 dark:text-gray-200 hover:text-cetpro dark:hover:text-cetpro-light">
-                    {{ prog.tipo_entrega }}
+                    {{ prog.nombre_entrega }}
                   </p>
                 </Td>
                 <Td class="font-mono text-xs">{{ prog.fecha_inicio }} - {{ prog.fecha_fin }}</Td>

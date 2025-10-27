@@ -24,8 +24,14 @@ class EntregaDocente extends Model
         'id_admin',
         'documento_admin',
         'observacion',
+        'cumplio',
         'fecha_aplazada',
         'dias_aplazadas'
+    ];
+
+    protected $casts = [
+        'fecha_inicio' => 'datetime',
+        'fecha_fin' => 'datetime',
     ];
 
     protected static function boot()
@@ -67,6 +73,4 @@ class EntregaDocente extends Model
     {
         return $this->hasOne(CarpetasEntregaDrive::class, 'id_entrega_docente');
     }
-
-
 }

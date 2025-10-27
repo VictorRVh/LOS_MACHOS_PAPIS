@@ -60,6 +60,7 @@ class EntregaDocenteController extends Controller
                 'estado' => $item->estado,
                 'documento_admin' => $item->documento_admin,
                 'observacion' => $item->observacion,
+                'cumplio' => $item->cumplio,
                 // 'created_at' => $item->created_at,
 
                 // 👇 Aquí se devuelven las carpetas asociadas

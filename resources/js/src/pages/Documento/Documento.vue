@@ -197,7 +197,11 @@ const createSubGrupos = (prog) => {
                 <Td>
                   <p
                     class="font-semibold text-gray-800 dark:text-gray-200 hover:text-cetpro dark:hover:text-cetpro-light">
+<<<<<<< HEAD
                     {{ prog.tipo_entrega }}
+=======
+                    {{ prog.nombre_entrega }}
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
                   </p>
                 </Td>
                 <Td class="font-mono text-xs">{{ prog.fecha_inicio }} - {{ prog.fecha_fin }}</Td>

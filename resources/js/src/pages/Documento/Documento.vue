@@ -132,18 +132,7 @@ const handleFormSubmitted = async () => {
 const onDelete = (prog) => {
 
   showConfirmModal(
-    {
-      title: "Confirmar Acción",
-      message: `¿Seguro que quieres eliminar esta programación?`,
-      actionButton: {
-        class: "bg-orange-600 hover:bg-orange-700",
-        text: "Sí, eliminar",
-      },
-      returnButton: {
-        class: "bg-gray-100 hover:bg-gray-200",
-        text: "Cancelar",
-      },
-    },
+    null,
     async (confirmed) => {
       if (!confirmed) return;
 
@@ -166,40 +155,50 @@ const onDelete = (prog) => {
 };
 
 const createSubGrupos = (prog) => {
-
   showConfirmModal(
     {
-      title: "Confirmar Acción",
-      message: `¿Seguro que publicar la programacion para los grupos?`,
-      actionButton: {
-        class: "bg-orange-600 hover:bg-orange-700",
-        text: "Sí, ",
-      },
-      returnButton: {
-        class: "bg-gray-100 hover:bg-gray-200",
-        text: "Volver",
-      },
+      title: "Confirmar publicación",
+    message: "¿Deseas publicar esta programación para todos los grupos?",
+    actionButton: {
+      class: "bg-emerald-600 hover:bg-emerald-700",
+      text: "Sí, publicar",
+    },
+    returnButton: {
+      class: "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600",
+      text: "Cancelar",
+    },
     },
     async (confirmed) => {
       if (!confirmed) return;
 
       try {
-        const response = await destroy(prog.id);
+        const response = await updateDocente(prog.id);
 
         if (!response) {
-          return showToast("No se puede eliminar la programacion porque ya fue programada para los grupos.", "error");
+          showToast(
+            "No se puede publicar la programación porque ya fue asignada a los grupos.",
+            "warning"
+          );
+          return;
         }
 
-        showToast("Programación eliminada.", "success");
+        showToast("Programación publicada correctamente.", "success");
         await fetchProgramaciones(selectedPeriodo.value);
 
-        if (programacionParaEditar.value?.id === prog.id) resetEditingState();
+        if (programacionParaEditar.value?.id === prog.id) {
+          resetEditingState();
+        }
       } catch (error) {
-        showToast("Error al eliminar.", "error");
+        console.error(error);
+        const msg =
+          error.response?.data?.message ||
+          "Ocurrió un error al intentar publicar la programación.";
+        showToast(msg, "error");
       }
     }
   );
-}
+};
+
 </script>
 
 

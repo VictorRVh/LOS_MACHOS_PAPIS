@@ -44,8 +44,6 @@ const initialFormData = () => ({
   tipo_entrega: "",
   fecha_inicio: "",
   fecha_fin: "",
-  mostrar: 0,
-  sub_grupos: 0,
 });
 
 const formData = ref(initialFormData());
@@ -85,19 +83,46 @@ watch(
   () => props.programacionToEdit,
   (newVal) => {
     if (newVal) {
-      formData.value = {
-        ...newVal,
-        id_periodo: newVal.id_periodo_academico,
+      // 🔹 Copiar valores base
+      formData.value = Object.entries(initialFormData()).reduce((r, [key, val]) => {
+        if (newVal[key]) return { ...r, [key]: newVal[key] };
+        return { ...r, [key]: val };
+      }, {});
+
+      // 🔹 Autoasignar periodo actual
+      formData.value.id_periodo = props.selectedPeriodoId;
+
+      // 🔹 Limpiar hora de las fechas
+      const takeDateOnly = (str) => {
+        if (!str) return "";
+        const datePart = String(str).split(" ")[0].split("T")[0];
+        if (datePart.includes("/")) {
+          const [d, m, y] = datePart.split("/");
+          return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+        }
+        return datePart;
       };
+
+      formData.value.fecha_inicio = takeDateOnly(newVal.fecha_inicio);
+      formData.value.fecha_fin = takeDateOnly(newVal.fecha_fin);
+
+      // 🔹 Si el tipo_entrega viene como número o string, asegurar formato correcto
+      formData.value.tipo_entrega = String(newVal.tipo_entrega);
+
+      // 🔹 Buscar el nombre correspondiente según tipo_entrega
+      const tipo = tiposEntrega.find(t => t.id === formData.value.tipo_entrega);
+      formData.value.nombre_entrega = tipo ? tipo.nombre : (newVal.nombre_entrega || "");
+
       isEditing.value = true;
       formErrors.value = {};
-      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       resetForm();
     }
   },
   { deep: true }
 );
+
+
 
 // 🧹 Reset
 const resetForm = () => {
@@ -208,13 +233,7 @@ const onSubmit = async () => {
         </div>
 
         <!-- Publicar -->
-        <div class="flex items-center space-x-3 pt-2">
-          <CheckBox v-model="formData.mostrar" />
-          <div>
-            <label class="font-medium text-gray-800 dark:text-gray-200">Publicar para docentes</label>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Al desmarcar, quedará como borrador.</p>
-          </div>
-        </div>
+      
 
         <!-- Botones -->
         <div class="flex gap-2 pt-2">

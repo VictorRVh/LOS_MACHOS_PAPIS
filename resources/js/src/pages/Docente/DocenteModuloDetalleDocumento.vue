@@ -41,11 +41,8 @@ onMounted(async () => {
     await documentoStore.loadGetProgramacionByGrupo(props.id)
     const data = documentoStore.programacionPorGrupo
 
-<<<<<<< HEAD
-=======
     console.log('respuesta del data', data)
 
->>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
     if (data && typeof data === 'object') {
       carpetas.value = data.subcarpetas || []
     } else {
@@ -99,10 +96,7 @@ const subirArchivo = async () => {
     const formData = new FormData();
     formData.append('file', archivo.value);
     formData.append('parentFolderId', carpetaSeleccionada.value.id);
-<<<<<<< HEAD
-=======
     formData.append('id_entrega', carpetaSeleccionada.value.programacion.id);
->>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
 
     // Subir archivo
     const response = await uploadArchivo(formData);
@@ -134,15 +128,10 @@ const subirArchivo = async () => {
 
     cerrarModal();
   } catch (error) {
-<<<<<<< HEAD
-    console.error('Error al subir archivo:', error);
-    alert('Error al subir el archivo. Por favor intenta nuevamente.');
-=======
     console.log(error)
     // console.error('Error al subir archivo:', error);
     const msg = error.response?.data?.error || 'Error al subir el archivo';
     showToast(msg, 'error');
->>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
   }
 };
 

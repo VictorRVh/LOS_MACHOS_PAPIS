@@ -32,81 +32,29 @@ class EntregaDocenteAdminController extends Controller
             'id_periodo'      => 'required|exists:periodo,id',
             'mostrar'         => 'nullable|boolean',
             'sub_grupos'      => 'nullable|boolean',
-            'observavcion'    => 'nullable|string',
+            'observacion'     => 'nullable|string',
         ]);
 
         // Buscar el periodo
         $periodo = Periodo::findOrFail($request->id_periodo);
 
-        // Crear programación admin
+        // Crear solo la programación admin
         $adminEntrega = EntregaDocenteAdmin::create([
-            'id_periodo'    => $periodo->id,
-            'tipo_entrega'  => $request->tipo_entrega,
-            'nombre_entrega'  => $request->nombre_entrega,
-            'fecha_inicio'  => $request->fecha_inicio,
-            'fecha_fin'     => $request->fecha_fin,
-            'status'        => EntregaDocenteAdmin::STATUS_PENDIENTE,
-            'mostrar'       => $request->mostrar ?? false,
+            'id_periodo'     => $periodo->id,
+            'tipo_entrega'   => $request->tipo_entrega,
+            'nombre_entrega' => $request->nombre_entrega,
+            'fecha_inicio'   => $request->fecha_inicio,
+            'fecha_fin'      => $request->fecha_fin,
+            'status'         => EntregaDocenteAdmin::STATUS_PENDIENTE,
+            'mostrar'        => 0,
+            'observacion'    => $request->observacion ?? '',
         ]);
 
-        // Obtener grupos del periodo
-        $grupos = Grupo::with('carpetaDrive')->where('id_periodo', $periodo->id)->get();
-
-        if ($grupos->isEmpty()) {
-            return response()->json([
-                'message' => 'No se encontraron grupos para el periodo ' . $periodo->nombre_periodo,
-            ], 404);
-        }
-
-        $driveController = new GoogleDriveController();
-
-        foreach ($grupos as $grupo) {
-
-            //  1. Crear entrega individual
-            $entregaDocente = EntregaDocente::create([
-                'id_grupo'        => $grupo->id,
-                'fecha_inicio'    => $adminEntrega->fecha_inicio,
-                'fecha_fin'       => $adminEntrega->fecha_fin,
-                'estado'          => $adminEntrega->status,
-                'id_admin'        => $adminEntrega->id,
-                'observacion'     => $request->observacion ?? '',
-            ]);
-
-            // 2. Crear carpeta en Drive para este tipo de entrega
-            if ($grupo->carpetaDrive && $grupo->carpetaDrive->drive_folder_id) {
-
-                $folderName = strtoupper($request->nombre_entrega); // Ej: "ACTA FINAL", "ASISTENCIA", etc.
-
-                $response = $driveController->createFolder(new Request([
-                    'folderName'     => $folderName,
-                    'parentFolderId' => $grupo->carpetaDrive->drive_folder_id,
-                ]));
-
-                if ($response->status() === 201) {
-                    $data = $response->getData();
-                    $folderId = $data->id ?? null;
-
-                    // 3. Registrar en tabla de carpetas de entrega (si quieres)
-                    // Por ejemplo:
-                    CarpetasEntregaDrive::create([
-                        'id_entrega_docente' => $entregaDocente->id,
-                        'id_grupo' => $grupo->id,
-                        'drive_folder_id' => $folderId,
-                        'nombre_carpeta' => $folderName
-                    ]);
-                } else {
-                    \Log::error('Error creando carpeta de tipo_entrega en Drive: ' . $response->getContent());
-                }
-            }
-        }
-
         return response()->json([
-            'message'          => 'Entrega programada para todos los grupos del periodo ' . $periodo->nombre_periodo,
-            'cantidad_grupos'  => $grupos->count(),
+            'message'          => 'Entrega creada en administración, pendiente de replicar a los grupos.',
             'entrega_admin_id' => $adminEntrega->id,
         ]);
     }
-
 
     // Mostrar uno por ID
     public function show($id)
@@ -285,6 +233,69 @@ class EntregaDocenteAdminController extends Controller
                 'nombre' => 'Carpeta raíz del grupo',
             ],
             'subcarpetas' => $resultado
+        ]);
+    }
+
+    public function updateSubGrupo($id)
+    {
+        $adminEntrega = EntregaDocenteAdmin::findOrFail($id);
+        $periodo = Periodo::findOrFail($adminEntrega->id_periodo);
+
+        // Obtener grupos del periodo
+        $grupos = Grupo::with('carpetaDrive')->where('id_periodo', $periodo->id)->get();
+
+        if ($grupos->isEmpty()) {
+            return response()->json([
+                'message' => 'No se encontraron grupos para el periodo ' . $periodo->nombre_periodo,
+            ], 404);
+        }
+
+        $driveController = new GoogleDriveController();
+
+        foreach ($grupos as $grupo) {
+
+            // 1. Crear entrega individual
+            $entregaDocente = EntregaDocente::create([
+                'id_grupo'      => $grupo->id,
+                'fecha_inicio'  => $adminEntrega->fecha_inicio,
+                'fecha_fin'     => $adminEntrega->fecha_fin,
+                'estado'        => $adminEntrega->status,
+                'id_admin'      => $adminEntrega->id,
+                'observacion'   => $adminEntrega->observacion ?? '',
+            ]);
+
+            // 2. Crear carpeta en Drive
+            if ($grupo->carpetaDrive && $grupo->carpetaDrive->drive_folder_id) {
+
+                $folderName = strtoupper($adminEntrega->nombre_entrega);
+
+                $response = $driveController->createFolder(new Request([
+                    'folderName'     => $folderName,
+                    'parentFolderId' => $grupo->carpetaDrive->drive_folder_id,
+                ]));
+
+                if ($response->status() === 201) {
+                    $data = $response->getData();
+                    $folderId = $data->id ?? null;
+
+                    CarpetasEntregaDrive::create([
+                        'id_entrega_docente' => $entregaDocente->id,
+                        'id_grupo' => $grupo->id,
+                        'drive_folder_id' => $folderId,
+                        'nombre_carpeta' => $folderName
+                    ]);
+                } else {
+                    \Log::error('Error creando carpeta de tipo_entrega en Drive: ' . $response->getContent());
+                }
+            }
+        }
+
+        // Activar el campo "mostrar"
+        $adminEntrega->update(['mostrar' => 1]);
+
+        return response()->json([
+            'message' => 'Entrega correctamente correctamente para los grupos del periodo' . $periodo->nombre_periodo ,
+            'cantidad_grupos' => $grupos->count(),
         ]);
     }
 }

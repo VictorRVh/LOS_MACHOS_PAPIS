@@ -25,7 +25,7 @@ const documentoProgramado = useProgramacionAdmintore();
 const { showToast, showConfirmModal } = useModalToast();
 const { destroy, loading } = useHttpRequest("/entrega_docente_admin");
 
-const { update: updateDocente, updating } = useHttpRequest('/entrega_docente_admin/crear_grupos/');
+const { update: updateDocente, updating } = useHttpRequest('crear_grupos');
 // 🔹 Estados
 const selectedPeriodo = ref(null);
 const programaciones = ref([]);

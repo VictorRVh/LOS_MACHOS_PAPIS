@@ -26,10 +26,18 @@ class EntregaDocenteAdminController extends Controller
     {
         $request->validate([
             'tipo_entrega'    => 'required|string|max:255',
+<<<<<<< HEAD
+=======
+            'nombre_entrega'  => 'required|string|max:255',
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
             'fecha_inicio'    => 'required|date',
             'fecha_fin'       => 'required|date|after_or_equal:fecha_inicio',
             'id_periodo'      => 'required|exists:periodo,id',
             'mostrar'         => 'nullable|boolean',
+<<<<<<< HEAD
+=======
+            'sub_grupos'      => 'nullable|boolean',
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
             'observavcion'    => 'nullable|string',
         ]);
 
@@ -40,6 +48,10 @@ class EntregaDocenteAdminController extends Controller
         $adminEntrega = EntregaDocenteAdmin::create([
             'id_periodo'    => $periodo->id,
             'tipo_entrega'  => $request->tipo_entrega,
+<<<<<<< HEAD
+=======
+            'nombre_entrega'  => $request->nombre_entrega,
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
             'fecha_inicio'  => $request->fecha_inicio,
             'fecha_fin'     => $request->fecha_fin,
             'status'        => EntregaDocenteAdmin::STATUS_PENDIENTE,
@@ -72,7 +84,11 @@ class EntregaDocenteAdminController extends Controller
             // 2. Crear carpeta en Drive para este tipo de entrega
             if ($grupo->carpetaDrive && $grupo->carpetaDrive->drive_folder_id) {
 
+<<<<<<< HEAD
                 $folderName = strtoupper($request->tipo_entrega); // Ej: "ACTA FINAL", "ASISTENCIA", etc.
+=======
+                $folderName = strtoupper($request->nombre_entrega); // Ej: "ACTA FINAL", "ASISTENCIA", etc.
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
 
                 $response = $driveController->createFolder(new Request([
                     'folderName'     => $folderName,
@@ -119,9 +135,12 @@ class EntregaDocenteAdminController extends Controller
 
         $request->validate([
             'tipo_entrega' => 'sometimes|string|max:100',
+            'nombre_entrega' => 'sometimes|string|max:100',
             'fecha_inicio' => 'sometimes|date',
             'fecha_fin' => 'sometimes|date|after_or_equal:fecha_inicio',
             'status' => 'sometimes|integer|in:0,1,2,3',
+            'mostrar' => 'sometimes|boolean',
+            'sub_grupos' => 'sometimes|boolean',
         ]);
 
         $entrega->update($request->all());
@@ -170,6 +189,10 @@ class EntregaDocenteAdminController extends Controller
                 ->get([
                     'id',
                     'tipo_entrega',
+<<<<<<< HEAD
+=======
+                    'nombre_entrega',
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
                     'fecha_inicio',
                     'fecha_fin',
                     'status',
@@ -181,6 +204,10 @@ class EntregaDocenteAdminController extends Controller
                 return [
                     'id' => $item->id,
                     'tipo_entrega' => $item->tipo_entrega,
+<<<<<<< HEAD
+=======
+                    'nombre_entrega' => $item->nombre_entrega,
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
                     'fecha_inicio' => Carbon::parse($item->fecha_inicio)->setTimezone('America/Lima')->format('d/m/Y H:i'),
                     'fecha_fin' => Carbon::parse($item->fecha_fin)->setTimezone('America/Lima')->format('d/m/Y H:i'),
                     'status' => $item->status,
@@ -205,7 +232,11 @@ class EntregaDocenteAdminController extends Controller
     public function programacionesPorGrupo($id_grupo)
     {
         $programaciones = EntregaDocente::with([
+<<<<<<< HEAD
             'entregaDocenteAdmin:id,tipo_entrega,fecha_inicio,fecha_fin,status',
+=======
+            'entregaDocenteAdmin:id,nombre_entrega,fecha_inicio,fecha_fin,status',
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
             'grupo.carpetaDrive'
         ])
             ->where('id_grupo', $id_grupo)
@@ -240,7 +271,11 @@ class EntregaDocenteAdminController extends Controller
 
             // Buscar programación con tipo_entrega parecido al nombre de la carpeta
             $programacion = $programaciones->first(function ($p) use ($carpeta) {
+<<<<<<< HEAD
                 return stripos($carpeta->name, $p->entregaDocenteAdmin->tipo_entrega) !== false;
+=======
+                return stripos($carpeta->name, $p->entregaDocenteAdmin->nombre_entrega) !== false;
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
             });
 
             // Obtener archivos dentro de esa subcarpeta
@@ -254,6 +289,10 @@ class EntregaDocenteAdminController extends Controller
                     'id' => $programacion->id,
                     'fecha_inicio' => $programacion->entregaDocenteAdmin->fecha_inicio,
                     'fecha_fin' => $programacion->entregaDocenteAdmin->fecha_fin,
+<<<<<<< HEAD
+=======
+                    'nombre_entrega' => $programacion->entregaDocenteAdmin->nombre_entrega,
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
                     'tipo_entrega' => $programacion->entregaDocenteAdmin->tipo_entrega,
                     'status' => $programacion->entregaDocenteAdmin->status,
                 ] : null,

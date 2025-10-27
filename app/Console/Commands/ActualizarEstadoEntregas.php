@@ -5,6 +5,10 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\EntregaDocenteAdmin;
 use App\Models\EntregaDocente;
+<<<<<<< HEAD
+=======
+use App\Models\Periodo;
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
 use Carbon\Carbon;
 
 class ActualizarEstadoEntregas extends Command
@@ -18,7 +22,26 @@ class ActualizarEstadoEntregas extends Command
     {
         $hoy = Carbon::now('America/Lima')->startOfMinute();
 
+<<<<<<< HEAD
         $programaciones = EntregaDocenteAdmin::all();
+=======
+        $periodo = Periodo::where('status', 1)->first();
+
+        if (!$periodo) {
+            $this->error('No hay un periodo académico activo. No se actualizó ningún registro.');
+            return Command::FAILURE;
+        }
+
+        $this->info('Actualizando entregas del periodo: ' . $periodo->nombre ?? $periodo->id);
+
+        $programaciones = EntregaDocenteAdmin::where('id_periodo', $periodo->id)
+            ->get();
+
+        if ($programaciones->isEmpty()) {
+            $this->warn('No se encontraron entregas para el periodo actual.');
+            return Command::SUCCESS;
+        }
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
 
         foreach ($programaciones as $programacion) {
 
@@ -27,6 +50,7 @@ class ActualizarEstadoEntregas extends Command
             $inicio = Carbon::parse($programacion->fecha_inicio)->timezone('America/Lima')->startOfMinute();
             $fin = Carbon::parse($programacion->fecha_fin)->timezone('America/Lima')->endOfMinute();
 
+<<<<<<< HEAD
             if ($hoy->lt($inicio)) {
                 $nuevoEstado = EntregaDocenteAdmin::STATUS_PENDIENTE;
             } elseif ($hoy->between($inicio, $fin)) {
@@ -41,6 +65,23 @@ class ActualizarEstadoEntregas extends Command
 
                 EntregaDocente::where('id_admin', $programacion->id)
                     ->update(['estado' => $nuevoEstado]);
+=======
+            $nuevoEstado = match (true) {
+                $hoy->lt($inicio) => EntregaDocenteAdmin::STATUS_PENDIENTE,
+                $hoy->between($inicio, $fin) => EntregaDocenteAdmin::STATUS_ACTIVO,
+                default => EntregaDocenteAdmin::STATUS_FINALIZADO,
+            };
+
+            if ($nuevoEstado !== $estadoAnterior) {
+                $programacion->timestamps = false;
+                $programacion->update(['status' => $nuevoEstado]);
+                $programacion->timestamps = true;
+
+                EntregaDocente::where('id_admin', $programacion->id)
+                    ->update(['estado' => $nuevoEstado]);
+
+                $this->info("{$programacion->tipo_entrega} → Estado actualizado a {$nuevoEstado}");
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
             }
 
             // DEBUG
@@ -55,6 +96,11 @@ class ActualizarEstadoEntregas extends Command
             $this->info('-----------------------');
         }
 
+<<<<<<< HEAD
         $this->info('Estados actualizados correctamente.');
+=======
+        $this->info('🎯 Estados de entregas actualizados correctamente.');
+        return Command::SUCCESS;
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
     }
 }

@@ -13,7 +13,11 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
+<<<<<<< HEAD
         "maatwebsite/excel": "3.1.47",
+=======
+        "maatwebsite/excel": "^3.1",
+>>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
         "masbug/flysystem-google-drive-ext": "*"
     },
     "require-dev": {

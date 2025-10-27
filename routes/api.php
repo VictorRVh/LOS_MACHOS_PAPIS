@@ -283,7 +283,7 @@ Route::middleware('auth:sanctum')->group(function () {
     ])->middleware('permission:todo-acceso-documento-programado|editar-documento-programado');
     Route::patch('entrega_docente_admin/crear_grupos/{id}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
-        'update',
+        'updateSubGrupo',
     ])->middleware('permission:todo-acceso-documento-programado|editar-documento-programado');
 
     Route::delete('entrega_docente_admin/{id}', [

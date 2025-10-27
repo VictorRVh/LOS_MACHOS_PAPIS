@@ -25,6 +25,7 @@ const documentoProgramado = useProgramacionAdmintore();
 const { showToast, showConfirmModal } = useModalToast();
 const { destroy, loading } = useHttpRequest("/entrega_docente_admin");
 
+const { update: updateDocente, updating } = useHttpRequest('/entrega_docente_admin/crear_grupos/');
 // 🔹 Estados
 const selectedPeriodo = ref(null);
 const programaciones = ref([]);
@@ -144,6 +145,17 @@ const onDelete = (prog) => {
 
 const createSubGrupos = (prog) => {
 
+  showConfirmModal("¿Seguro que quieres eliminar esta programación?", async (confirmed) => {
+    if (!confirmed) return;
+    try {
+      await updateDocente(prog.id);
+      await fetchProgramaciones(selectedPeriodo.value);
+      showToast("Programación eliminada.", "success");
+      if (programacionParaEditar.value?.id === prog.id) resetEditingState();
+    } catch (error) {
+      showToast("Error al eliminar.", "error");
+    }
+  });
 }
 </script>
 

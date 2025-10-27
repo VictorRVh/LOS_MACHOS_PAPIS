@@ -12,6 +12,7 @@ import AuthorizationFallback from "../AuthorizationFallback.vue";
 import BaseSelectCiclo from "../../ui/BaseSelectCiclo.vue";
 import CheckBox from "../../ui/CheckBox.vue";
 import useProgramaStore from "../../../store/Programa/useProgramaStore";
+import useProgramaStatusStore from "../../../store/Programa/useProgramaStatusStore";
 
 const props = defineProps({
   show: Boolean,
@@ -21,7 +22,7 @@ const props = defineProps({
 const emit = defineEmits(["hide", "programa-guardado"]);
 
  const programaStore = useProgramaStore();
-
+const programaStatusStore = useProgramaStatusStore();
 const { showToast } = useModalToast();
 const { runYupValidation } = useValidation();
 
@@ -176,6 +177,7 @@ const onSubmit = async () => {
       emit("programa-guardado", response);
       onCancelEdit();
       programaStore.loadProgramas();
+      programaStatusStore.loadPrograma();
       formData.value = initialFormData();
                   formErrors.value = {};
     }

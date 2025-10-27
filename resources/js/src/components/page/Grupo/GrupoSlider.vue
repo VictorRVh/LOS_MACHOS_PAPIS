@@ -130,6 +130,14 @@ watch(
   }
 );
 
+const secciones = [
+  { id: 'A', name: 'Sección A' },
+  { id: 'B', name: 'Sección B' },
+  { id: 'C', name: 'Sección C' },
+  { id: 'D', name: 'Sección D' },
+  { id: 'E', name: 'Sección E' }
+];
+
 
 const onProgramaChange = async (programaId) => {
   formData.value.id_especialidad = null;
@@ -188,7 +196,9 @@ const schema = yup.object({
     .date()
     .required("La fecha de entrega del acta es obligatoria")
     .min(yup.ref("fecha_fin"), "La entrega del acta debe ser después de la fecha de fin"),
-
+  seccion: yup
+    .string()
+    .required("La sección es obligatoria")
   // seccion: yup.string().nullable(),
   // status: yup.boolean(),
 });
@@ -286,22 +296,30 @@ const onSubmit = async () => {
             <BaseSelectCiclo v-model="formData.id_convenio" :options="convenioStore.convenios"
               label="nombre_institucion" placeholder="Seleccione un convenio" />
           </FormLabelError>
-          
-          
-          <FormInput v-model="formData.fecha_inicio" label="Fecha Inicio" type="date" :error="formErrors?.fecha_inicio" />
+
+
+          <FormInput v-model="formData.fecha_inicio" label="Fecha Inicio" type="date"
+            :error="formErrors?.fecha_inicio" />
           <FormInput v-model="formData.fecha_fin" label="Fecha Fin" type="date" :error="formErrors?.fecha_fin" />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormInput v-model="formData.fecha_entrega_acta" label="Entrega Acta" type="date" :error="formErrors?.fecha_entrega_acta" />
-          <FormInput v-model="formData.seccion" label="Sección" />
+          <FormInput v-model="formData.fecha_entrega_acta" label="Entrega Acta" type="date"
+            :error="formErrors?.fecha_entrega_acta" />
+          <FormLabelError label="Sección" required>
+
+            <BaseSelectGrupo v-model="formData.seccion" :options="secciones" label="name"
+              placeholder="Seleccione una sección" style="--vs-dropdown-max-height: 90px" />
+
+
+          </FormLabelError>
+
           <CheckBox v-model="formData.status" label="Habilitado" class="mt-8 pl-4 flex justify-center items-center" />
         </div>
 
         <Button :title="grupo?.id_grupo ? 'Guardar Cambios' : 'Crear Grupo'"
           :loading-title="grupo?.id_grupo ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
-          :disabled="saving || updating"
-          :loading="saving || updating" @click="onSubmit" />
+          :disabled="saving || updating" :loading="saving || updating" @click="onSubmit" />
       </div>
     </AuthorizationFallback>
   </Slider>

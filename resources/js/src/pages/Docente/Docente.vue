@@ -88,28 +88,20 @@ const {
         </div>
 
         <div class="flex-between flex-row-reverse my-5">
-          <SearchBar
-            :totalResultados="usuariosOrdenados.length"
-            :campoOrden="'apellido_paterno'"
-            @search="filtrarUsuarios"
-          />
+          <SearchBar :totalResultados="usuariosOrdenados.length" :campoOrden="'apellido_paterno'"
+            @search="filtrarUsuarios" />
 
           <div class="font-inter text-md w-full">Lista de docentes</div>
         </div>
       </div>
-      <Table
-        :paginacion="true"
-        :current-page="pagina"
-        :total-pages="totalPaginas"
-        @changePage="pagina = $event"
-      >
+      <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
         <THead>
           <Th>N°</Th>
           <Th>Nombres</Th>
           <Th>Apellidos</Th>
           <Th>Dni</Th>
           <Th>Correo</Th>
-  
+
           <Th>Fecha de Creación</Th>
           <Th>Estado</Th>
           <Th class="text-center">Acción</Th>
@@ -117,32 +109,27 @@ const {
 
         <TBody>
           <Tr v-for="(docente, index) in usuariosPaginados" :key="index">
-            <Td
-              ><span class="text-gray-800 dark:text-gray-300">{{
-                (pagina - 1) * itemsPorPagina + index + 1
-              }}</span></Td
-            >
+            <Td><span class="text-gray-800 dark:text-gray-300">{{
+              (pagina - 1) * itemsPorPagina + index + 1
+                }}</span></Td>
             <Td>{{ docente.name }}</Td>
             <Td>{{ docente.apellido_paterno }} {{ docente.apellido_materno }}</Td>
             <Td>{{ docente.dni }}</Td>
             <Td>{{ docente.email }}</Td>
-        
+
             <Td>{{ docente.created_at.slice(0, 10) }}</Td>
             <Td>
-              <span
-                :class="
-                  docente.status === 1
-                    ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
-                    : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
-                "
-                class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1"
-              >
+              <span :class="docente.status === 1
+                  ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
+                  : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
+                " class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
                 <span v-if="docente.status === 1"> Activo ✓ </span>
                 <span v-else="docente.status === 0"> Inactivo X </span>
               </span>
             </Td>
             <Td class="text-center text-gray-600 dark:text-gray-200">
-             
+              <MenuTable :actions="{ view: true, edit: true, delete: true, download: false }" entity-label="Docente"
+                @view="verGrupo(docente)" @edit="showSlider(true, docente)" @delete="onDelete(docente)" />
             </Td>
           </Tr>
         </TBody>

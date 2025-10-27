@@ -171,17 +171,10 @@ const desactivarGrupo = async (grupo) => {
           <div
             class="p-4 bg-gray-50 dark:bg-gray-800/50 border-t dark:border-gray-700 flex items-center justify-between">
             <div class="flex items-center gap-2"
-<<<<<<< HEAD
-              :class="grupo.estado ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-              <component :is="grupo.estado ? CheckCircleIcon : ClockIcon" class="h-5 w-5" />
-              <span class="text-sm font-semibold">
-                {{ grupo.estado ? 'Entregado' : 'Pendiente' }}
-=======
               :class="grupo.cumplio ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
               <component :is="grupo.estado ? CheckCircleIcon : ClockIcon" class="h-5 w-5" />
               <span class="text-sm font-semibold">
                 {{ grupo.cumplio ? 'Entregado' : 'Pendiente' }}
->>>>>>> f2878b34cbce9301735378d1394f4c2bf1f1243e
               </span>
             </div>
             <span class="text-xs text-gray-500 dark:text-gray-400">

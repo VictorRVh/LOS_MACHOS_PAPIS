@@ -23,6 +23,7 @@ class EntregaDocenteAdmin extends Model
         'status',
         'id_periodo',
         'mostrar',
+        'sub_grupos',
         'is_deleted'
     ];
 

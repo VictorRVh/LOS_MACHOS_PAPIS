@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\CarpetasGrupoDriveController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http; 
 use App\Http\Controllers\GoogleDriveController;
-use App\Models\CarpetasPeriodoDrive;
+use App\Http\Controllers\GoogleCalendarWebhookController;
 
 /**
  * ------------------------------------------------------------------------
@@ -296,6 +296,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('entrega_docente/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'update',
+    
     ])->middleware('permission:todo-acceso-programacion-documentos-subidos|editar-programacion-documentos-subidos');
 
     Route::delete('entrega_docente/{id}', [
@@ -307,7 +308,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('programacion_grupo/{id_grupo}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'programacionesPorGrupo',
-    ])->middleware('permission:todo-acceso-especialidades|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-especialidades|ver-especialidades');
+
+    Route::get('/google/subscribe-calendar', [
+    \App\Http\Controllers\EntregaDocenteAdminController::class, 
+    'subscribeToCalendarNotifications'
+])  ->middleware('permission:todo-acceso-permisos');
 
     // RUTA PARA ESPECIALIDAD_MADRE
     Route::get('especialidad_madre', [
@@ -800,26 +806,7 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
-    //RUTA PARA ACTIVIDADES RECIENTES
-    Route::get('actividades_recientes', [
-        \App\Http\Controllers\ActividadesRecientesController::class,
-        'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
-
-    Route::post('actividades_recientes', [
-        \App\Http\Controllers\ActividadesRecientesController::class,
-        'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
-
-    Route::patch('actividades_recientes/{id}', [
-        \App\Http\Controllers\ActividadesRecientesController::class,
-        'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
-
-    Route::delete('actividades_recientes/{id}', [
-        \App\Http\Controllers\ActividadesRecientesController::class,
-        'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+   
 
     // RUTA COMISION USUARIO
 
@@ -932,7 +919,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('infoGrupo/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'infoGrupo',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 });
 
 
@@ -942,14 +929,74 @@ Route::get('reportes/nomina/grupo/{idGrupo}', [
 ]);
 
 Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
-    Route::get('/files/{fileId}', [GoogleDriveController::class, 'listFilesNew']);
+    Route::get('/files', [GoogleDriveController::class, 'listFiles']);
     Route::post('/folder', [GoogleDriveController::class, 'createFolder']);
     Route::post('/upload', [GoogleDriveController::class, 'uploadFile']);
     Route::patch('/file/{fileId}/rename', [GoogleDriveController::class, 'renameFile']);
     Route::patch('/file/{fileId}/move', [GoogleDriveController::class, 'moveFile']);
     Route::delete('/file/{fileId}', [GoogleDriveController::class, 'deleteFile']);
-    Route::get('/drive/file/{id}/download', [GoogleDriveController::class, 'downloadFile']);
-
 });
 
-Route::post('/carpetas-grupo/crear/{id_grupo}', [CarpetasGrupoDriveController::class, 'crearCarpetaGrupo']);
+Route::post('/google/calendar-notifications', [GoogleCalendarWebhookController::class, 'handle']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/actividades-recientes', function () {
+        $user = auth()->user();
+
+        if ($user->roles()->whereRaw('LOWER(name) IN (?, ?)', ['directora', 'coordinador'])->exists()) {
+            return \App\Models\ActividadesRecientes::latest('fecha')->take(5)->get();
+        }
+
+        if ($user->roles()->whereRaw('LOWER(name) = ?', ['docente'])->exists()) {
+            return \App\Models\ActividadesRecientes::where('usuario_id', $user->id)
+                ->latest('fecha')
+                ->take(5)
+                ->get();
+        }
+        
+        return response()->json([]);
+    });
+
+    Route::get('/actividades-recientes/all', function () {
+        $user = auth()->user();
+
+        if ($user->roles()->whereRaw('LOWER(name) IN (?, ?)', ['directora', 'coordinador'])->exists()) {
+            return \App\Models\ActividadesRecientes::latest('fecha')->get();
+        }
+
+        if ($user->roles()->whereRaw('LOWER(name) = ?', ['docente'])->exists()) {
+            return \App\Models\ActividadesRecientes::where('usuario_id', $user->id)
+                ->latest('fecha')
+                ->get();
+        }
+        
+        return response()->json([]);
+    });
+    
+    Route::get('/google/subscribe-calendar', [
+        \App\Http\Controllers\EntregaDocenteAdminController::class, 
+        'subscribeToCalendarNotifications'
+    ])->middleware('permission:todo-acceso-permisos');
+    
+    // Rutas para que los admins gestionen TODAS las actividades
+    Route::post('actividades_recientes', [\App\Http\Controllers\ActividadesRecientesController::class, 'store'])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    Route::patch('actividades_recientes/{id}', [\App\Http\Controllers\ActividadesRecientesController::class, 'update'])->middleware('permission:todo-acceso-permisos|editar-permisos');
+    Route::delete('actividades_recientes/{id}', [\App\Http\Controllers\ActividadesRecientesController::class, 'destroy'])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+});
+Route::get('/google-holidays', function () {
+    $apiKey = env('GOOGLE_API_KEY');
+    if (!$apiKey) {
+        return response()->json(['error' => 'Google API Key no configurada en el backend.'], 500);
+    }
+    
+    $calendarId = 'es.pe#holiday@group.v.calendar.google.com';
+    $url = "https://www.googleapis.com/calendar/v3/calendars/" . urlencode($calendarId) . "/events?key={$apiKey}";
+
+    $response = Http::get($url);
+
+    if ($response->successful()) {
+        return $response->json();
+    }
+
+    return response()->json(['error' => 'No se pudieron obtener los feriados'], $response->status());
+});

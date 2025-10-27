@@ -58,7 +58,7 @@ const onDelete = (periodo) => {
         <periodoSlider :show="slider" :periodo="sliderData" @hide="hideSlider" />
       </div>
 
-
+      <iframe src="https://calendar.google.com/calendar/embed?src=c_ca58e49c321f32ffb3166ae636a26b9cb4783cd53c18f7c4de11bf9b81de4200%40group.calendar.google.com&ctz=America%2FLima" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
       <div class="w-full lg:w-2/3">
         <Table>
           <THead>

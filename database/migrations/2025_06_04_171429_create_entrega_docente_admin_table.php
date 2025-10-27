@@ -29,6 +29,9 @@ return new class extends Migration
             $table->boolean('sub_grupos')->default(0);
 
             $table->boolean('is_deleted')->default(0);
+            // 👇 agrega esto
+            $table->timestamps();
+
         });
     }
     /**

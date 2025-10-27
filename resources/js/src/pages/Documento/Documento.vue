@@ -130,32 +130,75 @@ const handleFormSubmitted = async () => {
 };
 
 const onDelete = (prog) => {
-  showConfirmModal("¿Seguro que quieres eliminar esta programación?", async (confirmed) => {
-    if (!confirmed) return;
-    try {
-      await destroy(prog.id);
-      await fetchProgramaciones(selectedPeriodo.value);
-      showToast("Programación eliminada.", "success");
-      if (programacionParaEditar.value?.id === prog.id) resetEditingState();
-    } catch (error) {
-      showToast("Error al eliminar.", "error");
+
+  showConfirmModal(
+    {
+      title: "Confirmar Acción",
+      message: `¿Seguro que quieres eliminar esta programación?`,
+      actionButton: {
+        class: "bg-orange-600 hover:bg-orange-700",
+        text: "Sí, eliminar",
+      },
+      returnButton: {
+        class: "bg-gray-100 hover:bg-gray-200",
+        text: "Cancelar",
+      },
+    },
+    async (confirmed) => {
+      if (!confirmed) return;
+
+      try {
+        const response = await destroy(prog.id);
+
+        if (!response) {
+          return showToast("No se puede eliminar la programacion porque ya fue programada para los grupos.", "error");
+        }
+
+        showToast("Programación eliminada.", "success");
+        await fetchProgramaciones(selectedPeriodo.value);
+
+        if (programacionParaEditar.value?.id === prog.id) resetEditingState();
+      } catch (error) {
+        showToast("Error al eliminar.", "error");
+      }
     }
-  });
+  );
 };
 
 const createSubGrupos = (prog) => {
 
-  showConfirmModal("¿Seguro que quieres eliminar esta programación?", async (confirmed) => {
-    if (!confirmed) return;
-    try {
-      await updateDocente(prog.id);
-      await fetchProgramaciones(selectedPeriodo.value);
-      showToast("Programación eliminada.", "success");
-      if (programacionParaEditar.value?.id === prog.id) resetEditingState();
-    } catch (error) {
-      showToast("Error al eliminar.", "error");
+  showConfirmModal(
+    {
+      title: "Confirmar Acción",
+      message: `¿Seguro que publicar la programacion para los grupos?`,
+      actionButton: {
+        class: "bg-orange-600 hover:bg-orange-700",
+        text: "Sí, ",
+      },
+      returnButton: {
+        class: "bg-gray-100 hover:bg-gray-200",
+        text: "Volver",
+      },
+    },
+    async (confirmed) => {
+      if (!confirmed) return;
+
+      try {
+        const response = await destroy(prog.id);
+
+        if (!response) {
+          return showToast("No se puede eliminar la programacion porque ya fue programada para los grupos.", "error");
+        }
+
+        showToast("Programación eliminada.", "success");
+        await fetchProgramaciones(selectedPeriodo.value);
+
+        if (programacionParaEditar.value?.id === prog.id) resetEditingState();
+      } catch (error) {
+        showToast("Error al eliminar.", "error");
+      }
     }
-  });
+  );
 }
 </script>
 
@@ -227,9 +270,8 @@ const createSubGrupos = (prog) => {
                 </Td>
                 <Td class="text-center">
                   <MenuTable :actions="{ view: true, edit: true, custom1: true, delete: true }"
-                    :labels="{ custom1: 'Sub Programaciones' }"
-                    entity-label="entrega" @view="verDetalleEntrega(prog)" @edit="editProgramacion(prog)"
-                    @delete="onDelete(prog)" @custom1="() => createSubGrupos(prog)" />
+                    :labels="{ custom1: 'Sub Programaciones' }" entity-label="entrega" @view="verDetalleEntrega(prog)"
+                    @edit="editProgramacion(prog)" @delete="onDelete(prog)" @custom1="() => createSubGrupos(prog)" />
 
                 </Td>
 

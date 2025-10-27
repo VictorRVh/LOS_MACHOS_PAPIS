@@ -86,32 +86,27 @@ class EntregaDocenteAdminController extends Controller
     // Eliminar
     public function destroy($id)
     {
-        // 1. Obtener la programación con sus carpetas
-        $entrega = EntregaDocenteAdmin::with('carpetas')->find($id);
+        // 1. Buscar la programación
+        $entrega = EntregaDocenteAdmin::find($id);
 
         if (!$entrega) {
             return response()->json(['message' => 'Entrega no encontrada'], 404);
         }
 
-        $driveController = new GoogleDriveController();
+        // 2. Verificar si tiene registros asociados en entrega_docente
+        $tieneEntregas = EntregaDocente::where('id_admin', $id)->exists();
 
-        // 2. Eliminar las carpetas en Drive
-        foreach ($entrega->carpetas as $carpeta) {
-            if ($carpeta->drive_folder_id) {
-                $response = $driveController->deleteFile($carpeta->drive_folder_id);
-
-                if ($response->status() !== 200 && $response->status() !== 204) {
-                    \Log::error('No se pudo eliminar carpeta en Drive: ' . $carpeta->drive_folder_id);
-                }
-            }
+        if ($tieneEntregas) {
+            return response()->json([
+                'message' => 'No se puede eliminar la programación porque ya fue replicada en entrega_docente.'
+            ], 400);
         }
 
+        // 3. Si no hay registros asociados, eliminar
         $entrega->delete();
 
-        return response()->json(['message' => 'Entrega y carpetas eliminadas correctamente'], 204);
+        return response()->json(['message' => 'Entrega eliminada correctamente'], 200);
     }
-
-
 
     // API DE PROGRAMACIOND DEL COORDINADOR
     public function indexByPeriodo($id_periodo)
@@ -294,7 +289,7 @@ class EntregaDocenteAdminController extends Controller
         $adminEntrega->update(['mostrar' => 1]);
 
         return response()->json([
-            'message' => 'Entrega correctamente correctamente para los grupos del periodo' . $periodo->nombre_periodo ,
+            'message' => 'Entrega correctamente correctamente para los grupos del periodo' . $periodo->nombre_periodo,
             'cantidad_grupos' => $grupos->count(),
         ]);
     }

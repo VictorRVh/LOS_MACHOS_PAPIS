@@ -1,106 +1,109 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import useGrupoStore from '../../store/Grupo/useGrupoStore';
-import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
+import Table from "../../components/table/Table.vue";
+import THead from "../../components/table/THead.vue";
+import TBody from "../../components/table/TBody.vue";
+import Tr from "../../components/table/Tr.vue";
+import Th from "../../components/table/Th.vue";
+import Td from "../../components/table/Td.vue";
+import EditButton from "../../components/ui/EditButton.vue";
+import DeleteButton from "../../components/ui/DeleteButton.vue";
+import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 
-const route = useRoute();
-const grupoStore = useGrupoStore();
-const infoGrupo = ref(null);
-const isLoading = ref(true);
-const errorAlCargar = ref(false);
+import useSlider from "../../composables/useSlider";
+import useModalToast from "../../composables/useModalToast";
+import useHttpRequest from "../../composables/useHttpRequest";
+import CapacidadTerminalSlider from "../../components/page/CapacidadesTerminales/CapacidadTerminalSlider.vue";
+import useCapacidadTerminalStore from "../../store/CapacidadTerminal/UseCapacidadTerminalStore";
 
-const groupId = route.params.id;
-const breadcrumb = useBreadcrumbStore();
-
-
-const navLinks = [
-  { text: 'Documentos', to: { name: 'docente.modulo.detalle.documentos', params: { id: groupId } } },
-  { text: 'Sesiones y asistencia', to: { name: 'docente.modulo.detalle.asistencia', params: { id: groupId } } },
-  { text: 'Calificaciones', to: { name: 'grupo.calificaciones', params: { id: groupId } } },
-  { text: 'Prácticas', to: { name: 'grupo.practicas', params: { id: groupId } } },
-  { text: 'Alumnos', to: { name: 'grupo.alumnos', params: { id: groupId } } },
-];
-
-
-const tituloPrincipal = computed(() => {
-  if (!infoGrupo.value) return 'Grupo';
-  return `Especialidad: ${infoGrupo.value.especialidad}`;
+const props = defineProps({
+  id: {
+    type: String,
+    required: true,
+  },
 });
 
-const subTitulo = computed(() => {
-  if (!infoGrupo.value) return 'Cargando detalles...';
-  return `Módulo ${infoGrupo.value.modulo_numero}: ${infoGrupo.value.modulo_nombre} | Sección ${infoGrupo.value.seccion}`;
-});
+const capacidadStore = useCapacidadTerminalStore();
 
-onMounted(async () => {
-  try {
-    if (!grupoStore?.infoGrupo?.length) {
-      await grupoStore.loadInfoGrupo(groupId);
+if (!capacidadStore.capacidadTerminal?.length)
+  await capacidadStore.loadCapacidadTerminal(props.id);
+
+const { slider, sliderData, showSlider, hideSlider } = useSlider("capacidad-terminal-crud");
+const { showConfirmModal, showToast } = useModalToast();
+const { destroy: deleteCapacidad, deleting } = useHttpRequest("/capacidad_terminal");
+
+const onDelete = (capacidad) => {
+  if (deleting.value) return;
+  showConfirmModal(null, async (confirmed) => {
+    if (!confirmed) return;
+
+    const isDeleted = await deleteCapacidad(capacidad?.id);
+    if (isDeleted) {
+      showToast(`Capacidad "${capacidad?.nombre_capacidad}" eliminada exitosamente.`);
+      capacidadStore.loadCapacidadTerminal(props.id);
     }
-    infoGrupo.value = grupoStore.infoGrupo;
-    breadcrumb.setTextItemAuto(`${infoGrupo?.value?.especialidad} | M: ${infoGrupo?.value?.modulo} | Grupo: ${infoGrupo?.value?.seccion}`, groupId, "grupo", { name: 'grupo.detalle', params: { groupId } });
-  } catch (error) {
-    console.error("Error al cargar la información del grupo:", error);
-    errorAlCargar.value = true;
-  } finally {
-    isLoading.value = false;
-  }
-});
+  });
+};
 </script>
 
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full">
-    <div v-if="isLoading" class="p-6 space-y-4">
-      <div class="h-8 w-3/4 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-      <div class="h-6 w-1/2 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-      <div class="h-10 w-full border-b border-gray-200 dark:border-gray-700 mt-2"></div>
-    </div>
-    
-    <div v-else-if="errorAlCargar" class="p-6 bg-red-50 dark:bg-red-900/50 rounded-lg">
-      <h1 class="text-xl font-bold text-red-700 dark:text-red-300">Error de Carga</h1>
-      <p class="text-red-600 dark:text-red-400">No se pudo obtener la información del grupo.</p>
-    </div>
+  <AuthorizationFallback :permissions="['todo-acceso-capacidad-terminal', 'ver-capacidad-terminal']">
 
-    <template v-else>
-      <header class="px-6 pt-5">
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 truncate">{{ tituloPrincipal }}</h2>
-        <p class="text-md text-gray-500 dark:text-gray-400">{{ subTitulo }}</p>
-      </header>
+    <div class="flex flex-col lg:flex-row px-6 gap-6">
 
-      <nav class="mt-4 px-6 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex space-x-4 sm:space-x-6 overflow-x-auto custom-scrollbar-nav">
-          <router-link
-            v-for="link in navLinks"
-            :key="link.text"
-            :to="link.to"
-            class="py-3 px-1 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-cetpro-dark dark:hover:text-cetpro-light hover:border-cetpro/50 transition-colors duration-200 whitespace-nowrap"
-            active-class="!text-cetpro !dark:text-cetpro-light !border-cetpro font-semibold"
-          >
-            {{ link.text }}
-          </router-link>
-        </div>
-      </nav>
-      
-      <div class="p-6 flex-grow">
-        <router-view />
+      <!-- FORMULARIO -->
+      <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+        <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
+          Agregar Capacidad Terminal
+        </h3>
+        <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+        <CapacidadTerminalSlider
+          :show="slider"
+          :idGrupo="id"
+          :capacidad="sliderData"
+          @hide="hideSlider"
+        />
       </div>
-    </template>
-  </div>
-</template>
 
-<style scoped>
-.custom-scrollbar-nav::-webkit-scrollbar {
-  height: 4px;
-}
-.custom-scrollbar-nav::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar-nav::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
-  border-radius: 20px;
-}
-.dark .custom-scrollbar-nav::-webkit-scrollbar-thumb {
-  background-color: #4b5563;
-}
-</style>
+      <!-- TABLA -->
+      <div class="w-full lg:w-2/3">
+        <Table>
+          <THead>
+            <Th>#</Th>
+            <Th>Nombre Capacidad</Th>
+            <Th>Fecha Inicio</Th>
+            <Th>Fecha Fin</Th>
+            <Th>Estado</Th>
+            <Th>Acciones</Th>
+          </THead>
+
+          <TBody>
+            <Tr
+              v-for="(capacidad, index) in capacidadStore.capacidadTerminal"
+              :key="capacidad.id"
+            >
+              <Td>{{ index + 1 }}</Td>
+              <Td>{{ capacidad?.nombre_capacidad }}</Td>
+              <Td>{{ capacidad?.fecha_inicio }}</Td>
+              <Td>{{ capacidad?.fecha_fin }}</Td>
+              <Td>
+                <span
+                  class="px-2 py-1 rounded text-xs font-semibold"
+                  :class="capacidad.status === 1 ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'"
+                >
+                  {{ capacidad.status === 1 ? 'Activo' : 'Inactivo' }}
+                </span>
+              </Td>
+              <Td class="align-middle">
+                <div class="flex items-center justify-center gap-1">
+                  <EditButton @click="showSlider(true, capacidad)" />
+                  <DeleteButton @click="onDelete(capacidad)" />
+                </div>
+              </Td>
+            </Tr>
+          </TBody>
+        </Table>
+      </div>
+
+    </div>
+  </AuthorizationFallback>
+</template>

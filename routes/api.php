@@ -555,27 +555,30 @@ Route::middleware('auth:sanctum')->group(function () {
         'gruposDisponibles',
     ])->middleware('permission:ver-grupos');
 
-
     //RUTA PARA CAPACIDAD TERMINAL
     Route::get('capacidad_terminal', [
         \App\Http\Controllers\CapacidadTerminalController::class,
+        'indexGrupo',
+    ])->middleware('permission:todo-acceso-capacidad-terminal|ver-capacidad-terminal');
+    Route::get('capacidad_terminal/{id}', [
+        \App\Http\Controllers\CapacidadTerminalController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-capacidad-terminal|ver-capacidad-terminal');
 
     Route::post('capacidad_terminal', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:todo-acceso-capacidad-terminal|crear-capacidad-terminal');
 
     Route::patch('capacidad_terminal/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
+    ])->middleware('permission:todo-acceso-capacidad-terminal|editar-capacidad-terminal');
 
     Route::delete('capacidad_terminal/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-acceso-capacidad-terminal|eliminar-capacidad-terminal');
 
 
     // RUTA PARA NOTA DE CAPACIDAD TERMINAL

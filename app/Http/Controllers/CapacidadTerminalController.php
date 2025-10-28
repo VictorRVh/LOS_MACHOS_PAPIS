@@ -15,7 +15,15 @@ class CapacidadTerminalController extends Controller
         $capacidades = CapacidadTerminal::with('grupo')->get();
         return response()->json($capacidades);
     }
+    public function indexGrupo($id)
+    {
+        $capacidades = CapacidadTerminal::with('grupo')
+            ->where('id_grupo', $id)
+            ->orderBy('fecha_inicio', 'desc')
+            ->get();
 
+        return response()->json($capacidades);
+    }
     // GET /api/capacidad-terminal/{id}
     public function show($id)
     {
@@ -27,7 +35,6 @@ class CapacidadTerminalController extends Controller
 
         return response()->json($capacidad);
     }
-
     // POST /api/capacidad-terminal
     public function store(Request $request)
     {

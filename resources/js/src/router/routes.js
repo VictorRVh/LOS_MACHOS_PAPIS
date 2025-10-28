@@ -221,27 +221,77 @@ export default [
         }
     },
     {
-        path: '/docente/modulo/:id/alumnos',
-        name: 'docente.modulo.alumnos',
-        component: () => import('../pages/Docente/DocenteAlumnosList.vue'),
+        path: '/docente/modulo/:id',
+        name: 'docente.modulo.detalle',
+        component: () => import('../pages/Docente/DocenteModuloDetalle.vue'),
         props: true,
+        redirect: route => ({ name: 'docente.modulo.detalle.documentos', params: { id: route.params.id } }),
         meta: {
             layout: 'dashboard',
             permissions: ['ver-estudiantes-asignados'],
             parent: 'moduloAsignado',
-            breadcrumb: [{ text: 'Mis Módulos', to: { name: 'moduloAsignado' } }, { text: 'Lista de Alumnos' }]
-        }
-    },
-     {
-        path: '/docente/modulo/:id/capacidades',
-        name: 'docente.grupo.capacidades',
-        component: () => import('../pages/Docente/DocenteCapacidadTerminal.vue'),
-        props: true,
-        meta: {
-            layout: 'dashboard',
-            permissions: [],
-            breadcrumb: [{ text: 'Mis Grupos' }, { text: 'Capacidad Terminal' }]
-        }
+            breadcrumb: async (route) => {
+                const breadcrumbStore = useBreadcrumbStore();
+                // Buscar el nombre del módulo en el store
+                let item = await breadcrumbStore.findTextById(route.params.id);
+                return {
+                    text: item?.name || "Cargando módulo...",
+                    to: { name: route?.name, params: { id: route.params.id } },
+                };
+            },
+            submenu: (route) => [
+                { text: 'Documentos', to: { name: 'docente.modulo.detalle.documentos', params: { id: route.params.id } } },
+                { text: 'Sesiones y asistencia', to: { name: 'docente.modulo.detalle.asistencia', params: { id: route.params.id } } },
+                { text: 'Calificaciones', to: { name: 'docente.modulo.detalle.calificaciones', params: { id: route.params.id } } },
+                { text: 'Prácticas', to: { name: 'docente.modulo.detalle.practicas', params: { id: route.params.id } } },
+                { text: 'Alumnos', to: { name: 'docente.modulo.detalle.alumnos', params: { id: route.params.id } } },
+                { text: 'Capacidades Terminales', to: { name: 'docente.modulo.detalle.capacidades', params: { id: route.params.id } } },
+            ]
+        },
+        children: [
+            {
+                path: 'documentos',
+                name: 'docente.modulo.detalle.documentos',
+                component: () => import('../pages/Docente/DocenteModuloDetalleDocumento.vue'),
+                props: true,
+                meta: { parent: 'docente.modulo.detalle', breadcrumb: { text: 'Documentos' } }
+            },
+            {
+                path: 'asistencia',
+                name: 'docente.modulo.detalle.asistencia',
+                component: () => import('../pages/Docente/DocenteModuloDetalleAsistencia.vue'),
+                props: true,
+                meta: { parent: 'docente.modulo.detalle', breadcrumb: { text: 'Sesiones y asistencia' } }
+            },
+            {
+                path: 'calificaciones',
+                name: 'docente.modulo.detalle.calificaciones',
+                component: () => import('../pages/Docente/DocenteCapacidadTerminal.vue'),
+                props: true,
+                meta: { parent: 'docente.modulo.detalle', breadcrumb: { text: 'Calificaciones' } }
+            },
+            {
+                path: 'practicas',
+                name: 'docente.modulo.detalle.practicas',
+                component: () => import('../pages/Docente/DocenteAlumnosList.vue'),
+                props: true,
+                meta: { parent: 'docente.modulo.detalle', breadcrumb: { text: 'Prácticas' } }
+            },
+            {
+                path: 'alumnos',
+                name: 'docente.modulo.detalle.alumnos',
+                component: () => import('../pages/Docente/DocenteAlumnosList.vue'),
+                props: true,
+                meta: { parent: 'docente.modulo.detalle', breadcrumb: { text: 'Alumnos' } }
+            },
+            {
+                path: 'capacidades',
+                name: 'docente.modulo.detalle.capacidades',
+                component: () => import('../pages/Docente/DocenteCapacidadTerminal.vue'),
+                props: true,
+                meta: { parent: 'docente.modulo.detalle', breadcrumb: { text: 'Capacidades Terminales' } }
+            },
+        ]
     },
     {
         path: '/documentos',
@@ -267,10 +317,10 @@ export default [
     {
         path: '/notificaciones',
         name: 'notificaciones.index',
-        component: () => import('../pages/Notificacion.vue'), 
+        component: () => import('../pages/Notificacion.vue'),
         meta: {
             layout: 'dashboard',
-            permissions: [], 
+            permissions: [],
             breadcrumb: [{ text: 'Todas las Notificaciones', to: { name: 'notificaciones.index' } }]
         }
     },
@@ -285,6 +335,6 @@ export default [
             breadcrumb: [{ text: 'Mis Grupos' }, { text: 'Programación de Sesiones' }]
         }
     },
-   
+
 
 ];

@@ -6,7 +6,7 @@ import FormInput from "../../ui/FormInput.vue";
 import CheckBox from "../../ui/CheckBox.vue";
 import Button from "../../ui/Button.vue";
 import BaseSelectGrupo from "../../ui/BaseSelectGrupo.vue";
-
+import FormLabelError from "../../ui/FormLabelError.vue";
 import useModalToast from "../../../composables/useModalToast";
 import useValidation from "../../../composables/useValidation";
 import useHttpRequest from "../../../composables/useHttpRequest";
@@ -57,20 +57,36 @@ const tiposEntrega = [
   { id: "99", nombre: "Otro" },
 ];
 
+
+yup.setLocale({
+  mixed: {
+    required: 'Este campo es obligatorio.',
+  },
+  string: {
+    email: 'Debe ser un correo válido.',
+  },
+  date: {
+    min: 'La fecha no puede ser anterior a ${min}',
+    max: 'La fecha no puede ser posterior a ${max}',
+    typeError: 'Debe ser una fecha válida',
+  },
+});
+
+
 const schema = yup.object().shape({
   id_periodo: yup.string().required("El periodo es requerido."),
   tipo_entrega: yup.string().required("El tipo de entrega es requerido."),
-  fecha_inicio: yup.date().required("La fecha de inicio es requerida."),
-  fecha_fin: yup
-    .date()
+  fecha_inicio: yup.date().required("La fecha de inicio es requerida.").typeError("Debe ingresar una fecha válida"),
+  fecha_fin: yup.date()
     .required("La fecha de fin es requerida.")
-    .min(yup.ref("fecha_inicio"), "La fecha de fin no puede ser anterior a la de inicio."),
-  // Si el tipo es "Otro", nombre_entrega es obligatorio
+    .min(yup.ref("fecha_inicio"), "La fecha de fin no puede ser anterior a la de inicio.")
+    .typeError("Debe ingresar una fecha válida"),
   nombre_entrega: yup.string().when("tipo_entrega", {
     is: (val) => val == "99",
     then: (schema) => schema.required("Debe ingresar el nombre de la entrega."),
   }),
 });
+
 
 const requiredPermissions = computed(() => {
   return props.comision?.id
@@ -182,10 +198,11 @@ const onSubmit = async () => {
     }
 
     if (response) {
+      resetForm();
       showToast(`Programación ${isEditing.value ? "actualizada" : "creada"} con éxito.`, "success");
       emit("form-submitted");
       await programacionDocumento.loadgetProgramacionSubidos(props.selectedPeriodoId);
-      resetForm();
+      
     }
   } catch (error) {
     console.log(error)
@@ -206,30 +223,34 @@ const onSubmit = async () => {
       <form @submit.prevent="onSubmit" class="space-y-4">
         <!-- Periodo -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Periodo Académico</label>
-          <BaseSelectGrupo v-model="formData.id_periodo" :options="periodos" label="nombre_periodo" value-prop="id"
+        <FormLabelError label="Periodo Académico *" :error="formErrors.id_periodo">
+        <BaseSelectGrupo v-model="formData.id_periodo" :options="periodos" label="nombre_periodo" value-prop="id"
             placeholder="Seleccione un Periodo" />
+        </FormLabelError>
+      
         </div>
 
         <!-- ✅ Tipo de entrega -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Entrega *</label>
-          <BaseSelectGrupo v-model="formData.tipo_entrega" :options="tiposEntrega" label="nombre" value-prop="id"
-            placeholder="Seleccione tipo de entrega" :error-message="formErrors.tipo_entrega" />
+        <FormLabelError label="Tipo de Entrega *" :error="formErrors.tipo_entrega">
+                  <BaseSelectGrupo v-model="formData.tipo_entrega" :options="tiposEntrega" label="nombre" value-prop="id"
+            placeholder="Seleccione tipo de entrega"  />
+        </FormLabelError>
+  
         </div>
 
         <!-- 👇 Campo dinámico si elige “Otro” -->
         <div v-if="formData.tipo_entrega == '99'">
           <FormInput v-model="formData.nombre_entrega" label="Nombre de la Entrega *"
-            placeholder="Ej: Subida de proyectos, Entrega final, etc." :error-message="formErrors.nombre_entrega" />
+            placeholder="Ej: Subida de proyectos, Entrega final, etc." :error="formErrors.nombre_entrega" />
         </div>
 
         <!-- Fechas -->
         <div class="grid grid-cols-2 gap-4">
           <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio *" type="date"
-            :error-message="formErrors.fecha_inicio" />
+            :error="formErrors.fecha_inicio" />
           <FormInput v-model="formData.fecha_fin" label="Fecha de Fin *" type="date"
-            :error-message="formErrors.fecha_fin" />
+            :error="formErrors.fecha_fin" />
         </div>
 
         <!-- Publicar -->
@@ -238,7 +259,7 @@ const onSubmit = async () => {
         <!-- Botones -->
         <div class="flex gap-2 pt-2">
           <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Programación'" type="submit"
-            :loading="saving || updating" class="w-full" />
+            :loading="saving || updating" class="w-full" :disabled="saving || updating" />
           <Button v-if="isEditing" title="Cancelar" variant="outline" @click="resetForm" />
         </div>
       </form>

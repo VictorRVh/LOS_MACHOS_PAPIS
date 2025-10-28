@@ -25,6 +25,7 @@ const documentoProgramado = useProgramacionAdmintore();
 const { showToast, showConfirmModal } = useModalToast();
 const { destroy, loading } = useHttpRequest("/entrega_docente_admin");
 
+const { update: updateDocente, updating } = useHttpRequest('crear_grupos');
 // 🔹 Estados
 const selectedPeriodo = ref(null);
 const programaciones = ref([]);
@@ -129,22 +130,75 @@ const handleFormSubmitted = async () => {
 };
 
 const onDelete = (prog) => {
-  showConfirmModal("¿Seguro que quieres eliminar esta programación?", async (confirmed) => {
-    if (!confirmed) return;
-    try {
-      await destroy(prog.id);
-      await fetchProgramaciones(selectedPeriodo.value);
-      showToast("Programación eliminada.", "success");
-      if (programacionParaEditar.value?.id === prog.id) resetEditingState();
-    } catch (error) {
-      showToast("Error al eliminar.", "error");
+
+  showConfirmModal(
+    null,
+    async (confirmed) => {
+      if (!confirmed) return;
+
+      try {
+        const response = await destroy(prog.id);
+
+        if (!response) {
+          return showToast("No se puede eliminar la programacion porque ya fue programada para los grupos.", "error");
+        }
+
+        showToast("Programación eliminada.", "success");
+        await fetchProgramaciones(selectedPeriodo.value);
+
+        if (programacionParaEditar.value?.id === prog.id) resetEditingState();
+      } catch (error) {
+        showToast("Error al eliminar.", "error");
+      }
     }
-  });
+  );
 };
 
 const createSubGrupos = (prog) => {
+  showConfirmModal(
+    {
+      title: "Confirmar publicación",
+    message: "¿Deseas publicar esta programación para todos los grupos?",
+    actionButton: {
+      class: "bg-emerald-600 hover:bg-emerald-700",
+      text: "Sí, publicar",
+    },
+    returnButton: {
+      class: "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600",
+      text: "Cancelar",
+    },
+    },
+    async (confirmed) => {
+      if (!confirmed) return;
 
-}
+      try {
+        const response = await updateDocente(prog.id);
+
+        if (!response) {
+          showToast(
+            "No se puede publicar la programación porque ya fue asignada a los grupos.",
+            "warning"
+          );
+          return;
+        }
+
+        showToast("Programación publicada correctamente.", "success");
+        await fetchProgramaciones(selectedPeriodo.value);
+
+        if (programacionParaEditar.value?.id === prog.id) {
+          resetEditingState();
+        }
+      } catch (error) {
+        console.error(error);
+        const msg =
+          error.response?.data?.message ||
+          "Ocurrió un error al intentar publicar la programación.";
+        showToast(msg, "error");
+      }
+    }
+  );
+};
+
 </script>
 
 
@@ -197,7 +251,7 @@ const createSubGrupos = (prog) => {
                 <Td>
                   <p
                     class="font-semibold text-gray-800 dark:text-gray-200 hover:text-cetpro dark:hover:text-cetpro-light">
-                    {{ prog.tipo_entrega }}
+                    {{ prog.nombre_entrega }}
                   </p>
                 </Td>
                 <Td class="font-mono text-xs">{{ prog.fecha_inicio }} - {{ prog.fecha_fin }}</Td>
@@ -215,9 +269,8 @@ const createSubGrupos = (prog) => {
                 </Td>
                 <Td class="text-center">
                   <MenuTable :actions="{ view: true, edit: true, custom1: true, delete: true }"
-                    :labels="{ custom1: 'Sub Programaciones' }"
-                    entity-label="entrega" @view="verDetalleEntrega(prog)" @edit="editProgramacion(prog)"
-                    @delete="onDelete(prog)" @custom1="() => createSubGrupos(prog)" />
+                    :labels="{ custom1: 'Sub Programaciones' }" entity-label="entrega" @view="verDetalleEntrega(prog)"
+                    @edit="editProgramacion(prog)" @delete="onDelete(prog)" @custom1="() => createSubGrupos(prog)" />
 
                 </Td>
 

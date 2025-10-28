@@ -957,3 +957,17 @@ Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
 });
 
 Route::post('/carpetas-grupo/crear/{id_grupo}', [CarpetasGrupoDriveController::class, 'crearCarpetaGrupo']);
+
+Route::post('/google/calendar-notifications', [GoogleCalendarWebhookController::class, 'handle']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/actividades-recientes', function () {
+        return \App\Models\ActividadesRecientes::latest('fecha')->take(5)->get();
+    })->middleware('permission:todo-acceso-permisos|ver-permisos');
+    
+    Route::get('/google/subscribe-calendar', [
+        \App\Http\Controllers\EntregaDocenteAdminController::class, 
+        'subscribeToCalendarNotifications'
+    ])->middleware('permission:todo-acceso-permisos');
+});
+

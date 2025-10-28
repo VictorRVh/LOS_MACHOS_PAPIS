@@ -75,7 +75,7 @@ class PeriodoController extends Controller
 
                 // 4️⃣ Guardar también en carpetas_periodo_drive
                 CarpetasPeriodoDrive::create([
-                    'id_periodo'     => $periodo->id,
+                    'id_periodo' => $periodo->id,
                     'drive_folder_id' => $data->id,
                     'nombre_carpeta' => $periodo->nombre_periodo,
                 ]);
@@ -108,6 +108,7 @@ class PeriodoController extends Controller
     }
 
     // Actualizar un periodo
+    // Actualizar un periodo
     public function update(Request $request, $id)
     {
         $periodo = Periodo::find($id);
@@ -121,9 +122,41 @@ class PeriodoController extends Controller
             'status' => 'sometimes|in:0,1,2,3',
         ]);
 
+        // Actualizar datos del periodo en BD
         $periodo->update($request->all());
+
+        // Si se envió un nuevo nombre, renombrar carpeta en Drive
+        if ($request->has('nombre_periodo')) {
+            try {
+                $carpetaDrive = CarpetasPeriodoDrive::where('id_periodo', $periodo->id)->first();
+
+                if ($carpetaDrive && $carpetaDrive->drive_folder_id) {
+                    $driveController = new GoogleDriveController();
+
+                    $renameRequest = new Request([
+                        'newName' => $request->nombre_periodo,
+                    ]);
+
+                    $response = $driveController->renameFile($renameRequest, $carpetaDrive->drive_folder_id);
+
+                    if ($response->status() === 200) {
+                        $data = $response->getData();
+                        // Actualizar nombre de la carpeta en BD
+                        $carpetaDrive->update([
+                            'nombre_carpeta' => $data->name,
+                        ]);
+                    } else {
+                        \Log::error('❌ Error al renombrar carpeta en Drive: ' . $response->getContent());
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error('⚠️ Error al intentar renombrar carpeta del periodo en Drive: ' . $e->getMessage());
+            }
+        }
+
         return response()->json($periodo);
     }
+
 
     // Eliminar un periodo
     public function destroy($id)

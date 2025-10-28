@@ -67,7 +67,9 @@ const useHttpRequest = (path = '') => {
             return null;
         } catch (error) {
             saving.value = false;
-            return handleError(error, null, callback);
+            // return handleError(error, null, callback);
+            handleError(error, null, callback);
+            throw error;
         }
     };
 

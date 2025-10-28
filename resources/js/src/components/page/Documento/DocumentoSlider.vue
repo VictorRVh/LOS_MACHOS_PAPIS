@@ -44,8 +44,6 @@ const initialFormData = () => ({
   tipo_entrega: "",
   fecha_inicio: "",
   fecha_fin: "",
-  mostrar: 0,
-  sub_grupos: 0,
 });
 
 const formData = ref(initialFormData());
@@ -85,19 +83,46 @@ watch(
   () => props.programacionToEdit,
   (newVal) => {
     if (newVal) {
-      formData.value = {
-        ...newVal,
-        id_periodo: newVal.id_periodo_academico,
+      // 🔹 Copiar valores base
+      formData.value = Object.entries(initialFormData()).reduce((r, [key, val]) => {
+        if (newVal[key]) return { ...r, [key]: newVal[key] };
+        return { ...r, [key]: val };
+      }, {});
+
+      // 🔹 Autoasignar periodo actual
+      formData.value.id_periodo = props.selectedPeriodoId;
+
+      // 🔹 Limpiar hora de las fechas
+      const takeDateOnly = (str) => {
+        if (!str) return "";
+        const datePart = String(str).split(" ")[0].split("T")[0];
+        if (datePart.includes("/")) {
+          const [d, m, y] = datePart.split("/");
+          return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+        }
+        return datePart;
       };
+
+      formData.value.fecha_inicio = takeDateOnly(newVal.fecha_inicio);
+      formData.value.fecha_fin = takeDateOnly(newVal.fecha_fin);
+
+      // 🔹 Si el tipo_entrega viene como número o string, asegurar formato correcto
+      formData.value.tipo_entrega = String(newVal.tipo_entrega);
+
+      // 🔹 Buscar el nombre correspondiente según tipo_entrega
+      const tipo = tiposEntrega.find(t => t.id === formData.value.tipo_entrega);
+      formData.value.nombre_entrega = tipo ? tipo.nombre : (newVal.nombre_entrega || "");
+
       isEditing.value = true;
       formErrors.value = {};
-      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       resetForm();
     }
   },
   { deep: true }
 );
+
+
 
 // 🧹 Reset
 const resetForm = () => {
@@ -133,6 +158,21 @@ const onSubmit = async () => {
   }
   formErrors.value = {};
 
+  const now = new Date();
+  const horaActual = now.toTimeString().slice(0, 8);
+  const horaFin = "23:59:59";
+
+  const formatDateTime = (fecha, hora) => {
+    const date = new Date(fecha);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hora}`;
+  };
+
+  data.fecha_inicio = formatDateTime(data.fecha_inicio, horaActual);
+  data.fecha_fin = formatDateTime(data.fecha_fin, horaFin);
+
   try {
     let response;
     if (isEditing.value) {
@@ -148,7 +188,9 @@ const onSubmit = async () => {
       resetForm();
     }
   } catch (error) {
-    showToast("Ocurrió un error al guardar.", "error");
+    console.log(error)
+    const msg = error.response?.data?.message || 'Error al subir el archivo';
+    showToast(msg, 'error');
   }
 };
 </script>
@@ -165,61 +207,38 @@ const onSubmit = async () => {
         <!-- Periodo -->
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Periodo Académico</label>
-          <BaseSelectGrupo
-            v-model="formData.id_periodo"
-            :options="periodos"
-            label="nombre_periodo"
-            value-prop="id"
-            placeholder="Seleccione un Periodo"
-          />
+          <BaseSelectGrupo v-model="formData.id_periodo" :options="periodos" label="nombre_periodo" value-prop="id"
+            placeholder="Seleccione un Periodo" />
         </div>
 
         <!-- ✅ Tipo de entrega -->
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Entrega *</label>
-          <BaseSelectGrupo
-            v-model="formData.tipo_entrega"
-            :options="tiposEntrega"
-            label="nombre"
-            value-prop="id"
-            placeholder="Seleccione tipo de entrega"
-            :error-message="formErrors.tipo_entrega"
-          />
+          <BaseSelectGrupo v-model="formData.tipo_entrega" :options="tiposEntrega" label="nombre" value-prop="id"
+            placeholder="Seleccione tipo de entrega" :error-message="formErrors.tipo_entrega" />
         </div>
 
         <!-- 👇 Campo dinámico si elige “Otro” -->
         <div v-if="formData.tipo_entrega == '99'">
-          <FormInput
-            v-model="formData.nombre_entrega"
-            label="Nombre de la Entrega *"
-            placeholder="Ej: Subida de proyectos, Entrega final, etc."
-            :error-message="formErrors.nombre_entrega"
-          />
+          <FormInput v-model="formData.nombre_entrega" label="Nombre de la Entrega *"
+            placeholder="Ej: Subida de proyectos, Entrega final, etc." :error-message="formErrors.nombre_entrega" />
         </div>
 
         <!-- Fechas -->
         <div class="grid grid-cols-2 gap-4">
-          <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio *" type="date" :error-message="formErrors.fecha_inicio" />
-          <FormInput v-model="formData.fecha_fin" label="Fecha de Fin *" type="date" :error-message="formErrors.fecha_fin" />
+          <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio *" type="date"
+            :error-message="formErrors.fecha_inicio" />
+          <FormInput v-model="formData.fecha_fin" label="Fecha de Fin *" type="date"
+            :error-message="formErrors.fecha_fin" />
         </div>
 
         <!-- Publicar -->
-        <div class="flex items-center space-x-3 pt-2">
-          <CheckBox v-model="formData.mostrar" />
-          <div>
-            <label class="font-medium text-gray-800 dark:text-gray-200">Publicar para docentes</label>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Al desmarcar, quedará como borrador.</p>
-          </div>
-        </div>
+      
 
         <!-- Botones -->
         <div class="flex gap-2 pt-2">
-          <Button
-            :title="isEditing ? 'Guardar Cambios' : 'Crear Programación'"
-            type="submit"
-            :loading="saving || updating"
-            class="w-full"
-          />
+          <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Programación'" type="submit"
+            :loading="saving || updating" class="w-full" />
           <Button v-if="isEditing" title="Cancelar" variant="outline" @click="resetForm" />
         </div>
       </form>

@@ -232,6 +232,17 @@ export default [
             breadcrumb: [{ text: 'Mis Módulos', to: { name: 'moduloAsignado' } }, { text: 'Lista de Alumnos' }]
         }
     },
+     {
+        path: '/docente/modulo/:id/capacidades',
+        name: 'docente.grupo.capacidades',
+        component: () => import('../pages/Docente/DocenteCapacidadTerminal.vue'),
+        props: true,
+        meta: {
+            layout: 'dashboard',
+            permissions: [],
+            breadcrumb: [{ text: 'Mis Grupos' }, { text: 'Capacidad Terminal' }]
+        }
+    },
     {
         path: '/documentos',
         name: 'documentos',
@@ -274,5 +285,6 @@ export default [
             breadcrumb: [{ text: 'Mis Grupos' }, { text: 'Programación de Sesiones' }]
         }
     },
+   
 
 ];

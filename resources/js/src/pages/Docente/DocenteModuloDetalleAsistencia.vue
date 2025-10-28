@@ -218,8 +218,6 @@ const eliminarArchivo = async (carpeta, archivo) => {
               :class="{ 'rotate-180': !carpetasAbiertas[carpeta.id] }" />
           </div>
         </div>
-
-
         <!-- Archivos -->
         <transition name="fade">
           <div v-if="carpetasAbiertas[carpeta.id]" class="px-6 pb-3 flex flex-wrap gap-2">

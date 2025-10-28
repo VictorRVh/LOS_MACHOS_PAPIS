@@ -84,6 +84,6 @@ class CapacidadTerminalController extends Controller
 
         $capacidad->delete();
 
-        return response()->json(['message' => 'Capacidad eliminada correctamente']);
+        return response()->json(['message' => 'Capacidad eliminada correctamente'],204);
     }
 }

@@ -3,8 +3,8 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { ClockIcon, ArrowRightIcon } from '@heroicons/vue/24/outline';
 import useHttpRequest from '../composables/useHttpRequest'; 
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+///import { formatDistanceToNow } from 'date-fns';
+// import { es } from 'date-fns/locale';
 
 const props = defineProps({
   show: { type: Boolean, default: false }
@@ -26,7 +26,7 @@ const fetchNotifications = async () => {
           icon: ClockIcon,
           title: actividad.accion || 'Actividad del Sistema',
           description: actividad.descripcion,
-          time: formatDistanceToNow(new Date(actividad.fecha), { addSuffix: true, locale: es }),
+          time: new Date(actividad.fecha),
           isRead: false,
           route: { name: 'notificaciones.index' } 
       }));

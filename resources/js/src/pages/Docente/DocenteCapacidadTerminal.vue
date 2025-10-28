@@ -20,7 +20,6 @@ const navLinks = [
   { text: 'Calificaciones', to: { name: 'grupo.calificaciones', params: { id: groupId } } },
   { text: 'Prácticas', to: { name: 'grupo.practicas', params: { id: groupId } } },
   { text: 'Alumnos', to: { name: 'grupo.alumnos', params: { id: groupId } } },
-  { text: 'Capacidades Terminales', to: { name: 'grupo.capacidades', params: { id: groupId } } },
 ];
 
 

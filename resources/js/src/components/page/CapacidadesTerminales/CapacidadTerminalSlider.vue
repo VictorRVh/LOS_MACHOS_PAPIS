@@ -5,6 +5,7 @@ import Button from "../../ui/Button.vue";
 import AuthorizationFallback from "../../../components/page/AuthorizationFallback.vue";
 import useValidation from "../../../composables/useValidation";
 import useHttpRequest from "../../../composables/useHttpRequest";
+import CheckBox from "../../ui/CheckBox.vue";
 import useModalToast from "../../../composables/useModalToast";
 import * as yup from "yup";
 import useCapacidadTerminalStore from "../../../store/CapacidadTerminal/UseCapacidadTerminalStore";
@@ -43,7 +44,7 @@ const initialFormData = () => ({
     fecha_inicio: "",
     fecha_fin: "",
     id_grupo: props.idGrupo,
-    status: 1,
+    status: 0,
 });
 
 const formData = ref(initialFormData());
@@ -68,20 +69,31 @@ watch(
     { immediate: true }
 );
 
+yup.setLocale({
+    mixed: {
+        required: 'Este campo es obligatorio.',
+    },
+    string: {
+        email: 'Debe ser un correo válido.',
+    },
+    date: {
+        min: 'La fecha no puede ser anterior a ${min}',
+        max: 'La fecha no puede ser posterior a ${max}',
+        typeError: 'Debe ser una fecha válida',
+    },
+});
+
 // Validación con Yup
 const schema = yup.object().shape({
     nombre_capacidad: yup
         .string()
         .nullable()
         .required("El nombre de la capacidad es obligatorio."),
-    fecha_inicio: yup
-        .date()
-        .nullable()
-        .required("La fecha de inicio es obligatoria."),
-    fecha_fin: yup
-        .date()
-        .nullable()
-        .required("La fecha de fin es obligatoria."),
+    fecha_inicio: yup.date().required("La fecha de inicio es requerida.").typeError("Debe ingresar una fecha válida"),
+    fecha_fin: yup.date()
+        .required("La fecha de fin es requerida.")
+        .min(yup.ref("fecha_inicio"), "La fecha de fin no puede ser anterior a la de inicio.")
+        .typeError("Debe ingresar una fecha válida"),
     status: yup
         .number()
         .oneOf([0, 1])
@@ -106,11 +118,13 @@ const onSubmit = async () => {
         : await createCapacidad(data);
 
     if (response?.id) {
+        formData.value = initialFormData();
+        formErrors.value = {};
         showToast(
             `Capacidad terminal ${isEditing.value ? "editada" : "creada"} exitosamente.`
         );
         await capacidadStore.loadCapacidadTerminal(props.idGrupo);
-        formData.value = initialFormData();
+
         emit("hide");
     }
 };
@@ -118,7 +132,12 @@ const onSubmit = async () => {
 
 <template>
     <AuthorizationFallback :permissions="requiredPermissions">
-        <div class="mt-2 space-y-2 font-inter">
+        <h2 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
+            {{ capacidad?.id ? "Editar Capacidad Terminal" : "Agregar Capacidad Terminal" }}
+        </h2>
+        <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+
+        <div class="mt-2 space-y-3 font-inter">
             <FormInput v-model="formData.nombre_capacidad" :focus="show" label="Nombre de la capacidad terminal"
                 :error="formErrors?.nombre_capacidad" required />
 
@@ -130,22 +149,13 @@ const onSubmit = async () => {
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
-                    Estado
-                </label>
-                <select v-model="formData.status" class="w-full border rounded-md p-2 dark:bg-gray-700 dark:text-white">
-                    <option :value="1">Activo</option>
-                    <option :value="0">Inactivo</option>
-                </select>
-                <p v-if="formErrors?.status" class="text-red-500 text-sm mt-1">
-                    {{ formErrors.status }}
-                </p>
+                <CheckBox v-model="formData.status" label="Estado" class="flex items-center" />
             </div>
 
             <div class="flex gap-2 mt-3">
                 <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Capacidad'"
-                    :loading-title="isEditing ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
-                    @click="onSubmit" class="!w-full" />
+                    :loading-title="isEditing ? 'Guardando...' : 'Creando...'" :disabled="saving || updating"
+                    :loading="saving || updating" @click="onSubmit" class="!w-full" />
                 <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"
                     class="bg-red-500 hover:bg-red-600 text-white px-4" />
             </div>

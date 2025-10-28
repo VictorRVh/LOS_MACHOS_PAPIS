@@ -17,12 +17,11 @@ const breadcrumb = useBreadcrumbStore();
 const navLinks = [
   { text: 'Documentos', to: { name: 'docente.modulo.detalle.documentos', params: { id: groupId } } },
   { text: 'Sesiones y asistencia', to: { name: 'docente.modulo.detalle.asistencia', params: { id: groupId } } },
-  { text: 'Calificaciones', to: { name: 'grupo.calificaciones', params: { id: groupId } } },
-  { text: 'Prácticas', to: { name: 'grupo.practicas', params: { id: groupId } } },
-  { text: 'Alumnos', to: { name: 'grupo.alumnos', params: { id: groupId } } },
-  { text: 'Capacidades Terminales', to: { name: 'grupo.capacidades', params: { id: groupId } } },
+  { text: 'Calificaciones', to: { name: 'docente.modulo.detalle.calificaciones', params: { id: groupId } } },
+  { text: 'Prácticas', to: { name: 'docente.modulo.detalle.practicas', params: { id: groupId } } },
+  { text: 'Alumnos', to: { name: 'docente.modulo.detalle.alumnos', params: { id: groupId } } },
+  { text: 'Capacidades Terminales', to: { name: 'docente.modulo.detalle.capacidades', params: { id: groupId } } },
 ];
-
 
 const tituloPrincipal = computed(() => {
   if (!infoGrupo.value) return 'Grupo';

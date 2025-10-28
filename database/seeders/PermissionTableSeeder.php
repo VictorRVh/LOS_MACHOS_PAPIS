@@ -138,7 +138,14 @@ class PermissionTableSeeder extends Seeder
             'editar-programacion-documentos-subidos',
             'eliminar-programacion-documentos-subidos',
             'icono-programacion-documentos-subidos',
-            
+
+                         // PERMISOS DE DE PROGRAMACION PARA DOCENTES
+            'todo-acceso-capacidad-terminal',
+            'ver-capacidad-terminal',
+            'crear-capacidad-terminal',
+            'editar-capacidad-terminal',
+            'eliminar-capacidad-terminal',
+                
 
             'ver-perfil-docente',
             'editar-perfil-docente',

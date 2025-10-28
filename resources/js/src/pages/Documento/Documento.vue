@@ -48,7 +48,7 @@ onMounted(async () => {
     const ultimoPeriodo = periodoStore.periodos.at(-1);
     if (ultimoPeriodo) {
       selectedPeriodo.value = ultimoPeriodo.id;
-      await fetchProgramaciones(selectedPeriodo.value);
+      //await fetchProgramaciones(selectedPeriodo.value);
     }
   } catch (error) {
     console.error("Error al cargar periodos o programaciones:", error);
@@ -138,7 +138,7 @@ const onDelete = (prog) => {
 
       try {
         const response = await destroy(prog.id);
-
+        console.log("entrada: ", response)
         if (!response) {
           return showToast("No se puede eliminar la programacion porque ya fue programada para los grupos.", "error");
         }
@@ -158,15 +158,15 @@ const createSubGrupos = (prog) => {
   showConfirmModal(
     {
       title: "Confirmar publicación",
-    message: "¿Deseas publicar esta programación para todos los grupos?",
-    actionButton: {
-      class: "bg-emerald-600 hover:bg-emerald-700",
-      text: "Sí, publicar",
-    },
-    returnButton: {
-      class: "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600",
-      text: "Cancelar",
-    },
+      message: "¿Deseas publicar esta programación para todos los grupos?",
+      actionButton: {
+        class: "bg-emerald-600 hover:bg-emerald-700",
+        text: "Sí, publicar",
+      },
+      returnButton: {
+        class: "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600",
+        text: "Cancelar",
+      },
     },
     async (confirmed) => {
       if (!confirmed) return;
@@ -268,9 +268,15 @@ const createSubGrupos = (prog) => {
                     class="px-2 py-1 text-xs rounded-full font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300">Borrador</span>
                 </Td>
                 <Td class="text-center">
-                  <MenuTable :actions="{ view: true, edit: true, custom1: true, delete: true }"
-                    :labels="{ custom1: 'Sub Programaciones' }" entity-label="entrega" @view="verDetalleEntrega(prog)"
+                <Td class="text-center">
+                  <MenuTable :actions="{
+                    view: prog.mostrar !== 0,     
+                    edit: true,
+                    custom1: prog.mostrar === 0,    
+                    delete: true
+                  }" :labels="{ custom1: 'Sub Programaciones' }" entity-label="entrega" @view="verDetalleEntrega(prog)"
                     @edit="editProgramacion(prog)" @delete="onDelete(prog)" @custom1="() => createSubGrupos(prog)" />
+                </Td>
 
                 </Td>
 

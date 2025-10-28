@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\CarpetasEntregaDrive;
 use App\Models\EntregaDocente;
 use App\Models\EntregaDocenteAdmin;
@@ -25,36 +24,53 @@ class EntregaDocenteAdminController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tipo_entrega'    => 'required|string|max:255',
-            'nombre_entrega'  => 'required|string|max:255',
-            'fecha_inicio'    => 'required|date',
-            'fecha_fin'       => 'required|date|after_or_equal:fecha_inicio',
-            'id_periodo'      => 'required|exists:periodo,id',
-            'mostrar'         => 'nullable|boolean',
-            'sub_grupos'      => 'nullable|boolean',
-            'observacion'     => 'nullable|string',
+            'tipo_entrega' => 'required|string|max:255',
+            'nombre_entrega' => 'required|string|max:255',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'id_periodo' => 'required|exists:periodo,id',
+            'mostrar' => 'nullable|boolean',
+            'sub_grupos' => 'nullable|boolean',
+            'observacion' => 'nullable|string',
         ]);
 
         // Buscar el periodo
         $periodo = Periodo::findOrFail($request->id_periodo);
+        if (!$periodo) {
+            return response()->json([
+                'message' => 'El periodo seleccionado no existe o fue eliminado.'
+            ], 404); // Not Found
+        }
 
-        // Crear solo la programación admin
+        // Verificar si hay grupos asociados al periodo
+        $gruposExistentes = Grupo::where('id_periodo', $periodo->id)->exists();
+
+        if (!$gruposExistentes) {
+
+            throw new \Exception('Error|No puedes Crear esta programació, por que aun no tieene grupos en este periodo--404', 13333);
+
+        }
+        // 🔹 Verificar si hay grupos en ese periodo
+
+
+        // Crear la entrega admin
         $adminEntrega = EntregaDocenteAdmin::create([
-            'id_periodo'     => $periodo->id,
-            'tipo_entrega'   => $request->tipo_entrega,
+            'id_periodo' => $periodo->id,
+            'tipo_entrega' => $request->tipo_entrega,
             'nombre_entrega' => $request->nombre_entrega,
-            'fecha_inicio'   => $request->fecha_inicio,
-            'fecha_fin'      => $request->fecha_fin,
-            'status'         => EntregaDocenteAdmin::STATUS_PENDIENTE,
-            'mostrar'        => 0,
-            'observacion'    => $request->observacion ?? '',
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_fin' => $request->fecha_fin,
+            'status' => EntregaDocenteAdmin::STATUS_PENDIENTE,
+            'mostrar' => 0,
+            'observacion' => $request->observacion ?? '',
         ]);
 
         return response()->json([
-            'message'          => 'Entrega creada en administración, pendiente de replicar a los grupos.',
+            'message' => 'Entrega creada en administración, pendiente de replicar a los grupos.',
             'entrega_admin_id' => $adminEntrega->id,
-        ]);
+        ], 201);
     }
+
 
     // Mostrar uno por ID
     public function show($id)
@@ -86,28 +102,56 @@ class EntregaDocenteAdminController extends Controller
     // Eliminar
     public function destroy($id)
     {
-        // 1. Buscar la programación
-        $entrega = EntregaDocenteAdmin::find($id);
+        try {
+            $entregaAdmin = EntregaDocenteAdmin::find($id);
 
-        if (!$entrega) {
-            return response()->json(['message' => 'Entrega no encontrada'], 404);
-        }
+            if (!$entregaAdmin) {
+                return response()->json(['message' => 'Entrega no encontrada'], 404);
+            }
+            $driveController = new GoogleDriveController();
+            $entregasDocentes = EntregaDocente::where('id_admin', $id)->get();
 
-        // 2. Verificar si tiene registros asociados en entrega_docente
-        $tieneEntregas = EntregaDocente::where('id_admin', $id)->exists();
+            foreach ($entregasDocentes as $entrega) {
+                $carpetas = CarpetasEntregaDrive::where('id_entrega_docente', $entrega->id)->get();
 
-        if ($tieneEntregas) {
+                foreach ($carpetas as $carpeta) {
+                    if ($carpeta->drive_folder_id) {
+                        try {
+                            $driveController->deleteFile($carpeta->drive_folder_id);
+                        } catch (\Exception $e) {
+                            return response()->json([
+                                'message' => 'No se pudo eliminar carpeta {$carpeta->drive_folder_id} en Drive:',
+                                'error' => $e->getMessage(),
+                            ], 500);
+                        }
+                    }
+
+                    $carpeta->delete();
+                }
+
+                if (method_exists($entrega, 'entregaRealizada')) {
+                    $entrega->entregaRealizada()->delete();
+                }
+
+                if (method_exists($entrega, 'sesiones')) {
+                    $entrega->sesiones()->delete();
+                }
+
+                $entrega->delete();
+            }
+            $entregaAdmin->delete();
+
             return response()->json([
-                'message' => 'No se puede eliminar la programación porque ya fue replicada en entrega_docente.'
-            ], 400);
+                'message' => 'Entrega y carpetas asociadas eliminadas correctamente.',
+            ], 204);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al eliminar la entrega y sus carpetas asociadas.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // 3. Si no hay registros asociados, eliminar
-        $entrega->delete();
-
-        return response()->json(['message' => 'Entrega eliminada correctamente'], 200);
     }
-
     // API DE PROGRAMACIOND DEL COORDINADOR
     public function indexByPeriodo($id_periodo)
     {
@@ -251,12 +295,12 @@ class EntregaDocenteAdminController extends Controller
 
             // 1. Crear entrega individual
             $entregaDocente = EntregaDocente::create([
-                'id_grupo'      => $grupo->id,
-                'fecha_inicio'  => $adminEntrega->fecha_inicio,
-                'fecha_fin'     => $adminEntrega->fecha_fin,
-                'estado'        => $adminEntrega->status,
-                'id_admin'      => $adminEntrega->id,
-                'observacion'   => $adminEntrega->observacion ?? '',
+                'id_grupo' => $grupo->id,
+                'fecha_inicio' => $adminEntrega->fecha_inicio,
+                'fecha_fin' => $adminEntrega->fecha_fin,
+                'estado' => $adminEntrega->status,
+                'id_admin' => $adminEntrega->id,
+                'observacion' => $adminEntrega->observacion ?? '',
             ]);
 
             // 2. Crear carpeta en Drive
@@ -265,7 +309,7 @@ class EntregaDocenteAdminController extends Controller
                 $folderName = strtoupper($adminEntrega->nombre_entrega);
 
                 $response = $driveController->createFolder(new Request([
-                    'folderName'     => $folderName,
+                    'folderName' => $folderName,
                     'parentFolderId' => $grupo->carpetaDrive->drive_folder_id,
                 ]));
 

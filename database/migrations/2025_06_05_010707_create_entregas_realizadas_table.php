@@ -15,7 +15,7 @@ return new class extends Migration
              $table->uuid('id')->primary();
             $table->uuid('id_entrega');
             $table->uuid('id_docente');
-            $table->string('archivo');
+            $table->string('archivo')->nullable();
             $table->timestamp('fecha_entrega');
             $table->string('observacion')->nullable();
 

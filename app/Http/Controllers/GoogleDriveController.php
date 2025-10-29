@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\EntregaDocente;
 use App\Models\EntregaDocenteAdmin;
+use App\Models\EntregasRealizadas;
+use App\Models\Grupo;
 use Carbon\Carbon;
 use Google_Client;
 use Google_Service_Drive;
@@ -174,30 +176,30 @@ class GoogleDriveController extends Controller
         }
     }
 
-    // public function uploadFile(Request $request)
-    // {
-    //     $request->validate(['file' => 'required|file', 'parentFolderId' => 'required|string']);
-    //     try {
-    //         $file = $request->file('file');
-    //         $fileMetadata = new \Google_Service_Drive_DriveFile([
-    //             'name' => $file->getClientOriginalName(),
-    //             'parents' => [$request->parentFolderId]
-    //         ]);
-    //         $content = file_get_contents($file->getRealPath());
-    //         $uploadedFile = $this->driveService->files->create($fileMetadata, [
-    //             'data' => $content,
-    //             'mimeType' => $file->getClientMimeType(),
-    //             'uploadType' => 'multipart',
-    //             'fields' => 'id, name',
-    //             'supportsAllDrives' => true
-    //         ]);
-    //         return response()->json($uploadedFile, 201);
-    //     } catch (Exception $e) {
-    //         return response()->json(['error' => 'No se pudo subir el archivo: ' . $e->getMessage()], 500);
-    //     }
-    // }
-
     public function uploadFile(Request $request)
+    {
+        $request->validate(['file' => 'required|file', 'parentFolderId' => 'required|string']);
+        try {
+            $file = $request->file('file');
+            $fileMetadata = new \Google_Service_Drive_DriveFile([
+                'name' => $file->getClientOriginalName(),
+                'parents' => [$request->parentFolderId]
+            ]);
+            $content = file_get_contents($file->getRealPath());
+            $uploadedFile = $this->driveService->files->create($fileMetadata, [
+                'data' => $content,
+                'mimeType' => $file->getClientMimeType(),
+                'uploadType' => 'multipart',
+                'fields' => 'id, name',
+                'supportsAllDrives' => true
+            ]);
+            return response()->json($uploadedFile, 201);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'No se pudo subir el archivo: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function uploadFileDocente(Request $request)
     {
         $request->validate([
             'file' => 'required|file',
@@ -207,32 +209,32 @@ class GoogleDriveController extends Controller
 
         try {
             // Buscar la entrega asociada (entrega_docente)
-            $entrega = EntregaDocente::with('entregaDocenteAdmin')->find($request->id_entrega);
+            $entrega = EntregaDocente::with(['entregaDocenteAdmin', 'grupo.docente'])
+                ->find($request->id_entrega);
 
             if (!$entrega) {
                 return response()->json(['error' => 'No se encontró la entrega asociada.'], 404);
             }
+
+            // 🔹 Verificamos que exista el grupo y el docente
+            $grupo = $entrega->grupo;
+            if (!$grupo || !$grupo->docente) {
+                return response()->json(['error' => 'No se encontró el grupo o el docente asociado.'], 404);
+            }
+
+            // Obtenemos el user_id del docente
+            $idDocente = $grupo->docente->user_id;
 
             // Verificar estado y fechas
             $ahora = now('America/Lima');
             $inicio = Carbon::parse($entrega->fecha_inicio)->startOfMinute();
             $fin = Carbon::parse($entrega->fecha_fin)->endOfMinute();
 
-            // Puedes verificar por estado o directamente por fecha
             if ($entrega->estado != EntregaDocenteAdmin::STATUS_ACTIVO) {
                 return response()->json(['error' => 'La entrega no está activa. No puede subir archivos.'], 403);
-                // throw new \Exception('Error|Comisión no encontrada--404', 13333);
             }
 
-            // if ($ahora->lt($inicio)) {
-            //     return response()->json(['error' => 'La entrega aún no ha iniciado.'], 403);
-            // }
-
-            // if ($ahora->gt($fin)) {
-            //     return response()->json(['error' => 'El plazo para subir documentos ha finalizado.'], 403);
-            // }
-
-            // Si pasa la validación, proceder con la subida
+            // Subida a Google Drive
             $file = $request->file('file');
             $fileMetadata = new \Google_Service_Drive_DriveFile([
                 'name' => $file->getClientOriginalName(),
@@ -248,14 +250,27 @@ class GoogleDriveController extends Controller
                 'supportsAllDrives' => true,
             ]);
 
+            // Actualizar estado en entrega_docente
             $entrega->update([
                 'cumplio' => 1,
-                // 'documento_admin' => $uploadedFile->id, // opcional
             ]);
 
-            return response()->json($uploadedFile, 201);
+            // Registrar en entregas_realizadas
+            EntregasRealizadas::create([
+                'id_entrega' => $entrega->id,
+                'id_docente' => $idDocente, // asegúrate que esta columna existe en entrega_docente
+                // 'archivo' => $uploadedFile->id,
+                'fecha_entrega' => $ahora,
+            ]);
+
+            return response()->json([
+                'message' => 'Archivo subido correctamente.',
+                'file' => $uploadedFile
+            ], 201);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'No se pudo subir el archivo: ' . $e->getMessage()], 500);
+            return response()->json([
+                'error' => 'No se pudo subir el archivo: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

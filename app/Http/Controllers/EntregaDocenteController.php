@@ -1,12 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Exports\ReporteEntregaDocenteExport;
 use Carbon\Carbon;
 use App\Models\EntregaDocenteAdmin;
 
 use App\Models\EntregaDocente;
 use Illuminate\Http\Request;
-
 use App\Models\CarpetasEntregaDrive;
 
 class EntregaDocenteController extends Controller
@@ -45,7 +46,7 @@ class EntregaDocenteController extends Controller
             'grupo.modulo:id,descripcion',
             'grupo.especialidad:id,id_especialidad',
             'grupo.especialidad.especialidadMadre:id,nombre_especialidad',
-            'carpeta:id,drive_folder_id,id_entrega_docente', // 👈 Agrega esto
+            'carpeta:id,drive_folder_id,id_entrega_docente',
         ])
             ->where('id_admin', $id_admin)
             ->get();
@@ -61,17 +62,18 @@ class EntregaDocenteController extends Controller
                 'documento_admin' => $item->documento_admin,
                 'observacion' => $item->observacion,
                 'cumplio' => $item->cumplio,
+                'fecha_aplazada' => Carbon::parse($item->fecha_aplazada)->format('d/m/Y H:i'),
+                'dias_aplazados' => $item->dias_aplazados,
                 // 'created_at' => $item->created_at,
 
-                // 👇 Aquí se devuelven las carpetas asociadas
                 'carpetas_drive' => optional($item->carpeta)->drive_folder_id,
 
                 'grupo_detalle' => [
                     'id' => $item->grupo->id,
                     'nombre_especialidad' =>
-                        $item->grupo->especialidad->especialidadMadre->nombre_especialidad ?? '',
+                    $item->grupo->especialidad->especialidadMadre->nombre_especialidad ?? '',
                     'nombre_modulo' =>
-                        $item->grupo->modulo->descripcion ?? '',
+                    $item->grupo->modulo->descripcion ?? '',
                     'nombre_docente' => $item->grupo->docente && $item->grupo->docente->user
                         ? $item->grupo->docente->user->name . ' ' .
                         $item->grupo->docente->user->apellido_paterno . ' ' .
@@ -88,6 +90,7 @@ class EntregaDocenteController extends Controller
             'total_programados' => $gruposProgramados->count(),
             'programacion' => [
                 'id' => $programacion->id,
+                'nombre_programacion' => $programacion->nombre_entrega,
                 'fecha_inicio' => Carbon::parse($programacion->fecha_inicio)->format('d/m/Y H:i'),
                 'fecha_fin' => Carbon::parse($programacion->fecha_fin)->format('d/m/Y H:i'),
                 'status' => $programacion->status,
@@ -125,29 +128,35 @@ class EntregaDocenteController extends Controller
             return response()->json(['message' => 'Entrega no encontrada'], 404);
         }
 
-        // 🧾 Validación
+        // Validación
         $request->validate([
             'observacion' => 'nullable|string|max:255',
-            'dias_aplazadas' => 'nullable|string|max:255',
+            'dias_aplazados' => 'nullable|string',
         ]);
 
-        // 🧩 Actualiza los demás campos
-        $data = $request->only([ 'observacion', 'dias_aplazadas']);
+        $data = $request->only(['observacion', 'dias_aplazados']);
 
-        // ⚙️ Si se aplazan días, actualizar automáticamente el estado
-        if ($request->filled('dias_aplazadas')) {
-            $data['fecha_aplazada'] = now();
-            $data['estado'] = 1;
+        // Si se aplican días aplazados
+        if ($request->filled('dias_aplazados')) {
+            $dias = (int) $request->dias_aplazados;
+
+            // Fecha aplazada con hora límite 23:59:59
+            $fechaAplazada = Carbon::now('America/Lima')
+                ->addDays($dias)
+                ->setTime(23, 59, 59);
+
+            $data['fecha_aplazada'] = $fechaAplazada;
+            $data['estado'] = 1; // activo o habilitado
         }
 
-        // 💾 Guardar cambios
         $entrega->update($data);
 
         return response()->json([
-            'message' => 'Entrega actualizada con éxito',
-            'programacion' => $entrega,
+            'message' => 'Entrega actualizada con éxito.',
+            'entrega' => $entrega
         ]);
     }
+
 
     // DELETE /api/entrega_docente/{id}
     public function destroy($id)
@@ -161,5 +170,41 @@ class EntregaDocenteController extends Controller
         $entrega->delete();
 
         return response()->json(['message' => 'Entrega eliminada correctamente']);
+    }
+
+    public function generarExcel(Request $request)
+    {
+        $idAdmin = $request->query('id_admin');
+
+        if (!$idAdmin) {
+            return response()->json(['error' => 'Debe enviar el parámetro id_admin'], 400);
+        }
+
+        try {
+            $export = new ReporteEntregaDocenteExport($idAdmin);
+            $contenido = $export->generarReporte();
+
+            // 🔹 DEBUG: Verificar tamaño del contenido
+            \Log::info('Tamaño del archivo Excel generado: ' . strlen($contenido) . ' bytes');
+
+            if (strlen($contenido) === 0) {
+                return response()->json(['error' => 'El contenido generado está vacío'], 500);
+            }
+
+            $nombreArchivo = 'reporte_entrega_docentes_' . date('Ymd_His') . '.xlsx';
+
+            return response($contenido)
+                ->header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                ->header('Content-Disposition', 'attachment; filename="' . $nombreArchivo . '"')
+                ->header('Cache-Control', 'max-age=0')
+                ->header('Content-Length', strlen($contenido)); // 🔹 Agregar tamaño
+
+        } catch (\Exception $e) {
+            \Log::error('Error generando Excel: ' . $e->getMessage());
+            return response()->json([
+                'error' => $e->getMessage(),
+                'linea' => $e->getLine()
+            ], 500);
+        }
     }
 }

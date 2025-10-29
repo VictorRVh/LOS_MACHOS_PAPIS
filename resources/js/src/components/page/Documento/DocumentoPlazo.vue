@@ -20,7 +20,7 @@ const props = defineProps({
         required: true,
     },
     load: {
-         type: String,
+        type: String,
         required: true,
     }
 });
@@ -37,10 +37,12 @@ const formData = ref({
     dias_aplazados: null,
 });
 
-// 📡 Watch: cada vez que cambia el grupo, recarga el formulario
+// Cada vez que cambia el grupo, recarga el formulario
 watch(
     () => props.grupo,
     (nuevoGrupo) => {
+        // console.log("Nuevo grupo recibido:", nuevoGrupo);
+
         if (nuevoGrupo) {
             formData.value = {
                 observacion: nuevoGrupo.observacion || "",
@@ -51,21 +53,21 @@ watch(
     { immediate: true }
 );
 
-// 📅 Si la fecha final ya pasó
-const fechaFinalPasada = computed(() => {
-    if (!props.grupo?.fecha_final) return false;
-    return new Date(props.grupo.fecha_final) < new Date();
+// Si la fecha final ya pasó
+const estadoFinalizado = computed(() => {
+
+    if (!props.grupo?.estado) return false;
+
+    const estado = props.grupo.estado;
+
+    return estado === 4;
 });
 
-// 🧾 Validación Yup
+// Validación Yup
 const schema = computed(() =>
     yup.object().shape({
         observacion: yup.string().nullable().max(255),
-        ...(fechaFinalPasada.value && {
-            dias_aplazados: yup
-                .string()
-                .required("Debe seleccionar los días de prórroga."),
-        }),
+        dias_aplazados: yup.string().required("Debe seleccionar los días de prórroga."),
     })
 );
 
@@ -82,7 +84,7 @@ const diasOptions = [
     { label: "5 días", value: "5" },
 ];
 
-// 🚀 Actualizar programación
+// Actualizar programación
 const onSubmit = async () => {
     if (updating.value) return;
 
@@ -100,9 +102,9 @@ const onSubmit = async () => {
             showToast("Datos actualizados correctamente.", "success");
             emit("hided");
 
-            // ✅ Refresca con el ID de la programación (no del grupo
-        await programacionStore.loadgetProgramacionSubidos(props.load);
-            
+            // Refresca con el ID de la programación (no del grupo
+            await programacionStore.loadgetProgramacionSubidos(props.load);
+
         }
     } catch (error) {
         console.error(error);
@@ -120,7 +122,8 @@ const onSubmit = async () => {
                 :error-message="formErrors.observacion" placeholder="Escribe alguna observación importante..." />
 
             <!-- SOLO SE MUESTRA SI LA FECHA FINAL YA PASÓ -->
-            <div v-if="fechaFinalPasada">
+            <div v-if="estadoFinalizado">
+
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                     Seleccione los días de prórroga para la entrega del grupo:
                     <span class="font-bold">
@@ -130,7 +133,7 @@ const onSubmit = async () => {
                 </p>
 
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Días de Prórroga *
+                    ¿Cúantos dias le darás plazo a este grupo?
                 </label>
 
                 <fieldset class="grid grid-cols-3 sm:grid-cols-5 gap-3">

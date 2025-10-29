@@ -26,12 +26,13 @@ class EntregaDocente extends Model
         'observacion',
         'cumplio',
         'fecha_aplazada',
-        'dias_aplazadas'
+        'dias_aplazados'
     ];
 
     protected $casts = [
         'fecha_inicio' => 'datetime',
         'fecha_fin' => 'datetime',
+        'fecha_aplazada' => 'datetime',
     ];
 
     protected static function boot()
@@ -44,6 +45,22 @@ class EntregaDocente extends Model
             }
         });
     }
+
+    const STATUS_PENDIENTE   = 0;
+    const STATUS_ACTIVO      = 1;
+    const STATUS_DESACTIVO   = 2;
+    const STATUS_ANULADO     = 3;
+    const STATUS_FINALIZADO  = 4;
+    const STATUS_COMPLETADO  = 5;
+
+    const STATUS = [
+        self::STATUS_PENDIENTE   => 'Pendiente',
+        self::STATUS_ACTIVO      => 'Activo',
+        self::STATUS_DESACTIVO   => 'Desactivo',
+        self::STATUS_ANULADO     => 'Anulado',
+        self::STATUS_FINALIZADO  => 'Finalizado',
+        self::STATUS_COMPLETADO  => 'Completado',
+    ];
 
     public function grupo()
     {

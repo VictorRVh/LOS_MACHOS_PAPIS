@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\CarpetasEntregaDrive;
 use App\Models\EntregaDocente;
 use App\Models\EntregaDocenteAdmin;
@@ -48,7 +49,6 @@ class EntregaDocenteAdminController extends Controller
         if (!$gruposExistentes) {
 
             throw new \Exception('Error|No puedes Crear esta programació, por que aun no tieene grupos en este periodo--404', 13333);
-
         }
         // 🔹 Verificar si hay grupos en ese periodo
 
@@ -82,22 +82,40 @@ class EntregaDocenteAdminController extends Controller
     // Actualizar
     public function update(Request $request, $id)
     {
-        $entrega = EntregaDocenteAdmin::findOrFail($id);
-
         $request->validate([
-            'tipo_entrega' => 'sometimes|string|max:100',
-            'nombre_entrega' => 'sometimes|string|max:100',
-            'fecha_inicio' => 'sometimes|date',
-            'fecha_fin' => 'sometimes|date|after_or_equal:fecha_inicio',
-            'status' => 'sometimes|integer|in:0,1,2,3',
-            'mostrar' => 'sometimes|boolean',
-            'sub_grupos' => 'sometimes|boolean',
+            'tipo_entrega' => 'required|string|max:255',
+            'nombre_entrega' => 'required|string|max:255',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
         ]);
 
-        $entrega->update($request->all());
+        // Buscar la entrega principal (admin)
+        $adminEntrega = EntregaDocenteAdmin::findOrFail($id);
 
-        return response()->json($entrega);
+        // Actualizar los datos en la tabla principal
+        $adminEntrega->update([
+            'tipo_entrega' => $request->tipo_entrega,
+            'nombre_entrega' => $request->nombre_entrega,
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_fin' => $request->fecha_fin,
+        ]);
+
+        // Si la entrega ya fue replicada a los grupos (mostrar = 1)
+        if ($adminEntrega->mostrar) {
+
+            // Actualizamos todas las entregas docentes que dependen de esta entrega admin
+            EntregaDocente::where('id_admin', $adminEntrega->id)->update([
+                'fecha_inicio' => $request->fecha_inicio,
+                'fecha_fin' => $request->fecha_fin,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Entrega actualizada correctamente.',
+            'replicada' => $adminEntrega->mostrar ? 'Las entregas en los grupos también fueron actualizadas.' : 'Aún no se ha replicado esta programación.',
+        ]);
     }
+
 
     // Eliminar
     public function destroy($id)
@@ -144,7 +162,6 @@ class EntregaDocenteAdminController extends Controller
             return response()->json([
                 'message' => 'Entrega y carpetas asociadas eliminadas correctamente.',
             ], 204);
-
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al eliminar la entrega y sus carpetas asociadas.',

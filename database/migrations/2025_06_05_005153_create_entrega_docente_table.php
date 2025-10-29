@@ -31,7 +31,7 @@ return new class extends Migration
                 ->references('id')->on('entrega_docente_admin')
                 ->onDelete('cascade');
 
-            $table->date('fecha_aplazada')->nullable();
+            $table->dateTime('fecha_aplazada')->nullable();
             $table->string('dias_aplazados', 10)->nullable();
 
             $table->timestamps();

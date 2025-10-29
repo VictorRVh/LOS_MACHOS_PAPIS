@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -15,13 +14,16 @@ class CalendarioAdmin extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 'fecha', 'laborable', 'descripcion', 
+        'id',
+        'id_sesion',
+        'fecha',
+        'laborable',
+        'descripcion',
     ];
 
     protected static function boot()
     {
         parent::boot();
-
         static::creating(function ($model) {
             if (empty($model->id)) {
                 $model->id = (string) Str::uuid();
@@ -29,9 +31,10 @@ class CalendarioAdmin extends Model
         });
     }
 
-    public function sesiones()
+    // 🔹 Una fecha pertenece a una sesión
+    public function sesion()
     {
-        return $this->hasMany(Sesiones::class, 'id_calendario');
+        return $this->belongsTo(Sesiones::class, 'id_sesion');
     }
 
     public function asistencia()

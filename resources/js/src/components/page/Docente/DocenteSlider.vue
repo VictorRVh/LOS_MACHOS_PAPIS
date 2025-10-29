@@ -72,7 +72,7 @@ watch(() => props.show, () => {
     if (props.show) {
         console.log('props de docente', props.docente?.id);
         if (props.docente?.id) {
-
+            
 
             formData.value = Object.assign(
                 {},
@@ -95,7 +95,7 @@ const schema = yup.object().shape({
     apellido_paterno: yup.string().nullable().required("El apellido paterno es requerido."),
     apellido_materno: yup.string().nullable().required("El apellido materno es requerido."),
     usuario: yup.string().nullable().required("El usuario es requerido."),
-    dni: yup.string().nullable().required("El DNI es requerido.").matches(/^[0-9]+$/, "El DNI solo debe contener números.")
+     dni: yup.string().nullable().required("El DNI es requerido.").matches(/^[0-9]+$/, "El DNI solo debe contener números.")
         .length(8, "El DNI debe tener exactamente 8 dígitos."),
     email: yup.string().email("Debe ser un email válido.").nullable().required("El email es requerido."),
     fecha_nacimiento: yup.date().nullable().required("La fecha de nacimiento es requerida."),
@@ -134,8 +134,7 @@ const onSubmit = async () => {
     const response = docenteId ? await updateDocente(docenteId, data) : await createDocente(data);
     if (response?.user.id) {
         showToast(`Docente ${props.docente?.id ? 'actualizado' : 'creado'} correctamente.`);
-        formData.value = initialFormData();
-        formErrors.value = {};
+
         docenteStore.loadDocentes();
         emit('hide');
     }
@@ -151,8 +150,7 @@ const onSubmit = async () => {
             <div class="mt-4 space-y-3">
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormInput v-model="formData.name" label="Nombres" :error="formErrors?.name" required
-                        :uppercase="true" />
+                    <FormInput v-model="formData.name" label="Nombres" :error="formErrors?.name" required :uppercase="true" />
                     <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno"
                         :error="formErrors?.apellido_paterno" required :uppercase="true" />
                     <FormInput v-model="formData.apellido_materno" label="Apellido Materno"
@@ -196,8 +194,8 @@ const onSubmit = async () => {
                     <template v-if="!docente?.id">
                         <FormInput v-model="formData.password" label="Contraseña" type="password"
                             :error="formErrors?.password" required />
-                        <FormInput v-model="formData.confirm_password" type="password" label="Confirmar Contraseña"
-                            :error="formErrors?.confirm_password" required />
+                        <FormInput v-model="formData.confirm_password" type="password" label="Confirmar Contraseña" :error="formErrors?.confirm_password"
+                            required />
                         <CheckBox v-model="formData.status" label="Estado"
                             class="mt-8 pl-4 flex justify-center items-centers" />
                     </template>
@@ -206,8 +204,9 @@ const onSubmit = async () => {
 
 
                 <Button :title="docente?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
-                    :disabled="saving || updating" :loading-title="docente?.id ? 'Guardando...' : 'Creando...'"
-                    class="!mt-6 !w-full" :loading="saving || updating" @click="onSubmit" />
+                    :disabled="saving || updating"
+                    :loading-title="docente?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
+                    :loading="saving || updating" @click="onSubmit" />
             </div>
         </AuthorizationFallback>
     </Slider>

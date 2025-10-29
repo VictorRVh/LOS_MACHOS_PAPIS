@@ -296,7 +296,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\EntregaDocenteController::class,
         'subidasPorProgramacion',
     ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
-    
+
     Route::patch('entrega_docente/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'update',
@@ -647,7 +647,7 @@ Route::middleware('auth:sanctum')->group(function () {
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
-  
+
 
 
     // RUTA PARA SESIONES
@@ -656,9 +656,13 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-sesiones-docente|ver-sesiones-docente');
 
-        Route::get('sesion_docente/{id}', [
+    Route::get('sesion_docente/{id}', [
         \App\Http\Controllers\SesionesController::class,
         'indexOneSesion',
+    ])->middleware('permission:todo-acceso-sesiones-docente|ver-sesiones-docente');
+    Route::get('programacion_sesion_docente/{id}', [
+        \App\Http\Controllers\SesionesController::class,
+        'indexListSesionesDocente',
     ])->middleware('permission:todo-acceso-sesiones-docente|ver-sesiones-docente');
 
     Route::post('sesiones', [
@@ -972,9 +976,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/actividades-recientes', function () {
         return \App\Models\ActividadesRecientes::latest('fecha')->take(5)->get();
     })->middleware('permission:todo-acceso-permisos|ver-permisos');
-    
+
     Route::get('/google/subscribe-calendar', [
-        \App\Http\Controllers\EntregaDocenteAdminController::class, 
+        \App\Http\Controllers\EntregaDocenteAdminController::class,
         'subscribeToCalendarNotifications'
     ])->middleware('permission:todo-acceso-permisos');
 });

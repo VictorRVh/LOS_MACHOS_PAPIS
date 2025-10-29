@@ -8,6 +8,7 @@ import DocumentoItemsSlider from '../../components/page/Documento/documetoItemsS
 import DocumentoPlazo from '../../components/page/Documento/DocumentoPlazo.vue';
 import MenuTable from "../../components/table/MenuTable.vue";
 import useHttpRequest from "../../composables/useHttpRequest";
+import axios from 'axios';
 
 const props = defineProps({
   id: {
@@ -34,6 +35,8 @@ if (!programacionStore?.programacionSubidos?.length) await programacionStore.loa
 
 const data = programacionStore.programacionSubidos;
 if (data && data.programacion) {
+
+  console.log('DATA', data)
   programacion.value = data.programacion;
   gruposProgramados.value = data.grupos_programados || [];
 } else {
@@ -106,9 +109,48 @@ const desactivarGrupo = async (grupo) => {
       }
     }
   );
-
 };
 
+const generarReporte = async () => {
+
+  try {
+    const idAdmin = programacion.value.id;
+    if (!idAdmin) {
+      showToast("No hay una programación seleccionada.", "error");
+      return;
+    }
+
+    const response = await axios.get(`/reporte-entregas-docentes`, {
+      params: { id_admin: idAdmin },
+      responseType: 'blob', // 🔹 Importante para archivos binarios
+    });
+
+    // Crear una URL temporal para descargarlo
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Reporte_Entregas_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    const grupos = programacionStore?.programacionSubidos?.grupos_programados || [];
+    const total = grupos.length;
+    const cumplidos = grupos.filter(g => g.cumplio).length;
+    const noCumplidos = total - cumplidos;
+
+    showToast(
+      `Reporte descargado correctamente.\nCumplieron: ${cumplidos}\nNo cumplieron: ${noCumplidos}`,
+      "success"
+    );
+  } catch (error) {
+    console.error('Error:', error);
+    showToast("Ocurrió un error al generar el reporte.", "error");
+  }
+
+
+};
 
 </script>
 
@@ -118,14 +160,23 @@ const desactivarGrupo = async (grupo) => {
       class="text-center py-20 text-gray-600 dark:text-gray-300">Cargando datos...</div>
 
     <div v-else-if="programacion">
-      <header class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">
-          {{ programacion.tipo_entrega }}
-        </h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">
-          <span class="font-semibold">Inicio:</span> {{ programacion.fecha_inicio }} |
-          <span class="font-semibold">Fin:</span> {{ programacion.fecha_fin }}
-        </p>
+      <header class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">
+            {{ programacion.nombre_programacion }}
+          </h1>
+          <p class="text-gray-500 dark:text-gray-400 mt-1">
+            <span class="font-semibold">Inicio:</span> {{ programacion.fecha_inicio }} |
+            <span class="font-semibold">Fin:</span> {{ programacion.fecha_fin }}
+          </p>
+        </div>
+
+        <div class="mt-4 md:mt-0 flex items-center gap-3">
+          <Button class="bg-cetpro hover:bg-cetpro-dark text-white px-4 py-2 rounded-lg text-sm shadow"
+            @click="generarReporte">
+            Generar reporte
+          </Button>
+        </div>
       </header>
 
       <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-4">
@@ -156,27 +207,59 @@ const desactivarGrupo = async (grupo) => {
 
           </div>
 
-          <div class="p-4 flex-grow">
+          <div class="p-4 flex-grow space-y-2">
             <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
               {{ grupo.grupo_detalle.nombre_docente }}
             </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Documento: {{ grupo.documento_admin }}
-            </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+
+            <div class="flex items-center gap-2"
+              :class="grupo.cumplio ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+              <span class="text-sm font-semibold">
+                {{ grupo.cumplio ? 'Entregado' : 'No entregado' }}
+              </span>
+            </div>
+
+            <p class="text-xs text-gray-500 dark:text-gray-400">
               Observación: {{ grupo.observacion || 'Ninguna' }}
             </p>
+
+            <!-- Bloque de fechas -->
+            <div class="mt-3 bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-600 dark:text-gray-300">Inicio:</span>
+                <span class="text-xs font-semibold text-gray-800 dark:text-gray-100">
+                  {{ grupo.fecha_inicio }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between mt-1">
+                <span class="text-xs text-gray-600 dark:text-gray-300">Fin:</span>
+                <span class="text-xs font-semibold"
+                  :class="grupo.dias_aplazados ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-800 dark:text-gray-100'">
+                  {{ grupo.fecha_fin }}
+                </span>
+              </div>
+
+              <div v-if="grupo.dias_aplazados" class="flex items-center justify-between mt-1">
+                <span class="text-xs text-yellow-600 dark:text-yellow-400">Fin aplazado (+{{ grupo.dias_aplazados }}
+                  días):</span>
+                <span class="text-xs font-semibold text-yellow-700 dark:text-yellow-300">
+                  {{ grupo.fecha_aplazada }}
+                </span>
+              </div>
+            </div>
           </div>
 
           <div
             class="p-4 bg-gray-50 dark:bg-gray-800/50 border-t dark:border-gray-700 flex items-center justify-between">
             <div class="flex items-center gap-2"
-              :class="grupo.cumplio ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-              <component :is="grupo.estado ? CheckCircleIcon : ClockIcon" class="h-5 w-5" />
+              :class="grupo.estado === 1 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+              <component :is="grupo.estado === 1 ? CheckCircleIcon : ClockIcon" class="h-5 w-5" />
               <span class="text-sm font-semibold">
-                {{ grupo.cumplio ? 'Entregado' : 'Pendiente' }}
+                {{ grupo.estado === 1 ? 'Activo' : grupo.estado === 4 ? 'Finalizado' : 'Desconocido' }}
               </span>
             </div>
+
             <span class="text-xs text-gray-500 dark:text-gray-400">
               {{ grupo.created_at }}
             </span>

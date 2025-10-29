@@ -296,7 +296,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\EntregaDocenteController::class,
         'subidasPorProgramacion',
     ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
-    
+
     Route::patch('entrega_docente/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'update',
@@ -647,7 +647,7 @@ Route::middleware('auth:sanctum')->group(function () {
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
-  
+
 
 
     // RUTA PARA SESIONES
@@ -656,7 +656,7 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-sesiones-docente|ver-sesiones-docente');
 
-        Route::get('sesion_docente/{id}', [
+    Route::get('sesion_docente/{id}', [
         \App\Http\Controllers\SesionesController::class,
         'indexOneSesion',
     ])->middleware('permission:todo-acceso-sesiones-docente|ver-sesiones-docente');
@@ -953,15 +953,20 @@ Route::get('reportes/nomina/grupo/{idGrupo}', [
     'nominaMatriculasExcel',
 ]);
 
+Route::get('/reporte-entregas-docentes', [
+    \App\Http\Controllers\EntregaDocenteController::class,
+    'generarExcel',
+])->middleware('permission:ver-programa-especialidades');
+
 Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
     Route::get('/files/{fileId}', [GoogleDriveController::class, 'listFilesNew']);
     Route::post('/folder', [GoogleDriveController::class, 'createFolder']);
     Route::post('/upload', [GoogleDriveController::class, 'uploadFile']);
+    Route::post('/uploadDocente', [GoogleDriveController::class, 'uploadFileDocente']);
     Route::patch('/file/{fileId}/rename', [GoogleDriveController::class, 'renameFile']);
     Route::patch('/file/{fileId}/move', [GoogleDriveController::class, 'moveFile']);
     Route::delete('/file/{fileId}', [GoogleDriveController::class, 'deleteFile']);
     Route::get('/drive/file/{id}/download', [GoogleDriveController::class, 'downloadFile']);
-
 });
 
 Route::post('/carpetas-grupo/crear/{id_grupo}', [CarpetasGrupoDriveController::class, 'crearCarpetaGrupo']);
@@ -972,10 +977,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/actividades-recientes', function () {
         return \App\Models\ActividadesRecientes::latest('fecha')->take(5)->get();
     })->middleware('permission:todo-acceso-permisos|ver-permisos');
-    
+
     Route::get('/google/subscribe-calendar', [
-        \App\Http\Controllers\EntregaDocenteAdminController::class, 
+        \App\Http\Controllers\EntregaDocenteAdminController::class,
         'subscribeToCalendarNotifications'
     ])->middleware('permission:todo-acceso-permisos');
 });
-

@@ -22,7 +22,7 @@ const props = defineProps({
   id: { type: String, required: true },
 })
 
-const { store: uploadArchivo, saving: uploadLoading } = useHttpRequest('/drive/upload')
+const { store: uploadArchivo, saving: uploadLoading } = useHttpRequest('/drive/uploadDocente')
 const { showConfirmModal, showToast } = useModalToast();
 
 const documentoStore = useProgramacionAdmintore();

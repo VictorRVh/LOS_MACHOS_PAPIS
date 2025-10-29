@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -18,26 +17,20 @@ return new class extends Migration
             $table->date('fecha_fin');
             $table->text('descripcion')->nullable();
             $table->string('archivo_sesion')->nullable();
-
-            $table->uuid('id_calendario');
             $table->uuid('id_capacidad');
             $table->uuid('id_entrega')->nullable();
-
             $table->tinyInteger('status')->default(0);
-
-            $table->foreign('id_calendario')
-                  ->references('id')->on('calendario_admin')
-                  ->onDelete('cascade');
+            $table->timestamps();
 
             $table->foreign('id_capacidad')
-                  ->references('id')->on('capacidad_terminal')
-                  ->onDelete('cascade');
+                ->references('id')->on('capacidad_terminal')
+                ->onDelete('cascade');
 
             $table->foreign('id_entrega')
-                  ->references('id')->on('entrega_docente')
-                  ->onDelete('cascade'); 
-            $table->timestamps();
+                ->references('id')->on('entrega_docente')
+                ->onDelete('set null');
         });
+
     }
 
     /**
@@ -47,4 +40,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('sesiones');
     }
+
 };

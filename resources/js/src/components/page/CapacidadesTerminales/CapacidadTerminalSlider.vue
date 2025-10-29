@@ -35,8 +35,8 @@ const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
     if (!props.capacidad?.id)
-        return ["todo-acceso-capacidad-terminal", "crear-capacidad-terminal"];
-    return ["todo-acceso-capacidad-terminal", "editar-capacidad-terminal"];
+        return ["todo-acceso-capacidad-terminal-docente", "crear-capacidad-terminal-docente"];
+    return ["todo-acceso-capacidad-terminal-docente", "editar-capacidad-terminal-docente"];
 });
 
 const initialFormData = () => ({

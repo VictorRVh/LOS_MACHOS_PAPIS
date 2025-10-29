@@ -57,8 +57,6 @@ const onDelete = (periodo) => {
         <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
         <periodoSlider :show="slider" :periodo="sliderData" @hide="hideSlider" />
       </div>
-
-      <iframe src="https://calendar.google.com/calendar/embed?src=c_ca58e49c321f32ffb3166ae636a26b9cb4783cd53c18f7c4de11bf9b81de4200%40group.calendar.google.com&ctz=America%2FLima" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
       <div class="w-full lg:w-2/3">
         <Table>
           <THead>
@@ -74,8 +72,8 @@ const onDelete = (periodo) => {
               <Td>{{ periodo?.nombre_periodo }}</Td>
               <Td>
                 <span :class="periodo.status === 1
-                    ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
-                    : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
+                  ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
+                  : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
                   " class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
                   <span v-if="periodo.status === 1"> Activo ✓ </span>
                   <span v-else="periodo.status === 0"> Inactivo X </span>

@@ -140,11 +140,17 @@ class PermissionTableSeeder extends Seeder
             'icono-programacion-documentos-subidos',
 
                          // PERMISOS DE DE PROGRAMACION PARA DOCENTES
-            'todo-acceso-capacidad-terminal',
-            'ver-capacidad-terminal',
-            'crear-capacidad-terminal',
-            'editar-capacidad-terminal',
-            'eliminar-capacidad-terminal',
+            'todo-acceso-capacidad-terminal-docente',
+            'ver-capacidad-terminal-docente',
+            'crear-capacidad-terminal-docente',
+            'editar-capacidad-terminal-docente',
+            'eliminar-capacidad-terminal-docente',
+
+            'todo-acceso-sesiones-docente',
+            'ver-sesiones-docente',
+            'crear-sesiones-docente',
+            'editar-sesiones-docente',
+            'eliminar-sesiones-docente',
                 
 
             'ver-perfil-docente',

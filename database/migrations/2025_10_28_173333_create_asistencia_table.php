@@ -16,7 +16,7 @@ return new class extends Migration
             $table->date('fecha_actual');
             $table->boolean('asistencia');
             $table->string('observacion')->nullable();
-            
+                        
             $table->uuid('id_grupo');
             $table->uuid('id_estudiante');
             $table->uuid('id_calendario');
@@ -36,9 +36,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('asistencia');

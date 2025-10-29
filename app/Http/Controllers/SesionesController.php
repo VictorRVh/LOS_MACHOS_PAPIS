@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sesiones;
+use App\Models\EntregaDocente;
+
 use Illuminate\Http\Request;
 
 class SesionesController extends Controller
@@ -15,6 +17,31 @@ class SesionesController extends Controller
         $sesiones = Sesiones::with(['calendarioAdmin', 'capacidadTerminal', 'entregaDocente'])->get();
         return response()->json($sesiones);
     }
+public function indexOneSesion($idGrupo)
+{
+    // Buscar la entrega del grupo cuyo padre (admin) tenga tipo_entrega = 2
+    $entrega = EntregaDocente::select(
+        'id',
+        'fecha_inicio',
+        'fecha_fin',
+        'estado',
+        'fecha_aplazada',
+        'dias_aplazados',
+    )
+        ->where('id_grupo', $idGrupo)
+        ->whereHas('entregaDocenteAdmin', function ($q) {
+            $q->where('tipo_entrega', 2); // Filtra por tipo de entrega = 2
+        })
+        ->first();
+
+    if (!$entrega) {
+        return response()->json(['message' => 'No se encontró la programación de sesión'], 404);
+    }
+
+    // Devuelve solo los campos seleccionados del modelo entrega_docente
+    return response()->json($entrega);
+}
+
 
     public function show($id)
     {
@@ -30,15 +57,15 @@ class SesionesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_sesion'   => 'required|string|max:255',
-            'fecha_inicio'    => 'required|date',
-            'fecha_fin'       => 'required|date|after_or_equal:fecha_inicio',
-            'descripcion'     => 'nullable|string',
-            'archivo_sesion'  => 'nullable|string',
-            'id_calendario'   => 'required|uuid|exists:calendario_admin,id',
-            'id_capacidad'    => 'required|uuid|exists:capacidad_terminal,id',
-            'id_entrega'      => 'required|uuid|exists:entrega_docente,id',
-            'status'          => 'required|integer|in:0,1,2,3'
+            'nombre_sesion' => 'required|string|max:255',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'descripcion' => 'nullable|string',
+            'archivo_sesion' => 'nullable|string',
+            'id_calendario' => 'required|uuid|exists:calendario_admin,id',
+            'id_capacidad' => 'required|uuid|exists:capacidad_terminal,id',
+            'id_entrega' => 'required|uuid|exists:entrega_docente,id',
+            'status' => 'required|integer|in:0,1,2,3'
         ]);
 
         $sesion = Sesiones::create($request->all());
@@ -55,15 +82,15 @@ class SesionesController extends Controller
         }
 
         $request->validate([
-            'nombre_sesion'   => 'sometimes|string|max:255',
-            'fecha_inicio'    => 'sometimes|date',
-            'fecha_fin'       => 'sometimes|date|after_or_equal:fecha_inicio',
-            'descripcion'     => 'nullable|string',
-            'archivo_sesion'  => 'nullable|string',
-            'id_calendario'   => 'sometimes|uuid|exists:calendario_admin,id',
-            'id_capacidad'    => 'sometimes|uuid|exists:capacidad_terminal,id',
-            'id_entrega'      => 'sometimes|uuid|exists:entrega_docente,id',
-            'status'          => 'sometimes|integer|in:0,1,2,3'
+            'nombre_sesion' => 'sometimes|string|max:255',
+            'fecha_inicio' => 'sometimes|date',
+            'fecha_fin' => 'sometimes|date|after_or_equal:fecha_inicio',
+            'descripcion' => 'nullable|string',
+            'archivo_sesion' => 'nullable|string',
+            'id_calendario' => 'sometimes|uuid|exists:calendario_admin,id',
+            'id_capacidad' => 'sometimes|uuid|exists:capacidad_terminal,id',
+            'id_entrega' => 'sometimes|uuid|exists:entrega_docente,id',
+            'status' => 'sometimes|integer|in:0,1,2,3'
         ]);
 
         $sesion->update($request->all());

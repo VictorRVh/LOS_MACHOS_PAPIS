@@ -4,22 +4,28 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
         Schema::create('calendario_admin', function (Blueprint $table) {
-            $table->uuid('id')->primary(); 
+            $table->uuid('id')->primary();
+
+            // 👉 Clave foránea a sesiones (uno a muchos)
+            $table->uuid('id_sesion');
 
             $table->date('fecha');
-            $table->boolean('laborable')->default(true); 
+            $table->boolean('laborable')->default(true);
             $table->string('descripcion', 255)->nullable();
-
             $table->timestamps();
+
+            $table->foreign('id_sesion')
+                ->references('id')->on('sesiones')
+                ->onDelete('cascade');
         });
+
     }
 
     /**
@@ -29,4 +35,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('calendario_admin');
     }
+
 };

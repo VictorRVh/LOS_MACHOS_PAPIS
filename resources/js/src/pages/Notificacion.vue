@@ -15,67 +15,67 @@ const emit = defineEmits(['close']);
 const notificationsContainer = ref(null);
 const notifications = ref([]);
 const { loading, index } = useHttpRequest('/actividades-recientes');
-let pollingInterval = null;
+// let pollingInterval = null;
 
-const fetchNotifications = async () => {
-  try {
-    const data = await index();
-    if (Array.isArray(data)) {
-      notifications.value = data.slice(0, 5).map(actividad => ({
-          id: actividad.id,
-          icon: ClockIcon,
-          title: actividad.accion || 'Actividad del Sistema',
-          description: actividad.descripcion,
-          time: new Date(actividad.fecha),
-          isRead: false,
-          route: { name: 'notificaciones.index' } 
-      }));
-    } else {
-      notifications.value = [];
-    }
-  } catch (error) {
-    console.error("Error al cargar actividades:", error);
-    notifications.value = [];
-  }
-};
+// const fetchNotifications = async () => {
+//   // try {
+//   //   const data = await index();
+//   //   if (Array.isArray(data)) {
+//   //     notifications.value = data.slice(0, 5).map(actividad => ({
+//   //         id: actividad.id,
+//   //         icon: ClockIcon,
+//   //         title: actividad.accion || 'Actividad del Sistema',
+//   //         description: actividad.descripcion,
+//   //         time: new Date(actividad.fecha),
+//   //         isRead: false,
+//   //         route: { name: 'notificaciones.index' } 
+//   //     }));
+//   //   } else {
+//   //     notifications.value = [];
+//   //   }
+//   // } catch (error) {
+//   //   console.error("Error al cargar actividades:", error);
+//   //   notifications.value = [];
+//   // }
+// };
 
-const markAllAsRead = () => {
-  notifications.value = [];
-};
+// const markAllAsRead = () => {
+//   notifications.value = [];
+// };
 
-const handleClickOutside = (event) => {
-    const bellButton = document.querySelector('[aria-label="Notificaciones"]');
-    if (
-        notificationsContainer.value && 
-        !notificationsContainer.value.contains(event.target) &&
-        !bellButton.contains(event.target)
-    ) {
-        emit('close');
-    }
-};
+// const handleClickOutside = (event) => {
+//     const bellButton = document.querySelector('[aria-label="Notificaciones"]');
+//     if (
+//         notificationsContainer.value && 
+//         !notificationsContainer.value.contains(event.target) &&
+//         !bellButton.contains(event.target)
+//     ) {
+//         emit('close');
+//     }
+// };
 
-const handleKeydown = (e) => {
-  if (e.key === 'Escape') emit('close');
-};
+// const handleKeydown = (e) => {
+//   if (e.key === 'Escape') emit('close');
+// };
 
-watch(() => props.show, (newValue) => {
-    if (newValue) {
-        fetchNotifications();
-    }
-});
+// watch(() => props.show, (newValue) => {
+//     if (newValue) {
+//         fetchNotifications();
+//     }
+// });
 
-onMounted(() => {
-  document.addEventListener('keydown', handleKeydown);
-  document.addEventListener('mousedown', handleClickOutside);
-  fetchNotifications();
-  pollingInterval = setInterval(fetchNotifications, 60000);
-});
+// onMounted(() => {
+//   document.addEventListener('keydown', handleKeydown);
+//   document.addEventListener('mousedown', handleClickOutside);
+//   fetchNotifications();
+//   pollingInterval = setInterval(fetchNotifications, 60000);
+// });
 
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown);
-  document.removeEventListener('mousedown', handleClickOutside);
-  clearInterval(pollingInterval);
-});
+// onUnmounted(() => {
+//   document.removeEventListener('keydown', handleKeydown);
+//   document.removeEventListener('mousedown', handleClickOutside);
+//   clearInterval(pollingInterval);
+// });
 </script>
 
 <template>

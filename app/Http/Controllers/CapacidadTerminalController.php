@@ -17,13 +17,15 @@ class CapacidadTerminalController extends Controller
     }
     public function indexGrupo($id)
     {
-        $capacidades = CapacidadTerminal::with('grupo')
-            ->where('id_grupo', $id)
+        $capacidades = CapacidadTerminal::where('id_grupo', $id)
             ->orderBy('fecha_inicio', 'desc')
+            ->select('id', 'id_grupo', 'nombre_capacidad', 'fecha_inicio', 'fecha_fin', 'status')
             ->get();
 
         return response()->json($capacidades);
     }
+
+
     // GET /api/capacidad-terminal/{id}
     public function show($id)
     {
@@ -84,6 +86,6 @@ class CapacidadTerminalController extends Controller
 
         $capacidad->delete();
 
-        return response()->json(['message' => 'Capacidad eliminada correctamente'],204);
+        return response()->json(['message' => 'Capacidad eliminada correctamente'], 204);
     }
 }

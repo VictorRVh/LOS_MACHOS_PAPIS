@@ -558,27 +558,27 @@ Route::middleware('auth:sanctum')->group(function () {
     //RUTA PARA CAPACIDAD TERMINAL
     Route::get('capacidad_terminal', [
         \App\Http\Controllers\CapacidadTerminalController::class,
-        'indexGrupo',
-    ])->middleware('permission:todo-acceso-capacidad-terminal|ver-capacidad-terminal');
+        'index',
+    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
     Route::get('capacidad_terminal/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
-        'index',
-    ])->middleware('permission:todo-acceso-capacidad-terminal|ver-capacidad-terminal');
+        'indexGrupo',
+    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
 
     Route::post('capacidad_terminal', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'store',
-    ])->middleware('permission:todo-acceso-capacidad-terminal|crear-capacidad-terminal');
+    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|crear-capacidad-terminal-docente');
 
     Route::patch('capacidad_terminal/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'update',
-    ])->middleware('permission:todo-acceso-capacidad-terminal|editar-capacidad-terminal');
+    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|editar-capacidad-terminal-docente');
 
     Route::delete('capacidad_terminal/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-capacidad-terminal|eliminar-capacidad-terminal');
+    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|eliminar-capacidad-terminal-docente');
 
 
     // RUTA PARA NOTA DE CAPACIDAD TERMINAL
@@ -654,22 +654,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('sesiones', [
         \App\Http\Controllers\SesionesController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-sesiones-docente|ver-sesiones-docente');
+
+        Route::get('sesion_docente/{id}', [
+        \App\Http\Controllers\SesionesController::class,
+        'indexOneSesion',
+    ])->middleware('permission:todo-acceso-sesiones-docente|ver-sesiones-docente');
 
     Route::post('sesiones', [
         \App\Http\Controllers\SesionesController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:todo-acceso-sesiones-docente|crear-sesiones-docente');
 
     Route::patch('sesiones/{id}', [
         \App\Http\Controllers\SesionesController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
+    ])->middleware('permission:todo-acceso-sesiones-docente|editar-sesiones-docente');
 
     Route::delete('sesiones/{id}', [
         \App\Http\Controllers\SesionesController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-acceso-sesiones-docente|eliminar-sesiones-docente');
 
 
     // RUTA PARA ASISTENCIA

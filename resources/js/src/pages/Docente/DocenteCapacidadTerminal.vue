@@ -50,7 +50,7 @@ const onDelete = (capacidad) => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-capacidad-terminal', 'ver-capacidad-terminal']">
+  <AuthorizationFallback :permissions="['todo-acceso-capacidad-terminal-docente', 'ver-capacidad-terminal-docente']">
 
     <div class="flex flex-col lg:flex-row px-6 gap-6">
 

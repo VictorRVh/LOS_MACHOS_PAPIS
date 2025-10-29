@@ -1,30 +1,15 @@
-export default function useCalendarEvents(bloquesDeSesiones, selectionEvents, holidays) {
+export default function useCalendarEvents(sesiones) {
   const buildAllEvents = () => {
-    const holidayEvents = holidays.value.map(h => ({
-      title: h.title,
-      start: h.date,
-      allDay: true,
-      color: '#6b7280',
-      classNames: ['gcal-event']
-    }));
-
-    const sessionBlockEvents = bloquesDeSesiones.value.flatMap(bloque =>
-      (bloque.dates || []).map(dateStr => ({
-        id: `${bloque.id}::${dateStr}`,
-        title: bloque.title,
-        start: dateStr,
+    return sesiones.value.flatMap(sesion =>
+      (sesion.calendario_admin || []).map(dia => ({
+        id: `${sesion.id}-${dia.fecha}`,
+        title: sesion.nombre_sesion,
+        start: dia.fecha,
         allDay: true,
-        backgroundColor: bloque.color,
+        backgroundColor: '#3B82F6', // azul
+        borderColor: '#2563EB',
       }))
     );
-
-    const selectionTemp = selectionEvents.value.map(e => ({
-      ...e,
-      id: `temp-${e.start}`,
-      title: ''
-    }));
-
-    return [...sessionBlockEvents, ...selectionTemp, ...holidayEvents];
   };
 
   return { buildAllEvents };

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +11,6 @@ class Sesiones extends Model
 
     public $incrementing = false;
     protected $keyType = 'string';
-
     protected $table = 'sesiones';
 
     protected $fillable = [
@@ -22,16 +20,14 @@ class Sesiones extends Model
         'fecha_fin',
         'descripcion',
         'archivo_sesion',
-        'id_calendario',
         'id_capacidad',
         'id_entrega',
-        'status'
+        'status',
     ];
 
     protected static function boot()
     {
         parent::boot();
-
         static::creating(function ($model) {
             if (empty($model->id)) {
                 $model->id = (string) Str::uuid();
@@ -40,10 +36,10 @@ class Sesiones extends Model
     }
 
     const STATUS = [
-        0 => 'Pendiente',    // 00
-        1 => 'Activo',       // 01
-        2 => 'Desactivo',    // 10
-        3 => 'Anulado',      // 11
+        0 => 'Pendiente',
+        1 => 'En curso',
+        2 => 'Finalizada',
+        3 => 'Anulada',
     ];
 
     public function getStatusTextoAttribute()
@@ -51,9 +47,10 @@ class Sesiones extends Model
         return self::STATUS[$this->status] ?? 'Desconocido';
     }
 
+    // 🔹 Una sesión tiene muchas fechas en el calendario
     public function calendarioAdmin()
     {
-        return $this->belongsTo(CalendarioAdmin::class, 'id_calendario');
+        return $this->hasMany(CalendarioAdmin::class, 'id_sesion');
     }
 
     public function capacidadTerminal()

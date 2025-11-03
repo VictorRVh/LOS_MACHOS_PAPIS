@@ -43,7 +43,6 @@ class SesionesController extends Controller
     }
     public function indexListSesionesDocente($idEntrega)
     {
-        // Buscar todas las sesiones asociadas a esta entrega, junto con su calendario
         $sesiones = Sesiones::with([
             'calendarioAdmin' => function ($q) {
                 $q->select('id', 'id_sesion', 'fecha', 'laborable')
@@ -52,7 +51,7 @@ class SesionesController extends Controller
         ])
             ->where('id_entrega', $idEntrega)
             ->orderBy('fecha_inicio', 'asc')
-            ->get(['id', 'nombre_sesion', 'descripcion', 'fecha_inicio', 'fecha_fin', 'status']);
+            ->get(['id', 'id_capacidad', 'nombre_sesion', 'descripcion', 'fecha_inicio', 'fecha_fin', 'status']);
 
         if ($sesiones->isEmpty()) {
             return response()->json([
@@ -60,8 +59,14 @@ class SesionesController extends Controller
             ], 404);
         }
 
+        // 🔥 Ocultar 'id_sesion' dentro de 'calendario_admin'
+        $sesiones->each(function ($sesion) {
+            $sesion->calendarioAdmin->makeHidden('id_sesion');
+        });
+
         return response()->json($sesiones);
     }
+
 
     public function show($id)
     {
@@ -165,6 +170,6 @@ class SesionesController extends Controller
             return response()->json(['message' => 'Sesión no encontrada'], 404);
         }
         $sesion->delete();
-        return response()->json(['message' => 'Sesión eliminada correctamente']);
+        return response()->json(['message' => 'Sesión eliminada correctamente'], 204);
     }
 }

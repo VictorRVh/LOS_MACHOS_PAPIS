@@ -665,17 +665,17 @@ Route::middleware('auth:sanctum')->group(function () {
         'indexListSesionesDocente',
     ])->middleware('permission:todo-acceso-sesiones-docente|ver-sesiones-docente');
 
-    Route::post('sesiones', [
+    Route::post('programacion_sesion_docente', [
         \App\Http\Controllers\SesionesController::class,
         'store',
     ])->middleware('permission:todo-acceso-sesiones-docente|crear-sesiones-docente');
 
-    Route::patch('sesiones/{id}', [
+    Route::patch('programacion_sesion_docente/{id}', [
         \App\Http\Controllers\SesionesController::class,
         'update',
     ])->middleware('permission:todo-acceso-sesiones-docente|editar-sesiones-docente');
 
-    Route::delete('sesiones/{id}', [
+    Route::delete('programacion_sesion_docente/{id}', [
         \App\Http\Controllers\SesionesController::class,
         'destroy',
     ])->middleware('permission:todo-acceso-sesiones-docente|eliminar-sesiones-docente');

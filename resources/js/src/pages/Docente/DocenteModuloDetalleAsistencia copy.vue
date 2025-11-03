@@ -1,3 +1,5 @@
+
+
 <script setup>
 import { ref, computed, watch } from 'vue'
 import useCalendarEvents from '@/composables/sesiones/useCalendarEvents'
@@ -8,15 +10,14 @@ import useSlider from "../../composables/useSlider";
 import EditButton from "@/components/ui/EditButton.vue";
 import DeleteButton from "@/components/ui/DeleteButton.vue";
 import useSesiones from '@/composables/sesiones/useSesiones'
-import BaseCalendar from '@/components/ui/FullCalendar.vue';
+import BaseCalendar from '@/components/ui/FullCalendar.vue'
 import SesionSlider from '@/components/page/SesionesDocente/SesionSlider.vue'
-import useHttpRequest from "../../composables/useHttpRequest";
-import Table from '@/components/table/Table.vue';
-import THead from '@/components/table/THead.vue';
-import TBody from '@/components/table/TBody.vue';
-import Tr from '@/components/table/Tr.vue';
-import Th from '@/components/table/Th.vue';
-import Td from '@/components/table/Td.vue';
+import Table from '@/components/table/Table.vue'
+import THead from '@/components/table/THead.vue'
+import TBody from '@/components/table/TBody.vue'
+import Tr from '@/components/table/Tr.vue'
+import Th from '@/components/table/Th.vue'
+import Td from '@/components/table/Td.vue'
 
 const props = defineProps({
   id: {
@@ -28,9 +29,8 @@ const props = defineProps({
 // 🧠 Store de sesiones
 const sesionStore = useSesionStore()
 const programacionSesion = useProgramacionStore();
-const datesForSlider = ref([])
 
-const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
+const { slider, sliderData, showSlider, closeSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteSesion, deleting } = useHttpRequest("/programacion_sesion_docente");
 
@@ -42,6 +42,9 @@ if (!sesionStore?.sesion?.length) {
 if (!programacionSesion?.sesiones?.length) {
   await programacionSesion.loadSesiones(sesionStore?.sesion?.id)
 }
+// 🔹 composable con bloques y delete
+const { bloquesDeSesiones, deleteSesionById } = useSesiones()
+
 
 // 🗓️ Calendario
 
@@ -116,17 +119,23 @@ watch(
   { deep: true, immediate: true }
 )
 
+
+
+
+
 // 🧭 Manejo de selección
+
+const showForm = ref(false)
+const editingBlockId = ref(null)
+const datesForSlider = ref([])
 
 const selectedDates = computed(() => selectionEvents.value.map(e => e.start).sort())
 const hasSelection = computed(() => selectedDates.value.length > 0)
 
-
-
-
 const handleDateClick = ({ dateStr, date }) => {
   const isWeekend = date.getDay() === 0 || date.getDay() === 6
   if (isWeekend) return
+
   const index = selectionEvents.value.findIndex(e => e.start === dateStr)
   if (index >= 0) {
     selectionEvents.value.splice(index, 1)
@@ -141,36 +150,36 @@ const handleDateClick = ({ dateStr, date }) => {
 
 const handleEventClick = (info) => {
   console.log('Evento seleccionado:', info.event)
-  // datesForSlider.value = [...bloque.dates]
 }
 
-// 👇 Agrega después de los handlers de selección
+const clearSelection = () => (selectionEvents.value = [])
 
-// Limpia la selección visual del calendario
-const clearSelection = () => {
-  selectionEvents.value = [];
-};
-
-// Abre el slider en modo CREACIÓN (nuevo bloque)
+// 🟢 abrir el slider para crear
 const openSessionForm = () => {
-  if (!hasSelection.value) return; // solo si hay fechas seleccionadas
+  if (!hasSelection.value) return
+  editingBlockId.value = null
+  datesForSlider.value = [...selectedDates.value]
+  showForm.value = true
+}
 
-  datesForSlider.value = [...selectedDates.value]; // copiar fechas
-  sliderData.value = null; // indicamos que NO estamos editando
-  showSlider(true); // mostramos el slider
-};
+// ✏️ abrir el slider para editar
+const startEditing = (id) => {
+  const bloque = bloquesDeSesiones.value.find(b => b.id === id)
+  if (!bloque) return
+  editingBlockId.value = id;
+  datesForSlider.value = [...bloque.dates]
+  showForm.value = true;
+}
 
 
 const confirmDelete = (bloque) => {
-  if (deleting.value) return;
-
   showConfirmModal(
     `¿Estás seguro de que deseas eliminar el bloque "${bloque.nombre_sesion}"?`,
     async (confirmed) => {
       if (!confirmed) return
 
       // llama a tu función DELETE
-      const wasDeleted = await deleteSesion(bloque.id)
+      const wasDeleted = await deleteSesionById(bloque.id)
 
       if (wasDeleted) {
         showToast(`"${bloque.nombre_sesion}" eliminado correctamente.`)
@@ -179,6 +188,7 @@ const confirmDelete = (bloque) => {
     }
   )
 }
+
 
 // 🔸 estado de sesión
 const estadoTexto = computed(() => {
@@ -191,6 +201,7 @@ const estadoTexto = computed(() => {
   }
 })
 </script>
+
 
 <template>
   <div v-if="sesionStore?.sesion"
@@ -249,7 +260,6 @@ const estadoTexto = computed(() => {
             Guardar {{ selectedDates.length }} sesión(es)
           </button>
         </div>
-
       </div>
 
       <BaseCalendar :events="allEvents" :holidays="holidays" @date-click="handleDateClick"
@@ -265,7 +275,6 @@ const estadoTexto = computed(() => {
           <Th>Fechas</Th>
           <Th>Acciones</Th>
         </THead>
-
         <TBody>
           <Tr v-if="programacionSesion?.sesiones?.length === 0">
             <Td colspan="3" class="text-center text-gray-500">
@@ -285,16 +294,17 @@ const estadoTexto = computed(() => {
             </Td>
             <Td class="flex gap-2">
               <DeleteButton @click="confirmDelete(bloque)" />
-              <EditButton @click="showSlider(true, bloque)" />
+              <EditButton @click="startEditing(bloque.id)" />
             </Td>
           </Tr>
         </TBody>
       </Table>
 
     </div>
-
-    <SesionSlider :show="slider" :blockToEdit="sliderData ?? null" :idGrupo="id" :sesion="sesionStore?.sesion"
-      @hide="hideSlider" @save="handleSaveSesion" :fechas-seleccionadas="datesForSlider" />
+    <!-- 🪟 SLIDER DE SESIÓN -->
+    <SesionSlider :show="slider" :idGrupo="id" :sesion="sesionStore?.sesion" :fechas-seleccionadas="datesForSlider"
+      :block-to-edit="bloquesDeSesiones.find(b => b.id === editingBlockId)" @hide="closeSlider"
+      @save="handleSaveSesion" />
   </div>
 </template>
 
@@ -305,3 +315,4 @@ const estadoTexto = computed(() => {
   overflow-y: auto;
 }
 </style>
+

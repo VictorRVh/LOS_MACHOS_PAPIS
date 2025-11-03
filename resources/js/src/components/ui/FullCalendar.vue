@@ -87,6 +87,12 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* .base-calendar {
+  transform: scale(0.75);
+  transform-origin: top left; 
+  width: 117.6%; 
+} */
+
 /* ✅ Colores personalizados para sábados y domingos */
 :deep(.fc-day-sun) {
   background-color: rgba(255, 99, 99, 0.15) !important; /* rojo claro */

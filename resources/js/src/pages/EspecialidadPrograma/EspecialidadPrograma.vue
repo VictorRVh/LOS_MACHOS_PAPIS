@@ -115,7 +115,7 @@ const SeeMore = (especialidadPrograma) => {
         />
       </div>
 
-      <div class="w-full">
+      <div class="w-full ml-6">
         <Table>
           <THead>
             <Th>Id</Th>

@@ -15,7 +15,7 @@ const props = defineProps({
   show: Boolean,
   fechasSeleccionadas: {
     type: Array,
-    default: () => [],
+    default: null,
   },
   blockToEdit: {
     type: Object,
@@ -36,7 +36,7 @@ const emit = defineEmits(["hide", "save"]);
 const capacidadStore = useCapacidadTerminalStore();
 const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
-const { store: createSesion, update: updateSesion, saving, updating } = useHttpRequest("/sesiones");
+const { store: createSesion, update: updateSesion, saving, updating } = useHttpRequest("/programacion_sesion_docente");
 
 const isEditing = computed(() => !!props.blockToEdit?.id);
 
@@ -53,28 +53,53 @@ const formErrors = ref({});
 const inputFile = ref(null);
 
 // 🧭 Reset o carga de datos al abrir el slider
+// watch(
+//   () => props.show,
+//   async (visible) => {
+//     if (visible) {
+//       await capacidadStore.loadCapacidadTerminal(props.idGrupo);
+
+//       console.log("el bloque de datos: ",props.blockToEdit)
+
+//       if (isEditing.value && props.blockToEdit) {
+//         form.value = {
+//           nombre_sesion: props.blockToEdit.title?.replace(/^Sesión:\s*/, "") || "",
+//           id_capacidad: props.blockToEdit.id_capacidad || "",
+//           id_entrega: props.sesion?.id || "",
+//           descripcion: props.blockToEdit.description || "",
+//           archivo_sesion: null,
+//         };
+//       } else {
+//         form.value = initialForm();
+//         if (inputFile.value) inputFile.value.value = "";
+//       }
+
+//       formErrors.value = {};
+//     }
+//   }
+// );
+
 watch(
-  () => props.show,
+  () => props.blockToEdit,
   async (visible) => {
     if (visible) {
       await capacidadStore.loadCapacidadTerminal(props.idGrupo);
+      if (props.show && visible?.id) {
+        form.value = Object.entries(initialForm()).reduce((acc, [key, defaultValue]) => ({
+          ...acc,
+          [key]: visible[key] ?? defaultValue,
+        }), {});
 
-      if (isEditing.value && props.blockToEdit) {
-        form.value = {
-          nombre_sesion: props.blockToEdit.title?.replace(/^Sesión:\s*/, "") || "",
-          id_capacidad: props.blockToEdit.id_capacidad || "",
-          id_entrega: props.sesion?.id || "",
-          descripcion: props.blockToEdit.description || "",
-          archivo_sesion: null,
-        };
-      } else {
-        form.value = initialForm();
-        if (inputFile.value) inputFile.value.value = "";
+        // Asegúrate de que `calendario_admin` sea siempre un array
+        if (!Array.isArray(form.value.calendario_admin)) {
+          form.value.calendario_admin = [];
+        }
+
+        formErrors.value = {};
       }
-
-      formErrors.value = {};
     }
-  }
+  },
+  { immediate: true }
 );
 
 
@@ -168,10 +193,11 @@ const onSubmit = async () => {
     <!-- BOTONES -->
     <div class="flex gap-2 mt-5">
       <Button :title="blockToEdit?.id ? 'Guardar Cambios' : 'Crear programación'" key="submit-btn"
-        :disabled="saving || updating" :loading-title="blockToEdit?.id ? 'Guardando...' : 'Creando...'"
-        class="!w-full" :loading="saving || updating" @click="onSubmit" />
+        :disabled="saving || updating" :loading-title="blockToEdit?.id ? 'Guardando...' : 'Creando...'" class="!w-full"
+        :loading="saving || updating" @click="onSubmit" />
 
-      <Button title="Cancelar" variant="outline" @click="emit('hide')" class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer px-4" />
+      <Button title="Cancelar" variant="outline" @click="emit('hide')"
+        class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer px-4" />
     </div>
 
   </Slider>

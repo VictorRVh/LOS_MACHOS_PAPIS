@@ -70,7 +70,7 @@ const formErrors = ref({});
 
 watch(() => props.show, () => {
     if (props.show) {
-        console.log('props de docente', props.docente?.id);
+      //  console.log('props de docente', props.docente?.id);
         if (props.docente?.id) {
             
 

@@ -564,6 +564,16 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\CapacidadTerminalController::class,
         'indexGrupo',
     ])->middleware('permission:todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
+    
+    Route::get('nro_capacidades/{id}', [
+        \App\Http\Controllers\CapacidadTerminalController::class,
+        'nroCapacidades',
+    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
+
+    Route::get('lista_calificaciones/{id}', [
+        \App\Http\Controllers\CapacidadTerminalController::class,
+        'getMatriculadosPorGrupoParaNotas',
+    ])->middleware('permission:ver-grupos|todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
 
     Route::post('capacidad_terminal', [
         \App\Http\Controllers\CapacidadTerminalController::class,

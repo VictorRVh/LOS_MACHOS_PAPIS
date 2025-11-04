@@ -9,6 +9,8 @@ import CheckBox from "../../ui/CheckBox.vue";
 import useModalToast from "../../../composables/useModalToast";
 import * as yup from "yup";
 import useCapacidadTerminalStore from "../../../store/CapacidadTerminal/UseCapacidadTerminalStore";
+import BaseSelectModulo from "../../ui/BaseSelectCiclo.vue";
+import FormLabelError from "../../ui/FormLabelError.vue";
 
 const props = defineProps({
     show: {
@@ -39,7 +41,21 @@ const requiredPermissions = computed(() => {
     return ["todo-acceso-capacidad-terminal-docente", "editar-capacidad-terminal-docente"];
 });
 
+const capacidades = ref([
+  { id: '01', name: 'Capacidad terminal 01' },
+  { id: '02', name: 'Capacidad terminal 02' },
+  { id: '03', name: 'Capacidad terminal 03' },
+  { id: '04', name: 'Capacidad terminal 04' },
+  { id: '05', name: 'Capacidad terminal 05' },
+  { id: '06', name: 'Capacidad terminal 06' },
+  { id: '07', name: 'Capacidad terminal 07' },
+  { id: '08', name: 'Capacidad terminal 08' },
+  { id: '09', name: 'Capacidad terminal 09' },
+  { id: '10', name: 'Capacidad terminal 10' }
+])
+
 const initialFormData = () => ({
+    numero_capacidad: "",
     nombre_capacidad: "",
     fecha_inicio: "",
     fecha_fin: "",
@@ -69,6 +85,16 @@ watch(
     { immediate: true }
 );
 
+// Lista de módulos ya creados (simulada)
+const capacidadesCreadas = ref([])
+
+// Opciones filtradas: excluye las ya creadas
+const filteredCapacidades = computed(() => {
+    return capacidades.value.filter(
+        cap => !capacidadesCreadas.value.includes(cap.id)
+    )
+})
+
 yup.setLocale({
     mixed: {
         required: 'Este campo es obligatorio.',
@@ -85,6 +111,10 @@ yup.setLocale({
 
 // Validación con Yup
 const schema = yup.object().shape({
+    numero_capacidad: yup
+        .string()
+        .nullable()
+        .required("El numero de la capacidad es obligatorio."),
     nombre_capacidad: yup
         .string()
         .nullable()
@@ -118,6 +148,9 @@ const onSubmit = async () => {
         : await createCapacidad(data);
 
     if (response?.id) {
+
+        capacidadesCreadas.value.push(data.numero_capacidad);
+
         formData.value = initialFormData();
         formErrors.value = {};
         showToast(
@@ -138,6 +171,12 @@ const onSubmit = async () => {
         <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
 
         <div class="mt-2 space-y-3 font-inter">
+            <FormLabelError label="Número de capacidad terminal" required :error="formErrors?.numero_capacidad">
+                <BaseSelectModulo v-model="formData.numero_capacidad" :options="filteredCapacidades" label="name"
+                    placeholder="Número de capacidad" />
+            </FormLabelError>
+
+
             <FormInput v-model="formData.nombre_capacidad" :focus="show" label="Nombre de la capacidad terminal"
                 :error="formErrors?.nombre_capacidad" required />
 

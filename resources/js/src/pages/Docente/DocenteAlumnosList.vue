@@ -7,6 +7,7 @@ import Tr from '../../components/table/Tr.vue';
 import Th from '../../components/table/Th.vue';
 import Td from '../../components/table/Td.vue';
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 
 const props = defineProps({
   id: {
@@ -15,16 +16,18 @@ const props = defineProps({
   },
 });
 
+const matriculaStore = useMatriculaStore()
+
+
 const alumnos = ref([]);
 
-onMounted(() => {
+onMounted(async () => {
   console.log(`Cargando alumnos para el módulo con ID: ${props.id}`);
-  alumnos.value = [
-    { id: 1, nombre: 'ALENCASTRE LUQUE, Kelly Angie', dni: '71234567', estado: 'Matriculado' },
-    { id: 2, nombre: 'ALFARO AVENDAÑO, Victoria Valentina', dni: '72345678', estado: 'Matriculado' },
-    { id: 3, nombre: 'APAZA HUARAYA, Ruth Gricelda', dni: '73456789', estado: 'Retirado' },
-  ];
+
+  await matriculaStore.fetchMatriculadosPorGrupoExtendido(props.id);
+  alumnos.value = matriculaStore.matriculadosPorGrupoExtendido.estudiantes;
 });
+
 </script>
 
 <template>
@@ -47,11 +50,11 @@ onMounted(() => {
         <TBody>
           <Tr v-for="(alumno, index) in alumnos" :key="alumno.id">
             <Td>{{ index + 1 }}</Td>
-            <Td>{{ alumno.nombre }}</Td>
-            <Td>{{ alumno.dni }}</Td>
+            <Td>{{ alumno.apellidos_nombres }}</Td>
+            <Td>{{ alumno.nro_documento }}</Td>
             <Td>
               <span :class="alumno.estado === 'Matriculado' ? 'text-green-600' : 'text-red-600'">
-                  {{ alumno.estado }}
+                {{ alumno.estado }}
               </span>
             </Td>
             <Td class="text-center">

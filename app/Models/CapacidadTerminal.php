@@ -17,6 +17,7 @@ class CapacidadTerminal extends Model
 
     protected $fillable = [
         'id',
+        'numero_capacidad',
         'nombre_capacidad',
         'fecha_inicio',
         'fecha_fin',

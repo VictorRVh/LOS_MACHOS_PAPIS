@@ -41,6 +41,7 @@ class CapacidadTerminalController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'numero_capacidad' => 'required|string|max:255',
             'nombre_capacidad' => 'required|string|max:255',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',

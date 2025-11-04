@@ -32,6 +32,7 @@ const formData = ref({
     horas: '',
     turno: '',
     seccion: '',
+
     tipo_documento: 'DNI',
     nro_documento: '',
     apellido_paterno: '',
@@ -45,22 +46,41 @@ const formData = ref({
     distrito_nacimiento: '',
     lugar_nacimiento: '',
     direccion_residencia: '',
-    correo: '',
+    correo_electronico: '',
     celular: '',
     estado_civil: '',
     grado_instruccion: '',
+
     trabaja: '',
-    puesto_trabajo: '',
-    condicion: "G | Gratuito",
-    nro_recibo: "",
-    aporte: "",
+    detalle_trabajo: '',       
+
+    carga_familiar: '',
+    detalle_carga_familiar: '',    
+
+    internet_casa: '',
+    tipo_internet: '',            
+
+    tipo_operador: '',
+    equipo_clases: [],             
+
+    discapacidad: '',
+    tipo_discapacidad: '',          
+
+    celular_referencia: '',
+    parentesco_referencia: '',
+    lengua_materna: '',
+
+    condicion: 'G | Gratuito',
+    nro_recibo: '',
+    aporte: '',
+    anio_egreso: ''
 });
 
 onMounted(async () => {
     try {
         await Promise.all([
             programaStore.loadPrograma(),
-          
+
         ]);
     } catch (error) {
         showToast("No se pudieron cargar los datos necesarios.", "error");
@@ -87,7 +107,7 @@ const stepSchemas = {
             .max(new Date(new Date().setFullYear(new Date().getFullYear() - 12)), 'El estudiante debe ser mayor de 12 años')
             .min(new Date(new Date().setFullYear(new Date().getFullYear() - 100)), 'La edad no puede ser mayor a 100 años'),
         celular: yup.string().required('Celular es requerido'),
-        correo: yup.string().email('Debe ser un correo válido').notRequired(),
+        correo_electronio: yup.string().email('Debe ser un correo válido').notRequired(),
         direccion_residencia: yup.string().required('La dirección es requerida'),
         estado_civil: yup.string().required('Estado civil es requerido'),
     }),
@@ -157,10 +177,11 @@ const onSubmit = async () => {
             </ol>
 
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-h-[450px]">
-   
-                <Step1 v-show="currentStep === 1" v-model="formData" :programas="programaStore.programa.programas" :nameGrupo="nameGrupo" @cambiarVariable="nameGrupo = $event" :errors="formErrors" />
-                <Step2 v-show="currentStep === 2" v-model="formData":errors="formErrors" />
-                <Step3 v-show="currentStep === 3" v-model="formData" :nameGrupo="nameGrupo"  />
+
+                <Step1 v-show="currentStep === 1" v-model="formData" :programas="programaStore.programa.programas"
+                    :nameGrupo="nameGrupo" @cambiarVariable="nameGrupo = $event" :errors="formErrors" />
+                <Step2 v-show="currentStep === 2" v-model="formData" :errors="formErrors" />
+                <Step3 v-show="currentStep === 3" v-model="formData" :nameGrupo="nameGrupo" />
             </div>
 
             <div class="flex justify-between ">

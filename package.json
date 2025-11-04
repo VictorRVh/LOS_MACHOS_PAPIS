@@ -35,6 +35,7 @@
         "three": "^0.180.0",
         "tiny-emitter": "^2.1.0",
         "uuid": "^9.0.1",
+        "vue-full-calendar": "^2.8.1-0",
         "vue-loader": "^17.3.1",
         "vue-router": "^4.2.5",
         "vue-select": "^4.0.0-beta.6",

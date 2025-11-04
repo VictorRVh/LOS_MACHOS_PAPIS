@@ -32,35 +32,47 @@ class MatriculaController extends Controller
         DB::beginTransaction();
 
         try {
-            // Crear estudiante
             $estudiante = Estudiante::create([
-                'tipo_documento'       => $request->tipo_documento,
-                'nro_documento'        => $request->nro_documento,
-                'apellido_paterno'     => $request->apellido_paterno,
-                'apellido_materno'     => $request->apellido_materno,
-                'nombre'               => $request->nombre,
-                'sexo'                 => $request->sexo,
-                'fecha_nacimiento'     => $request->fecha_nacimiento,
-                'pais_nacimiento'      => $request->pais_nacimiento,
+                'tipo_documento'          => $request->tipo_documento,
+                'nro_documento'           => $request->nro_documento,
+                'apellido_paterno'        => $request->apellido_paterno,
+                'apellido_materno'        => $request->apellido_materno,
+                'nombre'                  => $request->nombre,
+                'sexo'                    => $request->sexo,
+                'fecha_nacimiento'        => $request->fecha_nacimiento,
+                'pais_nacimiento'         => $request->pais_nacimiento,
                 'departamento_nacimiento' => $request->departamento_nacimiento,
-                'provincia_nacimiento' => $request->provincia_nacimiento,
-                'distrito_nacimiento'  => $request->distrito_nacimiento,
-                'lugar_nacimiento'     => $request->lugar_nacimiento,
-                'direccion_residencia' => $request->direccion_residencia,
-                'correo_electronico'   => $request->correo,
-                'celular_personal'     => $request->celular,
-                'estado_civil'         => $request->estado_civil,
-                'grado_instruccion'    => $request->grado_instruccion,
-                'trabaja'              => $request->trabaja,
-                'puesto_trabajo'       => $request->puesto_trabajo,
-                'carga_familiar'       => $request->carga_familiar,
-                'internet_casa'        => $request->internet_casa,
-                'operador_celular'     => $request->operador_celular,
-                'equipo_virtual'       => $request->equipo_virtual,
-                'discapacidad'         => $request->discapacidad,
-                'celular_referencia'   => $request->celular_referencia,
-                'parentesco_referencia' => $request->parentesco_referencia,
-                'lengua_originaria'    => $request->lengua_originaria
+                'provincia_nacimiento'    => $request->provincia_nacimiento,
+                'distrito_nacimiento'     => $request->distrito_nacimiento,
+                'lugar_nacimiento'        => $request->lugar_nacimiento,
+                'direccion_residencia'    => $request->direccion_residencia,
+                'correo_electronico'      => $request->correo_electronico,
+                'celular_personal'        => $request->celular,
+                'estado_civil'            => $request->estado_civil,
+                'grado_instruccion'       => $request->grado_instruccion,
+
+                'trabaja'                 => $request->trabaja,
+                'detalle_trabajo'         => $request->trabaja === 'Si' ? $request->detalle_trabajo : null,
+
+                'carga_familiar'          => $request->carga_familiar,
+                'detalle_carga_familiar'  => $request->carga_familiar === 'Si' ? $request->detalle_carga_familiar : null,
+
+                'internet_casa'           => $request->internet_casa,
+                'tipo_internet'           => $request->internet_casa === 'Si' ? $request->tipo_internet : null,
+
+                // 'tipo_operador'           => $request->tipo_operador,
+
+                'equipos_virtuales'           => $request->has('equipos_virtuales')
+                    ? json_encode($request->equipos_virtuales)
+                    : null,
+
+                'discapacidad'            => $request->discapacidad,
+                'tipo_discapacidad'       => $request->discapacidad === 'Si' ? $request->tipo_discapacidad : null,
+
+                'celular_referencia'      => $request->celular_referencia,
+                'parentesco_referencia'   => $request->parentesco_referencia,
+                'lengua_materna'       => $request->lengua_originaria,
+                'anio_egreso'       => $request->anio_egreso,
             ]);
 
             // Crear pago

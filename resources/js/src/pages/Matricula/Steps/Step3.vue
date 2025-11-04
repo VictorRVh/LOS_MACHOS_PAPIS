@@ -30,7 +30,7 @@ const formData = computed({
                 <FormLabelError label="Condición">
                     <vSelect 
                         v-model="formData.condicion" 
-                        :options="['G | Gratuito', 'P | Pagante', 'B | Becado']" 
+                        :options="['G | Gratuito', 'P | Pagante', 'B | Beca', 'S | Semibeca']" 
                         :clearable="false"
                     />
                 </FormLabelError>

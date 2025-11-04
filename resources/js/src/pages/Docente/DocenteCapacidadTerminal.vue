@@ -20,12 +20,18 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  idModulo: {
+    type: String,
+    required: true,
+  },
 });
 
 const capacidadStore = useCapacidadTerminalStore();
 
 if (!capacidadStore.capacidadTerminal?.length)
   await capacidadStore.loadCapacidadTerminal(props.id);
+
+console.log('denideideide', props.idModulo)
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("capacidad-terminal-crud");
 const { showConfirmModal, showToast } = useModalToast();
@@ -42,7 +48,7 @@ const onDelete = (capacidad) => {
       capacidadStore.loadCapacidadTerminal(props.id);
     }
 
-    else{
+    else {
       showToast("No se pudo Eliminar la capacidad. Intenta nuevamente.", "error");
     }
   });
@@ -57,12 +63,7 @@ const onDelete = (capacidad) => {
       <!-- FORMULARIO -->
       <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
 
-        <CapacidadTerminalSlider
-          :show="slider"
-          :idGrupo="id"
-          :capacidad="sliderData"
-          @hide="hideSlider"
-        />
+        <CapacidadTerminalSlider :show="slider" :idGrupo="id" :capacidad="sliderData" @hide="hideSlider" />
       </div>
 
       <!-- TABLA -->
@@ -78,19 +79,14 @@ const onDelete = (capacidad) => {
           </THead>
 
           <TBody>
-            <Tr
-              v-for="(capacidad, index) in capacidadStore.capacidadTerminal"
-              :key="capacidad.id"
-            >
+            <Tr v-for="(capacidad, index) in capacidadStore.capacidadTerminal" :key="capacidad.id">
               <Td>{{ index + 1 }}</Td>
               <Td>{{ capacidad?.nombre_capacidad }}</Td>
               <Td>{{ capacidad?.fecha_inicio }}</Td>
               <Td>{{ capacidad?.fecha_fin }}</Td>
               <Td>
-                <span
-                  class="px-2 py-1 rounded text-xs font-semibold"
-                  :class="capacidad.status === 1 ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'"
-                >
+                <span class="px-2 py-1 rounded text-xs font-semibold"
+                  :class="capacidad.status === 1 ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'">
                   {{ capacidad.status === 1 ? 'Activo' : 'Inactivo' }}
                 </span>
               </Td>

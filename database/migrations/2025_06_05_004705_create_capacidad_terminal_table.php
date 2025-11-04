@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('capacidad_terminal', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('numero_capacidad');
             $table->string('nombre_capacidad');
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
@@ -20,8 +21,8 @@ return new class extends Migration
             $table->tinyInteger('status')->default(0);
 
             $table->foreign('id_grupo')
-                  ->references('id')->on('grupo')
-                  ->onDelete('cascade');
+                ->references('id')->on('grupo')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }

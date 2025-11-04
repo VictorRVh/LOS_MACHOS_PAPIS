@@ -15,12 +15,42 @@ class Estudiante extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 'tipo_documento', 'nro_documento', 'apellido_paterno','apellido_materno', 'nombre', 'sexo',
-        'pais_nacimiento', 'departamento_nacimiento', 'provincia_nacimiento', 'distrito_nacimiento',
-        'distrito_nacimiento', 'lugar_nacimiento', 'direccion_residencia', 'fecha_nacimiento',
-        'estado_civil', 'grado_instruccion', 'trabaja', 'puesto_trabajo', 'carga_familiar', 'correo_electronico',
-        'celular_personal', 'internet_casa', 'tipo_operador', 'equipo_clases', 'discapacidad', 'celular_referencia',
-        'parentesco_referencia', 'lengua_originaria',
+        'id',
+        'tipo_documento',
+        'nro_documento',
+        'apellido_paterno',
+        'apellido_materno',
+        'nombre',
+        'sexo',
+        'pais_nacimiento',
+        'departamento_nacimiento',
+        'provincia_nacimiento',
+        'distrito_nacimiento',
+        'lugar_nacimiento',
+        'direccion_residencia',
+        'fecha_nacimiento',
+        'estado_civil',
+        'grado_instruccion',
+        'trabaja',
+        'detalle_trabajo',          
+        'carga_familiar',
+        'detalle_carga_familiar',   
+        'correo_electronico',
+        'celular_personal',
+        'internet_casa',
+        'tipo_internet',            
+        // 'tipo_operador',
+        'equipos_virtuales',
+        'discapacidad',
+        'tipo_discapacidad',        
+        'celular_referencia',
+        'parentesco_referencia',
+        'lengua_materna',
+        'anio_egreso'
+    ];
+
+    protected $casts = [
+        'equipo_clases' => 'array',
     ];
 
     protected static function boot()

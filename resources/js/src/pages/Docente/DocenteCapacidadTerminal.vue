@@ -14,6 +14,7 @@ import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import CapacidadTerminalSlider from "../../components/page/CapacidadesTerminales/CapacidadTerminalSlider.vue";
 import useCapacidadTerminalStore from "../../store/CapacidadTerminal/UseCapacidadTerminalStore";
+import { ref, computed } from "vue";
 
 const props = defineProps({
   id: {
@@ -53,6 +54,35 @@ const onDelete = (capacidad) => {
     }
   });
 };
+
+const indexCapacidades = ref([]);
+
+const cantidad = Number(capacidadStore.capacidadTerminal.nro_capacidades || 0);
+
+for (let i = 1; i <= cantidad; i++) {
+  const id = i.toString().padStart(2, "0");
+  indexCapacidades.value.push({
+    id,
+    name: `Módulo ${id}`,
+  });
+}
+
+const indicesArray = computed(() => {
+  // Mapea los módulos ya asignados
+  const asignadas = capacidadStore.capacidadTerminal?.capacidades.map(
+    (ep) => ep?.numero_capacidad
+  ) || [];
+
+  // Si estoy editando
+  const currentId = sliderData.value?.numero_capacidad;
+
+  return indexCapacidades.value.filter(
+    (indice) => !asignadas.includes(indice.id) || indice.id === currentId
+  );
+
+});
+
+
 </script>
 
 <template>
@@ -63,7 +93,8 @@ const onDelete = (capacidad) => {
       <!-- FORMULARIO -->
       <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
 
-        <CapacidadTerminalSlider :show="slider" :idGrupo="id" :capacidad="sliderData" @hide="hideSlider" />
+        <CapacidadTerminalSlider :show="slider" :idGrupo="id"
+          :indexCapacidades="indicesArray" :capacidad="sliderData" @hide="hideSlider" />
       </div>
 
       <!-- TABLA -->
@@ -79,7 +110,7 @@ const onDelete = (capacidad) => {
           </THead>
 
           <TBody>
-            <Tr v-for="(capacidad, index) in capacidadStore.capacidadTerminal" :key="capacidad.id">
+            <Tr v-for="(capacidad, index) in capacidadStore.capacidadTerminal.capacidades" :key="capacidad.id">
               <Td>{{ index + 1 }}</Td>
               <Td>{{ capacidad?.nombre_capacidad }}</Td>
               <Td>{{ capacidad?.fecha_inicio }}</Td>

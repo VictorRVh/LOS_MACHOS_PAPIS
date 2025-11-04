@@ -10,7 +10,7 @@ import Td from "../../components/table/Td.vue";
 import CreateButton from "../../components/ui/CreateButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 import useStudentsStore from "../../store/Estudiante/UseEstudianteGrupoStore";
-import useCapacidadTerminalStore from "../../store/CapacidadTerminal/UseCapacidadTerminalStore";
+import useCapacidadTerminalStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
 import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 
 const router = useRouter();
@@ -25,27 +25,32 @@ const props = defineProps({
 const userStore = useStudentsStore();
 const capacidadTerminal = useCapacidadTerminalStore();
 
+const lengthUnit = ref(0);
+
 const capacidadSeleccionada = ref(null); // ✅ Nuevo: capacidad terminal seleccionada
 const unidadesFiltradas = ref([]);       // ✅ Unidades filtradas según la capacidad seleccionada
 
 // ✅ Cargar datos al montar
 
-if (!userStore.estudiantes?.length) {
+if (!userStore.estudiantes?.matriculados?.length) {
     await userStore.loadEstudiantes(props.id);
 }
-if (!capacidadTerminal?.capacidadTerminal?.length) {
+if (!capacidadTerminal?.capacidadTerminal?.capacidades?.length) {
     await capacidadTerminal.loadCapacidadTerminal(props.id);
 }
 
+  lengthUnit.value = capacidadTerminal?.capacidadTerminal;
         // estudiantes,
         // loadEstudiantes,
         // estudianteLoading,
         // estudianteFirstTimeLoading,
 
+        console.log("estuidanes: ",userStore.estudiantes?.matriculados)
+
 // ✅ Recalcular unidades cuando cambia la capacidad seleccionada
 watch(capacidadSeleccionada, (newCapacidad) => {
     if (newCapacidad) {
-        unidadesFiltradas.value = userStore.estudiantes
+        unidadesFiltradas.value = capacidadTerminal?.capacidadTerminal?.capacidades
             .map((u) => ({
                 ...u,
                 notas: u.estudiante?.notas?.filter(
@@ -73,34 +78,47 @@ const verNotasUnidad = () => {
 
 
 <template>
-    <AuthorizationFallback :permissions="['todo-acceso-capacidad-terminal-notas-docente', 'ver-capacidad-terminal-notas-docente']">
+    <AuthorizationFallback
+        :permissions="['todo-acceso-capacidad-terminal-notas-docente', 'ver-capacidad-terminal-notas-docente']">
         <div class="w-full space-y-4 py-6">
             <div class="flex justify-between">
-                <h2 class="text-black font-bold text-2xl dark:text-white">Estudiantes Matriculados</h2>
+                <h2 class="text-black font-bold text-2xl dark:text-white">Estudiantes</h2>
             </div>
 
+            <div class="flex justify-between">
+                <BaseSelectGrupo v-model="capacidadSeleccionada" :options="capacidadTerminal?.capacidadTerminal"
+                    label="nombre_capacidad" placeholder="Seleccione una capacidad terminal" />
+                <CreateButton @click="verNotasUnidad" value="Ver Notas" />
+            </div>
+
+
             <div class="w-full">
+                <!-- Tabla con eliminación de líneas internas -->
                 <Table class="border-collapse divide-y divide-transparent">
                     <THead>
                         <Tr>
-                            <Th>#</Th>
-                            <Th>Estudiante</Th>
+                            <Th>Id</Th>
+                            <Th>Nombre</Th>
                             <Th>DNI</Th>
-                            <Th>Sexo</Th>
-                            <Th>Fecha de Nacimiento</Th>
-                            <Th>Turno</Th>
-                            <Th>Reserva</Th>
+                            <Th v-for="i in capacidadTerminal?.capacidadTerminal?.cantidad_capacidades" :key="i">Unidad</Th>
                         </Tr>
                     </THead>
                     <TBody>
-                        <Tr v-for="(mat, index) in estudiantes" :key="mat.id_matricula">
-                            <Td>{{ index + 1 }}</Td>
-                            <Td>{{ mat.estudiante }}</Td>
-                            <Td>{{ mat.nro_documento }}</Td>
-                            <Td>{{ mat.sexo }}</Td>
-                            <Td>{{ mat.fecha_nacimiento }}</Td>
-                            <Td>{{ mat.turno }}</Td>
-                            <Td>{{ mat.reserva ? 'Sí' : 'No' }}</Td>
+                        <Tr v-for="(user, index) in userStore.estudiantes?.matriculados" :key="user.id">
+                            <Td class="py-2 px-4 border-0 text-black">{{ index + 1 }}</Td>
+                            <Td class="py-2 px-4 border-0 text-black">{{ user?.estudiante }}</Td>
+                            <Td class="py-2 px-4 border-0 text-black">{{ user?.nro_documento }}</Td>
+                            <!-- resto de columnas del estudiante -->
+                            <Td class="py-2 px-4 border-0 text-black" v-for="note in user.notas" :key="note.id_nota">
+                                <span :class="[
+                                    'px-2 py-1 rounded-full',
+                                    note.nota <= 10
+                                        ? 'text-red-600 dark:text-red-500 font-bold'
+                                        : 'text-green-600 dark:text-green-300 font-bold'
+                                ]">
+                                    {{ note.nota }}
+                                </span>
+                            </Td>
                         </Tr>
                     </TBody>
                 </Table>
@@ -108,7 +126,6 @@ const verNotasUnidad = () => {
         </div>
     </AuthorizationFallback>
 </template>
-
 
 <style scoped>
 /* No se requiere CSS adicional, todo está gestionado con Tailwind */

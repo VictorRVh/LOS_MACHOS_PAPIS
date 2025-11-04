@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CapacidadTerminal;
 use App\Models\Matricula;
 use App\Models\NotaCapacidadTerminal;
 use Illuminate\Http\Request;
@@ -16,6 +17,31 @@ class NotaCapacidadTerminalController extends Controller
     {
         $notas = NotaCapacidadTerminal::with(['grupo', 'capacidadTerminal', 'estudiante'])->get();
         return response()->json($notas);
+    }
+
+    public function index_grupo_capacidad_terminal($id)
+    {
+        // ✅ Cantidad total de capacidades (independiente de si tienen notas)
+        $cantidadCapacidades = CapacidadTerminal::where('id_grupo', $id)->count();
+
+        // ✅ Solo capacidades que no tienen notas asignadas
+        $capacidades = CapacidadTerminal::where('id_grupo', $id)
+            ->orderBy('fecha_inicio', 'desc')
+            ->select(
+                'id',
+                'id_grupo',
+                'nombre_capacidad',
+                'fecha_inicio',
+                'fecha_fin',
+                'status'
+            )
+            ->whereDoesntHave('notaCapacidadTerminal') // 👈 Filtro para que no tengan notas asociadas
+            ->get();
+
+        return response()->json([
+            'capacidades' => $capacidades,
+            'cantidad_capacidades' => $cantidadCapacidades, // 👈 Total de capacidades, incluyendo con notas
+        ]);
     }
 
 
@@ -45,11 +71,7 @@ class NotaCapacidadTerminalController extends Controller
                 'm.id as id_matricula',
                 'e.id as id_estudiante',
                 DB::raw("CONCAT(e.apellido_paterno, ' ', e.apellido_materno, ', ', e.nombre) as estudiante"),
-                'e.nro_documento',
-                'e.sexo',
-                'e.fecha_nacimiento',
-                'm.turno',
-                'm.reserva'
+                'e.nro_documento'
             )
             ->orderBy('e.apellido_paterno', 'asc')
             ->orderBy('e.apellido_materno', 'asc')
@@ -61,7 +83,6 @@ class NotaCapacidadTerminalController extends Controller
             'modulo' => $infoGrupo->modulo,
             'matriculados' => $matriculados,
         ]);
-
     }
 
     // GET /api/nota-capacidad-terminal/{id}

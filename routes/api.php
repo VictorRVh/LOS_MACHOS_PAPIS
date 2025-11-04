@@ -590,6 +590,11 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'index_grupo_alumnos',
     ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|ver-capacidad-terminal-notas-docente');
+    
+    Route::get('nota_capacidad_terminal_restringido/{id}', [
+        \App\Http\Controllers\NotaCapacidadTerminalController::class,
+        'index_grupo_capacidad_terminal',
+    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|ver-capacidad-terminal-notas-docente');
 
 
     Route::post('nota_capacidad_terminal', [

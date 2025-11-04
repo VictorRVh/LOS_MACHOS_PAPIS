@@ -71,7 +71,7 @@ class MatriculaController extends Controller
 
                 'celular_referencia'      => $request->celular_referencia,
                 'parentesco_referencia'   => $request->parentesco_referencia,
-                'lengua_materna'       => $request->lengua_originaria,
+                'lengua_materna'       => $request->lengua_materna,
                 'anio_egreso'       => $request->anio_egreso,
             ]);
 

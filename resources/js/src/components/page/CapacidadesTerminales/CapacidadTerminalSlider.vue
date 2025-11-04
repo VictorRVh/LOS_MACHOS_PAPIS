@@ -25,6 +25,10 @@ const props = defineProps({
         type: String,
         required: true,
     },
+    indexCapacidades: {
+        type: [Object, null],
+        default: () => null,
+    },
 });
 
 const emit = defineEmits(["hide"]);
@@ -41,18 +45,7 @@ const requiredPermissions = computed(() => {
     return ["todo-acceso-capacidad-terminal-docente", "editar-capacidad-terminal-docente"];
 });
 
-const capacidades = ref([
-  { id: '01', name: 'Capacidad terminal 01' },
-  { id: '02', name: 'Capacidad terminal 02' },
-  { id: '03', name: 'Capacidad terminal 03' },
-  { id: '04', name: 'Capacidad terminal 04' },
-  { id: '05', name: 'Capacidad terminal 05' },
-  { id: '06', name: 'Capacidad terminal 06' },
-  { id: '07', name: 'Capacidad terminal 07' },
-  { id: '08', name: 'Capacidad terminal 08' },
-  { id: '09', name: 'Capacidad terminal 09' },
-  { id: '10', name: 'Capacidad terminal 10' }
-])
+const capacidades = ref([]);
 
 const initialFormData = () => ({
     numero_capacidad: "",
@@ -75,11 +68,23 @@ const onCancelEdit = () => {
 
 // cuando se recibe una capacidad para editar
 watch(
-    () => props.capacidad,
-    (newVal) => {
-        if (props.show && newVal?.id) {
-            formData.value = { ...initialFormData(), ...newVal };
+    [() => props.capacidad, () => props.capacidades],
+    ([newCapacidad, newCapacidades]) => {
+
+        if (props.show && newCapacidad?.id) {
+            formData.value = { ...initialFormData(), ...newCapacidad };
             formErrors.value = {};
+        }
+
+        const total = parseInt(newCapacidades, 10);
+        if (!isNaN(total) && total > 0) {
+            capacidades.value = Array.from({ length: total }, (_, i) => {
+                const num = String(i + 1).padStart(2, "0");
+                return {
+                    id: num,
+                    name: `Capacidad terminal ${num}`,
+                };
+            });
         }
     },
     { immediate: true }
@@ -172,7 +177,7 @@ const onSubmit = async () => {
 
         <div class="mt-2 space-y-3 font-inter">
             <FormLabelError label="Número de capacidad terminal" required :error="formErrors?.numero_capacidad">
-                <BaseSelectModulo v-model="formData.numero_capacidad" :options="filteredCapacidades" label="name"
+                <BaseSelectModulo v-model="formData.numero_capacidad" :options="props.indexCapacidades" label="name"
                     placeholder="Número de capacidad" />
             </FormLabelError>
 

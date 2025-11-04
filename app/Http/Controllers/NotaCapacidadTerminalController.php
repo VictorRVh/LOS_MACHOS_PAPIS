@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Matricula;
 use App\Models\NotaCapacidadTerminal;
 use Illuminate\Http\Request;
 
@@ -14,6 +15,16 @@ class NotaCapacidadTerminalController extends Controller
     {
         $notas = NotaCapacidadTerminal::with(['grupo', 'capacidadTerminal', 'estudiante'])->get();
         return response()->json($notas);
+    }
+
+    public function index_grupo_alumnos($idGrupo)
+    {
+        $matricula = Matricula::with(['grupo', 'estudiante', 'pago'])->find($idGrupo);
+        if (!$matricula) {
+            return response()->json(['message' => 'Matrícula no encontrada'], 404);
+        }
+
+        return response()->json($matricula);
     }
 
     // GET /api/nota-capacidad-terminal/{id}

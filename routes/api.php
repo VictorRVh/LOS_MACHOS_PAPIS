@@ -580,27 +580,32 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-capacidad-terminal-docente|eliminar-capacidad-terminal-docente');
 
-
     // RUTA PARA NOTA DE CAPACIDAD TERMINAL
     Route::get('nota_capacidad_terminal', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|ver-capacidad-terminal-notas-docente');
+
+    Route::get('nota_capacidad_terminal/{id}', [
+        \App\Http\Controllers\NotaCapacidadTerminalController::class,
+        'index_grupo_alumnos',
+    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|ver-capacidad-terminal-notas-docente');
+
 
     Route::post('nota_capacidad_terminal', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|crear-capacidad-terminal-notas-docente');
 
     Route::patch('nota_capacidad_terminal/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
+    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|editar-capacidad-terminal-notas-docente');
 
     Route::delete('nota_capacidad_terminal/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|eliminar-capacidad-terminal-notas-docente');
 
 
     // RUTA PARA EXPERIENCIA FORMATIVA

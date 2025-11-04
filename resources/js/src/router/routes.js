@@ -266,7 +266,7 @@ export default [
             {
                 path: 'calificaciones',
                 name: 'docente.modulo.detalle.calificaciones',
-                component: () => import('../pages/Docente/DocenteCapacidadTerminal.vue'),
+                component: () => import('../pages/Docente/DocenteModuloCalificacion.vue'),
                 props: true,
                 meta: { parent: 'docente.modulo.detalle', breadcrumb: { text: 'Calificaciones' } }
             },

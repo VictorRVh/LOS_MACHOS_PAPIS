@@ -119,10 +119,6 @@ watch(
   { deep: true, immediate: true }
 )
 
-
-
-
-
 // 🧭 Manejo de selección
 
 const showForm = ref(false)

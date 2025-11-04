@@ -47,6 +47,13 @@ class PermissionRoleTableSeeder extends Seeder
             'crear-sesiones-docente',
             'editar-sesiones-docente',
             'eliminar-sesiones-docente',
+
+            'todo-acceso-capacidad-terminal-notas-docente',
+            'ver-capacidad-terminal-notas-docente',
+            'crear-capacidad-terminal-notas-docente',
+            'editar-capacidad-terminal-notas-docente',
+            'eliminar-capacidad-terminal-notas-docente',
+
         ];
 
         // buscar IDs de los permisos creados en la tabla permissions

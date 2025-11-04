@@ -122,34 +122,49 @@ const selectedDates = computed(() => selectionEvents.value.map(e => e.start).sor
 const hasSelection = computed(() => selectedDates.value.length > 0)
 
 
-
-
 const handleDateClick = ({ dateStr, date }) => {
-  const isWeekend = date.getDay() === 0 || date.getDay() === 6
-  if (isWeekend) return
-  const index = selectionEvents.value.findIndex(e => e.start === dateStr)
+  const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+  if (isWeekend) return;
+
+  // ⛔ Evitar seleccionar fechas que ya están programadas
+  const isAlreadyScheduled = allEvents.value.some(event =>
+    dateStr >= event.start && dateStr < event.end
+  );
+
+  if (isAlreadyScheduled) {
+    showToast("Esta fecha ya está programada en una sesión.");
+    return;
+  }
+
+  // ✅ Alternar selección normalmente
+  const index = selectionEvents.value.findIndex(e => e.start === dateStr);
   if (index >= 0) {
-    selectionEvents.value.splice(index, 1)
+    selectionEvents.value.splice(index, 1);
   } else {
     selectionEvents.value.push({
       start: dateStr,
       display: 'background',
       color: 'rgba(51,139,191,0.4)',
-    })
+    });
   }
-}
+};
 
-const handleEventClick = (info) => {
-  console.log('Evento seleccionado:', info.event)
-  // datesForSlider.value = [...bloque.dates]
-}
 
 // 👇 Agrega después de los handlers de selección
 
 // Limpia la selección visual del calendario
+
 const clearSelection = () => {
   selectionEvents.value = [];
+  datesForSlider.value = [];
+
+  // 🔄 Si tienes referencia al calendario, forzamos el repaint
+  const calendar = document.querySelector('.fc');
+  if (calendar) {
+    calendar.dispatchEvent(new Event('refresh')); // opcional según tu implementación
+  }
 };
+
 
 // Abre el slider en modo CREACIÓN (nuevo bloque)
 const openSessionForm = () => {
@@ -294,7 +309,9 @@ const estadoTexto = computed(() => {
     </div>
 
     <SesionSlider :show="slider" :blockToEdit="sliderData ?? null" :idGrupo="id" :sesion="sesionStore?.sesion"
-      @hide="hideSlider" @save="handleSaveSesion" :fechas-seleccionadas="datesForSlider" />
+      @hide="hideSlider" @save="handleSaveSesion" @clear-selection="clearSelection"
+      :fechas-seleccionadas="datesForSlider" />
+
   </div>
 </template>
 

@@ -73,47 +73,34 @@ const verNotasUnidad = () => {
 
 
 <template>
-    <AuthorizationFallback
-        :permissions="['todo-acceso-capacidad-terminal-notas-docente', 'ver-capacidad-terminal-notas-docente']">
+    <AuthorizationFallback :permissions="['todo-acceso-capacidad-terminal-notas-docente', 'ver-capacidad-terminal-notas-docente']">
         <div class="w-full space-y-4 py-6">
             <div class="flex justify-between">
-                <h2 class="text-black font-bold text-2xl dark:text-white">Estudiantes</h2>
+                <h2 class="text-black font-bold text-2xl dark:text-white">Estudiantes Matriculados</h2>
             </div>
-
-            <div class="flex justify-between">
-                <BaseSelectGrupo v-model="capacidadSeleccionada" :options="capacidadTerminal?.capacidadTerminal"
-                    label="nombre_capacidad" placeholder="Seleccione una capacidad terminal" />
-                <CreateButton @click="verNotasUnidad" value="Ver Notas" />
-            </div>
-
 
             <div class="w-full">
-                <!-- Tabla con eliminación de líneas internas -->
                 <Table class="border-collapse divide-y divide-transparent">
                     <THead>
                         <Tr>
-                            <Th>Id</Th>
-                            <Th>Nombre</Th>
-                            <Th>Apellido Paterno</Th>
-                            <Th>Apellido Materno</Th>
+                            <Th>#</Th>
+                            <Th>Estudiante</Th>
                             <Th>DNI</Th>
-                            <Th v-for="i in lengthUnit" :key="i">Unidad</Th>
+                            <Th>Sexo</Th>
+                            <Th>Fecha de Nacimiento</Th>
+                            <Th>Turno</Th>
+                            <Th>Reserva</Th>
                         </Tr>
                     </THead>
                     <TBody>
-                        <Tr v-for="(user, index) in unidadesFiltradas" :key="user.id">
-                            <Td class="py-2 px-4 border-0 text-black">{{ index + 1 }}</Td>
-                            <!-- resto de columnas del estudiante -->
-                            <Td class="py-2 px-4 border-0 text-black" v-for="note in user.notas" :key="note.id_nota">
-                                <span :class="[
-                                    'px-2 py-1 rounded-full',
-                                    note.nota <= 10
-                                        ? 'text-red-600 dark:text-red-500 font-bold'
-                                        : 'text-green-600 dark:text-green-300 font-bold'
-                                ]">
-                                    {{ note.nota }}
-                                </span>
-                            </Td>
+                        <Tr v-for="(mat, index) in estudiantes" :key="mat.id_matricula">
+                            <Td>{{ index + 1 }}</Td>
+                            <Td>{{ mat.estudiante }}</Td>
+                            <Td>{{ mat.nro_documento }}</Td>
+                            <Td>{{ mat.sexo }}</Td>
+                            <Td>{{ mat.fecha_nacimiento }}</Td>
+                            <Td>{{ mat.turno }}</Td>
+                            <Td>{{ mat.reserva ? 'Sí' : 'No' }}</Td>
                         </Tr>
                     </TBody>
                 </Table>
@@ -121,6 +108,7 @@ const verNotasUnidad = () => {
         </div>
     </AuthorizationFallback>
 </template>
+
 
 <style scoped>
 /* No se requiere CSS adicional, todo está gestionado con Tailwind */

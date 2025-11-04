@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Matricula;
 use App\Models\NotaCapacidadTerminal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class NotaCapacidadTerminalController extends Controller
 {
@@ -17,14 +18,50 @@ class NotaCapacidadTerminalController extends Controller
         return response()->json($notas);
     }
 
-    public function index_grupo_alumnos($idGrupo)
-    {
-        $matricula = Matricula::with(['grupo', 'estudiante', 'pago'])->find($idGrupo);
-        if (!$matricula) {
-            return response()->json(['message' => 'Matrícula no encontrada'], 404);
-        }
 
-        return response()->json($matricula);
+    public function index_grupo_alumnos($grupoId)
+    {
+        // Traer solo la info de especialidad y módulo
+        $infoGrupo = DB::table('grupo as g')
+            ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
+            ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
+            ->join('modulos as mo', 'g.id_modulo', '=', 'mo.id')
+            ->where('g.id', $grupoId)
+            ->select(
+                'em.nombre_especialidad as especialidad',
+                'mo.descripcion as modulo'
+            )
+            ->first();
+
+        // Traer a los estudiantes matriculados en el grupo
+        $matriculados = DB::table('matricula as m')
+            ->join('estudiante as e', 'm.id_estudiante', '=', 'e.id')
+            ->where('m.id_grupo', $grupoId)
+            ->where(function ($q) {
+                $q->whereNull('m.reserva')
+                    ->orWhere('m.reserva', 0);
+            })
+            ->select(
+                'm.id as id_matricula',
+                'e.id as id_estudiante',
+                DB::raw("CONCAT(e.apellido_paterno, ' ', e.apellido_materno, ', ', e.nombre) as estudiante"),
+                'e.nro_documento',
+                'e.sexo',
+                'e.fecha_nacimiento',
+                'm.turno',
+                'm.reserva'
+            )
+            ->orderBy('e.apellido_paterno', 'asc')
+            ->orderBy('e.apellido_materno', 'asc')
+            ->orderBy('e.nombre', 'asc')
+            ->get();
+
+        return response()->json([
+            'especialidad' => $infoGrupo->especialidad,
+            'modulo' => $infoGrupo->modulo,
+            'matriculados' => $matriculados,
+        ]);
+
     }
 
     // GET /api/nota-capacidad-terminal/{id}

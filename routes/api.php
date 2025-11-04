@@ -949,6 +949,12 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\GrupoController::class,
         'infoGrupo',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+
+    // RUTA PARA REPORTE DE CUMPLIMIENTO
+    Route::get('/reporte-entregas-docentes', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'generarExcel',
+    ])->middleware('permission:ver-programa-especialidades');
 });
 
 
@@ -961,11 +967,11 @@ Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
     Route::get('/files/{fileId}', [GoogleDriveController::class, 'listFilesNew']);
     Route::post('/folder', [GoogleDriveController::class, 'createFolder']);
     Route::post('/upload', [GoogleDriveController::class, 'uploadFile']);
+    Route::post('/uploadDocente', [GoogleDriveController::class, 'uploadFileDocente']);
     Route::patch('/file/{fileId}/rename', [GoogleDriveController::class, 'renameFile']);
     Route::patch('/file/{fileId}/move', [GoogleDriveController::class, 'moveFile']);
     Route::delete('/file/{fileId}', [GoogleDriveController::class, 'deleteFile']);
     Route::get('/drive/file/{id}/download', [GoogleDriveController::class, 'downloadFile']);
-
 });
 
 Route::post('/carpetas-grupo/crear/{id_grupo}', [CarpetasGrupoDriveController::class, 'crearCarpetaGrupo']);
@@ -982,4 +988,3 @@ Route::middleware('auth:sanctum')->group(function () {
         'subscribeToCalendarNotifications'
     ])->middleware('permission:todo-acceso-permisos');
 });
-

@@ -9,6 +9,7 @@ import CheckBox from "../../ui/CheckBox.vue";
 import useModalToast from "../../../composables/useModalToast";
 import * as yup from "yup";
 import useCapacidadTerminalStore from "../../../store/CapacidadTerminal/UseCapacidadTerminalStore";
+import useCapacidadTerminalCalificacionStore from "../../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
 import BaseSelectModulo from "../../ui/BaseSelectCiclo.vue";
 import FormLabelError from "../../ui/FormLabelError.vue";
 
@@ -34,6 +35,8 @@ const props = defineProps({
 const emit = defineEmits(["hide"]);
 
 const capacidadStore = useCapacidadTerminalStore();
+const calificacionCapacidad = useCapacidadTerminalCalificacionStore();
+
 const { store: createCapacidad, saving, update: updateCapacidad, updating } =
     useHttpRequest("/capacidad_terminal");
 const { runYupValidation } = useValidation();
@@ -162,7 +165,7 @@ const onSubmit = async () => {
             `Capacidad terminal ${isEditing.value ? "editada" : "creada"} exitosamente.`
         );
         await capacidadStore.loadCapacidadTerminal(props.idGrupo);
-
+        await calificacionCapacidad.loadCapacidadTerminal(props.idGrupo);
         emit("hide");
     }
 };

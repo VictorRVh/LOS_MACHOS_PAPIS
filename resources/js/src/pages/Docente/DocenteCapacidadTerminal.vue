@@ -14,6 +14,7 @@ import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import CapacidadTerminalSlider from "../../components/page/CapacidadesTerminales/CapacidadTerminalSlider.vue";
 import useCapacidadTerminalStore from "../../store/CapacidadTerminal/UseCapacidadTerminalStore";
+import useCapacidadTerminalCalificacionesStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
 import { ref, computed } from "vue";
 
 const props = defineProps({
@@ -28,6 +29,7 @@ const props = defineProps({
 });
 
 const capacidadStore = useCapacidadTerminalStore();
+const calificacionCapacidad = useCapacidadTerminalCalificacionesStore();
 
 if (!capacidadStore.capacidadTerminal?.length)
   await capacidadStore.loadCapacidadTerminal(props.id);
@@ -47,6 +49,7 @@ const onDelete = (capacidad) => {
     if (isDeleted) {
       showToast(`Capacidad "${capacidad?.nombre_capacidad}" eliminada exitosamente.`);
       capacidadStore.loadCapacidadTerminal(props.id);
+      calificacionCapacidad.loadCapacidadTerminal(props.id);
     }
 
     else {

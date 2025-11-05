@@ -117,18 +117,47 @@ class NotaCapacidadTerminalController extends Controller
     // POST /api/nota-capacidad-terminal
     public function store(Request $request)
     {
+        // Validar estructura básica del request
         $request->validate([
-            // 'nota_capacidad' => 'sometimes|numeric|min:0|max:20',
-            'nota_capacidad' => 'required|string',
             'id_grupo' => 'required|exists:grupo,id',
-            'id_capacidad' => 'required|exists:capacidad_terminal,id',
-            'id_estudiante' => 'required|exists:estudiante,id',
+            'id_capacidad_terminal' => 'required|exists:capacidad_terminal,id',
+            'notas' => 'required|array',
+            'notas.*.id_estudiante' => 'required|exists:estudiante,id',
+            'notas.*.nota' => 'required|numeric|min:0|max:20',
         ]);
 
-        $nota = NotaCapacidadTerminal::create($request->all());
+        try {
+            DB::beginTransaction();
 
-        return response()->json($nota, 201);
+            $count = 0; 
+
+            foreach ($request->notas as $nota) {
+                NotaCapacidadTerminal::create([ // USAR INSERT EN CASO HAYA UNA INSERCION DE VARIOS DATOS
+                    'nota_capacidad' => $nota['nota'],
+                    'id_grupo' => $request->id_grupo,
+                    'id_capacidad' => $request->id_capacidad_terminal,
+                    'id_estudiante' => $nota['id_estudiante'],
+                ]);
+
+                $count++;
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Notas registradas correctamente',
+                'count' => $count,
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Error al registrar las notas',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
+
 
     // PUT/PATCH /api/nota-capacidad-terminal/{id}
     public function update(Request $request, $id)

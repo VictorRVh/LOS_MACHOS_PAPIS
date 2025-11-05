@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 
 import useHttpRequest from '../../composables/useHttpRequest';
 
-const useCapacidadTerminalStore = defineStore('CapacidadTerminal', () => {
+const useCapacidadTerminalStore = defineStore('CapacidadTerminalNotasEstudiante', () => {
     const {
         //index: getCapacidadTerminal,
         show : getCapacidadTerminal,

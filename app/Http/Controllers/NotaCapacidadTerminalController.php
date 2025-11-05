@@ -45,45 +45,61 @@ class NotaCapacidadTerminalController extends Controller
     }
 
 
-    public function index_grupo_alumnos($grupoId)
+    public function index_grupo_alumnos($idGrupo)
     {
-        // Traer solo la info de especialidad y módulo
-        $infoGrupo = DB::table('grupo as g')
-            ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
-            ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
-            ->join('modulos as mo', 'g.id_modulo', '=', 'mo.id')
-            ->where('g.id', $grupoId)
-            ->select(
-                'em.nombre_especialidad as especialidad',
-                'mo.descripcion as modulo'
-            )
-            ->first();
-
-        // Traer a los estudiantes matriculados en el grupo
-        $matriculados = DB::table('matricula as m')
-            ->join('estudiante as e', 'm.id_estudiante', '=', 'e.id')
-            ->where('m.id_grupo', $grupoId)
+        // Estudiantes matriculados (sin reserva)
+        $estudiantes = DB::table('matricula')
+            ->join('estudiante', 'matricula.id_estudiante', '=', 'estudiante.id')
+            ->where('matricula.id_grupo', $idGrupo)
             ->where(function ($q) {
-                $q->whereNull('m.reserva')
-                    ->orWhere('m.reserva', 0);
+                $q->whereNull('matricula.reserva')->orWhere('matricula.reserva', 0);
             })
             ->select(
-                'm.id as id_matricula',
-                'e.id as id_estudiante',
-                DB::raw("CONCAT(e.apellido_paterno, ' ', e.apellido_materno, ', ', e.nombre) as estudiante"),
-                'e.nro_documento'
+                'estudiante.id as id_estudiante',
+                DB::raw("CONCAT(estudiante.apellido_paterno, ' ', estudiante.apellido_materno, ', ', estudiante.nombre) as apellidos_nombres")
             )
-            ->orderBy('e.apellido_paterno', 'asc')
-            ->orderBy('e.apellido_materno', 'asc')
-            ->orderBy('e.nombre', 'asc')
+            ->orderBy('estudiante.apellido_paterno', 'asc')
             ->get();
 
-        return response()->json([
-            'especialidad' => $infoGrupo->especialidad,
-            'modulo' => $infoGrupo->modulo,
-            'matriculados' => $matriculados,
-        ]);
+        // Capacidades terminales activas
+        $capacidades = DB::table('capacidad_terminal')
+            ->where('id_grupo', $idGrupo)
+            ->where('status', 1)
+            ->select('id as id_capacidad', 'numero_capacidad', 'nombre_capacidad')
+            ->orderBy('numero_capacidad', 'asc')
+            ->get();
+
+        // Construir la lista de estudiantes con sus capacidades y notas (si existen)
+        $resultado = $estudiantes->map(function ($est) use ($capacidades, $idGrupo) {
+            $capConNotas = $capacidades->map(function ($cap) use ($est, $idGrupo) {
+                // Buscar si ya existe nota para este estudiante y capacidad
+                $nota = DB::table('nota_capacidad_terminal')
+                    ->where('id_grupo', $idGrupo)
+                    ->where('id_estudiante', $est->id_estudiante)
+                    ->where('id_capacidad', $cap->id_capacidad)
+                    ->select('id', 'nota_capacidad')
+                    ->first();
+
+                return [
+                    'id_capacidad' => $cap->id_capacidad,
+                    'numero_capacidad' => $cap->numero_capacidad,
+                    // 'nombre_capacidad' => $cap->nombre_capacidad,
+                    // 'id_nota' => $nota->id ?? null,
+                    'nota_capacidad' => $nota->nota_capacidad ?? null,
+                ];
+            });
+
+            return [
+                'id_estudiante' => $est->id_estudiante,
+                'apellidos_nombres' => $est->apellidos_nombres,
+                'capacidades' => $capConNotas
+            ];
+        });
+
+        // Respuesta final
+        return response()->json($resultado);
     }
+
 
     // GET /api/nota-capacidad-terminal/{id}
     public function show($id)

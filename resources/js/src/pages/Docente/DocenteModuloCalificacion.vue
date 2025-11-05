@@ -11,6 +11,8 @@ import BaseButton from "../../components/ui/Button.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 import useStudentsStore from "../../store/Estudiante/UseEstudianteGrupoStore";
 import useCapacidadTerminalStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
+import NotasEstudianteSlider from "../../components/page/CapacidadesTerminales/NotasCapacidadTerminalSlider.vue";
+
 import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 
 const router = useRouter();
@@ -28,6 +30,9 @@ const capacidadTerminal = useCapacidadTerminalStore();
 const capacidadSeleccionada = ref(null);
 const unidadesFiltradas = ref([]);
 const lengthUnit = ref(0);
+const slider = ref(false); // Estado para mostrar / ocultar slider
+const sliderData = ref(null); // Datos que se pasan al slider
+
 
 // ✅ Cargar datos al montar
 if (!userStore.estudiantes?.length) {
@@ -58,17 +63,24 @@ watch(capacidadSeleccionada, () => {
     unidadesFiltradas.value = userStore.estudiantes ?? [];
 });
 
-// ✅ Ir a la vista de notas de una unidad
+
+// Mostrar el slider con la capacidad seleccionada
 const verNotasUnidad = () => {
     if (capacidadSeleccionada.value) {
-        router.push({
-            name: "capacidadTerminalNotas",
-            params: { idgroup: props.id, id: capacidadSeleccionada.value.id },
-        });
+        sliderData.value = capacidadSeleccionada.value; // Asignar datos
+        slider.value = true; // Mostrar slider
     } else {
         console.error("Selecciona una capacidad terminal primero.");
     }
 };
+
+const hideSlider = () => {
+    slider.value = false;
+    sliderData.value = null;
+};
+
+
+
 </script>
 
 <template>
@@ -85,12 +97,8 @@ const verNotasUnidad = () => {
                         :options="capacidadTerminal?.capacidadTerminal?.capacidades" label="nombre_capacidad"
                         placeholder="Seleccione una capacidad terminal" class="w-2/5" />
 
-  
-                    <BaseButton
-    :title="'Asignar Nota'"
-    @click="verNotasUnidad"
-    class="px-6 py-2"
-/>
+
+                    <BaseButton :title="'Asignar Nota'" @click="verNotasUnidad" class="px-6 py-2" />
 
 
                 </div>
@@ -135,6 +143,8 @@ const verNotasUnidad = () => {
                 </Table>
             </div>
         </div>
+        <NotasEstudianteSlider v-if="slider" :show="slider" :idgroup="props.id" :id-capacidad-note="capacidadSeleccionada"
+            :idType="'capacidad'" @hide="hideSlider" />
     </AuthorizationFallback>
 </template>
 

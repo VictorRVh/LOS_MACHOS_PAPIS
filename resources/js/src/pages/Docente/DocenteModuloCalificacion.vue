@@ -7,7 +7,7 @@ import TBody from "../../components/table/TBody.vue";
 import Tr from "../../components/table/Tr.vue";
 import Th from "../../components/table/Th.vue";
 import Td from "../../components/table/Td.vue";
-import CreateButton from "../../components/ui/CreateButton.vue";
+import BaseButton from "../../components/ui/Button.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 import useStudentsStore from "../../store/Estudiante/UseEstudianteGrupoStore";
 import useCapacidadTerminalStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
@@ -16,10 +16,10 @@ import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 const router = useRouter();
 
 const props = defineProps({
-  id: {
-    type: String,
-    required: true,
-  },
+    id: {
+        type: String,
+        required: true,
+    },
 });
 
 const userStore = useStudentsStore();
@@ -31,10 +31,10 @@ const lengthUnit = ref(0);
 
 // ✅ Cargar datos al montar
 if (!userStore.estudiantes?.length) {
-  await userStore.loadEstudiantes(props.id);
+    await userStore.loadEstudiantes(props.id);
 }
 if (!capacidadTerminal?.capacidadTerminal?.capacidades?.length) {
-  await capacidadTerminal.loadCapacidadTerminal(props.id);
+    await capacidadTerminal.loadCapacidadTerminal(props.id);
 }
 
 // Total de unidades = cantidad de capacidades del grupo
@@ -42,102 +42,104 @@ lengthUnit.value = capacidadTerminal?.capacidadTerminal?.cantidad_capacidades ??
 
 // ✅ Rellenar capacidades vacías con nota_capacidad null
 if (userStore.estudiantes?.length) {
-  userStore.estudiantes = userStore.estudiantes.map((est) => {
-    const capacidadesCompletas = Array.from({ length: lengthUnit.value }, (_, i) => {
-      return est.capacidades[i] || { nota_capacidad: null };
+    userStore.estudiantes = userStore.estudiantes.map((est) => {
+        const capacidadesCompletas = Array.from({ length: lengthUnit.value }, (_, i) => {
+            return est.capacidades[i] || { nota_capacidad: null };
+        });
+        return {
+            ...est,
+            capacidades: capacidadesCompletas,
+        };
     });
-    return {
-      ...est,
-      capacidades: capacidadesCompletas,
-    };
-  });
 }
 
 // ✅ Recalcular unidades cuando cambia la capacidad seleccionada
 watch(capacidadSeleccionada, () => {
-  unidadesFiltradas.value = userStore.estudiantes ?? [];
+    unidadesFiltradas.value = userStore.estudiantes ?? [];
 });
 
 // ✅ Ir a la vista de notas de una unidad
 const verNotasUnidad = () => {
-  if (capacidadSeleccionada.value) {
-    router.push({
-      name: "capacidadTerminalNotas",
-      params: { idgroup: props.id, id: capacidadSeleccionada.value.id },
-    });
-  } else {
-    console.error("Selecciona una capacidad terminal primero.");
-  }
+    if (capacidadSeleccionada.value) {
+        router.push({
+            name: "capacidadTerminalNotas",
+            params: { idgroup: props.id, id: capacidadSeleccionada.value.id },
+        });
+    } else {
+        console.error("Selecciona una capacidad terminal primero.");
+    }
 };
 </script>
 
 <template>
-  <AuthorizationFallback    :permissions="[
-      'todo-acceso-capacidad-terminal-notas-docente',
-      'ver-capacidad-terminal-notas-docente',
-    ]"
-  >
-    <div class="w-full space-y-4 py-6">
-      <div class="flex justify-between">
-        <h2 class="text-black font-bold text-2xl dark:text-white">Estudiantes</h2>
-      </div>
+    <AuthorizationFallback :permissions="[
+        'todo-acceso-capacidad-terminal-notas-docente',
+        'ver-capacidad-terminal-notas-docente',
+    ]">
+        <div class="w-full space-y-4 ">
 
-      <div class="flex justify-between items-center">
-        <BaseSelectGrupo
-          v-model="capacidadSeleccionada"
-          :options="capacidadTerminal?.capacidadTerminal?.capacidades"
-          label="nombre_capacidad"
-          placeholder="Seleccione una capacidad terminal"
-        />
-        <CreateButton @click="verNotasUnidad" value="Ver Notas" />
-      </div>
+            <div class="m-2">
+                <div class="flex justify-between items-center gap-4 w-full">
 
-      <div class="w-full">
-        <Table class="border-collapse divide-y divide-transparent">
-          <THead>
-            
-              <Th>Id</Th>
-              <Th>Nombre</Th>
-              <Th v-for="i in lengthUnit" :key="i" class="text-center">
-                Unidad {{ i }}
-              </Th>
-          </THead>
-          <TBody>
-            <Tr v-for="(user, index) in userStore.estudiantes" :key="user.id_estudiante">
-              <Td class="py-2 px-4 border-0 text-black">{{ index + 1 }}</Td>
-              <Td class="py-2 px-4 border-0 text-black">
-                {{ user?.apellidos_nombres }}
-              </Td>
+                    <BaseSelectGrupo v-model="capacidadSeleccionada"
+                        :options="capacidadTerminal?.capacidadTerminal?.capacidades" label="nombre_capacidad"
+                        placeholder="Seleccione una capacidad terminal" class="w-2/5" />
 
-              <Td
-                v-for="(cap, i) in user.capacidades"
-                :key="cap.id_capacidad"
-                class="py-2 px-4 border-0 text-center text-black"
-              >
-                <span
-                  v-if="cap?.nota_capacidad !== null"
-                  :class="[
-                    'px-2 py-1 rounded-full',
-                    cap.nota_capacidad <= 10
-                      ? 'text-red-600 dark:text-red-500 font-bold'
-                      : 'text-green-600 dark:text-green-300 font-bold',
-                  ]"
-                >
-                  {{ cap.nota_capacidad }}
-                </span>
+  
+                    <BaseButton
+    :title="'Asignar Nota'"
+    @click="verNotasUnidad"
+    class="px-6 py-2"
+/>
 
-                <span v-else class="nota-vacia">--</span>
-              </Td>
-            </Tr>
-          </TBody>
-        </Table>
-      </div>
-    </div>
-  </AuthorizationFallback>
+
+                </div>
+
+                <div class="flex-between flex-row-reverse my-5">
+                    <div class="font-inter text-md w-full">Notas Capacidades Terminales</div>
+                </div>
+            </div>
+
+            <div class="w-full">
+                <Table class="border-collapse divide-y divide-transparent">
+                    <THead>
+
+                        <Th>Id</Th>
+                        <Th>Nombre</Th>
+                        <Th v-for="i in lengthUnit" :key="i" class="text-center">
+                            Unidad {{ i }}
+                        </Th>
+                    </THead>
+                    <TBody>
+                        <Tr v-for="(user, index) in userStore.estudiantes" :key="user.id_estudiante">
+                            <Td class="py-2 px-4 border-0 text-black">{{ index + 1 }}</Td>
+                            <Td class="py-2 px-4 border-0 text-black">
+                                {{ user?.apellidos_nombres }}
+                            </Td>
+
+                            <Td v-for="(cap, i) in user.capacidades" :key="cap.id_capacidad"
+                                class="py-2 px-4 border-0 text-center text-black">
+                                <span v-if="cap?.nota_capacidad !== null" :class="[
+                                    'px-2 py-1 rounded-full',
+                                    cap.nota_capacidad <= 10
+                                        ? 'text-red-600 dark:text-red-500 font-bold'
+                                        : 'text-green-600 dark:text-green-300 font-bold',
+                                ]">
+                                    {{ cap.nota_capacidad }}
+                                </span>
+
+                                <span v-else class="nota-vacia">--</span>
+                            </Td>
+                        </Tr>
+                    </TBody>
+                </Table>
+            </div>
+        </div>
+    </AuthorizationFallback>
 </template>
 
 <style scoped>
 .nota-vacia {
-  @apply text-gray-400 italic;
+    @apply text-gray-400 italic;
 }
 </style>

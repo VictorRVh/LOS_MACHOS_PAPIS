@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, watch, ref, onMounted, computed } from "vue";
+import { defineProps, watch, ref } from "vue";
 import { useRouter } from "vue-router";
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
@@ -16,117 +16,128 @@ import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 const router = useRouter();
 
 const props = defineProps({
-    id: {
-        type: String,
-        required: true,
-    },
+  id: {
+    type: String,
+    required: true,
+  },
 });
 
 const userStore = useStudentsStore();
 const capacidadTerminal = useCapacidadTerminalStore();
 
+const capacidadSeleccionada = ref(null);
+const unidadesFiltradas = ref([]);
 const lengthUnit = ref(0);
 
-const capacidadSeleccionada = ref(null); // ✅ Nuevo: capacidad terminal seleccionada
-const unidadesFiltradas = ref([]);       // ✅ Unidades filtradas según la capacidad seleccionada
-
 // ✅ Cargar datos al montar
-
-if (!userStore.estudiantes?.matriculados?.length) {
-    await userStore.loadEstudiantes(props.id);
+if (!userStore.estudiantes?.length) {
+  await userStore.loadEstudiantes(props.id);
 }
 if (!capacidadTerminal?.capacidadTerminal?.capacidades?.length) {
-    await capacidadTerminal.loadCapacidadTerminal(props.id);
+  await capacidadTerminal.loadCapacidadTerminal(props.id);
 }
 
-  lengthUnit.value = capacidadTerminal?.capacidadTerminal;
-        // estudiantes,
-        // loadEstudiantes,
-        // estudianteLoading,
-        // estudianteFirstTimeLoading,
+// Total de unidades = cantidad de capacidades del grupo
+lengthUnit.value = capacidadTerminal?.capacidadTerminal?.cantidad_capacidades ?? 0;
 
-        console.log("estuidanes: ",userStore.estudiantes?.matriculados)
+// ✅ Rellenar capacidades vacías con nota_capacidad null
+if (userStore.estudiantes?.length) {
+  userStore.estudiantes = userStore.estudiantes.map((est) => {
+    const capacidadesCompletas = Array.from({ length: lengthUnit.value }, (_, i) => {
+      return est.capacidades[i] || { nota_capacidad: null };
+    });
+    return {
+      ...est,
+      capacidades: capacidadesCompletas,
+    };
+  });
+}
 
 // ✅ Recalcular unidades cuando cambia la capacidad seleccionada
-watch(capacidadSeleccionada, (newCapacidad) => {
-    if (newCapacidad) {
-        unidadesFiltradas.value = capacidadTerminal?.capacidadTerminal?.capacidades
-            .map((u) => ({
-                ...u,
-                notas: u.estudiante?.notas?.filter(
-                    (n) => n.id_capacidad_terminal === newCapacidad.id
-                ),
-            }))
-            .filter((u) => u.notas.length > 0);
-    } else {
-        unidadesFiltradas.value = [];
-    }
+watch(capacidadSeleccionada, () => {
+  unidadesFiltradas.value = userStore.estudiantes ?? [];
 });
 
 // ✅ Ir a la vista de notas de una unidad
 const verNotasUnidad = () => {
-    if (capacidadSeleccionada.value) {
-        router.push({
-            name: "capacidadTerminalNotas",
-            params: { idgroup: props.id, id: capacidadSeleccionada.value.id },
-        });
-    } else {
-        console.error("Selecciona una capacidad terminal primero.");
-    }
+  if (capacidadSeleccionada.value) {
+    router.push({
+      name: "capacidadTerminalNotas",
+      params: { idgroup: props.id, id: capacidadSeleccionada.value.id },
+    });
+  } else {
+    console.error("Selecciona una capacidad terminal primero.");
+  }
 };
 </script>
 
-
 <template>
-    <AuthorizationFallback
-        :permissions="['todo-acceso-capacidad-terminal-notas-docente', 'ver-capacidad-terminal-notas-docente']">
-        <div class="w-full space-y-4 py-6">
-            <div class="flex justify-between">
-                <h2 class="text-black font-bold text-2xl dark:text-white">Estudiantes</h2>
-            </div>
+  <AuthorizationFallback    :permissions="[
+      'todo-acceso-capacidad-terminal-notas-docente',
+      'ver-capacidad-terminal-notas-docente',
+    ]"
+  >
+    <div class="w-full space-y-4 py-6">
+      <div class="flex justify-between">
+        <h2 class="text-black font-bold text-2xl dark:text-white">Estudiantes</h2>
+      </div>
 
-            <div class="flex justify-between">
-                <BaseSelectGrupo v-model="capacidadSeleccionada" :options="capacidadTerminal?.capacidadTerminal"
-                    label="nombre_capacidad" placeholder="Seleccione una capacidad terminal" />
-                <CreateButton @click="verNotasUnidad" value="Ver Notas" />
-            </div>
+      <div class="flex justify-between items-center">
+        <BaseSelectGrupo
+          v-model="capacidadSeleccionada"
+          :options="capacidadTerminal?.capacidadTerminal?.capacidades"
+          label="nombre_capacidad"
+          placeholder="Seleccione una capacidad terminal"
+        />
+        <CreateButton @click="verNotasUnidad" value="Ver Notas" />
+      </div>
 
+      <div class="w-full">
+        <Table class="border-collapse divide-y divide-transparent">
+          <THead>
+            
+              <Th>Id</Th>
+              <Th>Nombre</Th>
+              <Th v-for="i in lengthUnit" :key="i" class="text-center">
+                Unidad {{ i }}
+              </Th>
+          </THead>
+          <TBody>
+            <Tr v-for="(user, index) in userStore.estudiantes" :key="user.id_estudiante">
+              <Td class="py-2 px-4 border-0 text-black">{{ index + 1 }}</Td>
+              <Td class="py-2 px-4 border-0 text-black">
+                {{ user?.apellidos_nombres }}
+              </Td>
 
-            <div class="w-full">
-                <!-- Tabla con eliminación de líneas internas -->
-                <Table class="border-collapse divide-y divide-transparent">
-                    <THead>
-                        <Tr>
-                            <Th>Id</Th>
-                            <Th>Nombre</Th>
-                            <Th>DNI</Th>
-                            <Th v-for="i in capacidadTerminal?.capacidadTerminal?.cantidad_capacidades" :key="i">Unidad</Th>
-                        </Tr>
-                    </THead>
-                    <TBody>
-                        <Tr v-for="(user, index) in userStore.estudiantes?.matriculados" :key="user.id">
-                            <Td class="py-2 px-4 border-0 text-black">{{ index + 1 }}</Td>
-                            <Td class="py-2 px-4 border-0 text-black">{{ user?.estudiante }}</Td>
-                            <Td class="py-2 px-4 border-0 text-black">{{ user?.nro_documento }}</Td>
-                            <!-- resto de columnas del estudiante -->
-                            <Td class="py-2 px-4 border-0 text-black" v-for="note in user.notas" :key="note.id_nota">
-                                <span :class="[
-                                    'px-2 py-1 rounded-full',
-                                    note.nota <= 10
-                                        ? 'text-red-600 dark:text-red-500 font-bold'
-                                        : 'text-green-600 dark:text-green-300 font-bold'
-                                ]">
-                                    {{ note.nota }}
-                                </span>
-                            </Td>
-                        </Tr>
-                    </TBody>
-                </Table>
-            </div>
-        </div>
-    </AuthorizationFallback>
+              <Td
+                v-for="(cap, i) in user.capacidades"
+                :key="cap.id_capacidad"
+                class="py-2 px-4 border-0 text-center text-black"
+              >
+                <span
+                  v-if="cap?.nota_capacidad !== null"
+                  :class="[
+                    'px-2 py-1 rounded-full',
+                    cap.nota_capacidad <= 10
+                      ? 'text-red-600 dark:text-red-500 font-bold'
+                      : 'text-green-600 dark:text-green-300 font-bold',
+                  ]"
+                >
+                  {{ cap.nota_capacidad }}
+                </span>
+
+                <span v-else class="nota-vacia">--</span>
+              </Td>
+            </Tr>
+          </TBody>
+        </Table>
+      </div>
+    </div>
+  </AuthorizationFallback>
 </template>
 
 <style scoped>
-/* No se requiere CSS adicional, todo está gestionado con Tailwind */
+.nota-vacia {
+  @apply text-gray-400 italic;
+}
 </style>

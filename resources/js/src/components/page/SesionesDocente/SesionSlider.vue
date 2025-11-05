@@ -144,7 +144,7 @@ const closeAndReset = () => {
   <Slider :show="show" @hide="closeAndReset" :title="isEditing ? 'Editar Sesión' : 'Programar Sesiones'">
     <!-- CAPACIDAD TERMINAL -->
     <FormLabelError label="Capacidad terminal *" :error="formErrors.id_capacidad">
-      <BaseSelectGrupo v-model="form.id_capacidad" :options="capacidadStore.capacidadTerminal" label="nombre_capacidad"
+      <BaseSelectGrupo v-model="form.id_capacidad" :options="capacidadStore.capacidadTerminal?.capacidades" label="nombre_capacidad"
         value-prop="id" placeholder="Seleccione una capacidad" :loading="capacidadStore.sesionesLoading" />
     </FormLabelError>
 

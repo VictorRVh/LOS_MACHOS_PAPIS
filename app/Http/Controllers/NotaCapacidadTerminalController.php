@@ -27,7 +27,7 @@ class NotaCapacidadTerminalController extends Controller
 
         // ✅ Solo capacidades que no tienen notas asignadas
         $capacidades = CapacidadTerminal::where('id_grupo', $id)
-            ->orderBy('fecha_inicio', 'desc')
+            ->orderBy('numero_capacidad', 'asc')
             ->select(
                 'id',
                 'id_grupo',

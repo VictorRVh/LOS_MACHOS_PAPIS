@@ -32,17 +32,17 @@ class Estudiante extends Model
         'estado_civil',
         'grado_instruccion',
         'trabaja',
-        'detalle_trabajo',          
+        'detalle_trabajo',
         'carga_familiar',
-        'detalle_carga_familiar',   
+        'detalle_carga_familiar',
         'correo_electronico',
         'celular_personal',
         'internet_casa',
-        'tipo_internet',            
+        'tipo_internet',
         // 'tipo_operador',
         'equipos_virtuales',
         'discapacidad',
-        'tipo_discapacidad',        
+        'tipo_discapacidad',
         'celular_referencia',
         'parentesco_referencia',
         'lengua_materna',
@@ -62,6 +62,19 @@ class Estudiante extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+    }
+
+    // Un grupo puede tener muchos estudiantes.
+    // Un estudiante puede estar en muchos grupos (por ejemplo, distintos módulos o ciclos).
+
+    public function grupos()
+    {
+        return $this->belongsToMany(
+            Grupo::class,
+            'matricula',
+            'id_estudiante',
+            'id_grupo'
+        );
     }
 
     public function matricula()

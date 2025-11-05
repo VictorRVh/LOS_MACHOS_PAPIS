@@ -58,6 +58,16 @@ class Grupo extends Model
         return self::STATUS[$this->status] ?? 'Desconocido';
     }
 
+    public function estudiantes()
+    {
+        return $this->belongsToMany(
+            Estudiante::class,
+            'matricula',        
+            'id_grupo',         
+            'id_estudiante' 
+        );
+    }
+
     public function programaEstudio()
     {
         return $this->belongsTo(ProgramaEstudio::class, 'id_programa');

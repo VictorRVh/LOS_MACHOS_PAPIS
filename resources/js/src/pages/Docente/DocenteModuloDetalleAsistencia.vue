@@ -132,7 +132,7 @@ const handleDateClick = ({ dateStr, date }) => {
   );
 
   if (isAlreadyScheduled) {
-    showToast("Esta fecha ya está programada en una sesión.");
+    showToast("Esta fecha ya está programada en una sesión.", "warning");
     return;
   }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CapacidadTerminal;
+use App\Models\Grupo;
 use App\Models\Matricula;
 use App\Models\NotaCapacidadTerminal;
 use Illuminate\Http\Request;
@@ -162,5 +163,17 @@ class NotaCapacidadTerminalController extends Controller
         $nota->delete();
 
         return response()->json(['message' => 'Nota eliminada correctamente']);
+    }
+
+    public function listaAlumnosNotas($id)
+    {
+        $grupo = Grupo::findOrFail($id);
+
+        $alumnos = $grupo->estudiantes()
+            ->select('estudiante.id', 'apellido_paterno', 'apellido_materno', 'nombre')
+            ->get()
+            ->makeHidden(['pivot']);
+
+        return response()->json($alumnos);
     }
 }

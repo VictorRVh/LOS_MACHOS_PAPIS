@@ -95,13 +95,15 @@ const submitNotes = async () => {
         nota: parseFloat(String(n.nota).padStart(2, '0')),
       })),
     };
-    
-    console.log("los datos de docentes: ",payload)
+
+    console.log("los datos de docentes: ", payload)
     const response = await createUnit(payload);
 
-    if (response?.status === 201) {
+    console.log('response de notas', response)
+
+    if (response?.message === "Notas registradas correctamente") {
       showToast("Notas guardadas exitosamente", "success");
-      router.push(`/notasUnit/${props.idgroup}`);
+      router.push(`/docente/modulo/${props.idgroup}/calificaciones`);
       listNotes.value = [];
     } else {
       throw new Error("Error al guardar");

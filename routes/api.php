@@ -614,7 +614,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('nota_capacidad_terminal', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'store',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|crear-capacidad-terminal-notas-docente');
+    ])->middleware('permission:ver-grupos|todo-acceso-capacidad-terminal-notas-docente|crear-capacidad-terminal-notas-docente');
 
     Route::patch('nota_capacidad_terminal/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,

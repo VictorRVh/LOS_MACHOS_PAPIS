@@ -15,7 +15,13 @@ class Asistencia extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id', 'fecha_actual', 'asistencia', 'observacion', 'id_grupo', 'id_estudiante', 'id_calendario' 
+        'id',
+        'fecha_actual',
+        'asistencia',
+        'observacion',
+        'id_grupo',
+        'id_estudiante',
+        'id_calendario'
     ];
 
     protected static function boot()
@@ -27,6 +33,20 @@ class Asistencia extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+    }
+
+    const STATUS = [
+        0 => 'Pendiente',
+        1 => 'Asistió',
+        2 => 'Inasistencia',
+        3 => 'Tardanza',
+        4 => 'Permiso',
+        5 => 'Retirado',
+    ];
+
+    public function getStatusTextoAttribute()
+    {
+        return self::STATUS[$this->asistencia] ?? 'Desconocido';
     }
 
     public function grupo()
@@ -43,5 +63,4 @@ class Asistencia extends Model
     {
         return $this->belongsTo(CalendarioAdmin::class, 'id_calendario');
     }
-
 }

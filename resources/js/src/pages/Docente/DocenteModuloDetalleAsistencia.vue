@@ -17,6 +17,9 @@ import TBody from '@/components/table/TBody.vue';
 import Tr from '@/components/table/Tr.vue';
 import Th from '@/components/table/Th.vue';
 import Td from '@/components/table/Td.vue';
+import BaseButton from '@/components/ui/Button.vue';
+import TomarAsistencia from '../../components/page/SesionesDocente/TomarAsistenciaSlider.vue';
+
 
 const props = defineProps({
   id: {
@@ -34,6 +37,9 @@ const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteSesion, deleting } = useHttpRequest("/programacion_sesion_docente");
 
+    const asist = ref(false); // Estado para mostrar / ocultar slider
+    const asistData = ref(null); // Datos que se pasan al slider           
+ 
 // 🔹 Cargar la sesión una sola vez
 if (!sesionStore?.sesion?.length) {
   await sesionStore.loadSesion(props.id)
@@ -44,7 +50,18 @@ if (!programacionSesion?.sesiones?.length) {
 }
 
 // 🗓️ Calendario
-
+ const Asistencia = () => {
+          if (sesionStore?.sesion?.id) {
+              //sliderData.value = capacidadSeleccionada.value; // Asignar datos
+              asist.value = true; // Mostrar slider
+          } else {
+              console.error("Selecciona una capacidad terminal primero.");
+              showToast("Selecciona una capacidad terminal primero.","warning");
+          }
+    };         
+const ocultarSliderAsistencia = () => {
+  asist.value = false;
+};    
 const holidays = ref([])
 const selectionEvents = ref([])
 const allEvents = ref([])
@@ -132,7 +149,7 @@ const handleDateClick = ({ dateStr, date }) => {
   );
 
   if (isAlreadyScheduled) {
-    showToast("Esta fecha ya está programada en una sesión.", "warning");
+    showToast("Esta fecha ya está programada en una sesión.");
     return;
   }
 
@@ -307,6 +324,15 @@ const estadoTexto = computed(() => {
       </Table>
 
     </div>
+    <BaseButton :title="'Asistencia'" @click="Asistencia" class="px-6 py-2" /> 
+    <TomarAsistencia 
+      :show="asist"
+      :grupo-id="id"
+      :sesion-id="sesionStore?.sesion?.id"  
+      @hide="ocultarSliderAsistencia"      
+      @save="clearSelection" 
+    />
+        
 
     <SesionSlider :show="slider" :blockToEdit="sliderData ?? null" :idGrupo="id" :sesion="sesionStore?.sesion"
       @hide="hideSlider" @save="handleSaveSesion" @clear-selection="clearSelection"

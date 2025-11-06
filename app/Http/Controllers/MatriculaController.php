@@ -90,7 +90,7 @@ class MatriculaController extends Controller
                 'turno' => $request->turno,
                 'id_estudiante' => $estudiante->id,
                 'id_pago' => $pago->id,
-                'reserva' => $request->reserva ?? 0
+                'reserva' => $request->reserva ?? 0,
             ]);
 
             DB::commit();

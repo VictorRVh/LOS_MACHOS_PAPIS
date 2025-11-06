@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asistencia;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,19 +35,37 @@ class AsistenciaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'fecha_actual'   => 'required|date',
-            'asistencia'     => 'required',
-            'observacion'    => 'nullable|string|max:255',
-            'id_grupo'       => 'required|uuid|exists:grupo,id',
-            'id_estudiante'  => 'required|uuid|exists:estudiante,id',
-            'id_calendario'  => 'required|uuid|exists:calendario_admin,id',
+            'id_grupo' => 'required|uuid',
+            'id_calendario' => 'required|uuid',
+            'fecha_actual' => 'required|date',
+            'estudiantes' => 'required|array',
+            'estudiantes.*.id_estudiante' => 'required|uuid',
+            'estudiantes.*.asistencia' => 'required|integer',
+            'estudiantes.*.observacion' => 'nullable|string|max:255',
         ]);
 
-        $asistencia = Asistencia::create($request->all());
+        $fecha = Carbon::parse($request->fecha_actual)->format('Y-m-d');
+        $now = Carbon::now();
+
+        $asistencias = collect($request->estudiantes)->map(function ($est) use ($request, $fecha, $now) {
+            return [
+                'id' => (string) Str::uuid(),
+                'fecha_actual' => $fecha,
+                'asistencia' => $est['asistencia'],
+                'observacion' => $est['observacion'] ?? null,
+                'id_grupo' => $request->id_grupo,
+                'id_estudiante' => $est['id_estudiante'],
+                'id_calendario' => $request->id_calendario,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        })->toArray();
+
+        Asistencia::insert($asistencias);
 
         return response()->json([
-            'message' => 'Asistencia registrada correctamente',
-            'data' => $asistencia
+            'message' => 'Asistencias registradas correctamente.',
+            'total_insertados' => count($asistencias),
         ], 201);
     }
 
@@ -154,7 +173,7 @@ class AsistenciaController extends Controller
 
         if (!$sesion) {
             return response()->json([
-                'message' => 'No se encontró una sesión para la fecha actual',
+                'message' => 'No se encontro una sesion para la fecha actual.',
                 'fecha_actual' => $hoy,
                 'id_entrega' => $idEntrega
             ], 404);
@@ -180,9 +199,13 @@ class AsistenciaController extends Controller
             ->select(
                 'e.id as id_estudiante',
                 DB::raw("CONCAT(e.apellido_paterno, ' ', e.apellido_materno, ' ', e.nombre) as nombre_completo"),
+                'e.apellido_paterno',
+                'e.apellido_materno',
+                'e.nombre',
                 'e.nro_documento',
-                DB::raw('COALESCE(a.asistencia, 0) as asistencia') // 0 si aún no hay registro
+                DB::raw('COALESCE(a.asistencia, 0) as asistencia')
             )
+            ->orderBy('e.apellido_paterno', 'asc')  // 👈 Aquí agregas el orden alfabético
             ->get()
             ->map(function ($item) {
                 $item->ultima_vez = Asistencia::STATUS[$item->asistencia] ?? 'Desconocido';
@@ -190,12 +213,12 @@ class AsistenciaController extends Controller
                 $totales = DB::table('asistencia')
                     ->where('id_estudiante', $item->id_estudiante)
                     ->selectRaw("
-                    SUM(CASE WHEN asistencia = 1 THEN 1 ELSE 0 END) as asistencias,
-                    SUM(CASE WHEN asistencia = 2 THEN 1 ELSE 0 END) as faltas,
-                    SUM(CASE WHEN asistencia = 3 THEN 1 ELSE 0 END) as tardanzas,
-                    SUM(CASE WHEN asistencia = 4 THEN 1 ELSE 0 END) as permisos,
-                    SUM(CASE WHEN asistencia = 5 THEN 1 ELSE 0 END) as retirados
-                ")->first();
+                SUM(CASE WHEN asistencia = 1 THEN 1 ELSE 0 END) as asistencias,
+                SUM(CASE WHEN asistencia = 2 THEN 1 ELSE 0 END) as faltas,
+                SUM(CASE WHEN asistencia = 3 THEN 1 ELSE 0 END) as tardanzas,
+                SUM(CASE WHEN asistencia = 4 THEN 1 ELSE 0 END) as permisos,
+                SUM(CASE WHEN asistencia = 5 THEN 1 ELSE 0 END) as retirados
+            ")->first();
 
                 $item->totales = $totales;
 

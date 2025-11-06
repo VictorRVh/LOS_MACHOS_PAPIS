@@ -709,7 +709,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('asistencia', [
         \App\Http\Controllers\AsistenciaController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:ver-mis-modulos|todo-acceso-permisos|ver-permisos');
     
     Route::get('sesiones_entrega/{idEntrega}', [
         \App\Http\Controllers\AsistenciaController::class,
@@ -724,7 +724,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('asistencia', [
         \App\Http\Controllers\AsistenciaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:ver-grupos|todo-acceso-permisos|crear-permisos');
 
     Route::patch('asistencia/{id}', [
         \App\Http\Controllers\AsistenciaController::class,

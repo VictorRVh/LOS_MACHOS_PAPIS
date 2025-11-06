@@ -710,6 +710,16 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\AsistenciaController::class,
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    
+    Route::get('sesiones_entrega/{idEntrega}', [
+        \App\Http\Controllers\AsistenciaController::class,
+        'obtenerSesionPorEntrega',
+    ])->middleware('permission:ver-mis-modulos|todo-acceso-permisos|ver-permisos');
+    
+    Route::get('sesiones_asistencia/{idEntrega}', [
+        \App\Http\Controllers\AsistenciaController::class,
+        'obtenerAsistenciaEstudiantes',
+    ])->middleware('permission:ver-mis-modulos|todo-acceso-permisos|ver-permisos');
 
     Route::post('asistencia', [
         \App\Http\Controllers\AsistenciaController::class,

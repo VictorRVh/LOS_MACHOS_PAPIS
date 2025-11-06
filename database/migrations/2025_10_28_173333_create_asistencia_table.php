@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('asistencia', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->date('fecha_actual');
-            $table->tinyInteger('asistencia');
+            $table->tinyInteger('asistencia')->default(0);
             $table->string('observacion')->nullable();
                         
             $table->uuid('id_grupo');

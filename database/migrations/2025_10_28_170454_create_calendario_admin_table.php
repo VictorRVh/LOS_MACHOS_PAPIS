@@ -13,11 +13,10 @@ return new class extends Migration {
         Schema::create('calendario_admin', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            // 👉 Clave foránea a sesiones (uno a muchos)
             $table->uuid('id_sesion');
 
             $table->date('fecha');
-            $table->boolean('laborable')->default(true);
+            $table->tinyInteger('laborable')->default(0);
             $table->string('descripcion', 255)->nullable();
             $table->timestamps();
 

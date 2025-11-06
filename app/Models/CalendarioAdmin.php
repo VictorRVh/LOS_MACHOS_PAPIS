@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +30,17 @@ class CalendarioAdmin extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+    }
+
+    const STATUS = [
+        0 => 'Pendiente',
+        1 => 'Incumplio',
+        2 => 'Cumplio',
+    ];
+
+    public function getStatusTextoAttribute()
+    {
+        return self::STATUS[$this->laborable] ?? 'Desconocido';
     }
 
     // 🔹 Una fecha pertenece a una sesión

@@ -21,7 +21,8 @@ class Matricula extends Model
         'turno',
         'id_estudiante',
         'id_pago',
-        'reserva'
+        'reserva',
+        'matriculado'
     ];
 
     protected static function boot()

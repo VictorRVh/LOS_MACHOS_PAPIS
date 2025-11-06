@@ -12,13 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('matricula', function (Blueprint $table) {
-             $table->uuid('id')->primary();
+            $table->uuid('id')->primary();
 
             $table->uuid('id_grupo');
             $table->char('turno', 1)->nullable();
             $table->uuid('id_estudiante');
             $table->uuid('id_pago')->nullable();
             $table->boolean('reserva')->default(false);
+
+            $table->tinyInteger('matriculado')->default(1);
 
             $table->foreign('id_grupo')->references('id')->on('grupo')->onDelete('cascade');
             $table->foreign('id_estudiante')->references('id')->on('estudiante')->onDelete('cascade');

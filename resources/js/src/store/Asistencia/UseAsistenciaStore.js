@@ -6,17 +6,17 @@ import useHttpRequest from '../../composables/useHttpRequest';
 const useAsistenciaStore = defineStore('Asistencia', () => {
     const {
         //index: getAsistencia,
-        show : getAsistencia,
-        loading: asistenciaLoading,
-        initialLoading: AsistenciaFirstTimeLoading,
+        // show : getAsistencia,
+        // loading: asistenciaLoading,
+        // initialLoading: AsistenciaFirstTimeLoading,
     } = useHttpRequest('/asistencia');
-    
+
     const {
         //index: getAsistencia,
-        show : getSesionesEntrega,
-        // loading: asistenciaLoading,
-        // initialLoading: asistenciaFirstTimeLoading,
-    } = useHttpRequest('/sesiones_entrega');
+        show: getSesionesEntrega,
+        loading: asistenciaLoading,
+        initialLoading: asistenciaFirstTimeLoading,
+    } = useHttpRequest('/sesiones_asistencia');
 
     const sesionesPorEntrega = ref([]);
 
@@ -28,6 +28,9 @@ const useAsistenciaStore = defineStore('Asistencia', () => {
     return {
         loadSesionesEntrega,
         sesionesPorEntrega,
+        asistenciaLoading,
+        asistenciaFirstTimeLoading
+
     };
 });
 

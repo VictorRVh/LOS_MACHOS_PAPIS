@@ -724,7 +724,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('asistencia', [
         \App\Http\Controllers\AsistenciaController::class,
         'store',
-    ])->middleware('permission:ver-grupos|todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:ver-mis-modulos|todo-acceso-permisos|crear-permisos');
 
     Route::patch('asistencia/{id}', [
         \App\Http\Controllers\AsistenciaController::class,

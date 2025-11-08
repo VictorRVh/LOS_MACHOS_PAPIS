@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asistencia;
+use App\Models\CalendarioAdmin;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -38,34 +39,60 @@ class AsistenciaController extends Controller
             'id_grupo' => 'required|uuid',
             'id_calendario' => 'required|uuid',
             'fecha_actual' => 'required|date',
+            'observacion' => 'nullable|string',
             'estudiantes' => 'required|array',
             'estudiantes.*.id_estudiante' => 'required|uuid',
             'estudiantes.*.asistencia' => 'required|integer',
-            'estudiantes.*.observacion' => 'nullable|string|max:255',
+            // 'estudiantes.*.observacion' => 'nullable|string|max:255',
         ]);
 
         $fecha = Carbon::parse($request->fecha_actual)->format('Y-m-d');
         $now = Carbon::now();
 
-        $asistencias = collect($request->estudiantes)->map(function ($est) use ($request, $fecha, $now) {
-            return [
-                'id' => (string) Str::uuid(),
-                'fecha_actual' => $fecha,
-                'asistencia' => $est['asistencia'],
-                'observacion' => $est['observacion'] ?? null,
-                'id_grupo' => $request->id_grupo,
-                'id_estudiante' => $est['id_estudiante'],
-                'id_calendario' => $request->id_calendario,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        })->toArray();
+        $calendario = CalendarioAdmin::find($request->id_calendario);
+        if (!$calendario) {
+            return response()->json(['message' => 'Calendario no encontrado.'], 404);
+        }
 
-        Asistencia::insert($asistencias);
+        $yaRegistrado = Asistencia::where('id_calendario', $request->id_calendario)
+            ->whereDate('fecha_actual', $fecha)
+            ->exists();
+
+        if ($yaRegistrado) {
+            return response()->json([
+                'message' => 'Ya existe registro de asistencias para esta fecha',
+            ], 409);
+        }
+
+        DB::transaction(function () use ($request, $fecha, $now, $calendario) {
+
+            $asistencias = collect($request->estudiantes)->map(function ($est) use ($request, $fecha, $now) {
+                return [
+                    'id' => (string) Str::uuid(),
+                    'fecha_actual' => $fecha,
+                    'asistencia' => $est['asistencia'],
+                    'observacion' => $est['observacion'] ?? null,
+                    'id_grupo' => $request->id_grupo,
+                    'id_estudiante' => $est['id_estudiante'],
+                    'id_calendario' => $request->id_calendario,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            })->toArray();
+
+            Asistencia::insert($asistencias);
+
+            $calendario->update([
+                // 'laborable' => $request->laborable ?? 0,
+                'laborable' => 1,
+                'descripcion' => $request->observacion ?? 'Sesion de hoy realizada correctamente.',
+                'updated_at' => $now,
+            ]);
+        });
 
         return response()->json([
             'message' => 'Asistencias registradas correctamente.',
-            'total_insertados' => count($asistencias),
+            'total_insertados' => count($request->estudiantes),
         ], 201);
     }
 

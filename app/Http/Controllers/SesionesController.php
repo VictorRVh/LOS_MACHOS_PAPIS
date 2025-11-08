@@ -123,7 +123,7 @@ class SesionesController extends Controller
             CalendarioAdmin::create([
                 'id_sesion' => $sesion->id, // 🔹 relación directa
                 'fecha' => $fecha,
-                'laborable' => true,
+                'laborable' => 0,
             ]);
         }
 

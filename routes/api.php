@@ -636,7 +636,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('experiencia_formativa', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos');
 
     Route::patch('experiencia_formativa/{id}', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
@@ -658,7 +658,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('nota_experiencia_formativa', [
         \App\Http\Controllers\NotaExperienciaFormativaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-mis-modulos');
 
     Route::patch('nota_experiencia_formativa/{id}', [
         \App\Http\Controllers\NotaExperienciaFormativaController::class,
@@ -724,7 +724,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('asistencia', [
         \App\Http\Controllers\AsistenciaController::class,
         'store',
-    ])->middleware('permission:ver-mis-modulos|todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:ver-grupos|ver-mis-modulos|todo-acceso-permisos|crear-permisos');
 
     Route::patch('asistencia/{id}', [
         \App\Http\Controllers\AsistenciaController::class,
@@ -943,7 +943,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('matriculados/{grupoId}', [
         \App\Http\Controllers\MatriculaController::class,
         'getMatriculadosPorGrupoExtendido',
-    ])->middleware('permission:ver-matriculas');
+    ])->middleware('permission:ver-matriculas|ver-mis-modulos');
 
 
     // Cambio de matricula

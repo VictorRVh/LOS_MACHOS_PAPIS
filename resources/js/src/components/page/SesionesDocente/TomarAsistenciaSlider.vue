@@ -152,6 +152,7 @@ const onSubmit = async () => {
     id_grupo: props.grupoId,
     id_calendario: sesionInfo.value?.calendario?.id ?? null, // el id lo obtienes del backend
     fecha_actual: fechaDeHoyString,
+    observacion: observacionGeneral.value || null,
     estudiantes: alumnos.value.map(alumno => {
       const estadoKey = asistencias.value[alumno.id] || 'falto';
       const estadoObj = [...estadoAsistencia, estadoRetirado].find(e => e.key === estadoKey) || estadoAsistencia[1]; // fallback a 'falto'
@@ -159,7 +160,7 @@ const onSubmit = async () => {
       return {
         id_estudiante: alumno.id,
         asistencia: estadoObj.value,
-        observacion: observacionGeneral.value || null,
+        // observacion: observacionGeneral.value || null,
       };
     }),
   };

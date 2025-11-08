@@ -273,7 +273,7 @@ export default [
             {
                 path: 'practicas',
                 name: 'docente.modulo.detalle.practicas',
-                component: () => import('../pages/Docente/DocenteAlumnosList.vue'),
+                component: () => import('../pages/Docente/DocenteModuloPracticas.vue'),
                 props: true,
                 meta: { parent: 'docente.modulo.detalle', breadcrumb: { text: 'Prácticas' } }
             },

@@ -37,7 +37,7 @@ class ExperienciaFormativaController extends Controller
             'fecha_fin'          => 'required|date|after_or_equal:fecha_inicio',
             'horas'              => 'required|integer|min:1',
             'id_grupo'           => 'required|uuid|exists:grupo,id',
-            'status'             => 'required|integer|in:0,1,2,3',
+            'status'             => 'nullable',
         ]);
 
         $experiencia = ExperienciaFormativa::create($request->all());

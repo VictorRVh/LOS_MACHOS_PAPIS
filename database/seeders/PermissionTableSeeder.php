@@ -152,6 +152,12 @@ class PermissionTableSeeder extends Seeder
             'editar-capacidad-terminal-notas-docente',
             'eliminar-capacidad-terminal-notas-docente',
 
+            'todo-acceso-alumnos-docente',
+            'ver-alumnos-docente',
+           // 'crear-alumnos-docente',
+            'editar-alumnos-docente',
+           // 'eliminar-alumnos-docente',
+
             'todo-acceso-sesiones-docente',
             'ver-sesiones-docente',
             'crear-sesiones-docente',

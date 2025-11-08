@@ -28,10 +28,12 @@ onMounted(async () => {
   alumnos.value = matriculaStore.matriculadosPorGrupoExtendido.estudiantes;
 });
 
+
+
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['ver-mis-modulos']">
+  <AuthorizationFallback :permissions="['todo-acceso-alumnos-docente','ver-alumnos-docente']">
     <div class="w-full space-y-4">
       <div class="flex-between">
         <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">

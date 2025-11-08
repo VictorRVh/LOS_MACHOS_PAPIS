@@ -34,8 +34,8 @@ class CalendarioAdmin extends Model
 
     const STATUS = [
         0 => 'Pendiente',
-        1 => 'Incumplio',
-        2 => 'Cumplio',
+        1 => 'Laborado',
+        2 => 'NoLaborado',
     ];
 
     public function getStatusTextoAttribute()

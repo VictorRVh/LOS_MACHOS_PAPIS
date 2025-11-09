@@ -159,6 +159,7 @@ export default [
                 { text: 'Documentos', to: { name: 'grupo.documentos', params: { id: route.params.id } } },
                 { text: 'Sesiones y asistencia', to: { name: 'grupo.asistencia', params: { id: route.params.id } } },
                 { text: 'Calificaciones', to: { name: 'grupo.calificaciones', params: { id: route.params.id } } },
+                { text: 'Capacidades terminales', to: { name: 'grupo.capacidades.terminales', params: { id: route.params.id } } },
                 { text: 'Prácticas', to: { name: 'grupo.practicas', params: { id: route.params.id } } },
                 { text: 'Alumnos', to: { name: 'grupo.alumnos', params: { id: route.params.id } } },
             ]
@@ -185,6 +186,13 @@ export default [
                 props: true,
                 meta: { parent: 'grupo.detalle', breadcrumb: { text: 'Calificaciones' } }
             },
+            {
+                path: 'capacidadesTerminales',
+                name: 'grupo.capacidades.terminales',
+                component: () => import('../pages/Grupo/GrupoCapacidadesTerminales.vue'),
+                props: true,
+                meta: { parent: 'grupo.detalle', breadcrumb: { text: 'Calificaciones' } }
+            },            
             {
                 path: 'practicas',
                 name: 'grupo.practicas',

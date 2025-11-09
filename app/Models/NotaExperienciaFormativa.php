@@ -46,7 +46,7 @@ class NotaExperienciaFormativa extends Model
         return $this->belongsTo(Estudiante::class, 'id_estudiante');
     }
 
-    public function experienciaFormativa()
+    public function experiencia()
     {
         return $this->belongsTo(ExperienciaFormativa::class, 'id_experencia');
     }

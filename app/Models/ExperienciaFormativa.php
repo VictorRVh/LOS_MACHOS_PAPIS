@@ -52,4 +52,9 @@ class ExperienciaFormativa extends Model
     {
         return $this->belongsTo(Grupo::class, 'id_grupo');
     }
+
+    public function notas()
+    {
+        return $this->hasMany(NotaExperienciaFormativa::class, 'id_experiencia');
+    }
 }

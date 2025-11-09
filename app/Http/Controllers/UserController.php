@@ -21,23 +21,38 @@ class UserController extends Controller
         );
         return response()->json($users);
     }
-    
     public function index_filter_status()
     {
-        $usuariosSinComision = User::doesntHave('comisiones')
-            ->where('status', 1) 
+        $usuariosActivos = User::where('status', 1)
             ->where('is_deleted', 0)
             ->select('id', 'name', 'apellido_paterno', 'apellido_materno')
             ->get();
 
-        $users = $usuariosSinComision->map(function ($usuario) {
+        $users = $usuariosActivos->map(function ($usuario) {
             return [
                 'id' => $usuario->id,
                 'nameCompleto' => $usuario->name . ' ' . $usuario->apellido_paterno . ' ' . $usuario->apellido_materno,
             ];
         });
+
         return response()->json($users);
     }
+    // public function index_filter_status()
+    // {
+    //     $usuariosSinComision = User::doesntHave('comisiones')
+    //         ->where('status', 1) 
+    //         ->where('is_deleted', 0)
+    //         ->select('id', 'name', 'apellido_paterno', 'apellido_materno')
+    //         ->get();
+
+    //     $users = $usuariosSinComision->map(function ($usuario) {
+    //         return [
+    //             'id' => $usuario->id,
+    //             'nameCompleto' => $usuario->name . ' ' . $usuario->apellido_paterno . ' ' . $usuario->apellido_materno,
+    //         ];
+    //     });
+    //     return response()->json($users);
+    // }
 
 
     public function store(Request $request)

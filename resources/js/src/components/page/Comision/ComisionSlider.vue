@@ -102,14 +102,16 @@ const onUsuarioRemove = (usuario) => {
   };
 };
 
-// 🔥 Computed que filtra usuarios disponibles
-const usuariosDisponibles = computed(() => {
-  return props.usersFilter.filter(
-    (usuario) => !formData.value.usuarios.some((u) => u.id === usuario.id)
-  );
-});
+// 🔥 Computed que filtra usuarios disponibles  para ocultar usuarios
+// const usuariosDisponibles = computed(() => {
+//   return props.usersFilter.filter(
+//     (usuario) => !formData.value.usuarios.some((u) => u.id === usuario.id)
+//   );
+// });
 
 
+// ✅ Mostrar todos los usuarios del props sin excluir a nadie
+const usuariosDisponibles = computed(() => props.usersFilter);
 
 // Envío de formulario
 const onSubmit = async () => {

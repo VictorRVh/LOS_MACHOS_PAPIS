@@ -74,7 +74,7 @@ const {
 // --- Funciones utilitarias ---
 const getNotaClass = (nota) =>
   nota < 11
-    ? "text-red-600 font-bold"
+    ? "text-red-600 dark:text-red-500  font-bold"
     : "text-green-600 dark:text-green-300 font-bold";
 
 const getEstadoClass = (estado) =>
@@ -88,14 +88,24 @@ const getResumenNotas = (est) => {
     (sum, c) => sum + Number(c.nota_capacidad ?? 0),
     0
   );
+
   const promedio = est.capacidades.length
     ? total / est.capacidades.length
     : 0;
+
   const estado = promedio >= 11 ? "APROBADO" : "DESAPROBADO";
+
+  // --- Formateo del promedio ---
+  const promedioTexto =
+    Number.isInteger(promedio)
+      ? promedio === 0
+        ? "00" // si el promedio es 0 exacto
+        : promedio.toString().padStart(2, "0") // entero normal
+      : promedio.toFixed(1).replace(/\.0$/, "").padStart(4, "0"); // con decimal
 
   return {
     total: total.toString().padStart(2, "0"),
-    promedio: promedio.toFixed(1).padStart(4, "0"),
+    promedio: promedioTexto,
     estado,
     promedioClass:
       promedio < 11
@@ -104,6 +114,7 @@ const getResumenNotas = (est) => {
     estadoClass: getEstadoClass(estado),
   };
 };
+
 </script>
 
 <template>

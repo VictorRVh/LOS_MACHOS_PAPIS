@@ -17,6 +17,7 @@ const navLinks = [
   { text: 'Documentos', to: { name: 'grupo.documentos', params: { id: groupId } } },
   { text: 'Sesiones y asistencia', to: { name: 'grupo.asistencia', params: { id: groupId } } },
   { text: 'Calificaciones', to: { name: 'grupo.calificaciones', params: { id: groupId } } },
+  { text: 'Capacidades terminales', to: { name: 'grupo.capacidades.terminales', params: { id: groupId } } },
   { text: 'Prácticas', to: { name: 'grupo.practicas', params: { id: groupId } } },
   { text: 'Alumnos', to: { name: 'grupo.alumnos', params: { id: groupId } } },
 ];

@@ -139,15 +139,32 @@ class PermissionTableSeeder extends Seeder
             'eliminar-programacion-documentos-subidos',
             'icono-programacion-documentos-subidos',
 
+            
+            ///////////////////////////////////////
+            ///////////////////////////////////////
+            ///////////////////////////////////////
+            ///////////////////////////////////////
+
+            // PERMISOSPARA ELADMIN..PARA QUE PUEDA VISUALIZAR LOS DATOS DEL DOCENTE
+             // (CALENDARIZACION,CAPACIDADDES TERMINALES, NOTAS, ASISTENCIA)
+             'ver-sesiones-docente',
+             'ver-capacidad-terminal-docente',
+             'ver-capacidad-terminal-notas-docente',
+
+             ///////////////////////////////////////
+             ///////////////////////////////////////
+             ///////////////////////////////////////
+             ///////////////////////////////////////
+
                          // PERMISOS DE DE PROGRAMACION PARA DOCENTES
             'todo-acceso-capacidad-terminal-docente',
-            'ver-capacidad-terminal-docente',
+        /// 'ver-capacidad-terminal-docente',
             'crear-capacidad-terminal-docente',
             'editar-capacidad-terminal-docente',
             'eliminar-capacidad-terminal-docente',
 
             'todo-acceso-capacidad-terminal-notas-docente',
-            'ver-capacidad-terminal-notas-docente',
+            //'ver-capacidad-terminal-notas-docente',
             'crear-capacidad-terminal-notas-docente',
             'editar-capacidad-terminal-notas-docente',
             'eliminar-capacidad-terminal-notas-docente',
@@ -159,7 +176,7 @@ class PermissionTableSeeder extends Seeder
            // 'eliminar-alumnos-docente',
 
             'todo-acceso-sesiones-docente',
-            'ver-sesiones-docente',
+            //'ver-sesiones-docente',
             'crear-sesiones-docente',
             'editar-sesiones-docente',
             'eliminar-sesiones-docente',

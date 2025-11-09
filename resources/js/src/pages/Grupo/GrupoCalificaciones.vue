@@ -1,88 +1,214 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import useTableData from '../../composables/tabla/useTableData';
+import { ref, computed } from "vue";
+import { storeToRefs } from "pinia";
 
-import SearchBar from '../../components/head_table/headSearch.vue';
-import Table from '../../components/table/Table.vue';
-import THead from '../../components/table/THead.vue';
-import TBody from '../../components/table/TBody.vue';
-import Tr from '../../components/table/Tr.vue';
-import Th from '../../components/table/Th.vue';
-import Td from '../../components/table/Td.vue';
+import SearchBar from "../../components/head_table/headSearch.vue";
+import Table from "../../components/table/Table.vue";
+import THead from "../../components/table/THead.vue";
+import TBody from "../../components/table/TBody.vue";
+import Tr from "../../components/table/Tr.vue";
+import Th from "../../components/table/Th.vue";
+import Td from "../../components/table/Td.vue";
+
+import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+
+import useStudentsStore from "../../store/Estudiante/UseEstudianteGrupoStore";
+import useCapacidadTerminalStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
+import useTableData from "../../composables/tabla/useTableData";
 
 const props = defineProps({
-  id: {
-    type: String,
-    required: true,
-  },
+  id: { type: String, required: true },
 });
 
-const calificaciones = ref([]);
-const criterios = ref(['CT1', 'CT2', 'CT3', 'CT4', 'CT5']);
+// --- Stores ---
+const userStore = useStudentsStore();
+const capacidadStore = useCapacidadTerminalStore();
 
+// --- Carga inicial ---
+if (!userStore.estudiantes?.length) {
+  await userStore.loadEstudiantes(props.id);
+}
+if (!capacidadStore?.capacidadTerminal?.capacidades?.length) {
+  await capacidadStore.loadCapacidadTerminal(props.id);
+}
+
+// --- Reactividad segura ---
+const { estudiantes } = storeToRefs(userStore);
+const { capacidadTerminal } = storeToRefs(capacidadStore);
+
+// --- Cantidad de capacidades ---
+const lengthUnit = computed(
+  () =>
+    capacidadTerminal.value?.cantidad_capacidades ??
+    capacidadTerminal.value?.capacidades?.length ??
+    0
+);
+
+// --- Normalizar capacidades ---
+const estudiantesNormalizados = computed(() => {
+  const n = Number(lengthUnit.value) || 0;
+  return (estudiantes.value ?? []).map((est) => {
+    const capacidades = Array.from({ length: n }, (_, i) => {
+      const cap =
+        (est.capacidades && est.capacidades[i]) ??
+        { nota_capacidad: null, id_capacidad: `empty-${i}` };
+      return { ...cap, nota_capacidad: cap?.nota_capacidad ?? null };
+    });
+    return { ...est, capacidades };
+  });
+});
+
+// --- Tabla con búsqueda y paginación ---
 const {
-  query,
   pagina,
   itemsPorPagina,
-  paginados: calificacionesPaginadas,
+  paginados: estudiantesPaginados,
   totalPaginas,
-  ordenados: calificacionesOrdenadas,
-  filtrar: filtrarCalificaciones
-} = useTableData(calificaciones, {
-  defaultOrderBy: "nombre",
-  searchFields: ["nombre"]
+  ordenados: estudiantesOrdenados,
+  filtrar: filtrarEstudiantes,
+} = useTableData(estudiantesNormalizados, {
+  defaultOrderBy: "apellidos_nombres",
+  searchFields: ["apellidos_nombres", "dni", "apellidos", "nombres"],
 });
 
-onMounted(() => {
-  calificaciones.value = [
-    { id: 1, nombre: 'ALENCASTRE LUQUE, Kelly Angie', notas: [12, 14, 16, 15, 14, 17], puntaje: 89, promedio: 15, estado: 'APROBADO' },
-    { id: 2, nombre: 'ALFARO AVENDAÑO, Victoria Valentina', notas: [12, 8, 10, 8, 4, 7], puntaje: 9, promedio: 15, estado: 'DESAPROBADO' },
-    { id: 3, nombre: 'APAZA HUARAYA, Ruth Gricelda', notas: [12, 14, 16, 15, 14, 17], puntaje: 89, promedio: 15, estado: 'APROBADO' },
-    { id: 4, nombre: 'ARE QUISPE, Roxana Karina', notas: [12, 14, 16, 15, 14, 17], puntaje: 89, promedio: 15, estado: 'APROBADO' },
-    { id: 5, nombre: 'ARENAS SANCA, Rosanna Anjeli', notas: [12, 14, 16, 15, 14, 17], puntaje: 89, promedio: 15, estado: 'APROBADO' },
-    { id: 6, nombre: 'CALIZAYA MAMANI, Nelida Yudith', notas: [12, 14, 16, 15, 14, 17], puntaje: 89, promedio: 15, estado: 'APROBADO' },
-  ];
-});
+// --- Funciones utilitarias ---
+const getNotaClass = (nota) =>
+  nota < 11
+    ? "text-red-600 dark:text-red-500  font-bold"
+    : "text-green-600 dark:text-green-300 font-bold";
 
-const getNotaClass = (nota) => (nota < 11 ? 'text-red-600 font-bold' : '');
-const getEstadoClass = (estado) => (estado === 'APROBADO' ? 'text-green-600' : 'text-red-600');
+const getEstadoClass = (estado) =>
+  estado === "APROBADO"
+    ? "text-green-600 dark:text-green-400"
+    : "text-red-600 dark:text-red-400";
+
+// --- 🔥 Función resumen: total, promedio, estado y clases ---
+const getResumenNotas = (est) => {
+  const total = est.capacidades.reduce(
+    (sum, c) => sum + Number(c.nota_capacidad ?? 0),
+    0
+  );
+
+  const promedio = est.capacidades.length
+    ? total / est.capacidades.length
+    : 0;
+
+  const estado = promedio >= 11 ? "APROBADO" : "DESAPROBADO";
+
+  // --- Formateo del promedio ---
+  const promedioTexto =
+    Number.isInteger(promedio)
+      ? promedio === 0
+        ? "00" // si el promedio es 0 exacto
+        : promedio.toString().padStart(2, "0") // entero normal
+      : promedio.toFixed(1).replace(/\.0$/, "").padStart(4, "0"); // con decimal
+
+  return {
+    total: total.toString().padStart(2, "0"),
+    promedio: promedioTexto,
+    estado,
+    promedioClass:
+      promedio < 11
+        ? "text-red-600 dark:text-red-500 font-bold"
+        : "text-green-600 dark:text-green-400 font-bold",
+    estadoClass: getEstadoClass(estado),
+  };
+};
+
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div class="flex justify-between items-center">
-      <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300">
-        Lista de calificaciones
-      </h3>
-    </div>
-    
-    <div class="flex justify-end">
-        <SearchBar :totalResultados="calificacionesOrdenadas.length" @search="filtrarCalificaciones" />
-    </div>
+  <AuthorizationFallback
+    :permissions="[
+      'todo-acceso-capacidad-terminal-notas-docente',
+      'ver-capacidad-terminal-notas-docente',
+    ]"
+  >
+    <div class="space-y-4">
+      <!-- Cabecera -->
+      <div class="flex justify-between items-center">
+        <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300">
+          Lista de estudiantes con notas
+        </h3>
+      
 
-    <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
-      <THead>
-        <Th>N°</Th>
-        <Th>APELLIDOS Y NOMBRES</Th>
-        <Th v-for="criterio in criterios" :key="criterio">{{ criterio }}</Th>
-        <Th>PUNTAJE</Th>
-        <Th>PROMEDIO</Th>
-        <Th>A-D-R</Th>
-      </THead>
-      <TBody>
-        <Tr v-for="(calificacion, index) in calificacionesPaginadas" :key="calificacion.id">
-          <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
-          <Td class="font-medium whitespace-nowrap">{{ calificacion.nombre }}</Td>
-          <Td v-for="(nota, i) in calificacion.notas" :key="i" class="text-center" :class="getNotaClass(nota)">
-            {{ nota }}
-          </Td>
-          <Td class="text-center" :class="getNotaClass(calificacion.puntaje)">{{ calificacion.puntaje }}</Td>
-          <Td class="text-center">{{ calificacion.promedio }}</Td>
-          <Td class="font-bold text-center" :class="getEstadoClass(calificacion.estado)">
-            {{ calificacion.estado }}
-          </Td>
-        </Tr>
-      </TBody>
-    </Table>
-  </div>
+      <!-- Barra de búsqueda -->
+      <div class="flex justify-end">
+        <SearchBar
+          :totalResultados="estudiantesOrdenados.length"
+          @search="filtrarEstudiantes"
+        />
+      </div>
+      </div>
+
+      <!-- Tabla -->
+      <Table
+        :paginacion="true"
+        :current-page="pagina"
+        :total-pages="totalPaginas"
+        @changePage="pagina = $event"
+      >
+        <THead>
+          <Th>#</Th>
+          <Th>Apellidos y Nombres</Th>
+          <Th v-for="i in lengthUnit" :key="i">CT{{ i }}</Th>
+          <Th>PUNTAJE</Th>
+          <Th>PROMEDIO</Th>
+          <Th>A-D-R</Th>
+        </THead>
+
+        <TBody>
+          <Tr
+            v-for="(est, index) in estudiantesPaginados"
+            :key="est.id_estudiante ?? index"
+          >
+            <!-- N° -->
+            <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
+
+            <!-- Nombre -->
+            <Td class="font-medium whitespace-nowrap">
+              {{ est.apellidos_nombres }}
+            </Td>
+
+            <!-- Notas por CT -->
+            <Td
+              v-for="(cap, i) in est.capacidades"
+              :key="i"
+              class="text-center"
+              :class="getNotaClass(cap.nota_capacidad)"
+            >
+              {{ cap.nota_capacidad ?? "--" }}
+            </Td>
+
+            <!-- Resumen -->
+            <template v-if="getResumenNotas(est)">
+              <Td class="text-center font-semibold">
+                {{ getResumenNotas(est).total }}
+              </Td>
+
+              <Td
+                class="text-center font-semibold"
+                :class="getResumenNotas(est).promedioClass"
+              >
+                {{ getResumenNotas(est).promedio }}
+              </Td>
+
+              <Td
+                class="font-bold text-center"
+                :class="getResumenNotas(est).estadoClass"
+              >
+                {{ getResumenNotas(est).estado }}
+              </Td>
+            </template>
+          </Tr>
+        </TBody>
+      </Table>
+    </div>
+  </AuthorizationFallback>
 </template>
+
+<style scoped>
+.nota-vacia {
+  @apply text-gray-400 italic;
+}
+</style>

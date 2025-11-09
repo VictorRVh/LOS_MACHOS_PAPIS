@@ -631,12 +631,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('experiencia_formativa', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+
+    Route::get('experiencia_formativa_index/{id_grupo}', [
+        \App\Http\Controllers\ExperienciaFormativaController::class,
+        'indexExperienciaFormativa',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
 
     Route::post('experiencia_formativa', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos|ver-mis-modulos');
 
     Route::patch('experiencia_formativa/{id}', [
         \App\Http\Controllers\ExperienciaFormativaController::class,

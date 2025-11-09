@@ -12,8 +12,28 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('carpetas_practicas_drive', function (Blueprint $table) {
-            $table->id();
+           $table->uuid('id')->primary();
+
+            $table->uuid('id_nota_experiencia');
+            $table->uuid('id_estudiante');
+
+            $table->string('drive_file_id', 255);
+
+            // $table->tinyInteger('status')->default(1);
+
             $table->timestamps();
+
+            $table->foreign('id_nota_experiencia')
+                ->references('id')
+                ->on('nota_experiencia_formativa')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+
+            $table->foreign('id_estudiante')
+                ->references('id')
+                ->on('estudiante')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
         });
     }
 

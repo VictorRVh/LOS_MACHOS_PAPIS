@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CarpetasPracticasDrive;
 use App\Models\NotaExperienciaFormativa;
 use Illuminate\Http\Request;
 
@@ -41,21 +42,17 @@ class NotaExperienciaFormativaController extends Controller
         ]);
 
         try {
-            // 1️⃣ Subir archivo a Google Drive usando tu flujo existente
+            // 1️⃣ Subir archivo a Google Drive usando el request original
             $driveController = new GoogleDriveController();
 
-            $uploadRequest = new Request([
-                'file' => $request->file('file'),
-                'parentFolderId' => $request->parentFolderId,
-            ]);
-
-            $response = $driveController->uploadFile($uploadRequest);
+            // Pasar el request original que ya contiene el archivo
+            $response = $driveController->uploadFile($request);
 
             if ($response->status() !== 201) {
                 return response()->json(['error' => 'No se pudo subir el archivo al Drive.'], 500);
             }
 
-            $fileData = $response->getData(); // id, name, etc.
+            $fileData = $response->getData();
 
             // 2️⃣ Guardar el registro en la tabla nota_experiencia_formativa
             $nota = NotaExperienciaFormativa::create([
@@ -66,6 +63,12 @@ class NotaExperienciaFormativaController extends Controller
                 'id_grupo'       => $request->id_grupo,
                 'status'         => 1,
             ]);
+
+            // $carpeta = CarpetasPracticasDrive::create([
+            //     'id_nota_experiencia' => $nota->id,
+            //     'id_estudiante'       => $request->id_estudiante,
+            //     'drive_file_id'       => $fileData->id,
+            // ]);
 
             return response()->json([
                 'message' => 'Nota registrada y archivo subido con éxito.',

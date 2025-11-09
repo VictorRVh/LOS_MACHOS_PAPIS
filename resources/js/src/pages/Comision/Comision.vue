@@ -31,21 +31,34 @@ const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deletecomision, deleting } = useHttpRequest("/comisiones");
 
+console.log("comsiones: ",useUserStore.users)
+// esto funcionapara excluir usuarios
+// const UsuariosDisponibles = computed(() => {
+//   // todos los usuarios activos
+//   const todosUsuarios = useUserStore?.users || [];
 
+//   // todos los IDs de usuarios ya asignados a comisiones
+//   const usuariosAsignados = comisionesStore?.comisiones
+//     ?.flatMap(c => c.usuarios?.map(u => u.id)) || [];
+
+//   // si estoy editando, mantener el usuario ya asignado
+//   const currentUserIds = sliderData.value?.usuarios?.map(u => u.id) || [];
+
+//   return todosUsuarios.filter(usuario =>
+//     !usuariosAsignados.includes(usuario.id) || currentUserIds.includes(usuario.id)
+//   );
+// });
 
 const UsuariosDisponibles = computed(() => {
   // todos los usuarios activos
   const todosUsuarios = useUserStore?.users || [];
 
-  // todos los IDs de usuarios ya asignados a comisiones
-  const usuariosAsignados = comisionesStore?.comisiones
-    ?.flatMap(c => c.usuarios?.map(u => u.id)) || [];
-
   // si estoy editando, mantener el usuario ya asignado
   const currentUserIds = sliderData.value?.usuarios?.map(u => u.id) || [];
 
+  // ya no excluimos usuarios asignados a otras comisiones
   return todosUsuarios.filter(usuario =>
-    !usuariosAsignados.includes(usuario.id) || currentUserIds.includes(usuario.id)
+    !usuario.deleted_at || currentUserIds.includes(usuario.id)
   );
 });
 

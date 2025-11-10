@@ -118,6 +118,31 @@ class ComisionesController extends Controller
             return $this->errorResponse($error);
         }
     }
+    public function comision_docente($idUsuario){
+         
+        // Buscamos al usuario con sus comisiones
+        $usuario = User::with('comisiones')->find($idUsuario);
+
+        if (!$usuario) {
+            return response()->json([
+                'message' => 'Usuario no encontrado.'
+            ], 404);
+        }
+        // Retornar datos del usuario y sus comisiones
+        return response()->json([
+            'usuario' => [
+                'nombre_completo' => trim("{$usuario->apellido_paterno} {$usuario->apellido_materno} {$usuario->name}"),
+            ],
+            'comisiones' => $usuario->comisiones->map(function ($comision) {
+                return [
+                    'id' => $comision->id,
+                    'titulo' => $comision->titulo,
+                    'descripcion' => $comision->descripcion,
+                ];
+            }),
+        ]);
+    }
+
 
     public function destroy($id)
     {

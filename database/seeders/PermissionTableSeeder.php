@@ -139,7 +139,7 @@ class PermissionTableSeeder extends Seeder
             'eliminar-programacion-documentos-subidos',
             'icono-programacion-documentos-subidos',
 
-            
+
             ///////////////////////////////////////
             ///////////////////////////////////////
             ///////////////////////////////////////
@@ -155,6 +155,7 @@ class PermissionTableSeeder extends Seeder
              ///////////////////////////////////////
              ///////////////////////////////////////
              ///////////////////////////////////////
+             
 
                          // PERMISOS DE DE PROGRAMACION PARA DOCENTES
             'todo-acceso-capacidad-terminal-docente',
@@ -180,6 +181,9 @@ class PermissionTableSeeder extends Seeder
             'crear-sesiones-docente',
             'editar-sesiones-docente',
             'eliminar-sesiones-docente',
+
+            // ver comsiones 
+            'ver-comsion-docente',
                 
 
             'ver-perfil-docente',

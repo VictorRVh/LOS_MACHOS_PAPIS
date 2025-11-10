@@ -60,6 +60,9 @@ class PermissionRoleTableSeeder extends Seeder
             'editar-alumnos-docente',
             // 'eliminar-alumnos-docente',
 
+            // comsiones ...  
+            'ver-comsion-docente'
+
         ];
 
         // buscar IDs de los permisos creados en la tabla permissions

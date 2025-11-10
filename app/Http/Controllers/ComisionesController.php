@@ -35,9 +35,9 @@ class ComisionesController extends Controller
     public function index_filter()
     {
         $usuariosSinComision = User::doesntHave('comisiones')
-        ->where('status', 1) // 👈 Solo activos
-        ->select('id', 'name', 'apellido_paterno', 'apellido_materno')
-        ->get();
+            ->where('status', 1) // 👈 Solo activos
+            ->select('id', 'name', 'apellido_paterno', 'apellido_materno')
+            ->get();
 
         $data = $usuariosSinComision->map(function ($usuario) {
             return [
@@ -118,17 +118,17 @@ class ComisionesController extends Controller
             return $this->errorResponse($error);
         }
     }
-    public function comision_docente($idUsuario){
-         
-        // Buscamos al usuario con sus comisiones
-        $usuario = User::with('comisiones')->find($idUsuario);
+    public function comision_docente($idUsuario)
+    {
+        // Buscamos al usuario junto con sus comisiones y los usuarios de cada comisión
+        $usuario = User::with(['comisiones.usuarios'])->find($idUsuario);
 
         if (!$usuario) {
             return response()->json([
                 'message' => 'Usuario no encontrado.'
             ], 404);
         }
-        // Retornar datos del usuario y sus comisiones
+
         return response()->json([
             'usuario' => [
                 'nombre_completo' => trim("{$usuario->apellido_paterno} {$usuario->apellido_materno} {$usuario->name}"),
@@ -138,11 +138,19 @@ class ComisionesController extends Controller
                     'id' => $comision->id,
                     'titulo' => $comision->titulo,
                     'descripcion' => $comision->descripcion,
+                    'usuarios' => $comision->usuarios->map(function ($u) {
+                        return [
+                            'id' => $u->id,
+                            'nombre_completo' => trim("{$u->apellido_paterno} {$u->apellido_materno} {$u->name}"),
+                            'email' => $u->email,
+                            'dni' => $u->dni,
+                            'telefono' => $u->telefono, // ✅ existe en tu modelo
+                        ];
+                    }),
                 ];
             }),
         ]);
     }
-
 
     public function destroy($id)
     {

@@ -817,7 +817,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\ComisionesController::class,
         'index_filter',
     ])->middleware('permission:todo-acceso-comisiones|ver-comisiones');
-    Route::get('index_comision_docente', [
+    Route::get('index_comision_docente/{id}', [
         \App\Http\Controllers\ComisionesController::class,
         'comision_docente',
     ])->middleware('permission:ver-comsion-docente');

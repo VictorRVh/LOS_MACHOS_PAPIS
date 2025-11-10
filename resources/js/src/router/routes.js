@@ -24,6 +24,9 @@ export default [
     { path: '/administrativos', name: 'administrativos', component: () => import('../pages/Administrativo/Administrativo.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Administrativos', to: { name: 'administrativos' } }] }, },
     { path: '/especialidad', name: 'especialidad', component: () => import('../pages/Especialidad/Especialidad.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Especialidades', to: { name: 'especialidad' } }] }, },
     { path: '/comision', name: 'comision', component: () => import('../pages/Comision/Comision.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comision' } }] }, },
+    
+     { path: '/comision', name: 'comsion.docente', component: () => import('../pages/Docente-menu/DocenteComsion.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comsion.docente' } }] }, },
+    
     {
         path: '/programa',
         name: 'programa',

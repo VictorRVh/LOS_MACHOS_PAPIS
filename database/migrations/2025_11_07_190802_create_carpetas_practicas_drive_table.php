@@ -14,24 +14,15 @@ return new class extends Migration
         Schema::create('carpetas_practicas_drive', function (Blueprint $table) {
            $table->uuid('id')->primary();
 
-            $table->uuid('id_nota_experiencia');
-            $table->uuid('id_estudiante');
+            $table->uuid('id_experiencia');
 
-            $table->string('drive_file_id', 255);
-
-            // $table->tinyInteger('status')->default(1);
+            $table->string('drive_folder_id', 255);
 
             $table->timestamps();
 
-            $table->foreign('id_nota_experiencia')
+            $table->foreign('id_experiencia')
                 ->references('id')
-                ->on('nota_experiencia_formativa')
-                ->onDelete('cascade')
-                ->onUpdate('cascade');
-
-            $table->foreign('id_estudiante')
-                ->references('id')
-                ->on('estudiante')
+                ->on('experiencia_formativa')
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
         });

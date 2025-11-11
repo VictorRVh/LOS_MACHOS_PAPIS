@@ -229,7 +229,9 @@ class MatriculaController extends Controller
             ->where('g.id', $grupoId)
             ->select(
                 'em.nombre_especialidad as especialidad',
-                'mo.descripcion as modulo'
+                'mo.descripcion as modulo',
+                'g.id as id_grupo',
+                'g.id_periodo'
             )
             ->first();
 
@@ -258,6 +260,8 @@ class MatriculaController extends Controller
 
         return response()->json([
             'especialidad' => $infoGrupo->especialidad,
+            'id_periodo' => $infoGrupo->id_periodo,
+            'id_grupo' => $infoGrupo->id_grupo,
             'modulo' => $infoGrupo->modulo,
             'matriculados' => $matriculados,
         ]);

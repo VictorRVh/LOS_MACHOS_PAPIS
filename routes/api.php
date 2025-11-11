@@ -564,7 +564,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\CapacidadTerminalController::class,
         'indexGrupo',
     ])->middleware('permission:todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
-    
+
     Route::get('nro_capacidades/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'nroCapacidades',
@@ -605,7 +605,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'listaAlumnosNotas',
     ])->middleware('permission:ver-grupos|todo-acceso-capacidad-terminal-notas-docente|ver-capacidad-terminal-notas-docente');
-    
+
     Route::get('nota_capacidad_terminal_restringido/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'index_grupo_capacidad_terminal',
@@ -636,6 +636,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('experiencia_formativa_index/{id_grupo}', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'indexExperienciaFormativa',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+
+    Route::get('experiencia_formativa_folderDrive/{id_grupo}', [
+        \App\Http\Controllers\ExperienciaFormativaController::class,
+        'indexExperienciaFormativaFolderDrive',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
 
     Route::post('experiencia_formativa', [
@@ -715,12 +720,12 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\AsistenciaController::class,
         'index',
     ])->middleware('permission:ver-mis-modulos|todo-acceso-permisos|ver-permisos');
-    
+
     Route::get('sesiones_entrega/{idEntrega}', [
         \App\Http\Controllers\AsistenciaController::class,
         'obtenerSesionPorEntrega',
     ])->middleware('permission:ver-mis-modulos|todo-acceso-permisos|ver-permisos');
-    
+
     Route::get('sesiones_asistencia/{idEntrega}', [
         \App\Http\Controllers\AsistenciaController::class,
         'obtenerAsistenciaEstudiantes',

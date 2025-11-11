@@ -12,16 +12,31 @@ const useExperienciaFormativaStore = defineStore('ExperienciaFormativa', () => {
         initialLoading: ExperienciaFormativaByGrupoFirstTimeLoading,
     } = useHttpRequest('/experiencia_formativa_index');
 
-    const ExperienciaFormativaPorGrupo = ref([]);
+    const {
+        show: getDriveFolderId,
+        // loading: ExperienciaFormativaByGrupoLoading,
+        // initialLoading: ExperienciaFormativaByGrupoFirstTimeLoading,
+    } = useHttpRequest('/experiencia_formativa_folderDrive');
 
-    const loadgetExperienciaFormativaByGrupo = async (id) => {
+    const experienciaFormativaPorGrupo = ref([]);
+    const driveFolderId = ref([]);
+
+    const loadGetExperienciaFormativaByGrupo = async (id) => {
         const res = await getExperienciaFormativaByGrupo(id);
-        ExperienciaFormativaPorGrupo.value = res;
+        experienciaFormativaPorGrupo.value = res;
+    };
+
+    const loadDriveFolderId = async (id) => {
+        const res = await getDriveFolderId(id);
+        driveFolderId.value = res;
     };
 
     return {
-        loadgetExperienciaFormativaByGrupo,
-        ExperienciaFormativaPorGrupo
+        loadGetExperienciaFormativaByGrupo,
+        experienciaFormativaPorGrupo,
+
+        loadDriveFolderId,
+        driveFolderId
     };
 });
 

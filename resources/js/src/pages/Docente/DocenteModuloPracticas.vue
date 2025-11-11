@@ -16,6 +16,7 @@ import FormInputFile from "../../components/ui/FormFileInput.vue";
 import useModalToast from '../../composables/useModalToast';
 import useHttpRequest from '../../composables/useHttpRequest';
 import useExperienciaFormativaStore from '../../store/ExperienciaFormativa/useExperienciaFormativa';
+import { DocumentTextIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     id: {
@@ -29,7 +30,6 @@ const { saving: isSavingExp, store: guardarExperienciaFormativa } = useHttpReque
 const { saving: isSaving, store: guardarNotaExperienciaFormativa } = useHttpRequest('/nota_experiencia_formativa');
 
 const experienciaFormativaStore = useExperienciaFormativaStore();
-const documentoStore = useProgramacionAdmintore();
 
 const alumnos = ref([]);
 const showModal = ref(false);
@@ -37,6 +37,7 @@ const selectedAlumno = ref(null);
 const saving = ref(false);
 const idCarpetaGrupo = ref([])
 const idExperienciaFormativa = ref(null);
+const idPracticasDrive = ref(null)
 
 const nuevaExperiencia = ref({
     nombre_experiencia: "",
@@ -46,43 +47,56 @@ const nuevaExperiencia = ref({
 });
 
 onMounted(async () => {
-
     try {
-        await experienciaFormativaStore.loadgetExperienciaFormativaByGrupo(props.id);
+        await experienciaFormativaStore.loadGetExperienciaFormativaByGrupo(props.id);
 
-        const response = experienciaFormativaStore.ExperienciaFormativaPorGrupo
+        const response = experienciaFormativaStore.experienciaFormativaPorGrupo;
 
-        await documentoStore.loadGetProgramacionByGrupo(props.id);
-        idCarpetaGrupo.value = documentoStore.programacionPorGrupo;
+        await experienciaFormativaStore.loadDriveFolderId(props.id)
 
-        if (response) {
+        idCarpetaGrupo.value = experienciaFormativaStore.driveFolderId
 
-        
+        console.log('carpeta', idCarpetaGrupo.value)
+
+        if (response?.data) {
             const exp = response.data.experiencia;
-            const est = response.data.estudiantes;
+            const est = response.data.estudiantes || [];
+            idPracticasDrive.value = response.data.drive_folder_id;
 
-            console.log('esrurur', est)
-
-            nuevaExperiencia.value = {
-                id: exp.id,
-                nombre_experiencia: exp.nombre_experiencia,
-                fecha_inicio: exp.fecha_inicio,
-                fecha_fin: exp.fecha_fin,
-                horas: exp.horas,
-            };
-
-            idExperienciaFormativa.value = exp.id;
+            if (exp) {
+                nuevaExperiencia.value = {
+                    id: exp.id,
+                    nombre_experiencia: exp.nombre_experiencia,
+                    fecha_inicio: exp.fecha_inicio,
+                    fecha_fin: exp.fecha_fin,
+                    horas: exp.horas,
+                };
+                idExperienciaFormativa.value = exp.id;
+            } else {
+                nuevaExperiencia.value = {
+                    id: null,
+                    nombre_experiencia: "",
+                    fecha_inicio: "",
+                    fecha_fin: "",
+                    horas: "",
+                };
+                idExperienciaFormativa.value = null;
+            }
 
             alumnos.value = est.map(a => ({
                 ...a,
                 lugar: a.lugar || "",
-                documento: a.documento || ""
+                documento: a.documento || "",
             }));
+        } else {
+            console.warn("No se recibió información del grupo.");
         }
+
     } catch (error) {
-        console.log("No existe experiencia formativa para este grupo aún.");
+        console.log("Error al cargar experiencia formativa:", error);
     }
 });
+
 
 const formData = ref({
     lugar: "",
@@ -90,8 +104,6 @@ const formData = ref({
 });
 
 function abrirModal(alumno) {
-
-    console.log('alimnos', alumno)
     selectedAlumno.value = alumno;
     formData.value = { lugar: "", documento: null };
     showModal.value = true;
@@ -118,15 +130,18 @@ async function guardarExperiencia() {
         const response = await guardarExperienciaFormativa({
             ...nuevaExperiencia.value,
             id_grupo: props.id,
-            parentId: idCarpetaGrupo.value.carpeta_raiz.id,
+            parentId: idCarpetaGrupo.value.drive_folder_id,
         });
 
-        const experiencia = response?.data?.data; 
+        const experiencia = response?.data;
 
         if (experiencia) {
-            nuevaExperiencia.value = { ...experiencia };
 
+            console.log('entrado aca')
+            nuevaExperiencia.value = { ...experiencia };
             idExperienciaFormativa.value = experiencia.id;
+
+            idPracticasDrive.value = experiencia.drive_folder_id;
 
             showToast("Experiencia formativa registrada correctamente", "success");
         }
@@ -141,7 +156,7 @@ async function guardarExperiencia() {
 
 async function onSubmit() {
     if (!formData.value.lugar || !formData.value.documento) {
-        alert("Debe llenar el lugar y adjuntar el documento.");
+        showToast("Debe llenar el lugar y adjuntar el documento.", "warning");
         return;
     }
 
@@ -155,11 +170,21 @@ async function onSubmit() {
         form.append("id_grupo", props.id);
         form.append("lugar", formData.value.lugar);
         form.append("file", formData.value.documento);
-        form.append("parentFolderId", idCarpetaGrupo.value.carpeta_raiz.id);
+        form.append("parentFolderId", idPracticasDrive.value);
 
-        const response = await guardarNotaExperienciaFormativa(form)
+        await guardarNotaExperienciaFormativa(form);
 
-        console.log('respuesta del response', response)
+        await experienciaFormativaStore.loadGetExperienciaFormativaByGrupo(props.id);
+
+        const est = experienciaFormativaStore.experienciaFormativaPorGrupo.data.estudiantes;
+
+        alumnos.value = est.map(a => ({
+            ...a,
+            lugar: a.lugar || "",
+            documento: a.documento || "",
+        }));
+
+        showToast("Datos guardados correctamente.", "success");
 
         showModal.value = false;
     } catch (error) {
@@ -202,19 +227,22 @@ async function onSubmit() {
                 <THead>
                     <Th>N°</Th>
                     <Th>Apellidos y Nombres</Th>
-                    <Th>DNI</Th>
-                    <Th>Estado</Th>
+                    <Th>Lugar</Th>
+                    <Th>Archivo</Th>
                     <Th class="text-center">Acciones</Th>
                 </THead>
                 <TBody>
                     <Tr v-for="(alumno, index) in alumnos" :key="alumno.id_estudiante">
                         <Td>{{ index + 1 }}</Td>
                         <Td>{{ alumno.apellidos_nombres }}</Td>
-                        <Td>{{ alumno.nro_documento }}</Td>
-                        <Td>
-                            <span :class="alumno.estado === 'Matriculado' ? 'text-green-600' : 'text-red-600'">
-                                {{ alumno.estado }}
-                            </span>
+                        <Td>{{ alumno.lugar }}</Td>
+                        <Td class="text-center">
+                            <a v-if="alumno.documento_url" :href="alumno.documento_url" target="_blank"
+                                class="inline-flex items-center justify-center text-blue-600 hover:text-blue-800"
+                                title="Abrir documento">
+                                <DocumentTextIcon class="w-6 h-6" />
+                            </a>
+                            <span v-else class="text-gray-400">—</span>
                         </Td>
                         <Td class="text-center">
                             <Button title="Calificar" color="primary" size="sm" @click="abrirModal(alumno)" />

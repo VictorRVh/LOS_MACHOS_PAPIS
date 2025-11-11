@@ -57,4 +57,9 @@ class ExperienciaFormativa extends Model
     {
         return $this->hasMany(NotaExperienciaFormativa::class, 'id_experiencia');
     }
+
+    public function drive()
+    {
+        return $this->hasMany(CarpetasPracticasDrive::class, 'id_experiencia');
+    }
 }

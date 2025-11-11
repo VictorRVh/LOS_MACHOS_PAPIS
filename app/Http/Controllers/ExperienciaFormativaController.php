@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\CarpetasEntregaDrive;
+use App\Models\CarpetasGrupoDrive;
+use App\Models\CarpetasPracticasDrive;
 use App\Models\ExperienciaFormativa;
 use App\Models\Grupo;
 use Illuminate\Http\Request;
@@ -20,18 +22,7 @@ class ExperienciaFormativaController extends Controller
 
     public function indexExperienciaFormativa($id_grupo)
     {
-        $experiencia = ExperienciaFormativa::with(['notas'])
-            ->where('id_grupo', $id_grupo)
-            ->first();
-
-        if (!$experiencia) {
-            return response()->json([
-                'message' => 'No se encontró una experiencia formativa para este grupo',
-                'data' => null
-            ], 404);
-        }
-
-        // 🔹 Obtenemos los estudiantes pertenecientes a ese grupo
+        // 🔹 Cargar grupo y estudiantes
         $grupo = Grupo::with(['matricula.estudiante'])->find($id_grupo);
 
         if (!$grupo) {
@@ -41,29 +32,63 @@ class ExperienciaFormativaController extends Controller
             ], 404);
         }
 
-        // 🔹 Armamos la lista de estudiantes con sus notas (si existen)
+        // 🔹 Cargar experiencia formativa (si existe)
+        $experiencia = ExperienciaFormativa::with(['notas', 'drive'])
+            ->where('id_grupo', $id_grupo)
+            ->first();
+
+        // 🔹 Carpeta general de la experiencia
+        $drive_folder_id = $experiencia?->drive?->first()?->drive_folder_id ?? null;
+
+        // 🔹 Listar estudiantes con su información y documentos
         $estudiantes = $grupo->matricula->map(function ($matricula) use ($experiencia) {
-            $nota = $experiencia->notas
-                ->where('id_estudiante', $matricula->estudiante->id)
-                ->first();
+            $nota = null;
+            $documentoDriveUrl = null;
+
+            if ($experiencia) {
+                $nota = $experiencia->notas
+                    ->where('id_estudiante', $matricula->estudiante->id)
+                    ->first();
+
+                // Si el documento tiene un ID de archivo Drive, generamos URL pública (opcional)
+                if ($nota && $nota->documento) {
+                    $documentoDriveUrl = "https://drive.google.com/file/d/{$nota->documento}/view";
+                }
+            }
 
             return [
                 'id_estudiante' => $matricula->estudiante->id,
-                'apellidos_nombres' => $matricula->estudiante->apellido_paterno . ' ' .
+                'apellidos_nombres' =>
+                $matricula->estudiante->apellido_paterno . ' ' .
                     $matricula->estudiante->apellido_materno . ', ' .
                     $matricula->estudiante->nombre,
                 'dni' => $matricula->estudiante->nro_documento,
                 'lugar' => $nota->lugar ?? null,
-                'documento' => $nota->documento ?? null,
+                'documento_id' => $nota->documento ?? null, // ID interno o en Drive
+                'documento_url' => $documentoDriveUrl, // URL visible en Drive
             ];
         });
 
+        // 🔹 Retornar todo junto
         return response()->json([
             'data' => [
                 'experiencia' => $experiencia,
+                'drive_folder_id' => $drive_folder_id,
                 'estudiantes' => $estudiantes,
             ]
         ]);
+    }
+
+    public function indexExperienciaFormativaFolderDrive($id_grupo)
+    {
+        $driveFolderId = CarpetasGrupoDrive::where('id_grupo', $id_grupo)
+            ->value('drive_folder_id');
+
+        if (!$driveFolderId) {
+            return response()->json(['error' => 'No se encontró la carpeta para ese grupo'], 404);
+        }
+
+        return response()->json(['drive_folder_id' => $driveFolderId]);
     }
 
     // GET /api/experiencia_formativa/{id}
@@ -92,6 +117,7 @@ class ExperienciaFormativaController extends Controller
         ]);
 
         $experiencia = ExperienciaFormativa::create($request->all());
+        $driveFolderId = null;
 
         try {
             $parentFolderId = $request->parentId;
@@ -105,26 +131,20 @@ class ExperienciaFormativaController extends Controller
 
             $response = $driveController->createFolder($folderRequest);
 
-            if ($response->status() === 201) {
-                $data = $response->getData();
+            $status = method_exists($response, 'getStatusCode')
+                ? $response->getStatusCode()
+                : ($response['status'] ?? 200);
 
+            $data = method_exists($response, 'getData')
+                ? $response->getData(true)
+                : (array) $response;
 
-                // MODELO DE EJEMPLO 
-
-                // ExperienciaFormativaDrive::create([
-                //     'id_experiencia' => $experiencia->id,
-                //     'drive_folder_id' => $data->id,
-                //     'nombre_carpeta' => $experiencia->nombre_experiencia,
-                // ]);
-
-                // LA FIJA 
-
-                // CarpetasEntregaDrive::create([
-                //     'id_entrega_docente' => $entregaDocente->id,
-                //     'id_grupo' => $request->id_grupo,
-                //     'drive_folder_id' => $data->id,
-                //     'nombre_carpeta' => $experiencia->nombre_experiencia
-                // ]);
+            if ($status === 201 && !empty($data['id'])) {
+                $driveFolderId = $data['id'];
+                CarpetasPracticasDrive::create([
+                    'id_experiencia'  => $experiencia->id,
+                    'drive_folder_id' => $driveFolderId,
+                ]);
             } else {
                 \Log::error('❌ Error creando carpeta en Drive: ' . $response->getContent());
             }
@@ -134,7 +154,15 @@ class ExperienciaFormativaController extends Controller
 
         return response()->json([
             'message' => 'Experiencia creada con éxito',
-            'data' => $experiencia,
+            'data' => [
+                'id' => $experiencia->id,
+                'nombre_experiencia' => $experiencia->nombre_experiencia,
+                'fecha_inicio' => $experiencia->fecha_inicio,
+                'fecha_fin' => $experiencia->fecha_fin,
+                'horas' => $experiencia->horas,
+                'id_grupo' => $experiencia->id_grupo,
+                'drive_folder_id' => $driveFolderId,
+            ],
         ], 201);
     }
 

@@ -16,9 +16,8 @@ class CarpetasPracticasDrive extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id_nota_experiencia',
-        'id_estudiante',
-        'drive_file_id',
+        'id_experiencia',
+        'drive_folder_id',
     ];
 
     protected static function boot()
@@ -33,6 +32,6 @@ class CarpetasPracticasDrive extends Model
 
     public function grupo()
     {
-        return $this->belongsTo(NotaExperienciaFormativa::class, 'id_nota_experiencia');
+        return $this->belongsTo(ExperienciaFormativa::class, 'id_experiencia');
     }
 }

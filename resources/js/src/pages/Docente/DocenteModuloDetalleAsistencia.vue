@@ -37,9 +37,9 @@ const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteSesion, deleting } = useHttpRequest("/programacion_sesion_docente");
 
-    const asist = ref(false); // Estado para mostrar / ocultar slider
-    const asistData = ref(null); // Datos que se pasan al slider           
- 
+const asist = ref(false); // Estado para mostrar / ocultar slider
+const asistData = ref(null); // Datos que se pasan al slider           
+
 // 🔹 Cargar la sesión una sola vez
 if (!sesionStore?.sesion?.length) {
   await sesionStore.loadSesion(props.id)
@@ -50,18 +50,18 @@ if (!programacionSesion?.sesiones?.length) {
 }
 
 // 🗓️ Calendario
- const Asistencia = () => {
-          if (sesionStore?.sesion?.id) {
-              //sliderData.value = capacidadSeleccionada.value; // Asignar datos
-              asist.value = true; // Mostrar slider
-          } else {
-              console.error("Selecciona una capacidad terminal primero.");
-              showToast("Selecciona una capacidad terminal primero.","warning");
-          }
-    };         
+const Asistencia = () => {
+  if (sesionStore?.sesion?.id) {
+    //sliderData.value = capacidadSeleccionada.value; // Asignar datos
+    asist.value = true; // Mostrar slider
+  } else {
+    console.error("Selecciona una capacidad terminal primero.");
+    showToast("Selecciona una capacidad terminal primero.", "warning");
+  }
+};
 const ocultarSliderAsistencia = () => {
   asist.value = false;
-};    
+};
 const holidays = ref([])
 const selectionEvents = ref([])
 const allEvents = ref([])
@@ -225,149 +225,141 @@ const estadoTexto = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-4">
-    <!-- ENCABEZADO PRINCIPAL -->
-    <div v-if="sesionStore?.sesion"
-      class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <div>
-        <h2 class="text-xl font-bold text-gray-800 dark:text-white">Programación de Sesión</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          Del <strong>{{ new Date(sesionStore.sesion.fecha_inicio).toLocaleDateString('es-PE', { day: '2-digit', month: 'long' }) }}</strong> al <strong>{{ new Date(sesionStore.sesion.fecha_fin).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' }) }}</strong>
-        </p>
-      </div>
-      <div class="flex items-center gap-3 w-full sm:w-auto">
-        <span class="px-3 py-1 rounded-full text-xs font-bold w-full text-center sm:w-auto" :class="{
-          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300': sesionStore.sesion.estado === 0,
-          'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300': sesionStore.sesion.estado === 1,
-          'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300': sesionStore.sesion.estado === 2
-        }">
-          Estado: {{ estadoTexto }}
-        </span>
-        <BaseButton :title="'Asistencia'" @click="Asistencia" class="w-full sm:w-auto" />
-      </div>
+  <div v-if="sesionStore?.sesion"
+    class="col-span-full bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-2 px-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+    <div>
+      <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200">
+        Programación de Sesión
+      </h3>
+      <p class="text-sm text-gray-700 dark:text-gray-300">
+        Del
+        <strong>
+          {{
+            new Date(sesionStore?.sesion?.fecha_inicio).toLocaleDateString(
+              'es-PE',
+              { day: '2-digit', month: 'long', year: 'numeric' }
+            )
+          }}
+        </strong>
+        al
+        <strong>
+          {{
+            new Date(sesionStore?.sesion?.fecha_fin).toLocaleDateString(
+              'es-PE',
+              { day: '2-digit', month: 'long', year: 'numeric' }
+            )
+          }}
+        </strong>
+      </p>
     </div>
 
-    <!-- CUERPO PRINCIPAL: CALENDARIO Y TEMAS -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      
-      <!-- COLUMNA DEL CALENDARIO -->
-      <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-md flex flex-col h-[75vh]">
-        <header class="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <h3 class="text-lg font-bold text-gray-800 dark:text-gray-900">Programador de Sesiones</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Haz clic en los días laborables para programar un tema.</p>
-        </header>
+    <div class="px-3 py-1 rounded-full text-sm font-bold" :class="{
+      'bg-yellow-100 text-yellow-800': sesionStore?.sesion?.estado === 0,
+      'bg-green-100 text-green-800': sesionStore?.sesion?.estado === 1,
+      'bg-gray-200 text-gray-800': sesionStore?.sesion?.estado === 2,
+    }">
+      Estado: {{ estadoTexto }}
+    </div>
 
-        <div class="flex-grow overflow-hidden relative">
-          <BaseCalendar 
-            :events="[...allEvents, ...selectionEvents]" 
-            :holidays="holidays" 
-            @date-click="handleDateClick"
-            class="h-full"
-          >
-            <!-- Slot para la cabecera del calendario con botones de acción -->
-            <template #header="{ calendarApi }">
-              <div class="w-full flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 p-2 z-10">
-                <div class="flex items-center gap-1">
-                  <button @click="calendarApi.prev()" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">&lt;</button>
-                  <button @click="calendarApi.next()" class="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">&gt;</button>
-                  <button @click="calendarApi.today()" class="px-3 py-1.5 text-sm rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">Hoy</button>
-                </div>
-                <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-200">{{ calendarApi.getCurrentData().viewTitle }}</h4>
-                <div class="flex items-center gap-1">
-                  <button @click="calendarApi.changeView('dayGridMonth')" class="px-3 py-1.5 text-sm rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">Mes</button>
-                  <button @click="calendarApi.changeView('timeGridWeek')" class="px-3 py-1.5 text-sm rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">Semana</button>
-                </div>
-              </div>
-            </template>
-          </BaseCalendar>
+    <!-- 🔵 Botón de asistencia -->
+    <BaseButton title="Asistencia" @click="Asistencia"
+      class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow" />
 
-          <!-- Botones flotantes para guardar/limpiar selección -->
-          <Transition name="fade">
-            <div v-if="hasSelection" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-2 rounded-lg shadow-xl border dark:border-gray-700">
-              <button @click="clearSelection" class="bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 font-bold py-2 px-4 rounded-lg transition-colors">
-                Limpiar ({{ selectedDates.length }})
-              </button>
-              <button @click="openSessionForm" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors">
-                Crear Tema
-              </button>
-            </div>
-          </Transition>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-2">
+    <!-- 📅 CALENDARIO -->
+    <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow calendar-container">
+      <!-- Encabezado fijo -->
+      <div class="sticky top-0 z-10 bg-white dark:bg-gray-800 p-2 border-b border-gray-200 dark:border-gray-700">
+        <div class="md:flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">
+              Programador de Sesiones
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Haga clic en los días para seleccionar.
+            </p>
+          </div>
+
+          <!-- 🔵 Botones de acción (limpiar / guardar) -->
+          <div v-if="hasSelection" class="mt-4 md:mt-0 flex gap-2 justify-end">
+            <BaseButton title="Limpiar" variant="secondary" @click="clearSelection" />
+            <BaseButton :title="`Guardar ${selectedDates.length} sesión(es)`" variant="primary"
+              @click="openSessionForm" />
+          </div>
         </div>
       </div>
 
-      <!-- COLUMNA DE TEMAS PROGRAMADOS -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md flex flex-col h-[75vh]">
-        <header class="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <h3 class="text-lg font-bold text-gray-800 dark:text-gray-900">Temas Programados</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Lista de los temas y sus fechas.</p>
-        </header>
-
-        <div class="flex-grow overflow-y-auto">
-          <Table>
-            <THead class="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
-              <Th>Tema</Th>
-              <Th>Fechas</Th>
-              <Th class="text-right">Acciones</Th>
-            </THead>
-            <TBody>
-              <Tr v-if="programacionSesion?.sesiones?.length === 0">
-                <Td colspan="3" class="text-center text-gray-500 py-10">
-                  Aún no hay temas programados.
-                </Td>
-              </Tr>
-              <Tr v-for="bloque in programacionSesion?.sesiones" :key="bloque.id">
-                <Td class="font-semibold">{{ bloque.nombre_sesion }}</Td>
-                <Td class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ bloque.fecha_inicio }} al {{ bloque.fecha_fin }}
-                </Td>
-                <Td class="flex gap-2 justify-end">
-                  <DeleteButton @click="confirmDelete(bloque)" />
-                  <EditButton @click="showSlider(true, bloque)" />
-                </Td>
-              </Tr>
-            </TBody>
-          </Table>
-        </div>
+      <!-- Calendario con scroll -->
+      <div class="calendar-scroll">
+        <BaseCalendar :events="allEvents" :holidays="holidays" @date-click="handleDateClick"
+          @event-click="handleEventClick" :idEntrega="sesionStore?.sesion?.id" />
       </div>
     </div>
 
-    <!-- MODALS Y SLIDERS (NO VISIBLES INICIALMENTE) -->
-    <TomarAsistencia 
-      :show="asist"
-      :grupo-id="id"
-      :sesion-id="sesionStore?.sesion?.id"  
-      @hide="ocultarSliderAsistencia"      
-    />
-        
+    <!-- 📘 BLOQUES DE SESIONES -->
+    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+      <Table>
+        <THead>
+          <Th>Tema</Th>
+          <Th>Fechas</Th>
+          <Th>Acciones</Th>
+        </THead>
+
+        <TBody>
+          <Tr v-if="programacionSesion?.sesiones?.length === 0">
+            <Td colspan="3" class="text-center text-gray-500">
+              Aún no hay bloques programados.
+            </Td>
+          </Tr>
+
+          <Tr v-for="bloque in programacionSesion?.sesiones" :key="bloque.id">
+            <Td class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: bloque.color }"></span>
+              {{ bloque.nombre_sesion }}
+            </Td>
+            <Td class="text-xs">
+              {{ bloque?.fecha_inicio }} - {{ bloque?.fecha_fin }}
+            </Td>
+            <Td class="flex gap-2">
+              <DeleteButton @click="confirmDelete(bloque)" />
+              <EditButton @click="showSlider(true, bloque)" />
+            </Td>
+          </Tr>
+        </TBody>
+      </Table>
+    </div>
+
+    <!-- 🟢 Sliders -->
+    <TomarAsistencia :show="asist" :grupo-id="id" :sesion-id="sesionStore?.sesion?.id" @hide="ocultarSliderAsistencia"
+      @save="clearSelection" />
+
     <SesionSlider :show="slider" :blockToEdit="sliderData ?? null" :idGrupo="id" :sesion="sesionStore?.sesion"
-      @hide="hideSlider" @clear-selection="clearSelection"
+      @hide="hideSlider" @save="handleSaveSesion" @clear-selection="clearSelection"
       :fechas-seleccionadas="datesForSlider" />
   </div>
 </template>
 
-<style>
-/* Estilos para el contenedor del calendario y su cabecera sticky */
-.fc {
+
+<style scoped>
+.calendar-container {
+  /* ajusta según necesidad */
+  max-height: 450px;
+
+}
+
+.calendar-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 450px;
+  /* puedes ajustar según el espacio total */
 }
-.fc-header-toolbar {
-  flex-shrink: 0;
+
+
+/* Encabezado fijo */
+.sticky {
   position: sticky;
   top: 0;
-  background: inherit; /* Hereda el fondo del padre */
-  z-index: 10;
-}
-.fc-view-harness {
-  flex-grow: 1;
-  overflow-y: auto;
-}
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-  transform: translateY(10px);
 }
 </style>

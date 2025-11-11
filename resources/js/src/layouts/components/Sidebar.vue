@@ -26,7 +26,7 @@ const navLinks = [
     { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-grupos", "icono-grupos"]},
     { name: 'Mis Módulos', routeName: 'moduloAsignado', icon: AcademicCapIcon, permissions: ["ver-mis-modulos", "ver-estudiantes-asignados"]},
     { name: 'Comsión', routeName: 'comsion.docente', icon: AcademicCapIcon, permissions: ["ver-comsion-docente"] },
-    { name: 'Mis Sesiones', routeName: 'docente.grupo.sesiones', icon: ClipboardDocumentListIcon, permissions: [] },
+  
 ];
 
 const checkVisibility = (link) => {

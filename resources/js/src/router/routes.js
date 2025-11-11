@@ -335,17 +335,7 @@ export default [
             breadcrumb: [{ text: 'Todas las Notificaciones', to: { name: 'notificaciones.index' } }]
         }
     },
-    {
-        path: '/docente/grupos/:id/sesiones',
-        name: 'docente.grupo.sesiones',
-        component: () => import('../pages/SesionesDocente/GrupoSesiones.vue'),
-        props: true,
-        meta: {
-            layout: 'dashboard',
-            permissions: [],
-            breadcrumb: [{ text: 'Mis Grupos' }, { text: 'Programación de Sesiones' }]
-        }
-    },
+
 
 
 ];

@@ -7,20 +7,20 @@ import esLocale from '@fullcalendar/core/locales/es'
 
 const props = defineProps({
   events: { type: Array, default: () => [] },
-  holidays: { type: Array, default: () => [] },
   selectable: { type: Boolean, default: true },
 })
 
 const emit = defineEmits(['date-click', 'event-click', 'selection-change'])
 
-// 🔹 Fechas seleccionadas internamente
 const selectedDates = ref([])
 
-// 🔹 Opciones base del calendario
 const calendarOptions = ref({
   plugins: [dayGridPlugin, interactionPlugin],
   initialView: 'dayGridMonth',
   locale: esLocale,
+  height: 500,
+  stickyHeaderDates: true, // ✅ hace que “lun, mar, mié…” queden fijos
+  expandRows: true,
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
@@ -29,36 +29,30 @@ const calendarOptions = ref({
   buttonText: {
     today: 'Hoy',
     month: 'Mes',
-    week: 'Semana'
+    week: 'Semana',
   },
 
-  // ✅ Manejamos el click en día
   dateClick: (info) => {
     const day = info.date.getDay()
-    if (day === 0 || day === 6) return // Ignorar fines de semana
+    if (day === 0 || day === 6) return
 
     const dateStr = info.dateStr
     const index = selectedDates.value.findIndex(d => d.start === dateStr)
 
     if (index >= 0) {
-      // Deseleccionar
       selectedDates.value.splice(index, 1)
     } else {
-      // Seleccionar
       selectedDates.value.push({
         id: `select-${dateStr}`,
         start: dateStr,
         allDay: true,
         display: 'background',
-        backgroundColor: 'rgba(37,99,235,0.5)', // azul semitransparente
+        backgroundColor: 'rgba(37,99,235,0.5)',
         borderColor: '#2563eb',
       })
     }
 
-    // 🔹 Mantiene compatibilidad con el padre (botón “Crear sesión”)
     emit('date-click', info)
-
-    // 🔹 Nuevo evento con todas las fechas seleccionadas
     emit('selection-change', selectedDates.value.map(d => d.start))
   },
 
@@ -66,7 +60,6 @@ const calendarOptions = ref({
   events: props.events,
 })
 
-// 🔄 Combinar eventos externos + seleccionados
 watch(
   [() => props.events, selectedDates],
   ([newEvents, selected]) => {
@@ -81,40 +74,30 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="base-calendar">
+  <div class="calendar-container">
     <FullCalendar :options="calendarOptions" />
   </div>
 </template>
 
 <style scoped>
-/* .base-calendar {
-  transform: scale(0.75);
-  transform-origin: top left; 
-  width: 117.6%; 
-} */
+.calendar-container {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
 
-/* ✅ Colores personalizados para sábados y domingos */
+/* Colores de sábado y domingo */
 :deep(.fc-day-sun) {
-  background-color: rgba(255, 99, 99, 0.15) !important; /* rojo claro */
+  background-color: rgba(255, 99, 99, 0.15) !important;
 }
 :deep(.fc-day-sat) {
-  background-color: rgba(72, 187, 120, 0.15) !important; /* verde claro */
-}
-
-/* 🌑 En modo oscuro */
-:deep(.dark .fc-day-sun) {
-  background-color: rgba(239, 68, 68, 0.25) !important;
-}
-:deep(.dark .fc-day-sat) {
-  background-color: rgba(34, 197, 94, 0.25) !important;
+  background-color: rgba(72, 187, 120, 0.15) !important;
 }
 
 /* Día actual */
 :deep(.fc-day-today) {
-  background-color: rgba(252, 153, 4, 0.4) !important;
-}
-:deep(.dark .fc-day-today) {
-  background-color: rgba(56, 191, 51, 0.15) !important;
+  background-color: rgba(252, 153, 4, 0.35) !important;
 }
 
 /* Eventos */

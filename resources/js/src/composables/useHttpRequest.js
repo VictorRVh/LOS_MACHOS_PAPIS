@@ -135,6 +135,21 @@ const useHttpRequest = (path = '') => {
         }
     };
 
+    const patchCustom = async (data, callback = null) => {
+        try {
+            updating.value = true;
+            const response = await axios.patch(path, data);
+            updating.value = false;
+
+            if (typeof callback === 'function') callback(null, response);
+
+            return response.data || null;
+        } catch (error) {
+            updating.value = false;
+            return handleError(error, null, callback);
+        }
+    };
+
     const handleError = (
         error,
         returnValue,
@@ -191,6 +206,8 @@ const useHttpRequest = (path = '') => {
         destroy,
 
         indexWithParams,
+
+        patchCustom
     };
 };
 

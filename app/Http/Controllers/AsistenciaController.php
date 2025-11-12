@@ -178,13 +178,14 @@ class AsistenciaController extends Controller
         ]);
     }
 
-    public function obtenerAsistenciaEstudiantes($idEntrega)
+    public function obtenerAsistenciaEstudiantes($idGrupo)
     {
         $hoy = Carbon::now('America/Lima')->toDateString();
 
         $sesion = DB::table('sesiones as s')
+            ->join('entrega_docente as ed', 'ed.id', '=', 's.id_entrega')
             ->join('calendario_admin as c', 'c.id_sesion', '=', 's.id')
-            ->where('s.id_entrega', $idEntrega)
+            ->where('ed.id_grupo', $idGrupo)
             ->whereDate('c.fecha', '=', $hoy)
             ->select(
                 's.id as id_sesion',
@@ -198,31 +199,22 @@ class AsistenciaController extends Controller
             )
             ->first();
 
-        if (!$sesion) {
-            return response()->json([
-                'message' => 'No se encontro una sesion para la fecha actual.',
-                'fecha_actual' => $hoy,
-                'id_entrega' => $idEntrega
-            ], 404);
-        }
-
-        $grupo = DB::table('entrega_docente')
-            ->where('id', $idEntrega)
-            ->value('id_grupo');
-
-        if (!$grupo) {
-            return response()->json([
-                'message' => 'No se encontró el grupo para esta entrega'
-            ], 404);
-        }
-
         $estudiantes = DB::table('matricula as m')
             ->join('estudiante as e', 'e.id', '=', 'm.id_estudiante')
-            ->leftJoin('asistencia as a', function ($join) use ($sesion) {
-                $join->on('a.id_estudiante', '=', 'm.id_estudiante')
-                    ->where('a.id_calendario', '=', $sesion->id_calendario);
+            ->leftJoin('asistencia as a', function ($join) use ($sesion, $idGrupo) {
+                if ($sesion) {
+                    // Si hay sesión hoy, usar esa
+                    $join->on('a.id_estudiante', '=', 'm.id_estudiante')
+                        ->where('a.id_calendario', '=', $sesion->id_calendario)
+                        ->where('a.id_grupo', '=', $idGrupo);
+                } else {
+                    // Si no hay sesión hoy, traer la última asistencia registrada
+                    $join->on('a.id_estudiante', '=', 'm.id_estudiante')
+                        ->where('a.id_grupo', '=', $idGrupo)
+                        ->whereRaw('a.fecha_actual = (SELECT MAX(fecha_actual) FROM asistencia WHERE id_estudiante = m.id_estudiante AND id_grupo = ?)', [$idGrupo]);
+                }
             })
-            ->where('m.id_grupo', $grupo)
+            ->where('m.id_grupo', $idGrupo)
             ->select(
                 'e.id as id_estudiante',
                 DB::raw("CONCAT(e.apellido_paterno, ' ', e.apellido_materno, ' ', e.nombre) as nombre_completo"),
@@ -230,9 +222,10 @@ class AsistenciaController extends Controller
                 'e.apellido_materno',
                 'e.nombre',
                 'e.nro_documento',
+                'm.matriculado',
                 DB::raw('COALESCE(a.asistencia, 0) as asistencia')
             )
-            ->orderBy('e.apellido_paterno', 'asc')  // 👈 Aquí agregas el orden alfabético
+            ->orderBy('e.apellido_paterno', 'asc')
             ->get()
             ->map(function ($item) {
                 $item->ultima_vez = Asistencia::STATUS[$item->asistencia] ?? 'Desconocido';
@@ -240,30 +233,39 @@ class AsistenciaController extends Controller
                 $totales = DB::table('asistencia')
                     ->where('id_estudiante', $item->id_estudiante)
                     ->selectRaw("
-                SUM(CASE WHEN asistencia = 1 THEN 1 ELSE 0 END) as asistencias,
-                SUM(CASE WHEN asistencia = 2 THEN 1 ELSE 0 END) as faltas,
-                SUM(CASE WHEN asistencia = 3 THEN 1 ELSE 0 END) as tardanzas,
-                SUM(CASE WHEN asistencia = 4 THEN 1 ELSE 0 END) as permisos,
-                SUM(CASE WHEN asistencia = 5 THEN 1 ELSE 0 END) as retirados
-            ")->first();
+                    SUM(CASE WHEN asistencia = 1 THEN 1 ELSE 0 END) as asistencias,
+                    SUM(CASE WHEN asistencia = 2 THEN 1 ELSE 0 END) as faltas,
+                    SUM(CASE WHEN asistencia = 3 THEN 1 ELSE 0 END) as tardanzas,
+                    SUM(CASE WHEN asistencia = 4 THEN 1 ELSE 0 END) as permisos,
+                    SUM(CASE WHEN asistencia = 5 THEN 1 ELSE 0 END) as retirados
+                ")->first();
 
                 $item->totales = $totales;
+
+                $item->estado = $item->matriculado ? 'Matriculado' : 'Retirado';
 
                 return $item;
             });
 
         return response()->json([
-            'id' => $sesion->id_sesion,
             'fecha_actual' => $hoy,
-            'nombre_sesion' => $sesion->nombre_sesion,
-            'descripcion' => $sesion->descripcion,
-            'archivo_sesion' => $sesion->archivo_sesion,
-            'calendario' => [
-                'id' => $sesion->id_calendario,
-                'laborable' => $sesion->laborable,
-                'descripcion_calendario' => $sesion->descripcion_calendario
-            ],
-            'estudiantes' => $estudiantes
+            'hay_sesion' => $sesion ? true : false,
+            'id_calendario' => $sesion->id_calendario ?? null,
+            'sesion' => $sesion ? [
+                'id' => $sesion->id_sesion,
+                'nombre_sesion' => $sesion->nombre_sesion,
+                'descripcion' => $sesion->descripcion,
+                'archivo_sesion' => $sesion->archivo_sesion,
+                'calendario' => [
+                    'id' => $sesion->id_calendario,
+                    'laborable' => $sesion->laborable,
+                    'descripcion_calendario' => $sesion->descripcion_calendario
+                ]
+            ] : null,
+            'estudiantes' => $estudiantes,
+            'message' => $sesion
+                ? 'Sesión encontrada para la fecha actual.'
+                : 'No se encontró una sesión para la fecha actual, mostrando datos del grupo.'
         ]);
     }
 }

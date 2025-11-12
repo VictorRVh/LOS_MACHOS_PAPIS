@@ -66,7 +66,7 @@ for (let i = 1; i <= cantidad; i++) {
   const id = i.toString().padStart(2, "0");
   indexCapacidades.value.push({
     id,
-    name: `Módulo ${id}`,
+    name: `Capacidad terminal ${id}`,
   });
 }
 

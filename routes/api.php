@@ -972,6 +972,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'cambiarGrupo',
     ])->middleware('permission:todo-acceso-matriculas');
 
+    Route::patch('retirarEstudiante', [
+        \App\Http\Controllers\MatriculaController::class,
+        'retirarAlumno',
+    ])->middleware('permission:todo-acceso-matriculas|ver-mis-modulos');
+
 
     // programa por ciclo
 

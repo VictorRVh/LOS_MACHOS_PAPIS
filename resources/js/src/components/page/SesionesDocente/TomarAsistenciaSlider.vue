@@ -10,6 +10,8 @@ import {
 
 import useListaAlumnosAsistenciaStore from "../../../store/Asistencia/UseAsistenciaStore";
 import useHttpRequest from '../../../composables/useHttpRequest'; // solo para guardar
+import Slider from '../../ui/Slider.vue'
+import useMatriculaStore from '../../../store/Matricula/useMatriculaStore';
 
 const props = defineProps({
   show: Boolean,
@@ -20,15 +22,17 @@ const props = defineProps({
 const emit = defineEmits(['hide']);
 
 const listaAlumnoAsistencia = useListaAlumnosAsistenciaStore();
+const matriculaStore = useMatriculaStore();
 
 // Si no está cargado, cárgalo (top-level await en script setup)
 if (!listaAlumnoAsistencia.sesionesPorEntrega?.estudiantes?.length) {
-  await listaAlumnoAsistencia.loadSesionesEntrega(props.sesionId);
+  await listaAlumnoAsistencia.loadSesionesEntrega(props.grupoId);
 }
 
-const { showToast } = useModalToast();
+const { showToast, showConfirmModal } = useModalToast();
 // Solo usamos useHttpRequest para el endpoint que guarda asistencias
 const { saving: isSaving, store: guardarAsistencias } = useHttpRequest('/asistencia');
+const { saving: isSavingRetiro, patchCustom: retirarEsudiante } = useHttpRequest('/retirarEstudiante');
 
 const alumnos = ref([]);
 const sesionInfo = ref(null);
@@ -37,8 +41,12 @@ const observacionGeneral = ref('');
 const isEditing = ref(false);
 const isLoadingData = ref(true);
 
+const showModalRetiro = ref(false)
+const alumnoSeleccionado = ref(null)
+
 const fechaDeHoy = new Date();
 const fechaDeHoyString = fechaDeHoy.toISOString().slice(0, 10);
+const haySesion = ref(false);
 
 const sesionTitulo = computed(() => (sesionInfo.value?.nombre_sesion) || 'Asistencia General del Día');
 
@@ -81,6 +89,8 @@ function mapEstudiantes(apiEstudiantes = []) {
       apellido_materno,
       nombre,
       nro_documento: e.nro_documento || '',
+      matriculado: e.matriculado,
+      retirado: e.estado?.toLowerCase() === 'retirado' || e.matriculado === 0,
       // totales (pueden venir null) -> dejamos 0 como fallback
       asistencias_count: (e.totales && e.totales.asistencias) ?? 0,
       faltas_count: (e.totales && e.totales.faltas) ?? 0,
@@ -114,6 +124,7 @@ const loadData = async () => {
 
     sesionInfo.value = sesion;
     observacionGeneral.value = sesion.descripcion || '';
+    haySesion.value = sesion.hay_sesion;
 
     // mapear estudiantes ya con asistencia incluida
     alumnos.value = mapEstudiantes(sesion.estudiantes);
@@ -142,18 +153,23 @@ watch(() => props.show, (isVisible) => {
 });
 
 const marcarAsistencia = (alumnoId, estadoKey) => {
-  if (asistencias.value[alumnoId] === 'retirado') return;
-  // toggle: si ya está ese estado, lo desmarca
+  const alumno = alumnos.value.find(a => a.id === alumnoId);
+  if (!alumno || alumno.retirado) return;
   asistencias.value[alumnoId] = asistencias.value[alumnoId] === estadoKey ? undefined : estadoKey;
 };
 
 const onSubmit = async () => {
   const payload = {
     id_grupo: props.grupoId,
-    id_calendario: sesionInfo.value?.calendario?.id ?? null, // el id lo obtienes del backend
+    id_calendario: sesionInfo.value?.id_calendario ?? null, // el id lo obtienes del backend
     fecha_actual: fechaDeHoyString,
     observacion: observacionGeneral.value || null,
     estudiantes: alumnos.value.map(alumno => {
+
+      if (alumno.retirado) {
+        return { id_estudiante: alumno.id, asistencia: estadoRetirado.value };
+      }
+
       const estadoKey = asistencias.value[alumno.id] || 'falto';
       const estadoObj = [...estadoAsistencia, estadoRetirado].find(e => e.key === estadoKey) || estadoAsistencia[1]; // fallback a 'falto'
 
@@ -168,17 +184,17 @@ const onSubmit = async () => {
   try {
     const response = await guardarAsistencias(payload);
     if (response) {
-      showToast('Asistencia guardada correctamente ✅', 'success');
+      showToast('Asistencia guardada correctamente', 'success');
       isEditing.value = false;
       // Opcional: recargar el estado de la sesión
-      await listaAlumnoAsistencia.loadSesionesEntrega(props.sesionId);
+      await listaAlumnoAsistencia.loadSesionesEntrega(props.grupoId);
       await loadData();
     } else {
-      showToast('No se pudo guardar la asistencia ❌', 'error');
+      showToast('No se pudo guardar la asistencia.', 'error');
     }
   } catch (error) {
     console.error('Error al guardar asistencias:', error);
-    showToast('Error al guardar asistencias ❌', 'error');
+    showToast('Error al guardar asistencias.', 'error');
   }
 };
 
@@ -187,6 +203,49 @@ const getEstadoSeleccionado = (alumnoId) => {
   const estadoKey = asistencias.value[alumnoId];
   return [...estadoAsistencia, estadoRetirado].find(e => e.key === estadoKey);
 };
+
+const confirmarRetiroAlumno = (alumno, idGrupo) => {
+  showConfirmModal(
+    {
+      title: "Confirmar retiro de alumno",
+      message: `¿Deseas retirar al alumno "${alumno.nombre_completo}" del grupo?`,
+      actionButton: {
+        class: "bg-red-600 hover:bg-red-700",
+        text: "Sí, retirar",
+      },
+      returnButton: {
+        class: "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600",
+        text: "Cancelar",
+      },
+    },
+    async (confirmed) => {
+      if (!confirmed) return;
+
+      try {
+        const response = await retirarEsudiante({
+          id_estudiante: alumno.id,
+          id_grupo: props.grupoId,
+        });
+
+        showToast(
+          response?.message || "Alumno retirado correctamente.",
+          "success"
+        );
+
+        await listaAlumnoAsistencia.loadSesionesEntrega(props.grupoId);
+        await loadData();
+
+      } catch (error) {
+        console.error(error);
+        const msg =
+          error.response?.data?.message ||
+          "Ocurrió un error al intentar retirar al alumno.";
+        showToast(msg, "error");
+      }
+    }
+  );
+};
+
 
 const close = () => emit('hide');
 </script>
@@ -239,6 +298,7 @@ const close = () => emit('hide');
                   <th v-if="!isEditing" class="py-2 px-3 text-center w-24">Asist.</th>
                   <th v-if="!isEditing" class="py-2 px-3 text-center w-24">Faltas</th>
                   <th v-if="!isEditing" class="py-2 px-3 text-center w-24">Tard.</th>
+                  <th v-if="!isEditing" class="py-2 px-3 text-center w-24">¿Retirar?</th>
                   <th v-else class="py-2 px-3 text-center w-64">Marcar Asistencia de Hoy</th>
                 </tr>
               </thead>
@@ -260,17 +320,41 @@ const close = () => emit('hide');
                       alumno.faltas_count || 0 }}</td>
                     <td class="py-2 px-3 text-center font-medium text-gray-600 dark:text-gray-300">{{
                       alumno.tardanzas_count || 0 }}</td>
+                    <td class="py-2 px-3 text-center font-medium text-gray-600 dark:text-gray-300">
+                      <template v-if="alumno.matriculado === 1">
+                        <button @click="confirmarRetiroAlumno(alumno)"
+                          class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded transition duration-200">
+                          Retirar
+                        </button>
+                      </template>
+
+                      <template v-else>
+                        <span class="text-red-600 dark:text-red-400 font-semibold italic select-none">
+                          Retirado por inasistencia
+                        </span>
+                      </template>
+                    </td>
                   </template>
 
                   <td v-else class="py-2 px-3">
                     <div class="flex items-center justify-center gap-1.5 flex-shrink-0">
-                      <template v-if="!getEstadoSeleccionado(alumno.id)">
+
+                      <template v-if="alumno.retirado">
+                        <div
+                          class="px-3 py-1 rounded-full flex items-center gap-2 text-xs font-bold bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed select-none">
+                          <ArrowLeftOnRectangleIcon class="w-4 h-4" />
+                          <span>Retirado</span>
+                        </div>
+                      </template>
+
+                      <template v-else-if="!getEstadoSeleccionado(alumno.id)">
                         <button v-for="estado in estadoAsistencia" :key="estado.key"
                           @click="marcarAsistencia(alumno.id, estado.key)" :class="[estado.color, estado.hover]"
                           class="p-1.5 rounded-full transition-colors duration-200" :title="estado.label">
                           <component :is="estado.icon" class="w-5 h-5" />
                         </button>
                       </template>
+
                       <template v-else>
                         <div class="px-2.5 py-1 rounded-full flex items-center gap-2 text-xs font-bold" :class="{
                           'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400': getEstadoSeleccionado(alumno.id).key === 'asistio',
@@ -294,6 +378,30 @@ const close = () => emit('hide');
                 </tr>
               </tbody>
             </table>
+
+            <!-- MODAL PARA EL SLIDER RETIRO -->
+
+            <Slider :show="showModalRetiro" title="Confirmar retiro" @hide="cerrarModalRetiro">
+              <div class="p-4">
+                <p class="text-gray-700 dark:text-gray-200 text-center">
+                  ¿Estás seguro que deseas retirar al alumno
+                  <span class="font-semibold text-red-600">{{ alumnoSeleccionado?.nombre }}</span>?
+                </p>
+
+                <div class="flex justify-end mt-6 gap-3">
+                  <button @click="cerrarModalRetiro"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
+                    Cancelar
+                  </button>
+                  <button @click="confirmarRetiro"
+                    class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
+                    Confirmar Retiro
+                  </button>
+                </div>
+              </div>
+            </Slider>
+
+
           </main>
 
           <footer v-if="!isLoadingData && alumnos.length > 0"
@@ -307,11 +415,15 @@ const close = () => emit('hide');
             </div>
             <div class="flex justify-end gap-3">
               <Button title="Cancelar" variant="secondary" @click="isEditing ? isEditing = false : close()" />
-              <Button v-if="!isEditing" title="Tomar Asistencia Hoy" @click="isEditing = true">
+              <Button v-if="haySesion && !isEditing" title="Tomar Asistencia Hoy" @click="isEditing = true">
                 <template #icon>
                   <PencilSquareIcon class="w-5 h-5" />
                 </template>
               </Button>
+
+              <p v-else-if="!haySesion" class="text-gray-500 italic pt-2">
+                No hay sesión programada para hoy.
+              </p>
               <Button v-else title="Guardar Asistencias" :loading="isSaving" loading-title="Guardando..."
                 @click="onSubmit">
                 <template #icon>

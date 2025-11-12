@@ -448,4 +448,28 @@ class MatriculaController extends Controller
             'estudiantes' => $estudiantes
         ]);
     }
+
+    public function retirarAlumno(Request $request)
+    {
+        $request->validate([
+            'id_estudiante' => 'required|uuid',
+            'id_grupo' => 'required|uuid',
+        ]);
+
+        $matricula = Matricula::where('id_estudiante', $request->id_estudiante)
+            ->where('id_grupo', $request->id_grupo)
+            ->first();
+
+        if (!$matricula) {
+            return response()->json(['message' => 'Matrícula no encontrada'], 404);
+        }
+
+        $matricula->matriculado = 0;
+        $matricula->save();
+
+        return response()->json([
+            'message' => 'Alumno retirado correctamente',
+            'data' => $matricula,
+        ]);
+    }
 }

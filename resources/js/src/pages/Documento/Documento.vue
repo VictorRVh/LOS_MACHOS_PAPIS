@@ -205,6 +205,21 @@ const createSubGrupos = (prog) => {
 <template>
   <AuthorizationFallback :permissions="['todo-documento-programado', 'ver-documento-programado']">
     <div class="p-4 md:p-6 space-y-6">
+      <!-- Overlay de carga -->
+      <Transition name="fade">
+        <div v-if="updating"
+          class="fixed inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center z-50">
+          <div class="flex flex-col items-center space-y-4">
+            <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            <p class="text-white font-semibold text-lg">Publicando programación...</p>
+          </div>
+        </div>
+      </Transition>
+
       <header class="flex justify-between items-start">
         <div>
           <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">
@@ -270,11 +285,11 @@ const createSubGrupos = (prog) => {
                 <Td class="text-center">
                 <Td class="text-center">
                   <MenuTable :actions="{
-                    view: prog.mostrar !== 0,     
+                    view: prog.mostrar !== 0,
                     edit: true,
-                    custom1: prog.mostrar === 0,    
+                    custom1: prog.mostrar === 0,
                     delete: true
-                  }" :labels="{ custom1: 'Sub Programaciones' }" entity-label="entrega" @view="verDetalleEntrega(prog)"
+                  }" :labels="{ custom1: 'Publicar' }" entity-label="entrega" @view="verDetalleEntrega(prog)"
                     @edit="editProgramacion(prog)" @delete="onDelete(prog)" @custom1="() => createSubGrupos(prog)" />
                 </Td>
 
@@ -288,3 +303,15 @@ const createSubGrupos = (prog) => {
     </div>
   </AuthorizationFallback>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

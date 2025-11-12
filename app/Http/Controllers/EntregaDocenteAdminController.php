@@ -218,7 +218,8 @@ class EntregaDocenteAdminController extends Controller
     {
         $programaciones = EntregaDocente::with([
             'entregaDocenteAdmin:id,nombre_entrega,fecha_inicio,fecha_fin,status',
-            'grupo.carpetaDrive'
+            'grupo.carpetaDrive',
+            'grupo.carpetasEntrega'
         ])
             ->where('id_grupo', $id_grupo)
             ->get();
@@ -230,8 +231,8 @@ class EntregaDocenteAdminController extends Controller
             ], 404);
         }
 
-        // 1️⃣ Carpeta raíz del grupo
-        $driveFolderId = $programaciones->first()->grupo->carpetaDrive->drive_folder_id ?? null;
+        $grupo = $programaciones->first()->grupo;
+        $driveFolderId = $grupo->carpetaDrive->drive_folder_id ?? null;
 
         if (!$driveFolderId) {
             return response()->json([
@@ -239,23 +240,40 @@ class EntregaDocenteAdminController extends Controller
             ], 400);
         }
 
-        // 2️⃣ Obtener subcarpetas dentro del folder raíz
+        // Obtener IDs de carpetas registradas en la BD
+        $carpetasBD = $grupo->carpetasEntrega->pluck('drive_folder_id')->toArray();
+
+        if (empty($carpetasBD)) {
+            return response()->json([
+                'message' => 'No hay carpetas registradas en la base de datos para este grupo.',
+                'total' => 0,
+                'carpeta_raiz' => [
+                    'id' => $driveFolderId,
+                    'nombre' => 'Carpeta raíz del grupo',
+                ],
+                'subcarpetas' => []
+            ]);
+        }
+
         $driveController = new GoogleDriveController();
         $carpetasDrive = $driveController->listFiles($driveFolderId);
 
-        // 3️⃣ Para cada carpeta, buscar si coincide con alguna programación (por tipo_entrega)
+        $carpetasFiltradas = collect($carpetasDrive)->filter(function ($carpeta) use ($carpetasBD) {
+            return in_array($carpeta->id, $carpetasBD);
+        });
+
         $resultado = [];
-        foreach ($carpetasDrive as $carpeta) {
+        foreach ($carpetasFiltradas as $carpeta) {
             if ($carpeta->mimeType !== 'application/vnd.google-apps.folder') {
                 continue; // solo carpetas
             }
 
-            // Buscar programación con tipo_entrega parecido al nombre de la carpeta
+            // Buscar la programación que coincide con el nombre de la carpeta
             $programacion = $programaciones->first(function ($p) use ($carpeta) {
                 return stripos($carpeta->name, $p->entregaDocenteAdmin->nombre_entrega) !== false;
             });
 
-            // Obtener archivos dentro de esa subcarpeta
+            // Obtener archivos dentro de esa carpeta
             $archivos = $driveController->listFiles($carpeta->id);
 
             $resultado[] = [
@@ -267,7 +285,7 @@ class EntregaDocenteAdminController extends Controller
                     'fecha_inicio' => $programacion->entregaDocenteAdmin->fecha_inicio,
                     'fecha_fin' => $programacion->entregaDocenteAdmin->fecha_fin,
                     'nombre_entrega' => $programacion->entregaDocenteAdmin->nombre_entrega,
-                    'tipo_entrega' => $programacion->entregaDocenteAdmin->tipo_entrega,
+                    'tipo_entrega' => $programacion->entregaDocenteAdmin->tipo_entrega ?? null,
                     'status' => $programacion->entregaDocenteAdmin->status,
                 ] : null,
                 'archivos' => collect($archivos)->map(function ($file) {
@@ -288,7 +306,7 @@ class EntregaDocenteAdminController extends Controller
                 'id' => $driveFolderId,
                 'nombre' => 'Carpeta raíz del grupo',
             ],
-            'subcarpetas' => $resultado
+            'subcarpetas' => $resultado,
         ]);
     }
 

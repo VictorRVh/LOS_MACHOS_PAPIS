@@ -73,10 +73,8 @@ watch(
       const eventos = []
 
       nuevasSesiones.forEach((sesion) => {
-        const dias = sesion.calendario_admin
-          .filter(d => d.laborable === 1)
-          .map(d => d.fecha)
-          .sort() // ordenar por fecha
+        const dias = sesion.calendario_admin.map(d => d.fecha).sort()
+
 
         if (dias.length) {
           let inicio = dias[0]
@@ -125,7 +123,7 @@ watch(
       })
 
       allEvents.value = eventos
-      console.log('📅 Eventos agrupados:', allEvents.value)
+     // console.log('📅 Eventos agrupados:', allEvents.value)
     } else {
       allEvents.value = []
     }
@@ -138,22 +136,32 @@ watch(
 const selectedDates = computed(() => selectionEvents.value.map(e => e.start).sort())
 const hasSelection = computed(() => selectedDates.value.length > 0)
 
+watch(
+  selectedDates,
+  (nuevasFechas) => {
+    // 🔄 Mantener sincronizadas las fechas para el slider
+    datesForSlider.value = [...nuevasFechas];
+  },
+  { immediate: true }
+);
+
 
 const handleDateClick = ({ dateStr, date }) => {
   const isWeekend = date.getDay() === 0 || date.getDay() === 6;
   if (isWeekend) return;
 
-  // ⛔ Evitar seleccionar fechas que ya están programadas
+  // ⛔ Evitar seleccionar fechas ya programadas en otros bloques
   const isAlreadyScheduled = allEvents.value.some(event =>
-    dateStr >= event.start && dateStr < event.end
+    dateStr >= event.start && dateStr < event.end &&
+    (!isEditing.value || event.extendedProps.idSesion !== sliderData.value?.id)
   );
 
   if (isAlreadyScheduled) {
-    showToast("Esta fecha ya está programada en una sesión.");
+    showToast("Esta fecha ya está programada en otra sesión.");
     return;
   }
 
-  // ✅ Alternar selección normalmente
+  // ✅ Alternar selección
   const index = selectionEvents.value.findIndex(e => e.start === dateStr);
   if (index >= 0) {
     selectionEvents.value.splice(index, 1);
@@ -165,6 +173,7 @@ const handleDateClick = ({ dateStr, date }) => {
     });
   }
 };
+
 
 
 // 👇 Agrega después de los handlers de selección
@@ -211,6 +220,40 @@ const confirmDelete = (bloque) => {
     }
   )
 }
+const isEditing = ref(false)
+
+// aumentado para edicion 
+const handleEdit = (bloque) => {
+  clearSelection() // limpia selección anterior
+  isEditing.value = true // modo edición
+
+  // ✅ Marcar las fechas del bloque en el calendario
+  const fechas = bloque.calendario_admin.map(d => d.fecha)
+  selectionEvents.value = fechas.map(f => ({
+    start: f,
+    display: 'background',
+    color: 'rgba(51,139,191,0.9)' // amarillo suave
+  }))
+
+  datesForSlider.value = [...fechas] // para el slider
+  // console.log("antes: ",sliderData.value)
+  sliderData.value = bloque // pasamos el bloque al modal
+  // console.log("despues: ",sliderData.value)
+}
+const cancelEdit = () => {
+  isEditing.value = false
+  clearSelection()
+  sliderData.value = null
+}
+
+const updateSession = () => {
+  if (!datesForSlider.value.length) return
+ // console.log("antes: ",sliderData.value)
+  showSlider(true, sliderData.value) // abre el modal con datos y fechas
+ // console.log("despues: ",sliderData.value)
+}
+
+
 
 // 🔸 estado de sesión
 const estadoTexto = computed(() => {
@@ -283,17 +326,25 @@ const estadoTexto = computed(() => {
           </div>
 
           <!-- 🔵 Botones de acción (limpiar / guardar) -->
-          <div v-if="hasSelection" class="mt-4 md:mt-0 flex gap-2 justify-end">
-            <BaseButton title="Limpiar" variant="secondary" @click="clearSelection" />
-            <BaseButton :title="`Guardar ${selectedDates.length} sesión(es)`" variant="primary"
-              @click="openSessionForm" />
+          <div class="mt-4 md:mt-0 flex gap-2 justify-end">
+            <template v-if="isEditing">
+              <BaseButton title="Cancelar" variant="secondary" @click="cancelEdit" />
+              <BaseButton title="`Actualizar ${selectedDates.length} sesines`" variant="primary" @click="updateSession" />
+            </template>
+
+            <template v-else-if="hasSelection">
+              <BaseButton title="Limpiar" variant="secondary" @click="clearSelection" />
+              <BaseButton :title="`Guardar ${selectedDates.length} sesión(es)`" variant="primary"
+                @click="openSessionForm" />
+            </template>
           </div>
+
         </div>
       </div>
 
       <!-- Calendario con scroll -->
       <div class="calendar-scroll">
-        <BaseCalendar :events="allEvents" :holidays="holidays" @date-click="handleDateClick"
+        <BaseCalendar :events="[...allEvents, ...selectionEvents]" :holidays="holidays" @date-click="handleDateClick"
           @event-click="handleEventClick" :idEntrega="sesionStore?.sesion?.id" />
       </div>
     </div>
@@ -324,7 +375,8 @@ const estadoTexto = computed(() => {
             </Td>
             <Td class="flex gap-2">
               <DeleteButton @click="confirmDelete(bloque)" />
-              <EditButton @click="showSlider(true, bloque)" />
+              <EditButton @click="handleEdit(bloque)" />
+
             </Td>
           </Tr>
         </TBody>
@@ -355,7 +407,6 @@ const estadoTexto = computed(() => {
   height: 450px;
   /* puedes ajustar según el espacio total */
 }
-
 
 /* Encabezado fijo */
 .sticky {

@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         // $schedule->command('entregas:actualizar-estado')->daily();
         $schedule->command('entregas:actualizar-estado')->everyMinute();
+        $schedule->command('notas:actualizar-estado')->everyMinute();
     }
 
     /**
@@ -27,6 +28,6 @@ class Kernel extends ConsoleKernel
         require base_path('routes/console.php');
     }
     protected $commands = [
-    \App\Console\Commands\SyncGoogleCalendar::class,
+        \App\Console\Commands\SyncGoogleCalendar::class,
     ];
 }

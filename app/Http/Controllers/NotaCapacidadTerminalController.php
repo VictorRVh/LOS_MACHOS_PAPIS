@@ -8,6 +8,8 @@ use App\Models\Matricula;
 use App\Models\NotaCapacidadTerminal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
 
 class NotaCapacidadTerminalController extends Controller
 {
@@ -126,32 +128,58 @@ class NotaCapacidadTerminalController extends Controller
             'notas.*.nota' => 'required|numeric|min:0|max:20',
         ]);
 
+        $capacidad = CapacidadTerminal::find($request->id_capacidad_terminal);
+
+        if (!$capacidad) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Capacidad terminal no encontrada',
+            ], 404);
+        }
+
+        if (!$capacidad->puedeSubirNotas()) {
+            return response()->json([
+                'success' => false,
+                'message' => $capacidad->mensaje_subida_notas,
+                'estado' => $capacidad->status,
+                'fecha_limite' => $capacidad->fecha_limite_subida->format('Y-m-d H:i:s'),
+            ], 403);
+        }
+
         try {
             DB::beginTransaction();
 
-            $count = 0; 
+            $datosInsert = [];
+            $ahora = now();
 
             foreach ($request->notas as $nota) {
-                NotaCapacidadTerminal::create([ // USAR INSERT EN CASO HAYA UNA INSERCION DE VARIOS DATOS
+                $datosInsert[] = [
+                    'id' => (string) Str::uuid(),
                     'nota_capacidad' => $nota['nota'],
                     'id_grupo' => $request->id_grupo,
                     'id_capacidad' => $request->id_capacidad_terminal,
                     'id_estudiante' => $nota['id_estudiante'],
-                ]);
-
-                $count++;
+                    'created_at' => $ahora,
+                    'updated_at' => $ahora,
+                ];
             }
+
+            // Inserción masiva (más eficiente)
+            NotaCapacidadTerminal::insert($datosInsert);
 
             DB::commit();
 
             return response()->json([
+                'success' => true,
                 'message' => 'Notas registradas correctamente',
-                'count' => $count,
+                'count' => count($datosInsert),
+                'fecha_limite' => $capacidad->fecha_limite_subida->format('d/m/Y H:i'),
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
+                'success' => false,
                 'message' => 'Error al registrar las notas',
                 'error' => $e->getMessage(),
             ], 500);
@@ -160,24 +188,70 @@ class NotaCapacidadTerminalController extends Controller
 
 
     // PUT/PATCH /api/nota-capacidad-terminal/{id}
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $nota = NotaCapacidadTerminal::find($id);
-
-        if (!$nota) {
-            return response()->json(['message' => 'Nota no encontrada'], 404);
-        }
-
         $request->validate([
-            'nota_capacidad' => 'sometimes|numeric|min:0|max:20',
-            'id_grupo' => 'sometimes|exists:grupo,id',
-            'id_capacidad' => 'sometimes|exists:capacidad_terminal,id',
-            'id_estudiante' => 'sometimes|exists:estudiante,id',
+            'id_grupo' => 'required|exists:grupo,id',
+            'id_capacidad_terminal' => 'required|exists:capacidad_terminal,id',
+            'notas' => 'required|array',
+            'notas.*.id_estudiante' => 'required|exists:estudiante,id',
+            'notas.*.nota' => 'required|numeric|min:0|max:20',
         ]);
 
-        $nota->update($request->all());
+        // Validar si se pueden subir notas
+        $capacidad = CapacidadTerminal::find($request->id_capacidad_terminal);
 
-        return response()->json($nota);
+        if (!$capacidad || !$capacidad->puedeSubirNotas()) {
+            return response()->json([
+                'success' => false,
+                'message' => $capacidad ? $capacidad->mensaje_subida_notas : 'Capacidad no encontrada',
+            ], 403);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $actualizadas = 0;
+            $creadas = 0;
+
+            foreach ($request->notas as $nota) {
+                $notaExistente = NotaCapacidadTerminal::where('id_capacidad', $request->id_capacidad_terminal)
+                    ->where('id_estudiante', $nota['id_estudiante'])
+                    ->where('id_grupo', $request->id_grupo)
+                    ->first();
+
+                if ($notaExistente) {
+                    $notaExistente->update(['nota_capacidad' => $nota['nota']]);
+                    $actualizadas++;
+                } else {
+                    NotaCapacidadTerminal::create([
+                        'id' => (string) Str::uuid(),
+                        'nota_capacidad' => $nota['nota'],
+                        'id_grupo' => $request->id_grupo,
+                        'id_capacidad' => $request->id_capacidad_terminal,
+                        'id_estudiante' => $nota['id_estudiante'],
+                    ]);
+                    $creadas++;
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notas procesadas correctamente',
+                'actualizadas' => $actualizadas,
+                'creadas' => $creadas,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar las notas',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     // DELETE /api/nota-capacidad-terminal/{id}
@@ -204,5 +278,34 @@ class NotaCapacidadTerminalController extends Controller
             ->makeHidden(['pivot']);
 
         return response()->json($alumnos);
+    }
+
+    public function obtenerInfoCapacidad($id)
+    {
+        $capacidad = CapacidadTerminal::with('grupo')->find($id);
+
+        if (!$capacidad) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Capacidad no encontrada',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $capacidad->id,
+                'numero_capacidad' => $capacidad->numero_capacidad,
+                'nombre_capacidad' => $capacidad->nombre_capacidad,
+                'fecha_inicio' => $capacidad->fecha_inicio,
+                'fecha_fin' => $capacidad->fecha_fin,
+                'fecha_limite_subida' => $capacidad->fecha_limite_subida->format('Y-m-d H:i:s'),
+                'puede_subir_notas' => $capacidad->puedeSubirNotas(),
+                'status' => $capacidad->status,
+                'status_texto' => $capacidad->status_texto,
+                'mensaje' => $capacidad->mensaje_subida_notas,
+                'grupo' => $capacidad->grupo,
+            ],
+        ]);
     }
 }

@@ -25,11 +25,12 @@ import useCapacidadTerminalStore from "../../../store/Estudiante/UseEstudianteCa
 const props = defineProps({
   show: { type: Boolean, default: false },
   idgroup: { type: String, required: true },
-  idCapacidadNote: { type: String, required: true ,default:""},
+  idCapacidadNote: { type: String, required: true, default: "" },
+  estadoCapacidad: { type: Object, default: null },
 });
 
 const emit = defineEmits(["hide"]);
-console.log("capaicdad: ",props.idCapacidadNote)
+console.log("capaicdad: ", props.idCapacidadNote)
 
 const router = useRouter();
 const { store: saveNotas, saving } = useHttpRequest("nota_capacidad_terminal");
@@ -39,6 +40,34 @@ const estudianteNotasStore = useStudentsNotasStore();
 const capacidadTerminal = useCapacidadTerminalStore();
 
 const listNotes = ref([]);
+
+const puedeGuardarNotas = computed(() => {
+  return props.estadoCapacidad?.puede_subir_notas ?? false;
+});
+
+const mensajeAdvertencia = computed(() => {
+  if (!props.estadoCapacidad) return null;
+
+  if (!props.estadoCapacidad.puede_subir_notas) {
+    return {
+      tipo: 'error',
+      texto: props.estadoCapacidad.mensaje
+    };
+  }
+
+  const fechaLimite = new Date(props.estadoCapacidad.fecha_limite_subida);
+  const ahora = new Date();
+  const horasRestantes = (fechaLimite - ahora) / (1000 * 60 * 60);
+
+  if (horasRestantes > 0 && horasRestantes <= 24) {
+    return {
+      tipo: 'warning',
+      texto: `Quedan menos de ${Math.floor(horasRestantes)} horas para el cierre de subida de notas.`
+    };
+  }
+
+  return null;
+});
 
 const initialNotesData = () => {
   return userStore.alumnosNotas.map((est) => ({
@@ -95,6 +124,14 @@ const onNotaInput = (event, idx) => {
 const onSubmit = async () => {
   if (saving.value) return;
 
+  if (!puedeGuardarNotas.value) {
+    showToast(
+      props.estadoCapacidad?.mensaje || "No puede subir notas en este momento.",
+      "error"
+    );
+    return;
+  }
+
   if (!validateNotes()) return;
 
   const payload = {
@@ -108,22 +145,56 @@ const onSubmit = async () => {
 
   try {
     const response = await saveNotas(payload);
-    if (response?.message === "Notas registradas correctamente") {
+    if (response?.success === false) {
+      showToast(response.message || "Error al guardar notas.", "error");
+
+      // Si el error es por fecha, cerrar el slider
+      if (response.estado !== undefined && response.estado !== 1) {
+        setTimeout(() => {
+          emit("hide");
+        }, 2000);
+      }
+      return;
+    }
+
+    if (response?.message === "Notas registradas correctamente" || response?.success === true) {
       // Recargar datos del store
-      estudianteNotasStore.loadEstudiantes(props.idgroup);
-      capacidadTerminal.loadCapacidadTerminal(props.idgroup);
+      await estudianteNotasStore.loadEstudiantes(props.idgroup);
+      await capacidadTerminal.loadCapacidadTerminal(props.idgroup);
 
       showToast("Notas guardadas exitosamente.", "success");
-      resetForm(); // limpiar campos
-      emit("hide"); // cerrar formulario
+      resetForm();
+      emit("hide");
     } else {
       throw new Error("Error al guardar");
     }
   } catch (error) {
-    console.error("Error al enviar las notas:", error);
-    showToast("Error al guardar notas. Inténtalo de nuevo.", "error");
+    if (error.response?.status === 403) {
+      const errorData = error.response.data;
+      showToast(errorData.message || "No tiene permiso para subir notas.", "error");
+
+      // Cerrar slider después de mostrar error
+      setTimeout(() => {
+        emit("hide");
+      }, 2000);
+    } else {
+      showToast("Error al guardar notas. Inténtalo de nuevo.", "error");
+    }
   }
 };
+
+const fechaLimiteFormateada = computed(() => {
+  if (!props.estadoCapacidad?.fecha_limite_subida) return '';
+
+  const fecha = new Date(props.estadoCapacidad.fecha_limite_subida);
+  return fecha.toLocaleString('es-PE', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+});
 </script>
 
 <template>
@@ -131,9 +202,39 @@ const onSubmit = async () => {
     :permissions="['todo-acceso-capacidad-terminal-notas-docente', 'editar-capacidad-terminal-notas-docente']">
     <div v-if="show" class="w-full space-y-4 py-6">
       <!-- Header -->
-      <header class="flex justify-between">
-        <h2 class="text-black font-bold text-2xl">Asignar Notas - Capacidad Terminal</h2>
+      <header class="flex justify-between items-start">
+        <div>
+          <h2 class="text-black font-bold text-2xl">Asignar Notas - Capacidad Terminal</h2>
+          <!-- ✅ NUEVO: Mostrar información de estado -->
+          <p v-if="estadoCapacidad" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Estado: <span :class="{
+              'text-green-600 font-semibold': estadoCapacidad.status === 1,
+              'text-yellow-600 font-semibold': estadoCapacidad.status === 0,
+              'text-red-600 font-semibold': estadoCapacidad.status === 4,
+            }">
+              {{ estadoCapacidad.status_texto }}
+            </span>
+            <span v-if="puedeGuardarNotas" class="ml-2">
+              | Fecha límite: {{ fechaLimiteFormateada }}
+            </span>
+          </p>
+        </div>
       </header>
+
+      <!-- ✅ NUEVO: Alert de advertencia/error -->
+      <div v-if="mensajeAdvertencia" class="p-4 rounded-lg border" :class="{
+        'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20': mensajeAdvertencia.tipo === 'warning',
+        'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20': mensajeAdvertencia.tipo === 'error',
+      }">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clip-rule="evenodd" />
+          </svg>
+          <p class="text-sm font-medium">{{ mensajeAdvertencia.texto }}</p>
+        </div>
+      </div>
 
       <!-- Tabla de Estudiantes -->
       <section class="w-full">
@@ -149,8 +250,9 @@ const onSubmit = async () => {
               <Td>{{ index + 1 }}</Td>
               <Td>{{ user.fullName }}</Td>
               <Td class="w-[110px]">
-                <CustomInput v-model="user.nota" type="text" maxlength="2" :input-class="[
+                <CustomInput v-model="user.nota" type="text" maxlength="4" :disabled="!puedeGuardarNotas" :input-class="[
                   'text-center',
+                  !puedeGuardarNotas && 'bg-gray-100 cursor-not-allowed',
                   user.nota === null || user.nota === ''
                     ? 'text-gray-500'
                     : parseFloat(user.nota) <= 10
@@ -163,10 +265,19 @@ const onSubmit = async () => {
         </Table>
 
         <!-- Botón Guardar -->
-        <div class="flex justify-end w-[180px] mt-4">
-          <Button title="Guardar" :loading-title="saving ? 'Guardando...' : 'Crear...'" :loading="saving"
-            :disabled="saving" class="!w-full" @click="onSubmit" />
+        <div class="flex justify-end gap-4 mt-4">
+          <Button title="Cancelar" variant="secondary" @click="emit('hide')" />
+          <Button title="Guardar" :loading-title="saving ? 'Guardando...' : 'Guardar'" :loading="saving"
+            :disabled="saving || !puedeGuardarNotas" :class="{
+              'opacity-50 cursor-not-allowed': !puedeGuardarNotas,
+              '!w-[180px]': true
+            }" @click="onSubmit" />
         </div>
+
+        <!-- ✅ NUEVO: Texto informativo debajo del botón -->
+        <p v-if="!puedeGuardarNotas" class="text-sm text-red-600 dark:text-red-400 text-right mt-2">
+          No puede guardar notas en este momento
+        </p>
       </section>
     </div>
   </AuthorizationFallback>

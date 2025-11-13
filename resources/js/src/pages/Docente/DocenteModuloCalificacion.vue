@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed,watch } from "vue";
 import { storeToRefs } from "pinia";
 
 import SearchBar from "../../components/head_table/headSearch.vue";
@@ -15,10 +15,11 @@ import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 import NotasEstudianteSlider from "../../components/page/CapacidadesTerminales/NotasCapacidadTerminalSlider.vue";
 
 import useStudentsStore from "../../store/Estudiante/UseEstudianteGrupoStore";
-import useCapacidadTerminalStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
+import useEstudianteCapacidadTerminalStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
 import useTableData from "../../composables/tabla/useTableData";
+import useCapacidadTerminalStore from "../../store/CapacidadTerminal/UseCapacidadTerminalStore";
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -26,12 +27,14 @@ const props = defineProps({
 
 // --- Stores ---
 const userStore = useStudentsStore();
-const capacidadStore = useCapacidadTerminalStore();
+const capacidadStore = useEstudianteCapacidadTerminalStore();
+const capacidadTerminalStore = useCapacidadTerminalStore();
 const { showToast } = useModalToast();
 const { slider, showSlider, hideSlider } = useSlider("capacidad-terminal-notas");
 
 // --- Data ---
 const capacidadSeleccionada = ref(null);
+const estadoCapacidad = ref(null);
 
 // --- Carga inicial ---
 if (!userStore.estudiantes?.length) await userStore.loadEstudiantes(props.id);
@@ -41,6 +44,18 @@ if (!capacidadStore?.capacidadTerminal?.capacidades?.length)
 // --- Reactividad ---
 const { estudiantes } = storeToRefs(userStore);
 const { capacidadTerminal } = storeToRefs(capacidadStore);
+
+watch(capacidadSeleccionada, async (nuevaCapacidad) => {
+  console.log('capacidad', capacidadSeleccionada)
+  if (nuevaCapacidad) {
+    try {
+      await capacidadTerminalStore.verificarEstadoCapacidad(nuevaCapacidad);
+      estadoCapacidad.value = capacidadTerminalStore.estadoCapacidad
+    } catch (error) {
+      console.error('Error al verificar capacidad:', error);
+    }
+  }
+});
 
 // --- Cantidad de capacidades ---
 const lengthUnit = computed(
@@ -120,32 +135,70 @@ const getResumenNotas = (est) => {
 };
 
 // --- Slider ---
-const verNotasUnidad = () => {
+const verNotasUnidad = async () => {
   if (!capacidadSeleccionada.value) {
     showToast("Selecciona una capacidad terminal primero.", "warning");
     return;
   }
+
+  // Verificar estado actualizado
+  if (capacidadTerminalStore.capacidadTerminalInfoLoading) {
+    showToast("Verificando estado de la capacidad...", "info");
+    return;
+  }
+
+  // Validar si puede subir notas
+  if (!capacidadTerminalStore.puedeSubirNotas()) {
+    showToast(capacidadTerminalStore.getMensajeEstado(), "warning");
+    return;
+  }
+
+  // Mostrar fecha límite
+  const fechaLimite = capacidadTerminalStore.getFechaLimite();
+  if (fechaLimite) {
+    const fecha = new Date(fechaLimite);
+    const fechaFormateada = fecha.toLocaleString('es-PE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    showToast(`Puede subir notas hasta: ${fechaFormateada}`, "info", 5000);
+  }
+
   showSlider(true, {
     capacidad: capacidadSeleccionada.value,
     idGroup: props.id,
     idType: "capacidad",
+    estadoCapacidad: estadoCapacidad.value, // ✅ Pasar estado al slider
   });
 };
 
 const onHideSlider = async () => {
   hideSlider();
   capacidadSeleccionada.value = null;
+  estadoCapacidad.value = null;
   await userStore.loadEstudiantes(props.id);
 };
+
+const getEstadoCapacidadClass = computed(() => {
+  if (!estadoCapacidad.value) return '';
+
+  const status = estadoCapacidad.value.status;
+  if (status === 1) return 'border-green-500 bg-green-50 dark:bg-green-900/20';
+  if (status === 0) return 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20';
+  if (status === 4) return 'border-red-500 bg-red-50 dark:bg-red-900/20';
+  return '';
+});
+
 </script>
 
 <template>
-  <AuthorizationFallback
-    :permissions="[
-      'todo-acceso-capacidad-terminal-notas-docente',
-      'ver-capacidad-terminal-notas-docente',
-    ]"
-  >
+  <AuthorizationFallback :permissions="[
+    'todo-acceso-capacidad-terminal-notas-docente',
+    'ver-capacidad-terminal-notas-docente',
+  ]">
     <div v-if="!slider" class="space-y-4">
       <!-- Cabecera -->
       <div class="flex justify-between items-center">
@@ -156,28 +209,51 @@ const onHideSlider = async () => {
 
       <!-- Filtros -->
       <div class="flex justify-between items-center gap-4">
-        <BaseSelectGrupo
-          v-model="capacidadSeleccionada"
-          :options="opcionesCapacidades"
-          label="nombre_capacidad"
-          placeholder="Seleccione una capacidad terminal"
-          class="w-2/5"
-        />
-        <BaseButton :title="'Asignar Nota'" @click="verNotasUnidad" />
-        <SearchBar
-          class="ml-auto"
-          :totalResultados="estudiantesOrdenados.length"
-          @search="filtrarEstudiantes"
-        />
+        <div class="w-2/5 relative">
+          <BaseSelectGrupo v-model="capacidadSeleccionada" :options="opcionesCapacidades" label="nombre_capacidad"
+            placeholder="Seleccione una capacidad terminal"
+            :class="['transition-all duration-200', getEstadoCapacidadClass]" />
+
+          <!-- ✅ NUEVO: Indicador de estado -->
+          <div v-if="estadoCapacidad && capacidadSeleccionada" class="mt-1 text-xs flex items-center gap-2">
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" :class="{
+              'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': estadoCapacidad.status === 1,
+              'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': estadoCapacidad.status === 0,
+              'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': estadoCapacidad.status === 4,
+            }">
+              {{ estadoCapacidad.status_texto }}
+            </span>
+            <span v-if="estadoCapacidad.puede_subir_notas" class="text-gray-600 dark:text-gray-400">
+              Fecha límite: {{ new Date(estadoCapacidad.fecha_limite_subida).toLocaleDateString('es-PE') }}
+            </span>
+          </div>
+        </div>
+
+        <BaseButton :title="'Asignar Nota'" @click="verNotasUnidad"
+          :disabled="!capacidadSeleccionada || capacidadTerminalStore.capacidadTerminalInfoLoading || !capacidadTerminalStore.puedeSubirNotas()"
+          :class="{ 'opacity-50 cursor-not-allowed': !capacidadSeleccionada || !capacidadTerminalStore.puedeSubirNotas() }" />
+
+        <SearchBar class="ml-auto" :totalResultados="estudiantesOrdenados.length" @search="filtrarEstudiantes" />
+      </div>
+
+      <!-- ✅ NUEVO: Alert de estado -->
+      <div v-if="capacidadSeleccionada && estadoCapacidad && !estadoCapacidad.puede_subir_notas"
+        class="p-4 rounded-lg border" :class="{
+          'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200': estadoCapacidad.status === 0,
+          'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-200': estadoCapacidad.status === 4,
+        }">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clip-rule="evenodd" />
+          </svg>
+          <p class="text-sm font-medium">{{ estadoCapacidad.mensaje }}</p>
+        </div>
       </div>
 
       <!-- Tabla -->
-      <Table
-        :paginacion="true"
-        :current-page="pagina"
-        :total-pages="totalPaginas"
-        @changePage="pagina = $event"
-      >
+      <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
         <THead>
           <Th>#</Th>
           <Th>Apellidos y Nombres</Th>
@@ -193,12 +269,8 @@ const onHideSlider = async () => {
             <Td class="font-medium whitespace-nowrap">{{ est.apellidos_nombres }}</Td>
 
             <!-- Notas -->
-            <Td
-              v-for="(cap, i) in est.capacidades"
-              :key="i"
-              class="text-center"
-              :class="getNotaClass(cap.nota_capacidad)"
-            >
+            <Td v-for="(cap, i) in est.capacidades" :key="i" class="text-center"
+              :class="getNotaClass(cap.nota_capacidad)">
               {{ cap.nota_capacidad ?? "--" }}
             </Td>
 
@@ -218,14 +290,8 @@ const onHideSlider = async () => {
     </div>
 
     <!-- Slider -->
-    <NotasEstudianteSlider
-      v-if="slider"
-      :show="slider"
-      :idgroup="props.id"
-      :id-capacidad-note="capacidadSeleccionada"
-      :idType="'capacidad'"
-      @hide="onHideSlider"
-    />
+    <NotasEstudianteSlider v-if="slider" :show="slider" :idgroup="props.id" :id-capacidad-note="capacidadSeleccionada"
+      :idType="'capacidad'" :estado-capacidad="estadoCapacidad" @hide="onHideSlider" />
   </AuthorizationFallback>
 </template>
 

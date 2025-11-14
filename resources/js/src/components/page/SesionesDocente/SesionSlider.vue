@@ -39,11 +39,12 @@ const programacionSesion = useProgramacionStore();
 // Formulario y errores
 const initialForm = () => ({
   nombre_sesion: "",
-  id_capacidad: "",
-  id_entrega: props.sesion?.id || "",
   descripcion: "",
+  id_capacidad: "",
+  id_entrega: "",
   archivo_sesion: null,
 });
+
 
 if (!capacidadStore.capacidadTerminal?.capacidades?.length) {
   await capacidadStore.loadCapacidadTerminal(props.idGrupo)
@@ -56,19 +57,27 @@ const inputFile = ref(null);
 watch(
   () => props.show,
   (isVisible) => {
-    if (isVisible) {
-      form.value = isEditing.value
-        ? { ...initialForm(), ...props.blockToEdit }
-        : initialForm();
+    if (!isVisible) return;
 
-      if (!Array.isArray(form.value.calendario_admin)) {
-        form.value.calendario_admin = [];
-      }
+    if (isEditing.value) {
+      const s = props.blockToEdit;
 
-      formErrors.value = {};
+      form.value = {
+        nombre_sesion: s.nombre_sesion ?? "",
+        descripcion: s.descripcion ?? "",
+        id_capacidad: s.id_capacidad ?? "",
+        id_entrega: s.id_entrega ?? props.sesion?.id ?? "",
+        archivo_sesion: null,
+      };
+
+    } else {
+      form.value = initialForm();
     }
+
+    formErrors.value = {};
   }
 );
+
 
 const schema = yup.object({
   nombre_sesion: yup
@@ -87,46 +96,44 @@ const onSubmit = async () => {
 
   formErrors.value = {};
 
+  // Validación Yup
   const { validated, errors } = await runYupValidation(schema, form.value);
   if (!validated) {
     formErrors.value = errors;
     return;
   }
 
+  // Armado del FormData
   const formData = new FormData();
   formData.append("nombre_sesion", form.value.nombre_sesion);
   formData.append("descripcion", form.value.descripcion || "");
   formData.append("id_capacidad", form.value.id_capacidad);
   formData.append("id_entrega", form.value.id_entrega);
 
-  // ✅ Enviar array correctamente
+  // Fechas
   props.fechasSeleccionadas.forEach((fecha, index) => {
     formData.append(`fechas[${index}]`, fecha);
   });
 
+  // Archivo
   if (form.value.archivo_sesion) {
     formData.append("archivo_sesion", form.value.archivo_sesion);
   }
 
+  // Request
   const response = isEditing.value
     ? await updateSesion(props.blockToEdit.id, formData)
     : await createSesion(formData);
 
-  console.log("response: ", response);
-
   if (response?.sesion?.id) {
     closeAndReset();
     await programacionSesion.loadSesiones(props.sesion?.id);
-    showToast(
-      `Sesión ${isEditing.value ? "actualizada" : "creada"} correctamente.`
-    );
+    showToast(`Sesión ${isEditing.value ? "actualizada" : "creada"} correctamente.`);
     emit("save", response);
-
-    // 🔄 Limpiar selección visual en calendario desde aquí con un evento emitido:
-    emit('clear-selection');
+    emit("clear-selection"); // limpia el calendario
   }
-
 };
+
 
 // Reset general del modal
 const closeAndReset = () => {

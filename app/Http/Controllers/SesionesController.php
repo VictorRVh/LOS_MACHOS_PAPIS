@@ -151,66 +151,64 @@ class SesionesController extends Controller
 
     public function update(Request $request, $id)
     {
-         return $request->all();
 
-        // try {
-        //     // INICIAR TRANSACCIÓN
-        //     DB::beginTransaction();
+        try {
+            // INICIAR TRANSACCIÓN
+            DB::beginTransaction();
 
-        //     $sesion = Sesiones::findOrFail($id);
+            $sesion = Sesiones::findOrFail($id);
 
-        //     // VALIDACIÓN
-        //     $request->validate([
-        //         'nombre_sesion' => 'required|string|max:255',
-        //         'descripcion' => 'nullable|string',
-        //         'fechas' => 'required|array|min:1',
-        //         'fechas.*' => 'date',
-        //     ]);
+            // VALIDACIÓN
+            $request->validate([
+                'nombre_sesion' => 'sometimes|string|max:255',
+                'descripcion' => 'nullable|string',
+                'fechas' => 'required|array|min:1',
+                'fechas.*' => 'date',
+            ]);
 
-        //     // ORDENAR FECHAS
-        //     $fechas = collect($request->fechas)->sort()->values();
-        //     $fecha_inicio = $fechas->first();
-        //     $fecha_fin = $fechas->last();
+            // ORDENAR FECHAS
+            $fechas = collect($request->fechas)->sort()->values();
+            $fecha_inicio = $fechas->first();
+            $fecha_fin = $fechas->last();
 
-        //     // ACTUALIZAR SESIÓN
-        //     $sesion->update([
-        //         'nombre_sesion' => $request->nombre_sesion,
-        //         'descripcion' => $request->descripcion,
-        //         'fecha_inicio' => $fecha_inicio,
-        //         'fecha_fin' => $fecha_fin,
-        //     ]);
+            // ACTUALIZAR SESIÓN
+            $sesion->update([
+                'nombre_sesion' => $request->nombre_sesion,
+                'descripcion' => $request->descripcion,
+                'fecha_inicio' => $fecha_inicio,
+                'fecha_fin' => $fecha_fin,
+            ]);
 
-        //     // BORRAR FECHAS ANTERIORES
-        //     CalendarioAdmin::where('id_sesion', $sesion->id)->delete();
+            // BORRAR FECHAS ANTERIORES
+            CalendarioAdmin::where('id_sesion', $sesion->id)->delete();
 
-        //     // INSERTAR NUEVAS FECHAS
-        //     foreach ($fechas as $fecha) {
-        //         CalendarioAdmin::create([
-        //             'id_sesion' => $sesion->id,
-        //             'fecha' => $fecha,
-        //             'laborable' => 0,
-        //         ]);
-        //     }
+            // INSERTAR NUEVAS FECHAS
+            foreach ($fechas as $fecha) {
+                CalendarioAdmin::create([
+                    'id_sesion' => $sesion->id,
+                    'fecha' => $fecha,
+                    'laborable' => 0,
+                ]);
+            }
 
-        //     // TODO CORRECTO → CONFIRMAR
-        //     DB::commit();
+            // TODO CORRECTO → CONFIRMAR
+            DB::commit();
 
-        //     return response()->json([
-        //         'message' => 'Sesión actualizada correctamente',
-        //         'sesion' => $sesion,
-        //     ], 200);
+            return response()->json([
+                'message' => 'Sesión actualizada correctamente',
+                'sesion' => $sesion,
+            ], 200);
+        } catch (\Throwable $e) {
 
-        // } catch (\Throwable $e) {
-
-        //     // SI ALGO FALLA → ROLLBACK
-        //     DB::rollBack();
+            // SI ALGO FALLA → ROLLBACK
+            DB::rollBack();
 
 
-        //     return response()->json([
-        //         'message' => 'Error al actualizar la sesión',
-        //         'error' => $e->getMessage(), // puedes ocultarlo en producción si deseas
-        //     ], 500);
-        // }
+            return response()->json([
+                'message' => 'Error al actualizar la sesión',
+                'error' => $e->getMessage(), // puedes ocultarlo en producción si deseas
+            ], 500);
+        }
     }
 
 

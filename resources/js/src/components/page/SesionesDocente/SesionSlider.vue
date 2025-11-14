@@ -29,6 +29,7 @@ const { showToast } = useModalToast();
 const {
   store: createSesion,
   update: updateSesion,
+  updateFormData: updateSesionFormData,
   saving,
   updating,
 } = useHttpRequest("/programacion_sesion_docente");
@@ -120,9 +121,11 @@ const onSubmit = async () => {
     formData.append("archivo_sesion", form.value.archivo_sesion);
   }
 
+  formData.append("_method", "PATCH");
+
   // Request
   const response = isEditing.value
-    ? await updateSesion(props.blockToEdit.id, formData)
+    ? await updateSesionFormData(props.blockToEdit.id, formData)
     : await createSesion(formData);
 
   if (response?.sesion?.id) {

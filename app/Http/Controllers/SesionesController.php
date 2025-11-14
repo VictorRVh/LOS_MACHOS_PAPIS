@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sesiones;
 use App\Models\EntregaDocente;
 use App\Models\CalendarioAdmin;
+use DB;
 use Illuminate\Http\Request;
 
 class SesionesController extends Controller
@@ -43,29 +44,40 @@ class SesionesController extends Controller
     }
     public function indexListSesionesDocente($idEntrega)
     {
-        $sesiones = Sesiones::with([
-            'calendarioAdmin' => function ($q) {
-                $q->select('id', 'id_sesion', 'fecha', 'laborable')
-                    ->orderBy('fecha', 'asc');
+        // Traemos las capacidades con sus sesiones y dentro de ellas los calendarios
+        $capacidades = \App\Models\CapacidadTerminal::with([
+            'sesiones' => function ($q) {
+                $q->select('id', 'id_capacidad', 'nombre_sesion', 'descripcion', 'fecha_inicio', 'fecha_fin', 'status')
+                    ->orderBy('fecha_inicio', 'asc')
+                    ->with([
+                        'calendarioAdmin' => function ($c) {
+                            $c->select('id', 'id_sesion', 'fecha', 'laborable')
+                                ->orderBy('fecha', 'asc');
+                        }
+                    ]);
             }
         ])
-            ->where('id_entrega', $idEntrega)
-            ->orderBy('fecha_inicio', 'asc')
-            ->get(['id', 'id_capacidad', 'nombre_sesion', 'descripcion', 'fecha_inicio', 'fecha_fin', 'status']);
+            ->whereHas('sesiones', function ($q) use ($idEntrega) {
+                $q->where('id_entrega', $idEntrega);
+            })
+            ->get(['id', 'nombre_capacidad']);
 
-        if ($sesiones->isEmpty()) {
+        if ($capacidades->isEmpty()) {
             return response()->json([
-                'message' => 'No se encontraron sesiones para esta entrega docente'
+                'message' => 'No se encontraron capacidades con sesiones para esta entrega docente'
             ], 404);
         }
 
-        // 🔥 Ocultar 'id_sesion' dentro de 'calendario_admin'
-        $sesiones->each(function ($sesion) {
-            $sesion->calendarioAdmin->makeHidden('id_sesion');
+        // 🔥 Ocultar 'id_sesion' en los calendarios
+        $capacidades->each(function ($capacidad) {
+            $capacidad->sesiones->each(function ($sesion) {
+                $sesion->calendarioAdmin->makeHidden('id_sesion');
+            });
         });
 
-        return response()->json($sesiones);
+        return response()->json($capacidades);
     }
+
 
 
     public function show($id)
@@ -139,28 +151,66 @@ class SesionesController extends Controller
 
     public function update(Request $request, $id)
     {
-        $sesion = Sesiones::find($id);
+        try {
+            // INICIAR TRANSACCIÓN
+            DB::beginTransaction();
 
-        if (!$sesion) {
-            return response()->json(['message' => 'Sesión no encontrada'], 404);
+            $sesion = Sesiones::findOrFail($id);
+
+            // VALIDACIÓN
+            $request->validate([
+                'nombre_sesion' => 'required|string|max:255',
+                'descripcion' => 'nullable|string',
+                'fechas' => 'required|array|min:1',
+                'fechas.*' => 'date',
+            ]);
+
+            // ORDENAR FECHAS
+            $fechas = collect($request->fechas)->sort()->values();
+            $fecha_inicio = $fechas->first();
+            $fecha_fin = $fechas->last();
+
+            // ACTUALIZAR SESIÓN
+            $sesion->update([
+                'nombre_sesion' => $request->nombre_sesion,
+                'descripcion' => $request->descripcion,
+                'fecha_inicio' => $fecha_inicio,
+                'fecha_fin' => $fecha_fin,
+            ]);
+
+            // BORRAR FECHAS ANTERIORES
+            CalendarioAdmin::where('id_sesion', $sesion->id)->delete();
+
+            // INSERTAR NUEVAS FECHAS
+            foreach ($fechas as $fecha) {
+                CalendarioAdmin::create([
+                    'id_sesion' => $sesion->id,
+                    'fecha' => $fecha,
+                    'laborable' => 0,
+                ]);
+            }
+
+            // TODO CORRECTO → CONFIRMAR
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Sesión actualizada correctamente',
+                'sesion' => $sesion,
+            ], 200);
+
+        } catch (\Throwable $e) {
+
+            // SI ALGO FALLA → ROLLBACK
+            DB::rollBack();
+
+            
+            return response()->json([
+                'message' => 'Error al actualizar la sesión',
+                'error' => $e->getMessage(), // puedes ocultarlo en producción si deseas
+            ], 500);
         }
-
-        $request->validate([
-            'nombre_sesion' => 'sometimes|string|max:255',
-            'fecha_inicio' => 'sometimes|date',
-            'fecha_fin' => 'sometimes|date|after_or_equal:fecha_inicio',
-            'descripcion' => 'nullable|string',
-            'archivo_sesion' => 'nullable|string',
-            'id_calendario' => 'sometimes|uuid|exists:calendario_admin,id',
-            'id_capacidad' => 'sometimes|uuid|exists:capacidad_terminal,id',
-            'id_entrega' => 'sometimes|uuid|exists:entrega_docente,id',
-            'status' => 'sometimes|integer|in:0,1,2,3'
-        ]);
-
-        $sesion->update($request->all());
-
-        return response()->json(['message' => 'Sesión actualizada correctamente', 'data' => $sesion]);
     }
+
 
     public function destroy($id)
     {

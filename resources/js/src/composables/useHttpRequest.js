@@ -93,6 +93,26 @@ const useHttpRequest = (path = '') => {
         }
     };
 
+    const updateFormData = async (id, data, callback = null) => {
+        try {
+            updating.value = true;
+            const response = await axios.post(`${path}/${id}`, data);
+            updating.value = false;
+
+            if (typeof callback === 'function') {
+                callback(null, response);
+            }
+
+            if (response.data) {
+                return response.data;
+            }
+            return null;
+        } catch (error) {
+            updating.value = false;
+            return handleError(error, null, callback);
+        }
+    };
+
     const destroy = async (id, callback = null) => {
         try {
             deleting.value = true;
@@ -207,7 +227,9 @@ const useHttpRequest = (path = '') => {
 
         indexWithParams,
 
-        patchCustom
+        patchCustom,
+
+        updateFormData
     };
 };
 

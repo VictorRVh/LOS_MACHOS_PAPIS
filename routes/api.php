@@ -296,6 +296,21 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\EntregaDocenteController::class,
         'subidasPorProgramacion',
     ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
+    
+    Route::get('entrega_docente_estado/{id}', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'verificarEstado',
+    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos|ver-mis-modulos');
+    
+    Route::post('entrega_docente_subir', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'subirArchivo',
+    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos|ver-mis-modulos');
+    
+    Route::post('entrega_docente_sincronizar', [
+        \App\Http\Controllers\EntregaDocenteController::class,
+        'sincronizarEstado',
+    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
 
     Route::patch('entrega_docente/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,

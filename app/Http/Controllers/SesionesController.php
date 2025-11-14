@@ -151,64 +151,66 @@ class SesionesController extends Controller
 
     public function update(Request $request, $id)
     {
-        try {
-            // INICIAR TRANSACCIÓN
-            DB::beginTransaction();
+         return $request->all();
 
-            $sesion = Sesiones::findOrFail($id);
+        // try {
+        //     // INICIAR TRANSACCIÓN
+        //     DB::beginTransaction();
 
-            // VALIDACIÓN
-            $request->validate([
-                'nombre_sesion' => 'required|string|max:255',
-                'descripcion' => 'nullable|string',
-                'fechas' => 'required|array|min:1',
-                'fechas.*' => 'date',
-            ]);
+        //     $sesion = Sesiones::findOrFail($id);
 
-            // ORDENAR FECHAS
-            $fechas = collect($request->fechas)->sort()->values();
-            $fecha_inicio = $fechas->first();
-            $fecha_fin = $fechas->last();
+        //     // VALIDACIÓN
+        //     $request->validate([
+        //         'nombre_sesion' => 'required|string|max:255',
+        //         'descripcion' => 'nullable|string',
+        //         'fechas' => 'required|array|min:1',
+        //         'fechas.*' => 'date',
+        //     ]);
 
-            // ACTUALIZAR SESIÓN
-            $sesion->update([
-                'nombre_sesion' => $request->nombre_sesion,
-                'descripcion' => $request->descripcion,
-                'fecha_inicio' => $fecha_inicio,
-                'fecha_fin' => $fecha_fin,
-            ]);
+        //     // ORDENAR FECHAS
+        //     $fechas = collect($request->fechas)->sort()->values();
+        //     $fecha_inicio = $fechas->first();
+        //     $fecha_fin = $fechas->last();
 
-            // BORRAR FECHAS ANTERIORES
-            CalendarioAdmin::where('id_sesion', $sesion->id)->delete();
+        //     // ACTUALIZAR SESIÓN
+        //     $sesion->update([
+        //         'nombre_sesion' => $request->nombre_sesion,
+        //         'descripcion' => $request->descripcion,
+        //         'fecha_inicio' => $fecha_inicio,
+        //         'fecha_fin' => $fecha_fin,
+        //     ]);
 
-            // INSERTAR NUEVAS FECHAS
-            foreach ($fechas as $fecha) {
-                CalendarioAdmin::create([
-                    'id_sesion' => $sesion->id,
-                    'fecha' => $fecha,
-                    'laborable' => 0,
-                ]);
-            }
+        //     // BORRAR FECHAS ANTERIORES
+        //     CalendarioAdmin::where('id_sesion', $sesion->id)->delete();
 
-            // TODO CORRECTO → CONFIRMAR
-            DB::commit();
+        //     // INSERTAR NUEVAS FECHAS
+        //     foreach ($fechas as $fecha) {
+        //         CalendarioAdmin::create([
+        //             'id_sesion' => $sesion->id,
+        //             'fecha' => $fecha,
+        //             'laborable' => 0,
+        //         ]);
+        //     }
 
-            return response()->json([
-                'message' => 'Sesión actualizada correctamente',
-                'sesion' => $sesion,
-            ], 200);
+        //     // TODO CORRECTO → CONFIRMAR
+        //     DB::commit();
 
-        } catch (\Throwable $e) {
+        //     return response()->json([
+        //         'message' => 'Sesión actualizada correctamente',
+        //         'sesion' => $sesion,
+        //     ], 200);
 
-            // SI ALGO FALLA → ROLLBACK
-            DB::rollBack();
+        // } catch (\Throwable $e) {
 
-            
-            return response()->json([
-                'message' => 'Error al actualizar la sesión',
-                'error' => $e->getMessage(), // puedes ocultarlo en producción si deseas
-            ], 500);
-        }
+        //     // SI ALGO FALLA → ROLLBACK
+        //     DB::rollBack();
+
+
+        //     return response()->json([
+        //         'message' => 'Error al actualizar la sesión',
+        //         'error' => $e->getMessage(), // puedes ocultarlo en producción si deseas
+        //     ], 500);
+        // }
     }
 
 

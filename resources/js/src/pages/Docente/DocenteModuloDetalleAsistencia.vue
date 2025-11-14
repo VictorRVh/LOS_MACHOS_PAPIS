@@ -19,6 +19,7 @@ import Th from '@/components/table/Th.vue';
 import Td from '@/components/table/Td.vue';
 import BaseButton from '@/components/ui/Button.vue';
 import TomarAsistencia from '../../components/page/SesionesDocente/TomarAsistenciaSlider.vue';
+import MenuTable from "../../components/table/MenuTable.vue";
 
 
 const props = defineProps({
@@ -68,68 +69,77 @@ const allEvents = ref([])
 
 watch(
   () => programacionSesion.sesiones,
-  (nuevasSesiones) => {
-    if (Array.isArray(nuevasSesiones) && nuevasSesiones.length) {
-      const eventos = []
+  (nuevasCapacidades) => {
+    if (!Array.isArray(nuevasCapacidades) || !nuevasCapacidades.length) {
+      allEvents.value = []
+      return
+    }
 
-      nuevasSesiones.forEach((sesion) => {
-        const dias = sesion.calendario_admin.map(d => d.fecha).sort()
+    const eventos = []
 
+    nuevasCapacidades.forEach((cap) => {
+      if (!Array.isArray(cap.sesiones)) return
 
-        if (dias.length) {
-          let inicio = dias[0]
-          let fin = dias[0]
+      cap.sesiones.forEach((sesion) => {
+        const dias = (sesion.calendario_admin ?? [])
+          .map(d => d.fecha)
+          .filter(Boolean)
+          .sort()
 
-          for (let i = 1; i <= dias.length; i++) {
-            const actual = dias[i]
-            const anterior = dias[i - 1]
+        if (!dias.length) return
 
-            // si el día actual no es consecutivo al anterior, cerramos el tramo
-            const diff =
-              actual &&
-              (new Date(actual) - new Date(anterior)) / (1000 * 60 * 60 * 24)
+        let inicio = dias[0]
+        let fin = dias[0]
 
-            if (!actual || diff !== 1) {
-              eventos.push({
-                id: sesion.id + '-' + inicio,
-                title: sesion.nombre_sesion,
-                start: inicio,
-                end: new Date(new Date(fin).getTime() + 86400000) // +1 día porque FullCalendar trata el end como exclusivo
-                  .toISOString()
-                  .split('T')[0],
-                allDay: true,
-                backgroundColor:
-                  sesion.status === 0
-                    ? '#facc15' // amarillo pendiente
-                    : sesion.status === 1
-                      ? '#22c55e' // verde activo
-                      : '#3b82f6', // azul finalizado
-                borderColor: '#fff',
-                extendedProps: {
-                  descripcion: sesion.descripcion,
-                  idSesion: sesion.id,
-                },
-              })
+        for (let i = 1; i <= dias.length; i++) {
+          const actual = dias[i]
+          const anterior = dias[i - 1]
 
-              // iniciar nuevo tramo
-              inicio = actual
-              fin = actual
-            } else {
-              // seguimos en el mismo tramo
-              fin = actual
-            }
+          const diff =
+            actual &&
+            (new Date(actual) - new Date(anterior)) / (1000 * 60 * 60 * 24)
+
+          if (!actual || diff !== 1) {
+            // cerrar tramo
+            eventos.push({
+              id: `${sesion.id}-${inicio}`,
+              title: sesion.nombre_sesion,
+              start: inicio,
+              end: new Date(new Date(fin).getTime() + 86400000)
+                .toISOString()
+                .split("T")[0],
+              allDay: true,
+              backgroundColor:
+                sesion.status === 0
+                  ? '#facc15' // pendiente
+                  : sesion.status === 1
+                    ? '#22c55e' // activo
+                    : '#3b82f6', // finalizado
+              borderColor: '#fff',
+              extendedProps: {
+                descripcion: sesion.descripcion,
+                idSesion: sesion.id,
+                idCapacidad: cap.id,
+                nombreCapacidad: cap.nombre_capacidad
+              }
+            })
+
+            // iniciar tramo nuevo
+            inicio = actual
+            fin = actual
+          } else {
+            // seguimos tramo actual
+            fin = actual
           }
         }
       })
+    })
 
-      allEvents.value = eventos
-     // console.log('📅 Eventos agrupados:', allEvents.value)
-    } else {
-      allEvents.value = []
-    }
+    allEvents.value = eventos
   },
   { deep: true, immediate: true }
 )
+
 
 // 🧭 Manejo de selección
 
@@ -220,6 +230,10 @@ const confirmDelete = (bloque) => {
     }
   )
 }
+
+const verSesion = (bloque) =>{
+  
+}
 const isEditing = ref(false)
 
 // aumentado para edicion 
@@ -248,9 +262,9 @@ const cancelEdit = () => {
 
 const updateSession = () => {
   if (!datesForSlider.value.length) return
- // console.log("antes: ",sliderData.value)
+  // console.log("antes: ",sliderData.value)
   showSlider(true, sliderData.value) // abre el modal con datos y fechas
- // console.log("despues: ",sliderData.value)
+  // console.log("despues: ",sliderData.value)
 }
 
 
@@ -265,6 +279,19 @@ const estadoTexto = computed(() => {
     default: return 'Desconocido'
   }
 })
+
+// collapse
+const openCapacidades = ref(new Set())
+
+const toggleCapacidad = (id) => {
+  if (openCapacidades.value.has(id)) {
+    openCapacidades.value.delete(id)
+  } else {
+    openCapacidades.value.add(id)
+  }
+}
+
+
 </script>
 
 <template>
@@ -329,7 +356,8 @@ const estadoTexto = computed(() => {
           <div class="mt-4 md:mt-0 flex gap-2 justify-end">
             <template v-if="isEditing">
               <BaseButton title="Cancelar" variant="secondary" @click="cancelEdit" />
-              <BaseButton title="`Actualizar ${selectedDates.length} sesines`" variant="primary" @click="updateSession" />
+              <BaseButton :title="`Actualizar ${selectedDates.length} sesines`" variant="primary"
+                @click="updateSession" />
             </template>
 
             <template v-else-if="hasSelection">
@@ -352,35 +380,74 @@ const estadoTexto = computed(() => {
     <!-- 📘 BLOQUES DE SESIONES -->
     <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
       <Table>
-        <THead>
-          <Th>Tema</Th>
-          <Th>Fechas</Th>
-          <Th>Acciones</Th>
+        <THead class="hidden">
+          <Th>N°</Th>
+          <Th>Módulo</Th>
+          <Th>días</Th>
+          <Th>acción</Th>
         </THead>
 
         <TBody>
-          <Tr v-if="programacionSesion?.sesiones?.length === 0">
-            <Td colspan="3" class="text-center text-gray-500">
-              Aún no hay bloques programados.
-            </Td>
-          </Tr>
+          <template v-for="capacidad in programacionSesion?.sesiones" :key="capacidad.id">
 
-          <Tr v-for="bloque in programacionSesion?.sesiones" :key="bloque.id">
-            <Td class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: bloque.color }"></span>
-              {{ bloque.nombre_sesion }}
-            </Td>
-            <Td class="text-xs">
-              {{ bloque?.fecha_inicio }} - {{ bloque?.fecha_fin }}
-            </Td>
-            <Td class="flex gap-2">
-              <DeleteButton @click="confirmDelete(bloque)" />
-              <EditButton @click="handleEdit(bloque)" />
+            <!-- CABECERA DE CAPACIDAD -->
+            <tr @click="toggleCapacidad(capacidad.id)" class="bg-cetpro dark:bg-cetpro-dark hover:bg-cetpro-dark dark:hover:bg-cetpro cursor-pointer
+               transition-colors duration-200 border-b border-white dark:border-cetpro">
+              <td colspan="8" class="px-4 py-3 font-bold uppercase tracking-wider text-sm">
+                <div class="flex items-center justify-between text-cetpro-text">
+                  <span>Sesiones {{ capacidad.nombre_capacidad }}</span>
 
-            </Td>
-          </Tr>
+                  <ChevronDownIcon :class="[
+                    'h-6 w-6 text-cetpro-text transition-transform duration-300',
+                    { 'rotate-180': openCapacidades.has(capacidad.id) }
+                  ]" />
+                </div>
+              </td>
+            </tr>
+
+            <!-- SESIONES DE ESA CAPACIDAD -->
+            <tr v-if="openCapacidades.has(capacidad.id)" class="bg-white dark:bg-gray-800">
+              <td colspan="8" class="p-0">
+                <TransitionGroup name="list" tag="table" class="w-full">
+
+            <Tr v-for="(sesion, index) in capacidad.sesiones" :key="sesion.id" class="border-t-0">
+              <!-- Nº -->
+              <Td class="text-center w-12">{{ index + 1 }}</Td>
+
+              <!-- Título + Fechas -->
+              <Td>
+                <div class="flex items-center gap-2 font-medium">
+                  <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: '#22c55e' }"></span>
+                  {{ sesion.nombre_sesion }}
+                </div>
+
+                <!-- Fechas con opacidad -->
+                <div class="text-xs opacity-60 mt-1 ml-5">
+                  {{ sesion.fecha_inicio }} - {{ sesion.fecha_fin }}
+                </div>
+              </Td>
+
+              <!-- Días -->
+              <Td class="text-xs text-gray-500">
+                {{ sesion.calendario_admin.length }} días
+              </Td>
+
+              <!-- Acciones -->
+              <Td class="text-center text-gray-600 dark:text-gray-200">
+                <MenuTable :actions="{ view: true, edit: true, delete: true }" @view="verSesion(sesion)"
+                  @edit="handleEdit(sesion)" @delete="confirmDelete(sesion)" entity-label="sesión" />
+              </Td>
+            </Tr>
+
+            </TransitionGroup>
+            </td>
+            </tr>
+
+          </template>
         </TBody>
       </Table>
+
+
     </div>
 
     <!-- 🟢 Sliders -->

@@ -9,8 +9,6 @@ const useUserStore = defineStore('user_status', () => {
         initialLoading: usersFirstTimeLoading,
     } = useHttpRequest('/users_active');
 
-
-
     const users = ref([])
 
     const loadUsers = async () => {

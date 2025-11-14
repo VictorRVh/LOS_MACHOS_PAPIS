@@ -45,28 +45,24 @@ const initialForm = () => ({
   archivo_sesion: null,
 });
 
+if (!capacidadStore.capacidadTerminal?.capacidades?.length) {
+  await capacidadStore.loadCapacidadTerminal(props.idGrupo)
+}
+
 const form = ref(initialForm());
 const formErrors = ref({});
 const inputFile = ref(null);
 
-// 🔍 Solo cargamos capacidades y llenamos datos cuando el modal se abre
 watch(
   () => props.show,
-  async (isVisible) => {
+  (isVisible) => {
     if (isVisible) {
-      await capacidadStore.loadCapacidadTerminal(props.idGrupo);
+      form.value = isEditing.value
+        ? { ...initialForm(), ...props.blockToEdit }
+        : initialForm();
 
-      if (isEditing.value) {
-        form.value = {
-          ...initialForm(),
-          ...props.blockToEdit,
-        };
-
-        if (!Array.isArray(form.value.calendario_admin)) {
-          form.value.calendario_admin = [];
-        }
-      } else {
-        form.value = initialForm();
+      if (!Array.isArray(form.value.calendario_admin)) {
+        form.value.calendario_admin = [];
       }
 
       formErrors.value = {};
@@ -144,8 +140,9 @@ const closeAndReset = () => {
   <Slider :show="show" @hide="closeAndReset" :title="isEditing ? 'Editar Sesión' : 'Programar Sesiones'">
     <!-- CAPACIDAD TERMINAL -->
     <FormLabelError label="Capacidad terminal *" :error="formErrors.id_capacidad">
-      <BaseSelectGrupo v-model="form.id_capacidad" :options="capacidadStore.capacidadTerminal?.capacidades" label="nombre_capacidad"
-        value-prop="id" placeholder="Seleccione una capacidad" :loading="capacidadStore.sesionesLoading" />
+      <BaseSelectGrupo v-model="form.id_capacidad" :options="capacidadStore.capacidadTerminal?.capacidades"
+        label="nombre_capacidad" value-prop="id" placeholder="Seleccione una capacidad"
+        :loading="capacidadStore.sesionesLoading" />
     </FormLabelError>
 
     <!-- FECHAS -->

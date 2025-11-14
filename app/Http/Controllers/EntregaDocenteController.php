@@ -9,9 +9,18 @@ use App\Models\EntregaDocenteAdmin;
 use App\Models\EntregaDocente;
 use Illuminate\Http\Request;
 use App\Models\CarpetasEntregaDrive;
+use App\Http\Controllers\GoogleDriveController;
+use Illuminate\Support\Facades\DB;
 
 class EntregaDocenteController extends Controller
 {
+    protected $googleDriveController;
+
+    public function __construct(GoogleDriveController $googleDriveController)
+    {
+        $this->googleDriveController = $googleDriveController;
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -108,15 +117,37 @@ class EntregaDocenteController extends Controller
             'id_grupo' => 'required|uuid|exists:grupo,id',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'estado' => 'required|string|max:100',
+            'estado' => 'required|integer|in:0,1,4', // Solo permite estados válidos
             'id_admin' => 'required|uuid|exists:entrega_docente_admin,id',
             'documento_admin' => 'required|string|max:255',
-            'observacion' => 'required|string|max:255',
+            'observacion' => 'nullable|string|max:255',
+            'fecha_aplazada' => 'nullable|date|after_or_equal:fecha_fin',
         ]);
 
-        $entrega = EntregaDocente::create($request->all());
+        try {
+            DB::beginTransaction();
 
-        return response()->json(['message' => 'Entrega creada con éxito', 'data' => $entrega], 201);
+            $entrega = EntregaDocente::create($request->all());
+
+            // Sincronizar estado si es necesario
+            $entrega->sincronizarEstado();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Entrega creada con éxito',
+                'data' => $entrega,
+                'info_estado' => $entrega->obtenerInfoEstado()
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error al crear entrega: ' . $e->getMessage());
+
+            return response()->json([
+                'error' => 'No se pudo crear la entrega',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // PATCH /api/entrega_docente/{id}
@@ -128,48 +159,66 @@ class EntregaDocenteController extends Controller
             return response()->json(['message' => 'Entrega no encontrada'], 404);
         }
 
-        // Validación
+        // 🔹 Validación básica
         $request->validate([
             'observacion' => 'nullable|string|max:255',
-            'dias_aplazados' => 'nullable|string',
+            'dias_aplazados' => 'nullable|integer|min:1',
         ]);
 
         $data = $request->only(['observacion', 'dias_aplazados']);
 
-        // Si se aplican días aplazados
+        // 🔹 Si se aplican días aplazados
         if ($request->filled('dias_aplazados')) {
             $dias = (int) $request->dias_aplazados;
 
-            // Fecha aplazada con hora límite 23:59:59
-            $fechaAplazada = Carbon::now('America/Lima')
+            $data['fecha_aplazada'] = Carbon::now('America/Lima')
                 ->addDays($dias)
                 ->setTime(23, 59, 59);
-
-            $data['fecha_aplazada'] = $fechaAplazada;
-            $data['estado'] = 1; // activo o habilitado
+        } else {
+            // Si no se especifican días, limpiamos cualquier aplazamiento anterior
+            $data['fecha_aplazada'] = null;
+            $data['dias_aplazados'] = null;
         }
 
+        // 🔹 Guardar cambios
         $entrega->update($data);
+
+        // 🔹 Sincronizar estado inmediatamente (opcional, pero recomendable)
+        $entrega->sincronizarEstado();
 
         return response()->json([
             'message' => 'Entrega actualizada con éxito.',
-            'entrega' => $entrega
+            'entrega' => $entrega,
+            'info_estado' => $entrega->obtenerInfoEstado(),
         ]);
     }
-
 
     // DELETE /api/entrega_docente/{id}
     public function destroy($id)
     {
-        $entrega = EntregaDocente::find($id);
+        try {
+            $entrega = EntregaDocente::findOrFail($id);
 
-        if (!$entrega) {
-            return response()->json(['message' => 'Entrega no encontrada'], 404);
+            // Verificar si tiene entregas realizadas
+            if ($entrega->entregasRealizadas()->exists()) {
+                return response()->json([
+                    'error' => 'No se puede eliminar una entrega que ya tiene registros realizados'
+                ], 400);
+            }
+
+            $entrega->delete();
+
+            return response()->json([
+                'message' => 'Entrega eliminada con éxito'
+            ], 204);
+        } catch (\Exception $e) {
+            \Log::error('Error al eliminar entrega: ' . $e->getMessage());
+
+            return response()->json([
+                'error' => 'No se pudo eliminar la entrega',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        $entrega->delete();
-
-        return response()->json(['message' => 'Entrega eliminada correctamente']);
     }
 
     public function generarExcel(Request $request)
@@ -204,6 +253,123 @@ class EntregaDocenteController extends Controller
             return response()->json([
                 'error' => $e->getMessage(),
                 'linea' => $e->getLine()
+            ], 500);
+        }
+    }
+
+    public function subirArchivo(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|max:51200', // 50MB
+            'parentFolderId' => 'required|string',
+            'id_entrega' => 'required|uuid|exists:entrega_docente,id',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // 1. Buscar entrega con relaciones
+            $entrega = EntregaDocente::with(['grupo.docente'])
+                ->findOrFail($request->id_entrega);
+
+            // 2. Validar grupo y docente
+            if (!$entrega->grupo || !$entrega->grupo->docente) {
+                return response()->json([
+                    'error' => 'No se encontró el grupo o el docente asociado.'
+                ], 404);
+            }
+
+            // $idDocente = $entrega->grupo->docente->user_id;
+            $idDocente = $entrega->grupo->docente->id;
+
+            // 3. ✅ VALIDAR USANDO EL MODELO
+            $validacion = $entrega->puedeSubirArchivo();
+
+            if (!$validacion['activa']) {
+                return response()->json([
+                    'error' => $validacion['mensaje'],
+                    'codigo' => $validacion['codigo'],
+                    'info_estado' => $entrega->obtenerInfoEstado()
+                ], 403);
+            }
+
+            // 4. ✅ DELEGAR LA SUBIDA A GOOGLE DRIVE
+            // Llamar al método uploadFile del GoogleDriveController
+            $uploadRequest = new Request([
+                'file' => $request->file('file'),
+                'parentFolderId' => $request->parentFolderId
+            ]);
+            $uploadRequest->files->set('file', $request->file('file'));
+
+            $responseUpload = $this->googleDriveController->uploadFile($uploadRequest);
+
+            // Verificar si la subida fue exitosa
+            if ($responseUpload->getStatusCode() !== 201) {
+                throw new \Exception('Error al subir archivo a Google Drive');
+            }
+
+            $archivoSubido = json_decode($responseUpload->getContent());
+
+            // 5. Marcar como cumplida y registrar
+            $entregaRealizada = $entrega->marcarComoCumplida($idDocente);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Archivo subido correctamente.',
+                'data' => [
+                    'archivo' => $archivoSubido,
+                    'entrega_realizada' => $entregaRealizada,
+                    'fecha_entrega' => $entregaRealizada->fecha_entrega->format('d/m/Y H:i:s'),
+                    'fecha_limite' => $entrega->obtenerFechaFinEfectiva()->format('d/m/Y H:i:s'),
+                ]
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error al subir archivo de entrega: ' . $e->getMessage());
+
+            return response()->json([
+                'error' => 'No se pudo completar la entrega',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function verificarEstado($id)
+    {
+        try {
+            $entrega = EntregaDocente::findOrFail($id);
+
+            return response()->json([
+                'info_estado' => $entrega->obtenerInfoEstado(),
+                'validacion' => $entrega->puedeSubirArchivo(),
+                'necesita_sincronizar' => $entrega->necesitaActualizarEstado()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Entrega no encontrada',
+                'message' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    public function sincronizarEstado($id)
+    {
+        try {
+            $entrega = EntregaDocente::findOrFail($id);
+
+            $actualizado = $entrega->sincronizarEstado();
+
+            return response()->json([
+                'message' => $actualizado ? 'Estado sincronizado' : 'Estado ya estaba actualizado',
+                'actualizado' => $actualizado,
+                'info_estado' => $entrega->obtenerInfoEstado()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'No se pudo sincronizar el estado',
+                'message' => $e->getMessage()
             ], 500);
         }
     }

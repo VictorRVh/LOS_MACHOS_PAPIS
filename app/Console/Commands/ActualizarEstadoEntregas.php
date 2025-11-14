@@ -10,7 +10,6 @@ use Carbon\Carbon;
 
 class ActualizarEstadoEntregas extends Command
 {
-    // Nombre con el que lo usaremos en el scheduler
     protected $signature = 'entregas:actualizar-estado';
     protected $description = 'Actualiza el estado de las entregas según la fecha actual y fechas aplazadas';
 
@@ -18,7 +17,7 @@ class ActualizarEstadoEntregas extends Command
     {
         $hoy = Carbon::now('America/Lima')->startOfMinute();
 
-        // 🔹 Obtener TODOS los periodos activos
+        // 1. Obtener periodos activos
         $periodos = Periodo::where('status', 1)->get();
 
         if ($periodos->isEmpty()) {
@@ -28,107 +27,139 @@ class ActualizarEstadoEntregas extends Command
 
         $this->info('📅 Total de periodos activos: ' . $periodos->count());
 
-        // 🔁 Iterar sobre cada periodo
+        $totalActualizados = 0;
+
+        // 2. Iterar sobre cada periodo
         foreach ($periodos as $periodo) {
-            $this->info('');
+            $this->newLine();
             $this->info('═══════════════════════════════════════');
             $this->info('📚 Periodo: ' . ($periodo->nombre ?? $periodo->id));
 
-            // 🔹 Buscar todas las programaciones de ESTE periodo
+            // 3. Obtener programaciones del periodo
             $programaciones = EntregaDocenteAdmin::where('id_periodo', $periodo->id)->get();
 
-            $this->info('📊 Total de entregas encontradas: ' . $programaciones->count());
+            $this->info('📊 Total de entregas administrativas: ' . $programaciones->count());
 
             if ($programaciones->isEmpty()) {
                 $this->warn('No se encontraron entregas para este periodo.');
-                continue; // Pasar al siguiente periodo
+                continue;
             }
 
+            // 4. Procesar cada programación administrativa
             foreach ($programaciones as $programacion) {
-                $estadoAnterior = $programacion->status;
-                $inicio = Carbon::parse($programacion->fecha_inicio)->timezone('America/Lima');
-                $fin = Carbon::parse($programacion->fecha_fin)->timezone('America/Lima');
+                $actualizados = $this->procesarProgramacion($programacion, $hoy);
+                $totalActualizados += $actualizados;
+            }
+        }
 
-                // Determinar estado del admin
-                if ($hoy->lt($inicio)) {
-                    $nuevoEstado = EntregaDocenteAdmin::STATUS_PENDIENTE;
-                } elseif ($hoy->gt($fin)) {
-                    $nuevoEstado = EntregaDocenteAdmin::STATUS_FINALIZADO;
-                } else {
-                    $nuevoEstado = EntregaDocenteAdmin::STATUS_ACTIVO;
-                }
+        $this->newLine();
+        $this->info("Total de entregas actualizadas: {$totalActualizados}");
+        $this->info('Estados de entregas actualizados correctamente.');
 
-                // Actualizar admin si cambió
-                if ($nuevoEstado !== $estadoAnterior) {
-                    $programacion->update(['status' => $nuevoEstado]);
-                    $this->info("      📝 Admin: {$estadoAnterior} → {$nuevoEstado}");
-                }
+        return Command::SUCCESS;
+    }
 
-                // 🎯 LÓGICA MEJORADA: Actualizar entregas según el estado actual
+    /**
+     * Procesa una programación administrativa y sus entregas asociadas
+     */
+    protected function procesarProgramacion(EntregaDocenteAdmin $programacion, Carbon $hoy): int
+    {
+        $estadoAnterior = $programacion->status;
+        $inicio = Carbon::parse($programacion->fecha_inicio)->timezone('America/Lima')->startOfMinute();
+        $fin = Carbon::parse($programacion->fecha_fin)->timezone('America/Lima')->endOfMinute();
 
-                // 1️⃣ Si está PENDIENTE o ACTIVO: todas las entregas siguen al admin
-                if (
-                    $nuevoEstado === EntregaDocenteAdmin::STATUS_PENDIENTE ||
-                    $nuevoEstado === EntregaDocenteAdmin::STATUS_ACTIVO
-                ) {
+        // Determinar estado del admin
+        $nuevoEstadoAdmin = $this->calcularEstadoAdmin($hoy, $inicio, $fin);
 
-                    $actualizados = EntregaDocente::where('id_admin', $programacion->id)
-                        ->update(['estado' => $nuevoEstado]);
+        // Actualizar admin si cambió
+        if ($nuevoEstadoAdmin !== $estadoAnterior) {
+            $programacion->update(['status' => $nuevoEstadoAdmin]);
+            $this->info("Admin: {$estadoAnterior} → {$nuevoEstadoAdmin}");
+        }
 
-                    if ($actualizados > 0) {
-                        $this->info("      ✅ {$actualizados} entregas actualizadas → estado {$nuevoEstado}");
-                    }
-                }
+        // Actualizar entregas asociadas
+        return $this->actualizarEntregasAsociadas($programacion, $nuevoEstadoAdmin);
+    }
 
-                // 2️⃣ Si está FINALIZADO: aplicar lógica híbrida con aplazamientos
-                elseif ($nuevoEstado === EntregaDocenteAdmin::STATUS_FINALIZADO) {
+    /**
+     * Calcula el estado administrativo según fechas
+     */
+    protected function calcularEstadoAdmin(Carbon $hoy, Carbon $inicio, Carbon $fin): int
+    {
+        if ($hoy->lt($inicio)) {
+            return EntregaDocenteAdmin::STATUS_PENDIENTE;
+        } elseif ($hoy->gt($fin)) {
+            return EntregaDocenteAdmin::STATUS_FINALIZADO;
+        } else {
+            return EntregaDocenteAdmin::STATUS_ACTIVO;
+        }
+    }
 
-                    // Entregas SIN aplazamiento → FINALIZADAS
-                    $sinAplazamiento = EntregaDocente::where('id_admin', $programacion->id)
-                        ->whereNull('fecha_aplazada')
-                        ->update(['estado' => EntregaDocente::STATUS_FINALIZADO]);
+    /**
+     * Actualiza las entregas docentes según el estado del admin
+     */
+    protected function actualizarEntregasAsociadas(EntregaDocenteAdmin $programacion, int $nuevoEstadoAdmin): int
+    {
+        $totalActualizados = 0;
 
-                    if ($sinAplazamiento > 0) {
-                        $this->info("      ✅ {$sinAplazamiento} entregas sin aplazamiento → FINALIZADAS");
-                    }
+        // Caso 1: Admin PENDIENTE o ACTIVO → todas siguen al admin
+        if (in_array($nuevoEstadoAdmin, [EntregaDocenteAdmin::STATUS_PENDIENTE, EntregaDocenteAdmin::STATUS_ACTIVO])) {
+            $actualizados = EntregaDocente::where('id_admin', $programacion->id)
+                ->where('estado', '!=', $nuevoEstadoAdmin)
+                ->update(['estado' => $nuevoEstadoAdmin]);
 
-                    // Entregas CON aplazamiento → evaluar según fecha
-                    $entregasConAplazamiento = EntregaDocente::where('id_admin', $programacion->id)
-                        ->whereNotNull('fecha_aplazada')
-                        ->get();
+            if ($actualizados > 0) {
+                $this->info("{$actualizados} entregas → estado {$nuevoEstadoAdmin}");
+                $totalActualizados += $actualizados;
+            }
+        }
 
-                    if ($entregasConAplazamiento->isNotEmpty()) {
-                        $this->info("      📌 Procesando {$entregasConAplazamiento->count()} entregas con aplazamiento:");
+        // Caso 2: Admin FINALIZADO → aplicar lógica con aplazamientos
+        elseif ($nuevoEstadoAdmin === EntregaDocenteAdmin::STATUS_FINALIZADO) {
+            $totalActualizados += $this->procesarEntregasFinalizadas($programacion);
+        }
 
-                        foreach ($entregasConAplazamiento as $entrega) {
-                            $estadoAnteriorEntrega = $entrega->estado;
-                            $fechaAplazada = Carbon::parse($entrega->fecha_aplazada)->timezone('America/Lima');
+        return $totalActualizados;
+    }
 
-                            // Usar la fecha que sea MAYOR
-                            $fechaEfectiva = $fechaAplazada->gt($fin) ? $fechaAplazada : $fin;
+    /**
+     * Procesa entregas cuando el admin está finalizado
+     */
+    protected function procesarEntregasFinalizadas(EntregaDocenteAdmin $programacion): int
+    {
+        $totalActualizados = 0;
 
-                            // Si la fecha efectiva ya pasó → FINALIZADA, sino → ACTIVA
-                            $nuevoEstadoEntrega = $hoy->gt($fechaEfectiva)
-                                ? EntregaDocente::STATUS_FINALIZADO
-                                : EntregaDocente::STATUS_ACTIVO;
+        // 1. Entregas sin aplazamiento → FINALIZADAS
+        $sinAplazamiento = EntregaDocente::where('id_admin', $programacion->id)
+            ->whereNull('fecha_aplazada')
+            ->where('estado', '!=', EntregaDocente::STATUS_FINALIZADO)
+            ->update(['estado' => EntregaDocente::STATUS_FINALIZADO]);
 
-                            if ($nuevoEstadoEntrega !== $estadoAnteriorEntrega) {
-                                $entrega->estado = $nuevoEstadoEntrega;
-                                $entrega->save();
+        if ($sinAplazamiento > 0) {
+            $this->info("{$sinAplazamiento} entregas sin aplazamiento → FINALIZADAS");
+            $totalActualizados += $sinAplazamiento;
+        }
 
-                                $tipoFecha = $fechaAplazada->gt($fin) ? "aplazada" : "general";
-                                $fechaStr = $fechaEfectiva->format('Y-m-d H:i');
+        // 2. Entregas con aplazamiento → evaluar individualmente usando métodos del MODELO
+        $entregasConAplazamiento = EntregaDocente::where('id_admin', $programacion->id)
+            ->whereNotNull('fecha_aplazada')
+            ->get();
 
-                                $this->info("         🔄 Grupo {$entrega->id_grupo}: {$estadoAnteriorEntrega} → {$nuevoEstadoEntrega} (fecha {$tipoFecha}: {$fechaStr})");
-                            }
-                        }
-                    }
+        if ($entregasConAplazamiento->isNotEmpty()) {
+            $this->info("Procesando {$entregasConAplazamiento->count()} entregas con aplazamiento:");
+
+            foreach ($entregasConAplazamiento as $entrega) {
+                // ✅ Usar el método del modelo
+                if ($entrega->sincronizarEstado()) {
+                    $fechaEfectiva = $entrega->obtenerFechaFinEfectiva();
+                    $fechaStr = $fechaEfectiva->format('Y-m-d H:i');
+
+                    $this->info("Grupo {$entrega->id_grupo}: {$entrega->estado_texto} (fin: {$fechaStr})");
+                    $totalActualizados++;
                 }
             }
         }
 
-        $this->info('');
-        $this->info('🎯 Estados de entregas actualizados correctamente.');
-        return Command::SUCCESS;
+        return $totalActualizados;
     }
 }

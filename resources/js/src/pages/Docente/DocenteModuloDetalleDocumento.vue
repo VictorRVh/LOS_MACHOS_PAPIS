@@ -22,7 +22,7 @@ const props = defineProps({
   id: { type: String, required: true },
 })
 
-const { store: uploadArchivo, saving: uploadLoading } = useHttpRequest('/drive/uploadDocente')
+const { store: uploadArchivo, saving: uploadLoading } = useHttpRequest('/entrega_docente_subir')
 const { showConfirmModal, showToast } = useModalToast();
 
 const documentoStore = useProgramacionAdmintore();
@@ -35,8 +35,17 @@ const errorCarga = ref(false)
 const showUploadModal = ref(false)
 const carpetaSeleccionada = ref(null)
 const archivo = ref(null)
+const isRecargando = ref(false)
+
+const validacionEstado = ref(null)
+const infoEstado = ref(null)
+const mostrarAlertaEstado = ref(false)
 
 onMounted(async () => {
+  await cargarCarpetas()
+})
+
+const cargarCarpetas = async () => {
   try {
     await documentoStore.loadGetProgramacionByGrupo(props.id)
     const data = documentoStore.programacionPorGrupo
@@ -54,7 +63,7 @@ onMounted(async () => {
     errorCarga.value = true
     carpetas.value = []
   }
-})
+}
 
 const toggleCarpeta = (id) => {
   carpetasAbiertas.value[id] = !carpetasAbiertas.value[id]
@@ -69,16 +78,45 @@ const formatFecha = (fecha) => {
   })
 }
 
-const abrirModalSubir = (carpeta) => {
-  carpetaSeleccionada.value = carpeta;
+const abrirModalSubir = async (carpeta) => {
+  carpetaSeleccionada.value = carpeta
   console.log('carpeta seleccionada', carpeta)
-  showUploadModal.value = true;
+
+  // Verificar estado de la entrega antes de permitir subir
+  await verificarEstadoEntrega(carpeta.programacion.id)
+
+  showUploadModal.value = true
+}
+
+const verificarEstadoEntrega = async (idEntrega) => {
+  try {
+    const response = await axios.get(`/entrega_docente_estado/${idEntrega}`)
+
+    validacionEstado.value = response.data.validacion
+    infoEstado.value = response.data.info_estado
+
+    console.log('Estado de la entrega:', response.data)
+
+    // Si no está activa, mostrar alerta
+    if (!validacionEstado.value.activa) {
+      mostrarAlertaEstado.value = true
+    } else {
+      mostrarAlertaEstado.value = false
+    }
+
+  } catch (error) {
+    console.error('Error al verificar estado:', error)
+    showToast('Error al verificar el estado de la entrega', 'error')
+  }
 }
 
 const cerrarModal = () => {
-  showUploadModal.value = false;
-  carpetaSeleccionada.value = null;
-  archivo.value = null;
+  showUploadModal.value = false
+  carpetaSeleccionada.value = null
+  archivo.value = null
+  validacionEstado.value = null
+  infoEstado.value = null
+  mostrarAlertaEstado.value = false
 }
 
 const handleFileUpload = (event) => {
@@ -88,52 +126,89 @@ const handleFileUpload = (event) => {
 
 const subirArchivo = async () => {
   if (!archivo.value) {
-    showToast('No hay archivo seleccionado.', 'warning');
-    return;
+    showToast('No hay archivo seleccionado.', 'warning')
+    return
+  }
+
+  // ✅ Verificar si puede subir antes de intentar
+  if (!validacionEstado.value?.activa) {
+    showToast(validacionEstado.value?.mensaje || 'La entrega no está disponible', 'error')
+    return
   }
 
   try {
-    const formData = new FormData();
-    formData.append('file', archivo.value);
-    formData.append('parentFolderId', carpetaSeleccionada.value.id);
-    formData.append('id_entrega', carpetaSeleccionada.value.programacion.id);
+    const formData = new FormData()
+    formData.append('file', archivo.value)
+    formData.append('parentFolderId', carpetaSeleccionada.value.id)
+    formData.append('id_entrega', carpetaSeleccionada.value.programacion.id)
 
-    // Subir archivo
-    const response = await uploadArchivo(formData);
+    // ✅ Subir archivo al nuevo endpoint
+    const response = await uploadArchivo(formData)
 
-    // Actualizar la carpeta seleccionada con el nuevo archivo
-    const carpetaIndex = carpetas.value.findIndex(c => c.id === carpetaSeleccionada.value.id);
+    console.log('Respuesta de subida:', response)
 
-    if (carpetaIndex !== -1) {
-      // Inicializar array de archivos si no existe
-      if (!Array.isArray(carpetas.value[carpetaIndex].archivos)) {
-        carpetas.value[carpetaIndex].archivos = [];
+    // ✅ Verificar si la respuesta es exitosa
+    if (response.success) {
+      // Actualizar la carpeta seleccionada con el nuevo archivo
+      const carpetaIndex = carpetas.value.findIndex(c => c.id === carpetaSeleccionada.value.id)
+
+      if (carpetaIndex !== -1) {
+        // Inicializar array de archivos si no existe
+        if (!Array.isArray(carpetas.value[carpetaIndex].archivos)) {
+          carpetas.value[carpetaIndex].archivos = []
+        }
+
+        // ✅ Agregar el archivo desde response.data.archivo
+        if (response.data?.archivo) {
+          carpetas.value[carpetaIndex].archivos.push(response.data.archivo)
+        }
+
+        showToast('Archivo subido exitosamente', 'success')
+      } else {
+        console.error('No se encontró la carpeta seleccionada')
+        showToast('Error: carpeta no encontrada', 'error')
       }
 
-      // Agregar response directamente (es el archivo de Google Drive)
-      carpetas.value[carpetaIndex].archivos.push(response);
+      // Recargar datos actualizados
+      await cargarCarpetas()
 
-      showToast('Archivo subido exitosamente', 'success');
+      cerrarModal()
     } else {
-      console.error('No se encontró la carpeta seleccionada');
-      showToast('Error: carpeta no encontrada', 'error');
+      showToast(response.message || 'Error al subir el archivo', 'error')
     }
 
-    // Recargar datos actualizados
-    await documentoStore.loadGetProgramacionByGrupo(props.id);
-    const data = documentoStore.programacionPorGrupo;
-    if (data && typeof data === 'object') {
-      carpetas.value = data.subcarpetas || [];
-    }
-
-    cerrarModal();
   } catch (error) {
-    console.log(error)
-    // console.error('Error al subir archivo:', error);
-    const msg = error.response?.data?.error || 'Error al subir el archivo';
-    showToast(msg, 'error');
+    console.error('Error al subir archivo:', error)
+
+    // ✅ Manejo mejorado de errores con los códigos del backend
+    const errorData = error.response?.data
+    const errorMsg = errorData?.error || 'Error al subir el archivo'
+    const errorCode = errorData?.codigo
+
+    // Mostrar información adicional si está disponible
+    if (errorData?.info_estado) {
+      console.log('Info de estado:', errorData.info_estado)
+    }
+
+    // Mensajes específicos según el código de error
+    switch (errorCode) {
+      case 'ESTADO_INACTIVO':
+        showToast('❌ La entrega no está activa', 'error')
+        break
+      case 'YA_CUMPLIDA':
+        showToast('✅ Ya realizaste esta entrega', 'warning')
+        break
+      case 'NO_INICIADA':
+        showToast('⏰ La entrega aún no ha comenzado', 'warning')
+        break
+      case 'FINALIZADA':
+        showToast('⏱️ La entrega ha finalizado', 'error')
+        break
+      default:
+        showToast(errorMsg, 'error')
+    }
   }
-};
+}
 
 const recargarDocumentos = async () => {
   isRecargando.value = true
@@ -163,6 +238,42 @@ const eliminarArchivo = async (carpeta, archivo) => {
   });
 }
 
+const formatearTiempoRestante = (tiempoRestante) => {
+  if (!tiempoRestante) return ''
+
+  const { dias, horas, minutos, es_pasado } = tiempoRestante
+
+  if (es_pasado) {
+    return 'Tiempo agotado'
+  }
+
+  if (dias > 0) {
+    return `${dias} día${dias > 1 ? 's' : ''} ${horas}h`
+  }
+
+  if (horas > 0) {
+    return `${horas}h ${minutos}m`
+  }
+
+  return `${minutos} minutos`
+}
+
+const getColorEstado = (codigo) => {
+  switch (codigo) {
+    case 'ACTIVA':
+      return 'text-green-600 dark:text-green-400'
+    case 'NO_INICIADA':
+      return 'text-blue-600 dark:text-blue-400'
+    case 'FINALIZADA':
+    case 'ESTADO_INACTIVO':
+      return 'text-red-600 dark:text-red-400'
+    case 'YA_CUMPLIDA':
+      return 'text-gray-600 dark:text-gray-400'
+    default:
+      return 'text-gray-600 dark:text-gray-400'
+  }
+}
+
 const {
   query,
   orderBy,
@@ -183,7 +294,6 @@ const {
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-grupos', 'ver-grupos', 'ver-mis-modulos']">
-
     <div class="p-4 md:p-6 space-y-6">
       <!-- Header -->
       <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -194,7 +304,6 @@ const {
         <div class="flex items-center gap-3">
           <SearchBar v-if="!documentoStore.ProgramacionByGrupoLoading && carpetas.length > 0"
             :totalResultados="carpetasOrdenadas.length" :campoOrden="'nombre'" @search="filtrarCarpetas" />
-
 
           <button @click="recargarDocumentos"
             class="bg-cetpro hover:bg-cetpro-dark text-cetpro-text px-3 py-2 rounded-md flex items-center gap-2 transition-colors duration-300"
@@ -211,7 +320,7 @@ const {
 
       <!-- Loading -->
       <div v-if="documentoStore.ProgramacionByGrupoLoading"
-        class=" dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 text-center py-16">
+        class="dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 text-center py-16">
         <FolderIcon class="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600" />
         <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
           Cargando carpetas...
@@ -219,7 +328,7 @@ const {
       </div>
 
       <!-- Carpetas -->
-      <div v-else class=" dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div v-else class="dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event"
           v-if="carpetasPaginadas?.length > 0">
           <THead class="hidden">
@@ -230,14 +339,13 @@ const {
 
           <TBody>
             <template v-for="carpeta in carpetasPaginadas" :key="carpeta.id">
-
               <!-- Fila principal -->
               <Tr @click="toggleCarpeta(carpeta.id)"
                 class="dark:bg-cetpro-dark hover:bg-cetpro-dark dark:hover:bg-cetpro cursor-pointer transition-colors duration-200 border-b border-white dark:border-cetpro">
-                <Td colspan="3" class=" bg-cetpro  px-4 py-3 font-bold uppercase tracking-wider text-sm">
+                <Td colspan="3" class="bg-cetpro px-4 py-3 font-bold uppercase tracking-wider text-sm">
                   <div class="flex items-center justify-between text-cetpro-text">
                     <div class="flex items-center gap-2">
-                      <FolderIcon class="h-6 w-6 text-cetpro-text " />
+                      <FolderIcon class="h-6 w-6 text-cetpro-text" />
                       <div>
                         <span>{{ carpeta.nombre }}</span>
                         <p class="text-xs text-gray-100 dark:text-gray-300 flex items-center gap-1 mt-1">
@@ -256,24 +364,21 @@ const {
                       'h-6 w-6 text-cetpro-text transition-transform duration-300',
                       { 'rotate-180': carpetasAbiertas[carpeta.id] }
                     ]" />
-
                   </div>
-
                 </Td>
-
               </Tr>
 
               <!-- Fila expandida -->
               <Tr v-if="carpetasAbiertas[carpeta.id]" class="bg-white dark:bg-gray-800 border-t-0">
                 <Td colspan="3" class="p-0">
-                  <TransitionGroup name="list" tag="div" class=" grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <TransitionGroup name="list" tag="div" class="grid md:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
                     <div v-for="archivo in carpeta.archivos" :key="archivo.id"
                       class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition">
                       <div class="flex items-center gap-2 overflow-hidden">
                         <img :src="iconoArchivo(archivo.mimeType)" alt="icon" class="h-5 w-5 flex-shrink-0" />
                         <span class="text-gray-700 dark:text-gray-200 text-sm truncate max-w-[180px]"
-                          :title="archivo.nombre">
-                          {{ archivo.nombre }}
+                          :title="archivo.name || archivo.nombre">
+                          {{ archivo.name || archivo.nombre }}
                         </span>
                       </div>
 
@@ -306,9 +411,8 @@ const {
 
         <!-- No hay carpetas -->
         <div v-else class="text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-            aria-hidden="true">
-            <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
           </svg>
           <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
@@ -319,15 +423,65 @@ const {
           </p>
         </div>
 
-
+        <!-- ✅ MODAL MEJORADO CON VALIDACIONES -->
         <div v-if="showUploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
             <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Subir archivo a: {{ carpetaSeleccionada?.nombre }}
             </h2>
 
+            <!-- ✅ ALERTA DE ESTADO -->
+            <div v-if="mostrarAlertaEstado && validacionEstado" :class="[
+              'mb-4 p-4 rounded-lg flex items-start gap-3',
+              validacionEstado.codigo === 'FINALIZADA' || validacionEstado.codigo === 'ESTADO_INACTIVO'
+                ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                : 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
+            ]">
+              <ExclamationTriangleIcon :class="[
+                'h-6 w-6 flex-shrink-0',
+                validacionEstado.codigo === 'FINALIZADA' || validacionEstado.codigo === 'ESTADO_INACTIVO'
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-yellow-600 dark:text-yellow-400'
+              ]" />
+              <div>
+                <p :class="getColorEstado(validacionEstado.codigo)" class="font-semibold text-sm">
+                  {{ validacionEstado.mensaje }}
+                </p>
+                <p v-if="infoEstado" class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  Estado: {{ infoEstado.estado_texto }}
+                </p>
+              </div>
+            </div>
+
+            <!-- ✅ INFO DE TIEMPO RESTANTE (solo si está activa) -->
+            <div v-if="validacionEstado?.activa && infoEstado?.tiempo_restante"
+              class="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <div class="flex items-center gap-2">
+                <ClockIcon class="h-5 w-5 text-green-600 dark:text-green-400" />
+                <div>
+                  <p class="text-sm font-semibold text-green-700 dark:text-green-300">
+                    Tiempo restante
+                  </p>
+                  <p class="text-xs text-green-600 dark:text-green-400">
+                    {{ formatearTiempoRestante(infoEstado.tiempo_restante) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ✅ INFO SI YA CUMPLIÓ -->
+            <div v-if="infoEstado?.ha_cumplido"
+              class="mb-4 p-3 bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 rounded-lg">
+              <div class="flex items-center gap-2">
+                <CheckCircleIcon class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                  Ya realizaste esta entrega
+                </p>
+              </div>
+            </div>
+
             <!-- Input del archivo -->
-            <FormInputFile v-model="archivo" :multiple="false" class="mb-4" />
+            <FormInputFile v-model="archivo" :multiple="false" class="mb-4" :disabled="!validacionEstado?.activa" />
 
             <div class="flex justify-end gap-2">
               <!-- Botón Cancelar -->
@@ -340,7 +494,7 @@ const {
               <!-- Botón Subir con loading -->
               <button @click="subirArchivo"
                 class="px-4 py-2 bg-cetpro text-white rounded hover:bg-cetpro-dark flex items-center justify-center gap-2 disabled:opacity-50"
-                :disabled="uploadLoading">
+                :disabled="uploadLoading || !validacionEstado?.activa">
                 <template v-if="uploadLoading">
                   <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 24 24">
@@ -349,26 +503,31 @@ const {
                   </svg>
                   Subiendo...
                 </template>
-                <template v-else>Subir</template>
+                <template v-else>
+                  {{ validacionEstado?.activa ? 'Subir' : 'No disponible' }}
+                </template>
               </button>
             </div>
           </div>
         </div>
-
-
       </div>
     </div>
   </AuthorizationFallback>
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.3s ease;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.list-enter-from {
   opacity: 0;
+  transform: translateY(-10px);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
 }
 </style>

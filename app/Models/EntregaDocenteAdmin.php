@@ -43,6 +43,71 @@ class EntregaDocenteAdmin extends Model
                 $model->id = (string) Str::uuid();
             }
         });
+
+        static::updating(function ($model) {
+
+            if ($model->isDirty('fecha_fin')) {
+
+                $fechaNueva = $model->fecha_fin;
+                $fechaOriginal = $model->getOriginal('fecha_fin');
+                $ahora = now('America/Lima');
+
+                // ---- 1. Si amplió la fecha -> activar todo normal ----
+                if ($fechaNueva->gt($fechaOriginal)) {
+
+                    $model->status = self::STATUS_ACTIVO;
+
+                    EntregaDocente::where('id_admin', $model->id)->update([
+                        'fecha_fin' => $fechaNueva,
+                        'estado'    => EntregaDocente::STATUS_ACTIVO,
+                    ]);
+
+                    return;
+                }
+
+                // ---- 2. Si redujo la fecha -> manejo especial con aplazamientos ----
+                if ($fechaNueva->lt($fechaOriginal)) {
+
+                    // Actualiza la fecha global
+                    $model->status = $ahora->gt($fechaNueva)
+                        ? self::STATUS_FINALIZADO
+                        : self::STATUS_ACTIVO;
+
+                    // Procesar docente por docente
+                    EntregaDocente::where('id_admin', $model->id)->get()->each(function ($entrega) use ($fechaNueva, $ahora) {
+
+                        // CASO 1: Tiene aplazamiento
+                        if ($entrega->fecha_aplazada) {
+
+                            $fechaAplazada = $entrega->fecha_aplazada;
+
+                            if ($fechaAplazada->gt($ahora)) {
+                                // Aplazamiento aún activo
+                                $entrega->update([
+                                    'fecha_fin' => $fechaNueva,
+                                    'estado' => EntregaDocente::STATUS_ACTIVO,
+                                ]);
+                            } else {
+                                // Aplazamiento vencido
+                                $entrega->update([
+                                    'fecha_fin' => $fechaNueva,
+                                    'estado' => EntregaDocente::STATUS_FINALIZADO,
+                                ]);
+                            }
+                        } else {
+                            // CASO 2: No tiene aplazamiento → usar fecha_fin_admin
+                            $entrega->update([
+                                'fecha_fin' => $fechaNueva,
+                                'estado' => $ahora->gt($fechaNueva)
+                                    ? EntregaDocente::STATUS_FINALIZADO
+                                    : EntregaDocente::STATUS_ACTIVO,
+                            ]);
+                        }
+                    }); // end each
+
+                } // end if fechaNueva < original
+            }
+        });
     }
 
     const STATUS_PENDIENTE   = 0;

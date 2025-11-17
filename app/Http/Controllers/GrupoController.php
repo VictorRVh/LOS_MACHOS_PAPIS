@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\NotificationService;
 use App\Models\CarpetasGrupoDrive;
 use App\Models\CarpetasPeriodoDrive;
 use App\Models\Docente;
@@ -10,6 +11,7 @@ use App\Models\Grupo;
 use App\Models\Modulo;
 use App\Models\Periodo;
 use App\Models\ProgramaEstudio;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -82,6 +84,19 @@ class GrupoController extends Controller
 
         // 1️⃣ Crear el grupo
         $grupo = Grupo::create($request->all());
+
+        $admins = User::whereHas('roles', function ($q) {
+            $q->where('name', 'coordinador');
+        })->get();
+
+        foreach ($admins as $admin) {
+            NotificationService::enviar(
+                $admin->id,
+                'Nuevo Grupo creado',
+                'Se ha creado el grupo: ' . $grupo->seccion . ' - ' . $grupo->turno,
+                '/grupos/' . $grupo->id
+            );
+        }
 
         try {
             // 2️⃣ Buscar la carpeta del período (madre)

@@ -178,11 +178,16 @@ const onSubmit = async () => {
   const horaActual = now.toTimeString().slice(0, 8);
   const horaFin = "23:59:59";
 
+  // const formatDateTime = (fecha, hora) => {
+  //   const date = new Date(fecha);
+  //   const year = date.getFullYear();
+  //   const month = String(date.getMonth() + 1).padStart(2, "0");
+  //   const day = String(date.getDate()).padStart(2, "0");
+  //   return `${year}-${month}-${day} ${hora}`;
+  // };
+
   const formatDateTime = (fecha, hora) => {
-    const date = new Date(fecha);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+    const [year, month, day] = fecha.split("-");
     return `${year}-${month}-${day} ${hora}`;
   };
 
@@ -202,7 +207,7 @@ const onSubmit = async () => {
       showToast(`Programación ${isEditing.value ? "actualizada" : "creada"} con éxito.`, "success");
       emit("form-submitted");
       await programacionDocumento.loadgetProgramacionSubidos(props.selectedPeriodoId);
-      
+
     }
   } catch (error) {
     console.log(error)
@@ -223,20 +228,20 @@ const onSubmit = async () => {
       <form @submit.prevent="onSubmit" class="space-y-4">
         <!-- Periodo -->
         <div>
-        <FormLabelError label="Periodo Académico *" :error="formErrors.id_periodo">
-        <BaseSelectGrupo v-model="formData.id_periodo" :options="periodos" label="nombre_periodo" value-prop="id"
-            placeholder="Seleccione un Periodo" />
-        </FormLabelError>
-      
+          <FormLabelError label="Periodo Académico *" :error="formErrors.id_periodo">
+            <BaseSelectGrupo v-model="formData.id_periodo" :options="periodos" label="nombre_periodo" value-prop="id"
+              placeholder="Seleccione un Periodo" />
+          </FormLabelError>
+
         </div>
 
         <!-- ✅ Tipo de entrega -->
         <div>
-        <FormLabelError label="Tipo de Entrega *" :error="formErrors.tipo_entrega">
-                  <BaseSelectGrupo v-model="formData.tipo_entrega" :options="tiposEntrega" label="nombre" value-prop="id"
-            placeholder="Seleccione tipo de entrega"  />
-        </FormLabelError>
-  
+          <FormLabelError label="Tipo de Entrega *" :error="formErrors.tipo_entrega">
+            <BaseSelectGrupo v-model="formData.tipo_entrega" :options="tiposEntrega" label="nombre" value-prop="id"
+              placeholder="Seleccione tipo de entrega" />
+          </FormLabelError>
+
         </div>
 
         <!-- 👇 Campo dinámico si elige “Otro” -->
@@ -249,12 +254,11 @@ const onSubmit = async () => {
         <div class="grid grid-cols-2 gap-4">
           <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio *" type="date"
             :error="formErrors.fecha_inicio" />
-          <FormInput v-model="formData.fecha_fin" label="Fecha de Fin *" type="date"
-            :error="formErrors.fecha_fin" />
+          <FormInput v-model="formData.fecha_fin" label="Fecha de Fin *" type="date" :error="formErrors.fecha_fin" />
         </div>
 
         <!-- Publicar -->
-      
+
 
         <!-- Botones -->
         <div class="flex gap-2 pt-2">

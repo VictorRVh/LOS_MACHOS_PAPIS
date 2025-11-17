@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('entregas:actualizar-estado')->daily();
         $schedule->command('entregas:actualizar-estado')->everyMinute();
         $schedule->command('notas:actualizar-estado')->everyMinute();
+        $schedule->command('entregas:notificar-incumplidos')->everyMinute();
     }
 
     /**

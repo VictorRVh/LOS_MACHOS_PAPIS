@@ -98,11 +98,11 @@ const onSubmit = async () => {
   formErrors.value = {};
 
   // Validación Yup
-  const { validated, errors } = await runYupValidation(schema, form.value);
-  if (!validated) {
-    formErrors.value = errors;
-    return;
-  }
+  // const { validated, errors } = await runYupValidation(schema, form.value);
+  // if (!validated) {
+  //   formErrors.value = errors;
+  //   return;
+  // }
 
   // Armado del FormData
   const formData = new FormData();

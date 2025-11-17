@@ -1,11 +1,11 @@
 <script setup>
 import { inject, ref, computed, watch, onUnmounted } from 'vue';
 import userMenu from './UserMenu.vue';
-import Notificacion from '@/pages/Notificacion.vue';
 import useAppRouter from '../../composables/useAppRouter';
 import useUserStore from '../../store/useUserStore';
 import useHttpRequest from '../../composables/useHttpRequest';
 import Breadcrumbs from '../../components/breadcrumbs/Breadcrumbs.vue';
+import Notificacion from '../../pages/Notificacion.vue';
 import { useLayoutStore } from '@/store/useLayoutStore';
 import { 
     ArrowLeftIcon, 

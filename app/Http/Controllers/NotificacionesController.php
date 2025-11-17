@@ -12,8 +12,31 @@ class NotificacionesController extends Controller
      */
     public function index()
     {
-        $notificaciones = Notificaciones::with('usuario')->get();
+        $userId = auth()->id();
+
+        $notificaciones = Notificaciones::where('id_usuario', $userId)
+            ->orderBy('created_at', 'desc')
+            ->take(20)
+            ->get();
+
         return response()->json($notificaciones);
+    }
+
+    public function marcarTodo()
+    {
+        Notificaciones::where('user_id', auth()->id())
+            ->update(['leido' => 1]);
+
+        return response()->json(['message' => 'Notificaciones marcadas como leídas']);
+    }
+
+    public function marcarLeido($id)
+    {
+        Notificaciones::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->update(['leido' => 1]);
+
+        return response()->json(['message' => 'Notificación marcada']);
     }
 
     // GET /api/notificaciones/{id}

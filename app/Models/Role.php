@@ -14,12 +14,13 @@ class Role extends Model
     public function users()
     {
         return $this->belongsToMany(
-            Role::class,
+            User::class,
             'role_user',
             'role_id',
             'user_id'
         );
     }
+
 
     public function permissions()
     {

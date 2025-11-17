@@ -869,6 +869,16 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
+    Route::get('/notificaciones/marcar-todo', [
+        \App\Http\Controllers\NotificacionesController::class,
+        'marcarTodo',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    
+    Route::get('/notificaciones/leer/{id}', [
+        \App\Http\Controllers\NotificacionesController::class,
+        'marcarLeido',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
     Route::post('notificaciones', [
         \App\Http\Controllers\NotificacionesController::class,
         'store',

@@ -19,7 +19,7 @@ class ActividadesRecientes extends Model
         'id_role',
         'id_usuario',
         'descripcion',
-        'fecha',
+        'accion'
     ];
 
     protected static function boot()

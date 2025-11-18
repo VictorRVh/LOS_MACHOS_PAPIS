@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Models\ActividadesRecientes;
 use App\Models\User;
 
 trait Helpers
@@ -52,6 +53,25 @@ trait Helpers
         $user->makeHidden(['updated_at', 'email_verified_at']);
 
         return $user;
+    }
+
+
+    // insertar actividades .. leo csmr ni me lo toques 
+    public function registrarActividad($descripcion,$action)
+    {
+        $user = auth()->user();
+
+        // Tomamos el primer rol del usuario (si tiene)
+        $rol = $user->roles()->first();
+        $idRole = $rol ? $rol->id : null;
+
+        ActividadesRecientes::create([
+            'id_role'    => $idRole,       // puede ser null
+            'id_usuario' => $user->id,
+            'descripcion' => $descripcion,
+            'accion' => $action,
+            // no necesitamos 'fecha', usamos created_at
+        ]);
     }
 
     // public function extractPermissionsFromUser(User $user, $includePermissions = true): User

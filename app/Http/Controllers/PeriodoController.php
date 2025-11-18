@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\CarpetasPeriodoDrive;
 use App\Models\Periodo;
 use Illuminate\Http\Request;
+use App\Traits\Helpers;
+
 
 class PeriodoController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    use Helpers;
     public function index()
     {
         $periodos = Periodo::where('is_deleted', 0)
@@ -79,11 +82,21 @@ class PeriodoController extends Controller
                     'drive_folder_id' => $data->id,
                     'nombre_carpeta' => $periodo->nombre_periodo,
                 ]);
+
+                $this->registrarActividad("Creó el periodo '{$periodo->nombre_periodo}'", "Creado");
             } else {
-                \Log::error('❌ Error creando carpeta del periodo: ' . $response->getContent());
+
+                throw new \Exception(
+                    '❌ Error creando carpeta del periodo:' . $response->getContent(),
+                    13333
+                );
             }
         } catch (\Exception $e) {
-            \Log::error('⚠️ Error al crear carpeta del periodo en Drive: ' . $e->getMessage());
+
+            throw new \Exception(
+                '⚠️ Error al crear carpeta del periodo en Drive: ' . $e->getMessage(),
+                13333
+            );
         }
 
         return response()->json($periodo, 201);
@@ -122,11 +135,36 @@ class PeriodoController extends Controller
             'status' => 'sometimes|in:0,1,2,3',
         ]);
 
-        // Actualizar datos del periodo en BD
+        // Guardamos valores previos
+        $nombreAnterior = $periodo->nombre_periodo;
+        $statusAnterior = $periodo->status;
+
+        // Actualizamos
         $periodo->update($request->all());
 
-        // Si se envió un nuevo nombre, renombrar carpeta en Drive
-        if ($request->has('nombre_periodo')) {
+        // 🔥 Detectar cambios reales
+        $cambios = [];
+
+        if ($request->has('nombre_periodo') && $nombreAnterior != $periodo->nombre_periodo) {
+            $cambios[] = "nombre del periodo  {$nombreAnterior} a {$periodo->nombre_periodo} ";
+        }
+
+        if ($request->has('status') && $statusAnterior != $periodo->status) {
+
+            $estadoAnteriorTxt = $statusAnterior == 0 ? 'desactivado' : 'activado';
+            $estadoNuevoTxt = $periodo->status == 0 ? 'desactivado' : 'activado';
+
+            $cambios[] = "estado del periodo {$periodo->nombre_periodo} de {$estadoAnteriorTxt} a {$estadoNuevoTxt}";
+        }
+
+        // 🔥 Registrar actividad si hubo cambios reales
+        if (!empty($cambios)) {
+            $lista = implode(" y ", $cambios);
+            $this->registrarActividad("Actualizó el {$lista} ", "Actualizado");
+        }
+
+        // 🔧 Renombrar en Drive si el nombre cambió (pero sin registrar actividad)
+        if ($request->has('nombre_periodo') && $nombreAnterior != $periodo->nombre_periodo) {
             try {
                 $carpetaDrive = CarpetasPeriodoDrive::where('id_periodo', $periodo->id)->first();
 
@@ -141,16 +179,15 @@ class PeriodoController extends Controller
 
                     if ($response->status() === 200) {
                         $data = $response->getData();
-                        // Actualizar nombre de la carpeta en BD
                         $carpetaDrive->update([
                             'nombre_carpeta' => $data->name,
                         ]);
                     } else {
-                        \Log::error('❌ Error al renombrar carpeta en Drive: ' . $response->getContent());
+                        throw new \Exception('Error al renombrar carpeta: ' . $response->getContent(), 13333);
                     }
                 }
             } catch (\Exception $e) {
-                \Log::error('⚠️ Error al intentar renombrar carpeta del periodo en Drive: ' . $e->getMessage());
+                throw new \Exception('Error al renombrar carpeta del periodo: ' . $e->getMessage(), 13333);
             }
         }
 
@@ -163,13 +200,18 @@ class PeriodoController extends Controller
     {
         $periodo = Periodo::findOrFail($id);
 
-        // Cambiar estado a Anulado (3)
+        // Guardar el nombre para el log
+        $nombre = $periodo->nombre_periodo;
+
+        // Cambiar estado a Anulado (soft delete)
         $periodo->is_deleted = 1;
         $periodo->save();
 
+        // 🔥 Registrar actividad
+        $this->registrarActividad("Anuló el periodo '{$nombre}' ", "Eliminado");
+
         return response()->json([
             'message' => 'Periodo anulado correctamente (no eliminado físicamente).',
-            'data' => $periodo
-        ]);
+        ], 204);
     }
 }

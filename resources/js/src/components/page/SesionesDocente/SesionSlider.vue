@@ -21,7 +21,7 @@ const props = defineProps({
   sesion: Object,
 });
 
-const emit = defineEmits(["hide", "save"]);
+const emit = defineEmits(["hide"]);
 
 const capacidadStore = useCapacidadTerminalStore();
 const { runYupValidation } = useValidation();
@@ -42,7 +42,7 @@ const initialForm = () => ({
   nombre_sesion: "",
   descripcion: "",
   id_capacidad: "",
-  id_entrega: "",
+  id_entrega: props.sesion?.id || "",
   archivo_sesion: null,
 });
 
@@ -97,12 +97,12 @@ const onSubmit = async () => {
 
   formErrors.value = {};
 
-  // Validación Yup
-  // const { validated, errors } = await runYupValidation(schema, form.value);
-  // if (!validated) {
-  //   formErrors.value = errors;
-  //   return;
-  // }
+  //Validación Yup
+  const { validated, errors } = await runYupValidation(schema, form.value);
+  if (!validated) {
+    formErrors.value = errors;
+    return;
+  }
 
   // Armado del FormData
   const formData = new FormData();
@@ -121,19 +121,22 @@ const onSubmit = async () => {
     formData.append("archivo_sesion", form.value.archivo_sesion);
   }
 
-  formData.append("_method", "PATCH");
+  let response;
 
-  // Request
-  const response = isEditing.value
-    ? await updateSesionFormData(props.blockToEdit.id, formData)
-    : await createSesion(formData);
+  if (isEditing.value) {
+    // SOLO PARA ACTUALIZAR
+    formData.append("_method", "PATCH");
+    response = await updateSesionFormData(props.blockToEdit.id, formData);
+  } else {
+    // CREAR
+    response = await createSesion(formData);
+  }
 
   if (response?.sesion?.id) {
     closeAndReset();
     await programacionSesion.loadSesiones(props.sesion?.id);
     showToast(`Sesión ${isEditing.value ? "actualizada" : "creada"} correctamente.`);
-    emit("save", response);
-    emit("clear-selection"); // limpia el calendario
+    emit("hide")
   }
 };
 

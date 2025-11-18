@@ -306,12 +306,10 @@ const onSubmit = async () => {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormInput v-model="formData.fecha_entrega_acta" label="Entrega Acta" type="date"
             :error="formErrors?.fecha_entrega_acta" />
-          <FormLabelError label="Sección" required>
+          <FormLabelError label="Sección" :error="formErrors?.seccion" required>
 
             <BaseSelectGrupo v-model="formData.seccion" :options="secciones" label="name"
               placeholder="Seleccione una sección" style="--vs-dropdown-max-height: 90px" />
-
-
           </FormLabelError>
 
           <CheckBox v-model="formData.status" label="Habilitado" class="mt-8 pl-4 flex justify-center items-center" />

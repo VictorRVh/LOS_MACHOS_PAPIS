@@ -19,7 +19,12 @@ class ActulizarEstadoNotas extends Command
         $this->info('');
 
         // Obtener todas las capacidades terminales activas
-        $capacidades = CapacidadTerminal::where('status', 1)->get();
+        // $capacidades = CapacidadTerminal::where('status', 1)->get();
+        $capacidades = CapacidadTerminal::whereIn('status', [
+            CapacidadTerminal::STATUS_PENDIENTE,
+            CapacidadTerminal::STATUS_ACTIVO
+        ])->get();
+
 
         if ($capacidades->isEmpty()) {
             $this->warn('⚠️  No hay capacidades terminales activas.');

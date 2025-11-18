@@ -17,6 +17,7 @@ import usePeriodoStatusStore from "../../store/Periodo/usePeriodoStatusStore";
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import useProgramacionAdmintore from "../../store/Documento/useDocumentoStore";
+import PublicarEntregaModal from "../../components/ui/PublicarEntregaModal.vue";
 
 const router = useRouter();
 const periodoStore = usePeriodoStatusStore();
@@ -26,10 +27,16 @@ const { showToast, showConfirmModal } = useModalToast();
 const { destroy, loading } = useHttpRequest("/entrega_docente_admin");
 
 const { update: updateDocente, updating } = useHttpRequest('crear_grupos');
+const { update: storeGrupoPersonalizado } = useHttpRequest('crear_grupos_personalizado');
 // 🔹 Estados
 const selectedPeriodo = ref(null);
 const programaciones = ref([]);
 const programacionParaEditar = ref(null);
+
+const gruposPorPeriodo = ref([]);
+const modalPublicarAbierto = ref(false);
+const modalPublicarData = ref(null);
+
 
 // 🔹 Función para traer programaciones por periodo
 const fetchProgramaciones = async (periodoId) => {
@@ -199,6 +206,72 @@ const createSubGrupos = (prog) => {
   );
 };
 
+const abrirModalPublicar = async (prog) => {
+  try {
+    // Cargar grupos por período
+    await documentoProgramado.loadGruposByPeriodo(selectedPeriodo.value);
+    gruposPorPeriodo.value = documentoProgramado.gruposByPeriodo
+
+    // Guardar la programación seleccionada
+    modalPublicarData.value = prog;
+
+    // Abrir modal
+    modalPublicarAbierto.value = true;
+
+  } catch (error) {
+    console.error("Error al abrir modal:", error);
+    showToast("No se pudieron cargar los grupos.", "error");
+  }
+};
+
+
+const publicarMasivo = async (prog) => {
+  try {
+    updating.value = true;
+
+    const response = await updateDocente(prog.id);
+
+    if (!response) {
+      return showToast("No se puede publicar masivamente.", "warning");
+    }
+
+    showToast("Publicación masiva realizada correctamente", "success");
+    modalPublicarAbierto.value = false;
+    await fetchProgramaciones(selectedPeriodo.value);
+
+  } catch (error) {
+    console.error(error);
+    showToast("Error en la publicación masiva.", "error");
+  } finally {
+    updating.value = false;
+  }
+};
+
+const publicarPersonalizado = async (prog, gruposSeleccionados) => {
+  try {
+    const response = await storeGrupoPersonalizado(prog.id, {
+      grupos: gruposSeleccionados
+    });
+
+    if (!response) {
+      return showToast("No se pudo publicar para los grupos seleccionados.", "warning");
+    }
+
+    showToast("Publicación personalizada realizada correctamente.", "success");
+
+    modalPublicarAbierto.value = false;
+    await fetchProgramaciones(selectedPeriodo.value);
+
+  } catch (error) {
+    console.error(error);
+    showToast(
+      error.response?.data?.message || "Ocurrió un error al publicar.",
+      "error"
+    );
+  }
+};
+
+
 </script>
 
 
@@ -283,16 +356,13 @@ const createSubGrupos = (prog) => {
                     class="px-2 py-1 text-xs rounded-full font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300">Borrador</span>
                 </Td>
                 <Td class="text-center">
-                <Td class="text-center">
                   <MenuTable :actions="{
                     view: prog.mostrar !== 0,
                     edit: true,
                     custom1: prog.mostrar === 0,
                     delete: true
                   }" :labels="{ custom1: 'Publicar' }" entity-label="entrega" @view="verDetalleEntrega(prog)"
-                    @edit="editProgramacion(prog)" @delete="onDelete(prog)" @custom1="() => createSubGrupos(prog)" />
-                </Td>
-
+                    @edit="editProgramacion(prog)" @delete="onDelete(prog)" @custom1="() => abrirModalPublicar(prog)" />
                 </Td>
 
               </Tr>
@@ -300,7 +370,12 @@ const createSubGrupos = (prog) => {
           </Table>
         </div>
       </div>
+
+
     </div>
+    <PublicarEntregaModal v-if="modalPublicarAbierto" :programacion="modalPublicarData" :periodo-id="selectedPeriodo"
+      :grupos="gruposPorPeriodo" @close="modalPublicarAbierto = false" @masivo="publicarMasivo(modalPublicarData)"
+      @personalizado="publicarPersonalizado(modalPublicarData, $event)" />
   </AuthorizationFallback>
 </template>
 

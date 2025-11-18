@@ -281,6 +281,12 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'update',
     ])->middleware('permission:todo-acceso-documento-programado|editar-documento-programado');
+
+    Route::patch('crear_grupos_personalizado/{idAdminEntrega}', [
+        \App\Http\Controllers\EntregaDocenteAdminController::class,
+        'publicarSoloGrupo',
+    ])->middleware('permission:todo-acceso-documento-programado|editar-documento-programado');
+
     Route::patch('crear_grupos/{id}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'updateSubGrupo',
@@ -1019,7 +1025,11 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\MatriculaController::class,
         'getGruposPorEspecialidad',
     ])->middleware('permission:ver-especialidades');
-
+    
+    Route::get('grupoByPeriodo/{idPeriodo}', [
+        \App\Http\Controllers\EntregaDocenteAdminController::class,
+        'obtenerGruposPorPeriodo',
+    ])->middleware('permission:ver-especialidades');
 
     // PARA DOCENTES MODULOS ASIGNADOS
     Route::get('modulosAsignados', [

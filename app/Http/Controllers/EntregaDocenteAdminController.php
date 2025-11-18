@@ -372,4 +372,94 @@ class EntregaDocenteAdminController extends Controller
             'cantidad_grupos' => $grupos->count(),
         ]);
     }
+
+    public function publicarSoloGrupo(Request $request, $idAdminEntrega)
+    {
+        $request->validate([
+            'grupos' => 'required|array|min:1',
+            'grupos.*' => 'exists:grupo,id'
+        ]);
+
+        $adminEntrega = EntregaDocenteAdmin::findOrFail($idAdminEntrega);
+        $driveController = new GoogleDriveController();
+        $publicados = [];
+
+        foreach ($request->grupos as $idGrupo) {
+            $grupo = Grupo::with('carpetaDrive')->findOrFail($idGrupo);
+
+            // Crear entrega
+            $entregaDocente = EntregaDocente::create([
+                'id_grupo' => $idGrupo,
+                'fecha_inicio' => $adminEntrega->fecha_inicio,
+                'fecha_fin' => $adminEntrega->fecha_fin,
+                'estado' => $adminEntrega->status,
+                'id_admin' => $adminEntrega->id,
+                'observacion' => $adminEntrega->observacion ?? '',
+            ]);
+
+            if ($grupo->carpetaDrive && $grupo->carpetaDrive->drive_folder_id) {
+
+                $folderName = strtoupper($adminEntrega->nombre_entrega);
+
+                $response = $driveController->createFolder(new Request([
+                    'folderName' => $folderName,
+                    'parentFolderId' => $grupo->carpetaDrive->drive_folder_id,
+                ]));
+
+                if ($response->status() === 201) {
+                    $data = $response->getData();
+                    $folderId = $data->id ?? null;
+
+                    CarpetasEntregaDrive::create([
+                        'id_entrega_docente' => $entregaDocente->id,
+                        'id_grupo' => $grupo->id,
+                        'drive_folder_id' => $folderId,
+                        'nombre_carpeta' => $folderName
+                    ]);
+                } else {
+                    \Log::error('Error creando carpeta Drive en publicación individual: ' . $response->getContent());
+                }
+            }
+
+            $publicados[] = [
+                'grupo' => $grupo->id,
+                'entrega_docente_id' => $entregaDocente->id,
+            ];
+        }
+
+        $adminEntrega->update(['mostrar' => 1]);
+
+        return response()->json([
+            'message' => "Entrega publicada correctamente.",
+            'publicados' => $publicados
+        ]);
+    }
+
+    public function obtenerGruposPorPeriodo($idPeriodo)
+    {
+        $grupos = Grupo::with(['periodo', 'modulo', 'docente'])
+            ->where('id_periodo', $idPeriodo)
+            // ->where('status', 1) // si aplica
+            ->get();
+
+        // Formatear nombre_grupo
+        $gruposFormateados = $grupos->map(function ($grupo) {
+
+            $periodo = $grupo->periodo->nombre_periodo ?? 'SIN PERIODO';
+            $modulo = $grupo->modulo->nombre_modulo ?? 'SIN MÓDULO';
+
+            $seccion = $grupo->seccion ?? '-';
+            $turno = $grupo->turno ?? '-';
+            $seccionTurno = "{$seccion}{$turno}";
+
+            $docente = $grupo->docente->nombre_completo ?? 'SIN DOCENTE';
+
+            return [
+                'id' => $grupo->id,
+                'nombre_grupo' => "{$periodo} | {$modulo} | {$seccionTurno} | {$docente}"
+            ];
+        });
+
+        return response()->json($gruposFormateados);
+    }
 }

@@ -117,7 +117,6 @@ class ProgramaEstudioController extends Controller
             return response()->json(['message' => 'Programa de estudio no encontrado'], 404);
         }
 
-
         $request->validate([
             'id_ciclo' => 'sometimes|required|exists:ciclo_academico,id',
             'año' => ['sometimes', 'required', 'regex:/^\d{4}(-\d{4})?$/'],
@@ -126,46 +125,49 @@ class ProgramaEstudioController extends Controller
             'descripcion' => 'nullable|string|max:255',
         ]);
 
-        // Guardamos los valores anteriores
         $original = $programa->toArray();
-
-        // Actualizamos
         $programa->update($request->all());
 
-        // Campos que queremos mostrar en el registro
-        $camposImportantes = ['id_ciclo', 'año', 'numero_rd', 'status', 'descripcion'];
+        // Campos importantes y sus alias
+        $camposAlias = [
+            'id_ciclo' => 'Ciclo',
+            'año' => 'Año',
+            'numero_rd' => 'Número R.D.',
+            'status' => 'Estado',
+            'descripcion' => 'Descripción',
+        ];
 
         $cambios = [];
+
         foreach ($programa->getChanges() as $campo => $nuevoValor) {
-            if (in_array($campo, $camposImportantes)) {
+            if (isset($camposAlias[$campo])) {
                 $valorAnterior = $original[$campo] ?? 'N/A';
-                // Si es id_ciclo, podemos obtener el nombre del ciclo
+
+                // Si es id_ciclo, usamos el nombre del ciclo
                 if ($campo === 'id_ciclo') {
-                    $valorAnterior = optional($programa->ciclo()->find($valorAnterior))->nombre_ciclo ?? 'N/A';
+                    $valorAnterior = $request->nameCiclo ?? 'N/A';
                     $nuevoValor = optional($programa->ciclo)->nombre_ciclo ?? 'N/A';
                 }
-                $cambios[] = ucfirst($campo) . ": '{$valorAnterior}' → '{$nuevoValor}'";
+
+                $cambios[] = "{$camposAlias[$campo]}: '{$valorAnterior}' → '{$nuevoValor}'";
             }
         }
 
-        // Registrar actividad con formato bonito
+        // Registrar actividad con mensaje bonito
         if (!empty($cambios)) {
             $this->registrarActividad(
-                "Actualizó el programa '{$request->nameCiclo}' - Número R.D. : '{$programa->numero_rd}' (" . implode(', ', $cambios) . ")",
+                "Actualizó el programa '{$request->nameCiclo}' - Número R.D. '{$programa->numero_rd}' (" . implode(', ', $cambios) . ")",
                 "Actualizado"
             );
         } else {
             $this->registrarActividad(
-                "Actualizó el programa '{$request->nameCiclo}' Número R.D. : '{$programa->numero_rd}' sin cambios visibles",
+                "Actualizó el programa '{$request->nameCiclo}' - Número R.D. '{$programa->numero_rd}' sin cambios",
                 "Actualizado"
             );
         }
 
         return response()->json($programa);
     }
-
-
-
 
     // Eliminar un programa
     public function destroy($id)

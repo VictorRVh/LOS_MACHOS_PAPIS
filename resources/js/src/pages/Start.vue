@@ -139,7 +139,7 @@ onUnmounted(() => {
 
 
 <template>
-  <div class="p-4 sm:p-6 lg:p-8 space-y-6 font-sans bg-gray-50 dark:bg-slate-900">
+  <div class="p-4 sm:p-6 lg:p-8 space-y-2 font-sans bg-gray-50 dark:bg-slate-900">
 
 
     <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-md flex flex-wrap items-center justify-between gap-4">
@@ -207,11 +207,11 @@ onUnmounted(() => {
       </div>
 
       <!-- Contenedor con scroll -->
-      <div class="max-h-60 overflow-y-auto">
+      <div class="max-h-40 overflow-y-auto">
         <div v-if="currentActivities.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
           No hay actividad reciente para este rol en el rango de fechas seleccionado.
         </div>
-        <div v-else v-for="(actividad, index) in currentActivities" :key="index" class="flex gap-4">
+        <div v-else v-for="(actividad, index) in currentActivities" :key="index" class="flex gap-2">
           <div class="flex flex-col items-center">
             <!-- ICONO DE ACTIVIDAD RECIENTE CORREGIDO -->
             <div class="bg-gray-100 dark:bg-slate-700 rounded-full p-2">

@@ -66,6 +66,7 @@ const ocultarSliderAsistencia = () => {
 const holidays = ref([])
 const selectionEvents = ref([])
 const allEvents = ref([])
+const calendarKey = ref(0)
 
 watch(
   () => programacionSesion.sesiones,
@@ -193,6 +194,8 @@ const handleDateClick = ({ dateStr, date }) => {
 const clearSelection = () => {
   selectionEvents.value = [];
   datesForSlider.value = [];
+  selectedDates.value = [];
+calendarKey.value++   // 🔥 fuerza a recrear el calendario
 
   // 🔄 Si tienes referencia al calendario, forzamos el repaint
   const calendar = document.querySelector('.fc');
@@ -226,13 +229,14 @@ const confirmDelete = (bloque) => {
       if (wasDeleted) {
         showToast(`"${bloque.nombre_sesion}" eliminado correctamente.`)
         await programacionSesion.loadSesiones(sesionStore?.sesion?.id)
+
       }
     }
   )
 }
 
-const verSesion = (bloque) =>{
-  
+const verSesion = (bloque) => {
+
 }
 const isEditing = ref(false)
 
@@ -257,7 +261,7 @@ const handleEdit = (bloque) => {
 const cancelEdit = () => {
   isEditing.value = false
   clearSelection()
-  sliderData.value = null
+  // sliderData.value = null
 }
 
 const updateSession = () => {
@@ -290,7 +294,15 @@ const toggleCapacidad = (id) => {
     openCapacidades.value.add(id)
   }
 }
+const onSliderHide = () => {
+  hideSlider();          // 👈 Cerrar el slider
+  sliderData.value = null; // 👈 Reset al bloque en edición
+  isEditing.value = false
+  clearSelection()
+};
 
+
+console.log("dATOS SESION: ", sesionStore?.sesion)
 
 </script>
 
@@ -372,7 +384,7 @@ const toggleCapacidad = (id) => {
 
       <!-- Calendario con scroll -->
       <div class="calendar-scroll">
-        <BaseCalendar :events="[...allEvents, ...selectionEvents]" :holidays="holidays" @date-click="handleDateClick"
+        <BaseCalendar :key="calendarKey" :events="[...allEvents, ...selectionEvents]" :holidays="holidays" @date-click="handleDateClick"
           @event-click="handleEventClick" :idEntrega="sesionStore?.sesion?.id" />
       </div>
     </div>
@@ -455,7 +467,7 @@ const toggleCapacidad = (id) => {
       @save="clearSelection" />
 
     <SesionSlider :show="slider" :blockToEdit="sliderData ?? null" :idGrupo="id" :sesion="sesionStore?.sesion"
-      @hide="hideSlider" @save="handleSaveSesion" @clear-selection="clearSelection"
+      @hide="onSliderHide"
       :fechas-seleccionadas="datesForSlider" />
   </div>
 </template>

@@ -16,10 +16,16 @@ const useProgramacionAdmintore = defineStore('programacion_admin_c', () => {
         loading: ProgramacionByGrupoLoading,
         initialLoading: ProgramacionByGrupoFirstTimeLoading,
     } = useHttpRequest('/programacion_grupo');
+    
+    const {
+        show: getGrupoByGrupo,
+        loading: grupoByGrupoLoading,
+        initialLoading: grupoByGrupoFirstTimeLoading,
+    } = useHttpRequest('/grupoByPeriodo');
 
     const programacionAdmin = ref([]);
     const programacionPorGrupo = ref([]);
-
+    const gruposByPeriodo = ref([]);
 
     const loadgetProgramacionAdminByPerido = async (id) => {
         const res = await getProgramacionAdminByPerido(id);
@@ -29,6 +35,11 @@ const useProgramacionAdmintore = defineStore('programacion_admin_c', () => {
     const loadGetProgramacionByGrupo = async (id) => {
         const res = await getProgramacionByGrupo(id);
         programacionPorGrupo.value = res;
+    };
+    
+    const loadGruposByPeriodo = async (id) => {
+        const res = await getGrupoByGrupo(id);
+        gruposByPeriodo.value = res;
     };
 
     return {
@@ -40,7 +51,10 @@ const useProgramacionAdmintore = defineStore('programacion_admin_c', () => {
         loadGetProgramacionByGrupo,
         programacionPorGrupo,
         ProgramacionByGrupoLoading,
-        ProgramacionByGrupoFirstTimeLoading
+        ProgramacionByGrupoFirstTimeLoading,
+
+        loadGruposByPeriodo,
+        gruposByPeriodo
     };
 });
 

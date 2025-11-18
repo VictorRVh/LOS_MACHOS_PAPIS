@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_role');
             $table->unsignedBigInteger('id_usuario');
             $table->string('descripcion');
-            $table->date('fecha');
+            $table->string('accion');
 
             $table->foreign('id_usuario')
                 ->references('id')->on('users')

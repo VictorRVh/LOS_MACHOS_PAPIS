@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\PersonalAdministrativo;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Traits\Helpers;
 
 class PersonalAdministrativoController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    use Helpers;
     public function index()
     {
         // Obtener todos los usuarios que NO sean docentes
@@ -67,6 +69,7 @@ class PersonalAdministrativoController extends Controller
 
         $item = PersonalAdministrativo::create($request->all());
 
+        $this->registrarActividad("Creó el personal '{$item->usuario->name}'", "Creado");
         return response()->json([
             'message' => 'Datos del personal creado correctamente',
             'data' => $item
@@ -101,7 +104,7 @@ class PersonalAdministrativoController extends Controller
 
 
         $item->update($request->all());
-
+        $this->registrarActividad("Actualizó el personal '{$item->usuario->name}'", "Actualizado");
         return response()->json([
             'message' => 'Datos del personal actualizado correctamente',
             'data' => $item
@@ -118,7 +121,7 @@ class PersonalAdministrativoController extends Controller
         }
 
         $item->delete();
-
+        $this->registrarActividad("Eliminó el personal '{$item->usuario->name}'", "Eliminado");
         return response()->json(['message' => 'Datos del personal eliminado correctamente']);
     }
 }

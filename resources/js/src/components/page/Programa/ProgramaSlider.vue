@@ -31,8 +31,8 @@ const { store: createPrograma, update: updatePrograma, saving, updating } = useH
 
 const requiredPermissions = computed(() =>
   props.programa?.id
-    ? ["todo-acceso-roles", "editar-roles"]
-    : ["todo-acceso-roles", "crear-roles"]
+    ? ["todo-acceso-programas", "editar-programas"]
+    : ["todo-acceso-programas", "crear-programas"]
 );
 
 const title = computed(() =>

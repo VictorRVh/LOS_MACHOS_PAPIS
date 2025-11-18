@@ -34,6 +34,7 @@ const onDelete = (periodo) => {
     if (!confirmed) return;
 
     const isDeleted = await deletePeriodo(periodo?.id);
+    console.log(isDeleted)
     if (isDeleted) {
       showToast(`Periodo "${periodo?.nombre_periodo}" eliminado exitosamente...`);
       periodosStore.loadPeriodos();

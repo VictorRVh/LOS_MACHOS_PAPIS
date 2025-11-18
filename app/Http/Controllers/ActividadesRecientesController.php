@@ -12,9 +12,33 @@ class ActividadesRecientesController extends Controller
      */
     public function index()
     {
-        $actividades = ActividadesRecientes::with(['usuario', 'rol'])->orderBy('fecha', 'desc')->get();
+        $actividades = ActividadesRecientes::with(['usuario', 'rol'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($act) {
+
+                $nombreCompleto = trim(
+                    ($act->usuario->name ?? '') . ' ' .
+                        ($act->usuario->apellido_paterno ?? '') . ' ' .
+                        ($act->usuario->apellido_materno ?? '')
+                );
+
+                return [
+                    'role'   => $act->rol->name ?? 'sin-rol',
+
+                    'actor'  => strtoupper($act->rol->name ?? 'Usuario')
+                        . ' | ' . $nombreCompleto,
+
+                    'accion' => $act->accion,
+                    'detalle' => $act->descripcion,
+                    'created_at' => $act->created_at,
+                ];
+            });
+
         return response()->json($actividades);
     }
+
+
 
     // GET /api/actividades-recientes/{id}
     public function show($id)

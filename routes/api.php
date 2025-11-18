@@ -221,7 +221,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('ciclo_academico', [
         \App\Http\Controllers\CicloAcademicoController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-programas|ver-programas');
 
     Route::post('ciclo_academico', [
         \App\Http\Controllers\CicloAcademicoController::class,
@@ -457,7 +457,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('periodo', [
         \App\Http\Controllers\PeriodoController::class,
         'store',
-    ])->middleware('permission:todo-acceso-eriodos|crear-periodos');
+    ])->middleware('permission:todo-acceso-periodos|crear-periodos');
 
     Route::patch('periodo/{id}', [
         \App\Http\Controllers\PeriodoController::class,

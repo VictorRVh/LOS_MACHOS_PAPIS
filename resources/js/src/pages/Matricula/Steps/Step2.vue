@@ -171,16 +171,20 @@ const buscarDNI = async () => {
 
                 <div class="flex items-end gap-2 flex-1">
                     <FormInput v-model="formData.nro_documento" label="Nro Doc. *" />
-                    <button type="button" @click="buscarDNI" :disabled="saving"
-                        class="px-4 py-2.5 bg-cetpro text-white rounded-lg hover:bg-cetpro-light transition flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed">
-                        <span v-if="!saving">Buscar</span>
-                        <svg v-else class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                    <button type="button" @click="buscarDNI" :disabled="saving" class="px-3 py-2 bg-cetpro text-white rounded-lg flex items-center gap-2 
+           hover:bg-cetpro-light transition disabled:opacity-70 disabled:cursor-not-allowed">
+
+                        <svg v-if="saving" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
                             </circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                         </svg>
+
+                        <MagnifyingGlassIcon v-else class="w-5 h-5" />
+
                     </button>
+
                 </div>
             </div>
 
@@ -257,7 +261,8 @@ const buscarDNI = async () => {
                 label="Nro de personas a cargo" />
 
             <FormLabelError label="¿Tiene internet en casa?" :error-message="errors.internet_casa">
-                <v-select v-model="formData.internet_casa" :options="opcionesSiNo" placeholder="Seleccione una opción" />
+                <v-select v-model="formData.internet_casa" :options="opcionesSiNo"
+                    placeholder="Seleccione una opción" />
             </FormLabelError>
 
             <FormInput v-if="formData.internet_casa === 'Si'" v-model="formData.tipo_internet"

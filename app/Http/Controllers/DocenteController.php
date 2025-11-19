@@ -8,12 +8,14 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\Helpers;
 
 class DocenteController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    use Helpers;
     public function index()
     {
         $usuariosDocentes = User::whereHas('roles', function ($query) {
@@ -83,7 +85,11 @@ class DocenteController extends Controller
 
             // 3. (Opcional) asignar rol docente
             $user->roles()->attach(Role::where('name', 'docente')->first()->id);
-
+            // 🔹 Registrar actividad
+            $this->registrarActividad(
+                "Creó el docente '{$user->name} {$user->apellido_paterno} {$user->apellido_materno}' con DNI: {$user->dni}",
+                "Creado"
+            );
             DB::commit();
 
             return response()->json([
@@ -183,7 +189,10 @@ class DocenteController extends Controller
                 'escala_magisterial' => $request->escala_magisterial,
                 'rd_nombramiento' => $request->rd_nombramiento,
             ]);
-
+            $this->registrarActividad(
+                "Actualizó los datos del docente '{$user->name} {$user->apellido_paterno} {$user->apellido_materno}'",
+                "Actualizado"
+            );
             DB::commit();
 
             return response()->json([
@@ -210,7 +219,18 @@ class DocenteController extends Controller
             return response()->json(['message' => 'Docente no encontrado'], 404);
         }
 
+        $nombre = $docente->user->name . " " .
+            $docente->user->apellido_paterno . " " .
+            $docente->user->apellido_materno;
+
         $docente->delete();
+
+        // 🔹 Registrar actividad
+        $this->registrarActividad(
+            "Eliminó al docente '{$nombre}'",
+            "Eliminado"
+        );
+
         return response()->json(['message' => 'Docente eliminado correctamente']);
     }
 
@@ -228,7 +248,7 @@ class DocenteController extends Controller
             ->leftJoin('matricula as ma', 'ma.id_grupo', '=', 'g.id')
             ->where('d.user_id', $userId)
             ->select(
-                'g.id as id_grupo',    
+                'g.id as id_grupo',
                 'em.nombre_especialidad as especialidad',
                 'm.descripcion as modulo',
                 DB::raw("CONCAT(u.name, ' ', u.apellido_paterno, ' ', u.apellido_materno) as docente"),

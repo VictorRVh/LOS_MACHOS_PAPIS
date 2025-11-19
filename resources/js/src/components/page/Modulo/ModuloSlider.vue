@@ -139,8 +139,11 @@ const onSubmit = async () => {
 
 <template>
     <AuthorizationFallback :permissions="requiredPermissions">
-        <div class="mt-2 space-y-1.5 font-inter">
-
+        <div class="bg-white space-y-3 dark:bg-gray-800 rounded-lg shadow-md p-6 h-fit sticky top-6">
+            <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
+                {{ isEditing ? "Editar módulo" : "Agregar nuevo módulo" }}
+            </h3>
+            <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
             <FormInput v-model="formData.descripcion" :focus="show" label="Nombre del módulo"
                 :error="formErrors?.descripcion" required />
 
@@ -169,10 +172,8 @@ const onSubmit = async () => {
                 <div class="flex gap-2 mt-1">
                     <!-- Botón Guardar: ancho completo -->
                     <Button :title="modulo?.id ? 'Guardar Cambios' : 'Crear Módulo'"
-                        :loading-title="role?.id ? 'Guardando...' : 'Creando...'"
-                        :disabled="saving || updating"
-                         :loading="saving || updating"
-                        key="submit-btn" @click="onSubmit" class="!w-full" />
+                        :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :disabled="saving || updating"
+                        :loading="saving || updating" key="submit-btn" @click="onSubmit" class="!w-full" />
 
                     <!-- Botón Cancelar: ancho flexible solo si se está editando -->
                     <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"

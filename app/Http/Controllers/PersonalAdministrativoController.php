@@ -95,6 +95,8 @@ class PersonalAdministrativoController extends Controller
                 ['id' => $id] // Solo si quieres mantener el mismo ID
             ));
 
+            $this->registrarActividad("Asigno los datos administrativos de '{$item->usuario->name}'", "Asignado");
+            
             return response()->json([
                 'message' => 'Datos del personal creado porque no existía',
                 'data' => $item
@@ -104,7 +106,9 @@ class PersonalAdministrativoController extends Controller
 
 
         $item->update($request->all());
-        $this->registrarActividad("Actualizó el personal '{$item->usuario->name}'", "Actualizado");
+
+        $this->registrarActividad("Actualizó los datos administrativos de '{$item->usuario->name}'", "Actualizado");
+
         return response()->json([
             'message' => 'Datos del personal actualizado correctamente',
             'data' => $item
@@ -121,7 +125,7 @@ class PersonalAdministrativoController extends Controller
         }
 
         $item->delete();
-        $this->registrarActividad("Eliminó el personal '{$item->usuario->name}'", "Eliminado");
-        return response()->json(['message' => 'Datos del personal eliminado correctamente']);
+        $this->registrarActividad("Eliminó los datos administrativos de  '{$item->usuario->name}'", "Eliminado");
+        return response()->json(['message' => 'Datos del personal eliminado correctamente'],204);
     }
 }

@@ -37,22 +37,7 @@ class UserController extends Controller
 
         return response()->json($users);
     }
-    // public function index_filter_status()
-    // {
-    //     $usuariosSinComision = User::doesntHave('comisiones')
-    //         ->where('status', 1) 
-    //         ->where('is_deleted', 0)
-    //         ->select('id', 'name', 'apellido_paterno', 'apellido_materno')
-    //         ->get();
 
-    //     $users = $usuariosSinComision->map(function ($usuario) {
-    //         return [
-    //             'id' => $usuario->id,
-    //             'nameCompleto' => $usuario->name . ' ' . $usuario->apellido_paterno . ' ' . $usuario->apellido_materno,
-    //         ];
-    //     });
-    //     return response()->json($users);
-    // }
 
 
     public function store(Request $request)
@@ -80,23 +65,41 @@ class UserController extends Controller
             }
             $user->save();
 
+            $rolesAsignadosNombres = [];
+
             if (isset($request->roles) && is_array($request->roles)) {
-                // removing super admin role if it is exists on the role list;
-                // so there is no possibility to add super-directora role for newly created users
+
+                // remover super-directora si está
                 $superAdminRole = Role::where('name', 'super-directora')->first();
                 $roles = array_filter(
                     $request->roles,
-                    fn($roleId) => $roleId !== $superAdminRole->id
+                    fn($roleId) => $roleId !== ($superAdminRole->id ?? null)
                 );
 
+                // sincronizar
                 $user->roles()->sync($roles);
+
+                // obtener nombres de roles asignados para el registro
+                $rolesAsignadosNombres = Role::whereIn('id', $roles)->pluck('name')->toArray();
             }
+
+            // Convertir roles a texto elegante
+            $rolesTexto = empty($rolesAsignadosNombres)
+                ? 'sin roles asignados'
+                : implode(', ', $rolesAsignadosNombres);
+
+            // REGISTRAR ACTIVIDAD
+            $this->registrarActividad(
+                "Creó un nuevo usuario: {$user->name} {$user->apellido_paterno} (DNI: {$user->dni}) con los roles: {$rolesTexto}",
+                "Creado"
+            );
 
             return response()->json($user);
         } catch (\Exception $error) {
             return $this->errorResponse($error);
         }
     }
+
 
     public function update(Request $request)
     {
@@ -128,7 +131,7 @@ class UserController extends Controller
 
             $user = User::with('roles')->find($request->userId);
             if (!$user) {
-                throw new \Exception('Error|User not found--404', 13333);
+                throw new \Exception('Error|Usuario no encontrado --404', 13333);
             }
 
             $usersSuperAdminRole = $user->roles->firstWhere(
@@ -141,7 +144,7 @@ class UserController extends Controller
                     13333
                 );
             }
-
+            $nombreAnterior = $user->name . ' ' . $user->apellido_paterno . ' ' . $user->apellido_materno;
             foreach ($validated as $key => $val) {
                 $user->{$key} = $val;
             }
@@ -164,6 +167,10 @@ class UserController extends Controller
 
                 $user->roles()->sync($roles);
             }
+            $this->registrarActividad(
+                "Actualizó el usuario '{$nombreAnterior}'",
+                "Actualizado"
+            );
 
             return response()->json($user);
         } catch (\Exception $error) {
@@ -225,10 +232,13 @@ class UserController extends Controller
                     13333
                 );
             }
-
+            $nombre = $user->name . ' ' . $user->apellido_paterno . ' ' . $user->apellido_materno;
             $user->is_deleted = 1;
             $user->save();
-
+            $this->registrarActividad(
+                "Eliminó al usuario '{$nombre}'",
+                "Eliminado"
+            );
             return response()->json([], 204);
         } catch (\Exception $error) {
             return $this->errorResponse($error);

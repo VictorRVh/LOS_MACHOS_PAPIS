@@ -25,7 +25,7 @@ const navLinks = [
     { name: 'Matricula', routeName: 'matricula.index', icon: IdentificationIcon, permissions: ["todo-acceso-matriculas", "icono-matriculas"]},
     { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-grupos", "icono-grupos"]},
     { name: 'Mis Módulos', routeName: 'moduloAsignado', icon: AcademicCapIcon, permissions: ["ver-mis-modulos", "ver-estudiantes-asignados"]},
-    { name: 'Comsión', routeName: 'comsion.docente', icon: AcademicCapIcon, permissions: ["ver-comsion-docente"] },
+    { name: 'Comisión', routeName: 'comsion.docente', icon: AcademicCapIcon, permissions: ["ver-comsion-docente"] },
   
 ];
 

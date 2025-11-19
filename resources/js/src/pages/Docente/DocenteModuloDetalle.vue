@@ -30,8 +30,9 @@ const tituloPrincipal = computed(() => {
 
 const subTitulo = computed(() => {
   if (!infoGrupo.value) return 'Cargando detalles...';
-  return `Módulo ${infoGrupo.value.modulo_numero}: ${infoGrupo.value.modulo_nombre} | Sección ${infoGrupo.value.seccion}`;
+  return `Módulo: <b>${infoGrupo.value.modulo}</b> | Sección: <b>${infoGrupo.value.seccion}</b> | Turno: <b>${infoGrupo.value.turno}</b>`;
 });
+
 
 onMounted(async () => {
   try {
@@ -65,7 +66,8 @@ onMounted(async () => {
     <template v-else>
       <header class="px-6 pt-5">
         <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 truncate">{{ tituloPrincipal }}</h2>
-        <p class="text-md text-gray-500 dark:text-gray-400">{{ subTitulo }}</p>
+       <p class="text-md text-gray-500 dark:text-gray-400" v-html="subTitulo"></p>
+
       </header>
 
       <nav class="mt-4 px-6 border-b border-gray-200 dark:border-gray-700">

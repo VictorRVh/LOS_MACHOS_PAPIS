@@ -267,7 +267,7 @@ const onSliderHide = () => {
 
 
 
-console.log("dATOS SESION: ", sesionStore?.sesion)
+//console.log("dATOS SESION: ", sesionStore?.sesion)
 </script>
 
 <template>
@@ -362,7 +362,7 @@ console.log("dATOS SESION: ", sesionStore?.sesion)
         <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200">
           Sesiones Programadas
         </h3>
-        <BaseButton title="Exportar" @click="exportarCalendarioExcel(sesionStore, programacionSesion, showToast)">
+        <BaseButton title="Exportar" @click="exportarCalendarioExcel(sesionStore, programacionSesion)">
           <template #icon>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">

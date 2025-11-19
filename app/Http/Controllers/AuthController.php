@@ -73,7 +73,9 @@ class AuthController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return response()->json(true);
+            // return response()->json(true);
+            return response()
+                ->json(true);
         } catch (\Exception $error) {
             return $this->errorResponse($error);
         }

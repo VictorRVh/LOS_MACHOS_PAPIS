@@ -20,6 +20,8 @@ import Td from '@/components/table/Td.vue';
 import BaseButton from '@/components/ui/Button.vue';
 import TomarAsistencia from '../../components/page/SesionesDocente/TomarAsistenciaSlider.vue';
 import MenuTable from "../../components/table/MenuTable.vue";
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 
 const props = defineProps({
@@ -29,7 +31,6 @@ const props = defineProps({
   },
 })
 
-// 🧠 Store de sesiones
 const sesionStore = useSesionStore()
 const programacionSesion = useProgramacionStore();
 const datesForSlider = ref([])
@@ -38,10 +39,9 @@ const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteSesion, deleting } = useHttpRequest("/programacion_sesion_docente");
 
-const asist = ref(false); // Estado para mostrar / ocultar slider
-const asistData = ref(null); // Datos que se pasan al slider           
+const asist = ref(false);
+const asistData = ref(null);
 
-// 🔹 Cargar la sesión una sola vez
 if (!sesionStore?.sesion?.length) {
   await sesionStore.loadSesion(props.id)
 }
@@ -50,11 +50,9 @@ if (!programacionSesion?.sesiones?.length) {
   await programacionSesion.loadSesiones(sesionStore?.sesion?.id)
 }
 
-// 🗓️ Calendario
 const Asistencia = () => {
   if (sesionStore?.sesion?.id) {
-    //sliderData.value = capacidadSeleccionada.value; // Asignar datos
-    asist.value = true; // Mostrar slider
+    asist.value = true;
   } else {
     console.error("Selecciona una capacidad terminal primero.");
     showToast("Selecciona una capacidad terminal primero.", "warning");
@@ -101,7 +99,6 @@ watch(
             (new Date(actual) - new Date(anterior)) / (1000 * 60 * 60 * 24)
 
           if (!actual || diff !== 1) {
-            // cerrar tramo
             eventos.push({
               id: `${sesion.id}-${inicio}`,
               title: sesion.nombre_sesion,
@@ -112,10 +109,10 @@ watch(
               allDay: true,
               backgroundColor:
                 sesion.status === 0
-                  ? '#facc15' // pendiente
+                  ? '#facc15'
                   : sesion.status === 1
-                    ? '#22c55e' // activo
-                    : '#3b82f6', // finalizado
+                    ? '#22c55e'
+                    : '#3b82f6',
               borderColor: '#fff',
               extendedProps: {
                 descripcion: sesion.descripcion,
@@ -125,11 +122,9 @@ watch(
               }
             })
 
-            // iniciar tramo nuevo
             inicio = actual
             fin = actual
           } else {
-            // seguimos tramo actual
             fin = actual
           }
         }
@@ -141,27 +136,21 @@ watch(
   { deep: true, immediate: true }
 )
 
-
-// 🧭 Manejo de selección
-
 const selectedDates = computed(() => selectionEvents.value.map(e => e.start).sort())
 const hasSelection = computed(() => selectedDates.value.length > 0)
 
 watch(
   selectedDates,
   (nuevasFechas) => {
-    // 🔄 Mantener sincronizadas las fechas para el slider
     datesForSlider.value = [...nuevasFechas];
   },
   { immediate: true }
 );
 
-
 const handleDateClick = ({ dateStr, date }) => {
   const isWeekend = date.getDay() === 0 || date.getDay() === 6;
   if (isWeekend) return;
 
-  // ⛔ Evitar seleccionar fechas ya programadas en otros bloques
   const isAlreadyScheduled = allEvents.value.some(event =>
     dateStr >= event.start && dateStr < event.end &&
     (!isEditing.value || event.extendedProps.idSesion !== sliderData.value?.id)
@@ -172,7 +161,6 @@ const handleDateClick = ({ dateStr, date }) => {
     return;
   }
 
-  // ✅ Alternar selección
   const index = selectionEvents.value.findIndex(e => e.start === dateStr);
   if (index >= 0) {
     selectionEvents.value.splice(index, 1);
@@ -185,35 +173,25 @@ const handleDateClick = ({ dateStr, date }) => {
   }
 };
 
-
-
-// 👇 Agrega después de los handlers de selección
-
-// Limpia la selección visual del calendario
-
 const clearSelection = () => {
   selectionEvents.value = [];
   datesForSlider.value = [];
   selectedDates.value = [];
-calendarKey.value++   // 🔥 fuerza a recrear el calendario
+  calendarKey.value++
 
-  // 🔄 Si tienes referencia al calendario, forzamos el repaint
   const calendar = document.querySelector('.fc');
   if (calendar) {
-    calendar.dispatchEvent(new Event('refresh')); // opcional según tu implementación
+    calendar.dispatchEvent(new Event('refresh'));
   }
 };
 
-
-// Abre el slider en modo CREACIÓN (nuevo bloque)
 const openSessionForm = () => {
-  if (!hasSelection.value) return; // solo si hay fechas seleccionadas
+  if (!hasSelection.value) return;
 
-  datesForSlider.value = [...selectedDates.value]; // copiar fechas
-  sliderData.value = null; // indicamos que NO estamos editando
-  showSlider(true); // mostramos el slider
+  datesForSlider.value = [...selectedDates.value];
+  sliderData.value = null;
+  showSlider(true);
 };
-
 
 const confirmDelete = (bloque) => {
   if (deleting.value) return;
@@ -223,57 +201,43 @@ const confirmDelete = (bloque) => {
     async (confirmed) => {
       if (!confirmed) return
 
-      // llama a tu función DELETE
       const wasDeleted = await deleteSesion(bloque.id)
 
       if (wasDeleted) {
         showToast(`"${bloque.nombre_sesion}" eliminado correctamente.`)
         await programacionSesion.loadSesiones(sesionStore?.sesion?.id)
-
       }
     }
   )
 }
 
-const verSesion = (bloque) => {
-
-}
+const verSesion = (bloque) => { }
 const isEditing = ref(false)
 
-// aumentado para edicion 
 const handleEdit = (bloque) => {
-  clearSelection() // limpia selección anterior
-  isEditing.value = true // modo edición
+  clearSelection()
+  isEditing.value = true
 
-  // ✅ Marcar las fechas del bloque en el calendario
   const fechas = bloque.calendario_admin.map(d => d.fecha)
   selectionEvents.value = fechas.map(f => ({
     start: f,
     display: 'background',
-    color: 'rgba(51,139,191,0.9)' // amarillo suave
+    color: 'rgba(51,139,191,0.9)'
   }))
 
-  datesForSlider.value = [...fechas] // para el slider
-  // console.log("antes: ",sliderData.value)
-  sliderData.value = bloque // pasamos el bloque al modal
-  // console.log("despues: ",sliderData.value)
+  datesForSlider.value = [...fechas]
+  sliderData.value = bloque
 }
 const cancelEdit = () => {
   isEditing.value = false
   clearSelection()
-  // sliderData.value = null
 }
 
 const updateSession = () => {
   if (!datesForSlider.value.length) return
-  // console.log("antes: ",sliderData.value)
-  showSlider(true, sliderData.value) // abre el modal con datos y fechas
-  // console.log("despues: ",sliderData.value)
+  showSlider(true, sliderData.value)
 }
 
-
-
-// 🔸 estado de sesión
 const estadoTexto = computed(() => {
   if (!sesionStore?.sesion) return 'Sin programación'
   switch (sesionStore?.sesion?.estado) {
@@ -284,7 +248,6 @@ const estadoTexto = computed(() => {
   }
 })
 
-// collapse
 const openCapacidades = ref(new Set())
 
 const toggleCapacidad = (id) => {
@@ -295,15 +258,164 @@ const toggleCapacidad = (id) => {
   }
 }
 const onSliderHide = () => {
-  hideSlider();          // 👈 Cerrar el slider
-  sliderData.value = null; // 👈 Reset al bloque en edición
+  hideSlider();
+  sliderData.value = null;
   isEditing.value = false
   clearSelection()
 };
 
+const exportarCalendarioExcel = async () => {
+  if (!sesionStore.sesion || !programacionSesion.sesiones) {
+    showToast("No hay datos suficientes para generar el reporte.", "error");
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Programacion de Sesiones');
+
+  const grupoInfo = sesionStore.grupo;
+  const sesionInfo = sesionStore.sesion;
+
+  worksheet.mergeCells('B2:E2');
+  const titleCell = worksheet.getCell('B2');
+  titleCell.value = 'REPORTE DE PROGRAMACIÓN DE SESIONES';
+  titleCell.font = { name: 'Calibri', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+  titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+  titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF007B8C' } };
+
+  const headerData = [
+    ['Módulo:', grupoInfo?.modulo || 'N/A', 'Docente:', grupoInfo?.docente || 'N/A'],
+    ['Especialidad:', grupoInfo?.especialidad || 'N/A', 'Turno:', grupoInfo?.turno || 'N/A'],
+    ['Periodo:', `${new Date(sesionInfo.fecha_inicio).toLocaleDateString()} - ${new Date(sesionInfo.fecha_fin).toLocaleDateString()}`, 'Sección:', grupoInfo?.seccion || 'N/A'],
+  ];
+
+  let currentRowNum = 4;
+  headerData.forEach(rowData => {
+    const row = worksheet.getRow(currentRowNum);
+    row.getCell(2).value = { richText: [{ font: { bold: true }, text: rowData[0] }] };
+    row.getCell(3).value = rowData[1];
+    row.getCell(5).value = { richText: [{ font: { bold: true }, text: rowData[2] }] };
+    row.getCell(6).value = rowData[3];
+
+    ['B', 'C', 'E', 'F'].forEach(col => {
+        const cell = worksheet.getCell(`${col}${currentRowNum}`);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
+        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+    });
+    currentRowNum++;
+  });
+  
+  const startDate = new Date(sesionInfo.fecha_inicio);
+  const endDate = new Date(sesionInfo.fecha_fin);
+  const dateToCellMap = new Map();
+
+  let currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  currentRowNum += 2;
+
+  while (currentDate <= endDate) {
+    const anio = currentDate.getFullYear();
+    const mes = currentDate.getMonth();
+    const nombreMes = currentDate.toLocaleString('es-ES', { month: 'long' }).toUpperCase();
+
+    worksheet.mergeCells(`A${currentRowNum}:G${currentRowNum}`);
+    const monthTitleCell = worksheet.getCell(`A${currentRowNum}`);
+    monthTitleCell.value = `${nombreMes} ${anio}`;
+    monthTitleCell.font = { bold: true, size: 14, color: { argb: 'FF007B8C' } };
+    monthTitleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+    currentRowNum++;
+
+    const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const headerRow = worksheet.getRow(currentRowNum);
+    diasSemana.forEach((dia, index) => {
+        const cell = headerRow.getCell(index + 1);
+        cell.value = dia;
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF007B8C' } };
+        cell.alignment = { horizontal: 'center' };
+    });
+    currentRowNum++;
+
+    const primerDiaDelMes = new Date(anio, mes, 1);
+    let diaDeSemanaInicial = primerDiaDelMes.getDay();
+    if (diaDeSemanaInicial === 0) diaDeSemanaInicial = 7;
+
+    let fechaIterador = new Date(primerDiaDelMes);
+    fechaIterador.setDate(primerDiaDelMes.getDate() - (diaDeSemanaInicial - 1));
+
+    for (let semana = 0; semana < 6; semana++) {
+        const row = worksheet.getRow(currentRowNum + semana);
+        row.height = 60;
+        for (let dia = 0; dia < 7; dia++) {
+            const cell = row.getCell(dia + 1);
+            const fechaActualStr = fechaIterador.toISOString().split('T')[0];
+            
+            dateToCellMap.set(fechaActualStr, cell);
+
+            if (fechaIterador.getMonth() === mes) {
+                cell.value = fechaIterador.getDate();
+                cell.font = { color: { argb: 'FF000000' } };
+            } else {
+                cell.font = { color: { argb: 'FFB0B0B0' } };
+            }
+            
+            cell.alignment = { vertical: 'top', horizontal: 'right', wrapText: true };
+            cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            fechaIterador.setDate(fechaIterador.getDate() + 1);
+        }
+    }
+    currentRowNum += 7;
+    currentDate.setMonth(currentDate.getMonth() + 1);
+  }
+
+  programacionSesion.sesiones.forEach(capacidad => {
+    capacidad.sesiones.forEach(sesion => {
+      const color = sesion.status === 0 ? 'FFFACС15' : (sesion.status === 1 ? 'FF22C55E' : 'FF3B82F6');
+      (sesion.calendario_admin || []).forEach(dia => {
+        const cell = dateToCellMap.get(dia.fecha);
+        if (cell) {
+          const numeroDia = cell.value || '';
+          cell.value = `${numeroDia}\n\n${sesion.nombre_sesion}`;
+          cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+          cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        }
+      });
+    });
+  });
+
+  currentRowNum++;
+  worksheet.getCell(`B${currentRowNum}`).value = { richText: [{ font: { bold: true, size: 12 }, text: "Leyenda de Estados:" }] };
+  currentRowNum++;
+  const leyendaData = [
+    { text: 'Pendiente', color: 'FFFACС15' },
+    { text: 'Activo / En Curso', color: 'FF22C55E' },
+    { text: 'Finalizado', color: 'FF3B82F6' },
+  ];
+  leyendaData.forEach(item => {
+    const cellColor = worksheet.getCell(`B${currentRowNum}`);
+    cellColor.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: item.color } };
+    cellColor.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+
+    const cellText = worksheet.getCell(`C${currentRowNum}`);
+    cellText.value = item.text;
+    currentRowNum++;
+  });
+  
+  worksheet.columns.forEach(column => {
+    column.width = 20;
+  });
+
+  workbook.xlsx.writeBuffer().then(buffer => {
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const fileName = `Programacion_${grupoInfo?.modulo || 'General'}.xlsx`;
+    saveAs(blob, fileName);
+  }).catch(err => {
+    console.error("Error al generar el Excel:", err);
+    showToast("Hubo un error al generar el reporte.", "error");
+  });
+};
 
 console.log("dATOS SESION: ", sesionStore?.sesion)
-
 </script>
 
 <template>
@@ -343,16 +455,13 @@ console.log("dATOS SESION: ", sesionStore?.sesion)
       Estado: {{ estadoTexto }}
     </div>
 
-    <!-- 🔵 Botón de asistencia -->
     <BaseButton title="Asistencia" @click="Asistencia"
       class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow" />
 
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-5 gap-2">
-    <!-- 📅 CALENDARIO -->
     <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow calendar-container">
-      <!-- Encabezado fijo -->
       <div class="sticky top-0 z-10 bg-white dark:bg-gray-800 p-2 border-b border-gray-200 dark:border-gray-700">
         <div class="md:flex justify-between items-center">
           <div>
@@ -364,11 +473,10 @@ console.log("dATOS SESION: ", sesionStore?.sesion)
             </p>
           </div>
 
-          <!-- 🔵 Botones de acción (limpiar / guardar) -->
           <div class="mt-4 md:mt-0 flex gap-2 justify-end">
             <template v-if="isEditing">
               <BaseButton title="Cancelar" variant="secondary" @click="cancelEdit" />
-              <BaseButton :title="`Actualizar ${selectedDates.length} sesines`" variant="primary"
+              <BaseButton :title="`Actualizar ${selectedDates.length} sesiones`" variant="primary"
                 @click="updateSession" />
             </template>
 
@@ -382,15 +490,30 @@ console.log("dATOS SESION: ", sesionStore?.sesion)
         </div>
       </div>
 
-      <!-- Calendario con scroll -->
       <div class="calendar-scroll">
         <BaseCalendar :key="calendarKey" :events="[...allEvents, ...selectionEvents]" :holidays="holidays" @date-click="handleDateClick"
           @event-click="handleEventClick" :idEntrega="sesionStore?.sesion?.id" />
       </div>
     </div>
 
-    <!-- 📘 BLOQUES DE SESIONES -->
     <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+      <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200">
+            Sesiones Programadas
+        </h3>
+        <BaseButton 
+            title="Exportar" 
+            @click="exportarCalendarioExcel" 
+            variant="secondary"
+        >
+            <template #icon>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+            </template>
+        </BaseButton>
+      </div>
+
       <Table>
         <THead class="hidden">
           <Th>N°</Th>
@@ -402,7 +525,6 @@ console.log("dATOS SESION: ", sesionStore?.sesion)
         <TBody>
           <template v-for="capacidad in programacionSesion?.sesiones" :key="capacidad.id">
 
-            <!-- CABECERA DE CAPACIDAD -->
             <tr @click="toggleCapacidad(capacidad.id)" class="bg-cetpro dark:bg-cetpro-dark hover:bg-cetpro-dark dark:hover:bg-cetpro cursor-pointer
                transition-colors duration-200 border-b border-white dark:border-cetpro">
               <td colspan="8" class="px-4 py-3 font-bold uppercase tracking-wider text-sm">
@@ -417,62 +539,50 @@ console.log("dATOS SESION: ", sesionStore?.sesion)
               </td>
             </tr>
 
-            <!-- SESIONES DE ESA CAPACIDAD -->
             <tr v-if="openCapacidades.has(capacidad.id)" class="bg-white dark:bg-gray-800">
               <td colspan="8" class="p-0">
                 <TransitionGroup name="list" tag="table" class="w-full">
 
-            <Tr v-for="(sesion, index) in capacidad.sesiones" :key="sesion.id" class="border-t-0">
-              <!-- Nº -->
-              <Td class="text-center w-12">{{ index + 1 }}</Td>
+                  <Tr v-for="(sesion, index) in capacidad.sesiones" :key="sesion.id" class="border-t-0">
+                    <Td class="text-center w-12">{{ index + 1 }}</Td>
 
-              <!-- Título + Fechas -->
-              <Td>
-                <div class="flex items-center gap-2 font-medium">
-                  <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: '#22c55e' }"></span>
-                  {{ sesion.nombre_sesion }}
-                </div>
+                    <Td>
+                      <div class="flex items-center gap-2 font-medium">
+                        <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: '#22c55e' }"></span>
+                        {{ sesion.nombre_sesion }}
+                      </div>
 
-                <!-- Fechas con opacidad -->
-                <div class="text-xs opacity-60 mt-1 ml-5">
-                  {{ sesion.fecha_inicio }} - {{ sesion.fecha_fin }}
-                </div>
-              </Td>
+                      <div class="text-xs opacity-60 mt-1 ml-5">
+                        {{ sesion.fecha_inicio }} - {{ sesion.fecha_fin }}
+                      </div>
+                    </Td>
 
-              <!-- Días -->
-              <Td class="text-xs text-gray-500">
-                {{ sesion.calendario_admin.length }} días
-              </Td>
+                    <Td class="text-xs text-gray-500">
+                      {{ sesion.calendario_admin.length }} días
+                    </Td>
 
-              <!-- Acciones -->
-              <Td class="text-center text-gray-600 dark:text-gray-200">
-                <MenuTable :actions="{ view: true, edit: true, delete: true }" @view="verSesion(sesion)"
-                  @edit="handleEdit(sesion)" @delete="confirmDelete(sesion)" entity-label="sesión" />
-              </Td>
-            </Tr>
+                    <Td class="text-center text-gray-600 dark:text-gray-200">
+                      <MenuTable :actions="{ view: true, edit: true, delete: true }" @view="verSesion(sesion)"
+                        @edit="handleEdit(sesion)" @delete="confirmDelete(sesion)" entity-label="sesión" />
+                    </Td>
+                  </Tr>
 
-            </TransitionGroup>
-            </td>
+                </TransitionGroup>
+              </td>
             </tr>
 
           </template>
         </TBody>
       </Table>
-
-
     </div>
 
-    <!-- 🟢 Sliders -->
     <TomarAsistencia :show="asist" :grupo-id="id" :sesion-id="sesionStore?.sesion?.id" @hide="ocultarSliderAsistencia"
       @save="clearSelection" />
 
     <SesionSlider :show="slider" :blockToEdit="sliderData ?? null" :idGrupo="id" :sesion="sesionStore?.sesion"
-      @hide="onSliderHide"
-      :fechas-seleccionadas="datesForSlider" />
+      @hide="onSliderHide" :fechas-seleccionadas="datesForSlider" />
   </div>
 </template>
-
-
 <style scoped>
 .calendar-container {
   /* ajusta según necesidad */

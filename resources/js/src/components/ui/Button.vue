@@ -2,31 +2,31 @@
 const props = defineProps({
     loading: {
         type: Boolean,
-        default: () => false,
+        default: false,
     },
     disabled: {
         type: Boolean,
-        default: () => false,
+        default: false,
     },
     title: {
         type: String,
-        default: () => 'Enviar',
+        default: 'Enviar',
     },
     loadingTitle: {
         type: String,
-        default: () => '',
+        default: '',
     },
     disabledClass: {
         type: String,
-        default: () => 'cursor-not-allowed',
+        default: 'cursor-not-allowed',
     },
     loaderClass: {
         type: String,
-        default: () => '',
+        default: '',
     },
     slotted: {
         type: Boolean,
-        default: () => false,
+        default: false,
     },
 });
 </script>
@@ -34,21 +34,26 @@ const props = defineProps({
 <template>
     <button
         type="button"
-        class="text-white bg-cetpro active:bg-cetpro-light hover:bg-cetpro-light font-medium rounded text-sm px-5 py-2.5 text-center flex-center"
+        class="text-white bg-cetpro active:bg-cetpro-light hover:bg-cetpro-light font-medium rounded text-sm px-5 py-2.5 text-center flex-center gap-2"
         :class="[disabled ? disabledClass : '']"
         :disabled="disabled"
     >
+        <!-- SLOT COMPLETO -->
         <slot v-if="slotted"></slot>
-        <div
-            v-else
-            class="w-max"
-        >
+
+        <!-- CONTENIDO NORMAL -->
+        <div v-else class="flex items-center gap-2">
+
+            <!-- ICONO DINÁMICO -->
+            <slot name="icon" v-if="!loading"></slot>
+
+            <!-- LOADER -->
             <svg
                 v-if="loading"
                 aria-hidden="true"
                 role="status"
-                class="inline w-4 h-4 mr-3 text-white animate-spin fill-gray-400"
-                :class="[loaderClass ? loaderClass : '']"
+                class="inline w-4 h-4 mr-1 animate-spin"
+                :class="[loaderClass]"
                 viewBox="0 0 100 101"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -61,11 +66,11 @@ const props = defineProps({
                     fill="currentColor"
                 />
             </svg>
+
+            <!-- TEXTO -->
             {{
                 loading
-                    ? loadingTitle
-                        ? loadingTitle
-                        : 'Procesando...'
+                    ? (loadingTitle ? loadingTitle : "Procesando...")
                     : title
             }}
         </div>

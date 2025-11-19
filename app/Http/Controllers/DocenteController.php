@@ -228,9 +228,9 @@ class DocenteController extends Controller
             ->leftJoin('matricula as ma', 'ma.id_grupo', '=', 'g.id')
             ->where('d.user_id', $userId)
             ->select(
-                'g.id as id_grupo',     // ✅ Agregado
+                'g.id as id_grupo',    
                 'em.nombre_especialidad as especialidad',
-                'm.numero_modulo as modulo',
+                'm.descripcion as modulo',
                 DB::raw("CONCAT(u.name, ' ', u.apellido_paterno, ' ', u.apellido_materno) as docente"),
                 'g.fecha_inicio',
                 'g.fecha_fin',
@@ -241,7 +241,7 @@ class DocenteController extends Controller
             ->groupBy(
                 'g.id',
                 'em.nombre_especialidad',
-                'm.numero_modulo',
+                'm.descripcion',
                 'u.name',
                 'u.apellido_paterno',
                 'u.apellido_materno',

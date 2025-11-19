@@ -27,7 +27,7 @@ const { showToast, showConfirmModal } = useModalToast();
 const { destroy, loading } = useHttpRequest("/entrega_docente_admin");
 
 const { update: updateDocente, updating } = useHttpRequest('crear_grupos');
-const { update: storeGrupoPersonalizado } = useHttpRequest('crear_grupos_personalizado');
+const { update: storeGrupoPersonalizado, updating: updtingPersonalizado} = useHttpRequest('crear_grupos_personalizado');
 // 🔹 Estados
 const selectedPeriodo = ref(null);
 const programaciones = ref([]);
@@ -115,8 +115,6 @@ const getProgramacionStatus = (doc) => {
       };
   }
 };
-
-
 
 // 🔹 Acciones
 const verDetalleEntrega = (programacion) => {
@@ -249,6 +247,8 @@ const publicarMasivo = async (prog) => {
 
 const publicarPersonalizado = async (prog, gruposSeleccionados) => {
   try {
+    updtingPersonalizado.value = true;
+
     const response = await storeGrupoPersonalizado(prog.id, {
       grupos: gruposSeleccionados
     });
@@ -268,6 +268,8 @@ const publicarPersonalizado = async (prog, gruposSeleccionados) => {
       error.response?.data?.message || "Ocurrió un error al publicar.",
       "error"
     );
+  } finally {
+    updtingPersonalizado.value = false;
   }
 };
 
@@ -280,7 +282,7 @@ const publicarPersonalizado = async (prog, gruposSeleccionados) => {
     <div class="p-4 md:p-6 space-y-6">
       <!-- Overlay de carga -->
       <Transition name="fade">
-        <div v-if="updating"
+        <div v-if="updating || updtingPersonalizado"
           class="fixed inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center z-50">
           <div class="flex flex-col items-center space-y-4">
             <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"

@@ -17,7 +17,7 @@ import {
 const router = useRouter();
 const docenteStore = useDocenteStore();
 
-if (!docenteStore.modulosAsignados?.length) await docenteStore.loadModulosAsignados();
+await docenteStore.loadModulosAsignados();
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("docente-crud");
 const { showToast } = useModalToast();

@@ -446,13 +446,15 @@ class EntregaDocenteAdminController extends Controller
         $gruposFormateados = $grupos->map(function ($grupo) {
 
             $periodo = $grupo->periodo->nombre_periodo ?? 'SIN PERIODO';
-            $modulo = $grupo->modulo->nombre_modulo ?? 'SIN MÓDULO';
+            $modulo = $grupo->modulo->descripcion ?? 'SIN MÓDULO';
 
             $seccion = $grupo->seccion ?? '-';
             $turno = $grupo->turno ?? '-';
             $seccionTurno = "{$seccion}{$turno}";
 
-            $docente = $grupo->docente->nombre_completo ?? 'SIN DOCENTE';
+            $docente = $grupo->docente
+                ? trim($grupo->docente->user->name . ' ' . $grupo->docente->user->apellido_paterno . ' ' . $grupo->docente->user->apellido_materno)
+                : null;
 
             return [
                 'id' => $grupo->id,

@@ -74,6 +74,7 @@ const initialNotesData = () => {
     id_estudiante: est?.id,
     fullName: `${est?.apellido_paterno} ${est?.apellido_materno}, ${est?.nombre}`,
     nota: null,
+    matriculado: est?.matriculado
   }));
 };
 
@@ -98,8 +99,12 @@ const validateNotes = () => {
   const regex = /^(?:\d{1,2}(?:\.\d)?|20(?:\.0)?)$/;
 
   for (const note of listNotes.value) {
+
+    if (note.matriculado === 0) continue;
+
     const value = String(note.nota).trim();
 
+    // Validar solo si tiene contenido o si es requerido
     if (!regex.test(value)) {
       showToast(
         `La nota para ${note.fullName} debe ser un número entre 0 y 20, entero o con un decimal (ej: 05, 8.6, 15.7).`,
@@ -108,6 +113,7 @@ const validateNotes = () => {
       return false;
     }
   }
+
   return true;
 };
 
@@ -249,18 +255,33 @@ const fechaLimiteFormateada = computed(() => {
             <Tr v-for="(user, index) in listNotes" :key="user.id_estudiante">
               <Td>{{ index + 1 }}</Td>
               <Td>{{ user.fullName }}</Td>
-              <Td class="w-[110px]">
-                <CustomInput v-model="user.nota" type="text" maxlength="4" :disabled="!puedeGuardarNotas" :input-class="[
-                  'text-center',
-                  !puedeGuardarNotas && 'bg-gray-100 cursor-not-allowed',
-                  user.nota === null || user.nota === ''
-                    ? 'text-gray-500'
-                    : parseFloat(user.nota) <= 10
-                      ? 'text-red-600 font-bold'
-                      : 'text-black font-bold',
-                ]" @input="(e) => onNotaInput(e, index)" />
-              </Td>
+
+              <!-- Si el alumno está retirado -->
+              <template v-if="user.matriculado === 0">
+                <Td class="text-center">
+                  <span class="px-3 py-1 rounded bg-red-100 text-red-700 font-semibold text-sm uppercase tracking-wide">
+                    RETIRADO POR INASISTENCIA
+                  </span>
+                </Td>
+              </template>
+
+              <!-- Si el alumno está activo -->
+              <template v-else>
+                <Td class="w-[110px]">
+                  <CustomInput v-model="user.nota" type="text" maxlength="4" :disabled="!puedeGuardarNotas"
+                    :input-class="[
+                      'text-center',
+                      !puedeGuardarNotas && 'bg-gray-100 cursor-not-allowed',
+                      user.nota === null || user.nota === ''
+                        ? 'text-gray-500'
+                        : parseFloat(user.nota) <= 10
+                          ? 'text-red-600 font-bold'
+                          : 'text-black font-bold',
+                    ]" @input="(e) => onNotaInput(e, index)" />
+                </Td>
+              </template>
             </Tr>
+
           </TBody>
         </Table>
 

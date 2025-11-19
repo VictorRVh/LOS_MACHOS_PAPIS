@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Modulo;
+use App\Traits\Helpers;
 use Illuminate\Http\Request;
 use App\Models\EspecialidadPrograma;
+
 class ModuloController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    use Helpers;
     public function index()
     {
         $modulos = Modulo::with(['periodo', 'especialidadPrograma'])
@@ -32,7 +35,10 @@ class ModuloController extends Controller
         ]);
 
         $modulo = Modulo::create($request->all());
-
+        $this->registrarActividad(
+            "Creó el módulo N° '{$modulo->numero_modulo}' para la especialidad '{$modulo->especialidadPrograma->especialidadMadre->nombre_especialidad}'",
+            "Creado"
+        );
         return response()->json($modulo, 201);
     }
 
@@ -125,10 +131,44 @@ class ModuloController extends Controller
             'nro_capacidades' => 'sometimes|integer|min:0',
         ]);
 
+        // Alias bonitos
+        $alias = [
+            'numero_modulo' => 'Número del módulo',
+            'descripcion'   => 'Descripción',
+            'creditos'      => 'Créditos',
+            'horas'         => 'Horas',
+        ];
+
+        // Valores ANTES
+        $antes = $modulo->only(array_keys($alias));
+
+        // Actualizar
         $modulo->update($request->all());
+
+        // Detectar cambios (solo nombres con alias)
+        $cambios = [];
+
+        foreach ($antes as $campo => $valorAnterior) {
+            if ($modulo->$campo != $valorAnterior) {
+                $cambios[] = $alias[$campo];
+            }
+        }
+
+        // Mensaje
+        $descripcionCambios = empty($cambios)
+            ? "sin cambios importantes"
+            : "campos modificados: " . implode(", ", $cambios);
+
+        // ACTIVIDAD
+        $this->registrarActividad(
+            "Actualizó el módulo '{$modulo->numero_modulo}' de la especialidad '{$modulo->especialidadPrograma->especialidadMadre->nombre_especialidad}' ({$descripcionCambios})",
+            "Actualizado"
+        );
 
         return response()->json($modulo);
     }
+
+
 
 
     // Eliminar un módulo
@@ -140,7 +180,19 @@ class ModuloController extends Controller
             return response()->json(['message' => 'Modulo no encontrado'], 404);
         }
 
+
+        $nombreModulo = $modulo->numero_modulo;
+        $nombreEspecialidad = $modulo->especialidadPrograma->especialidadMadre->nombre_especialidad ?? "desconocida";
+
+
         $modulo->delete();
+        // ACTIVIDAD
+        // ACTIVIDAD
+        $this->registrarActividad(
+            "Eliminó el módulo '{$nombreModulo}' de la especialidad '{$nombreEspecialidad}'",
+            "Eliminado"
+        );
+
         return response()->json(['message' => 'Modulo eliminado correctamente'], 204);
     }
 }

@@ -48,8 +48,8 @@ const onDelete = (user) => {
 
     const isDeleted = await deleteUser(user?.id);
     if (isDeleted) {
-      showToast(`"${user?.name}" eliminado correctamente...`);
-     administrativo.loadUsers();
+      showToast(`Los datos administrativos de "${user?.name}" fueron eliminados correctamente.`);
+      administrativo.loadUsers();
     }
   });
 };
@@ -71,6 +71,9 @@ const {
   defaultOrderBy: "apellido_paterno",
   searchFields: ["name", "apellido_paterno", "dni"],
 });
+
+
+
 </script>
 
 <template>
@@ -84,21 +87,13 @@ const {
         </div>
 
         <div class="flex-between flex-row-reverse my-5">
-          <SearchBar
-            :totalResultados="usuariosOrdenados.length"
-            :campoOrden="'apellido_paterno'"
-            @search="filtrarUsuarios"
-          />
+          <SearchBar :totalResultados="usuariosOrdenados.length" :campoOrden="'apellido_paterno'"
+            @search="filtrarUsuarios" />
 
           <div class="font-inter text-md w-full">Lista de usuarios</div>
         </div>
       </div>
-      <Table
-        :paginacion="true"
-        :current-page="pagina"
-        :total-pages="totalPaginas"
-        @changePage="pagina = $event"
-      >
+      <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
         <THead>
           <Th>N°</Th>
           <Th>Nombres</Th>
@@ -112,16 +107,12 @@ const {
 
         <TBody>
           <Tr v-for="(user, index) in usuariosPaginados" :key="index">
-            <Td
-              ><span class="text-gray-800 dark:text-gray-300">{{
-                (pagina - 1) * itemsPorPagina + index + 1
-              }}</span></Td
-            >
+            <Td><span class="text-gray-800 dark:text-gray-300">{{
+              (pagina - 1) * itemsPorPagina + index + 1
+                }}</span></Td>
             <Td>{{ user.name }}</Td>
-            <Td
-              >{{ user.apellido_paterno }}
-              {{ user.apellido_materno }}</Td
-            >
+            <Td>{{ user.apellido_paterno }}
+              {{ user.apellido_materno }}</Td>
             <Td>{{ user.dni }}</Td>
 
             <Td>
@@ -138,6 +129,8 @@ const {
 
             <Td class="flex items-center justify-center gap-1">
               <EditButton @click="showSlider(true, user)" />
+              <DeleteButton @click="onDelete(user)" />
+
             </Td>
           </Tr>
         </TBody>

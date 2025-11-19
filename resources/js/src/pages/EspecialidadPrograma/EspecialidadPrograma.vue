@@ -100,11 +100,7 @@ const SeeMore = (especialidadPrograma) => {
     </div>
 
     <div class="flex px-6">
-      <div class="w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-        <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-          Asignar Especialidad
-        </h3>
-        <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+      <div class="w-1/2">
 
         <EspecialidadProgramaSlider
           :show="slider"

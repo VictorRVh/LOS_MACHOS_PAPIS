@@ -1,11 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
-import {
-  UsersIcon,
-  ArrowRightIcon,
-} from '@heroicons/vue/24/outline';
-
+import { UsersIcon, ArrowRightIcon } from '@heroicons/vue/24/outline';
 import useActividadesStore from '../store/ActividadesRecientes/UseActividadesRecientesStore';
 
 const breadcrumbStore = useBreadcrumbStore();
@@ -67,7 +63,6 @@ const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 min
 
 const startAutoUpdate = () => {
   if (interval) return;
-
   interval = setInterval(async () => {
     if (document.visibilityState === 'visible') {
       await actividadesStore.loadActividadesRecientes();
@@ -83,13 +78,21 @@ const stopAutoUpdate = () => {
 
 const resetInactivityTimer = () => {
   clearTimeout(inactivityTimer);
-
   inactivityTimer = setTimeout(() => {
     stopAutoUpdate(); // parar por inactividad
   }, INACTIVITY_LIMIT);
 
   if (!interval && document.visibilityState === 'visible') {
     startAutoUpdate(); // reactivar si vuelve
+  }
+};
+
+/* -------------------- HANDLER VISIBILITY -------------------- */
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible') {
+    resetInactivityTimer();
+  } else {
+    stopAutoUpdate();
   }
 };
 
@@ -118,13 +121,10 @@ onMounted(async () => {
   startAutoUpdate();
   resetInactivityTimer();
 
+  // listeners
   window.addEventListener('mousemove', resetInactivityTimer);
   window.addEventListener('keydown', resetInactivityTimer);
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') resetInactivityTimer();
-    else stopAutoUpdate();
-  });
+  document.addEventListener('visibilitychange', handleVisibilityChange);
 });
 
 onUnmounted(() => {
@@ -133,9 +133,10 @@ onUnmounted(() => {
 
   window.removeEventListener('mousemove', resetInactivityTimer);
   window.removeEventListener('keydown', resetInactivityTimer);
-  document.removeEventListener('visibilitychange', resetInactivityTimer);
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
 });
 </script>
+
 
 
 <template>

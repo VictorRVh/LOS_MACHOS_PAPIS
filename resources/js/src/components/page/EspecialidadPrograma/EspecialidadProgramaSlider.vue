@@ -142,8 +142,12 @@ const onSubmit = async () => {
 
 <template>
     <AuthorizationFallback :permissions="requiredPermissions">
-        <div class="mt-2 space-y-1.5 font-inter">
 
+        <div class="bg-white  space-y-3  dark:bg-gray-800 rounded-lg shadow-md p-6 h-fit sticky top-6">
+            <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
+                {{ isEditing ? "Editar especialidad" : "Agregar nuevo especialidad" }}
+            </h3>
+            <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
             <FormLabelError label="Especialidad" required :error="formErrors?.id_especialidad">
                 <BaseSelectCiclo v-model="formData.id_especialidad" :options="especialidad" label="nombre_especialidad"
                     placeholder="Seleccione una especialidad" />

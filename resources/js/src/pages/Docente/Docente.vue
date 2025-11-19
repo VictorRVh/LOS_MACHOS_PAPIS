@@ -51,6 +51,9 @@ const onDelete = (docente) => {
     if (isDeleted) {
       showToast(`"${docente?.name}" eliminado correctamente...`);
       docenteStore.loadDocentes();
+    }   else {
+      showToast(`"${docente?.name}" no se pudo eliminar...`,"warning");
+
     }
   });
 };

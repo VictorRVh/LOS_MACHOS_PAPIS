@@ -6,13 +6,15 @@ use App\Models\ProgramaEstudio;
 use App\Models\EspecialidadPrograma;
 use App\Models\Periodo;
 use Illuminate\Http\Request;
-
+use App\Traits\Helpers;
 
 class EspecialidadProgramaController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    use Helpers;
+
     public function index()
     {
         $data = EspecialidadPrograma::with(['especialidadMadre', 'programaEstudio'])->get();
@@ -30,6 +32,11 @@ class EspecialidadProgramaController extends Controller
         ]);
 
         $nuevo = EspecialidadPrograma::create($request->all());
+        $this->registrarActividad(
+            "Asignó la especialidad '{$nuevo->especialidadMadre->nombre_especialidad}' al programa de estudios '{$nuevo->programaEstudio->año}'",
+            "Creado"
+        );
+
         return response()->json($nuevo, 201);
     }
 
@@ -71,32 +78,43 @@ class EspecialidadProgramaController extends Controller
 
 
     // Actualizar
-    public function update(Request $request, $id)
-    {
-        $registro = EspecialidadPrograma::find($id);
+public function update(Request $request, $id)
+{
+    $registro = EspecialidadPrograma::find($id);
 
-        if (!$registro) {
-            return response()->json(['message' => 'No encontrado'], 404);
-        }
-
-        // $validator = Validator::make($request->all(), [
-        //     'id_especialidad' => 'sometimes|exists:especialidad_madre,id',
-        //     'id_programa' => 'sometimes|exists:programa_estudio,id',
-        // ]);
-
-        // if ($validator->fails()) {
-        //     return response()->json(['errors' => $validator->errors()], 422);
-        // }
-
-        $request->validate([
-            'id_especialidad' => 'sometimes|exists:especialidad_madre,id',
-            'id_programa' => 'sometimes|exists:programa_estudio,id',
-            'nro_modulos' => 'sometimes|integer|min:0'
-        ]);
-
-        $registro->update($request->all());
-        return response()->json($registro);
+    if (!$registro) {
+        return response()->json(['message' => 'No encontrado'], 404);
     }
+
+    $request->validate([
+        'id_especialidad' => 'sometimes|exists:especialidad_madre,id',
+        'id_programa' => 'sometimes|exists:programa_estudio,id',
+        'nro_modulos' => 'sometimes|integer|min:0'
+    ]);
+
+    // Guardar valores antes del cambio
+    $antes_nro_modulos = $registro->nro_modulos;
+
+    // Actualizar
+    $registro->update($request->all());
+
+    // Guardar después del cambio
+    $despues_nro_modulos = $registro->nro_modulos;
+
+    // Detectar solo cambio en n° de módulos
+    $mensajeCambio = ($antes_nro_modulos != $despues_nro_modulos)
+        ? "y módulos de {$antes_nro_modulos} a {$despues_nro_modulos}"
+        : " ";
+
+    // ACTIVIDAD (se mantiene lo que ya tenías)
+    $this->registrarActividad(
+        "Actualizó la especialidad '{$registro->especialidadMadre->nombre_especialidad}' del programa '{$registro->programaEstudio->año}' ({$mensajeCambio})",
+        "Actualizado"
+    );
+
+    return response()->json($registro);
+}
+
 
     // Eliminar
     public function destroy($id)
@@ -106,8 +124,14 @@ class EspecialidadProgramaController extends Controller
         if (!$registro) {
             return response()->json(['message' => 'No encontrado'], 404);
         }
-
+        $nombreEspecialidad = $registro->especialidadMadre->nombre_especialidad;
+        $nombrePrograma = $registro->programaEstudio->nombre_programa;
         $registro->delete();
+        $this->registrarActividad(
+            "Eliminó la especialidad '{$nombreEspecialidad}' del programa '{$nombrePrograma}'",
+            "Eliminado"
+        );
+
         return response()->json(['message' => 'Eliminado correctamente'], 204);
     }
 

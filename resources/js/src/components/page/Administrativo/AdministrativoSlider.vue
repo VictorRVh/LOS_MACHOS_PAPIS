@@ -67,10 +67,12 @@ watch(
     if (props.show) {
       //console.log("silder administrativo: ",props.admin)
       if (props.admin?.administrativo) {
-        formData.value = Object.entries(initialFormData()).reduce(
-          (r, [key, val]) => ({ ...r, [key]: props.admin?.administrativo[key] || val }),
-          {}
-        );
+        formData.value = {
+          id_usuario: props.admin?.id,
+          local: props.admin?.administrativo?.local || "",
+          turno: turnos.find(t => t.value === props.admin?.administrativo?.turno) || ""
+        };
+
       } else {
         formData.value = initialFormData();
       }
@@ -103,7 +105,10 @@ const onSubmit = async () => {
   if (saving.value || updating.value) return;
   let data = {
     ...formData.value,
-    turno: formData.value.turno?.value || null, // 👈 aquí
+    turno: typeof formData.value.turno === "object"
+      ? formData.value.turno.value
+      : formData.value.turno || null,
+
   };
 
   const { validated, errors } = await runYupValidation(schema, data);
@@ -120,7 +125,7 @@ const onSubmit = async () => {
 
   if (response?.data?.id) {
     showToast(`Datos ${props.admin?.administrativo ? "actualizado" : "agregado"} correctamente.`);
-formData.value = initialFormData();
+    formData.value = initialFormData();
     adminStore.loadUsers();
     emit("hide");
   }

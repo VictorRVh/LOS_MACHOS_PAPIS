@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\CicloAcademico;
 use App\Models\EspecialidadMadre;
 use Illuminate\Http\Request;
+use App\Traits\Helpers;
 
 class EspecialidadMadreController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    use Helpers;
     public function index()
     {
         $especialidades = EspecialidadMadre::with('cicloAcademico')
@@ -43,7 +45,10 @@ class EspecialidadMadreController extends Controller
         ]);
 
         $especialidad = EspecialidadMadre::create($request->all());
-
+        $this->registrarActividad(
+            "Creó la especialidad '{$especialidad->nombre_especialidad}'",
+            "Creado"
+        );
         return response()->json($especialidad, 201);
     }
 
@@ -62,6 +67,10 @@ class EspecialidadMadreController extends Controller
         ]);
 
         $especialidad->update($request->all());
+        $this->registrarActividad(
+            "Actualizó la especialidad '{$especialidad->nombre_especialidad}'",
+            "Actualizado"
+        );
 
         return response()->json($especialidad);
     }
@@ -77,7 +86,11 @@ class EspecialidadMadreController extends Controller
 
         $especialidad->is_deleted = 1;
         $especialidad->save();
-
+        // ACTIVIDAD
+        $this->registrarActividad(
+            "Eliminó la especialidad '{$especialidad->nombre_especialidad}'",
+            "Eliminado"
+        );
         return response()->json(['message' => 'Especialidad eliminada'], 204);
     }
 

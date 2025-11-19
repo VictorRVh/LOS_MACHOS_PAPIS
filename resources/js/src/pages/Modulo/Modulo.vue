@@ -104,12 +104,9 @@ const onDelete = (modulo) => {
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-modulos', 'ver-modulos']">
 
-    <div class="flex  px-6">
-      <div class="w-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-        <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-          Asignar Módulo
-        </h3>
-        <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
+    <div class="flex  px-6 py-6">
+      <div class="w-1/2">
+        
         <ModuloSlider :show="slider" :modulo="sliderData" :especialidad="props.idEspecialidadPrograma"
           :indexModulo="indicesArray" @hide="hideSlider" />
       </div>

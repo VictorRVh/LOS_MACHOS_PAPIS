@@ -23,7 +23,7 @@ const onLogout = async () => {
         roleStore.roles = [];
         permissionStore.permissions = [];
 
-        await axios.get('/sanctum/csrf-cookie');
+        // await axios.get('/sanctum/csrf-cookie');
 
         await pushToRoute({ name: 'login' });
     }

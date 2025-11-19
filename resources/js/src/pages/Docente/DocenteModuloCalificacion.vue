@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed,watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 
 import SearchBar from "../../components/head_table/headSearch.vue";
@@ -265,26 +265,41 @@ const getEstadoCapacidadClass = computed(() => {
 
         <TBody>
           <Tr v-for="(est, index) in estudiantesPaginados" :key="est.id_estudiante ?? index">
-            <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
-            <Td class="font-medium whitespace-nowrap">{{ est.apellidos_nombres }}</Td>
-
-            <!-- Notas -->
-            <Td v-for="(cap, i) in est.capacidades" :key="i" class="text-center"
-              :class="getNotaClass(cap.nota_capacidad)">
-              {{ cap.nota_capacidad ?? "--" }}
-            </Td>
-
-            <!-- Totales -->
-            <template v-if="getResumenNotas(est)">
-              <Td class="text-center font-semibold">{{ getResumenNotas(est).total }}</Td>
-              <Td class="text-center font-semibold" :class="getResumenNotas(est).promedioClass">
-                {{ getResumenNotas(est).promedio }}
-              </Td>
-              <Td class="font-bold text-center" :class="getResumenNotas(est).estadoClass">
-                {{ getResumenNotas(est).estado }}
+            <!-- Si está retirado -->
+            <template v-if="est.matriculado === 0">
+              <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
+              <Td class="font-medium whitespace-nowrap">{{ est.apellidos_nombres }}</Td>
+              <Td :colspan="lengthUnit + 3" class="text-center">
+                <span class="px-3 py-1 rounded bg-red-100 text-red-700 font-semibold text-sm uppercase tracking-wide">
+                  RETIRADO POR INASISTENCIA
+                </span>
               </Td>
             </template>
+
+            <!-- Si está activo -->
+            <template v-else>
+              <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
+              <Td class="font-medium whitespace-nowrap">{{ est.apellidos_nombres }}</Td>
+
+              <!-- Notas -->
+              <Td v-for="(cap, i) in est.capacidades" :key="i" class="text-center"
+                :class="getNotaClass(cap.nota_capacidad)">
+                {{ cap.nota_capacidad ?? "--" }}
+              </Td>
+
+              <!-- Totales -->
+              <template v-if="getResumenNotas(est)">
+                <Td class="text-center font-semibold">{{ getResumenNotas(est).total }}</Td>
+                <Td class="text-center font-semibold" :class="getResumenNotas(est).promedioClass">
+                  {{ getResumenNotas(est).promedio }}
+                </Td>
+                <Td class="font-bold text-center" :class="getResumenNotas(est).estadoClass">
+                  {{ getResumenNotas(est).estado }}
+                </Td>
+              </template>
+            </template>
           </Tr>
+
         </TBody>
       </Table>
     </div>

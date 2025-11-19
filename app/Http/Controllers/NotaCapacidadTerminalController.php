@@ -59,6 +59,7 @@ class NotaCapacidadTerminalController extends Controller
             })
             ->select(
                 'estudiante.id as id_estudiante',
+                'matricula.matriculado',
                 DB::raw("CONCAT(estudiante.apellido_paterno, ' ', estudiante.apellido_materno, ', ', estudiante.nombre) as apellidos_nombres")
             )
             ->orderBy('estudiante.apellido_paterno', 'asc')
@@ -95,6 +96,7 @@ class NotaCapacidadTerminalController extends Controller
             return [
                 'id_estudiante' => $est->id_estudiante,
                 'apellidos_nombres' => $est->apellidos_nombres,
+                'matriculado' => $est->matriculado,
                 'capacidades' => $capConNotas
             ];
         });
@@ -273,7 +275,7 @@ class NotaCapacidadTerminalController extends Controller
         $grupo = Grupo::findOrFail($id);
 
         $alumnos = $grupo->estudiantes()
-            ->select('estudiante.id', 'apellido_paterno', 'apellido_materno', 'nombre')
+            ->select('estudiante.id', 'apellido_paterno', 'apellido_materno', 'nombre', 'matricula.matriculado')
             ->get()
             ->makeHidden(['pivot']);
 

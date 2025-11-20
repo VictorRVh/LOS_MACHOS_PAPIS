@@ -14,12 +14,15 @@ use App\Models\ProgramaEstudio;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Traits\Helpers; // <-- AÑADIDO
+
 
 class GrupoController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    use Helpers;
     public function index()
     {
         $grupos = Grupo::with([
@@ -82,68 +85,94 @@ class GrupoController extends Controller
             'status'              => 'required|integer|in:0,1,2,3'
         ]);
 
-        // 1️⃣ Crear el grupo
-        $grupo = Grupo::create($request->all());
-
-        $admins = User::whereHas('roles', function ($q) {
-            $q->where('name', 'coordinador');
-        })->get();
-
-        foreach ($admins as $admin) {
-            NotificationService::enviar(
-                $admin->id,
-                'Nuevo Grupo creado',
-                'Se ha creado el grupo: ' . $grupo->seccion . ' - ' . $grupo->turno,
-                '/grupos/' . $grupo->id
-            );
-        }
+        DB::beginTransaction();
 
         try {
-            // 2️⃣ Buscar la carpeta del período (madre)
+
+            // 1️⃣ Verificar que exista carpeta del periodo
             $carpetaPeriodo = CarpetasPeriodoDrive::where('id_periodo', $request->id_periodo)->first();
 
-            // dd($carpetaPeriodo);
-
             if (!$carpetaPeriodo) {
+
                 \Log::warning("No existe carpeta de periodo para id_periodo: " . $request->id_periodo);
-                return response()->json([
-                    'message' => 'Grupo creado, pero no existe carpeta del periodo para crear subcarpeta',
-                    'data' => $grupo
-                ], 201);
+
+                throw new \Exception(
+                    'No existe carpeta del periodo en Drive',
+                    13333
+                );
             }
 
-            // 3️⃣ Definir nombre de la subcarpeta del grupo
-            $folderName = 'Grupo_' . $request->seccion . '_' . $request->turno;
+            // 2️⃣ Crear el grupo SOLO si existe carpeta de periodo
+            $grupo = Grupo::create($request->all());
 
-            // 4️⃣ Crear subcarpeta en Google Drive
+            $modulo = Modulo::find($request->id_modulo);
+            $especialidad = EspecialidadPrograma::with('especialidadMadre')->find($request->id_especialidad);
+
+            // Registrar actividad con detalles completos
+            $this->registrarActividad(
+                "Creó el grupo {$grupo->seccion} | Turno {$grupo->turno} | Módulo: {$modulo->descripcion} | Especialidad: {$especialidad->especialidadMadre->nombre_especialidad}",
+                "Creado"
+            );
+
+            // Notificaciones
+            // $admins = User::whereHas('roles', function ($q) {
+            //     $q->where('name', 'coordinador');
+            // })->get();
+
+            // foreach ($admins as $admin) {
+            //     NotificationService::enviar(
+            //         $admin->id,
+            //         'Nuevo Grupo creado',
+            //         'Se ha creado el grupo: ' . $grupo->seccion . ' - ' . $grupo->turno,
+            //         '/grupos/' . $grupo->id
+            //     );
+            // }
+
+            // 3️⃣ Crear subcarpeta del grupo en Drive
+            $folderName = 'Grupo_' . $grupo->seccion . '_' . $grupo->turno;
+
             $driveController = new GoogleDriveController();
             $response = $driveController->createFolder(new Request([
                 'folderName' => $folderName,
                 'parentFolderId' => $carpetaPeriodo->drive_folder_id,
             ]));
 
-            if ($response->status() === 201) {
-                $data = $response->getData();
-                $driveFolderId = $data->id ?? null;
+            if ($response->status() !== 201) {
 
-                // 5️⃣ Guardar registro en carpetas_grupo_drive
-                CarpetasGrupoDrive::create([
-                    'id_grupo' => $grupo->id,
-                    'drive_folder_id' => $driveFolderId,
-                    'nombre_carpeta' => $folderName,
-                ]);
-            } else {
-                \Log::error('Error creando subcarpeta de grupo en Drive: ' . $response->getContent());
+                \Log::error("Error creando subcarpeta del grupo en Drive: " . $response->getContent());
+
+                throw new \Exception(
+                    'Error creando subcarpeta del grupo en Drive',
+                    13333
+                );
             }
-        } catch (\Exception $e) {
-            \Log::error('Excepción creando carpeta de grupo en Drive: ' . $e->getMessage());
-        }
 
-        return response()->json([
-            'message' => 'Grupo creado con éxito',
-            'data' => $grupo
-        ], 201);
+            $data = $response->getData();
+            $driveFolderId = $data->id ?? null;
+
+            CarpetasGrupoDrive::create([
+                'id_grupo' => $grupo->id,
+                'drive_folder_id' => $driveFolderId,
+                'nombre_carpeta'  => $folderName,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Grupo creado con éxito',
+                'data'    => $grupo
+            ], 201);
+        } catch (\Exception $e) {
+
+            DB::rollBack(); // ❗REVERSA TODO (grupo incluido)
+
+            \Log::error("Error en creación de grupo y carpeta: " . $e->getMessage());
+
+            // SIEMPRE devolver código 13333
+            throw new \Exception($e->getMessage(), 13333);
+        }
     }
+
 
     // GET /api/grupos/{id}
     public function show($id)
@@ -190,6 +219,7 @@ class GrupoController extends Controller
         ]);
 
         $grupo->update($request->all());
+        $this->registrarActividad("Actualizó el grupo {$grupo->seccion} | turno {$grupo->turno}", "Actualizado");
 
         return response()->json(['message' => 'Grupo actualizado con éxito', 'data' => $grupo]);
     }
@@ -205,7 +235,9 @@ class GrupoController extends Controller
 
         $grupo->delete();
 
-        return response()->json(['message' => 'Grupo eliminado con éxito']);
+        $this->registrarActividad("Eliminó el grupo {$grupo->seccion} | turno {$grupo->turno}", "Eliminado");
+
+        return response()->json(['message' => 'Grupo eliminado con éxito'], 204);
     }
 
     //ESPECIALIDADE DE UN PROGRAMA

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, useSlots } from 'vue';
+import { ref, onMounted, useSlots, computed } from 'vue';
 import Table from '../../components/table/Table.vue';
 import THead from '../../components/table/THead.vue';
 import TBody from '../../components/table/TBody.vue';
@@ -40,7 +40,6 @@ const idExperienciaFormativa = ref(null);
 const idPracticasDrive = ref(null)
 
 const nuevaExperiencia = ref({
-    nombre_experiencia: "",
     fecha_inicio: "",
     fecha_fin: "",
     horas: "",
@@ -66,7 +65,6 @@ onMounted(async () => {
             if (exp) {
                 nuevaExperiencia.value = {
                     id: exp.id,
-                    nombre_experiencia: exp.nombre_experiencia,
                     fecha_inicio: exp.fecha_inicio,
                     fecha_fin: exp.fecha_fin,
                     horas: exp.horas,
@@ -75,7 +73,6 @@ onMounted(async () => {
             } else {
                 nuevaExperiencia.value = {
                     id: null,
-                    nombre_experiencia: "",
                     fecha_inicio: "",
                     fecha_fin: "",
                     horas: "",
@@ -97,6 +94,9 @@ onMounted(async () => {
     }
 });
 
+const existeExperiencia = computed(() => {
+    return idExperienciaFormativa.value !== null;
+});
 
 const formData = ref({
     lugar: "",
@@ -115,7 +115,6 @@ function removeFile() {
 
 async function guardarExperiencia() {
     if (
-        !nuevaExperiencia.value.nombre_experiencia ||
         !nuevaExperiencia.value.fecha_inicio ||
         !nuevaExperiencia.value.fecha_fin ||
         !nuevaExperiencia.value.horas
@@ -203,18 +202,23 @@ async function onSubmit() {
             <div class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
                 <h3 class="font-bold text-lg text-cetpro mb-3">Registrar Nueva Experiencia Formativa</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <FormInput v-model="nuevaExperiencia.nombre_experiencia" label="Nombre de la experiencia *"
-                        placeholder="Ej. Prácticas Clínicas 2025" />
-                    <FormInput type="date" v-model="nuevaExperiencia.fecha_inicio" label="Fecha Inicio *" />
-                    <FormInput type="date" v-model="nuevaExperiencia.fecha_fin" label="Fecha Fin *" />
-                    <FormInput v-model="nuevaExperiencia.horas" label="Horas *" type="number" min="1"
-                        placeholder="Ej. 120" />
+                    <FormInput type="date" v-model="nuevaExperiencia.fecha_inicio" label="Fecha Inicio" required />
+                    <FormInput type="date" v-model="nuevaExperiencia.fecha_fin" label="Fecha Fin" required />
+                    <FormInput v-model="nuevaExperiencia.horas" label="Horas" type="number" min="1"
+                        placeholder="Ej. 120" required />
+                    <div class="flex justify-end mt-6">
+                        <!-- Si NO hay experiencia => botón GUARDAR -->
+                        <Button v-if="!existeExperiencia" title="Guardar Experiencia" :loading="isSavingExp"
+                            :disabled="isSavingExp" @click="guardarExperiencia" />
+
+                        <!-- Si SÍ hay experiencia => botón EDITAR -->
+                        <Button v-else title="Editar Experiencia" color="secondary" :loading="isSavingExp"
+                            :disabled="isSavingExp" @click="guardarExperiencia" />
+
+                    </div>
                 </div>
 
-                <div class="flex justify-end mt-4">
-                    <Button title="Guardar Experiencia" :loading="isSavingExp" :disabled="isSavingExp"
-                        @click="guardarExperiencia" />
-                </div>
+
             </div>
 
             <div class="flex-between mt-6">
@@ -233,21 +237,48 @@ async function onSubmit() {
                 </THead>
                 <TBody>
                     <Tr v-for="(alumno, index) in alumnos" :key="alumno.id_estudiante">
-                        <Td>{{ index + 1 }}</Td>
-                        <Td>{{ alumno.apellidos_nombres }}</Td>
-                        <Td>{{ alumno.lugar }}</Td>
-                        <Td class="text-center">
-                            <a v-if="alumno.documento_url" :href="alumno.documento_url" target="_blank"
-                                class="inline-flex items-center justify-center text-blue-600 hover:text-blue-800"
-                                title="Abrir documento">
-                                <DocumentTextIcon class="w-6 h-6" />
-                            </a>
-                            <span v-else class="text-gray-400">—</span>
-                        </Td>
-                        <Td class="text-center">
-                            <Button title="Calificar" color="primary" size="sm" @click="abrirModal(alumno)" />
-                        </Td>
+
+                        <!-- Alumno está retirado -->
+                        <template v-if="alumno.matriculado == 0">
+                            <Td>{{ index + 1 }}</Td>
+                            <Td class="font-medium whitespace-nowrap">{{ alumno.apellidos_nombres }}</Td>
+                            <Td :colspan="3" class="text-center">
+                                <span
+                                    class="px-3 py-1 rounded bg-red-100 text-red-700 font-semibold text-sm uppercase tracking-wide">
+                                    RETIRADO POR INASISTENCIA
+                                </span>
+                            </Td>
+                        </template>
+
+                        <!-- Alumno no retirado -->
+                        <template v-else>
+                            <Td>{{ index + 1 }}</Td>
+                            <Td>{{ alumno.apellidos_nombres }}</Td>
+                            <Td>{{ alumno.lugar }}</Td>
+                            <Td class="text-center">
+                                <a v-if="alumno.documento_url" :href="alumno.documento_url" target="_blank"
+                                    class="inline-flex items-center justify-center text-blue-600 hover:text-blue-800"
+                                    title="Abrir documento">
+                                    <DocumentTextIcon class="w-6 h-6" />
+                                </a>
+                                <span v-else class="text-gray-400">—</span>
+                            </Td>
+                            <Td class="text-center">
+                                <!-- Si NO hay experiencia => botón deshabilitado -->
+                                <Button v-if="!existeExperiencia" title="Calificar" color="primary" size="sm" disabled
+                                    @click="showToast('Debe registrar una experiencia formativa primero.', 'warning')" />
+
+                                <Button v-else-if="alumno.lugar !== null || alumno.documento_id !== null"
+                                    title="Ya calificado" color="secondary" size="sm" disabled />
+
+                                <!-- Si SÍ hay experiencia => botón normal -->
+                                <Button v-else title="Calificar" color="primary" size="sm"
+                                    @click="abrirModal(alumno)" />
+                            </Td>
+                        </template>
+
                     </Tr>
+
                 </TBody>
             </Table>
 

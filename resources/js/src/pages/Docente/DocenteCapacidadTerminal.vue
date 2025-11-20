@@ -105,7 +105,7 @@ const indicesArray = computed(() => {
         <Table>
           <THead>
             <Th>#</Th>
-            <Th>Nombre Capacidad</Th>
+            <!-- <Th>Nombre Capacidad</Th> -->
             <Th>Fecha Inicio</Th>
             <Th>Fecha Fin</Th>
             <Th>Estado</Th>
@@ -118,12 +118,12 @@ const indicesArray = computed(() => {
               <Td>{{ capacidad?.nombre_capacidad }}</Td>
               <Td>{{ capacidad?.fecha_inicio }}</Td>
               <Td>{{ capacidad?.fecha_fin }}</Td>
-              <Td>
+              <!-- <Td>
                 <span class="px-2 py-1 rounded text-xs font-semibold"
                   :class="capacidad.status === 1 ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'">
                   {{ capacidad.status === 1 ? 'Activo' : 'Inactivo' }}
                 </span>
-              </Td>
+              </Td> -->
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">
                   <EditButton @click="showSlider(true, capacidad)" />

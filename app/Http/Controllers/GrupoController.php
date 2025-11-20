@@ -114,19 +114,7 @@ class GrupoController extends Controller
                 "Creado"
             );
 
-            // Notificaciones
-            // $admins = User::whereHas('roles', function ($q) {
-            //     $q->where('name', 'coordinador');
-            // })->get();
 
-            // foreach ($admins as $admin) {
-            //     NotificationService::enviar(
-            //         $admin->id,
-            //         'Nuevo Grupo creado',
-            //         'Se ha creado el grupo: ' . $grupo->seccion . ' - ' . $grupo->turno,
-            //         '/grupos/' . $grupo->id
-            //     );
-            // }
 
             // 3️⃣ Crear subcarpeta del grupo en Drive
             $folderName = 'Grupo_' . $grupo->seccion . '_' . $grupo->turno;

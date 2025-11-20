@@ -7,6 +7,7 @@ use App\Models\Grupo;
 use App\Models\Matricula;
 use App\Models\Pago;
 use App\Models\ProgramaEstudio;
+use App\Traits\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -15,6 +16,7 @@ class MatriculaController extends Controller
     /**
      * Display a listing of the resource.
      */
+    use Helpers;
     public function index()
     {
         $matriculas = Matricula::with([
@@ -92,6 +94,21 @@ class MatriculaController extends Controller
                 'id_pago' => $pago->id,
                 'reserva' => $request->reserva ?? 0,
             ]);
+            // Datos para actividad
+            $grupo = Grupo::with(['modulo', 'especialidad.especialidadMadre'])
+                ->find($request->id_grupo);
+
+            $nombreCompleto = "{$estudiante->apellido_paterno} {$estudiante->apellido_materno}, {$estudiante->nombre}";
+
+            $descripcionGrupo = "{$grupo->seccion} | Turno: {$grupo->turno} | "
+                . "Módulo: {$grupo->modulo->descripcion} | "
+                . "Especialidad: {$grupo->especialidad->especialidadMadre->nombre_especialidad}";
+
+            // Registrar actividad
+            $this->registrarActividad(
+                "Registró matrícula del estudiante: {$nombreCompleto} en el grupo {$descripcionGrupo}",
+                "Registrado"
+            );
 
             DB::commit();
 
@@ -133,6 +150,7 @@ class MatriculaController extends Controller
             return response()->json(['message' => 'Matrícula no encontrada'], 404);
         }
 
+        // Validar campos
         $request->validate([
             'id_grupo'      => 'sometimes|uuid|exists:grupo,id',
             'turno'         => 'sometimes|string|max:10',
@@ -141,10 +159,35 @@ class MatriculaController extends Controller
             'reserva'       => 'nullable|boolean'
         ]);
 
+        // Actualizar matrícula
         $matricula->update($request->all());
 
-        return response()->json(['message' => 'Matrícula actualizada con éxito', 'data' => $matricula]);
+        // Obtener estudiante
+        $estudiante = Estudiante::find($matricula->id_estudiante);
+
+        $nombreCompleto = "{$estudiante->apellido_paterno} {$estudiante->apellido_materno}, {$estudiante->nombre}";
+
+        // Obtener grupo (el nuevo o el que ya estaba)
+        $grupo = Grupo::with(['modulo', 'especialidad.especialidadMadre'])
+            ->find($matricula->id_grupo);
+
+        $descripcionGrupo =
+            "{$grupo->seccion} | Turno: {$grupo->turno} | " .
+            "Módulo: {$grupo->modulo->descripcion} | " .
+            "Especialidad: {$grupo->especialidad->especialidadMadre->nombre_especialidad}";
+
+        // Registrar actividad
+        $this->registrarActividad(
+            "Actualizó matrícula del estudiante: {$nombreCompleto} en el grupo {$descripcionGrupo}",
+            "Actualizado"
+        );
+
+        return response()->json([
+            'message' => 'Matrícula actualizada con éxito',
+            'data' => $matricula
+        ]);
     }
+
 
     // DELETE /api/matriculas/{id}
     public function destroy($id)
@@ -155,6 +198,27 @@ class MatriculaController extends Controller
             return response()->json(['message' => 'Matrícula no encontrada'], 404);
         }
 
+        // Obtener estudiante
+        $estudiante = Estudiante::find($matricula->id_estudiante);
+
+        $nombreCompleto = "{$estudiante->apellido_paterno} {$estudiante->apellido_materno}, {$estudiante->nombre}";
+
+        // Obtener grupo asociado
+        $grupo = Grupo::with(['modulo', 'especialidad.especialidadMadre'])
+            ->find($matricula->id_grupo);
+
+        $descripcionGrupo =
+            "{$grupo->seccion} | Turno: {$grupo->turno} | " .
+            "Módulo: {$grupo->modulo->descripcion} | " .
+            "Especialidad: {$grupo->especialidad->especialidadMadre->nombre_especialidad}";
+
+        // Registrar actividad
+        $this->registrarActividad(
+            "Eliminó matrícula del estudiante: {$nombreCompleto} en el grupo {$descripcionGrupo}",
+            "Eliminado"
+        );
+
+        // Eliminar matrícula
         $matricula->delete();
 
         return response()->json(['message' => 'Matrícula eliminada con éxito']);

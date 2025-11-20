@@ -80,7 +80,7 @@ watch(
     if (!programaStore.programa.length) await programaStore.loadPrograma();
 
     // DAMOS FORMATO PARA EL SELECT
-    console.log("verificamos- ", programaStore.programa.programas)
+    // console.log("verificamos- ", programaStore.programa.programas)
     programas.value = programaStore.programa.programas.map(p => ({
       id: p.id,
       name: p.nameCiclo,
@@ -88,8 +88,9 @@ watch(
 
     // 1) Asegurarnos que programas/convenios/docentes/períodos ya están cargados (si no, cargarlos)
     if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
-    // if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
-    await periodoStore.loadPeriodos();
+    if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
+    // await periodoStore.loadPeriodos();
+    
 
     if (props.grupo?.id_grupo) {
 

@@ -522,59 +522,59 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('especialidadByPrograma/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'getEspecialidadesPorPrograma',
-    ])->middleware('permission:ver-programas');
+    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programas');
 
     Route::get('moduloByEspecialidad/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'getModulosPorEspecialidad',
-    ])->middleware('permission:ver-programa-especialidades');
+    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programa-especialidades');
 
     Route::get('periodoByModulo/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'getPeriodoPorModulo',
-    ])->middleware('permission:ver-periodos');
+    ])->middleware('permission:todo-acceso-grupos|ver-periodos');
 
     // grupo-docente
     Route::get('docenteGrupo', [
         \App\Http\Controllers\GrupoController::class,
         'docentesPorGrupo',
-    ])->middleware('permission:ver-docentes');
+    ])->middleware('permission:todo-acceso-grupos|ver-docentes');
 
     // grupos filtrados
     Route::get('gruposFiltrados', [
         \App\Http\Controllers\GrupoController::class,
         'gruposPorCicloAnioPeriodo',
-    ])->middleware('permission:ver-grupos');
+    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
 
     // Rutas nuevas para filtro de grupo
     Route::get('aniosByCiclo/{idCiclo}', [
         \App\Http\Controllers\GrupoController::class,
         'getAniosPorCiclo',
-    ])->middleware('permission:ver-grupos');
+    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
 
     Route::get('periodoByAnio/{idAnio}', [
         \App\Http\Controllers\GrupoController::class,
         'getPeriodosPorAnio',
-    ])->middleware('permission:ver-grupos');
+    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
 
     // para filtros de lista de grupos
 
     Route::get('periodoByCiclo/{cicloId}', [
         \App\Http\Controllers\GrupoController::class,
         'getPeriodosPorCiclo',
-    ])->middleware('permission:ver-grupos');
+    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
 
     // lista de grupos
     Route::get('gruposMatricula', [
         \App\Http\Controllers\GrupoController::class,
         'getGruposPorCicloYPeriodo',
-    ])->middleware('permission:ver-grupos');
+    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
 
     // Lista de grupos disponibles para cambio de grupo
     Route::get('gruposDisponibles', [
         \App\Http\Controllers\GrupoController::class,
         'gruposDisponibles',
-    ])->middleware('permission:ver-grupos');
+    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
 
     //RUTA PARA CAPACIDAD TERMINAL
     Route::get('capacidad_terminal', [
@@ -1019,7 +1019,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('especialidadByPrograma/{idPrograma}', [
         \App\Http\Controllers\MatriculaController::class,
         'getEspecialidadesPorPrograma',
-    ])->middleware('permission:ver-programa-especialidades');
+    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programa-especialidades');
 
     Route::get('grupoByEspecialidad/{idEspecialidad}', [
         \App\Http\Controllers\MatriculaController::class,

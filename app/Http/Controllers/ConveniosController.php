@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Convenios;
 use Illuminate\Http\Request;
+use App\Traits\Helpers;
 
 class ConveniosController extends Controller
 {
@@ -11,6 +12,7 @@ class ConveniosController extends Controller
      * Display a listing of the resource.
      */
     // Mostrar todos los convenios
+    use Helpers;
     public function index()
     {
         return response()->json(
@@ -31,6 +33,13 @@ class ConveniosController extends Controller
         ]);
 
         $convenio = Convenios::create($request->all());
+
+        // 🔵 Registrar actividad
+        $this->registrarActividad(
+            "Creó el convenio con la institución '{$convenio->nombre_institucion}'",
+            "Creado"
+        );
+
         return response()->json($convenio, 201);
     }
 
@@ -59,6 +68,15 @@ class ConveniosController extends Controller
         ]);
 
         $convenio->update($request->all());
+        $this->registrarActividad(
+            "Actualizó el convenio con la institución '{$convenio->nombre_institucion}'",
+            "Actualizado"
+        );
+        // 🔵 Registrar actividad
+        $this->registrarActividad(
+            "Actualizó el convenio con la institución '{$convenio->nombre_institucion}'",
+            "Actualizado"
+        );
         return response()->json($convenio, 200);
     }
 
@@ -69,9 +87,14 @@ class ConveniosController extends Controller
         if (!$convenio) {
             return response()->json(['message' => 'Convenio no encontrado'], 404);
         }
-
+        $nombre = $convenio->nombre_institucion;
         $convenio->is_deleted = 1;
         $convenio->save();
+        // 🔵 Registrar actividad
+        $this->registrarActividad(
+            "Eliminó el convenio con la institución '{$nombre}'",
+            "Eliminado"
+        );
 
         return response()->json(['message' => 'Convenio eliminado'], 204);
     }

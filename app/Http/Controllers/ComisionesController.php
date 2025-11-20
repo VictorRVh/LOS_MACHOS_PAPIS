@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Comisiones;
 use App\Models\User;
 use App\Traits\Error;
+use App\Traits\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class ComisionesController extends Controller
 {
     use Error;
-
+    use Helpers;
     public function index(Request $request)
     {
         $comisiones = Comisiones::with(['usuarios:id,name,apellido_paterno,apellido_materno'])->get();
@@ -79,6 +80,7 @@ class ComisionesController extends Controller
                     'nameCompleto' => $usuario->name . ' ' . $usuario->apellido_paterno . ' ' . $usuario->apellido_materno,
                 ];
             });
+            $this->registrarActividad("Creó la comisión '{$comision->titulo}'", "Creado");
 
             return response()->json([
                 'id' => $comision->id,
@@ -112,6 +114,7 @@ class ComisionesController extends Controller
             if (isset($request->usuarios) && is_array($request->usuarios)) {
                 $comision->usuarios()->sync($request->usuarios);
             }
+            $this->registrarActividad("Actualizó la comisión '{$comision->titulo}'", "Actualizado");
 
             return response()->json($comision);
         } catch (\Exception $error) {
@@ -159,10 +162,10 @@ class ComisionesController extends Controller
             if (!$comision) {
                 throw new \Exception('Error|Comisión no encontrada--404', 13333);
             }
-
+            $titulo = $comision->titulo;
             $comision->usuarios()->detach();
             $comision->delete();
-
+            $this->registrarActividad("Eliminó la comisión '{$titulo}'", "Eliminado");
             return response()->json([], 204);
         } catch (\Exception $error) {
             return $this->errorResponse($error);

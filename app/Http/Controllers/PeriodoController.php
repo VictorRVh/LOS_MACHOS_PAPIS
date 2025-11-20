@@ -6,7 +6,7 @@ use App\Models\CarpetasPeriodoDrive;
 use App\Models\Periodo;
 use Illuminate\Http\Request;
 use App\Traits\Helpers;
-
+use Illuminate\Support\Facades\DB;
 
 class PeriodoController extends Controller
 {
@@ -55,52 +55,68 @@ class PeriodoController extends Controller
             'status' => 'required|in:0,1,2,3',
         ]);
 
-        // 1️⃣ Crear el periodo en la BD
-        $periodo = Periodo::create($request->only(['nombre_periodo', 'status']));
+        DB::beginTransaction();
 
         try {
+
+            // 1️⃣ Crear el periodo en BD (aún sin commit)
+            $periodo = Periodo::create([
+                'nombre_periodo' => $request->nombre_periodo,
+                'status' => $request->status,
+            ]);
+
             // 2️⃣ Carpeta madre fija en Google Drive
             $parentFolderId = '0AB477u4EnjP6Uk9PVA';
 
             $driveController = new GoogleDriveController();
 
             $folderRequest = new Request([
-                'folderName' => $periodo->nombre_periodo,
+                'folderName'     => $periodo->nombre_periodo,
                 'parentFolderId' => $parentFolderId,
             ]);
 
+            // 3️⃣ Crear carpeta del periodo en Drive
             $response = $driveController->createFolder($folderRequest);
 
-            if ($response->status() === 201) {
-                $data = $response->getData();
+            if ($response->status() !== 201) {
 
-                $periodo->save();
-
-                // 4️⃣ Guardar también en carpetas_periodo_drive
-                CarpetasPeriodoDrive::create([
-                    'id_periodo' => $periodo->id,
-                    'drive_folder_id' => $data->id,
-                    'nombre_carpeta' => $periodo->nombre_periodo,
-                ]);
-
-                $this->registrarActividad("Creó el periodo '{$periodo->nombre_periodo}'", "Creado");
-            } else {
+                \Log::error("Error creando carpeta del periodo en Drive: " . $response->getContent());
 
                 throw new \Exception(
-                    '❌ Error creando carpeta del periodo:' . $response->getContent(),
+                    'Error creando carpeta del periodo en Drive',
                     13333
                 );
             }
+
+            $data = $response->getData();
+
+            // 4️⃣ Guardar en carpetas_periodo_drive
+            CarpetasPeriodoDrive::create([
+                'id_periodo'      => $periodo->id,
+                'drive_folder_id' => $data->id,
+                'nombre_carpeta'  => $periodo->nombre_periodo,
+            ]);
+
+            // 5️⃣ Registrar actividad
+            $this->registrarActividad(
+                "Creó el periodo '{$periodo->nombre_periodo}'",
+                "Creado"
+            );
+
+            DB::commit(); // ✔ Todo correcto
+
+            return response()->json($periodo, 201);
         } catch (\Exception $e) {
 
+            DB::rollBack(); // ❗REVERSA TODO (el periodo no queda creado)
+
             throw new \Exception(
-                '⚠️ Error al crear carpeta del periodo en Drive: ' . $e->getMessage(),
+                '⚠️ Error creando periodo y su carpeta: ' . $e->getMessage(),
                 13333
             );
         }
-
-        return response()->json($periodo, 201);
     }
+
 
 
     // Mostrar un periodo específico

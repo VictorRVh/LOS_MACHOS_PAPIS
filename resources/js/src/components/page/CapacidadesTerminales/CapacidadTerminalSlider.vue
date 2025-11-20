@@ -195,9 +195,9 @@ const onSubmit = async () => {
                     required />
             </div>
 
-            <div>
+            <!-- <div>
                 <CheckBox v-model="formData.status" label="Estado" class="flex items-center" />
-            </div>
+            </div> -->
 
             <div class="flex gap-2 mt-3">
                 <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Capacidad'"

@@ -15,16 +15,27 @@ class UserController extends Controller
     use Error, Helpers;
     public function index(Request $request)
     {
-        $users = User::with('roles.permissions')->where('is_deleted', 0)->get();
+        $users = User::with('roles.permissions')
+            ->where('is_deleted', 0)
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'super-directora');
+            })
+            ->get();
+
         $users = $users->map(
             fn($user) => $this->extractPermissionsFromUser($user)
         );
+
         return response()->json($users);
     }
+
     public function index_filter_status()
     {
         $usuariosActivos = User::where('status', 1)
             ->where('is_deleted', 0)
+            ->whereDoesntHave('roles', function ($q) {
+                $q->where('name', 'super-directora');
+            })
             ->select('id', 'name', 'apellido_paterno', 'apellido_materno')
             ->get();
 
@@ -37,6 +48,7 @@ class UserController extends Controller
 
         return response()->json($users);
     }
+
 
 
 

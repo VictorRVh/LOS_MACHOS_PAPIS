@@ -19,7 +19,10 @@ class PersonalAdministrativoController extends Controller
         $usuarios = User::whereDoesntHave('roles', function ($query) {
             $query->where('name', 'docente');
         })
-            ->with(['roles', 'personalAdministrativo']) // ahora funciona gracias a la relación agregada
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'super-directora'); // ⬅️ SE AGREGA ESTO
+            })
+            ->with(['roles', 'personalAdministrativo'])
             ->get();
 
         // Armar la respuesta
@@ -44,6 +47,7 @@ class PersonalAdministrativoController extends Controller
 
         return response()->json($administrativo);
     }
+
 
 
     // GET /api/personal-administrativo/{id}
@@ -96,7 +100,7 @@ class PersonalAdministrativoController extends Controller
             ));
 
             $this->registrarActividad("Asigno los datos administrativos de '{$item->usuario->name}'", "Asignado");
-            
+
             return response()->json([
                 'message' => 'Datos del personal creado porque no existía',
                 'data' => $item
@@ -126,6 +130,6 @@ class PersonalAdministrativoController extends Controller
 
         $item->delete();
         $this->registrarActividad("Eliminó los datos administrativos de  '{$item->usuario->name}'", "Eliminado");
-        return response()->json(['message' => 'Datos del personal eliminado correctamente'],204);
+        return response()->json(['message' => 'Datos del personal eliminado correctamente'], 204);
     }
 }

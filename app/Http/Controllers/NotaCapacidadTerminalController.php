@@ -127,7 +127,8 @@ class NotaCapacidadTerminalController extends Controller
             'id_capacidad_terminal' => 'required|exists:capacidad_terminal,id',
             'notas' => 'required|array',
             'notas.*.id_estudiante' => 'required|exists:estudiante,id',
-            'notas.*.nota' => 'required|numeric|min:0|max:20',
+            // 'notas.*.nota' => 'required|numeric|min:0|max:20',
+            'notas.*.nota' => 'nullable|string|min:0|max:20',
         ]);
 
         $capacidad = CapacidadTerminal::find($request->id_capacidad_terminal);

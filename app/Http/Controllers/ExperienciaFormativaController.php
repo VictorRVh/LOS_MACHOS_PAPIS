@@ -66,8 +66,11 @@ class ExperienciaFormativaController extends Controller
                 'lugar' => $nota->lugar ?? null,
                 'documento_id' => $nota->documento ?? null, // ID interno o en Drive
                 'documento_url' => $documentoDriveUrl, // URL visible en Drive
+                'matriculado' => $matricula->matriculado // URL visible en Drive
             ];
         });
+
+        $estudiantes = $estudiantes->sortBy('apellidos_nombres')->values();
 
         // 🔹 Retornar todo junto
         return response()->json([
@@ -107,7 +110,7 @@ class ExperienciaFormativaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_experiencia' => 'required|string|max:255',
+            'nombre_experiencia' => 'nullable|string|max:255',
             'parentId'           => 'required|string|max:255',
             'fecha_inicio'       => 'required|date',
             'fecha_fin'          => 'required|date|after_or_equal:fecha_inicio',
@@ -116,7 +119,11 @@ class ExperienciaFormativaController extends Controller
             'status'             => 'nullable',
         ]);
 
-        $experiencia = ExperienciaFormativa::create($request->all());
+        $data = $request->all();
+        $data['nombre_experiencia'] = 'practicas';
+
+        $experiencia = ExperienciaFormativa::create($data);
+
         $driveFolderId = null;
 
         try {

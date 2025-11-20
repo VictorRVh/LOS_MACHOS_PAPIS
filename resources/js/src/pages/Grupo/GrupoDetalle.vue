@@ -29,7 +29,7 @@ const tituloPrincipal = computed(() => {
 
 const subTitulo = computed(() => {
   if (!infoGrupo.value) return 'Cargando detalles...';
-  return `Módulo ${infoGrupo.value.modulo_numero}: ${infoGrupo.value.modulo_nombre} | Sección ${infoGrupo.value.seccion}`;
+  return `Módulo: ${infoGrupo.value.modulo} | Sección ${infoGrupo.value.seccion}`;
 });
 
 onMounted(async () => {

@@ -110,14 +110,12 @@ class GrupoController extends Controller
 
             // Registrar actividad con detalles completos
             $this->registrarActividad(
-                "Creó el grupo {$grupo->seccion} | Turno {$grupo->turno} | Módulo: {$modulo->descripcion} | Especialidad: {$especialidad->especialidadMadre->nombre_especialidad}",
+                "Creó el grupo {$grupo->seccion} | Turno: {$grupo->turno} | Módulo: {$modulo->descripcion} | Especialidad: {$especialidad->especialidadMadre->nombre_especialidad}",
                 "Creado"
             );
 
-
-
             // 3️⃣ Crear subcarpeta del grupo en Drive
-            $folderName = 'Grupo_' . $grupo->seccion . '_' . $grupo->turno;
+            $folderName = "Grupo {$grupo->seccion} | Turno: {$grupo->turno} | Módulo: {$modulo->descripcion} | Especialidad: {$especialidad->especialidadMadre->nombre_especialidad}";
 
             $driveController = new GoogleDriveController();
             $response = $driveController->createFolder(new Request([
@@ -207,7 +205,16 @@ class GrupoController extends Controller
         ]);
 
         $grupo->update($request->all());
-        $this->registrarActividad("Actualizó el grupo {$grupo->seccion} | turno {$grupo->turno}", "Actualizado");
+
+        $modulo = Modulo::find($request->id_modulo);
+        $especialidad = EspecialidadPrograma::with('especialidadMadre')->find($request->id_especialidad);
+
+        // Registrar actividad con detalles completos
+        $this->registrarActividad(
+            "Actualizó el grupo {$grupo->seccion} | Turno: {$grupo->turno} | Módulo: {$modulo->descripcion} | Especialidad: {$especialidad->especialidadMadre->nombre_especialidad}",
+            "Actualizado"
+        );
+
 
         return response()->json(['message' => 'Grupo actualizado con éxito', 'data' => $grupo]);
     }
@@ -221,12 +228,29 @@ class GrupoController extends Controller
             return response()->json(['message' => 'Grupo no encontrado'], 404);
         }
 
+        // 🔍 Obtener módulo actual del grupo
+        $modulo = Modulo::find($grupo->id_modulo);
+
+        // 🔍 Obtener especialidad actual del grupo
+        $especialidad = EspecialidadPrograma::with('especialidadMadre')
+            ->find($grupo->id_especialidad);
+
+        // Guardar antes de eliminar
+        $seccion = $grupo->seccion;
+        $turno   = $grupo->turno;
+
+        // 🚮 Eliminar el grupo
         $grupo->delete();
 
-        $this->registrarActividad("Eliminó el grupo {$grupo->seccion} | turno {$grupo->turno}", "Eliminado");
+        // 📝 Registrar actividad con datos completos
+        $this->registrarActividad(
+            "Eliminó el grupo {$seccion} | Turno: {$turno} | Módulo: {$modulo->descripcion} | Especialidad: {$especialidad->especialidadMadre->nombre_especialidad}",
+            "Eliminado"
+        );
 
         return response()->json(['message' => 'Grupo eliminado con éxito'], 204);
     }
+
 
     //ESPECIALIDADE DE UN PROGRAMA
 

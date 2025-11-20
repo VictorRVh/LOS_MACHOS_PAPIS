@@ -323,9 +323,16 @@ class GrupoController extends Controller
             ->pluck('id_docente');
 
         // Traer docentes que no estén ocupados
-        $docentes = Docente::with('user:id,name,apellido_paterno,apellido_materno')
+        $docentes = Docente::with(['user' => function ($q) {
+            $q->select('id', 'name', 'apellido_paterno', 'apellido_materno')
+                ->where('is_deleted', 0); 
+        }])
             ->whereNotIn('id', $ocupados)
+            ->whereHas('user', function ($q) {
+                $q->where('is_deleted', 0);
+            })
             ->get();
+
 
         if ($request->id_grupo) {
             $grupoActual = Grupo::with('docente.user')->find($request->id_grupo);

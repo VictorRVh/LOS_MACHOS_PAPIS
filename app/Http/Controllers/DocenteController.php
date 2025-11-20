@@ -19,7 +19,7 @@ class DocenteController extends Controller
     public function index()
     {
         $usuariosDocentes = User::whereHas('roles', function ($query) {
-            $query->where('name', 'docente');
+            $query->where('name', 'docente')->where('is_deleted', 0);
         })
             ->with('docente')
             ->get();
@@ -213,17 +213,19 @@ class DocenteController extends Controller
     // Eliminar un docente
     public function destroy($id)
     {
-        $docente = Docente::find($id);
+        $docente = User::find($id);
 
         if (!$docente) {
             return response()->json(['message' => 'Docente no encontrado'], 404);
         }
 
-        $nombre = $docente->user->name . " " .
-            $docente->user->apellido_paterno . " " .
-            $docente->user->apellido_materno;
+        $nombre = $docente->name . " " .
+            $docente->apellido_paterno . " " .
+            $docente->apellido_materno;
 
-        $docente->delete();
+        // $docente->delete();
+        $docente->is_deleted = 1;
+        $docente->save();
 
         // 🔹 Registrar actividad
         $this->registrarActividad(
@@ -231,7 +233,7 @@ class DocenteController extends Controller
             "Eliminado"
         );
 
-        return response()->json(['message' => 'Docente eliminado correctamente']);
+        return response()->json(['message' => 'Docente eliminado correctamente'], 204);
     }
 
 

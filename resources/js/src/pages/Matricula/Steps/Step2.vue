@@ -29,7 +29,7 @@ const formData = computed({
 
 const opcionesSexo = [{ name: 'Masculino', value: "M" }, { name: 'Femenino', value: "F" }, { name: 'Otro', value: "O" }];
 const opcionesEstadoCivil = ['SOLTERO(A)', 'CASADO(A)', 'VIUDO(A)', 'DIVORCIADO(A)', 'CONVIVIENTE'];
-const opcionesGradoInstruccion = ['Primaria incompleta', 'Primaria completa', 'Secundaria incompleta', 'Secundaria completa', 'Superior incompleta', 'Superior incompleta'];
+const opcionesGradoInstruccion = ['Primaria incompleta', 'Primaria completa', 'Secundaria incompleta', 'Secundaria completa', 'Superior incompleta', 'Superior completa'];
 const opcionesLenguaMaterna = ['Castellano', 'Quechua', 'Aymara', 'Ashaninka', 'Awajun', 'Otros'];
 const opcionesEquiposVirtuales = ['Laptop', 'Computadora', 'Tablet', 'Celular'];
 const opcionesSiNo = ["Si", "No"];

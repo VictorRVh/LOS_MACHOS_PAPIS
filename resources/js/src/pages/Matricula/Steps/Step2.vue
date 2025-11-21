@@ -190,31 +190,31 @@ const buscarDNI = async () => {
 
             <!-- Otros campos -->
             <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno"
-                :error-message="errors.apellido_paterno" required />
+                :error="errors.apellido_paterno" required />
             <FormInput v-model="formData.apellido_materno" label="Apellido Materno"
-                :error-message="errors.apellido_materno" required />
-            <FormInput v-model="formData.nombre" label="Nombres" :error-message="errors.nombre" />
+                :error="errors.apellido_materno" required />
+            <FormInput v-model="formData.nombre" label="Nombres" :error="errors.nombre" />
 
-            <FormLabelError label="Sexo" :error-message="errors.sexo">
+            <FormLabelError label="Sexo" :error="errors.sexo">
                 <v-select v-model="formData.sexo" :options="opcionesSexo" label="name" :reduce="opcion => opcion.value"
                     placeholder="Seleccione sexo" :clearable="false" />
             </FormLabelError>
 
-            <FormLabelError label="Fecha de Nacimiento" :error-message="errors.fecha_nacimiento">
+            <FormLabelError label="Fecha de Nacimiento" :error="errors.fecha_nacimiento" >
                 <FormInput v-model="formData.fecha_nacimiento" type="date" />
             </FormLabelError>
 
-            <FormLabelError label="Departamento de Nacimiento" :error-message="errors.departamento_nacimiento">
+            <FormLabelError label="Departamento de Nacimiento" :error="errors.departamento_nacimiento">
                 <v-select v-model="formData.departamento_nacimiento" :options="departamentos"
                     placeholder="Buscar departamento..." />
             </FormLabelError>
 
-            <FormLabelError label="Provincia de Nacimiento" :error-message="errors.provincia_nacimiento">
+            <FormLabelError label="Provincia de Nacimiento" :error="errors.provincia_nacimiento">
                 <v-select v-model="formData.provincia_nacimiento" :options="provincias"
                     placeholder="Buscar provincia..." :disabled="!formData.departamento_nacimiento" />
             </FormLabelError>
 
-            <FormLabelError label="Distrito de Nacimiento" :error-message="errors.distrito_nacimiento">
+            <FormLabelError label="Distrito de Nacimiento" :error="errors.distrito_nacimiento">
                 <v-select v-model="formData.distrito_nacimiento" :options="distritos" placeholder="Buscar distrito..."
                     :disabled="!formData.provincia_nacimiento" />
             </FormLabelError>
@@ -222,17 +222,17 @@ const buscarDNI = async () => {
             <FormInput v-if="mostrarOtroDistrito" v-model="formData.lugar_nacimiento" label="Especifique otro lugar" />
 
             <!-- Información adicional -->
-            <FormInput v-model="formData.celular" label="Celular" :error-message="errors.celular" maxlength="9" />
+            <FormInput v-model="formData.celular" label="Celular" :error="errors.celular" maxlength="9" />
             <FormInput v-model="formData.correo_electronico" label="Correo Electrónico (Opcional)" type="email" />
             <FormInput v-model="formData.direccion_residencia" label="Dirección de residencia *"
-                :error-message="errors.direccion_residencia" />
+                :error="errors.direccion_residencia" />
 
-            <FormLabelError label="Estado Civil" :error-message="errors.estado_civil">
+            <FormLabelError label="Estado Civil" :error="errors.estado_civil">
                 <v-select v-model="formData.estado_civil" :options="opcionesEstadoCivil"
                     placeholder="Seleccione estado" />
             </FormLabelError>
 
-            <FormLabelError label="Grado de instrucción *" :error-message="errors.grado_instruccion">
+            <FormLabelError label="Grado de instrucción *" :error="errors.grado_instruccion">
                 <v-select v-model="formData.grado_instruccion" :options="opcionesGradoInstruccion"
                     placeholder="Seleccione grado" />
             </FormLabelError>
@@ -240,19 +240,19 @@ const buscarDNI = async () => {
             <FormInput v-model="formData.pais_nacimiento" label="País de Nacimiento" />
             <FormInput v-model="formData.anio_egreso" label="Año de egreso (colegio)" />
 
-            <FormLabelError label="Lengua materna" :error-message="errors.lengua_materna">
+            <FormLabelError label="Lengua materna" :error="errors.lengua_materna">
                 <v-select v-model="formData.lengua_materna" :options="opcionesLenguaMaterna"
                     placeholder="Seleccione lengua" />
             </FormLabelError>
 
-            <FormLabelError label="¿Trabaja?" :error-message="errors.trabaja">
+            <FormLabelError label="¿Trabaja?" :error="errors.trabaja">
                 <v-select v-model="formData.trabaja" :options="opcionesSiNo" placeholder="Seleccione una opción" />
             </FormLabelError>
 
             <FormInput v-if="formData.trabaja === 'Si'" v-model="formData.detalle_trabajo"
                 label="Especifique ocupación o centro laboral" />
 
-            <FormLabelError label="¿Tiene carga familiar?" :error-message="errors.carga_familiar">
+            <FormLabelError label="¿Tiene carga familiar?" :error="errors.carga_familiar">
                 <v-select v-model="formData.carga_familiar" :options="opcionesSiNo"
                     placeholder="Seleccione una opción" />
             </FormLabelError>
@@ -260,7 +260,7 @@ const buscarDNI = async () => {
             <FormInput v-if="formData.carga_familiar === 'Si'" v-model="formData.detalle_carga_familiar"
                 label="Nro de personas a cargo" />
 
-            <FormLabelError label="¿Tiene internet en casa?" :error-message="errors.internet_casa">
+            <FormLabelError label="¿Tiene internet en casa?" :error="errors.internet_casa">
                 <v-select v-model="formData.internet_casa" :options="opcionesSiNo"
                     placeholder="Seleccione una opción" />
             </FormLabelError>
@@ -268,17 +268,17 @@ const buscarDNI = async () => {
             <FormInput v-if="formData.internet_casa === 'Si'" v-model="formData.tipo_internet"
                 label="Tipo de conexión (Wifi, datos móviles, etc.)" />
 
-            <FormLabelError label="Equipos virtuales en casa" :error-message="errors.equipos_virtuales">
+            <FormLabelError label="Equipos virtuales en casa" :error="errors.equipos_virtuales">
                 <v-select v-model="formData.equipos_virtuales" :options="opcionesEquiposVirtuales"
                     placeholder="Seleccione los equipos disponibles" multiple :close-on-select="false" />
             </FormLabelError>
 
-            <FormLabelError label="¿Tiene discapacidad?" :error-message="errors.discapacidad">
+            <FormLabelError label="¿Tiene discapacidad?" :error="errors.discapacidad">
                 <v-select v-model="formData.discapacidad" :options="opcionesSiNo" placeholder="Seleccione una opción" />
             </FormLabelError>
 
             <FormLabelError v-if="formData.discapacidad === 'Si'" label="Tipo de discapacidad"
-                :error-message="errors.tipo_discapacidad">
+                :error="errors.tipo_discapacidad">
                 <v-select v-model="formData.tipo_discapacidad" :options="opcionesDiscapacidad"
                     placeholder="Seleccione la discapacidad" />
             </FormLabelError>

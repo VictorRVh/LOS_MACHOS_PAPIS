@@ -677,7 +677,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('experiencia_formativa/{id}', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos|ver-mis-modulos');
 
     Route::delete('experiencia_formativa/{id}', [
         \App\Http\Controllers\ExperienciaFormativaController::class,

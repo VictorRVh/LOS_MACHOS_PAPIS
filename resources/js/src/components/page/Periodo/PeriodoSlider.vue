@@ -75,7 +75,10 @@ const schema = yup.object().shape({
   nombre_periodo: yup
     .string()
     .required("El periodo es obligatorio.")
-    .matches(/^\d{4}-(I|II)$/, "Formato inválido. Usa: 2024-I o 2024-II"),
+    .matches(
+      /^\d{4}-(I|II|III|IV)$/,
+      "Formato inválido. Usa: 2024-I, 2024-II, 2024-III o 2024-IV"
+    ),
   status: yup.boolean().required(),
 });
 
@@ -89,15 +92,15 @@ const onSubmit = async () => {
     return;
   }
 
- 
+
 
   const response = props.periodo?.id
     ? await updatePeriodo(props.periodo?.id, formData.value)
     : await createPeriodo(formData.value);
 
   if (response?.id) {
-     formData.value = initialFormData();
-        formErrors.value = {};
+    formData.value = initialFormData();
+    formErrors.value = {};
     showToast(`Periodo ${props.periodo?.id ? "actualizado" : "creado"} exitosamente.`);
     await periodosStore.loadPeriodos();
     await ListStatusPerido.loadPeriodos();
@@ -108,29 +111,39 @@ const onSubmit = async () => {
 const onPeriodoInput = (e) => {
   let value = e.target.value.toUpperCase();
 
-  // 1. Limpiar caracteres no válidos (solo permite números, guion e 'I')
-  value = value.replace(/[^0-9I-]/g, '');
+  // 1. Permitir números, guion, I y V
+  value = value.replace(/[^0-9IV-]/g, "");
 
-  // 2. Limitar la longitud total
-  if (value.length > 7) {
-    value = value.slice(0, 7);
+  // 2. Insertar guion automáticamente después de 4 dígitos si no se está borrando
+  if (/^\d{4}$/.test(value) && e.inputType !== "deleteContentBackward") {
+    value = value + "-";
   }
 
-  // 3. Insertar guion SOLO si aún no existe y el usuario ha escrito 4 dígitos
-  //    y no está borrando
-  if (/^\d{4}$/.test(value) && e.inputType !== 'deleteContentBackward') {
-    value = value + '-';
+  // 3. Validar parte del periodo (I, II, III, IV)
+  if (value.includes("-")) {
+    const [year, period = ""] = value.split("-");
+
+    // Mantener solo I y V
+    let clean = period.replace(/[^IV]/g, "");
+
+    // Limitar a max 3 caracteres (III) o 2 si es IV
+    if (clean.length > 3) clean = clean.slice(0, 3);
+
+    // Aceptar solo opciones válidas:
+    // I, II, III, IV
+    const validOptions = ["I", "II", "III", "IV"];
+
+    // Si no coincide con ninguna opción válida, limpiar lo inválido
+    if (!validOptions.some(opt => opt.startsWith(clean))) {
+      // ejemplo: si escribe "V" → limpiar
+      clean = "";
+    }
+
+    value = `${year}-${clean}`;
   }
 
-  // 4. Validar semestre (solo 'I' o 'II')
-  if (value.includes('-')) {
-    const [year, semester = ''] = value.split('-');
-
-    let cleanSemester = semester.replace(/[^I]/g, ''); // eliminar todo excepto "I"
-    if (cleanSemester.length > 2) cleanSemester = cleanSemester.slice(0, 2); // máximo "II"
-
-    value = `${year}-${cleanSemester}`;
-  }
+  // Limitar longitud máxima a 8 ("2024-III")
+  value = value.slice(0, 8);
 
   formData.value.nombre_periodo = value;
 };
@@ -140,44 +153,21 @@ const onPeriodoInput = (e) => {
 <template>
   <AuthorizationFallback :permissions="requiredPermissions">
     <div class="mt-4 px-4 space-y-2 font-inter max-w-lg mx-auto">
-      <FormInput
-        v-model="formData.nombre_periodo"
-        :focus="show"
-        label="Periodo"
-        :error="formErrors?.nombre_periodo"
-        required
-        placeholder="2024-I"
-        @input="onPeriodoInput"
-      />
+      <FormInput v-model="formData.nombre_periodo" :focus="show" label="Periodo" :error="formErrors?.nombre_periodo"
+        required placeholder="2024-I" @input="onPeriodoInput" />
 
-      <CheckBox
-        v-model="formData.status"
-        label="Estado"
-        class="flex items-center"
-      />
+      <CheckBox v-model="formData.status" label="Estado" class="flex items-center" />
 
       <div class="w-full space-y-2 pt-2">
         <div class="flex flex-col md:flex-row gap-2">
-          <Button
-            :title="periodo?.id ? 'Guardar Cambios' : 'Crear Periodo'"
-            :loading-title="periodo?.id ? 'Guardando...' : 'Creando...'"
-            :loading="saving || updating"
-            :disabled="saving || updating"
-            key="submit-btn"
-            @click="onSubmit"
-            class="w-full"
-          />
+          <Button :title="periodo?.id ? 'Guardar Cambios' : 'Crear Periodo'"
+            :loading-title="periodo?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
+            :disabled="saving || updating" key="submit-btn" @click="onSubmit" class="w-full" />
 
-          <Button
-            v-if="isEditing"
-            title="Cancelar"
-            variant="outline"
-            @click="onCancelEdit"
-            class="bg-red-500 text-white px-4 md:w-auto"
-          />
+          <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"
+            class="bg-red-500 text-white px-4 md:w-auto" />
         </div>
       </div>
     </div>
   </AuthorizationFallback>
 </template>
-

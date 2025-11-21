@@ -26,7 +26,7 @@ const props = defineProps({
 });
 
 const { showToast } = useModalToast();
-const { saving: isSavingExp, store: guardarExperienciaFormativa } = useHttpRequest('/experiencia_formativa');
+const { saving: isSavingExp, store: guardarExperienciaFormativa, update: actualizarExperienciaFormativa } = useHttpRequest('/experiencia_formativa');
 const { saving: isSaving, store: guardarNotaExperienciaFormativa } = useHttpRequest('/nota_experiencia_formativa');
 
 const experienciaFormativaStore = useExperienciaFormativaStore();
@@ -54,8 +54,6 @@ onMounted(async () => {
         await experienciaFormativaStore.loadDriveFolderId(props.id)
 
         idCarpetaGrupo.value = experienciaFormativaStore.driveFolderId
-
-        console.log('carpeta', idCarpetaGrupo.value)
 
         if (response?.data) {
             const exp = response.data.experiencia;
@@ -90,7 +88,9 @@ onMounted(async () => {
         }
 
     } catch (error) {
-        console.log("Error al cargar experiencia formativa:", error);
+        // console.log("Error al cargar experiencia formativa:", error);
+        showToast("Error al cargar experiencia formativa", "error");
+
     }
 });
 
@@ -126,32 +126,46 @@ async function guardarExperiencia() {
     try {
         isSavingExp.value = true;
 
-        const response = await guardarExperienciaFormativa({
-            ...nuevaExperiencia.value,
-            id_grupo: props.id,
-            parentId: idCarpetaGrupo.value.drive_folder_id,
-        });
+        let response;
+
+        // SI YA EXISTE → ACTUALIZAR
+        if (existeExperiencia.value) {
+            response = await actualizarExperienciaFormativa(idExperienciaFormativa.value, {
+                ...nuevaExperiencia.value,
+                id_grupo: props.id,
+                parentId: idCarpetaGrupo.value.drive_folder_id,
+            });
+        }
+        // SI NO EXISTE → CREAR
+        else {
+            response = await guardarExperienciaFormativa({
+                ...nuevaExperiencia.value,
+                id_grupo: props.id,
+                parentId: idCarpetaGrupo.value.drive_folder_id,
+            });
+        }
 
         const experiencia = response?.data;
 
         if (experiencia) {
-
-            console.log('entrado aca')
             nuevaExperiencia.value = { ...experiencia };
             idExperienciaFormativa.value = experiencia.id;
-
             idPracticasDrive.value = experiencia.drive_folder_id;
 
-            showToast("Experiencia formativa registrada correctamente", "success");
+            showToast(
+                existeExperiencia.value
+                    ? "Experiencia actualizada correctamente."
+                    : "Experiencia registrada correctamente.",
+                "success"
+            );
         }
     } catch (error) {
         console.error("Error al guardar experiencia:", error);
-        showToast("Error al registrar la experiencia", "error");
+        showToast("Error al procesar la experiencia", "error");
     } finally {
         isSavingExp.value = false;
     }
 }
-
 
 async function onSubmit() {
     if (!formData.value.lugar || !formData.value.documento) {

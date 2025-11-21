@@ -22,6 +22,7 @@ const isLoading = ref(true);
 const currentStep = ref(1);
 
 const nameGrupo = ref("");
+const formErrors = ref({});
 
 const formData = ref({
     id_programa: null,
@@ -52,19 +53,19 @@ const formData = ref({
     grado_instruccion: '',
 
     trabaja: '',
-    detalle_trabajo: '',       
+    detalle_trabajo: '',
 
     carga_familiar: '',
-    detalle_carga_familiar: '',    
+    detalle_carga_familiar: '',
 
     internet_casa: '',
-    tipo_internet: '',            
+    tipo_internet: '',
 
     tipo_operador: '',
-    equipo_clases: [],             
+    equipo_clases: [],
 
     discapacidad: '',
-    tipo_discapacidad: '',          
+    tipo_discapacidad: '',
 
     celular_referencia: '',
     parentesco_referencia: '',
@@ -111,13 +112,37 @@ const stepSchemas = {
         direccion_residencia: yup.string().required('La dirección es requerida'),
         estado_civil: yup.string().required('Estado civil es requerido'),
     }),
+    3: yup.object({}),
 };
 
-const nextStep = () => {
-    // console.log("Paso actual:", currentStep.value, "ID Grupo:", formData.value.id_grupo); 
+const validateCurrentStep = async () => {
+    const schema = stepSchemas[currentStep.value];
+
+    try {
+        await schema.validate(formData.value, { abortEarly: false });
+        formErrors.value = {}; // limpiar errores si todo va bien
+        return true;
+    } catch (err) {
+        const errors = {};
+        err.inner.forEach(e => {
+            errors[e.path] = e.message;
+        });
+        formErrors.value = errors;
+        return false;
+    }
+};
+
+
+const nextStep = async () => {
+    const isValid = await validateCurrentStep();
+    if (!isValid) {
+        showToast("Por favor complete todos los campos obligatorios.", "error");
+        return;
+    }
 
     if (currentStep.value < 3) currentStep.value++;
 };
+
 
 const prevStep = () => {
     if (currentStep.value > 1) currentStep.value--;
@@ -125,7 +150,13 @@ const prevStep = () => {
 
 const onSubmit = async () => {
 
-    console.log('llegada de datos de matricula: ', formData.value)
+    // console.log('llegada de datos de matricula: ', formData.value)
+
+    const isValid = await validateCurrentStep();
+    if (!isValid) {
+        showToast("Faltan datos por completar.", "error");
+        return;
+    }
 
     const response = await store(formData.value);
     if (response.data.matricula.id) {

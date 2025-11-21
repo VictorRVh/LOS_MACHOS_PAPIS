@@ -120,7 +120,7 @@ class ExperienciaFormativaController extends Controller
         ]);
 
         $data = $request->all();
-        $data['nombre_experiencia'] = 'practicas';
+        $data['nombre_experiencia'] = 'PRACTICAS';
 
         $experiencia = ExperienciaFormativa::create($data);
 
@@ -194,7 +194,20 @@ class ExperienciaFormativaController extends Controller
 
         $experiencia->update($request->all());
 
-        return response()->json(['message' => 'Experiencia actualizada con éxito', 'data' => $experiencia]);
+        $carpeta = CarpetasPracticasDrive::where('id_experiencia', $experiencia->id)->first();
+
+        return response()->json([
+            'message' => 'Experiencia actualizada con éxito',
+            'data' => [
+                'id' => $experiencia->id,
+                'nombre_experiencia' => $experiencia->nombre_experiencia,
+                'fecha_inicio' => $experiencia->fecha_inicio,
+                'fecha_fin' => $experiencia->fecha_fin,
+                'horas' => $experiencia->horas,
+                'id_grupo' => $experiencia->id_grupo,
+                'drive_folder_id' => optional($carpeta)->drive_folder_id,
+            ],
+        ]);
     }
 
     // DELETE /api/experiencia_formativa/{id}

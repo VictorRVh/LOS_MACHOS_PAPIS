@@ -55,6 +55,15 @@ class PeriodoController extends Controller
             'status' => 'required|in:0,1,2,3',
         ]);
 
+        $gruposExistentes = Periodo::where('nombre_periodo', $request->nombre_periodo)->exists();
+
+        if ($gruposExistentes) {
+            // return response()->json([
+            //     'error' => 'Ya existe un periodo con ese nombre.'
+            // ], 422);
+            throw new \Exception('Error|Ya existe un periodo con ese nombre--404', 13333);
+        }
+
         DB::beginTransaction();
 
         try {

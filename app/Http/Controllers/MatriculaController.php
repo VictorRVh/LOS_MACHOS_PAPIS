@@ -334,6 +334,7 @@ class MatriculaController extends Controller
 
     public function getFichaMatricula($estudianteId)
     {
+        // Primero obtenemos la matrícula + info relacionada
         $ficha = DB::table('estudiante as e')
             ->join('matricula as m', 'e.id', '=', 'm.id_estudiante')
             ->join('grupo as g', 'm.id_grupo', '=', 'g.id')
@@ -350,13 +351,36 @@ class MatriculaController extends Controller
                 'e.fecha_nacimiento',
                 'm.id as id_matricula',
                 'm.turno',
+                'g.id as id_grupo',
                 'em.nombre_especialidad as especialidad',
                 'mo.descripcion as modulo',
-                'p.nombre_periodo as periodo'
+                'p.nombre_periodo as periodo',
+                DB::raw("CONCAT(DATE_FORMAT(g.fecha_inicio, '%d/%m/%Y'), ' - ', DATE_FORMAT(g.fecha_fin, '%d/%m/%Y')) as periodo_clases")
             )
             ->first();
 
-        return response()->json($ficha);
+        if (!$ficha) {
+            return response()->json(['error' => 'No existe matrícula para este estudiante'], 404);
+        }
+
+        // Obtener capacidades terminales del grupo de esta matrícula
+        $capacidades = DB::table('capacidad_terminal')
+            ->where('id_grupo', $ficha->id_grupo)
+            ->select(
+                'id',
+                'numero_capacidad',
+                'nombre_capacidad',
+                'fecha_inicio',
+                'fecha_fin',
+                'status'
+            )
+            ->orderBy('numero_capacidad')
+            ->get();
+
+        return response()->json([
+            'ficha' => $ficha,
+            'capacidades_terminales' => $capacidades
+        ]);
     }
 
     public function getMatriculadosPorGrupoExtendido($idGrupo)

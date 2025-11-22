@@ -48,7 +48,7 @@ const formData = ref({
     lugar_nacimiento: '',
     direccion_residencia: '',
     correo_electronico: '',
-    celular: '',
+    celular_personal: '',
     estado_civil: '',
     grado_instruccion: '',
 
@@ -107,7 +107,7 @@ const stepSchemas = {
             .required('Fecha de nacimiento es requerida')
             .max(new Date(new Date().setFullYear(new Date().getFullYear() - 12)), 'El estudiante debe ser mayor de 12 años')
             .min(new Date(new Date().setFullYear(new Date().getFullYear() - 100)), 'La edad no puede ser mayor a 100 años'),
-        celular: yup.string().required('Celular es requerido'),
+        celular_personal: yup.string().required('Celular es requerido'),
         correo_electronio: yup.string().email('Debe ser un correo válido').notRequired(),
         direccion_residencia: yup.string().required('La dirección es requerida'),
         estado_civil: yup.string().required('Estado civil es requerido'),

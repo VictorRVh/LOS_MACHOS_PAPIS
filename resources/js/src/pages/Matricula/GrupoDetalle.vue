@@ -222,7 +222,7 @@ const {
                 </div>
 
                 <!-- 🔍 BUSCADOR ABAJO PERO DENTRO DEL MISMO BLOQUE -->
-                <div class="flex justify-between my-2">
+                <div class="flex justify-end my-2">
                     <SearchBar :totalResultados="matriculadosOrdenados.length" :campoOrden="'estudiante'"
                         @search="filtrarMatriculados" />
                 </div>
@@ -273,12 +273,20 @@ const {
                         <Td class="text-center">
                             <MenuTable :actions="{
                                 view: false,
-                                edit: false,
-                                delete: false,
+                                edit: true,
+                                delete: true,
                                 download: true,
                                 custom1: true
-                            }" entity-label="Matricula" @download="exportarFicha(matricula.id_estudiante)"
-                                @custom1="abrirModalReserva(matricula)" />
+                            }" :labels="{
+                                download: 'descargar ficha',
+                                custom1: 'Reservar matrícula',
+                                edit: 'editar matrícula',
+                                delete: 'eliminar matrícula'
+                            }"
+                             @edit="exportarFicha(matricula.id_estudiante)"
+                              @delete="Editar(matricula.id_estudiante)"
+                                @download="eliminar(matricula.id_estudiante)"
+                             @custom1="abrirModalReserva(matricula)" />
                         </Td>
 
 

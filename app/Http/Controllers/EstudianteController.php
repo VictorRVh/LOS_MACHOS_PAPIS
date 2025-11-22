@@ -50,7 +50,6 @@ class EstudianteController extends Controller
             'puesto_trabajo' => 'required|string|max:100',
             'carga_familiar' => 'required|string|max:100',
             'correo_electronico' => 'required|string|max:100',
-            'correo_electronico' => 'required|string|max:100',
             'celular_personal' => 'required|string|max:100',
             'internet_casa' => 'required|string|max:100',
             'tipo_operador' => 'required|string|max:100',
@@ -175,7 +174,6 @@ class EstudianteController extends Controller
     //         ], 500);
     //     }
     // }
-
     public function buscar(Request $request)
     {
         $tipo = $request->input('tipo_documento');
@@ -194,32 +192,59 @@ class EstudianteController extends Controller
             return response()->json(['error' => 'Carnet de extranjería inválido'], 422);
         }
 
-        // Buscamos al estudiante en nuestra base de datos
+        // -------------------------------
+        // 1️⃣ BUSCAR EN BD
+        // -------------------------------
         $estudiante = Estudiante::where('nro_documento', $numero)->first();
 
         if ($estudiante) {
             return response()->json([
                 'success' => true,
                 'source' => 'database',
-                'data' => $estudiante
+                'data' => $estudiante  // Devuelve TODOS los campos exactos de tu tabla
             ]);
         }
 
-        // Si el estudiante no existe en nuestra BD, consultamos al FACTILIZA
+        // -------------------------------
+        // 2️⃣ CONSULTAR A FACTILIZA
+        // -------------------------------
         try {
             $endpoint = $tipo === 'DNI'
                 ? "https://api.factiliza.com/v1/dni/info/{$numero}"
                 : "https://api.factiliza.com/v1/cee/info/{$numero}";
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzOTE3MSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnN1bHRvciJ9.MUQqU8axqigAZZXN-TOWTmSVrFsrQIXpujPPvgPDqBU'
+                 'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzOTE3MSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnN1bHRvciJ9.MUQqU8axqigAZZXN-TOWTmSVrFsrQIXpujPPvgPDqBU'
             ])->get($endpoint);
 
             if ($response->failed()) {
                 return response()->json(['error' => 'No se pudo consultar el documento'], 500);
             }
 
-            return $response->json();
+            $data = $response->json()['data'];
+
+            // ---------------------------------------
+            // 3️⃣ MAPEAR DATOS FACTILIZA → CAMPOS BD
+            // ---------------------------------------
+            $mapped = [
+                'tipo_documento' => $tipo,
+                'nro_documento' => $data['numero'] ?? $numero,
+                'apellido_paterno' => $data['apellido_paterno'] ?? null,
+                'apellido_materno' => $data['apellido_materno'] ?? null,
+                'nombre' => $data['nombres'] ?? null,
+                'sexo' => $data['sexo'] ?? null,
+                'fecha_nacimiento' => $data['fecha_nacimiento'] ?? null,
+                'departamento_nacimiento' => $data['departamento'] ?? null,
+                'provincia_nacimiento' => $data['provincia'] ?? null,
+                'distrito_nacimiento' => $data['distrito'] ?? null,
+                'direccion_residencia' => $data['direccion_completa'] ?? null,
+            ];
+
+            return response()->json([
+                'success' => true,
+                'source' => 'factiliza',
+                'data' => $mapped
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error en la consulta',

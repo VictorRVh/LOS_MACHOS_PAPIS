@@ -49,10 +49,9 @@ class MatriculaController extends Controller
                 'lugar_nacimiento'        => $request->lugar_nacimiento,
                 'direccion_residencia'    => $request->direccion_residencia,
                 'correo_electronico'      => $request->correo_electronico,
-                'celular_personal'        => $request->celular,
+                'celular_personal'        => $request->celular_personal,
                 'estado_civil'            => $request->estado_civil,
                 'grado_instruccion'       => $request->grado_instruccion,
-
                 'trabaja'                 => $request->trabaja,
                 'detalle_trabajo'         => $request->trabaja === 'Si' ? $request->detalle_trabajo : null,
 

@@ -215,6 +215,7 @@ class AsistenciaController extends Controller
                 }
             })
             ->where('m.id_grupo', $idGrupo)
+            ->where('m.reserva', 0)
             ->select(
                 'e.id as id_estudiante',
                 DB::raw("CONCAT(e.apellido_paterno, ' ', e.apellido_materno, ' ', e.nombre) as nombre_completo"),

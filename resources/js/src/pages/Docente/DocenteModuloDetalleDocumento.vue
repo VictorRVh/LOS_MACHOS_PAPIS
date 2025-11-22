@@ -23,6 +23,8 @@ const props = defineProps({
 })
 
 const { store: uploadArchivo, saving: uploadLoading } = useHttpRequest('/entrega_docente_subir')
+const { destroy } = useHttpRequest('entregas_realizadas')
+
 const { showConfirmModal, showToast } = useModalToast();
 
 const documentoStore = useProgramacionAdmintore();
@@ -193,16 +195,16 @@ const subirArchivo = async () => {
     // Mensajes específicos según el código de error
     switch (errorCode) {
       case 'ESTADO_INACTIVO':
-        showToast('❌ La entrega no está activa', 'error')
+        showToast('La entrega no está activa', 'error')
         break
       case 'YA_CUMPLIDA':
-        showToast('✅ Ya realizaste esta entrega', 'warning')
+        showToast('Ya realizaste esta entrega', 'warning')
         break
       case 'NO_INICIADA':
-        showToast('⏰ La entrega aún no ha comenzado', 'warning')
+        showToast('La entrega aún no ha comenzado', 'warning')
         break
       case 'FINALIZADA':
-        showToast('⏱️ La entrega ha finalizado', 'error')
+        showToast('La entrega ha finalizado', 'error')
         break
       default:
         showToast(errorMsg, 'error')
@@ -218,11 +220,18 @@ const recargarDocumentos = async () => {
 
 const eliminarArchivo = async (carpeta, archivo) => {
 
+  console.log('carpeta', carpeta)
+
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
 
     try {
-      await axios.delete(`/drive/file/${archivo.id}`);
+      const response = await destroy(archivo.id);
+      console.log('respuesta de eliminacion', response)
+
+      if (response) {
+        showToast('Archivo eliminado correctamente.', 'success')
+      }
 
       const carpetaIndex = carpetas.value.findIndex(c => c.id === carpeta.id);
       if (carpetaIndex !== -1) {
@@ -475,7 +484,7 @@ const {
               <div class="flex items-center gap-2">
                 <CheckCircleIcon class="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <p class="text-sm text-gray-700 dark:text-gray-300">
-                  Ya realizaste esta entrega
+                  Ya realizaste esta entrega, pero puedes subir más.
                 </p>
               </div>
             </div>

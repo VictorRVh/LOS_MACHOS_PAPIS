@@ -310,8 +310,10 @@ class EntregaDocenteController extends Controller
 
             $archivoSubido = json_decode($responseUpload->getContent());
 
+            $fileId = $archivoSubido->id;
+
             // 5. Marcar como cumplida y registrar
-            $entregaRealizada = $entrega->marcarComoCumplida($idDocente);
+            $entregaRealizada = $entrega->marcarComoCumplida($idDocente, $fileId);
 
             DB::commit();
 

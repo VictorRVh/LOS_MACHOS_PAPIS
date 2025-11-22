@@ -2,11 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EntregaDocente;
 use App\Models\EntregasRealizadas;
+use App\Http\Controllers\GoogleDriveController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EntregasRealizadasController extends Controller
 {
+
+    protected $googleDriveController;
+
+    public function __construct(GoogleDriveController $googleDriveController)
+    {
+        $this->googleDriveController = $googleDriveController;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -73,16 +84,53 @@ class EntregasRealizadasController extends Controller
     }
 
     // DELETE /api/entregas-realizadas/{id}
-    public function destroy($id)
+    public function destroy($fileId)
     {
-        $entrega = EntregasRealizadas::find($id);
+        try {
+            DB::beginTransaction();
 
-        if (!$entrega) {
-            return response()->json(['message' => 'Entrega no encontrada'], 404);
+            // 1. Buscar registro en BD por fileId (archivo)
+            $registro = EntregasRealizadas::where('archivo', $fileId)->first();
+
+            if (!$registro) {
+                return response()->json(['error' => 'Archivo no encontrado en base de datos'], 404);
+            }
+
+            // 2. Obtener la entrega asociada
+            $entrega = EntregaDocente::find($registro->id_entrega);
+
+            // 3. Eliminar archivo en Google Drive usando tu controlador
+            $response = $this->googleDriveController->deleteFile($fileId);
+
+            if ($response->getStatusCode() !== 204) {
+                throw new \Exception("No se pudo eliminar el archivo del Drive");
+            }
+
+            // 4. Eliminar registro en BD
+            $registro->delete();
+
+            // 5. Verificar si aún quedan archivos
+            $quedanArchivos = EntregasRealizadas::where('id_entrega', $entrega->id)->exists();
+
+            if (!$quedanArchivos) {
+                // actualizar cumplio = 0
+                $entrega->update(['cumplio' => 0]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Archivo eliminado correctamente'
+            ], 204);
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'error' => 'Error al eliminar archivo',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        $entrega->delete();
-
-        return response()->json(['message' => 'Entrega eliminada correctamente']);
     }
 }

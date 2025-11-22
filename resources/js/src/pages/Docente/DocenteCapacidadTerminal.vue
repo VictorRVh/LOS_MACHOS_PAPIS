@@ -105,10 +105,10 @@ const indicesArray = computed(() => {
         <Table>
           <THead>
             <Th>#</Th>
-            <!-- <Th>Nombre Capacidad</Th> -->
+            <Th>Nombre Capacidad</Th>
             <Th>Fecha Inicio</Th>
             <Th>Fecha Fin</Th>
-            <Th>Estado</Th>
+            <!-- <Th>Estado</Th> -->
             <Th>Acciones</Th>
           </THead>
 

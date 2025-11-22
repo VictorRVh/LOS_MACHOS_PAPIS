@@ -40,6 +40,35 @@ const provincias = ref([]);
 const distritos = ref([]);
 const mostrarOtroDistrito = ref(false);
 
+watch(() => formData.value.departamento_nacimiento, (newDep) => {
+    formData.value.provincia_nacimiento = null;
+    formData.value.distrito_nacimiento = null;
+    provincias.value = [];
+    distritos.value = [];
+    mostrarOtroDistrito.value = false;
+    if (newDep) {
+        const depData = ubigeo.find(d => d.departamento === newDep);
+        provincias.value = depData ? depData.provincias.map(p => p.provincia) : [];
+    }
+});
+
+watch(() => formData.value.provincia_nacimiento, (newProv) => {
+    formData.value.distrito_nacimiento = null;
+    distritos.value = [];
+    mostrarOtroDistrito.value = false;
+    if (newProv && formData.value.departamento_nacimiento) {
+        const depData = ubigeo.find(d => d.departamento === formData.value.departamento_nacimiento);
+        const provData = depData ? depData.provincias.find(p => p.provincia === newProv) : null;
+        distritos.value = provData ? [...provData.distritos, 'OTRO'] : [];
+    }
+});
+
+watch(() => formData.value.distrito_nacimiento, (newDist) => {
+    mostrarOtroDistrito.value = newDist === 'OTRO';
+    if (newDist !== 'OTRO') {
+        formData.value.lugar_nacimiento = '';
+    }
+});
 
 const buscarDNI = async () => {
     const { tipo_documento: tipo, nro_documento: numero } = formData.value;

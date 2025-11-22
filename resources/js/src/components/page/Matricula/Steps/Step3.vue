@@ -1,10 +1,10 @@
 <script setup>
 import { computed } from 'vue';
-import FormInput from '../../ui/FormInput.vue';
-import FormLabelError from '../../ui/FormLabelError.vue';
+import FormInput from '../../../ui/FormInput.vue';
+import FormLabelError from '../../../ui/FormLabelError.vue';
 import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
-
+import { Bars3Icon, InformationCircleIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     modelValue: { type: Object, required: true },
@@ -30,7 +30,7 @@ const formData = computed({
                 <FormLabelError label="Condición">
                     <vSelect 
                         v-model="formData.condicion" 
-                        :options="['G | Gratuito', 'P | Pagante', 'B | Becado']" 
+                        :options="['G | Gratuito', 'P | Pagante', 'B | Beca', 'S | Semibeca']" 
                         :clearable="false"
                     />
                 </FormLabelError>

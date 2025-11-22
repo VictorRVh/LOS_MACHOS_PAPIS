@@ -148,7 +148,7 @@ const onSubmit = async () => {
       <FormInput
         v-model="formData.nombre_institucion"
         :focus="show"
-        label="Nombre del convenio"
+        label="Nombre de la modalidad"
         :error="formErrors?.nombre_institucion"
         required
       />

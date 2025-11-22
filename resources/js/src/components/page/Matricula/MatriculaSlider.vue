@@ -1,23 +1,20 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import useHttpRequest from '../../composables/useHttpRequest';
-import useModalToast from '../../composables/useModalToast';
-import useProgramaStore from '../../store/Programa/useProgramaStatusStore';
+import useHttpRequest from '../../../composables/useHttpRequest';
+import useModalToast from '../../../composables/useModalToast';
+import useProgramaStore from '../../../store/Programa//useProgramaStatusStore';
+
+
 import Step1 from './Steps/Step1.vue';
 import Step2 from './Steps/Step2.vue';
 import Step3 from './Steps/Step3.vue';
-import Button from '../ui/Button.vue';
+import Button from '../../ui/Button.vue';
 import * as yup from "yup";
 
 const router = useRouter();
 const { showToast } = useModalToast();
-const { store: createMatricula, saving, update: updateModulo, updating } = useHttpRequest(
-    "/matricula"
-);
-cons
-
-
+const { store, saving } = useHttpRequest('/matricula');
 const programaStore = useProgramaStore();
 
 
@@ -25,6 +22,7 @@ const isLoading = ref(true);
 const currentStep = ref(1);
 
 const nameGrupo = ref("");
+const formErrors = ref({});
 
 const formData = ref({
     id_programa: null,
@@ -35,6 +33,7 @@ const formData = ref({
     horas: '',
     turno: '',
     seccion: '',
+
     tipo_documento: 'DNI',
     nro_documento: '',
     apellido_paterno: '',
@@ -48,22 +47,41 @@ const formData = ref({
     distrito_nacimiento: '',
     lugar_nacimiento: '',
     direccion_residencia: '',
-    correo: '',
+    correo_electronico: '',
     celular: '',
     estado_civil: '',
     grado_instruccion: '',
+
     trabaja: '',
-    puesto_trabajo: '',
-    condicion: "G | Gratuito",
-    nro_recibo: "",
-    aporte: "",
+    detalle_trabajo: '',
+
+    carga_familiar: '',
+    detalle_carga_familiar: '',
+
+    internet_casa: '',
+    tipo_internet: '',
+
+    tipo_operador: '',
+    equipo_clases: [],
+
+    discapacidad: '',
+    tipo_discapacidad: '',
+
+    celular_referencia: '',
+    parentesco_referencia: '',
+    lengua_materna: '',
+
+    condicion: 'G | Gratuito',
+    nro_recibo: '',
+    aporte: '',
+    anio_egreso: ''
 });
 
 onMounted(async () => {
     try {
         await Promise.all([
             programaStore.loadPrograma(),
-          
+
         ]);
     } catch (error) {
         showToast("No se pudieron cargar los datos necesarios.", "error");
@@ -90,17 +108,41 @@ const stepSchemas = {
             .max(new Date(new Date().setFullYear(new Date().getFullYear() - 12)), 'El estudiante debe ser mayor de 12 años')
             .min(new Date(new Date().setFullYear(new Date().getFullYear() - 100)), 'La edad no puede ser mayor a 100 años'),
         celular: yup.string().required('Celular es requerido'),
-        correo: yup.string().email('Debe ser un correo válido').notRequired(),
+        correo_electronio: yup.string().email('Debe ser un correo válido').notRequired(),
         direccion_residencia: yup.string().required('La dirección es requerida'),
         estado_civil: yup.string().required('Estado civil es requerido'),
     }),
+    3: yup.object({}),
 };
 
-const nextStep = () => {
-    // console.log("Paso actual:", currentStep.value, "ID Grupo:", formData.value.id_grupo); 
+const validateCurrentStep = async () => {
+    const schema = stepSchemas[currentStep.value];
+
+    try {
+        await schema.validate(formData.value, { abortEarly: false });
+        formErrors.value = {}; // limpiar errores si todo va bien
+        return true;
+    } catch (err) {
+        const errors = {};
+        err.inner.forEach(e => {
+            errors[e.path] = e.message;
+        });
+        formErrors.value = errors;
+        return false;
+    }
+};
+
+
+const nextStep = async () => {
+    const isValid = await validateCurrentStep();
+    if (!isValid) {
+        showToast("Por favor complete todos los campos obligatorios.", "error");
+        return;
+    }
 
     if (currentStep.value < 3) currentStep.value++;
 };
+
 
 const prevStep = () => {
     if (currentStep.value > 1) currentStep.value--;
@@ -108,9 +150,15 @@ const prevStep = () => {
 
 const onSubmit = async () => {
 
-    console.log('llegada de datos de matricula: ', formData.value)
+    // console.log('llegada de datos de matricula: ', formData.value)
 
-    const response = await createMatricula(formData.value);
+    const isValid = await validateCurrentStep();
+    if (!isValid) {
+        showToast("Faltan datos por completar.", "error");
+        return;
+    }
+
+    const response = await store(formData.value);
     if (response.data.matricula.id) {
         showToast('¡Matrícula realizada con éxito!', 'success');
         router.push({ name: 'matricula.grupo.detalle', params: { id: formData.value.id_grupo } });
@@ -121,7 +169,7 @@ const onSubmit = async () => {
 </script>
 
 <template>
-    <div class="p-2 bg-gray-100 dark:bg-gray-900/50 font-inter">
+    <div class="p-2 bg-white dark:bg-gray-900/50 font-inter">
         <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 ">Nueva Matrícula de Estudiante</h2>
 
         <div v-if="isLoading"
@@ -160,10 +208,11 @@ const onSubmit = async () => {
             </ol>
 
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-h-[450px]">
-   
-                <Step1 v-show="currentStep === 1" v-model="formData" :programas="programaStore.programa.programas" :nameGrupo="nameGrupo" @cambiarVariable="nameGrupo = $event" :errors="formErrors" />
-                <Step2 v-show="currentStep === 2" v-model="formData":errors="formErrors" />
-                <Step3 v-show="currentStep === 3" v-model="formData" :nameGrupo="nameGrupo"  />
+
+                <Step1 v-show="currentStep === 1" v-model="formData" :programas="programaStore.programa.programas"
+                    :nameGrupo="nameGrupo" @cambiarVariable="nameGrupo = $event" :errors="formErrors" />
+                <Step2 v-show="currentStep === 2" v-model="formData" :errors="formErrors" />
+                <Step3 v-show="currentStep === 3" v-model="formData" :nameGrupo="nameGrupo" />
             </div>
 
             <div class="flex justify-between ">
@@ -173,7 +222,6 @@ const onSubmit = async () => {
                 <div>
                     <Button v-if="currentStep < 3" @click="nextStep" title="Siguiente" />
                     <Button v-if="currentStep === 3" @click="onSubmit" :loading="saving"
-                    :disabled="saving || updating"
                         title="Confirmar y Matricular" />
                 </div>
             </div>

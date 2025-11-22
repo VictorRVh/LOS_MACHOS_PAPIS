@@ -293,7 +293,7 @@ const onSubmit = async () => {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
 
-          <FormLabelError label="Convenio" required>
+          <FormLabelError label="Modalidad" required>
             <BaseSelectCiclo v-model="formData.id_convenio" :options="convenioStore.convenios"
               label="nombre_institucion" placeholder="Seleccione un convenio" />
           </FormLabelError>

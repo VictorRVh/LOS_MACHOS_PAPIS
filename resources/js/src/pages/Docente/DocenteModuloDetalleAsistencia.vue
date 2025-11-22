@@ -149,8 +149,8 @@ watch(
 );
 
 const handleDateClick = ({ dateStr, date }) => {
-  const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-  if (isWeekend) return;
+  // const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+  // if (isWeekend) return;
 
   const isAlreadyScheduled = allEvents.value.some(event =>
     dateStr >= event.start && dateStr < event.end &&
@@ -244,7 +244,9 @@ const estadoTexto = computed(() => {
   switch (sesionStore?.sesion?.estado) {
     case 0: return 'Pendiente'
     case 1: return 'En curso'
-    case 2: return 'Finalizada'
+    case 2: return 'En curso'
+    case 3: return 'En curso'
+    case 4: return 'Finalizada'
     default: return 'Desconocido'
   }
 })

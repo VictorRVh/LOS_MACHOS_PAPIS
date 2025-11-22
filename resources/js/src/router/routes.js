@@ -24,9 +24,9 @@ export default [
     { path: '/administrativos', name: 'administrativos', component: () => import('../pages/Administrativo/Administrativo.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Administrativos', to: { name: 'administrativos' } }] }, },
     { path: '/especialidad', name: 'especialidad', component: () => import('../pages/Especialidad/Especialidad.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Especialidades', to: { name: 'especialidad' } }] }, },
     { path: '/comision', name: 'comision', component: () => import('../pages/Comision/Comision.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comision' } }] }, },
-    
-     { path: '/comisionDocente', name: 'comsion.docente', component: () => import('../pages/Docente-menu/DocenteComsion.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comsion.docente' } }] }, },
-    
+
+    { path: '/comisionDocente', name: 'comsion.docente', component: () => import('../pages/Docente-menu/DocenteComsion.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comsion.docente' } }] }, },
+
     {
         path: '/programa',
         name: 'programa',
@@ -78,57 +78,50 @@ export default [
     {
         path: '/matricula',
         name: 'matricula.index',
-
         component: () => import('../pages/Matricula/Matricula.vue'),
+        redirect: { name: 'matricula.registrar' },
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos'],
-            parent: 'grupo',
-            breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }]
+            parent: null,
+            breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }],
+            submenu: () => [
+                { text: 'Matricular', to: { name: 'matricula.registrar' } },
+                { text: 'Lista por Grupos', to: { name: 'matricula.grupos' } },
+                { text: 'Reservas', to: { name: 'matricula.reservas' } },
+            ]
         },
+
+        children: [
+            {
+                path: 'registrar',
+                name: 'matricula.registrar',
+                component: () => import('../components/page/Matricula/MatriculaSlider.vue'),
+                meta: { breadcrumb: [{ text: 'Matricular' }] }
+            },
+            {
+                path: 'grupos',
+                name: 'matricula.grupos',
+                component: () => import('../pages/Matricula/ListaGrupos.vue'),
+                meta: { breadcrumb: [{ text: 'Lista por Grupos' }] }
+            },
+            {
+                path: 'reservas',
+                name: 'matricula.reservas',
+                component: () => import('../pages/Matricula/Reservas.vue'),
+                meta: { breadcrumb: [{ text: 'Reservas' }] }
+            },
+            {
+                path: 'grupo/:id/alumnos',
+                name: 'matricula.grupo.alumnos',
+                component: () => import('../pages/Matricula/GrupoDetalle.vue'),
+                props: true,
+                meta: { breadcrumb: [{ text: 'Grupo de Alumnos' }] }
+            }
+
+        ]
     },
-    {
-        path: '/matricula/registrar',
-        name: 'matricula.registrar',
-        component: () => import('../pages/Matricula/MatriculaForm.vue'),
-        meta: {
-            layout: 'dashboard',
-            permissions: ['todo-acceso-permisos'],
-            breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }, { text: 'Matricular Estudiante' }]
-        },
-    },
-    {
-        path: '/matricula/grupos',
-        name: 'matricula.grupos',
-        component: () => import('../pages/Matricula/ListaGrupos.vue'),
-        meta: {
-            layout: 'dashboard',
-            permissions: ['todo-acceso-permisos'],
-            breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }, { text: 'Lista por Grupos' }]
-        },
-    },
-    {
-        path: '/matricula/grupo/:id',
-        name: 'matricula.grupo.detalle',
-        component: () => import('../pages/Matricula/GrupoDetalle.vue'),
-        props: true,
-        meta: {
-            layout: 'dashboard',
-            permissions: ['todo-acceso-permisos'],
-            parent: 'matricula.grupos',
-            breadcrumb: { text: 'Detalle de Grupo' }
-        },
-    },
-    {
-        path: '/matricula/reservas',
-        name: 'matricula.reservas',
-        component: () => import('../pages/Matricula/Reservas.vue'),
-        meta: {
-            layout: 'dashboard',
-            permissions: ['todo-acceso-permisos'],
-            breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }, { text: 'Estudiantes con Reserva' }]
-        },
-    },
+
     {
         path: '/grupo',
         name: 'grupo',
@@ -195,7 +188,7 @@ export default [
                 component: () => import('../pages/Grupo/GrupoCapacidadesTerminales.vue'),
                 props: true,
                 meta: { parent: 'grupo.detalle', breadcrumb: { text: 'Calificaciones' } }
-            },            
+            },
             {
                 path: 'practicas',
                 name: 'grupo.practicas',

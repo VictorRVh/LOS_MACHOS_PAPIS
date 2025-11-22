@@ -17,6 +17,8 @@ import useModalToast from '../../composables/useModalToast';
 import useHttpRequest from '../../composables/useHttpRequest';
 import useExperienciaFormativaStore from '../../store/ExperienciaFormativa/useExperienciaFormativa';
 import { DocumentTextIcon } from '@heroicons/vue/24/outline'
+import BaseSelectCiclo from '../../components/ui/BaseSelectCiclo.vue';
+import FormLabelError from '../../components/ui/FormLabelError.vue';
 
 const props = defineProps({
     id: {
@@ -44,6 +46,11 @@ const nuevaExperiencia = ref({
     fecha_fin: "",
     horas: "",
 });
+
+const modalidadPracticas = [
+  { id: 'PPP INTERNAS', label: 'PPP INTERNAS' },
+  { id: 'PPP EXTERNAS', label: 'PPP EXTERNAS' }
+];
 
 onMounted(async () => {
     try {
@@ -80,8 +87,8 @@ onMounted(async () => {
 
             alumnos.value = est.map(a => ({
                 ...a,
-                lugar: a.lugar || "",
-                documento: a.documento || "",
+                lugar: a.lugar || null,
+                documento: a.documento || null,
             }));
         } else {
             console.warn("No se recibió información del grupo.");
@@ -245,7 +252,7 @@ async function onSubmit() {
                 <THead>
                     <Th>N°</Th>
                     <Th>Apellidos y Nombres</Th>
-                    <Th>Lugar</Th>
+                    <Th>Modalidad</Th>
                     <Th>Archivo</Th>
                     <Th class="text-center">Acciones</Th>
                 </THead>
@@ -279,7 +286,7 @@ async function onSubmit() {
                             </Td>
                             <Td class="text-center">
                                 <!-- Si NO hay experiencia => botón deshabilitado -->
-                                <Button v-if="!existeExperiencia" title="Calificar" color="primary" size="sm" disabled
+                                <Button v-if="!existeExperiencia" title="Calificar" color="primary" size="sm"
                                     @click="showToast('Debe registrar una experiencia formativa primero.', 'warning')" />
 
                                 <Button v-else-if="alumno.lugar !== null || alumno.documento_id !== null"
@@ -303,8 +310,11 @@ async function onSubmit() {
                         Alumno: {{ selectedAlumno?.apellidos_nombres }}
                     </h3>
 
-                    <FormInput v-model="formData.lugar" label="Lugar de prácticas *"
-                        placeholder="Ej. Clínica Odontovida" />
+                    <FormLabelError label="Modalidad" required :error="formErrors?.lugar">
+                        <BaseSelectCiclo v-model="formData.lugar" :options="modalidadPracticas" label="label"
+                            placeholder="Seleccione la modalidad" />
+                    </FormLabelError>
+
                     <FormInputFile v-model="formData.documento" label="Documento (Informe o Evidencia) *" />
 
                     <div v-if="formData.documento" class="mt-3">

@@ -789,10 +789,10 @@ Route::middleware('auth:sanctum')->group(function () {
         'update',
     ])->middleware('permission:todo-acceso-permisos|editar-permisos');
 
-    Route::delete('entregas_realizadas/{id}', [
+    Route::delete('entregas_realizadas/{fileId}', [
         \App\Http\Controllers\EntregasRealizadasController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-mis-modulos');
 
 
     //RUTA PARA EGRESADOS

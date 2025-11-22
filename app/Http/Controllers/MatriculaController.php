@@ -285,7 +285,7 @@ class MatriculaController extends Controller
 
     public function getMatriculadosPorGrupo($grupoId)
     {
-        // Traer solo la info de especialidad y módulo
+        // INFO DEL GRUPO
         $infoGrupo = DB::table('grupo as g')
             ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
             ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
@@ -295,31 +295,43 @@ class MatriculaController extends Controller
                 'em.nombre_especialidad as especialidad',
                 'mo.descripcion as modulo',
                 'g.id as id_grupo',
-                'g.id_periodo'
+                'g.id_periodo',
+                'g.turno',
+                'g.seccion'
             )
             ->first();
 
-        // Traer a los estudiantes matriculados en el grupo
+        // Si no existe el grupo, devolver 404 o respuesta vacía según prefieras
+        if (!$infoGrupo) {
+            return response()->json([
+                'message' => 'Grupo no encontrado'
+            ], 404);
+        }
+
+        // MATRICULADOS DEL GRUPO
         $matriculados = DB::table('matricula as m')
             ->join('estudiante as e', 'm.id_estudiante', '=', 'e.id')
             ->where('m.id_grupo', $grupoId)
             ->where(function ($q) {
-                $q->whereNull('m.reserva')
-                    ->orWhere('m.reserva', 0);
+                $q->whereNull('m.reserva')->orWhere('m.reserva', 0);
             })
             ->select(
                 'm.id as id_matricula',
                 'e.id as id_estudiante',
+                // Nombre completo
                 DB::raw("CONCAT(e.apellido_paterno, ' ', e.apellido_materno, ', ', e.nombre) as estudiante"),
+                // Campos REALES del estudiante
+                'e.tipo_documento',
                 'e.nro_documento',
                 'e.sexo',
                 'e.fecha_nacimiento',
-                'm.turno',
-                'm.reserva'
+                'e.celular_personal',
+                'e.correo_electronico',
+                 DB::raw("DATE(m.created_at) as created_at")
             )
-            ->orderBy('e.apellido_paterno', 'asc')
-            ->orderBy('e.apellido_materno', 'asc')
-            ->orderBy('e.nombre', 'asc')
+            ->orderBy('e.apellido_paterno')
+            ->orderBy('e.apellido_materno')
+            ->orderBy('e.nombre')
             ->get();
 
         return response()->json([
@@ -327,6 +339,8 @@ class MatriculaController extends Controller
             'id_periodo' => $infoGrupo->id_periodo,
             'id_grupo' => $infoGrupo->id_grupo,
             'modulo' => $infoGrupo->modulo,
+            'turno' => $infoGrupo->turno,
+            'seccion' => $infoGrupo->seccion,
             'matriculados' => $matriculados,
         ]);
     }

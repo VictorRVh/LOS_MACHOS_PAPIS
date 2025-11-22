@@ -51,7 +51,7 @@ const filtrarPorSeleccion = async () => {
 };
 
 const verMatriculados = (grupo) => {
-    router.push({ name: 'matricula.grupo.detalle', params: { id: grupo.id } });
+    router.push({ name: 'matricula.grupo.alumnos', params: { id: grupo.id } });
 };
 
 const descargarNomina = async (idGrupo) => {

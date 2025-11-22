@@ -143,13 +143,16 @@ const loadData = async () => {
   }
 };
 
-
 watch(() => props.show, (isVisible) => {
   if (isVisible) {
     isEditing.value = false;
     // recargar por si cambió el store
     loadData();
   }
+});
+
+const asistenciaYaTomada = computed(() => {
+  return alumnos.value.some(e => e.asistencia_num !== 0);
 });
 
 const marcarAsistencia = (alumnoId, estadoKey) => {
@@ -415,11 +418,15 @@ const close = () => emit('hide');
             </div>
             <div class="flex justify-end gap-3">
               <Button title="Cancelar" variant="secondary" @click="isEditing ? isEditing = false : close()" />
-              <Button v-if="haySesion && !isEditing" title="Tomar Asistencia Hoy" @click="isEditing = true">
+              <Button v-if="haySesion && !isEditing" :disabled="asistenciaYaTomada"
+                :class="{ 'opacity-50 cursor-not-allowed': asistenciaYaTomada }"
+                :title="asistenciaYaTomada ? 'La asistencia ya fue registrada hoy' : 'Tomar Asistencia Hoy'"
+                @click="asistenciaYaTomada ? null : (isEditing = true)">
                 <template #icon>
                   <PencilSquareIcon class="w-5 h-5" />
                 </template>
               </Button>
+
 
               <p v-else-if="!haySesion" class="text-gray-500 italic pt-2">
                 No hay sesión programada para hoy.

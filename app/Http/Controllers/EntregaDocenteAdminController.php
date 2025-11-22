@@ -218,6 +218,7 @@ class EntregaDocenteAdminController extends Controller
     {
         $programaciones = EntregaDocente::with([
             'entregaDocenteAdmin:id,nombre_entrega,fecha_inicio,fecha_fin,status',
+            'entregaRealizada:id,id_entrega,id_docente,fecha_entrega',
             'grupo.carpetaDrive',
             'grupo.carpetasEntrega'
         ])
@@ -287,6 +288,13 @@ class EntregaDocenteAdminController extends Controller
                     'nombre_entrega' => $programacion->entregaDocenteAdmin->nombre_entrega,
                     'tipo_entrega' => $programacion->entregaDocenteAdmin->tipo_entrega ?? null,
                     'status' => $programacion->entregaDocenteAdmin->status,
+                    'entregas_realizadas' => $programacion->entregaRealizada->map(function ($e) {
+                        return [
+                            'id' => $e->id,
+                            'id_docente' => $e->id_docente,
+                            'fecha_entrega' => $e->fecha_entrega,
+                        ];
+                    }),
                 ] : null,
                 'archivos' => collect($archivos)->map(function ($file) {
                     return [

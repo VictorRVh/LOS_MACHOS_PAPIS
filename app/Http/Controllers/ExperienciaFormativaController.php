@@ -41,7 +41,7 @@ class ExperienciaFormativaController extends Controller
         $drive_folder_id = $experiencia?->drive?->first()?->drive_folder_id ?? null;
 
         // 🔹 Listar estudiantes con su información y documentos
-        $estudiantes = $grupo->matricula->map(function ($matricula) use ($experiencia) {
+        $estudiantes = $grupo->matricula->where('reserva', 0)->map(function ($matricula) use ($experiencia) {
             $nota = null;
             $documentoDriveUrl = null;
 

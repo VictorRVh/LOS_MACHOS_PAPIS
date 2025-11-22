@@ -239,7 +239,7 @@ class DocenteController extends Controller
 
     public function getModulosAsignados()
     {
-        $userId = auth()->id(); // ID del usuario logueado
+        $userId = auth()->id();
 
         return DB::table('grupo as g')
             ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
@@ -247,7 +247,10 @@ class DocenteController extends Controller
             ->join('modulos as m', 'g.id_modulo', '=', 'm.id')
             ->leftJoin('docente as d', 'g.id_docente', '=', 'd.id')
             ->leftJoin('users as u', 'd.user_id', '=', 'u.id')
-            ->leftJoin('matricula as ma', 'ma.id_grupo', '=', 'g.id')
+            ->leftJoin('matricula as ma', function ($join) {
+                $join->on('ma.id_grupo', '=', 'g.id')
+                    ->where('ma.reserva', 0); // <-- SOLO matriculados reales
+            })
             ->where('d.user_id', $userId)
             ->select(
                 'g.id as id_grupo',

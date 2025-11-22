@@ -127,7 +127,7 @@ class EntregaDocente extends Model
         // 2. Verificar si ya cumplió
         if ($this->cumplio) {
             return [
-                'activa' => false,
+                'activa' => true,
                 'mensaje' => 'Ya ha realizado esta entrega previamente.',
                 'codigo' => 'YA_CUMPLIDA'
             ];
@@ -286,15 +286,20 @@ class EntregaDocente extends Model
      * @param int $idDocente
      * @return EntregasRealizadas
      */
-    public function marcarComoCumplida(string $idDocente): EntregasRealizadas
+    public function marcarComoCumplida(string $idDocente, string $fileId): EntregasRealizadas
     {
         // Actualizar campo cumplio
-        $this->update(['cumplio' => 1]);
+        // $this->update(['cumplio' => 1]);
+
+        if (!$this->cumplio) {
+            $this->update(['cumplio' => 1]);
+        }
 
         // Crear registro en entregas_realizadas
         return EntregasRealizadas::create([
             'id_entrega' => $this->id,
             'id_docente' => $idDocente,
+            'archivo'    => $fileId,
             'fecha_entrega' => Carbon::now('America/Lima'),
         ]);
     }

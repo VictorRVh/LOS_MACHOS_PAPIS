@@ -51,14 +51,14 @@ const onDelete = (convenio) => {
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-convenios', 'ver-convenios']">
     <div class="flex justify-between items-center p-4">
-      <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Convenios</h2>
+      <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Modalidad</h2>
     </div>
 
     <div class="flex flex-col lg:flex-row px-6 gap-6">
 
       <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
         <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-          Agregar Convenio
+          Agregar Modalidad
         </h3>
         <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
         <ConvenioSlider :show="slider" :convenio="sliderData" @hide="hideSlider" />
@@ -68,7 +68,7 @@ const onDelete = (convenio) => {
         <Table>
           <THead>
             <Th>Id</Th>
-            <Th>Convenio</Th>
+            <Th>Modalidad</Th>
             <Th>Acciones</Th>
           </THead>
 

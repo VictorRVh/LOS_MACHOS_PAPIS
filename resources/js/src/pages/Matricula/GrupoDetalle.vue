@@ -18,10 +18,17 @@ import ConfirmModalReserva from '../../components/page/ConfirmModalReserva.vue';
 import Slider from '../../components/ui/Slider.vue';
 import BaseSelectGrupo from '../../components/ui/BaseSelectGrupo.vue';
 import FormLabelError from '../../components/ui/FormLabelError.vue';
+// --- NUEVO ---
+import SearchBar from "../../components/head_table/headSearch.vue";
+import MenuTable from "../../components/table/MenuTable.vue";
+import useTableData from "../../composables/tabla/useTableData";
+
 
 const props = defineProps({
-    id: { type: [String, Number], required: true },
+    id: { type: [String], required: true },
 });
+
+console.log(" id de grupo: ".props?.id)
 
 const { showConfirmModal, showToast } = useModalToast();
 
@@ -31,7 +38,7 @@ const grupoStore = useGrupoStore();
 onMounted(() => {
     loading.value = true;
     setTimeout(async () => {
-        await matriculaStore.fetchMatriculadosPorGrupo(props.id)
+        await matriculaStore.fetchMatriculadosPorGrupo(props?.id)
         loading.value = false;
     }, 1000);
 });
@@ -88,7 +95,7 @@ const cambiarGrupo = async () => {
     try {
         await matriculaStore.loadCambioMatricula(estudiantesSeleccionados.value, nuevoGrupoId.value)
 
-        await matriculaStore.fetchMatriculadosPorGrupo(props.id)
+        await matriculaStore.fetchMatriculadosPorGrupo(props?.id)
 
         estudiantesSeleccionados.value = []
         nuevoGrupoId.value = ""
@@ -110,7 +117,7 @@ const abrirModalReserva = (matricula) => {
 const confirmarReserva = async () => {
     try {
         await matriculaStore.loadReservaMatricula(selectedMatricula.value.id_matricula)
-        await matriculaStore.fetchMatriculadosPorGrupo(props.id)
+        await matriculaStore.fetchMatriculadosPorGrupo(props?.id)
     } catch (error) {
         console.error(error)
         alert('Error al reservar la matrícula')
@@ -135,29 +142,96 @@ const exportarFicha = async (matricula) => {
     }
 };
 
+const exportarAlumnos = () => {
+
+}
+// Lista raw desde el store
+const listaMatriculados = computed(() => matriculados.value?.matriculados ?? []);
+
+// Aplicando filtrado + ordenamiento + paginación
+const {
+    query,
+    orderBy,
+    orderDirection,
+    pagina,
+    itemsPorPagina,
+    paginados: matriculadosPaginados,
+    totalPaginas,
+    ordenados: matriculadosOrdenados,
+    filtrar: filtrarMatriculados
+} = useTableData(listaMatriculados, {
+    defaultOrderBy: "estudiante",
+    searchFields: ["estudiante", "nro_documento", "celular_personal", "correo_electronico"]
+});
+
 </script>
 <template>
     <AuthorizationFallback :permissions="['todo-acceso-grupo', 'ver-grupos']">
-        <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
-            <div class="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 shadow-md">
-                <h2 class="text-xl font-bold text-cetpro dark:text-cetpro-light mb-2">
-                    Especialidad: <span class="font-semibold text-gray-800 dark:text-gray-200">{{
-                        matriculados.especialidad }}</span>
-                </h2>
-                <p class="text-gray-700 dark:text-gray-300">
-                    Módulo: <span class="font-semibold">{{ matriculados.modulo }}</span>
-                </p>
+        <div class="w-full px-3" v-if="matriculados">
+            <div>
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                    <!-- 🟦 IZQUIERDA: Detalles del grupo -->
+                    <div class="text-sm">
+                        <h2 class="text-base font-bold text-cetpro dark:text-cetpro-light mb-1">
+                            Especialidad:
+                            <span class="font-semibold text-gray-800 dark:text-gray-200">
+                                {{ matriculados.especialidad }}
+                            </span>
+                        </h2>
+
+                        <p class="text-gray-700 dark:text-gray-300">
+                            Módulo:
+                            <span class="font-semibold">
+                                {{ matriculados.modulo }}
+                            </span> |
+                            Turno:
+                            <span class="font-semibold">
+                                {{ matriculados.turno }}
+                            </span> |
+                            Sección:
+                            <span class="font-semibold">
+                                {{ matriculados.seccion }}
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- 🟥 DERECHA: Botones -->
+                    <div class="flex flex-wrap gap-3 justify-end">
+
+                        <!-- CAMBIAR GRUPO -->
+                        <Button title="Cambiar de Grupo" variant="secondary" @click="showCambioGrupoModal = true"
+                            :disabled="estudiantesSeleccionados.length === 0">
+                            <template #icon>
+                                <ArrowPathIcon class="h-4 w-4" />
+                            </template>
+
+                            Cambiar Grupo ({{ estudiantesSeleccionados.length }})
+                        </Button>
+
+                        <!-- EXPORTAR ALUMNOS -->
+                        <Button title="Exportar Alumnos" variant="secondary" @click="exportarAlumnos()">
+                            <template #icon>
+                                <ArrowDownTrayIcon class="h-4 w-4" />
+                            </template>
+
+                            Exportar Alumnos
+                        </Button>
+
+                    </div>
+                </div>
+
+                <!-- 🔍 BUSCADOR ABAJO PERO DENTRO DEL MISMO BLOQUE -->
+                <div class="flex justify-between my-2">
+                    <SearchBar :totalResultados="matriculadosOrdenados.length" :campoOrden="'estudiante'"
+                        @search="filtrarMatriculados" />
+                </div>
             </div>
 
-            <div class="flex justify-start mb-4 ml-2">
-                <Button title="Cambiar de Grupo Seleccionados" @click="showCambioGrupoModal = true"
-                    :disabled="estudiantesSeleccionados.length === 0" variant="secondary">
-                    <ArrowPathIcon class="h-5 w-5 mr-2" />
-                    Cambiar Grupo ({{ estudiantesSeleccionados.length }})
-                </Button>
-            </div>
 
-            <Table>
+
+            <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
+
                 <THead>
                     <Th class="w-10 text-center">
                         <input type="checkbox" v-model="todosSeleccionados"
@@ -166,11 +240,16 @@ const exportarFicha = async (matricula) => {
                     <Th>N°</Th>
                     <Th>Estudiante</Th>
                     <Th>DNI</Th>
-                    <Th>Fecha de Matrícula</Th>
+                    <Th>Sexo</Th>
+
+                    <Th>Celular</Th>
+                    <Th>Correo</Th>
+                    <Th>F. Matrícula</Th>
                     <Th class="text-center">Acciones</Th>
                 </THead>
+
                 <TBody>
-                    <Tr v-for="(matricula, index) in matriculados.matriculados" :key="matricula.id"
+                    <Tr v-for="(matricula, index) in matriculadosPaginados" :key="matricula.id_matricula"
                         class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
 
                         <Td class="text-center">
@@ -181,38 +260,41 @@ const exportarFicha = async (matricula) => {
                         <Td>{{ index + 1 }}</Td>
                         <Td>{{ matricula.estudiante }}</Td>
                         <Td>{{ matricula.nro_documento }}</Td>
-                        <Td>{{ new Date(matricula.created_at).toLocaleDateString() }}</Td>
+                        <Td>{{ matricula.sexo }}</Td>
+
+
+                        <Td>{{ matricula.celular_personal }}</Td>
+                        <Td>{{ matricula.correo_electronico }}</Td>
+
+
+                        <!-- FECHA DE MATRÍCULA CORREGIDA -->
+                        <Td>{{ matricula.created_at }}</Td>
+
                         <Td class="text-center">
-                            <div class="flex justify-center items-center space-x-1">
-                                <!-- <button @click="editarMatricula(matricula)" title="Editar"
-                                    class="p-1 text-blue-500 hover:text-blue-700">
-                                    <PencilSquareIcon class="h-5 w-5" />
-                                </button>
-                                <button @click="eliminarMatricula(matricula)" title="Eliminar"
-                                    class="p-1 text-red-500 hover:text-red-700">
-                                    <TrashIcon class="h-5 w-5" />
-                                </button> -->
-                                <button @click="abrirModalReserva(matricula)" title="Reservar Matrícula"
-                                    class="p-1 text-yellow-500 hover:text-yellow-700">
-                                    <ArchiveBoxIcon class="h-5 w-5" />
-                                </button>
-                                <button @click="exportarFicha(matricula.id_estudiante)" title="Exportar Ficha"
-                                    class="p-1 text-green-500 hover:text-green-700">
-                                    <DocumentArrowDownIcon class="h-5 w-5" />
-                                </button>
-                            </div>
+                            <MenuTable :actions="{
+                                view: false,
+                                edit: false,
+                                delete: false,
+                                download: true,
+                                custom1: true
+                            }" entity-label="Matricula" @download="exportarFicha(matricula.id_estudiante)"
+                                @custom1="abrirModalReserva(matricula)" />
                         </Td>
+
+
                     </Tr>
+
                     <Tr v-if="matriculados?.matriculados?.length === 0 && !loading">
-                        <Td colspan="6" class="text-center py-4">No hay estudiantes matriculados en este grupo.</Td>
+                        <Td colspan="12" class="text-center py-4">No hay estudiantes matriculados en este grupo.</Td>
                     </Tr>
 
                     <Tr v-if="loading">
-                        <Td colspan="6" class="text-center py-4">Cargando estudiantes...</Td>
+                        <Td colspan="12" class="text-center py-4">Cargando estudiantes...</Td>
                     </Tr>
 
                 </TBody>
             </Table>
+
         </div>
         <div v-else class="text-center p-8">Cargando información del grupo...</div>
 

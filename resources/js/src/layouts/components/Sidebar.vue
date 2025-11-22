@@ -15,7 +15,7 @@ const navLinks = [
     { name: 'Roles', routeName: 'roles', icon: ShieldCheckIcon, permissions: ["todo-acceso-roles", "icono-roles"]},
     { name: 'Permisos', routeName: 'permissions', icon: KeyIcon, permissions: ["todo-acceso-permisos", "icono-permisos"]},
     { name: 'Docentes', routeName: 'docente', icon: AcademicCapIcon, permissions: ["todo-acceso-docentes", "icono-docentes"]},
-    { name: 'Convenios', routeName: 'convenio', icon: PresentationChartLineIcon, permissions: ["todo-acceso-convenios", "icono-convenios"]},
+    { name: 'Modalidad', routeName: 'convenio', icon: PresentationChartLineIcon, permissions: ["todo-acceso-convenios", "icono-convenios"]},
     { name: 'Periodo', routeName: 'periodo', icon: CalendarDaysIcon, permissions: ["todo-acceso-periodos", "icono-periodos"]},
     { name: 'Administrativos', routeName: 'administrativos', icon: NewspaperIcon, permissions: ["todo-acceso-administrativos", "icono-administrativos"]},
     { name: 'Especialidad', routeName: 'especialidad', icon: AcademicCapIcon, permissions: ["todo-acceso-especialidades", "icono-especialidades"]},

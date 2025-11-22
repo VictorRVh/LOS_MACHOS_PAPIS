@@ -33,8 +33,8 @@ const calendarOptions = ref({
   },
 
   dateClick: (info) => {
-    const day = info.date.getDay()
-    if (day === 0 || day === 6) return
+    // const day = info.date.getDay()
+    // if (day === 0 || day === 6) return
 
     const dateStr = info.dateStr
     const index = selectedDates.value.findIndex(d => d.start === dateStr)

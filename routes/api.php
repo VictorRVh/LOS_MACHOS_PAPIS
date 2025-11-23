@@ -302,17 +302,17 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\EntregaDocenteController::class,
         'subidasPorProgramacion',
     ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
-    
+
     Route::get('entrega_docente_estado/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'verificarEstado',
     ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos|ver-mis-modulos');
-    
+
     Route::post('entrega_docente_subir', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'subirArchivo',
     ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos|ver-mis-modulos');
-    
+
     Route::post('entrega_docente_sincronizar', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'sincronizarEstado',
@@ -631,7 +631,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'index_grupo_capacidad_terminal',
     ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|ver-capacidad-terminal-notas-docente');
-    
+
     Route::get('nota_capacidad_terminal_info/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'obtenerInfoCapacidad',
@@ -879,7 +879,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\NotificacionesController::class,
         'marcarTodo',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
-    
+
     Route::get('/notificaciones/leer/{id}', [
         \App\Http\Controllers\NotificacionesController::class,
         'marcarLeido',
@@ -949,6 +949,14 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\MatriculaController::class,
         'index',
     ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
+
+
+    Route::get('matricula_alumno_data/{id}', [
+        \App\Http\Controllers\MatriculaController::class,
+        'matricula_alumno_data',
+    ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
+
+
 
     Route::post('matricula', [
         \App\Http\Controllers\MatriculaController::class,
@@ -1024,8 +1032,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('grupoByEspecialidad/{idEspecialidad}', [
         \App\Http\Controllers\MatriculaController::class,
         'getGruposPorEspecialidad',
-    ])->middleware('permission:ver-especialidades');
-    
+    ])->middleware('permission:permission:todo-acceso-matriculas|ver-matriculas');
+
     Route::get('grupoByPeriodo/{idPeriodo}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'obtenerGruposPorPeriodo',

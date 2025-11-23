@@ -108,7 +108,6 @@ class EstudianteController extends Controller
             'puesto_trabajo' => 'sometimes|string|max:100',
             'carga_familiar' => 'sometimes|string|max:100',
             'correo_electronico' => 'sometimes|string|max:100',
-            'correo_electronico' => 'sometimes|string|max:100',
             'celular_personal' => 'sometimes|string|max:100',
             'internet_casa' => 'sometimes|string|max:100',
             'tipo_operador' => 'sometimes|string|max:100',
@@ -174,6 +173,8 @@ class EstudianteController extends Controller
     //         ], 500);
     //     }
     // }
+
+
     public function buscar(Request $request)
     {
         $tipo = $request->input('tipo_documento');
@@ -214,7 +215,7 @@ class EstudianteController extends Controller
                 : "https://api.factiliza.com/v1/cee/info/{$numero}";
 
             $response = Http::withHeaders([
-                 'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzOTE3MSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnN1bHRvciJ9.MUQqU8axqigAZZXN-TOWTmSVrFsrQIXpujPPvgPDqBU'
+                'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzOTE3MSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImNvbnN1bHRvciJ9.MUQqU8axqigAZZXN-TOWTmSVrFsrQIXpujPPvgPDqBU'
             ])->get($endpoint);
 
             if ($response->failed()) {
@@ -226,6 +227,15 @@ class EstudianteController extends Controller
             // ---------------------------------------
             // 3️⃣ MAPEAR DATOS FACTILIZA → CAMPOS BD
             // ---------------------------------------
+            function coalesce_non_empty(...$values)
+            {
+                foreach ($values as $v) {
+                    if (isset($v) && $v !== '' && $v !== null) {
+                        return $v;
+                    }
+                }
+                return null;
+            }
             $mapped = [
                 'tipo_documento' => $tipo,
                 'nro_documento' => $data['numero'] ?? $numero,
@@ -237,7 +247,10 @@ class EstudianteController extends Controller
                 'departamento_nacimiento' => $data['departamento'] ?? null,
                 'provincia_nacimiento' => $data['provincia'] ?? null,
                 'distrito_nacimiento' => $data['distrito'] ?? null,
-                'direccion_residencia' => $data['direccion_completa'] ?? null,
+                'direccion_residencia' => coalesce_non_empty(
+                    $data['direccion_completa'] ?? null,
+                    $data['direccion'] ?? null
+                ),
             ];
 
             return response()->json([

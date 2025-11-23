@@ -161,7 +161,7 @@ const onSubmit = async () => {
     const response = await store(formData.value);
     if (response.data.matricula.id) {
         showToast('¡Matrícula realizada con éxito!', 'success');
-        router.push({ name: 'matricula.grupo.detalle', params: { id: formData.value.id_grupo } });
+        router.push({ name: 'matricula.grupo.alumnos', params: { id: formData.value.id_grupo } });
     } else {
         showToast('Hubo un error al procesar la matrícula.', 'error');
     }
@@ -207,7 +207,7 @@ const onSubmit = async () => {
                 </li>
             </ol>
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-h-[450px]">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-h-[350px]">
 
                 <Step1 v-show="currentStep === 1" v-model="formData" :programas="programaStore.programa.programas"
                     :nameGrupo="nameGrupo" @cambiarVariable="nameGrupo = $event" :errors="formErrors" />

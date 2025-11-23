@@ -34,6 +34,7 @@ const { showConfirmModal, showToast } = useModalToast();
 
 const matriculaStore = useMatriculaStore();
 const grupoStore = useGrupoStore();
+const router = useRouter();
 
 onMounted(() => {
     loading.value = true;
@@ -145,6 +146,10 @@ const exportarFicha = async (matricula) => {
 const exportarAlumnos = () => {
 
 }
+const EditarMatricula = (idMatricula) => {
+    // Redirige al componente de matrícula con el id para edición
+    router.push({ name: 'matricula.editar', params: { id: idMatricula } })
+}
 // Lista raw desde el store
 const listaMatriculados = computed(() => matriculados.value?.matriculados ?? []);
 
@@ -160,8 +165,8 @@ const {
     ordenados: matriculadosOrdenados,
     filtrar: filtrarMatriculados
 } = useTableData(listaMatriculados, {
-    defaultOrderBy: "estudiante",
-    searchFields: ["estudiante", "nro_documento", "celular_personal", "correo_electronico"]
+    defaultOrderBy: "apellidos",
+    searchFields: ["apellidos", "nombre","nro_documento", "celular_personal", "correo_electronico"]
 });
 
 </script>
@@ -223,7 +228,7 @@ const {
 
                 <!-- 🔍 BUSCADOR ABAJO PERO DENTRO DEL MISMO BLOQUE -->
                 <div class="flex justify-end my-2">
-                    <SearchBar :totalResultados="matriculadosOrdenados.length" :campoOrden="'estudiante'"
+                    <SearchBar :totalResultados="matriculadosOrdenados.length" :campoOrden="'apellidos'"
                         @search="filtrarMatriculados" />
                 </div>
             </div>
@@ -258,7 +263,7 @@ const {
                         </Td>
 
                         <Td>{{ index + 1 }}</Td>
-                        <Td>{{ matricula.estudiante }}</Td>
+                        <Td>{{ matricula.apellidos}}, {{ matricula.nombre}}</Td>
                         <Td>{{ matricula.nro_documento }}</Td>
                         <Td>{{ matricula.sexo }}</Td>
 
@@ -278,15 +283,17 @@ const {
                                 download: true,
                                 custom1: true
                             }" :labels="{
-                                download: 'descargar ficha',
+                                 edit: 'Editar matrícula',
+                                
                                 custom1: 'Reservar matrícula',
-                                edit: 'editar matrícula',
-                                delete: 'eliminar matrícula'
+                               download: 'Descargar ficha',
+                                delete: 'Eliminar matrícula'
                             }"
-                             @edit="exportarFicha(matricula.id_estudiante)"
-                              @delete="Editar(matricula.id_estudiante)"
-                                @download="eliminar(matricula.id_estudiante)"
-                             @custom1="abrirModalReserva(matricula)" />
+                             @edit="EditarMatricula(matricula.id_estudiante)"
+                             @custom1="abrirModalReserva(matricula)" 
+                              @delete="EliminarMatricula(matricula.id_estudiante)"
+                                @download="exportarFicha(matricula.id_estudiante)"
+                              />
                         </Td>
 
 

@@ -170,7 +170,6 @@ const onSubmit = async () => {
 
 <template>
     <div class="p-2 bg-white dark:bg-gray-900/50 font-inter">
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 ">Nueva Matrícula de Estudiante</h2>
 
         <div v-if="isLoading"
             class="flex justify-center items-center min-h-[500px] bg-white dark:bg-gray-800 rounded-lg shadow-xl">

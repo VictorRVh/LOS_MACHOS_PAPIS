@@ -619,9 +619,22 @@ class MatriculaController extends Controller
             'data' => $matricula,
         ]);
     }
-    public function matricula_alumno_data($id)
+    public function matriculaAlumnoData($id)
     {
-        return "<h1 style='color: green;'>✔ EL MÉTODO ENTRÓ CORRECTAMENTE</h1>
-            <p>ID recibido: <b>$id</b></p>";
+        $matricula = Matricula::with([
+            'estudiante',
+            'pago',
+            'grupo.modulo',
+            'grupo.especialidad.especialidadMadre',
+        ])
+            ->select('id', 'id_grupo', 'id_estudiante', 'id_pago') // SOLO estos campos
+            ->where('id', $id)
+            ->first();
+
+        if (!$matricula) {
+            return response()->json(['message' => 'Matrícula no encontrada'], 404);
+        }
+
+        return response()->json($matricula);
     }
 }

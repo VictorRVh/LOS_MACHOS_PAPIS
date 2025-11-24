@@ -289,7 +289,7 @@ const {
                                download: 'Descargar ficha',
                                 delete: 'Eliminar matrícula'
                             }"
-                             @edit="EditarMatricula(matricula.id_estudiante)"
+                             @edit="EditarMatricula(matricula.id)"
                              @custom1="abrirModalReserva(matricula)" 
                               @delete="EliminarMatricula(matricula.id_estudiante)"
                                 @download="exportarFicha(matricula.id_estudiante)"

@@ -67,11 +67,6 @@ const resetGrupoData = () => {
 
 <template>
   <div>
-    <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white mb-6">
-      <Bars3Icon class="h-6 w-6" />
-      DATOS ACADÉMICOS
-    </h3>
-
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Programa -->
       <FormLabelError label="Programa de Estudio *">

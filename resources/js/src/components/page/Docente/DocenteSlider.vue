@@ -70,9 +70,9 @@ const formErrors = ref({});
 
 watch(() => props.show, () => {
     if (props.show) {
-      //  console.log('props de docente', props.docente?.id);
+        //  console.log('props de docente', props.docente?.id);
         if (props.docente?.id) {
-            
+
 
             formData.value = Object.assign(
                 {},
@@ -95,7 +95,7 @@ const schema = yup.object().shape({
     apellido_paterno: yup.string().nullable().required("El apellido paterno es requerido."),
     apellido_materno: yup.string().nullable().required("El apellido materno es requerido."),
     usuario: yup.string().nullable().required("El usuario es requerido."),
-     dni: yup.string().nullable().required("El DNI es requerido.").matches(/^[0-9]+$/, "El DNI solo debe contener números.")
+    dni: yup.string().nullable().required("El DNI es requerido.").matches(/^[0-9]+$/, "El DNI solo debe contener números.")
         .length(8, "El DNI debe tener exactamente 8 dígitos."),
     email: yup.string().email("Debe ser un email válido.").nullable().required("El email es requerido."),
     fecha_nacimiento: yup.date().nullable().required("La fecha de nacimiento es requerida."),
@@ -150,7 +150,8 @@ const onSubmit = async () => {
             <div class="mt-4 space-y-3">
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormInput v-model="formData.name" label="Nombres" :error="formErrors?.name" required :uppercase="true" />
+                    <FormInput v-model="formData.name" label="Nombres" :error="formErrors?.name" required
+                        :uppercase="true" />
                     <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno"
                         :error="formErrors?.apellido_paterno" required :uppercase="true" />
                     <FormInput v-model="formData.apellido_materno" label="Apellido Materno"
@@ -194,19 +195,21 @@ const onSubmit = async () => {
                     <template v-if="!docente?.id">
                         <FormInput v-model="formData.password" label="Contraseña" type="password"
                             :error="formErrors?.password" required />
-                        <FormInput v-model="formData.confirm_password" type="password" label="Confirmar Contraseña" :error="formErrors?.confirm_password"
-                            required />
+                        <FormInput v-model="formData.confirm_password" type="password" label="Confirmar Contraseña"
+                            :error="formErrors?.confirm_password" required />
                         <CheckBox v-model="formData.status" label="Estado"
                             class="mt-8 pl-4 flex justify-center items-centers" />
                     </template>
                 </div>
 
 
-
-                <Button :title="docente?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
-                    :disabled="saving || updating"
-                    :loading-title="docente?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
-                    :loading="saving || updating" @click="onSubmit" />
+                <div class="flex gap-2 mt-1">
+                    <Button :title="docente?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
+                        :disabled="saving || updating" :loading-title="docente?.id ? 'Guardando...' : 'Creando...'"
+                        class="!mt-6 !w-full" :loading="saving || updating" @click="onSubmit" />
+                    <Button title="Cancelar" variant="outline" @click="emit('hide');"
+                        class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer !mt-6 h-10" />
+                </div>
             </div>
         </AuthorizationFallback>
     </Slider>

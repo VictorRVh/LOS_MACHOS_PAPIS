@@ -99,11 +99,7 @@ onMounted(() => {
 
 <template>
     <AuthorizationFallback :permissions="['todo-acceso-permisos', 'ver-permisos']">
-        <div class="p-4 md:p-6 space-y-6">
-            <header>
-                <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Gestión de Matrícula por Grupos</h1>
-                <p class="text-gray-500 dark:text-gray-400 mt-1">Filtra y visualiza los grupos de estudio para gestionar sus matrículas.</p>
-            </header>
+        <div class="">
 
             <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">

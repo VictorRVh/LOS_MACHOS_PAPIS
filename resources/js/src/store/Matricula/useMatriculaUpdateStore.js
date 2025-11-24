@@ -9,7 +9,7 @@ const useMatriculaUpdateStore = defineStore('matriculaUpdatealumno', () => {
         show: getMatriculaUpdate,
         loading: matriculaUpdateLoading,
         initialLoading: matriculaUpdateFirstTimeLoading,
-    } = useHttpRequest('/matricula_update');
+    } = useHttpRequest('/matriculaUpdate');
 
     const matriculaUpdate = ref([]);
     const loadMatriculaUpdate = async (idMatricula) => {

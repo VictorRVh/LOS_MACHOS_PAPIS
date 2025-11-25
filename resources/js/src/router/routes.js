@@ -117,7 +117,15 @@ export default [
                 component: () => import('../pages/Matricula/GrupoDetalle.vue'),
                 props: true,
                 meta: { breadcrumb: [{ text: 'Grupo de Alumnos' }] }
+            },
+            {
+                path: '/matricula/:id/editar',
+                name: 'matricula.editar',
+                props: true,
+                 component: () => import('../components/page/Matricula/MatriculaEditarSlider.vue'),
+                meta: { breadcrumb: [{ text: 'Editar Alumno' }] },
             }
+
 
         ]
     },

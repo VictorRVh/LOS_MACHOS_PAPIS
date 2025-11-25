@@ -50,7 +50,6 @@ class EstudianteController extends Controller
             'puesto_trabajo' => 'required|string|max:100',
             'carga_familiar' => 'required|string|max:100',
             'correo_electronico' => 'required|string|max:100',
-            'correo_electronico' => 'required|string|max:100',
             'celular_personal' => 'required|string|max:100',
             'internet_casa' => 'required|string|max:100',
             'tipo_operador' => 'required|string|max:100',
@@ -108,7 +107,6 @@ class EstudianteController extends Controller
             'trabaja' => 'sometimes|string|max:100',
             'puesto_trabajo' => 'sometimes|string|max:100',
             'carga_familiar' => 'sometimes|string|max:100',
-            'correo_electronico' => 'sometimes|string|max:100',
             'correo_electronico' => 'sometimes|string|max:100',
             'celular_personal' => 'sometimes|string|max:100',
             'internet_casa' => 'sometimes|string|max:100',
@@ -176,6 +174,7 @@ class EstudianteController extends Controller
     //     }
     // }
 
+
     public function buscar(Request $request)
     {
         $tipo = $request->input('tipo_documento');
@@ -194,18 +193,22 @@ class EstudianteController extends Controller
             return response()->json(['error' => 'Carnet de extranjería inválido'], 422);
         }
 
-        // Buscamos al estudiante en nuestra base de datos
+        // -------------------------------
+        // 1️⃣ BUSCAR EN BD
+        // -------------------------------
         $estudiante = Estudiante::where('nro_documento', $numero)->first();
 
         if ($estudiante) {
             return response()->json([
                 'success' => true,
                 'source' => 'database',
-                'data' => $estudiante
+                'data' => $estudiante  // Devuelve TODOS los campos exactos de tu tabla
             ]);
         }
 
-        // Si el estudiante no existe en nuestra BD, consultamos al FACTILIZA
+        // -------------------------------
+        // 2️⃣ CONSULTAR A FACTILIZA
+        // -------------------------------
         try {
             $endpoint = $tipo === 'DNI'
                 ? "https://api.factiliza.com/v1/dni/info/{$numero}"
@@ -219,7 +222,42 @@ class EstudianteController extends Controller
                 return response()->json(['error' => 'No se pudo consultar el documento'], 500);
             }
 
-            return $response->json();
+            $data = $response->json()['data'];
+
+            // ---------------------------------------
+            // 3️⃣ MAPEAR DATOS FACTILIZA → CAMPOS BD
+            // ---------------------------------------
+            function coalesce_non_empty(...$values)
+            {
+                foreach ($values as $v) {
+                    if (isset($v) && $v !== '' && $v !== null) {
+                        return $v;
+                    }
+                }
+                return null;
+            }
+            $mapped = [
+                'tipo_documento' => $tipo,
+                'nro_documento' => $data['numero'] ?? $numero,
+                'apellido_paterno' => $data['apellido_paterno'] ?? null,
+                'apellido_materno' => $data['apellido_materno'] ?? null,
+                'nombre' => $data['nombres'] ?? null,
+                'sexo' => $data['sexo'] ?? null,
+                'fecha_nacimiento' => $data['fecha_nacimiento'] ?? null,
+                'departamento_nacimiento' => $data['departamento'] ?? null,
+                'provincia_nacimiento' => $data['provincia'] ?? null,
+                'distrito_nacimiento' => $data['distrito'] ?? null,
+                'direccion_residencia' => coalesce_non_empty(
+                    $data['direccion_completa'] ?? null,
+                    $data['direccion'] ?? null
+                ),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'source' => 'factiliza',
+                'data' => $mapped
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error en la consulta',

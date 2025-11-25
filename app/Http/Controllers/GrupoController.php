@@ -541,7 +541,8 @@ class GrupoController extends Controller
         $idGrupoActual = $request->input('grupo'); // puede venir null si no lo mandas
 
         $query = Grupo::with(['periodo', 'modulo', 'docente.user', 'convenio'])
-            ->where('id_periodo', $idPeriodo);
+            ->where('id_periodo', $idPeriodo)
+            ->where('status', 1); // ✔ solo grupos activos;
 
         // excluir grupo actual si lo mandan
         if (!empty($idGrupoActual)) {

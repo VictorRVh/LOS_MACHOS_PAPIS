@@ -17,7 +17,9 @@ const { store: busquedaDni, saving, update: updateModulo, updating } = useHttpRe
 
 const props = defineProps({
     modelValue: { type: Object, required: true },
-    errors: { type: Object, default: () => ({}) }
+    errors: { type: Object, default: () => ({}) },
+    edit: { type: Boolean, default: false }
+
 });
 const emit = defineEmits(['update:modelValue']);
 
@@ -205,7 +207,7 @@ watch(() => formData.value.distrito_nacimiento, (nuevo) => {
             </div>
         </transition>
 
-        <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white mb-6">
+        <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-white mb-6">
             <UserCircleIcon class="h-6 w-6" />
             DATOS PERSONALES DEL ESTUDIANTE
         </h3>
@@ -220,7 +222,7 @@ watch(() => formData.value.distrito_nacimiento, (nuevo) => {
 
                 <div class="flex items-end gap-2 flex-1">
                     <FormInput v-model="formData.nro_documento" label="Nro Doc. *" />
-                    <button type="button" @click="buscarDNI" :disabled="saving" class="px-3 py-2 bg-cetpro text-white rounded-lg flex items-center gap-2 
+                    <button v-if="!edit" type="button" @click="buscarDNI" :disabled="saving" class="px-3 py-2 bg-cetpro text-white rounded-lg flex items-center gap-2 
            hover:bg-cetpro-light transition disabled:opacity-70 disabled:cursor-not-allowed">
 
                         <svg v-if="saving" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"

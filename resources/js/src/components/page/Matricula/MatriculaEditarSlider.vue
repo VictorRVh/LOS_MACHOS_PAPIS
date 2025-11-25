@@ -13,7 +13,7 @@ import * as yup from "yup";
 const router = useRouter();
 const route = useRoute();
 const { showToast } = useModalToast();
-const { saving, update: updateModulo } = useHttpRequest('/matricula');
+const { updating, update: updateMatricula } = useHttpRequest('/matricula');
 
 const props = defineProps({
     id: { type: String, required: true },
@@ -98,12 +98,52 @@ const validate = async () => {
 
 // cargar estudiante
 const editarEstudiante = async (idMatricula) => {
-
     try {
         await dataMatricula.loadMatriculaUpdate(props.id)
         const data = dataMatricula.matriculaUpdate;
 
-        formData.value = { ...formData.value, ...data };
+        // Cargar datos correctamente
+        formData.value = {
+            ...formData.value,
+
+            // Estudiante
+            tipo_documento: data.estudiante.tipo_documento,
+            nro_documento: data.estudiante.nro_documento,
+            apellido_paterno: data.estudiante.apellido_paterno,
+            apellido_materno: data.estudiante.apellido_materno,
+            nombre: data.estudiante.nombre,
+            sexo: data.estudiante.sexo,
+            fecha_nacimiento: data.estudiante.fecha_nacimiento,
+            pais_nacimiento: data.estudiante.pais_nacimiento,
+            departamento_nacimiento: data.estudiante.departamento_nacimiento,
+            provincia_nacimiento: data.estudiante.provincia_nacimiento,
+            distrito_nacimiento: data.estudiante.distrito_nacimiento,
+            lugar_nacimiento: data.estudiante.lugar_nacimiento,
+            direccion_residencia: data.estudiante.direccion_residencia,
+            correo_electronico: data.estudiante.correo_electronico,
+            celular_personal: data.estudiante.celular_personal,
+            estado_civil: data.estudiante.estado_civil,
+            grado_instruccion: data.estudiante.grado_instruccion,
+            trabaja: data.estudiante.trabaja,
+            detalle_trabajo: data.estudiante.detalle_trabajo,
+            carga_familiar: data.estudiante.carga_familiar,
+            detalle_carga_familiar: data.estudiante.detalle_carga_familiar,
+            internet_casa: data.estudiante.internet_casa,
+            tipo_internet: data.estudiante.tipo_internet,
+            equipo_clases: JSON.parse(data.estudiante.equipos_virtuales ?? "[]"),
+            discapacidad: data.estudiante.discapacidad,
+            tipo_discapacidad: data.estudiante.tipo_discapacidad,
+            celular_referencia: data.estudiante.celular_referencia,
+            parentesco_referencia: data.estudiante.parentesco_referencia,
+            lengua_materna: data.estudiante.lengua_materna,
+
+            // Pago
+            condicion: data.pago.condicion,
+            nro_recibo: data.pago.nro_recibo,
+            aporte: data.pago.aporte,
+            anio_egreso: data.estudiante.anio_egreso
+        };
+
         nameGrupo.value = data.grupo_nombre || '';
         matriculaId.value = idMatricula;
         isEditing.value = true;
@@ -116,6 +156,7 @@ const editarEstudiante = async (idMatricula) => {
     }
 };
 
+
 // guardar cambios
 const onSubmit = async () => {
     const isValid = await validate();
@@ -124,11 +165,13 @@ const onSubmit = async () => {
         return;
     }
 
-    const response = await updateModulo(`/matricula/${matriculaId.value}`, formData.value);
+    const response = await updateMatricula(matriculaId.value,  formData.value);
 
-    if (response.data?.matricula?.id) {
-        showToast('Matrícula actualizada.', 'success');
-        router.push({ name: 'matricula.grupo.alumnos', params: { id: response.data.matricula.id_grupo } });
+    if (response?.matricula?.id) {
+        showToast(`Matrícula actualizada. para ${response?.matricula?.nombre_completo}`, 'success');
+
+        router.replace({ name: 'matricula.grupo.alumnos', params: { id: response?.matricula?.idGrupo } });
+
     } else {
         showToast('Error al guardar.', 'error');
     }
@@ -144,9 +187,9 @@ onMounted(() => {
 
 <template>
     <div class="p-2 bg-white dark:bg-gray-900/50 font-inter">
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200">
+        <h4 class="text-xl font-bold text-gray-800 dark:text-gray-200">
             Editar Datos del Estudiante
-        </h2>
+        </h4>
 
         <div v-if="isLoading"
             class="flex justify-center items-center min-h-[500px] bg-white dark:bg-gray-800 rounded-lg shadow-xl">
@@ -158,8 +201,13 @@ onMounted(() => {
         <div v-else>
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-h-[350px]">
 
-                <Step2 v-model="formData" :errors="formErrors" />
-                <Step3 v-model="formData" :nameGrupo="nameGrupo" />
+                <Step2 v-model="formData" :errors="formErrors" :edit="isEditing" />
+                <hr class="my-4 border-gray-300" />
+                <h4 class="text-xl font-bold text-gray-800 dark:text-gray-200">
+                    Editar Datos de pago
+                </h4>
+
+                <Step3 v-model="formData" :nameGrupo="nameGrupo" :edit="isEditing" />
 
             </div>
 

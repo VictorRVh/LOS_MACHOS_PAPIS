@@ -956,8 +956,6 @@ Route::middleware('auth:sanctum')->group(function () {
         'matriculaAlumnoData',
     ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
 
-
-
     Route::post('matricula', [
         \App\Http\Controllers\MatriculaController::class,
         'store',
@@ -1057,7 +1055,6 @@ Route::middleware('auth:sanctum')->group(function () {
         'generarExcel',
     ])->middleware('permission:ver-programa-especialidades');
 });
-
 
 Route::get('reportes/nomina/grupo/{idGrupo}', [
     \App\Http\Controllers\ReporteController::class,

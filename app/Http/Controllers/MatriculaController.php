@@ -187,49 +187,123 @@ class MatriculaController extends Controller
     // PATCH /api/matriculas/{id}
     public function update(Request $request, $id)
     {
-        $matricula = Matricula::find($id);
+        $matricula = Matricula::with(['estudiante', 'pago'])->find($id);
 
         if (!$matricula) {
             return response()->json(['message' => 'Matrícula no encontrada'], 404);
         }
 
-        // Validar campos
+        /* -------------------------
+       VALIDACIÓN COMPLETA
+    --------------------------*/
         $request->validate([
-            'id_grupo'      => 'sometimes|uuid|exists:grupo,id',
-            'turno'         => 'sometimes|string|max:10',
-            'id_estudiante' => 'sometimes|uuid|exists:estudiante,id',
-            'id_pago'       => 'nullable|uuid|exists:pago,id',
-            'reserva'       => 'nullable|boolean'
+
+            // ESTUDIANTE
+            'tipo_documento'        => 'sometimes|string|max:20',
+            'nro_documento'         => 'sometimes|string|max:20',
+            'apellido_paterno'      => 'sometimes|string|max:255',
+            'apellido_materno'      => 'sometimes|string|max:255',
+            'nombre'                => 'sometimes|string|max:255',
+            'sexo'                  => 'sometimes|string|max:10',
+            'fecha_nacimiento'      => 'sometimes|date',
+            'pais_nacimiento'       => 'sometimes|string|max:255',
+            'departamento_nacimiento' => 'sometimes|string|max:255',
+            'provincia_nacimiento'  => 'sometimes|string|max:255',
+            'distrito_nacimiento'   => 'sometimes|string|max:255',
+            'lugar_nacimiento'      => 'nullable|string|max:255',
+            'direccion_residencia'  => 'sometimes|string|max:255',
+            'celular_personal'      => 'sometimes|string|max:20',
+            'correo_electronico'    => 'sometimes|email|max:255',
+            'estado_civil'          => 'sometimes|string|max:255',
+            'grado_instruccion'     => 'sometimes|string|max:255',
+            'anio_egreso'           => 'nullable|string|max:10',
+            'lengua_materna'        => 'sometimes|string|max:255',
+            'trabaja'               => 'sometimes|string|max:10',
+            'detalle_trabajo'       => 'nullable|string|max:255',
+            'carga_familiar'        => 'sometimes|string|max:10',
+            'detalle_carga_familiar' => 'nullable|string|max:255',
+            'internet_casa'         => 'sometimes|string|max:10',
+            'tipo_internet'         => 'nullable|string|max:255',
+            'equipos_virtuales'     => 'nullable|array',
+            'discapacidad'          => 'sometimes|string|max:10',
+            'tipo_discapacidad'     => 'nullable|string|max:255',
+            'celular_referencia'    => 'nullable|string|max:20',
+            'parentesco_referencia' => 'nullable|string|max:255',
+
+            // PAGO
+            'condicion'  => 'sometimes|string|max:255',
+            'nro_recibo' => 'sometimes|string|max:255',
+            'aporte'     => 'sometimes|numeric',
+            'status'     => 'sometimes|integer|min:0|max:1',
         ]);
 
-        // Actualizar matrícula
-        $matricula->update($request->all());
+        /* -------------------------
+        ACTUALIZAR ESTUDIANTE
+    --------------------------*/
+        $estudianteData = $request->only([
+            'tipo_documento',
+            'nro_documento',
+            'apellido_paterno',
+            'apellido_materno',
+            'nombre',
+            'sexo',
+            'fecha_nacimiento',
+            'pais_nacimiento',
+            'departamento_nacimiento',
+            'provincia_nacimiento',
+            'distrito_nacimiento',
+            'lugar_nacimiento',
+            'direccion_residencia',
+            'celular_personal',
+            'correo_electronico',
+            'estado_civil',
+            'grado_instruccion',
+            'anio_egreso',
+            'lengua_materna',
+            'trabaja',
+            'detalle_trabajo',
+            'carga_familiar',
+            'detalle_carga_familiar',
+            'internet_casa',
+            'tipo_internet',
+            'discapacidad',
+            'tipo_discapacidad',
+            'celular_referencia',
+            'parentesco_referencia',
+        ]);
 
-        // Obtener estudiante
-        $estudiante = Estudiante::find($matricula->id_estudiante);
+        // equipos_virtuales debe guardarse como JSON
+        if ($request->has('equipos_virtuales')) {
+            $estudianteData['equipos_virtuales'] = json_encode($request->equipos_virtuales);
+        }
 
-        $nombreCompleto = "{$estudiante->apellido_paterno} {$estudiante->apellido_materno}, {$estudiante->nombre}";
+        $matricula->estudiante->update($estudianteData);
 
-        // Obtener grupo (el nuevo o el que ya estaba)
-        $grupo = Grupo::with(['modulo', 'especialidad.especialidadMadre'])
-            ->find($matricula->id_grupo);
+        /* -------------------------
+             ACTUALIZAR PAGO
+    --------------------------*/
 
-        $descripcionGrupo =
-            "{$grupo->seccion} | Turno: {$grupo->turno} | " .
-            "Módulo: {$grupo->modulo->descripcion} | " .
-            "Especialidad: {$grupo->especialidad->especialidadMadre->nombre_especialidad}";
+        $pagoData = $request->only([
+            'condicion',
+            'nro_recibo',
+            'aporte',
+            'status'
+        ]);
 
-        // Registrar actividad
-        $this->registrarActividad(
-            "Actualizó matrícula del estudiante: {$nombreCompleto} en el grupo {$descripcionGrupo}",
-            "Actualizado"
-        );
+        $matricula->pago->update($pagoData);
 
         return response()->json([
-            'message' => 'Matrícula actualizada con éxito',
-            'data' => $matricula
+            'message' => 'Datos actualizados correctamente',
+            'matricula' => [
+                'id' => $matricula->id,
+                'idGrupo' => $matricula->id_grupo,
+                'nombre_completo' => $matricula->estudiante->apellido_paterno . ' ' .
+                    $matricula->estudiante->apellido_materno . ' ' .
+                    $matricula->estudiante->nombre
+            ]
         ]);
     }
+
 
 
     // DELETE /api/matriculas/{id}
@@ -244,16 +318,17 @@ class MatriculaController extends Controller
         // Obtener estudiante
         $estudiante = Estudiante::find($matricula->id_estudiante);
 
-        $nombreCompleto = "{$estudiante->apellido_paterno} {$estudiante->apellido_materno}, {$estudiante->nombre}";
+        $nombreCompleto = $estudiante
+            ? "{$estudiante->apellido_paterno} {$estudiante->apellido_materno}, {$estudiante->nombre}"
+            : "Estudiante no encontrado";
 
-        // Obtener grupo asociado
+        // Obtener grupo
         $grupo = Grupo::with(['modulo', 'especialidad.especialidadMadre'])
             ->find($matricula->id_grupo);
 
-        $descripcionGrupo =
-            "{$grupo->seccion} | Turno: {$grupo->turno} | " .
-            "Módulo: {$grupo->modulo->descripcion} | " .
-            "Especialidad: {$grupo->especialidad->especialidadMadre->nombre_especialidad}";
+        $descripcionGrupo = $grupo
+            ? "{$grupo->seccion} | Turno: {$grupo->turno} | Módulo: {$grupo->modulo->descripcion} | Especialidad: {$grupo->especialidad->especialidadMadre->nombre_especialidad}"
+            : "Grupo no encontrado";
 
         // Registrar actividad
         $this->registrarActividad(
@@ -261,11 +336,12 @@ class MatriculaController extends Controller
             "Eliminado"
         );
 
-        // Eliminar matrícula
+        // ❗ Eliminar SOLO la matrícula
         $matricula->delete();
 
-        return response()->json(['message' => 'Matrícula eliminada con éxito']);
+        return response()->json(['message' => 'Matrícula eliminada con éxito'], 204);
     }
+
 
     // END POINTS PARA MATRICULA
 
@@ -329,11 +405,13 @@ class MatriculaController extends Controller
 
     public function getMatriculadosPorGrupo($grupoId)
     {
-        // INFO DEL GRUPO
+        // INFO DEL GRUPO + DOCENTE
         $infoGrupo = DB::table('grupo as g')
             ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
             ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
             ->join('modulos as mo', 'g.id_modulo', '=', 'mo.id')
+            ->leftJoin('docente as d', 'g.id_docente', '=', 'd.id')
+            ->leftJoin('users as u', 'd.user_id', '=', 'u.id') // 🔥 Aquí están los nombres
             ->where('g.id', $grupoId)
             ->select(
                 'em.nombre_especialidad as especialidad',
@@ -341,18 +419,19 @@ class MatriculaController extends Controller
                 'g.id as id_grupo',
                 'g.id_periodo',
                 'g.turno',
-                'g.seccion'
+                'g.seccion',
+                // DOCENTE REAL DESDE USERS
+                DB::raw("CONCAT(u.name, ' ', u.apellido_paterno, ' ', u.apellido_materno) as docente")
             )
             ->first();
 
-        // Si no existe el grupo, devolver 404 o respuesta vacía según prefieras
         if (!$infoGrupo) {
             return response()->json([
                 'message' => 'Grupo no encontrado'
             ], 404);
         }
 
-        // MATRICULADOS DEL GRUPO
+        // MATRICULADOS
         $matriculados = DB::table('matricula as m')
             ->join('estudiante as e', 'm.id_estudiante', '=', 'e.id')
             ->where('m.id_grupo', $grupoId)
@@ -362,10 +441,8 @@ class MatriculaController extends Controller
             ->select(
                 'm.id as id_matricula',
                 'e.id as id_estudiante',
-                // Nombre completo
                 'e.nombre',
                 DB::raw("CONCAT(e.apellido_paterno, ' ', e.apellido_materno) as apellidos"),
-                // Campos REALES del estudiante
                 'e.tipo_documento',
                 'e.nro_documento',
                 'e.sexo',
@@ -386,6 +463,7 @@ class MatriculaController extends Controller
             'modulo' => $infoGrupo->modulo,
             'turno' => $infoGrupo->turno,
             'seccion' => $infoGrupo->seccion,
+            'docente' => $infoGrupo->docente, // 💯 ahora sí funciona
             'matriculados' => $matriculados,
         ]);
     }
@@ -624,8 +702,6 @@ class MatriculaController extends Controller
         $matricula = Matricula::with([
             'estudiante',
             'pago',
-            'grupo.modulo',
-            'grupo.especialidad.especialidadMadre',
         ])
             ->select('id', 'id_grupo', 'id_estudiante', 'id_pago') // SOLO estos campos
             ->where('id', $id)

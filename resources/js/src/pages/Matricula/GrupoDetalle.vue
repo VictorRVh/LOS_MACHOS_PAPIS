@@ -22,6 +22,15 @@ import FormLabelError from '../../components/ui/FormLabelError.vue';
 import SearchBar from "../../components/head_table/headSearch.vue";
 import MenuTable from "../../components/table/MenuTable.vue";
 import useTableData from "../../composables/tabla/useTableData";
+import useHttpRequest from "../../composables/useHttpRequest";
+
+import useExportAlumnos from "@/composables/tabla/useAlumnosMatricula";
+
+
+
+
+
+
 
 
 const props = defineProps({
@@ -31,6 +40,7 @@ const props = defineProps({
 console.log(" id de grupo: ".props?.id)
 
 const { showConfirmModal, showToast } = useModalToast();
+const { destroy: deleteMatricula, deleting } = useHttpRequest("/matricula");
 
 const matriculaStore = useMatriculaStore();
 const grupoStore = useGrupoStore();
@@ -47,6 +57,9 @@ onMounted(() => {
 const matriculados = computed(() => matriculaStore.matriculadosPorGrupo)
 const loading = ref(false)
 const estudiantesSeleccionados = ref([]);
+
+const { exportarAlumnos } = useExportAlumnos();
+
 
 const nuevoGrupoId = ref("");
 const saving = ref(false);
@@ -143,9 +156,7 @@ const exportarFicha = async (matricula) => {
     }
 };
 
-const exportarAlumnos = () => {
 
-}
 const EditarMatricula = (idMatricula) => {
     // Redirige al componente de matrícula con el id para edición
     router.push({ name: 'matricula.editar', params: { id: idMatricula } })
@@ -166,8 +177,26 @@ const {
     filtrar: filtrarMatriculados
 } = useTableData(listaMatriculados, {
     defaultOrderBy: "apellidos",
-    searchFields: ["apellidos", "nombre","nro_documento", "celular_personal", "correo_electronico"]
+    searchFields: ["apellidos", "nombre", "nro_documento", "celular_personal", "correo_electronico"]
 });
+
+
+
+const EliminarMatricula = (idMatricula, nombre) => {
+
+    if (deleting.value) return;
+
+    showConfirmModal(null, async (confirmed) => {
+        if (!confirmed) return;
+
+        const isDeleted = await deleteMatricula(idMatricula);
+        if (isDeleted) {
+            console.log('eliminadno ')
+            showToast(`Matrícula de  "${nombre}" eliminada exitosamente...`);
+            await matriculaStore.fetchMatriculadosPorGrupo(props?.id);
+        }
+    });
+};
 
 </script>
 <template>
@@ -215,7 +244,7 @@ const {
                         </Button>
 
                         <!-- EXPORTAR ALUMNOS -->
-                        <Button title="Exportar Alumnos" variant="secondary" @click="exportarAlumnos()">
+                        <Button title="Exportar Alumnos" variant="secondary" @click="exportarAlumnos(matriculados)">
                             <template #icon>
                                 <ArrowDownTrayIcon class="h-4 w-4" />
                             </template>
@@ -263,7 +292,7 @@ const {
                         </Td>
 
                         <Td>{{ index + 1 }}</Td>
-                        <Td>{{ matricula.apellidos}}, {{ matricula.nombre}}</Td>
+                        <Td>{{ matricula.apellidos }}, {{ matricula.nombre }}</Td>
                         <Td>{{ matricula.nro_documento }}</Td>
                         <Td>{{ matricula.sexo }}</Td>
 
@@ -283,17 +312,14 @@ const {
                                 download: true,
                                 custom1: true
                             }" :labels="{
-                                 edit: 'Editar matrícula',
-                                
+                                edit: 'Editar matrícula',
+
                                 custom1: 'Reservar matrícula',
-                               download: 'Descargar ficha',
+                                download: 'Descargar ficha',
                                 delete: 'Eliminar matrícula'
-                            }"
-                             @edit="EditarMatricula(matricula.id)"
-                             @custom1="abrirModalReserva(matricula)" 
-                              @delete="EliminarMatricula(matricula.id_estudiante)"
-                                @download="exportarFicha(matricula.id_estudiante)"
-                              />
+                            }" @edit="EditarMatricula(matricula.id_matricula)" @custom1="abrirModalReserva(matricula)"
+                                @delete="EliminarMatricula(matricula.id_matricula, `${matricula.nombre}, ${matricula.apellidos}`)"
+                                @download="exportarFicha(matricula.id_estudiante)" />
                         </Td>
 
 
@@ -323,7 +349,6 @@ const {
 
                 <div class="grid grid-cols-1 gap-4">
                     <label class="font-medium">Grupos disponibles</label>
-
                     <BaseSelectGrupo v-model="nuevoGrupoId" :options="grupoStore.gruposDisponibles" label="nombre_grupo"
                         value-prop="id" placeholder="Seleccione un grupo" />
 

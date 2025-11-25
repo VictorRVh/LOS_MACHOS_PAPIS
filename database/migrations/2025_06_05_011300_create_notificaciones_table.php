@@ -18,9 +18,11 @@ return new class extends Migration
             $table->string('descripcion');
             $table->string('link');
 
+            // $table->tinyInteger('leido')->default(0);
+
             $table->foreign('id_usuario')
-                  ->references('id')->on('users')
-                  ->onDelete('cascade');
+                ->references('id')->on('users')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -62,41 +62,32 @@ const estadoRetirado = { key: 'retirado', label: 'Retirado', value: 5, icon: Arr
 // helper para mapear la respuesta de la API al formato que usa la UI
 function mapEstudiantes(apiEstudiantes = []) {
   return apiEstudiantes.map(e => {
-    // parsea nombre_completo en partes (intento razonable)
-    const full = (e.nombre_completo || '').trim();
-    const tokens = full.split(/\s+/).filter(Boolean);
-    let apellido_paterno = '', apellido_materno = '', nombre = '';
-
-    if (tokens.length === 0) {
-      nombre = '';
-    } else if (tokens.length === 1) {
-      nombre = tokens[0];
-    } else if (tokens.length === 2) {
-      apellido_paterno = tokens[0];
-      nombre = tokens[1];
-    } else {
-      // asumimos: [apellido_paterno, apellido_materno, ...nombres]
-      apellido_paterno = tokens[0];
-      apellido_materno = tokens[1];
-      nombre = tokens.slice(2).join(' ');
-    }
-
     return {
-      // adaptamos ids a los que usa tu componente (antes: alumno.id)
       id: e.id_estudiante || e.id || null,
-      nombre_completo: full,
-      apellido_paterno,
-      apellido_materno,
-      nombre,
+
+      // Ya vienen listos desde el backend
+      nombre_completo: e.nombre_completo || '',
+      apellido_paterno: e.apellido_paterno || '',
+      apellido_materno: e.apellido_materno || '',
+      nombre: e.nombre || '',
+
       nro_documento: e.nro_documento || '',
-      matriculado: e.matriculado,
-      retirado: e.estado?.toLowerCase() === 'retirado' || e.matriculado === 0,
-      // totales (pueden venir null) -> dejamos 0 como fallback
-      asistencias_count: (e.totales && e.totales.asistencias) ?? 0,
-      faltas_count: (e.totales && e.totales.faltas) ?? 0,
-      tardanzas_count: (e.totales && e.totales.tardanzas) ?? 0,
-      // estado actual provisto por la API (número)
-      asistencia_num: (typeof e.asistencia !== 'undefined') ? e.asistencia : 0,
+
+      // NUEVO: mejor usar 'estado' y 'estado_texto'
+      matriculado: e.estado, // 1 = matriculado, 0 = retirado, 2 = justificado
+      estado_texto: e.estado_texto,
+
+      // totales (mantener fallback)
+      asistencias_count: e.totales?.asistencias ?? 0,
+      faltas_count: e.totales?.faltas ?? 0,
+      tardanzas_count: e.totales?.tardanzas ?? 0,
+      permisos_count: e.totales?.permisos ?? 0,
+      retirados_count: e.totales?.retirados ?? 0,
+
+      // Asistencia del día
+      asistencia_num: e.asistencia ?? 0,
+
+      ultima_vez: e.ultima_vez || 'Pendiente'
     };
   });
 }
@@ -164,24 +155,20 @@ const marcarAsistencia = (alumnoId, estadoKey) => {
 const onSubmit = async () => {
   const payload = {
     id_grupo: props.grupoId,
-    id_calendario: sesionInfo.value?.id_calendario ?? null, // el id lo obtienes del backend
+    id_calendario: sesionInfo.value?.id_calendario ?? null,
     fecha_actual: fechaDeHoyString,
     observacion: observacionGeneral.value || null,
-    estudiantes: alumnos.value.map(alumno => {
+    estudiantes: alumnos.value
+      .filter(alumno => alumno.matriculado === 1) // solo alumnos activos
+      .map(alumno => {
+        const estadoKey = asistencias.value[alumno.id] || 'falto';
+        const estadoObj = estadoAsistencia.find(e => e.key === estadoKey) || estadoAsistencia[1]; // fallback a 'falto'
 
-      if (alumno.retirado) {
-        return { id_estudiante: alumno.id, asistencia: estadoRetirado.value };
-      }
-
-      const estadoKey = asistencias.value[alumno.id] || 'falto';
-      const estadoObj = [...estadoAsistencia, estadoRetirado].find(e => e.key === estadoKey) || estadoAsistencia[1]; // fallback a 'falto'
-
-      return {
-        id_estudiante: alumno.id,
-        asistencia: estadoObj.value,
-        // observacion: observacionGeneral.value || null,
-      };
-    }),
+        return {
+          id_estudiante: alumno.id,
+          asistencia: estadoObj.value,
+        };
+      }),
   };
 
   try {
@@ -189,7 +176,7 @@ const onSubmit = async () => {
     if (response) {
       showToast('Asistencia guardada correctamente', 'success');
       isEditing.value = false;
-      // Opcional: recargar el estado de la sesión
+      // recargar estado de la sesión y UI
       await listaAlumnoAsistencia.loadSesionesEntrega(props.grupoId);
       await loadData();
     } else {
@@ -200,7 +187,6 @@ const onSubmit = async () => {
     showToast('Error al guardar asistencias.', 'error');
   }
 };
-
 
 const getEstadoSeleccionado = (alumnoId) => {
   const estadoKey = asistencias.value[alumnoId];
@@ -228,6 +214,8 @@ const confirmarRetiroAlumno = (alumno, idGrupo) => {
         const response = await retirarEsudiante({
           id_estudiante: alumno.id,
           id_grupo: props.grupoId,
+          estado: 2,
+          motivo: null,
         });
 
         showToast(
@@ -243,6 +231,48 @@ const confirmarRetiroAlumno = (alumno, idGrupo) => {
         const msg =
           error.response?.data?.message ||
           "Ocurrió un error al intentar retirar al alumno.";
+        showToast(msg, "error");
+      }
+    }
+  );
+};
+
+const reincorporarAlumno = async (alumno) => {
+  showConfirmModal(
+    {
+      title: "Reincorporar alumno",
+      message: `¿Reincorporar a "${alumno.nombre_completo}" al grupo?`,
+      actionButton: {
+        class: "bg-green-600 hover:bg-green-700",
+        text: "Sí, reincorporar",
+      },
+      returnButton: {
+        class: "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600",
+        text: "Cancelar",
+      },
+    },
+    async (confirmed) => {
+      if (!confirmed) return;
+
+      try {
+        const response = await retirarEsudiante({
+          id_estudiante: alumno.id,
+          id_grupo: props.grupoId,
+          estado: 1,     // 👈 REINCORPORAR
+          motivo: null,
+        });
+
+        showToast(
+          response?.message || "Alumno reincorporado correctamente.",
+          "success"
+        );
+
+        await listaAlumnoAsistencia.loadSesionesEntrega(props.grupoId);
+        await loadData();
+
+      } catch (error) {
+        console.error(error);
+        const msg = error.response?.data?.message || "Error al reincorporar al alumno.";
         showToast(msg, "error");
       }
     }
@@ -329,12 +359,18 @@ const close = () => emit('hide');
                           class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded transition duration-200">
                           Retirar
                         </button>
+
                       </template>
 
                       <template v-else>
                         <span class="text-red-600 dark:text-red-400 font-semibold italic select-none">
-                          Retirado por inasistencia
+                          Retirado
                         </span>
+                        
+                        <button v-if="alumno.matriculado === 2" @click="reincorporarAlumno(alumno)"
+                          class="px-2 py-1 bg-green-600 hover:bg-green-800 text-white rounded">
+                          ¿Reincorporar?
+                        </button>
                       </template>
                     </td>
                   </template>
@@ -381,30 +417,6 @@ const close = () => emit('hide');
                 </tr>
               </tbody>
             </table>
-
-            <!-- MODAL PARA EL SLIDER RETIRO -->
-
-            <Slider :show="showModalRetiro" title="Confirmar retiro" @hide="cerrarModalRetiro">
-              <div class="p-4">
-                <p class="text-gray-700 dark:text-gray-200 text-center">
-                  ¿Estás seguro que deseas retirar al alumno
-                  <span class="font-semibold text-red-600">{{ alumnoSeleccionado?.nombre }}</span>?
-                </p>
-
-                <div class="flex justify-end mt-6 gap-3">
-                  <button @click="cerrarModalRetiro"
-                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
-                    Cancelar
-                  </button>
-                  <button @click="confirmarRetiro"
-                    class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
-                    Confirmar Retiro
-                  </button>
-                </div>
-              </div>
-            </Slider>
-
-
           </main>
 
           <footer v-if="!isLoadingData && alumnos.length > 0"

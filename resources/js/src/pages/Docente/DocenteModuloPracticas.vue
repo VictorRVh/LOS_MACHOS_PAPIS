@@ -48,8 +48,9 @@ const nuevaExperiencia = ref({
 });
 
 const modalidadPracticas = [
-  { id: 'PPP INTERNAS', label: 'PPP INTERNAS' },
-  { id: 'PPP EXTERNAS', label: 'PPP EXTERNAS' }
+    { id: 1, label: 'PPP INTERNAS' },
+    { id: 2, label: 'PPP EXTERNAS' },
+    { id: 3, label: 'NO HIZO PRACTICAS' }
 ];
 
 onMounted(async () => {
@@ -106,8 +107,9 @@ const existeExperiencia = computed(() => {
 });
 
 const formData = ref({
-    lugar: "",
+    tipo_practicas: null,
     documento: null,
+    observacion: ""
 });
 
 function abrirModal(alumno) {
@@ -142,6 +144,8 @@ async function guardarExperiencia() {
                 id_grupo: props.id,
                 parentId: idCarpetaGrupo.value.drive_folder_id,
             });
+
+            showToast("Experiencia actualizada correctamente.", "success")
         }
         // SI NO EXISTE → CREAR
         else {
@@ -150,6 +154,8 @@ async function guardarExperiencia() {
                 id_grupo: props.id,
                 parentId: idCarpetaGrupo.value.drive_folder_id,
             });
+
+            showToast("Experiencia registrada correctamente.", "success")
         }
 
         const experiencia = response?.data;
@@ -158,13 +164,6 @@ async function guardarExperiencia() {
             nuevaExperiencia.value = { ...experiencia };
             idExperienciaFormativa.value = experiencia.id;
             idPracticasDrive.value = experiencia.drive_folder_id;
-
-            showToast(
-                existeExperiencia.value
-                    ? "Experiencia actualizada correctamente."
-                    : "Experiencia registrada correctamente.",
-                "success"
-            );
         }
     } catch (error) {
         console.error("Error al guardar experiencia:", error);
@@ -175,8 +174,8 @@ async function guardarExperiencia() {
 }
 
 async function onSubmit() {
-    if (!formData.value.lugar || !formData.value.documento) {
-        showToast("Debe llenar el lugar y adjuntar el documento.", "warning");
+    if (!formData.value.tipo_practicas || !formData.value.documento) {
+        showToast("Debe seleccionar la modalidad y adjuntar el documento.", "warning");
         return;
     }
 
@@ -188,8 +187,9 @@ async function onSubmit() {
         // aca deberia ir el ID DE MATRICULA O ID DEL ESTUDIANTE
         form.append("id_estudiante", selectedAlumno.value.id_estudiante);
         form.append("id_grupo", props.id);
-        form.append("lugar", formData.value.lugar);
+        form.append("tipo_practicas", formData.value.tipo_practicas);
         form.append("file", formData.value.documento);
+        form.append("observacion", observacion.value || "");
         form.append("parentFolderId", idPracticasDrive.value);
 
         await guardarNotaExperienciaFormativa(form);
@@ -275,7 +275,7 @@ async function onSubmit() {
                         <template v-else>
                             <Td>{{ index + 1 }}</Td>
                             <Td>{{ alumno.apellidos_nombres }}</Td>
-                            <Td>{{ alumno.lugar }}</Td>
+                            <Td>{{ alumno.tipo_practicas_texto }}</Td>
                             <Td class="text-center">
                                 <a v-if="alumno.documento_url" :href="alumno.documento_url" target="_blank"
                                     class="inline-flex items-center justify-center text-blue-600 hover:text-blue-800"
@@ -311,11 +311,17 @@ async function onSubmit() {
                     </h3>
 
                     <FormLabelError label="Modalidad" required :error="formErrors?.lugar">
-                        <BaseSelectCiclo v-model="formData.lugar" :options="modalidadPracticas" label="label"
+                        <BaseSelectCiclo v-model="formData.tipo_practicas" :options="modalidadPracticas" label="label"
                             placeholder="Seleccione la modalidad" />
                     </FormLabelError>
 
                     <FormInputFile v-model="formData.documento" label="Documento (Informe o Evidencia) *" />
+
+                    <label for="observacion"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observación
+                        General</label>
+                    <textarea id="observacion" v-model="formData.observacion" rows="2"
+                        class="w-full text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
 
                     <div v-if="formData.documento" class="mt-3">
                         <div

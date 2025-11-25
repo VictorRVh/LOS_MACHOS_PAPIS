@@ -27,6 +27,7 @@ class NotificarEntregasIncumplidas extends Command
 
             $docente = $entrega->grupo->docente?->user;
             $grupo = $entrega->grupo;
+            $tipo_entrega = $entrega->entregaDocenteAdmin->nombre_entrega;
 
             // Notificar al docente
             NotificationService::enviar(
@@ -50,7 +51,7 @@ class NotificarEntregasIncumplidas extends Command
                 NotificationService::enviar(
                     $admin->id,
                     'Docente incumplió entrega',
-                    "{$docente->name} {$docente->apellido_paterno} {$docente->apellido_materno} no cumplió la entrega del grupo {$grupo->especialidad->especialidadMadre->nombre_especialidad} {$grupo->seccion}.",
+                    "{$docente->name} {$docente->apellido_paterno} {$docente->apellido_materno} no cumplió la entrega de {$tipo_entrega} del grupo {$grupo->especialidad->especialidadMadre->nombre_especialidad} {$grupo->seccion}.",
                     "/entregas-admin/{$entrega->id}"
                 );
             }

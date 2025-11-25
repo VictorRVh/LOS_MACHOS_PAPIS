@@ -54,9 +54,11 @@ onUnmounted(() => {
 })
 
 /* Limpiar notificaciones (opcional: puedes llamar al backend si deseas) */
-const markAllAsRead = () => {
-  notificacionesStore.clearNotificaciones()
-}
+const markAllAsRead = async () => {
+  await notificacionesStore.loadNotificacionesMarcarTodo();
+  await notificacionesStore.loadNotificaciones();
+};
+
 </script>
 
 <template>
@@ -96,6 +98,7 @@ const markAllAsRead = () => {
         class="max-h-[400px] overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700"
       >
         <li v-for="n in notificaciones" :key="n.id">
+          
           <RouterLink
             :to="n.link"
             @click="$emit('close')"

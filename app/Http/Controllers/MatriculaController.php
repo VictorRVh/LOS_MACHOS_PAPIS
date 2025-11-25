@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Estudiante;
 use App\Models\Grupo;
 use App\Models\Matricula;
+use App\Models\MatriculaHistorial;
 use App\Models\Pago;
 use App\Models\ProgramaEstudio;
 use App\Traits\Helpers;
@@ -674,26 +675,53 @@ class MatriculaController extends Controller
         ]);
     }
 
+    // public function retirarAlumno(Request $request)
+    // {
+    //     $request->validate([
+    //         'id_estudiante' => 'required|uuid',
+    //         'id_grupo' => 'required|uuid',
+    //     ]);
+
+    //     $matricula = Matricula::where('id_estudiante', $request->id_estudiante)
+    //         ->where('id_grupo', $request->id_grupo)
+    //         ->first();
+
+    //     if (!$matricula) {
+    //         return response()->json(['message' => 'Matrícula no encontrada'], 404);
+    //     }
+
+    //     // Registrar el cambio + actualizar estado
+    //     $matricula->registrarCambioEstado(
+    //         Matricula::STATUS_RETIRADO,
+    //         "Retirado por faltas"
+    //     );
+
+    //     return response()->json([
+    //         'message' => 'Alumno retirado correctamente',
+    //         'data' => $matricula,
+    //     ]);
+    // }
+
     public function retirarAlumno(Request $request)
     {
         $request->validate([
             'id_estudiante' => 'required|uuid',
             'id_grupo' => 'required|uuid',
+            'estado' => 'required|integer|in:1,2',
+            'motivo' => 'nullable|string',
         ]);
 
         $matricula = Matricula::where('id_estudiante', $request->id_estudiante)
             ->where('id_grupo', $request->id_grupo)
-            ->first();
+            ->firstOrFail();
 
-        if (!$matricula) {
-            return response()->json(['message' => 'Matrícula no encontrada'], 404);
-        }
-
-        $matricula->matriculado = 0;
-        $matricula->save();
+        $matricula->registrarCambioEstado(
+            $request->estado,
+            $request->motivo
+        );
 
         return response()->json([
-            'message' => 'Alumno retirado correctamente',
+            'message' => 'Estado actualizado correctamente',
             'data' => $matricula,
         ]);
     }

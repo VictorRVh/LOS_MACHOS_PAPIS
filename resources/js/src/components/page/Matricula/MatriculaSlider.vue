@@ -48,7 +48,7 @@ const formData = ref({
     lugar_nacimiento: '',
     direccion_residencia: '',
     correo_electronico: '',
-    celular: '',
+    celular_personal: '',
     estado_civil: '',
     grado_instruccion: '',
 
@@ -107,7 +107,7 @@ const stepSchemas = {
             .required('Fecha de nacimiento es requerida')
             .max(new Date(new Date().setFullYear(new Date().getFullYear() - 12)), 'El estudiante debe ser mayor de 12 años')
             .min(new Date(new Date().setFullYear(new Date().getFullYear() - 100)), 'La edad no puede ser mayor a 100 años'),
-        celular: yup.string().required('Celular es requerido'),
+        celular_personal: yup.string().required('Celular es requerido'),
         correo_electronio: yup.string().email('Debe ser un correo válido').notRequired(),
         direccion_residencia: yup.string().required('La dirección es requerida'),
         estado_civil: yup.string().required('Estado civil es requerido'),
@@ -161,7 +161,7 @@ const onSubmit = async () => {
     const response = await store(formData.value);
     if (response.data.matricula.id) {
         showToast('¡Matrícula realizada con éxito!', 'success');
-        router.push({ name: 'matricula.grupo.detalle', params: { id: formData.value.id_grupo } });
+        router.push({ name: 'matricula.grupo.alumnos', params: { id: formData.value.id_grupo } });
     } else {
         showToast('Hubo un error al procesar la matrícula.', 'error');
     }
@@ -170,7 +170,6 @@ const onSubmit = async () => {
 
 <template>
     <div class="p-2 bg-white dark:bg-gray-900/50 font-inter">
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 ">Nueva Matrícula de Estudiante</h2>
 
         <div v-if="isLoading"
             class="flex justify-center items-center min-h-[500px] bg-white dark:bg-gray-800 rounded-lg shadow-xl">
@@ -207,7 +206,7 @@ const onSubmit = async () => {
                 </li>
             </ol>
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-h-[450px]">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-h-[350px]">
 
                 <Step1 v-show="currentStep === 1" v-model="formData" :programas="programaStore.programa.programas"
                     :nameGrupo="nameGrupo" @cambiarVariable="nameGrupo = $event" :errors="formErrors" />

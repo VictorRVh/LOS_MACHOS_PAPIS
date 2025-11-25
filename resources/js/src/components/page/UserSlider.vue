@@ -69,7 +69,7 @@ watch(() => props.show, () => {
             );
         } else {
             formData.value = initialFormData();
-            
+
         }
         formErrors.value = {};
     }
@@ -145,6 +145,7 @@ const onSubmit = async () => {
         emit('hide');
     }
 };
+
 </script>
 
 <template>
@@ -199,12 +200,16 @@ const onSubmit = async () => {
                 <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
                     <SelectedChips :items="formData.roles" @remove="onRoleRemove" />
                 </div>
+<div class="flex gap-2 mt-1">
+    <Button :title="user?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
+        :loading-title="user?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full h-10" 
+        :loading="saving || updating" @click="onSubmit" :disabled="saving || updating" />
+    
+    <!-- Botón Cancelar: ancho flexible solo si se está editando -->
+    <Button title="Cancelar" variant="outline" @click="emit('hide');"
+        class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer !mt-6 h-10" />
+</div>
 
-                <Button :title="user?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
-                    :loading-title="user?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
-                    :loading="saving || updating" @click="onSubmit"
-                    :disabled="saving || updating"
-                     />
             </div>
         </AuthorizationFallback>
     </Slider>

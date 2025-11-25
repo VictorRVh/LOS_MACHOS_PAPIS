@@ -10,7 +10,6 @@ import BaseSelect from '../../../ui/BaseSelect.vue';
 import useModalToast from '../../../../composables/useModalToast';
 import useHttpRequest from '../../../../composables/useHttpRequest';
 
-
 const { showConfirmModal, showToast } = useModalToast();
 const { store: busquedaDni, saving, update: updateModulo, updating } = useHttpRequest(
     "/buscar-documento"
@@ -27,117 +26,167 @@ const formData = computed({
     set: (value) => emit('update:modelValue', value),
 });
 
-const opcionesSexo = [{ name: 'Masculino', value: "M" }, { name: 'Femenino', value: "F" }, { name: 'Otro', value: "O" }];
-const opcionesEstadoCivil = ['SOLTERO(A)', 'CASADO(A)', 'VIUDO(A)', 'DIVORCIADO(A)', 'CONVIVIENTE'];
-const opcionesGradoInstruccion = ['Primaria incompleta', 'Primaria completa', 'Secundaria incompleta', 'Secundaria completa', 'Superior incompleta', 'Superior completa'];
-const opcionesLenguaMaterna = ['Castellano', 'Quechua', 'Aymara', 'Ashaninka', 'Awajun', 'Otros'];
+// ---------- OPCIONES ----------
+const opcionesSexo = [
+    { name: 'Masculino', value: "M" },
+    { name: 'Femenino', value: "F" },
+    { name: 'Otro', value: "O" }
+];
+
+const opcionesEstadoCivil = [
+    'SOLTERO(A)', 'CASADO(A)', 'VIUDO(A)', 'DIVORCIADO(A)', 'CONVIVIENTE'
+];
+
+const opcionesGradoInstruccion = [
+    'Primaria incompleta', 'Primaria completa',
+    'Secundaria incompleta', 'Secundaria completa',
+    'Superior incompleta', 'Superior completa'
+];
+
+const opcionesLenguaMaterna = [
+    'Castellano', 'Quechua', 'Aymara', 'Ashaninka', 'Awajun', 'Otros'
+];
+
 const opcionesEquiposVirtuales = ['Laptop', 'Computadora', 'Tablet', 'Celular'];
 const opcionesSiNo = ["Si", "No"];
-const opcionesDiscapacidad = ["Discapacidad intelectual - Retardo mental leve", "Transtorno del espectro autista", "Discapacidad intelectual - Retardo mental moderado", "Discapacidad visual - Baja visión", "Discapacidad visual - Ceguera", "Discapacidad auditiva - Hipoacusia", "Discapacidad auditiva - Sordera total", "Otros"];
+const opcionesDiscapacidad = [
+    "Discapacidad intelectual - Retardo mental leve",
+    "Transtorno del espectro autista",
+    "Discapacidad intelectual - Retardo mental moderado",
+    "Discapacidad visual - Baja visión",
+    "Discapacidad visual - Ceguera",
+    "Discapacidad auditiva - Hipoacusia",
+    "Discapacidad auditiva - Sordera total",
+    "Otros"
+];
 
+// ---------- UBIGEO ----------
 const departamentos = ref(ubigeo.map(dep => dep.departamento));
 const provincias = ref([]);
 const distritos = ref([]);
 const mostrarOtroDistrito = ref(false);
 
-watch(() => formData.value.departamento_nacimiento, (newDep) => {
-    formData.value.provincia_nacimiento = null;
-    formData.value.distrito_nacimiento = null;
-    provincias.value = [];
-    distritos.value = [];
-    mostrarOtroDistrito.value = false;
-    if (newDep) {
-        const depData = ubigeo.find(d => d.departamento === newDep);
-        provincias.value = depData ? depData.provincias.map(p => p.provincia) : [];
+// controla watchers
+const watchActive = ref(true);
+
+// ---------- NORMALIZAR ----------
+function normalize(str) {
+    return str
+        ?.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/ñ/gi, "n")
+        .replace(/[^a-zA-Z ]/g, "")
+        .toUpperCase()
+        .trim();
+}
+
+const autoParseJson = (value, fallback = []) => {
+    try {
+        return typeof value === "string" ? JSON.parse(value) : (value ?? fallback);
+    } catch {
+        return fallback;
     }
+};
+
+// ---------- ADAPTAR RESPUESTA ----------
+const adaptDniResponse = d => ({
+    ...d,
+    departamento_nacimiento: d.departamento_nacimiento?.toUpperCase() ?? "",
+    provincia_nacimiento: d.provincia_nacimiento?.toUpperCase() ?? "",
+    distrito_nacimiento: d.distrito_nacimiento?.toUpperCase() ?? "",
+    celular: d.celular_personal ?? "",
+    equipos_virtuales: autoParseJson(d.equipos_virtuales, []),
 });
 
-watch(() => formData.value.provincia_nacimiento, (newProv) => {
-    formData.value.distrito_nacimiento = null;
-    distritos.value = [];
-    mostrarOtroDistrito.value = false;
-    if (newProv && formData.value.departamento_nacimiento) {
-        const depData = ubigeo.find(d => d.departamento === formData.value.departamento_nacimiento);
-        const provData = depData ? depData.provincias.find(p => p.provincia === newProv) : null;
-        distritos.value = provData ? [...provData.distritos, 'OTRO'] : [];
-    }
-});
-
-watch(() => formData.value.distrito_nacimiento, (newDist) => {
-    mostrarOtroDistrito.value = newDist === 'OTRO';
-    if (newDist !== 'OTRO') {
-        formData.value.lugar_nacimiento = '';
-    }
-});
-
+// ---------- BUSCAR DNI ----------
 const buscarDNI = async () => {
-    const tipo = formData.value.tipo_documento;
-    const numero = formData.value.nro_documento;
-
-    if (!tipo) {
-        showToast("Debe seleccionar un tipo de documento");
-        return;
-    }
-
-    if (!numero) {
-        showToast("Debe ingresar un número de documento");
-        return;
-    }
-
-    if (tipo === "DNI" && numero.length !== 8) {
-        showToast("El DNI debe tener 8 dígitos");
-        return;
-    }
-
-    if (tipo === "CARNET EXT." && numero.length < 9) {
-        showToast("El Carnet de Extranjería debe tener al menos 9 caracteres");
-        return;
-    }
+    const { tipo_documento: tipo, nro_documento: numero } = formData.value;
 
     try {
-
         const response = await busquedaDni({
             tipo_documento: tipo,
             dni: numero,
         });
 
-        console.log('busqueda dni', response)
-
         if (response.error) {
-            showToast(response.error);
+            showToast("Error al buscar documento, llene manual.");
+            watchActive.value = true;
             return;
         }
 
-        const d = response.data ?? data;
+        if (!response.data) {
+            showToast("Sin datos, llene manual.");
+            watchActive.value = true;
+            return;
+        }
 
-        // Para comprobar si los datos vienen de FACTILIZA
-        const esFactiliza = !!d.nombres;
+        watchActive.value = false;
 
-        formData.value.apellido_paterno = d.apellido_paterno ?? "";
-        formData.value.apellido_materno = d.apellido_materno ?? "";
-        formData.value.nombre = esFactiliza ? d.nombres ?? "" : d.nombre ?? "";
-        formData.value.direccion_residencia = esFactiliza
-            ? d.direccion ?? ""
-            : d.direccion_residencia ?? "";
-        formData.value.departamento_nacimiento = esFactiliza
-            ? d.departamento ?? ""
-            : d.departamento_nacimiento ?? "";
-        formData.value.provincia_nacimiento = esFactiliza
-            ? d.provincia ?? ""
-            : d.provincia_nacimiento ?? "";
-        formData.value.distrito_nacimiento = esFactiliza
-            ? d.distrito ?? ""
-            : d.distrito_nacimiento ?? "";
-        formData.value.pais_nacimiento = d.pais_nacimiento ?? "PERÚ";
+        const d = adaptDniResponse(response.data);
 
-        showToast("Datos encontrados correctamente");
-    } catch (error) {
-        console.error(error);
-        showToast("Error al buscar el documento");
+        Object.assign(formData.value, { ...formData.value, ...d });
+
+        actualizarListas();
+
+        watchActive.value = true;
+
+        showToast("Datos encontrados.");
+    } catch (e) {
+        showToast("Error inesperado.");
+        watchActive.value = true;
     }
 };
 
+// ---------- SOLO LLENA LISTAS (NO AUTOSELECT) ----------
+const actualizarListas = () => {
+    const depNorm = normalize(formData.value.departamento_nacimiento);
+    const provNorm = normalize(formData.value.provincia_nacimiento);
+
+    const depData = ubigeo.find(d => normalize(d.departamento) === depNorm);
+    provincias.value = depData ? depData.provincias.map(p => p.provincia) : [];
+
+    const provData = depData?.provincias.find(p => normalize(p.provincia) === provNorm);
+    distritos.value = provData ? [...provData.distritos, "OTRO"] : [];
+};
+
+// ---------- WATCH DEPARTAMENTO ----------
+watch(() => formData.value.departamento_nacimiento, (nuevo) => {
+    if (!watchActive.value) return;
+
+    const depNorm = normalize(nuevo);
+    const depData = ubigeo.find(d => normalize(d.departamento) === depNorm);
+
+    provincias.value = depData ? depData.provincias.map(p => p.provincia) : [];
+    distritos.value = [];
+});
+
+// ---------- WATCH PROVINCIA ----------
+watch(() => formData.value.provincia_nacimiento, (nuevo) => {
+    if (!watchActive.value) return;
+
+    const depNorm = normalize(formData.value.departamento_nacimiento);
+    const provNorm = normalize(nuevo);
+
+    const depData = ubigeo.find(d => normalize(d.departamento) === depNorm);
+    const provData = depData?.provincias.find(p => normalize(p.provincia) === provNorm);
+
+    distritos.value = provData ? [...provData.distritos, "OTRO"] : [];
+});
+
+// ---------- WATCH DISTRITO ----------
+watch(() => formData.value.distrito_nacimiento, (nuevo) => {
+    if (!watchActive.value) return;
+
+    const distNorm = normalize(nuevo);
+
+    mostrarOtroDistrito.value = distNorm === "OTRO";
+
+    if (distNorm !== "OTRO") {
+        formData.value.lugar_nacimiento = "";
+    }
+});
 </script>
+
 
 <template>
     <div class="relative">
@@ -189,10 +238,10 @@ const buscarDNI = async () => {
             </div>
 
             <!-- Otros campos -->
-            <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno"
-                :error="errors.apellido_paterno" required />
-            <FormInput v-model="formData.apellido_materno" label="Apellido Materno"
-                :error="errors.apellido_materno" required />
+            <FormInput v-model="formData.apellido_paterno" label="Apellido Paterno" :error="errors.apellido_paterno"
+                required />
+            <FormInput v-model="formData.apellido_materno" label="Apellido Materno" :error="errors.apellido_materno"
+                required />
             <FormInput v-model="formData.nombre" label="Nombres" :error="errors.nombre" />
 
             <FormLabelError label="Sexo" :error="errors.sexo">
@@ -200,7 +249,7 @@ const buscarDNI = async () => {
                     placeholder="Seleccione sexo" :clearable="false" />
             </FormLabelError>
 
-            <FormLabelError label="Fecha de Nacimiento" :error="errors.fecha_nacimiento" >
+            <FormLabelError label="Fecha de Nacimiento" :error="errors.fecha_nacimiento">
                 <FormInput v-model="formData.fecha_nacimiento" type="date" />
             </FormLabelError>
 
@@ -222,7 +271,8 @@ const buscarDNI = async () => {
             <FormInput v-if="mostrarOtroDistrito" v-model="formData.lugar_nacimiento" label="Especifique otro lugar" />
 
             <!-- Información adicional -->
-            <FormInput v-model="formData.celular" label="Celular" :error="errors.celular" maxlength="9" />
+            <FormInput v-model="formData.celular_personal" label="Celular" :error="errors.celular_personal"
+                maxlength="9" />
             <FormInput v-model="formData.correo_electronico" label="Correo Electrónico (Opcional)" type="email" />
             <FormInput v-model="formData.direccion_residencia" label="Dirección de residencia *"
                 :error="errors.direccion_residencia" />

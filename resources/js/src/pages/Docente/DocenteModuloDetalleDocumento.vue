@@ -92,12 +92,13 @@ const abrirModalSubir = async (carpeta) => {
 
 const verificarEstadoEntrega = async (idEntrega) => {
   try {
-    const response = await axios.get(`/entrega_docente_estado/${idEntrega}`)
+    // const response = await axios.get(`/entrega_docente_estado/${idEntrega}`)
+    await documentoStore.loadEstadoEntregas(idEntrega);
 
-    validacionEstado.value = response.data.validacion
-    infoEstado.value = response.data.info_estado
+    const response = documentoStore.estadoEntrega;
 
-    console.log('Estado de la entrega:', response.data)
+    validacionEstado.value = response.validacion
+    infoEstado.value = response.info_estado
 
     // Si no está activa, mostrar alerta
     if (!validacionEstado.value.activa) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Asistencia;
 use App\Models\CalendarioAdmin;
+use App\Models\Matricula;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -243,7 +244,10 @@ class AsistenciaController extends Controller
 
                 $item->totales = $totales;
 
-                $item->estado = $item->matriculado ? 'Matriculado' : 'Retirado';
+                $item->estado = $item->matriculado;
+
+                // $item->estado = $item->matriculado ? 'Matriculado' : 'Retirado';
+                $item->estado_texto = Matricula::STATUS[$item->matriculado] ?? 'Desconocido';
 
                 return $item;
             });

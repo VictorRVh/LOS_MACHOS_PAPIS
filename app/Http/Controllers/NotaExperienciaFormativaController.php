@@ -34,11 +34,12 @@ class NotaExperienciaFormativaController extends Controller
     {
         $request->validate([
             'id_experiencia'  => 'required|uuid|exists:experiencia_formativa,id',
-            'lugar'           => 'required|string|max:255',
+            'tipo_practicas'  => 'required|integer|in:1,2,3',
             'file'            => 'required|file',
             'parentFolderId'  => 'required|string',
             'id_estudiante'   => 'required|uuid|exists:estudiante,id',
             'id_grupo'        => 'required|uuid|exists:grupo,id',
+            'observacion'     => 'nullable',
         ]);
 
         try {
@@ -57,10 +58,11 @@ class NotaExperienciaFormativaController extends Controller
             // 2️⃣ Guardar el registro en la tabla nota_experiencia_formativa
             $nota = NotaExperienciaFormativa::create([
                 'id_experiencia' => $request->id_experiencia,
-                'lugar'          => $request->lugar,
+                'tipo_practicas' => $request->tipo_practicas,
                 'documento'      => $fileData->id,
                 'id_estudiante'  => $request->id_estudiante,
                 'id_grupo'       => $request->id_grupo,
+                'observacion'       => $request->observacion,
                 'status'         => 1,
             ]);
 
@@ -94,10 +96,11 @@ class NotaExperienciaFormativaController extends Controller
 
         $request->validate([
             'id_experiencia'  => 'sometimes|uuid|exists:experiencia_formativa,id',
-            'lugar'           => 'sometimes|string|max:255',
+            'tipo_practicas'  => 'sometimes|integer',
             'documento'       => 'sometimes|string|max:255',
             'id_estudiante'   => 'sometimes|uuid|exists:estudiante,id',
             'id_grupo'        => 'sometimes|uuid|exists:grupo,id',
+            'observacion'     => 'sometimes',
             'status'          => 'sometimes|integer|in:0,1,2,3',
         ]);
 

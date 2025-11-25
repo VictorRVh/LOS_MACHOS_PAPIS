@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('nota_experiencia_formativa', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('id_experiencia');
-            $table->string('lugar');
+            $table->tinyInteger('tipo_practicas');
+            // $table->string('lugar');
             $table->string('documento');
+            $table->string('observacion');
             $table->uuid('id_estudiante');
             $table->uuid('id_grupo');
             $table->tinyInteger('status')->default(0);

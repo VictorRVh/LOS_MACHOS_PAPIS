@@ -25,6 +25,25 @@ class Matricula extends Model
         'matriculado'
     ];
 
+    const STATUS_PENDIENTE              = 0;
+    const STATUS_MATRICULADO            = 1;
+    const STATUS_RETIRADO               = 2;
+    const STATUS_RETIRADO_JUSTIFICADO   = 3;
+
+    const STATUS = [
+        self::STATUS_PENDIENTE              => 'Pendiente',
+        self::STATUS_MATRICULADO            => 'Matriculado',
+        self::STATUS_RETIRADO               => 'Retirado',
+        self::STATUS_RETIRADO_JUSTIFICADO   => 'Retirado Justificado',
+    ];
+
+    protected $appends = ['status_texto'];
+
+    public function getStatusTextoAttribute()
+    {
+        return self::STATUS[$this->matriculado] ?? 'Desconocido';
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -49,5 +68,27 @@ class Matricula extends Model
     public function pago()
     {
         return $this->belongsTo(Pago::class, 'id_pago');
+    }
+
+    public function historial()
+    {
+        return $this->hasMany(MatriculaHistorial::class, 'id_matricula');
+    }
+
+    // FUNCION PARA REALIZAR CAMBIOS DE ESTADO Y CONECTAR CON LA NUEVA TABLA DE HISTORIAL_MATRICULA
+
+    public function registrarCambioEstado($nuevoEstado, $motivo = null)
+    {
+        MatriculaHistorial::create([
+            'id_matricula'   => $this->id,
+            'estado_anterior' => $this->matriculado,
+            'estado_nuevo'   => $nuevoEstado,
+            'motivo'         => $motivo,
+            // 'id_usuario'     => auth()->id(), // opcional
+        ]);
+
+        $this->update([
+            'matriculado' => $nuevoEstado,
+        ]);
     }
 }

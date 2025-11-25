@@ -157,6 +157,22 @@ onBeforeUnmount(() =>
             <PencilSquareIcon class="w-4 h-4 text-black dark:text-gray-300" />
             {{ mergedLabels.edit }} {{ entityLabel }}
           </button>
+          <!-- CUSTOM -->
+          <button v-if="actions.custom1" @click="emitAndClose('custom1')"
+            class="flex items-center  w-full gap-3 px-4 py-1 hover:bg-gray-100 text-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            <CalendarDaysIcon class="w-4 h-4 text-black dark:text-gray-300" />
+            {{ mergedLabels.custom1 }}
+          </button>
+
+          <hr class="my-1 mx-2 border-gray-300">
+
+
+          <!-- DEACTIVATE -->
+          <button v-if="actions.deactivate" @click="emitAndClose('deactivate')"
+            class="flex items-center w-full gap-3 px-4 py-1 hover:bg-gray-100 text-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            <ExclamationTriangleIcon class="w-4 h-4 text-black dark:text-gray-300" /> 
+            {{ mergedLabels.deactivate }} {{ entityLabel }}
+          </button>
 
           <!-- DELETE -->
           <button v-if="actions.delete" @click="emitAndClose('delete')"
@@ -172,19 +188,9 @@ onBeforeUnmount(() =>
             {{ mergedLabels.download }} {{ entityLabel }}
           </button>
 
-          <!-- CUSTOM -->
-          <button v-if="actions.custom1" @click="emitAndClose('custom1')"
-            class="flex items-center  w-full gap-3 px-4 py-1 hover:bg-gray-100 text-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-            <CalendarDaysIcon class="w-4 h-4 text-black dark:text-gray-300" />
-            {{ mergedLabels.custom1 }}
-          </button>
 
-          <!-- DEACTIVATE -->
-          <button v-if="actions.deactivate" @click="emitAndClose('deactivate')"
-            class="flex items-center w-full gap-3 px-4 py-1 hover:bg-gray-100 text-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-            <ExclamationTriangleIcon class="w-4 h-4 text-black dark:text-gray-300" />
-            {{ mergedLabels.deactivate }} {{ entityLabel }}
-          </button>
+
+
 
         </div>
 

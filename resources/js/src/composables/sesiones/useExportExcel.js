@@ -283,8 +283,8 @@ export default function useExportExcel() {
             const blob = new Blob([buffer], {
                 type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             });
-
-            const fileName = `Programacion ${grupoStore?.infoGrupo?.modulo|| 'General'}.xlsx`;
+            showToast("Reporte generado correctamente!!.", "success");
+            const fileName = `Programacion ${grupoStore?.infoGrupo?.modulo || 'General'}.xlsx`;
             saveAs(blob, fileName);
 
         }).catch(err => {

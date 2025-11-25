@@ -15,6 +15,7 @@ class NotificacionesController extends Controller
         $userId = auth()->id();
 
         $notificaciones = Notificaciones::where('id_usuario', $userId)
+            ->where('leido', 0)
             ->orderBy('created_at', 'desc')
             ->take(20)
             ->get();
@@ -24,7 +25,7 @@ class NotificacionesController extends Controller
 
     public function marcarTodo()
     {
-        Notificaciones::where('user_id', auth()->id())
+        Notificaciones::where('id_usuario', auth()->id())
             ->update(['leido' => 1]);
 
         return response()->json(['message' => 'Notificaciones marcadas como leídas']);
@@ -33,10 +34,19 @@ class NotificacionesController extends Controller
     public function marcarLeido($id)
     {
         Notificaciones::where('id', $id)
-            ->where('user_id', auth()->id())
+            ->where('id_usuario', auth()->id())
             ->update(['leido' => 1]);
 
         return response()->json(['message' => 'Notificación marcada']);
+    }
+
+    public function countUnread()
+    {
+        $count = Notificaciones::where('id_usuario', auth()->id())
+            ->where('leido', 0)
+            ->count();
+
+        return response()->json(['unread' => $count]);
     }
 
     // GET /api/notificaciones/{id}

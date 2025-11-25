@@ -63,7 +63,8 @@ class ExperienciaFormativaController extends Controller
                     $matricula->estudiante->apellido_materno . ', ' .
                     $matricula->estudiante->nombre,
                 'dni' => $matricula->estudiante->nro_documento,
-                'lugar' => $nota->lugar ?? null,
+                'tipo_practicas' => $nota->tipo_practicas ?? null,
+                'tipo_practicas_texto' => $nota->tipo_practicas_texto ?? null,
                 'documento_id' => $nota->documento ?? null, // ID interno o en Drive
                 'documento_url' => $documentoDriveUrl, // URL visible en Drive
                 'matriculado' => $matricula->matriculado // URL visible en Drive

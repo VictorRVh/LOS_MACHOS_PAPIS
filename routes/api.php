@@ -884,6 +884,11 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\NotificacionesController::class,
         'marcarLeido',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    
+    Route::get('/notificaciones/pendientes/{id}', [
+        \App\Http\Controllers\NotificacionesController::class,
+        'countUnread',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
     Route::post('notificaciones', [
         \App\Http\Controllers\NotificacionesController::class,

@@ -3,14 +3,10 @@ import { ref, onMounted, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   ClockIcon,
-  ArchiveBoxXMarkIcon,
+  ArchiveBoxXMarkIcon, XCircleIcon
 } from '@heroicons/vue/24/outline'
 import Button from '@/components/ui/Button.vue'
-import useHttpRequest from '@/composables/useHttpRequest'
 import useNotificacionesStore from '../store/Notificaciones/UseNotificacionesStore'
-
-const { store: storeMarcar } = useHttpRequest('/notificaciones/marcar-todo')
-const { store: storeLeer } = useHttpRequest('/notificaciones/leer')
 
 /* Estado local */
 const notificacionesStore = useNotificacionesStore();
@@ -37,23 +33,23 @@ const loadNotifications = async () => {
     //   addSuffix: true,
     //   locale: es
     // }),
-    isRead: false
+    isRead: n.leido == 1,
   }));
 }
 
 /* Marcar todo como leído */
 const markAllAsRead = async () => {
-  await storeMarcar() // backend: marcar todo como leído
-  allNotifications.value.forEach(n => n.isRead = true)
+  await notificacionesStore.loadNotificacionesMarcarTodo();
+  allNotifications.value.forEach(n => n.isRead = true);
+  loadNotifications()
 }
 
-/* Borrar todas las leídas */
-const clearRead = () => {
-  allNotifications.value = allNotifications.value.filter(n => !n.isRead)
+const markOneAsRead = async (n) => {
+  await notificacionesStore.loadNotificacionesMarcarLeido(n.id);
+  n.isRead = true;
 }
 
 onMounted(() => {
-  console.log('diendiediendiejdiej')
   loadNotifications()
 })
 </script>
@@ -65,14 +61,14 @@ onMounted(() => {
       <h1 class="text-2xl font-bold">Todas las Notificaciones</h1>
 
       <div class="flex gap-2">
-        <Button variant="outline" @click="markAllAsRead">
+        <button variant="outline" @click="markAllAsRead">
           Marcar todas como leídas
-        </Button>
+        </button>
 
-        <Button variant="destructive" @click="clearRead">
+        <!-- <button variant="destructive" @click="clearRead">
           <ArchiveBoxXMarkIcon class="w-5 h-5 mr-1" />
           Limpiar leídas
-        </Button>
+        </button> -->
       </div>
     </header>
 
@@ -97,9 +93,13 @@ onMounted(() => {
             {{ n.time }}
           </p>
 
-          <RouterLink :to="n.link" class="text-sm text-cetpro hover:underline mt-2 inline-block">
+          <button @click="markOneAsRead(n)" type="button" class="text-amber-500 hover:text-amber-700">
+            Marcar como leído
+          </button>
+
+          <!-- <RouterLink :to="n.link" class="text-sm text-cetpro hover:underline mt-2 inline-block">
             Ver detalle →
-          </RouterLink>
+          </RouterLink> -->
         </div>
 
         <span v-if="!n.isRead" class="w-3 h-3 rounded-full bg-cetpro" title="No leído"></span>

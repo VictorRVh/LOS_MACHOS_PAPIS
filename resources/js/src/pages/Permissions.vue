@@ -1,10 +1,15 @@
 <script setup>
+import { ref, computed } from 'vue';
+
+import SearchBar from '../components/head_table/headSearch.vue';
+
 import Table from '../components/table/Table.vue';
 import THead from '../components/table/THead.vue';
 import TBody from '../components/table/TBody.vue';
 import Tr from '../components/table/Tr.vue';
 import Th from '../components/table/Th.vue';
 import Td from '../components/table/Td.vue';
+
 import CreateButton from '../components/ui/CreateButton.vue';
 import EditButton from '../components/ui/EditButton.vue';
 import DeleteButton from '../components/ui/DeleteButton.vue';
@@ -18,7 +23,8 @@ import usePermissionStore from '../store/usePermissionStore';
 import useSlider from '../composables/useSlider';
 import useModalToast from '../composables/useModalToast';
 import useHttpRequest from '../composables/useHttpRequest';
-//import useAuth from '../composables/useAuth';
+
+import useTableData from '../composables/tabla/useTableData';
 
 const userStore = useUserStore();
 const roleStore = useRoleStore();
@@ -31,7 +37,6 @@ const { slider, sliderData, showSlider, hideSlider } =
     useSlider('permission-crud');
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deletePermission, deleting } = useHttpRequest('/permissions');
-//const { isUserAuthenticated } = useAuth();
 
 const onDelete = (permission) => {
     if (deleting.value) return;
@@ -41,17 +46,35 @@ const onDelete = (permission) => {
 
         const isDeleted = await deletePermission(permission?.id);
         if (isDeleted) {
-            showToast(
-                `Permission "${permission?.name}" deleted successfully...`,
-            );
+            showToast(`Permission "${permission?.name}" deleted successfully...`);
             permissionStore.loadPermissions();
             userStore.loadUsers();
             roleStore.loadRoles();
-           // isUserAuthenticated();
         }
     });
 };
+
+// ----------------------------
+// FILTRO, ORDEN Y PAGINACIÓN
+// ----------------------------
+const permisos = computed(() => permissionStore.permissions);
+
+const {
+    query,
+    orderBy,
+    orderDirection,
+    pagina,
+    itemsPorPagina,
+    paginados: permisosPaginados,
+    totalPaginas,
+    ordenados: permisosOrdenados,
+    filtrar: filtrarPermisos
+} = useTableData(permisos, {
+    defaultOrderBy: "name",
+    searchFields: ["name", "id"]
+});
 </script>
+
 
 <template>
     <AuthorizationFallback :permissions="['todo-acceso-permisos', 'ver-permisos']">
@@ -60,8 +83,26 @@ const onDelete = (permission) => {
                 <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Permisos</h2>
                 <CreateButton @click="showSlider(true)" />
             </div>
-            
-            <Table>
+
+            <!-- Barra de búsqueda y contador -->
+            <div class="flex-between flex-row-reverse my-5">
+                <SearchBar
+                    :totalResultados="permisosOrdenados.length"
+                    :campoOrden="'name'"
+                    @search="filtrarPermisos"
+                />
+
+                <div class="font-inter text-md w-full">
+                    Lista de permisos
+                </div>
+            </div>
+
+            <Table
+                :paginacion="true"
+                :current-page="pagina"
+                :total-pages="totalPaginas"
+                @changePage="pagina = $event"
+            >
                 <THead>
                     <Th>Id</Th>
                     <Th>Permiso</Th>
@@ -69,9 +110,9 @@ const onDelete = (permission) => {
                 </THead>
 
                 <TBody>
-                    <Tr v-for="permission in permissionStore.permissions" :key="permission.id">
+                    <Tr v-for="permission in permisosPaginados" :key="permission.id">
                         <Td>{{ permission?.id }}</Td>
-                        
+
                         <Td>{{ permission?.name }}</Td>
 
                         <Td class="align-middle">
@@ -85,6 +126,10 @@ const onDelete = (permission) => {
             </Table>
         </div>
 
-        <PermissionSlider :show="slider" :permission="sliderData" @hide="hideSlider" />
+        <PermissionSlider
+            :show="slider"
+            :permission="sliderData"
+            @hide="hideSlider"
+        />
     </AuthorizationFallback>
 </template>

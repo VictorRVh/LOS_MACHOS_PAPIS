@@ -164,6 +164,13 @@ const onSubmit = async () => {
 <template>
   <AuthorizationFallback :permissions="requiredPermissions">
     <div class="mt-2 space-y-1.5 font-inter">
+            
+      <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
+        {{ isEditing ? "Editar rol" : "Agregar nuevo rol" }}
+      </h3>
+      <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+
+
       <FormInput v-model="formData.name" :focus="show" label="Nombre del rol" :error="formErrors?.name" required />
       <FormLabelError label="Añadir permiso" :error="formErrors.permissions">
         <BaseSelect v-model="selectedPermission" :options="permissionOptions" label="name"

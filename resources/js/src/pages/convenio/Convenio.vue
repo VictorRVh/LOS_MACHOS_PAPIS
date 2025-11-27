@@ -57,10 +57,7 @@ const onDelete = (convenio) => {
     <div class="flex flex-col lg:flex-row px-6 gap-6">
 
       <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-        <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-          Agregar Modalidad
-        </h3>
-        <hr class="border-t-2  border-cetpro dark:border-cetpro-light mb-4" />
+        
         <ConvenioSlider :show="slider" :convenio="sliderData" @hide="hideSlider" />
       </div>
       

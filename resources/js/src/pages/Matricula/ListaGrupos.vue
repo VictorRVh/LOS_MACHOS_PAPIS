@@ -105,17 +105,22 @@ onMounted(() => {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Ciclo</label>
-                        <BaseSelectGrupo v-model="selectedCiclo" :options="cicloStore.ciclo" label="nombre_ciclo" placeholder="Seleccione un ciclo" @change="onCicloChange" />
+                        <BaseSelectGrupo v-model="selectedCiclo" :options="cicloStore.ciclo" label="nombre_ciclo"
+                            placeholder="Seleccione un ciclo" @change="onCicloChange" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Periodo</label>
-                        <BaseSelectGrupo v-model="selectedPeriodo" :options="grupoStore.periodoCiclo" label="nombre_periodo" placeholder="Seleccione un periodo" :loading="grupoStore.periodoByCicloLoading" :disabled="!selectedCiclo"/>
+                        <BaseSelectGrupo v-model="selectedPeriodo" :options="grupoStore.periodoCiclo"
+                            label="nombre_periodo" placeholder="Seleccione un periodo"
+                            :loading="grupoStore.periodoByCicloLoading" :disabled="!selectedCiclo" />
                     </div>
-                    <button @click="filtrarPorSeleccion" class="w-full bg-cetpro hover:bg-cetpro-dark text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 h-10 flex items-center justify-center">
+                    <button @click="filtrarPorSeleccion"
+                        class="w-full bg-cetpro hover:bg-cetpro-dark text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 h-10 flex items-center justify-center">
                         Filtrar
                     </button>
                 </div>
-                 <div class="mt-4 p-3 flex items-center bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+                <div
+                    class="mt-4 p-3 flex items-center bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
                     <InformationCircleIcon class="h-5 w-5 text-green-500 dark:text-green-400 mr-3 flex-shrink-0" />
                     <p class="text-sm text-green-700 dark:text-green-300">
                         Nota: La lista de periodos solo muestra aquellos que se encuentran actualmente activos.
@@ -123,53 +128,126 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
                 <Table v-if="gruposData.length > 0">
+                    
                     <THead class="hidden">
-                        <Th>N°</Th><Th>Módulo</Th><Th>Sección</Th><Th>Turno</Th><Th>Docente</Th><Th>Acciones</Th>
+                        <Th>N°</Th>
+                        <Th>Módulo</Th>
+                        <Th>Sección</Th>
+                        <Th>Turno</Th>
+                        <Th>Docente</Th>
+                        <Th>N° Estudiantes</Th>
+                        <Th>Acciones</Th>
                     </THead>
                     <TBody>
                         <template v-for="([especialidad, grupos], espIndex) in gruposAgrupados" :key="especialidad">
-                            <tr @click="toggleEspecialidad(especialidad)" class="bg-cetpro dark:bg-cetpro-dark hover:bg-cetpro-dark dark:hover:bg-cetpro cursor-pointer transition-colors duration-200 border-b border-white dark:border-cetpro">
+
+
+                            <!-- Fila de Especialidad -->
+                            <tr @click="toggleEspecialidad(especialidad)"
+                                class="bg-cetpro dark:bg-cetpro-dark hover:bg-cetpro-dark dark:hover:bg-cetpro cursor-pointer transition-colors duration-200 border-b border-white dark:border-cetpro">
                                 <td colspan="6" class="px-4 py-3 font-bold uppercase tracking-wider text-sm">
                                     <div class="flex items-center justify-between text-cetpro-text">
                                         <span>{{ especialidad }}</span>
-                                        <ChevronDownIcon :class="['h-6 w-6 text-cetpro-text transition-transform duration-300', { 'rotate-180': openEspecialidades.has(especialidad) }]" />
+                                        <ChevronDownIcon
+                                            :class="['h-6 w-6 text-cetpro-text transition-transform duration-300', { 'rotate-180': openEspecialidades.has(especialidad) }]" />
                                     </div>
                                 </td>
                             </tr>
+
+
+                            <!-- Contenido de grupos -->
                             <tr v-if="openEspecialidades.has(especialidad)" class="bg-white dark:bg-gray-800">
                                 <td colspan="6" class="p-0">
-                                    <table class="w-full">
+                                    <Table class="w-full">
                                         <tbody>
                                             <Tr v-for="(grupo, index) in grupos" :key="grupo.id" class="border-t-0">
+
+                                                <!-- Número -->
                                                 <Td class="text-center w-12">{{ index + 1 }}</Td>
-                                                <Td>{{ grupo.modulo }}</Td>
-                                                <Td class="text-center">{{ grupo.seccion }}</Td>
-                                                <Td class="text-center">{{ grupo.turno }}</Td>
-                                                <Td>{{ grupo.docente }}</Td>
+
+
+                                                <!-- Módulo + Badge -->
+                                                <Td>
+                                                    <div class="flex items-center space-x-2"><span
+                                                            class="px-2 py-0.5 text-xs font-semibold  bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-200">MÓDULO</span><span>{{
+                                                            grupo.modulo }}</span>
+                                                        
+                                                    </div>
+                                                </Td>
+
+
+                                                <!-- Sección + Badge -->
+                                                <Td class="text-center">
+                                                    <div class="flex items-center justify-center space-x-2"><span
+                                                            class="px-2 py-0.5 text-xs font-semibold  bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-200">SECCIÓN</span><span>{{
+                                                            grupo.seccion }}</span>
+                              
+                                                    </div>
+                                                </Td>
+
+
+                                                <!-- Turno + Badge -->
+                                                <Td class="text-center">
+                                                    <div class="flex items-center justify-center space-x-2"><span
+                                                            class="px-2 py-0.5 text-xs font-semibold  bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-200">TURNO</span><span>{{
+                                                            grupo.turno }}</span>
+                            
+                                                    </div>
+                                                </Td>
+
+
+                                                <!-- Docente + Badge -->
+                                                <Td>
+                                                    <div class="flex items-center space-x-2"><span
+                                                            class="px-2 py-0.5 text-xs font-semibold  bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-200">DOCENTE</span><span>{{
+                                                            grupo.docente }}</span>
+      
+                                                    </div>
+                                                </Td>
+                                                <Td>
+                                                    <div class="flex items-center space-x-2"><span
+                                                            class="px-2 py-0.5 text-xs font-semibold  bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-200">Nro Est:</span><span>{{
+                                                            grupo.docente }}</span>
+      
+                                                    </div>
+                                                </Td>
+
+
+                                                <!-- Acciones -->
                                                 <Td class="w-28">
                                                     <div class="flex items-center justify-center space-x-2">
-                                                        <button @click="verMatriculados(grupo)" title="Ver Matriculados" class="p-2 text-gray-500 hover:text-cetpro dark:text-gray-400 dark:hover:text-cetpro-light transition-colors duration-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                        <button @click="verMatriculados(grupo)" title="Ver Matriculados"
+                                                            class="p-2 text-gray-500 hover:text-cetpro dark:text-gray-400 dark:hover:text-cetpro-light transition-colors duration-200  hover:bg-gray-100 dark:hover:bg-gray-700">
                                                             <EyeIcon class="h-5 w-5" />
                                                         </button>
-                                                        <button @click="descargarNomina(grupo.id)" title="Descargar Nómina" class="p-2 text-gray-500 hover:text-cetpro dark:text-gray-400 dark:hover:text-cetpro-light transition-colors duration-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                        <button @click="descargarNomina(grupo.id)"
+                                                            title="Descargar Nómina"
+                                                            class="p-2 text-gray-500 hover:text-cetpro dark:text-gray-400 dark:hover:text-cetpro-light transition-colors duration-200  hover:bg-gray-100 dark:hover:bg-gray-700">
                                                             <ArrowDownTrayIcon class="h-5 w-5" />
                                                         </button>
                                                     </div>
                                                 </Td>
+
+
                                             </Tr>
                                         </tbody>
-                                    </table>
+                                    </Table>
                                 </td>
                             </tr>
+
+
                         </template>
                     </TBody>
                 </Table>
                 <div v-if="!loading && gruposData.length === 0" class="text-center py-12">
-                     <UserGroupIcon class="mx-auto h-12 w-12 text-gray-400" />
-                     <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">No se encontraron grupos</h3>
-                     <p class="mt-1 text-sm text-gray-500">Selecciona los filtros y haz clic en "Filtrar" para buscar.</p>
+                    <UserGroupIcon class="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 class="mt-2 text-lg font-semibold text-gray-600 dark:text-gray-200">No se encontraron grupos
+                    </h3>
+                    <p class="mt-1 text-sm text-gray-500">Selecciona los filtros y haz clic en "Filtrar" para buscar.
+                    </p>
                 </div>
             </div>
         </div>

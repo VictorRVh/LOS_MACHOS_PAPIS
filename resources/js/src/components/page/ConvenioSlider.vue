@@ -79,7 +79,7 @@ watch(
 
 const schema = yup.object().shape({
   nombre_institucion: yup.string().nullable().required('El nombre del convenio es obligatorio.'),
-    descripcion: yup
+  descripcion: yup
     .string()
     .nullable()          // permite null
     .notRequired()       // no es obligatorio
@@ -145,43 +145,28 @@ const onSubmit = async () => {
 <template>
   <AuthorizationFallback :permissions="requiredPermissions">
     <div class="mt-2 space-y-1.5 font-inter">
-      <FormInput
-        v-model="formData.nombre_institucion"
-        :focus="show"
-        label="Nombre de la modalidad"
-        :error="formErrors?.nombre_institucion"
-        required
-      />
+      <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
+        {{ isEditing ? "Editar modalidad" : "Agregar nuevo modalidad" }}
+      </h3>
+      <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
 
-      <FormInput
-        v-model="formData.descripcion"
-        :focus="show"
-        label="Descripcion"
-        :error="formErrors?.descripcion"
-        required
-      />
+      <FormInput v-model="formData.nombre_institucion" :focus="show" label="Nombre de la modalidad"
+        :error="formErrors?.nombre_institucion" required />
+
+      <FormInput v-model="formData.descripcion" :focus="show" label="Descripcion" :error="formErrors?.descripcion"
+        required />
 
       <div class="w-full space-y-3">
-    
+
         <div class="flex gap-2 mt-1">
           <!-- Botón Guardar: ancho completo -->
-          <Button
-            :title="convenio?.id ? 'Guardar Cambios' : 'Crear Convenio'"
-            :loading-title="role?.id ? 'Guardando...' : 'Creando...'"
-            :loading="saving || updating"
-            key="submit-btn"
-            @click="onSubmit"
-            class="!w-full"
-          />
+          <Button :title="convenio?.id ? 'Guardar Cambios' : 'Crear Convenio'"
+            :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating" key="submit-btn"
+            @click="onSubmit" class="!w-full" />
 
           <!-- Botón Cancelar: ancho flexible solo si se está editando -->
-          <Button
-            v-if="isEditing"
-            title="Cancelar"
-            variant="outline"
-            @click="onCancelEdit"
-            class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer px-4"
-          />
+          <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"
+            class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer px-4" />
         </div>
       </div>
     </div>

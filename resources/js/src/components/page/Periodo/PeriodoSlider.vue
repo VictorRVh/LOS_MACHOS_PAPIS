@@ -153,6 +153,13 @@ const onPeriodoInput = (e) => {
 <template>
   <AuthorizationFallback :permissions="requiredPermissions">
     <div class="mt-4 px-4 space-y-2 font-inter max-w-lg mx-auto">
+      
+      <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
+        {{ isEditing ? "Editar periodo" : "Agregar nuevo periodo" }}
+      </h3>
+      <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+
+
       <FormInput v-model="formData.nombre_periodo" :focus="show" label="Periodo" :error="formErrors?.nombre_periodo"
         required placeholder="2024-I" @input="onPeriodoInput" />
 

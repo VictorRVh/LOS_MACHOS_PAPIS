@@ -126,23 +126,25 @@ const onSubmit = async () => {
   <AuthorizationFallback :permissions="requiredPermissions">
     <div class="mt-2 space-y-1.5 font-inter">
 
+      <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
+        {{ isEditing ? "Editar programa de estudio" : "Agregar nuevo programa de estudio" }}
+      </h3>
+      <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
 
       <FormLabelError label="Ciclo" :error="formErrors?.id_ciclo" required>
         <BaseSelectCiclo v-model="formData.id_ciclo" :options="ciclo" label="nombre_ciclo"
           placeholder="Seleccione un ciclo" />
       </FormLabelError>
       <FormInput v-model="formData.nombre_especialidad" :focus="show" label="Nombre de la especialidad"
-        :error="formErrors?.nombre_especialidad" required :uppercase="true"/>
+        :error="formErrors?.nombre_especialidad" required :uppercase="true" />
 
       <div class="w-full space-y-3">
 
         <div class="flex gap-2 mt-1">
           <!-- Botón Guardar: ancho completo -->
           <Button :title="especialidad?.id ? 'Guardar Cambios' : 'Crear Especialidad'"
-            :loading-title="role?.id ? 'Guardando...' : 'Creando...'"
-            :disabled="saving || updating"
-             :loading="saving || updating" key="submit-btn"
-            @click="onSubmit" class="!w-full" />
+            :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :disabled="saving || updating"
+            :loading="saving || updating" key="submit-btn" @click="onSubmit" class="!w-full" />
 
           <!-- Botón Cancelar: ancho flexible solo si se está editando -->
           <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"

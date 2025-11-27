@@ -9,6 +9,7 @@ import Th from "../../components/table/Th.vue";
 import Td from "../../components/table/Td.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
+import viewButton from "../../components/ui/ViewButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
@@ -117,21 +118,22 @@ const SeeMore = (especialidadPrograma) => {
             <Th>Id</Th>
             <Th>Especialidad</Th>
             <Th>Nro módulos</Th>
-            <Th>Acciones</Th>
+            <Th  class="text-center">Acciones</Th>
           </THead>
 
           <TBody>
             <Tr
               v-for="(especialidadPrograma, index) in especialidadProgramaStore?.especialidadProgramaFiltrado?.especialidad_programas"
               :key="especialidadPrograma.id"
-               @click="SeeMore(especialidadPrograma)"
-               class=" bg-white dark:bg-gray-800 rounded-lg shadow-md  border-l-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:bg-gray-200 dark:hover:bg-gray-700/50"
+              
+               class=" bg-white dark:bg-gray-800 rounded-lg shadow-md  border-l-4 transition-all duration-200 hover:shadow-lg hover:bg-gray-200 dark:hover:bg-gray-700/50"
             >
               <Td>{{ index + 1 }}</Td>
               <Td>{{ especialidadPrograma?.especialidad_madre?.nombre_especialidad }}</Td>
               <Td>{{ especialidadPrograma?.nro_modulos }}</Td>
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">
+                   <viewButton  @click="SeeMore(especialidadPrograma)" label="Ver módulos" />
                   <EditButton @click.stop="showSlider(true, especialidadPrograma)" />
                   <DeleteButton @click.stop="onDelete(especialidadPrograma)" />
                  

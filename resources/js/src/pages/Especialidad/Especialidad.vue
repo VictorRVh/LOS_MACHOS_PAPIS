@@ -50,7 +50,7 @@ const onDelete = (especialidad) => {
   <AuthorizationFallback :permissions="['todo-acceso-especialidades', 'ver-especialidades']">
     <!-- TU CABECERA ORIGINAL, INTACTA -->
     <div class="flex justify-between items-center p-4">
-      <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Especialidad</h2>
+      <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Programas de estudio</h2>
       <!-- <CreateButton @click="showSlider(true)" /> -->
     </div>
 
@@ -60,10 +60,7 @@ const onDelete = (especialidad) => {
       
       <!-- Se ajusta el ancho para que sea adaptable: ancho completo en móvil, 1/3 en grande -->
       <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-        <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-          Agregar Especialidad
-        </h3>
-        <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+    
         <EspecialidadSlider :show="slider" :especialidad="sliderData" :ciclo="cicloStore.ciclo" @hide="hideSlider" />
       </div>
       

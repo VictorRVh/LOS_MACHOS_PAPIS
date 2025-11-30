@@ -82,7 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('users/{userId}', [
         \App\Http\Controllers\UserController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-usuarios|users-delete');
+    ])->middleware('permission:todo-acceso-usuarios|eliminar-usuarios');
 
     Route::patch('users-update-password/{id}', [
         \App\Http\Controllers\UserController::class,
@@ -117,7 +117,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('roles/{roleId}', [
         \App\Http\Controllers\RoleController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-roles|roles-delete');
+    ])->middleware('permission:todo-acceso-roles|eliminar-roles');
 
     /**
      * ------------------------------------------------------------------------

@@ -37,7 +37,7 @@ const requiredPermissions = computed(() =>
 
 const title = computed(() =>
   props.programa?.id
-    ? `Editar Ciclo académico "${props.programa?.nombre_programa}"`
+    ? `Editar ciclo académico "${props.programa?.nombre_programa}"`
     : "Agregar nuevo ciclo académico"
 );
 
@@ -171,7 +171,7 @@ const onSubmit = async () => {
 
     if (response?.id) {
       showToast(
-        `Programa ${isEditing.value ? "actualizado" : "creado"} correctamente`,
+        `Ciclo académico ${isEditing.value ? "actualizado" : "creado"} correctamente`,
         "success"
       );
       emit("programa-guardado", response);
@@ -184,7 +184,7 @@ const onSubmit = async () => {
   } catch (error) {
     const message =
       error?.response?.data?.message ||
-      "Ocurrió un error al guardar el programa";
+      "Ocurrió un error al guardar el ciclo académico";
     showToast(message, "error");
   }
 };
@@ -195,7 +195,7 @@ const onSubmit = async () => {
 
     <div class="bg-white space-y-3 dark:bg-gray-800 rounded-lg shadow-md p-6 h-fit sticky top-6">
       <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-        {{ isEditing ? "Editar programa de estudio" : "Agregar nuevo programa de estudio" }}
+        {{ isEditing ? "Editar ciclo académico" : "Agregar nuevo ciclo académico" }}
       </h3>
       <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
       <FormLabelError label="Ciclo" required :error="formErrors?.id_ciclo">
@@ -220,7 +220,7 @@ const onSubmit = async () => {
       <!-- Botones -->
       <div class="w-full space-y-3">
         <div class="flex gap-2 mt-1">
-          <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Programa'"
+          <Button :title="isEditing ? 'Guardar Cambios' : 'Crear ciclo académico'"
             :loading-title="isEditing ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
             :disabled="saving || updating" key="submit-btn" @click="onSubmit" class="!w-full" />
           <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"

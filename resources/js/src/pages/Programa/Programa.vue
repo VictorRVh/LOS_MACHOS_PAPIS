@@ -62,7 +62,7 @@ const seeMore = (programa) => {
 
 const tooltip = ref({
   visible: false,
-  text: 'Asignar Especialidades',
+  text: 'Asignar programas',
   x: 0,
   y: 0,
 });

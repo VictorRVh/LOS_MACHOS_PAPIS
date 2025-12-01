@@ -90,12 +90,12 @@ class PermissionTableSeeder extends Seeder
             'icono-modulos',
 
             // PERMISOS DE PROGRAMA ESPECIALIDAD
-            'todo-acceso-programa-especialidades',
-            'ver-programa-especialidades',
-            'crear-programa-especialidades',
-            'editar-programa-especialidades',
-            'eliminar-programa-especialidades',
-            'icono-programa-especialidades',
+            'todo-acceso-ciclo-programa',
+            'ver-ciclo-programa',
+            'crear-ciclo-programa',
+            'editar-ciclo-programa',
+            'eliminar-ciclo-programa',
+            'icono-ciclo-programa',
 
             //
             

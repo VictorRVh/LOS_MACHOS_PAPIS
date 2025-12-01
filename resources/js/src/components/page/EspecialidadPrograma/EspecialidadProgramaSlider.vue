@@ -47,8 +47,8 @@ const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
-    if (!props.role?.id) return ["todo-acceso-programa-especialidades", "crear-programa-especialidades"];
-    else return ["todo-acceso-programa-especialidades", "editar-programa-especialidades"];
+    if (!props.role?.id) return ["todo-acceso-ciclo-programa", "crear-ciclo-programa"];
+    else return ["todo-acceso-ciclo-programa", "editar-ciclo-programa"];
 });
 
 const initialFormData = () => {
@@ -94,8 +94,8 @@ watch(
 );
 
 const schema = yup.object().shape({
-    id_especialidad: yup.string().nullable().required("La especialidad es obligatoria"),
-    id_programa: yup.string().nullable().required("El programa es obligatorio"),
+    id_especialidad: yup.string().nullable().required("El programa es obligatoria"),
+    id_programa: yup.string().nullable().required("El ciclo es obligatorio"),
     nro_modulos: yup
         .number()
         .typeError("Debe ser un número válido") // si escriben texto u otra cosa
@@ -145,7 +145,7 @@ const onSubmit = async () => {
 
         <div class="bg-white  space-y-3  dark:bg-gray-800 rounded-lg shadow-md p-6 h-fit sticky top-6">
             <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-                {{ isEditing ? "Editar especialidad" : "Agregar nuevo especialidad" }}
+                {{ isEditing ? "Editar programa" : "Agregar nuevo programa" }}
             </h3>
             <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
             <FormLabelError label="Especialidad" required :error="formErrors?.id_especialidad">

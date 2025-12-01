@@ -393,32 +393,32 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('especialidad_programa', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'index',
-    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programa-especialidades');
+    ])->middleware('permission:todo-acceso-ciclo-programa|ver-ciclo-programa');
 
     Route::get('especialidad_programa/{id}', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'show',
-    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programa-especialidades');
+    ])->middleware('permission:todo-acceso-ciclo-programa|ver-ciclo-programa');
 
     Route::get('especialidad_programa/{id}/modulos', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'getRelacionadosPorEspecialidadPrograma',
-    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programa-especialidades');
+    ])->middleware('permission:todo-acceso-ciclo-programa|ver-ciclo-programa');
 
     Route::post('especialidad_programa', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-programa-especialidades|crear-programa-especialidades');
+    ])->middleware('permission:todo-acceso-ciclo-programa|crear-ciclo-programa');
 
     Route::patch('especialidad_programa/{id}', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'update',
-    ])->middleware('permission:todo-acceso-programa-especialidades|editar-programa-especialidades');
+    ])->middleware('permission:todo-acceso-ciclo-programa|editar-ciclo-programa');
 
     Route::delete('especialidad_programa/{id}', [
         \App\Http\Controllers\EspecialidadProgramaController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-programa-especialidades|eliminar-programa-especialidades');
+    ])->middleware('permission:todo-acceso-ciclo-programa|eliminar-ciclo-programa');
 
 
     // RUTA PARA DOCENTE
@@ -522,12 +522,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('especialidadByPrograma/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'getEspecialidadesPorPrograma',
-    ])->middleware('permission:todo-acceso-programa-especialidades|ver-ciclo-academico');
+    ])->middleware('permission:todo-acceso-ciclo-programa|ver-ciclo-academico');
 
     Route::get('moduloByEspecialidad/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'getModulosPorEspecialidad',
-    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programa-especialidades');
+    ])->middleware('permission:todo-acceso-ciclo-programa|ver-ciclo-programa');
 
     Route::get('periodoByModulo/{id}', [
         \App\Http\Controllers\GrupoController::class,
@@ -1030,7 +1030,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('especialidadByPrograma/{idPrograma}', [
         \App\Http\Controllers\MatriculaController::class,
         'getEspecialidadesPorPrograma',
-    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programa-especialidades');
+    ])->middleware('permission:todo-acceso-ciclo-programa|ver-ciclo-programa');
 
     Route::get('grupoByEspecialidad/{idEspecialidad}', [
         \App\Http\Controllers\MatriculaController::class,
@@ -1058,7 +1058,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reporte-entregas-docentes', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'generarExcel',
-    ])->middleware('permission:ver-programa-especialidades');
+    ])->middleware('permission:ver-ciclo-programa');
 });
 
 Route::get('reportes/nomina/grupo/{idGrupo}', [

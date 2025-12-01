@@ -95,7 +95,7 @@ const SeeMore = (especialidadPrograma) => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-programa-especialidades', 'ver-programa-especialidades']">
+  <AuthorizationFallback :permissions="['todo-acceso-ciclo-programa', 'ver-ciclo-programa']">
     <div class="flex justify-between items-center p-4">
       <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Asignar especialidad</h2>
     </div>
@@ -116,7 +116,7 @@ const SeeMore = (especialidadPrograma) => {
         <Table>
           <THead>
             <Th>Id</Th>
-            <Th>Especialidad</Th>
+            <Th>Programas</Th>
             <Th>Nro módulos</Th>
             <Th  class="text-center">Acciones</Th>
           </THead>

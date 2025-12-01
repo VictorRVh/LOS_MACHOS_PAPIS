@@ -31,14 +31,14 @@ const { store: createPrograma, update: updatePrograma, saving, updating } = useH
 
 const requiredPermissions = computed(() =>
   props.programa?.id
-    ? ["todo-acceso-programas", "editar-programas"]
-    : ["todo-acceso-programas", "crear-programas"]
+    ? ["todo-acceso-ciclo-academico", "editar-ciclo-academico"]
+    : ["todo-acceso-ciclo-academico", "crear-ciclo-academico"]
 );
 
 const title = computed(() =>
   props.programa?.id
-    ? `Editar programa "${props.programa?.nombre_programa}"`
-    : "Agregar nuevo programa"
+    ? `Editar Ciclo académico "${props.programa?.nombre_programa}"`
+    : "Agregar nuevo ciclo académico"
 );
 
 const initialFormData = () => ({

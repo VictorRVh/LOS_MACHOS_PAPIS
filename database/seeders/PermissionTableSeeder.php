@@ -100,12 +100,12 @@ class PermissionTableSeeder extends Seeder
             //
             
             // PERMISOS DE PROGRAMAS
-            'todo-acceso-programas',
-            'ver-programas',
-            'crear-programas',
-            'editar-programas',
-            'eliminar-programas',
-            'icono-programas',
+            'todo-acceso-ciclo-academico',
+            'ver-ciclo-academico',
+            'crear-ciclo-academico',
+            'editar-ciclo-academico',
+            'eliminar-ciclo-academico',
+            'icono-ciclo-academico',
 
             
 

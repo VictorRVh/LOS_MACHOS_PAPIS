@@ -221,7 +221,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('ciclo_academico', [
         \App\Http\Controllers\CicloAcademicoController::class,
         'index',
-    ])->middleware('permission:todo-acceso-programas|ver-programas');
+    ])->middleware('permission:todo-acceso-ciclo-academico|ver-ciclo-academico');
 
     Route::post('ciclo_academico', [
         \App\Http\Controllers\CicloAcademicoController::class,
@@ -365,28 +365,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('programa_estudio', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'index',
-    ])->middleware('permission:todo-acceso-programas|ver-programas');
+    ])->middleware('permission:todo-acceso-ciclo-academico|ver-ciclo-academico');
 
     Route::get('programa_estudio_status', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'index_filter_status',
-    ])->middleware('permission:todo-acceso-programas|ver-programas');
+    ])->middleware('permission:todo-acceso-ciclo-academico|ver-ciclo-academico');
 
 
     Route::post('programa_estudio', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'store',
-    ])->middleware('permission:todo-acceso-programas|crear-programas');
+    ])->middleware('permission:todo-acceso-ciclo-academico|crear-ciclo-academico');
 
     Route::patch('programa_estudio/{id}', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'update',
-    ])->middleware('permission:todo-acceso-programas|editar-programas');
+    ])->middleware('permission:todo-acceso-ciclo-academico|editar-ciclo-academico');
 
     Route::delete('programa_estudio/{id}', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-programas|eliminar-programas');
+    ])->middleware('permission:todo-acceso-ciclo-academico|eliminar-ciclo-academico');
 
 
     // RUTA PARA ESPECIALIDAD_PROGRAMA
@@ -522,7 +522,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('especialidadByPrograma/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'getEspecialidadesPorPrograma',
-    ])->middleware('permission:todo-acceso-programa-especialidades|ver-programas');
+    ])->middleware('permission:todo-acceso-programa-especialidades|ver-ciclo-academico');
 
     Route::get('moduloByEspecialidad/{id}', [
         \App\Http\Controllers\GrupoController::class,

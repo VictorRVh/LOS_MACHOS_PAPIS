@@ -43,10 +43,10 @@ const onDelete = async (programa) => {
     try {
       await deletePrograma(programa.id);
       programaStore.loadProgramas()
-      showToast(`Programa eliminado exitosamente.`);
+      showToast(`Ciclo académico eliminado exitosamente.`);
 
     } catch (error) {
-      showToast('Error al eliminar el programa.', 'error');
+      showToast('Error al eliminar el Ciclo académico.', 'error');
     }
   });
 };
@@ -84,11 +84,11 @@ const updateTooltipPos = (event) => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-programas', 'ver-programas']">
+  <AuthorizationFallback :permissions="['todo-acceso-ciclo-academico', 'ver-ciclo-academico']">
     <div class="p-4 md:p-6 space-y-6">
       <header>
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Programas de Estudio</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">Administra los programas de ciclo técnico y auxiliar.</p>
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Ciclo académico</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">Administra los Ciclo académicos de ciclo técnico y auxiliar.</p>
       </header>
       
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -20,7 +20,7 @@ const navLinks = [
     { name: 'Administrativos', routeName: 'administrativos', icon: NewspaperIcon, permissions: ["todo-acceso-administrativos", "icono-administrativos"] },
     { name: 'Programa de Estudios', routeName: 'especialidad', icon: AcademicCapIcon, permissions: ["todo-acceso-especialidades", "icono-especialidades"] },
     { name: 'Comisión', routeName: 'comision', icon: UserGroupIcon, permissions: ["todo-acceso-comisiones", "icono-comisiones"] },
-    { name: 'Programa', routeName: 'programa', icon: RectangleStackIcon, permissions: ["todo-acceso-programas", "icono-programas"] },
+    { name: 'Ciclo Académico', routeName: 'programa', icon: RectangleStackIcon, permissions: ["todo-acceso-ciclo-academico", "icono-ciclo-academico"] },
     { name: 'Doc. Curricular', routeName: 'documentos', icon: DocumentDuplicateIcon, permissions: ["todo-documento-programado", "icono-periodos"] },
     { name: 'Matricula', routeName: 'matricula.index', icon: IdentificationIcon, permissions: ["todo-acceso-matriculas", "icono-matriculas"] },
     { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-grupos", "icono-grupos"] },

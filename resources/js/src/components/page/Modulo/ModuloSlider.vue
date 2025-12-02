@@ -101,7 +101,7 @@ const schema = yup.object().shape({
     creditos: yup.number().required("Los créditos son obligatorios"),
     horas: yup.number().required("Las horas son obligatorias"),
     id_especialidad: yup.string().required("La especialidad es obligatoria"),
-    nro_capacidades: yup.number().required("El número de capacidades es obligatorio"),
+    nro_capacidades: yup.number().required("El número de unidades es obligatorio"),
 });
 
 const onSubmit = async () => {
@@ -162,7 +162,7 @@ const onSubmit = async () => {
             </div>
 
 
-            <FormInput v-model="formData.nro_capacidades" :focus="show" label="Número de capacidades"
+            <FormInput v-model="formData.nro_capacidades" :focus="show" label="Número de unidades didácticas"
                 :error="formErrors?.nro_capacidades" required type="number" />
 
 

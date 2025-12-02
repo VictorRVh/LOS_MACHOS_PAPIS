@@ -80,7 +80,7 @@ const onDelete = (especialidadPrograma) => {
 
     const isDeleted = await deletePrograma(especialidadPrograma?.id);
     if (isDeleted) {
-      showToast(`Especialidad eliminada exitosamente.`);
+      showToast(`Programa eliminada exitosamente.`);
       await especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma);
     }
   });
@@ -97,7 +97,7 @@ const SeeMore = (especialidadPrograma) => {
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-ciclo-programa', 'ver-ciclo-programa']">
     <div class="flex justify-between items-center p-4">
-      <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Asignar especialidad</h2>
+      <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Asignar programas</h2>
     </div>
 
     <div class="flex px-6">
@@ -116,7 +116,7 @@ const SeeMore = (especialidadPrograma) => {
         <Table>
           <THead>
             <Th>Id</Th>
-            <Th>Programas</Th>
+            <Th>Programa</Th>
             <Th>Nro módulos</Th>
             <Th  class="text-center">Acciones</Th>
           </THead>

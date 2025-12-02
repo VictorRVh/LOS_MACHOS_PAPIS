@@ -247,13 +247,13 @@ const onSubmit = async () => {
 
       <div class="mt-4 space-y-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormLabelError label="Programa" required>
+          <FormLabelError label="Ciclo Académico" required>
             <BaseSelectGrupo v-model="formData.id_programa" :options="programas" label="name"
               placeholder="Seleccione un programa" @change="onProgramaChange"
               :loading="programaStore.programasFirstTimeLoading" />
           </FormLabelError>
 
-          <FormLabelError label="Especialidad" required>
+          <FormLabelError label="Programa de estudio" required>
             <BaseSelectGrupo v-model="formData.id_especialidad" :options="grupoStore.especialidades"
               label="nombre_especialidad" placeholder="Seleccione una especialidad" @change="onEspecialidadChange"
               :loading="grupoStore.especialidadByProgramLoading" :disabled="!formData.id_programa" />
@@ -295,7 +295,7 @@ const onSubmit = async () => {
 
           <FormLabelError label="Modalidad" required>
             <BaseSelectCiclo v-model="formData.id_convenio" :options="convenioStore.convenios"
-              label="nombre_institucion" placeholder="Seleccione un convenio" />
+              label="nombre_institucion" placeholder="Seleccione una modalidad" />
           </FormLabelError>
 
 

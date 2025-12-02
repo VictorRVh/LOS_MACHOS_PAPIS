@@ -58,13 +58,13 @@ const indicesArray = computed(() => {
       <!-- 🧾 INFORMACIÓN -->
       <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
         <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
-          Capacidades Terminales (Vista de Administración)
+          Unidades Didácticas (Vista de Administración)
         </h2>
         <p class="text-sm text-gray-500 dark:text-gray-400">
           Solo lectura — no editable.
         </p>
         <ul class="mt-3 text-sm text-gray-700 dark:text-gray-300 list-disc list-inside">
-          <li>Total de capacidades: {{ capacidadStore.capacidadTerminal?.capacidades?.length || 0 }}</li>
+          <li>Total de unidades: {{ capacidadStore.capacidadTerminal?.capacidades?.length || 0 }}</li>
           <li>Módulos definidos: {{ cantidad }}</li>
         </ul>
       </div>

@@ -204,7 +204,7 @@ const onSubmit = async () => {
 
 
                 <div class="flex gap-2 mt-1">
-                    <Button :title="docente?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
+                    <Button :title="docente?.id ? 'Guardar Cambios' : 'Crear Docente'" key="submit-btn"
                         :disabled="saving || updating" :loading-title="docente?.id ? 'Guardando...' : 'Creando...'"
                         class="!mt-6 !w-full" :loading="saving || updating" @click="onSubmit" />
                     <Button title="Cancelar" variant="outline" @click="emit('hide');"

@@ -50,8 +50,17 @@ class EntregaDocenteAdminController extends Controller
 
             throw new \Exception('Error|No puedes Crear esta programació, por que aun no tieene grupos en este periodo--404', 13333);
         }
-        // 🔹 Verificar si hay grupos en ese periodo
 
+        // CUANDO LA FECHA DE INICIO COINCIDE CON LA DE HOY
+        $estadoInicial = EntregaDocenteAdmin::STATUS_PENDIENTE;
+
+        // Convertir ambas fechas a solo YYYY-MM-DD
+        $fechaInicio = Carbon::parse($request->fecha_inicio)->toDateString();
+        $hoy = Carbon::now()->toDateString();
+
+        if ($fechaInicio === $hoy) {
+            $estadoInicial = EntregaDocente::STATUS_ACTIVO;
+        }
 
         // Crear la entrega admin
         $adminEntrega = EntregaDocenteAdmin::create([
@@ -60,7 +69,8 @@ class EntregaDocenteAdminController extends Controller
             'nombre_entrega' => $request->nombre_entrega,
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
-            'status' => EntregaDocenteAdmin::STATUS_PENDIENTE,
+            // 'status' => EntregaDocenteAdmin::STATUS_PENDIENTE,
+            'status' => $estadoInicial,
             'mostrar' => 0,
             'observacion' => $request->observacion ?? '',
         ]);
@@ -92,12 +102,24 @@ class EntregaDocenteAdminController extends Controller
         // Buscar la entrega principal (admin)
         $adminEntrega = EntregaDocenteAdmin::findOrFail($id);
 
+        // CUANDO LA FECHA DE INICIO COINCIDE CON LA DE HOY
+        $estadoInicial = EntregaDocenteAdmin::STATUS_PENDIENTE;
+
+        // Convertir ambas fechas a solo YYYY-MM-DD
+        $fechaInicio = Carbon::parse($request->fecha_inicio)->toDateString();
+        $hoy = Carbon::now()->toDateString();
+
+        if ($fechaInicio === $hoy) {
+            $estadoInicial = EntregaDocente::STATUS_ACTIVO;
+        }
+
         // Actualizar los datos en la tabla principal
         $adminEntrega->update([
             'tipo_entrega' => $request->tipo_entrega,
             'nombre_entrega' => $request->nombre_entrega,
             'fecha_inicio' => $request->fecha_inicio,
             'fecha_fin' => $request->fecha_fin,
+            'status' => $estadoInicial
         ]);
 
         // Si la entrega ya fue replicada a los grupos (mostrar = 1)
@@ -342,6 +364,7 @@ class EntregaDocenteAdminController extends Controller
                 'fecha_inicio' => $adminEntrega->fecha_inicio,
                 'fecha_fin' => $adminEntrega->fecha_fin,
                 'estado' => $adminEntrega->status,
+                // 'estado' => $estadoInicial,
                 'id_admin' => $adminEntrega->id,
                 'observacion' => $adminEntrega->observacion ?? '',
             ]);
@@ -401,6 +424,7 @@ class EntregaDocenteAdminController extends Controller
                 'fecha_inicio' => $adminEntrega->fecha_inicio,
                 'fecha_fin' => $adminEntrega->fecha_fin,
                 'estado' => $adminEntrega->status,
+                // 'estado' => $estadoInicial,
                 'id_admin' => $adminEntrega->id,
                 'observacion' => $adminEntrega->observacion ?? '',
             ]);

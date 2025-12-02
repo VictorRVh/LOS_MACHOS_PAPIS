@@ -130,7 +130,7 @@ const onSubmit = async () => {
         : await createPrograma(data);
 
     if (response?.id) {
-        showToast(`programa ${props.idPrograma ? "editado" : "creado"} exitosamente.`);
+        showToast(`programa ${props.isEditing  ? "editado" : "asignado"} exitosamente.`);
         especialidadProgramaStore.loadEspecialidadProgramaById(props.idPrograma)
 
         formData.value = initialFormData();
@@ -148,9 +148,9 @@ const onSubmit = async () => {
                 {{ isEditing ? "Editar programa" : "Agregar nuevo programa" }}
             </h3>
             <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
-            <FormLabelError label="Especialidad" required :error="formErrors?.id_especialidad">
+            <FormLabelError label="Programa" required :error="formErrors?.id_especialidad">
                 <BaseSelectCiclo v-model="formData.id_especialidad" :options="especialidad" label="nombre_especialidad"
-                    placeholder="Seleccione una especialidad" />
+                    placeholder="Seleccione una programa" />
             </FormLabelError>
 
             <FormInput v-model="formData.nro_modulos" :focus="show" label="Numero de modulos"
@@ -167,7 +167,7 @@ const onSubmit = async () => {
 
                 <div class="flex gap-2 mt-1">
                     <!-- Botón Guardar: ancho completo -->
-                    <Button :title="especialidadPrograma?.id ? 'Guardar Cambios' : 'Asignar especialidad'"
+                    <Button :title="especialidadPrograma?.id ? 'Guardar Cambios' : 'Asignar programa'"
                     :disabled="saving || updating"
                         :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
                         key="submit-btn" @click="onSubmit" class="!w-full" />

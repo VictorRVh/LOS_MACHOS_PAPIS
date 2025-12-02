@@ -129,7 +129,7 @@ const onSubmit = async () => {
   if (response?.id) {
     console.log('entra al response', response);
 
-    showToast(`Convenio ${isEditing ? "editado" : "creado"} exitosamente.`);
+    showToast(`Modalidad ${isEditing ? "creada" : "editada"} exitosamente.`);
     roleStore.loadRoles();
     userStore.loadUsers();
     conveniosStore.loadConvenios();

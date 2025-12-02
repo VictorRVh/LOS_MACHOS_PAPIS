@@ -34,6 +34,7 @@ class EntregaDocente extends Model
         'fecha_inicio' => 'datetime',
         'fecha_fin' => 'datetime',
         'fecha_aplazada' => 'datetime',
+        'estado' => 'integer'
     ];
 
     protected static function boot()

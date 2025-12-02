@@ -30,6 +30,7 @@ class EntregaDocenteAdmin extends Model
     protected $casts = [
         'fecha_inicio' => 'datetime',
         'fecha_fin' => 'datetime',
+        'status' => 'integer' // PARA RETORNAR LA COMPARACION DE FECHA DE INICIO
     ];
 
     protected $appends = ['status_texto'];

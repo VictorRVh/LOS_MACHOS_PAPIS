@@ -39,9 +39,11 @@ watch(
   (nuevasSesiones) => {
     if (Array.isArray(nuevasSesiones) && nuevasSesiones.length) {
       const eventos = []
+
       nuevasSesiones.forEach((sesion) => {
-        const dias = sesion.calendario_admin
-          .filter(d => d.laborable === 1)
+        // Asegurar que calendario_admin siempre sea un array
+        const dias = (sesion?.calendario_admin ?? [])
+          .filter(d => d.laborable === 0)
           .map(d => d.fecha)
           .sort()
 
@@ -58,7 +60,7 @@ watch(
 
             if (!actual || diff !== 1) {
               eventos.push({
-                id: sesion.id + '-' + inicio,
+                id: `${sesion.id}-${inicio}`,
                 title: sesion.nombre_sesion,
                 start: inicio,
                 end: new Date(new Date(fin).getTime() + 86400000)
@@ -77,6 +79,7 @@ watch(
                   idSesion: sesion.id,
                 },
               })
+
               inicio = actual
               fin = actual
             } else {
@@ -85,6 +88,7 @@ watch(
           }
         }
       })
+
       allEvents.value = eventos
     } else {
       allEvents.value = []
@@ -92,6 +96,7 @@ watch(
   },
   { deep: true, immediate: true }
 )
+
 
 // 🔸 Estado de la sesión
 const estadoTexto = computed(() => {
@@ -115,11 +120,15 @@ const estadoTexto = computed(() => {
       <p class="text-sm text-gray-700 dark:text-gray-300">
         Del
         <strong>
-          {{ new Date(sesionStore?.sesion?.fecha_inicio).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year:'numeric' }) }}
+          {{ new Date(sesionStore?.sesion?.fecha_inicio).toLocaleDateString('es-PE', {
+            day: '2-digit', month: 'long',
+            year:'numeric' }) }}
         </strong>
         al
         <strong>
-          {{ new Date(sesionStore?.sesion?.fecha_fin).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year:'numeric' }) }}
+          {{ new Date(sesionStore?.sesion?.fecha_fin).toLocaleDateString('es-PE', {
+            day: '2-digit', month: 'long',
+            year:'numeric' }) }}
         </strong>
       </p>
     </div>
@@ -143,12 +152,7 @@ const estadoTexto = computed(() => {
         </div>
       </div>
 
-      <BaseCalendar
-        :events="allEvents"
-        :holidays="holidays"
-        :read-only="true"
-        :idEntrega="sesionStore?.sesion?.id"
-      />
+      <BaseCalendar :events="allEvents" :holidays="holidays" :read-only="true" :idEntrega="sesionStore?.sesion?.id" />
     </div>
 
     <!-- 📘 LISTA DE SESIONES -->

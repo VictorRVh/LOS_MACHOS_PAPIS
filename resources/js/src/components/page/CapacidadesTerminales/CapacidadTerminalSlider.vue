@@ -85,7 +85,7 @@ watch(
                 const num = String(i + 1).padStart(2, "0");
                 return {
                     id: num,
-                    name: `Capacidad terminal ${num}`,
+                    name: `Unidad Didactica ${num}`,
                 };
             });
         }
@@ -162,7 +162,7 @@ const onSubmit = async () => {
         formData.value = initialFormData();
         formErrors.value = {};
         showToast(
-            `Capacidad terminal ${isEditing.value ? "editada" : "creada"} exitosamente.`
+            `Unidad Didactica ${isEditing.value ? "editada" : "creada"} exitosamente.`
         );
         await capacidadStore.loadCapacidadTerminal(props.idGrupo);
         await calificacionCapacidad.loadCapacidadTerminal(props.idGrupo);
@@ -174,18 +174,18 @@ const onSubmit = async () => {
 <template>
     <AuthorizationFallback :permissions="requiredPermissions">
         <h2 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-            {{ capacidad?.id ? "Editar Capacidad Terminal" : "Agregar Capacidad Terminal" }}
+            {{ capacidad?.id ? "Editar Unidad Didactica" : "Agregar Unidad Didactica" }}
         </h2>
         <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
 
         <div class="mt-2 space-y-3 font-inter">
-            <FormLabelError label="Número de capacidad terminal" required :error="formErrors?.numero_capacidad">
+            <FormLabelError label="Número de Unidad Didactica" required :error="formErrors?.numero_capacidad">
                 <BaseSelectModulo v-model="formData.numero_capacidad" :options="props.indexCapacidades" label="name"
                     placeholder="Número de capacidad" />
             </FormLabelError>
 
 
-            <FormInput v-model="formData.nombre_capacidad" :focus="show" label="Nombre de la capacidad terminal"
+            <FormInput v-model="formData.nombre_capacidad" :focus="show" label="Nombre de la Unidad Didactica"
                 :error="formErrors?.nombre_capacidad" required />
 
             <div class="flex gap-2">

@@ -210,7 +210,7 @@ const fechaLimiteFormateada = computed(() => {
       <!-- Header -->
       <header class="flex justify-between items-start">
         <div>
-          <h2 class="text-black font-bold text-2xl">Asignar Notas - Capacidad Terminal</h2>
+          <h2 class="text-black font-bold text-2xl">Asignar Notas - Unidad Didactica</h2>
           <!-- ✅ NUEVO: Mostrar información de estado -->
           <p v-if="estadoCapacidad" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Estado: <span :class="{

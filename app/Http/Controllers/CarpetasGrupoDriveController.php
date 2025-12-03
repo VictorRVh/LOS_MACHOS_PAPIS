@@ -13,8 +13,8 @@ use Exception;
 class CarpetasGrupoDriveController extends Controller
 {
     protected $driveService;
-    protected $rootFolderId = '0AB477u4EnjP6Uk9PVA'; 
-    // Ejemplo: '0AB477u4EnjP6Uk9PVA'
+    protected $rootFolderId = '0AHvmdsLWgTWyUk9PVA'; 
+    // Ejemplo: '0AHvmdsLWgTWyUk9PVA'
 
     public function __construct()
     {
@@ -38,7 +38,7 @@ class CarpetasGrupoDriveController extends Controller
                 ], 200);
             }
 
-            $parentFolderId = '0AB477u4EnjP6Uk9PVA';
+            $parentFolderId = '0AHvmdsLWgTWyUk9PVA';
 
             // 2. Obtener datos del grupo
             $grupo = Grupo::findOrFail($id_grupo);

@@ -136,7 +136,7 @@ class NotaCapacidadTerminalController extends Controller
         if (!$capacidad) {
             return response()->json([
                 'success' => false,
-                'message' => 'Capacidad terminal no encontrada',
+                'message' => 'Unidad Didactica no encontrada',
             ], 404);
         }
 

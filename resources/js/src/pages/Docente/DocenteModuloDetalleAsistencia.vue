@@ -55,8 +55,8 @@ const Asistencia = () => {
   if (sesionStore?.sesion?.id) {
     asist.value = true;
   } else {
-    console.error("Selecciona una capacidad terminal primero.");
-    showToast("Selecciona una capacidad terminal primero.", "warning");
+    console.error("Selecciona una Unidad Didactica primero.");
+    showToast("Selecciona una Unidad Didactica primero.", "warning");
   }
 };
 const ocultarSliderAsistencia = () => {

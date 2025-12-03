@@ -91,10 +91,12 @@ class PeriodoController extends Controller
 
                 \Log::error("Error creando carpeta del periodo en Drive: " . $response->getContent());
 
-                throw new \Exception(
-                    'Error creando carpeta del periodo en Drive',
-                    13333
-                );
+
+                return response()->json([
+                    'errorCode' => 13333,
+                    'errorMessage' => 'Error creando carpeta del periodo en Drive',
+                    'errorText' => $response->getContent()
+                ], 500);
             }
 
             $data = $response->getData();

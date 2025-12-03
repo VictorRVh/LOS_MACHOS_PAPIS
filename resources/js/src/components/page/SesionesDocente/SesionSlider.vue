@@ -88,7 +88,7 @@ const schema = yup.object({
   descripcion: yup.string().nullable(),
   id_capacidad: yup
     .string()
-    .required("Debe seleccionar una capacidad terminal."),
+    .required("Debe seleccionar una Unidad Didactica."),
   id_entrega: yup.string().required("Debe asignar una entrega válida."),
 });
 
@@ -151,8 +151,8 @@ const closeAndReset = () => {
 
 <template>
   <Slider :show="show" @hide="closeAndReset" :title="isEditing ? 'Editar Sesión' : 'Programar Sesiones'">
-    <!-- CAPACIDAD TERMINAL -->
-    <FormLabelError label="Capacidad terminal *" :error="formErrors.id_capacidad">
+    <!-- Unidad Didactica -->
+    <FormLabelError label="Unidad Didactica *" :error="formErrors.id_capacidad">
       <BaseSelectGrupo v-model="form.id_capacidad" :options="capacidadStore.capacidadTerminal?.capacidades"
         label="nombre_capacidad" value-prop="id" placeholder="Seleccione una capacidad"
         :loading="capacidadStore.sesionesLoading" />

@@ -137,7 +137,7 @@ const getResumenNotas = (est) => {
 // --- Slider ---
 const verNotasUnidad = async () => {
   if (!capacidadSeleccionada.value) {
-    showToast("Selecciona una capacidad terminal primero.", "warning");
+    showToast("Selecciona una Unidad Didactica primero.", "warning");
     return;
   }
 
@@ -211,7 +211,7 @@ const getEstadoCapacidadClass = computed(() => {
       <div class="flex justify-between items-center gap-4">
         <div class="w-2/5 relative">
           <BaseSelectGrupo v-model="capacidadSeleccionada" :options="opcionesCapacidades" label="nombre_capacidad"
-            placeholder="Seleccione una capacidad terminal"
+            placeholder="Seleccione una Unidad Didactica"
             :class="['transition-all duration-200', getEstadoCapacidadClass]" />
 
           <!-- ✅ NUEVO: Indicador de estado -->

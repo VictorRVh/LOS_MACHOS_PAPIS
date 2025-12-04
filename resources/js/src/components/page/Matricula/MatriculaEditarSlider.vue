@@ -25,6 +25,7 @@ const isEditing = ref(false);
 const matriculaId = ref(null);
 const formErrors = ref({});
 const nameGrupo = ref("");
+const idGrupo = ref("");
 
 
 
@@ -71,17 +72,37 @@ const formData = ref({
 
 // VALIDACIÓN SOLO STEP 2 (step3 no necesita)
 const schema = yup.object({
-    tipo_documento: yup.string().required(),
-    nro_documento: yup.string().required(),
-    apellido_paterno: yup.string().required(),
-    apellido_materno: yup.string().required(),
-    nombre: yup.string().required(),
-    sexo: yup.string().required(),
-    fecha_nacimiento: yup.date().required(),
-    celular_personal: yup.string().required(),
-    direccion_residencia: yup.string().required(),
-    estado_civil: yup.string().required(),
+    tipo_documento: yup.string().required('Tipo de documento es requerido'),
+    nro_documento: yup.string().required('N° de documento es requerido'),
+    apellido_paterno: yup.string().required('Apellido paterno es requerido'),
+    apellido_materno: yup.string().required('Apellido materno es requerido'),
+    nombre: yup.string().required('Nombre es requerido'),
+    sexo: yup.string().required('Sexo es requerido'),
+
+    fecha_nacimiento: yup.date()
+        .required('Fecha de nacimiento es requerida')
+        .max(new Date(new Date().setFullYear(new Date().getFullYear() - 12)), 'Debe tener más de 12 años')
+        .min(new Date(new Date().setFullYear(new Date().getFullYear() - 100)), 'Edad inválida'),
+
+    celular_personal: yup
+        .string()
+        .required('Celular es requerido')
+        .matches(/^\d{9}$/, 'El celular debe tener 9 números'),
+
+    celular_referencia: yup
+        .string()
+        .notRequired()
+        .matches(/^\d{9}$/, 'El celular debe tener 9 números'),
+
+    correo_electronico: yup
+        .string()
+        .email('Debe ser un correo válido')
+        .notRequired(),
+
+    direccion_residencia: yup.string().required('La dirección es requerida'),
+    estado_civil: yup.string().required('Estado civil es requerido'),
 });
+
 
 const validate = async () => {
     try {
@@ -145,6 +166,7 @@ const editarEstudiante = async (idMatricula) => {
         };
 
         nameGrupo.value = data.grupo_nombre || '';
+        idGrupo.value = data.id_grupo;
         matriculaId.value = idMatricula;
         isEditing.value = true;
 
@@ -165,7 +187,7 @@ const onSubmit = async () => {
         return;
     }
 
-    const response = await updateMatricula(matriculaId.value,  formData.value);
+    const response = await updateMatricula(matriculaId.value, formData.value);
 
     if (response?.matricula?.id) {
         showToast(`Matrícula actualizada. para ${response?.matricula?.nombre_completo}`, 'success');
@@ -211,9 +233,19 @@ onMounted(() => {
 
             </div>
 
-            <div class="flex justify-end mt-4">
+            <div class="flex justify-end gap-3 mt-4">
+
+
+                <Button slotted @click="router.replace({ name: 'matricula.grupo.alumnos', params: { id: idGrupo } })"
+                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 ">
+                    Cancelar
+                </Button>
+
+
+                <!-- Botón Guardar Cambios -->
                 <Button @click="onSubmit" :loading="saving" title="Guardar Cambios" />
             </div>
+
         </div>
     </div>
 </template>

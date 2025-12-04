@@ -4,12 +4,9 @@ import { saveAs } from "file-saver";
 import useGrupoStore from "@/store/Grupo/useGrupoStore";
 import useModalToast from "../../composables/useModalToast";
 
-
-const { showConfirmModal, showToast } = useModalToast();
+const { showToast } = useModalToast();
 
 export default function useExportAlumnos() {
-
-    const grupoStore = useGrupoStore();
 
     const exportarAlumnos = async (lista) => {
 
@@ -19,12 +16,16 @@ export default function useExportAlumnos() {
         // ======================================================
         // 1) TÍTULO PRINCIPAL
         // ======================================================
-        worksheet.mergeCells("A1:H1");
+        worksheet.mergeCells("A1:K1");
         const titleCell = worksheet.getCell("A1");
-        titleCell.value = `REPORTE DE ALUMNOS MATRICULADOS`;
+        titleCell.value = "REPORTE DE ALUMNOS MATRICULADOS";
         titleCell.font = { bold: true, size: 16, color: { argb: "FFFFFFFF" } };
         titleCell.alignment = { horizontal: "center", vertical: "middle" };
-        titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF007B8C" } };
+        titleCell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FF007B8C" },
+        };
 
         // ======================================================
         // 2) INFORMACIÓN DEL GRUPO
@@ -40,40 +41,21 @@ export default function useExportAlumnos() {
         infoRows.forEach((rowData) => {
             const row = worksheet.getRow(rowIndex);
 
-            // ======================================================
-            // FILA 1: Especialidad - Módulo
-            // ======================================================
             if (rowData.length === 4) {
                 const [label1, value1, label2, value2] = rowData;
 
-                // Especialidad
                 row.getCell(2).value = label1;
                 row.getCell(2).font = { bold: true };
                 row.getCell(3).value = value1;
 
-                // Módulo
                 row.getCell(5).value = label2;
                 row.getCell(5).font = { bold: true };
                 row.getCell(6).value = value2;
 
-                // Alinear
-                ["B", "C", "E", "F"].forEach(col => {
-                    worksheet.getCell(`${col}${rowIndex}`).alignment = {
-                        vertical: "middle",
-                        horizontal: "left"
-                    };
-                });
-
-                // Si el módulo es largo, fusionar valores C–D y F–G
-                if (label2 === "Módulo:") {
-                    worksheet.mergeCells(`C${rowIndex}:D${rowIndex}`);
-                    worksheet.mergeCells(`F${rowIndex}:G${rowIndex}`);
-                }
+                worksheet.mergeCells(`C${rowIndex}:D${rowIndex}`);
+                worksheet.mergeCells(`F${rowIndex}:G${rowIndex}`);
             }
 
-            // ======================================================
-            // FILA 2: Docente (solo una pareja)
-            // ======================================================
             else if (rowData.length === 2) {
                 const [label, value] = rowData;
 
@@ -81,32 +63,29 @@ export default function useExportAlumnos() {
                 row.getCell(2).font = { bold: true };
                 row.getCell(3).value = value;
 
-                row.getCell(2).alignment = { horizontal: "left", vertical: "middle" };
-                row.getCell(3).alignment = { horizontal: "left", vertical: "middle" };
-
-                // Docente → fusionar para textos largos
-                if (label === "Docente:") {
-                    worksheet.mergeCells(`C${rowIndex}:G${rowIndex}`);
-                }
+                worksheet.mergeCells(`C${rowIndex}:G${rowIndex}`);
             }
 
             rowIndex++;
         });
 
-        rowIndex++; // Línea en blanco antes de la tabla
+        rowIndex++;
 
         // ======================================================
-        // 3) CABECERA DE LA TABLA
+        // 3) CABECERA DE LA TABLA (incluye datos de pago)
         // ======================================================
         worksheet.getRow(rowIndex).values = [
-            "N",
+            "N°",
             "Nombre",
             "Tipo Doc",
             "N° Documento",
             "Sexo",
             "Celular",
             "Email",
-            "Fecha nacimiento"
+            "Fecha Nac.",
+            "Condición de Pago",
+            "N° Recibo",
+            "Aporte",
         ];
 
         worksheet.getRow(rowIndex).eachCell((cell) => {
@@ -117,17 +96,15 @@ export default function useExportAlumnos() {
                 top: { style: "thin" },
                 left: { style: "thin" },
                 bottom: { style: "thin" },
-                right: { style: "thin" }
+                right: { style: "thin" },
             };
         });
 
         rowIndex++;
 
         // ======================================================
-        // 4) AGREGAR ALUMNOS (CORREGIDO)
+        // 4) AGREGAR ALUMNOS (CON columnas de pago)
         // ======================================================
-
-
         lista?.matriculados?.forEach((item, index) => {
             worksheet.addRow([
                 index + 1,
@@ -138,9 +115,17 @@ export default function useExportAlumnos() {
                 item.celular_personal,
                 item.correo_electronico,
                 item.fecha_nacimiento,
+
+                // 🟩 DATOS DEL PAGO (SIN estado_pago)
+                item.condicion,
+                item.nro_recibo,
+                item.aporte
             ]);
         });
 
+        // ======================================================
+        // 5) ANCHO DE COLUMNAS
+        // ======================================================
         worksheet.columns = [
             { width: 5 },
             { width: 30 },
@@ -149,14 +134,23 @@ export default function useExportAlumnos() {
             { width: 10 },
             { width: 15 },
             { width: 32 },
-            { width: 18 }
+            { width: 15 },
+            { width: 20 },
+            { width: 15 },
+            { width: 12 }
         ];
-    showToast("Reporte generado correctamente!!.", "success");
+
         // ======================================================
-        // 5) GENERAR ARCHIVO
+        // 6) GENERAR ARCHIVO
         // ======================================================
         const buffer = await workbook.xlsx.writeBuffer();
-        saveAs(new Blob([buffer]), `Lista de Matrícula especialidad: ${lista?.especialidad} módulo: ${lista?.modulo} sección: ${lista?.seccion} turno: ${lista?.turno}.xlsx`);
+
+        saveAs(
+            new Blob([buffer]),
+            `Lista de Matrícula - ${lista.especialidad} - ${lista.modulo} - ${lista.seccion} - ${lista.turno}.xlsx`
+        );
+
+        showToast("Reporte generado correctamente!!", "success");
     };
 
     return { exportarAlumnos };

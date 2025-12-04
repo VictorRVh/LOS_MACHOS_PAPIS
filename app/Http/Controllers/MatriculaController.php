@@ -412,7 +412,7 @@ class MatriculaController extends Controller
             ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
             ->join('modulos as mo', 'g.id_modulo', '=', 'mo.id')
             ->leftJoin('docente as d', 'g.id_docente', '=', 'd.id')
-            ->leftJoin('users as u', 'd.user_id', '=', 'u.id') // 🔥 Aquí están los nombres
+            ->leftJoin('users as u', 'd.user_id', '=', 'u.id')
             ->where('g.id', $grupoId)
             ->select(
                 'em.nombre_especialidad as especialidad',
@@ -421,7 +421,6 @@ class MatriculaController extends Controller
                 'g.id_periodo',
                 'g.turno',
                 'g.seccion',
-                // DOCENTE REAL DESDE USERS
                 DB::raw("CONCAT(u.name, ' ', u.apellido_paterno, ' ', u.apellido_materno) as docente")
             )
             ->first();
@@ -432,9 +431,10 @@ class MatriculaController extends Controller
             ], 404);
         }
 
-        // MATRICULADOS
+        // MATRICULADOS + INFO DE PAGO (TABLA REAL: pagos)
         $matriculados = DB::table('matricula as m')
             ->join('estudiante as e', 'm.id_estudiante', '=', 'e.id')
+            ->leftJoin('pagos as p', 'm.id_pago', '=', 'p.id') // 🔥 CORREGIDO
             ->where('m.id_grupo', $grupoId)
             ->where(function ($q) {
                 $q->whereNull('m.reserva')->orWhere('m.reserva', 0);
@@ -450,7 +450,14 @@ class MatriculaController extends Controller
                 'e.fecha_nacimiento',
                 'e.celular_personal',
                 'e.correo_electronico',
-                DB::raw("DATE(m.created_at) as created_at")
+                DB::raw("DATE(m.created_at) as created_at"),
+
+                // 🔥 CAMPOS DEL PAGO SEGÚN TU MODELO
+                'p.id as id_pago',
+                'p.condicion',
+                'p.nro_recibo',
+                'p.aporte',
+                'p.status as estado_pago'
             )
             ->orderBy('e.apellido_paterno')
             ->orderBy('e.apellido_materno')
@@ -458,14 +465,14 @@ class MatriculaController extends Controller
             ->get();
 
         return response()->json([
-            'especialidad' => $infoGrupo->especialidad,
-            'id_periodo' => $infoGrupo->id_periodo,
-            'id_grupo' => $infoGrupo->id_grupo,
-            'modulo' => $infoGrupo->modulo,
-            'turno' => $infoGrupo->turno,
-            'seccion' => $infoGrupo->seccion,
-            'docente' => $infoGrupo->docente, // 💯 ahora sí funciona
-            'matriculados' => $matriculados,
+            'especialidad'   => $infoGrupo->especialidad,
+            'id_periodo'     => $infoGrupo->id_periodo,
+            'id_grupo'       => $infoGrupo->id_grupo,
+            'modulo'         => $infoGrupo->modulo,
+            'turno'          => $infoGrupo->turno,
+            'seccion'        => $infoGrupo->seccion,
+            'docente'        => $infoGrupo->docente,
+            'matriculados'   => $matriculados,
         ]);
     }
 

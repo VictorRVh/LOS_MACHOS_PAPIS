@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch} from 'vue';
 import FormInput from '../../../ui/FormInput.vue';
 import FormLabelError from '../../../ui/FormLabelError.vue';
 import vSelect from 'vue-select';
@@ -9,6 +9,8 @@ import ubigeo from '../../../../utils/ubigeo';
 import BaseSelect from '../../../ui/BaseSelect.vue';
 import useModalToast from '../../../../composables/useModalToast';
 import useHttpRequest from '../../../../composables/useHttpRequest';
+
+
 
 const { showConfirmModal, showToast } = useModalToast();
 const { store: busquedaDni, saving, update: updateModulo, updating } = useHttpRequest(
@@ -22,6 +24,7 @@ const props = defineProps({
 
 });
 const emit = defineEmits(['update:modelValue']);
+
 
 const formData = computed({
     get: () => props.modelValue,
@@ -275,7 +278,8 @@ watch(() => formData.value.distrito_nacimiento, (nuevo) => {
             <!-- Información adicional -->
             <FormInput v-model="formData.celular_personal" label="Celular" :error="errors.celular_personal"
                 maxlength="9" />
-            <FormInput v-model="formData.correo_electronico" label="Correo Electrónico (Opcional)" type="email" />
+            <FormInput v-model="formData.correo_electronico" label="Correo Electrónico (Opcional)" type="email"  :error="errors.correo_electronico" />
+            
             <FormInput v-model="formData.direccion_residencia" label="Dirección de residencia *"
                 :error="errors.direccion_residencia" />
 
@@ -335,7 +339,7 @@ watch(() => formData.value.distrito_nacimiento, (nuevo) => {
                     placeholder="Seleccione la discapacidad" />
             </FormLabelError>
 
-            <FormInput v-model="formData.celular_referencia" label="Celular de referencia" />
+            <FormInput v-model="formData.celular_referencia" label="Celular de referencia" :error="errors.celular_referencia" />
             <FormInput v-model="formData.parentesco_referencia" label="Parentesco con referencia" />
 
         </div>

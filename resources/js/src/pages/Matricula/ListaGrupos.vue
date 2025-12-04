@@ -13,6 +13,7 @@ import axios from 'axios';
 import useGrupoStore from '../../store/Grupo/useGrupoStore';
 import BaseSelectGrupo from '../../components/ui/BaseSelectGrupo.vue';
 import useCicloStore from '../../store/Ciclo/useCicloStore';
+import MenuTable from "../../components/table/MenuTable.vue";
 
 const router = useRouter();
 const grupoStore = useGrupoStore();
@@ -131,7 +132,7 @@ onMounted(() => {
             <div
                 class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
                 <Table v-if="gruposData.length > 0">
-                    
+
                     <THead class="hidden">
                         <Th>N°</Th>
                         <Th>Módulo</Th>
@@ -173,8 +174,8 @@ onMounted(() => {
                                                 <Td>
                                                     <div class="flex items-center space-x-2"><span
                                                             class="px-2 py-0.5 text-xs font-semibold  bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-200">MÓDULO</span><span>{{
-                                                            grupo.modulo }}</span>
-                                                        
+                                                                grupo.modulo }}</span>
+
                                                     </div>
                                                 </Td>
 
@@ -183,8 +184,8 @@ onMounted(() => {
                                                 <Td class="text-center">
                                                     <div class="flex items-center justify-center space-x-2"><span
                                                             class="px-2 py-0.5 text-xs font-semibold  bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-200">SECCIÓN</span><span>{{
-                                                            grupo.seccion }}</span>
-                              
+                                                                grupo.seccion }}</span>
+
                                                     </div>
                                                 </Td>
 
@@ -193,8 +194,8 @@ onMounted(() => {
                                                 <Td class="text-center">
                                                     <div class="flex items-center justify-center space-x-2"><span
                                                             class="px-2 py-0.5 text-xs font-semibold  bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-200">TURNO</span><span>{{
-                                                            grupo.turno }}</span>
-                            
+                                                                grupo.turno }}</span>
+
                                                     </div>
                                                 </Td>
 
@@ -203,32 +204,42 @@ onMounted(() => {
                                                 <Td>
                                                     <div class="flex items-center space-x-2"><span
                                                             class="px-2 py-0.5 text-xs font-semibold  bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-200">DOCENTE</span><span>{{
-                                                            grupo.docente }}</span>
-      
+                                                                grupo.docente }}</span>
+
                                                     </div>
                                                 </Td>
                                                 <Td>
                                                     <div class="flex items-center space-x-2"><span
-                                                            class="px-2 py-0.5 text-xs font-semibold  bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-200">Nro Est:</span><span>{{
-                                                            grupo.docente }}</span>
-      
+                                                            class="px-2 py-0.5 text-xs font-semibold  bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-200">Nro
+                                                            Est:</span><span>{{
+                                                                grupo.docente }}</span>
+
                                                     </div>
                                                 </Td>
 
 
                                                 <!-- Acciones -->
                                                 <Td class="w-28">
-                                                    <div class="flex items-center justify-center space-x-2">
-                                                        <button @click="verMatriculados(grupo)" title="Ver Matriculados"
-                                                            class="p-2 text-gray-500 hover:text-cetpro dark:text-gray-400 dark:hover:text-cetpro-light transition-colors duration-200  hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                            <EyeIcon class="h-5 w-5" />
-                                                        </button>
-                                                        <button @click="descargarNomina(grupo.id)"
-                                                            title="Descargar Nómina"
-                                                            class="p-2 text-gray-500 hover:text-cetpro dark:text-gray-400 dark:hover:text-cetpro-light transition-colors duration-200  hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                            <ArrowDownTrayIcon class="h-5 w-5" />
-                                                        </button>
-                                                    </div>
+
+
+                                                    <MenuTable :actions="{
+                                                        view: true,
+                                                        edit: false,
+                                                        delete: false,
+                                                        download: true,
+                                                        custom1:false
+                                                    }" :labels="{
+                                view: 'Ver Alumnos',
+                                edit: 'Editar matrícula',
+                                custom1: 'Reservar matrícula',
+                                download: 'Descargar Nomina',
+                                delete: 'Eliminar matrícula'
+                            }" @view="verMatriculados(grupo)" @edit="EditarMatricula(matricula.id_matricula)"
+                                                        @custom1="abrirModalReserva(matricula)"
+                                                        @delete="EliminarMatricula(matricula.id_matricula, `${matricula.nombre}, ${matricula.apellidos}`)"
+                                                        @download="descargarNomina(grupo.id)" />
+
+
                                                 </Td>
 
 

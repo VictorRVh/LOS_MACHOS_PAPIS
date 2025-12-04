@@ -10,6 +10,7 @@ import Td from '../../components/table/Td.vue';
 import Button from '../../components/ui/Button.vue';
 import AuthorizationFallback from '../../components/page/AuthorizationFallback.vue';
 
+import StudentInfoModal  from '../../components/page/Matricula/ViewModalSlider.vue'
 import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 import useGrupoStore from '../../store/Grupo/useGrupoStore';
 import { generatePdfMatricula } from '../../pdf/fichaMatricula';
@@ -37,7 +38,7 @@ const props = defineProps({
     id: { type: [String], required: true },
 });
 
-console.log(" id de grupo: ".props?.id)
+//console.log(" id de grupo: ".props?.id)
 
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteMatricula, deleting } = useHttpRequest("/matricula");
@@ -45,6 +46,17 @@ const { destroy: deleteMatricula, deleting } = useHttpRequest("/matricula");
 const matriculaStore = useMatriculaStore();
 const grupoStore = useGrupoStore();
 const router = useRouter();
+
+//variaalbes para mostra informacion del estudiante
+const showInfoModal = ref(false)
+const estudianteSeleccionado = ref(null)
+
+
+const verEstudiante = (matricula) => {
+    estudianteSeleccionado.value = matricula
+    showInfoModal.value = true
+}
+
 
 onMounted(() => {
     loading.value = true;
@@ -306,20 +318,22 @@ const EliminarMatricula = (idMatricula, nombre) => {
 
                         <Td class="text-center">
                             <MenuTable :actions="{
-                                view: false,
+                                view: true,
                                 edit: true,
                                 delete: true,
                                 download: true,
                                 custom1: true
                             }" :labels="{
+                                view: 'Ver estudiante',
                                 edit: 'Editar matrícula',
-
                                 custom1: 'Reservar matrícula',
                                 download: 'Descargar ficha',
                                 delete: 'Eliminar matrícula'
-                            }" @edit="EditarMatricula(matricula.id_matricula)" @custom1="abrirModalReserva(matricula)"
+                            }" @view="verEstudiante(matricula)" @edit="EditarMatricula(matricula.id_matricula)"
+                                @custom1="abrirModalReserva(matricula)"
                                 @delete="EliminarMatricula(matricula.id_matricula, `${matricula.nombre}, ${matricula.apellidos}`)"
                                 @download="exportarFicha(matricula.id_estudiante)" />
+
                         </Td>
 
 
@@ -370,5 +384,8 @@ const EliminarMatricula = (idMatricula, nombre) => {
 
         <ConfirmModalReserva :show="showReservaModal" :estudiante="selectedMatricula" @close="showReservaModal = false"
             @confirm="confirmarReserva" />
+        <StudentInfoModal :show="showInfoModal" :data="estudianteSeleccionado" @close="showInfoModal = false" />
+
     </AuthorizationFallback>
+
 </template>

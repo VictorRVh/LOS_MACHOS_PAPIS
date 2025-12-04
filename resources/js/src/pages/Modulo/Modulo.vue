@@ -119,7 +119,7 @@ const onDelete = (modulo) => {
             <Th>Modulo</Th>
             <Th>Creditos</Th>
             <Th>Horas</Th>
-            <Th>Acciones</Th>
+            <Th class="text-center">Acciones</Th>
           </THead>
 
           <TBody>

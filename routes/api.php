@@ -601,6 +601,16 @@ Route::middleware('auth:sanctum')->group(function () {
         'store',
     ])->middleware('permission:todo-acceso-capacidad-terminal-docente|crear-capacidad-terminal-docente');
 
+    Route::patch('capacidad_terminal_reactivar/{id}', [
+        \App\Http\Controllers\CapacidadTerminalController::class,
+        'reactivarNota',
+    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|editar-capacidad-terminal-docente|ver-grupos');
+
+    Route::post('capacidad_terminal_aplazar/{id}', [
+        \App\Http\Controllers\CapacidadTerminalController::class,
+        'aplazarCapacidadTerminal',
+    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|editar-capacidad-terminal-docente|ver-grupos');
+
     Route::patch('capacidad_terminal/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'update',
@@ -884,7 +894,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\NotificacionesController::class,
         'marcarLeido',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
-    
+
     Route::get('/notificaciones/pendientes/{id}', [
         \App\Http\Controllers\NotificacionesController::class,
         'countUnread',

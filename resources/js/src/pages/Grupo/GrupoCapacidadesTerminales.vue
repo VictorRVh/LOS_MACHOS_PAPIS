@@ -10,6 +10,9 @@ import AuthorizationFallback from "../../components/page/AuthorizationFallback.v
 import useCapacidadTerminalStore from "../../store/CapacidadTerminal/UseCapacidadTerminalStore";
 import useCapacidadTerminalCalificacionesStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
 import { ref, computed } from "vue";
+import CapacidadTerminalPlazo from "../../components/page/CapacidadesTerminales/CapacidadTerminalPlazo.vue";
+import useHttpRequest from "../../composables/useHttpRequest";
+import useModalToast from "../../composables/useModalToast";
 
 const props = defineProps({
   id: {
@@ -22,8 +25,14 @@ const props = defineProps({
   },
 });
 
+const { update, deleting } = useHttpRequest("/capacidad_terminal_reactivar");
+const { showToast } = useModalToast();
+
 const capacidadStore = useCapacidadTerminalStore();
 const calificacionCapacidad = useCapacidadTerminalCalificacionesStore();
+
+const showModal = ref(false);
+const capacidadSeleccionada = ref(null);
 
 // 🧠 Cargar capacidades
 if (!capacidadStore.capacidadTerminal?.length) {
@@ -50,6 +59,29 @@ const indicesArray = computed(() => {
     (indice) => !asignadas.includes(indice.id)
   );
 });
+
+const abrirModal = (capacidad, tipo) => {
+  capacidadSeleccionada.value = {
+    ...capacidad,
+    tipo_aplazamiento: tipo, // esto indica al modal qué acción realizar
+  };
+  showModal.value = true;
+};
+
+const reactivarNota = async (capacidad) => {
+  try {
+    const response = await update(capacidad.id, null)
+
+    showToast("Nota reactivada para edición.", "success");
+
+     await capacidadStore.loadCapacidadTerminal(props.id)
+     
+  } catch (e) {
+    console.error(e);
+    showToast("Error al reactivar la nota.", "error");
+  }
+};
+
 </script>
 
 <template>
@@ -77,39 +109,52 @@ const indicesArray = computed(() => {
             <Th>Nombre Capacidad</Th>
             <Th>Fecha Inicio</Th>
             <Th>Fecha Fin</Th>
-            <Th>Estado</Th>
+            <Th>¿Aplazar?</Th>
           </THead>
 
           <TBody>
-            <Tr
-              v-if="!capacidadStore.capacidadTerminal?.capacidades?.length"
-            >
+            <Tr v-if="!capacidadStore.capacidadTerminal?.capacidades?.length">
               <Td colspan="5" class="text-center text-gray-500">
                 No hay capacidades registradas.
               </Td>
             </Tr>
 
-            <Tr
-              v-for="(capacidad, index) in capacidadStore.capacidadTerminal.capacidades"
-              :key="capacidad.id"
-            >
+            <Tr v-for="(capacidad, index) in capacidadStore.capacidadTerminal.capacidades" :key="capacidad.id">
               <Td>{{ index + 1 }}</Td>
               <Td>{{ capacidad?.nombre_capacidad }}</Td>
               <Td>{{ capacidad?.fecha_inicio }}</Td>
               <Td>{{ capacidad?.fecha_fin }}</Td>
               <Td>
-                <span
-                  class="px-2 py-1 rounded text-xs font-semibold"
-                  :class="capacidad.status === 1
-                    ? 'bg-green-200 text-green-800'
-                    : 'bg-red-200 text-red-800'"
-                >
-                  {{ capacidad.status === 1 ? "Activo" : "Inactivo" }}
-                </span>
+                <!-- Solo reactiva nota -->
+              <td>
+                <!-- Reactivar Nota -->
+                <button v-if="!capacidad.puede_aplazar && capacidad.status_nota === 1" @click="reactivarNota(capacidad)"
+                  class="px-3 py-1.5 rounded-md text-sm font-medium 
+           bg-blue-600 text-white hover:bg-blue-700 
+           dark:bg-blue-500 dark:hover:bg-blue-600 
+           transition-all duration-150 shadow-sm 
+           flex items-center gap-1">
+                  🔄 Reactivar
+                </button>
+
+                <!-- Aplazar Fecha -->
+                <button v-if="capacidad.puede_aplazar" @click="abrirModal(capacidad, 'aplazamiento_real')" class="px-3 py-1.5 rounded-md text-sm font-medium 
+           bg-amber-500 text-white hover:bg-amber-600 
+           dark:bg-amber-400 dark:hover:bg-amber-500
+           transition-all duration-150 shadow-sm 
+           flex items-center gap-1 mt-1">
+                  ⏳ Aplazar
+                </button>
+              </td>
+
               </Td>
+
             </Tr>
           </TBody>
         </Table>
+        <CapacidadTerminalPlazo :show="showModal" :capacidad="capacidadSeleccionada" :load="props.id"
+          @hided="showModal = false" />
+
       </div>
     </div>
   </AuthorizationFallback>

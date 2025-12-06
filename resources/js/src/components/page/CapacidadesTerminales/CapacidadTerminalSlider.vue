@@ -132,10 +132,6 @@ const schema = yup.object().shape({
         .required("La fecha de fin es requerida.")
         .min(yup.ref("fecha_inicio"), "La fecha de fin no puede ser anterior a la de inicio.")
         .typeError("Debe ingresar una fecha válida"),
-    status: yup
-        .number()
-        .oneOf([0, 1])
-        .required("El estado es obligatorio."),
 });
 
 const onSubmit = async () => {
@@ -150,6 +146,19 @@ const onSubmit = async () => {
     }
 
     formErrors.value = {};
+
+
+    const now = new Date();
+    const horaActual = now.toTimeString().slice(0, 8);
+    const horaFin = "23:59:59";
+
+    const formatDateTime = (fecha, hora) => {
+        const [year, month, day] = fecha.split("-");
+        return `${year}-${month}-${day} ${hora}`;
+    };
+
+    data.fecha_inicio = formatDateTime(data.fecha_inicio, horaActual);
+    data.fecha_fin = formatDateTime(data.fecha_fin, horaFin);
 
     const response = props.capacidad?.id
         ? await updateCapacidad(props.capacidad.id, data)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CapacidadTerminal;
 use App\Models\Grupo;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -20,18 +21,14 @@ class CapacidadTerminalController extends Controller
 
     public function indexGrupo($id)
     {
-        // 1️⃣ Obtener las capacidades terminales del grupo
         $capacidades = CapacidadTerminal::where('id_grupo', $id)
             ->orderBy('fecha_inicio', 'desc')
-            ->select('id', 'id_grupo', 'numero_capacidad', 'nombre_capacidad', 'fecha_inicio', 'fecha_fin', 'status')
             ->get();
 
-        // 2️⃣ Obtener el número de capacidades del módulo asociado al grupo
         $nroCapacidades = Grupo::join('modulos', 'grupo.id_modulo', '=', 'modulos.id')
             ->where('grupo.id', $id)
             ->value('modulos.nro_capacidades');
 
-        // 3️⃣ Devolver ambos datos en la respuesta JSON
         return response()->json([
             'nro_capacidades' => $nroCapacidades,
             'capacidades' => $capacidades
@@ -94,7 +91,6 @@ class CapacidadTerminalController extends Controller
             'fecha_inicio' => 'sometimes|date',
             'fecha_fin' => 'sometimes|date|after_or_equal:fecha_inicio',
             'id_grupo' => 'sometimes|exists:grupo,id',
-            'status' => 'sometimes|in:0,1,2,3',
         ]);
 
         $capacidad->update($request->all());
@@ -116,5 +112,54 @@ class CapacidadTerminalController extends Controller
         return response()->json(['message' => 'Capacidad eliminada correctamente'], 204);
     }
 
-    
+    public function aplazarCapacidadTerminal(Request $request, $id)
+    {
+        $capacidad = CapacidadTerminal::findOrFail($id);
+        $dias = $request->dias_aplazados ?? 1;
+
+        $capacidad->fecha_aplazada = Carbon::now('America/Lima')->startOfMinute()->addDays($dias);
+        $capacidad->status = CapacidadTerminal::STATUS_ACTIVO;
+        $capacidad->status_nota = 2;
+        $capacidad->save();
+
+        return response()->json([
+            "message" => "Fecha aplazada correctamente",
+            "fecha_aplazada" => $capacidad->fecha_aplazada,
+            "status_nota" => $capacidad->status_nota,
+        ]);
+    }
+
+    public function reactivarNota(Request $request, $id)
+    {
+        $capacidad = CapacidadTerminal::findOrFail($id);
+        $ahora = Carbon::now('America/Lima');
+
+        // Solo se puede reactivar si la nota ya está asignada
+        if ($capacidad->status_nota != 1) {
+            return response()->json([
+                "message" => "La nota no está en un estado que permita reactivación.",
+            ], 400);
+        }
+
+        // ✅ Usar el accessor fecha_limite_subida que ya calcula todo correctamente
+        $fechaLimite = $capacidad->fecha_limite_subida;
+
+        if ($ahora->lte($fechaLimite)) {
+            // Reactivar nota
+            $capacidad->status_nota = 0;
+            $capacidad->save();
+
+            return response()->json([
+                "message" => "Nota reactivada correctamente.",
+                "status_nota" => $capacidad->status_nota,
+                "puede_subir_hasta" => $fechaLimite->format('d/m/Y H:i'),
+            ]);
+        }
+
+        return response()->json([
+            "message" => "No se puede reactivar la nota. La fecha límite ya venció.",
+            "fecha_limite_era" => $fechaLimite->format('d/m/Y H:i'),
+            "ahora_es" => $ahora->format('d/m/Y H:i'),
+        ], 400);
+    }
 }

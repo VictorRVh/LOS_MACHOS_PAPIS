@@ -56,6 +56,7 @@ const formData = ref({
     internet_casa: '',
     tipo_internet: '',
     tipo_operador: '',
+    otro_operador: '',
     equipo_clases: [],
     discapacidad: '',
     tipo_discapacidad: '',
@@ -151,12 +152,14 @@ const editarEstudiante = async (idMatricula) => {
             detalle_carga_familiar: data.estudiante.detalle_carga_familiar,
             internet_casa: data.estudiante.internet_casa,
             tipo_internet: data.estudiante.tipo_internet,
-            equipo_clases: JSON.parse(data.estudiante.equipos_virtuales ?? "[]"),
+            equipos_virtuales: JSON.parse(data.estudiante.equipos_virtuales ?? "[]"),
             discapacidad: data.estudiante.discapacidad,
             tipo_discapacidad: data.estudiante.tipo_discapacidad,
             celular_referencia: data.estudiante.celular_referencia,
             parentesco_referencia: data.estudiante.parentesco_referencia,
             lengua_materna: data.estudiante.lengua_materna,
+            tipo_operador: data.estudiante.tipo_operador,
+            otro_operador: data.estudiante.otro_operador ?? "",
 
             // Pago
             condicion: data.pago.condicion,

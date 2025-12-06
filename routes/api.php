@@ -955,7 +955,6 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
 
-
     Route::get('matriculaUpdate/{id}', [
         \App\Http\Controllers\MatriculaController::class,
         'matriculaAlumnoData',

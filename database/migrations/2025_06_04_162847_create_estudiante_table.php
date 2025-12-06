@@ -47,6 +47,10 @@ return new class extends Migration
             $table->string('internet_casa', 10)->nullable(); 
             $table->string('tipo_internet', 100)->nullable();
 
+            $table->string('tipo_operador', 100)->nullable();
+            $table->string('otro_operador', 100)->nullable();
+
+
             $table->json('equipos_virtuales')->nullable();
 
             $table->string('discapacidad', 10)->nullable(); 

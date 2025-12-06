@@ -325,7 +325,7 @@ class GrupoController extends Controller
         // Traer docentes que no estén ocupados
         $docentes = Docente::with(['user' => function ($q) {
             $q->select('id', 'name', 'apellido_paterno', 'apellido_materno')
-                ->where('is_deleted', 0); 
+                ->where('is_deleted', 0);
         }])
             ->whereNotIn('id', $ocupados)
             ->whereHas('user', function ($q) {
@@ -507,7 +507,6 @@ class GrupoController extends Controller
 
     public function getGruposPorCicloYPeriodo(Request $request)
     {
-
         $cicloId = $request->id_ciclo;
         $periodoId = $request->id_periodo;
 
@@ -520,6 +519,13 @@ class GrupoController extends Controller
             ->join('modulos as m', 'g.id_modulo', '=', 'm.id')
             ->leftJoin('docente as d', 'g.id_docente', '=', 'd.id')
             ->leftJoin('users as u', 'd.user_id', '=', 'u.id')
+
+            // 🔥 AQUI SE AGREGA EL JOIN PARA MATRÍCULA
+            ->leftJoin('matricula as ma', function ($join) {
+                $join->on('ma.id_grupo', '=', 'g.id')
+                    ->where('ma.reserva', 0); // opcional
+            })
+
             ->where('ca.id', $cicloId)
             ->where('p.id', $periodoId)
             ->select(
@@ -528,12 +534,26 @@ class GrupoController extends Controller
                 'm.descripcion as modulo',
                 'g.seccion',
                 'g.turno',
-                DB::raw("CONCAT(u.apellido_paterno, ' ', u.apellido_materno, ', ', u.name) as docente")
+                DB::raw("CONCAT(u.apellido_paterno, ' ', u.apellido_materno, ', ', u.name) as docente"),
+
+                // 🔥 CANTIDAD DE ESTUDIANTES
+                DB::raw('COUNT(ma.id) as cantidad_estudiantes')
+            )
+            ->groupBy(
+                'g.id',
+                'em.nombre_especialidad',
+                'm.descripcion',
+                'g.seccion',
+                'g.turno',
+                'u.apellido_paterno',
+                'u.apellido_materno',
+                'u.name'
             )
             ->get();
 
         return $grupos;
     }
+
 
     public function gruposDisponibles(Request $request)
     {

@@ -71,7 +71,7 @@ const toggleMenu = async () => {
   }
 
   const left =
-    buttonRect.left - tableRect.left - 150 + 20; // pegado al borde derecho
+    buttonRect.left - tableRect.left - 195 + 20; // pegado al borde derecho
 
   menuStyles.value = {
     position: "absolute",

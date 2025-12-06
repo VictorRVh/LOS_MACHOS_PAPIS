@@ -54,6 +54,7 @@ const formData = reactive({
     internet_casa: '',
     tipo_internet: '',
     tipo_operador: '',
+    otro_operador: '',
     equipo_clases: [],
     discapacidad: '',
     tipo_discapacidad: '',

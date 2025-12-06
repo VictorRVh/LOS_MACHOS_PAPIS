@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch} from 'vue';
+import { computed, ref, watch } from 'vue';
 import FormInput from '../../../ui/FormInput.vue';
 import FormLabelError from '../../../ui/FormLabelError.vue';
 import vSelect from 'vue-select';
@@ -24,6 +24,7 @@ const props = defineProps({
 
 });
 const emit = defineEmits(['update:modelValue']);
+const mostrarOtroOperador = ref(false);
 
 
 const formData = computed({
@@ -47,6 +48,17 @@ const opcionesGradoInstruccion = [
     'Secundaria incompleta', 'Secundaria completa',
     'Superior incompleta', 'Superior completa'
 ];
+
+const opcionesOperadores = [
+    'CLARO',
+    'MOVISTAR',
+    'ENTEL',
+    'BITEL',
+    'WOW',
+    'OTRO'
+];
+
+
 
 const opcionesLenguaMaterna = [
     'Castellano', 'Quechua', 'Aymara', 'Ashaninka', 'Awajun', 'Otros'
@@ -179,17 +191,23 @@ watch(() => formData.value.provincia_nacimiento, (nuevo) => {
 });
 
 // ---------- WATCH DISTRITO ----------
-watch(() => formData.value.distrito_nacimiento, (nuevo) => {
-    if (!watchActive.value) return;
+watch(
+    () => formData.value.distrito_nacimiento,
+    (nuevo) => {
+        if (!watchActive.value) return;
 
-    const distNorm = normalize(nuevo);
+        const distNorm = normalize(nuevo);
+        mostrarOtroDistrito.value = distNorm === "OTRO";
 
-    mostrarOtroDistrito.value = distNorm === "OTRO";
+        if (distNorm !== "OTRO") {
+            formData.value.lugar_nacimiento = "";
+        }
+    },
+    { immediate: true } // 🔥 EJECUTA EL WATCH AL CARGAR LA DATA
+);
 
-    if (distNorm !== "OTRO") {
-        formData.value.lugar_nacimiento = "";
-    }
-});
+
+
 </script>
 
 
@@ -278,8 +296,9 @@ watch(() => formData.value.distrito_nacimiento, (nuevo) => {
             <!-- Información adicional -->
             <FormInput v-model="formData.celular_personal" label="Celular" :error="errors.celular_personal"
                 maxlength="9" />
-            <FormInput v-model="formData.correo_electronico" label="Correo Electrónico (Opcional)" type="email"  :error="errors.correo_electronico" />
-            
+            <FormInput v-model="formData.correo_electronico" label="Correo Electrónico (Opcional)" type="email"
+                :error="errors.correo_electronico" />
+
             <FormInput v-model="formData.direccion_residencia" label="Dirección de residencia *"
                 :error="errors.direccion_residencia" />
 
@@ -324,6 +343,14 @@ watch(() => formData.value.distrito_nacimiento, (nuevo) => {
             <FormInput v-if="formData.internet_casa === 'Si'" v-model="formData.tipo_internet"
                 label="Tipo de conexión (Wifi, datos móviles, etc.)" />
 
+            <FormLabelError label="Tipo operador celular" :error="errors.tipo_operador">
+                <v-select v-model="formData.tipo_operador" :options="opcionesOperadores"
+                    placeholder="Seleccione operador" />
+            </FormLabelError>
+
+            <FormInput v-if="formData.tipo_operador === 'OTRO'" v-model="formData.otro_operador"
+                label="Especifique el operador" />
+
             <FormLabelError label="Equipos virtuales en casa" :error="errors.equipos_virtuales">
                 <v-select v-model="formData.equipos_virtuales" :options="opcionesEquiposVirtuales"
                     placeholder="Seleccione los equipos disponibles" multiple :close-on-select="false" />
@@ -339,7 +366,8 @@ watch(() => formData.value.distrito_nacimiento, (nuevo) => {
                     placeholder="Seleccione la discapacidad" />
             </FormLabelError>
 
-            <FormInput v-model="formData.celular_referencia" label="Celular de referencia" :error="errors.celular_referencia" />
+            <FormInput v-model="formData.celular_referencia" label="Celular de referencia"
+                :error="errors.celular_referencia" />
             <FormInput v-model="formData.parentesco_referencia" label="Parentesco con referencia" />
 
         </div>

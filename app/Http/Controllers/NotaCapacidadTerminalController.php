@@ -22,31 +22,59 @@ class NotaCapacidadTerminalController extends Controller
         return response()->json($notas);
     }
 
+    // public function index_grupo_capacidad_terminal($id)
+    // {
+    //     // ✅ Cantidad total de capacidades (independiente de si tienen notas)
+    //     $cantidadCapacidades = CapacidadTerminal::where('id_grupo', $id)->count();
+
+    //     // ✅ Solo capacidades que no tienen notas asignadas
+    //     $capacidades = CapacidadTerminal::where('id_grupo', $id)
+    //         ->orderBy('numero_capacidad', 'asc')
+    //         ->select(
+    //             'id',
+    //             'id_grupo',
+    //             'nombre_capacidad',
+    //             'fecha_inicio',
+    //             'fecha_fin',
+    //             'status'
+    //         )
+    //         ->whereDoesntHave('notaCapacidadTerminal') // 👈 Filtro para que no tengan notas asociadas
+    //         ->get();
+
+    //     return response()->json([
+    //         'capacidades' => $capacidades,
+    //         'cantidad_capacidades' => $cantidadCapacidades, // 👈 Total de capacidades, incluyendo con notas
+    //     ]);
+    // }
+
     public function index_grupo_capacidad_terminal($id)
     {
-        // ✅ Cantidad total de capacidades (independiente de si tienen notas)
         $cantidadCapacidades = CapacidadTerminal::where('id_grupo', $id)->count();
 
-        // ✅ Solo capacidades que no tienen notas asignadas
         $capacidades = CapacidadTerminal::where('id_grupo', $id)
             ->orderBy('numero_capacidad', 'asc')
-            ->select(
-                'id',
-                'id_grupo',
-                'nombre_capacidad',
-                'fecha_inicio',
-                'fecha_fin',
-                'status'
-            )
-            ->whereDoesntHave('notaCapacidadTerminal') // 👈 Filtro para que no tengan notas asociadas
-            ->get();
+            ->get()
+            ->filter(function ($capacidad) {
+                // 1️⃣ Sin nota registrada → disponible
+                if ($capacidad->status_nota === 0) {
+                    return true;
+                }
+
+                // 2️⃣ Aplazamiento aprobado → solo si la fecha aplazada no pasó
+                if ($capacidad->status_nota === 2 && $capacidad->fecha_aplazada) {
+                    return now()->lte($capacidad->fecha_aplazada);
+                }
+
+                // 3️⃣ Nota registrada → no disponible
+                return false;
+            })
+            ->values(); // reindexa la colección
 
         return response()->json([
             'capacidades' => $capacidades,
-            'cantidad_capacidades' => $cantidadCapacidades, // 👈 Total de capacidades, incluyendo con notas
+            'cantidad_capacidades' => $cantidadCapacidades,
         ]);
     }
-
 
     public function index_grupo_alumnos($idGrupo)
     {
@@ -121,14 +149,13 @@ class NotaCapacidadTerminalController extends Controller
     // POST /api/nota-capacidad-terminal
     public function store(Request $request)
     {
-        // Validar estructura básica del request
+        // Validación correcta
         $request->validate([
             'id_grupo' => 'required|exists:grupo,id',
             'id_capacidad_terminal' => 'required|exists:capacidad_terminal,id',
             'notas' => 'required|array',
             'notas.*.id_estudiante' => 'required|exists:estudiante,id',
-            // 'notas.*.nota' => 'required|numeric|min:0|max:20',
-            'notas.*.nota' => 'nullable|string|min:0|max:20',
+            'notas.*.nota' => 'nullable|numeric|min:0|max:20',
         ]);
 
         $capacidad = CapacidadTerminal::find($request->id_capacidad_terminal);
@@ -136,7 +163,7 @@ class NotaCapacidadTerminalController extends Controller
         if (!$capacidad) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unidad Didactica no encontrada',
+                'message' => 'Unidad Didáctica no encontrada',
             ], 404);
         }
 
@@ -152,30 +179,29 @@ class NotaCapacidadTerminalController extends Controller
         try {
             DB::beginTransaction();
 
-            $datosInsert = [];
-            $ahora = now();
-
             foreach ($request->notas as $nota) {
-                $datosInsert[] = [
-                    'id' => (string) Str::uuid(),
-                    'nota_capacidad' => $nota['nota'],
-                    'id_grupo' => $request->id_grupo,
-                    'id_capacidad' => $request->id_capacidad_terminal,
-                    'id_estudiante' => $nota['id_estudiante'],
-                    'created_at' => $ahora,
-                    'updated_at' => $ahora,
-                ];
+                NotaCapacidadTerminal::updateOrCreate(
+                    [
+                        'id_grupo' => $request->id_grupo,
+                        'id_capacidad' => $request->id_capacidad_terminal,
+                        'id_estudiante' => $nota['id_estudiante'],
+                    ],
+                    [
+                        'nota_capacidad' => $nota['nota'],
+                        'updated_at' => now(),
+                    ]
+                );
             }
 
-            // Inserción masiva (más eficiente)
-            NotaCapacidadTerminal::insert($datosInsert);
+            $capacidad->status_nota = 1;
+            $capacidad->save(); 
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Notas registradas correctamente',
-                'count' => count($datosInsert),
+                'count' => count($request->notas),
                 'fecha_limite' => $capacidad->fecha_limite_subida->format('d/m/Y H:i'),
             ], 201);
         } catch (\Exception $e) {
@@ -188,7 +214,6 @@ class NotaCapacidadTerminalController extends Controller
             ], 500);
         }
     }
-
 
     // PUT/PATCH /api/nota-capacidad-terminal/{id}
     public function update(Request $request)

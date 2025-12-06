@@ -22,9 +22,19 @@ class CapacidadTerminal extends Model
         'nombre_capacidad',
         'fecha_inicio',
         'fecha_fin',
+        'fecha_aplazada',
         'id_grupo',
         'status',
+        'status_nota'
     ];
+
+    protected $casts = [
+        'fecha_inicio' => 'date:Y-m-d',
+        'fecha_fin' => 'date:Y-m-d',
+        'fecha_aplazada' => 'date:Y-m-d',
+    ];
+
+    protected $appends = ['puede_reactivar', 'puede_aplazar'];
 
     protected static function boot()
     {
@@ -53,6 +63,11 @@ class CapacidadTerminal extends Model
         self::STATUS_COMPLETADO  => 'Completado',
     ];
 
+    // SOBRE EL CASO DE SUBIDA DE NOTAS DE DOCENTES
+    // 0 = sin registrar
+    // 1 = nota registrada
+    // 2 = aplazamiento aprobado
+
     public function getStatusTextoAttribute()
     {
         return self::STATUS[$this->status] ?? 'Desconocido';
@@ -75,10 +90,25 @@ class CapacidadTerminal extends Model
     // ✅ NUEVO: Obtener fecha límite de subida
     public function getFechaLimiteSubidaAttribute()
     {
-        return Carbon::parse($this->fecha_fin)
+        // Fecha límite original (fecha_fin + 1 día a las 23:59)
+        $limiteNormal = Carbon::parse($this->fecha_fin)
             ->timezone('America/Lima')
             ->addDay()
             ->setTime(23, 59, 59);
+
+        // Si NO hay fecha aplazada, retornar límite normal
+        if (!$this->fecha_aplazada) {
+            return $limiteNormal;
+        }
+
+        $fechaAplazada = Carbon::parse($this->fecha_aplazada)
+            ->timezone('America/Lima')
+            ->setTime(23, 59, 59);
+
+        // Retornar cuál fecha es mayor
+        return $fechaAplazada->greaterThan($limiteNormal)
+            ? $fechaAplazada
+            : $limiteNormal;
     }
 
     // ✅ NUEVO: Obtener mensaje de estado de subida
@@ -101,6 +131,40 @@ class CapacidadTerminal extends Model
         return 'Puede subir notas hasta el ' .
             $this->fecha_limite_subida->format('d/m/Y H:i');
     }
+
+    public function getPuedeReactivarAttribute()
+    {
+        $ahora = Carbon::now('America/Lima');
+        $fechaLimite = $this->fecha_limite_subida;
+
+        // Solo si tiene nota registrada Y está dentro del límite
+        return $this->status_nota == 1 && $ahora->lte($fechaLimite);
+    }
+
+    // Puede solicitar APLAZAMIENTO (fuera del límite, sin nota)
+    public function getPuedeAplazarAttribute()
+    {
+        $ahora = Carbon::now('America/Lima');
+        $fechaLimite = $this->fecha_limite_subida;
+
+        // Solo si YA pasó el límite Y no tiene nota registrada
+        return $ahora->gt($fechaLimite) && $this->status_nota == 0;
+    }
+
+    // public function getFechaInicioAttribute($value)
+    // {
+    //     return Carbon::parse($value)->format('d/m/Y H:i');
+    // }
+
+    // public function getFechaInicioFormateadaAttribute()
+    // {
+    //     return Carbon::parse($this->fecha_inicio)->format('d/m/Y');
+    // }
+
+    // public function getFechaFinAttribute($value)
+    // {
+    //     return Carbon::parse($value)->format('d/m/Y H:i');
+    // }
 
     public function grupo()
     {

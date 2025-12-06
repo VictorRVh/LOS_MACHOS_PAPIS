@@ -15,8 +15,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('numero_capacidad');
             $table->string('nombre_capacidad');
-            $table->date('fecha_inicio');
-            $table->date('fecha_fin');
+            $table->dateTime('fecha_inicio');
+            $table->dateTime('fecha_fin');
+            $table->dateTime('fecha_aplazada')->nullable();
             $table->uuid('id_grupo');
             $table->tinyInteger('status')->default(0);
 

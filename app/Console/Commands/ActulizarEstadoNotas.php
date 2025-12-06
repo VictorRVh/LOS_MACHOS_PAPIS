@@ -18,13 +18,12 @@ class ActulizarEstadoNotas extends Command
         $this->info('🕐 Hora actual: ' . $ahora->format('Y-m-d H:i:s'));
         $this->info('');
 
-        // Obtener todas las capacidades terminales activas
-        // $capacidades = CapacidadTerminal::where('status', 1)->get();
+        // Solo capacidades que pueden cambiar de estado
         $capacidades = CapacidadTerminal::whereIn('status', [
             CapacidadTerminal::STATUS_PENDIENTE,
-            CapacidadTerminal::STATUS_ACTIVO
+            CapacidadTerminal::STATUS_ACTIVO,
+            CapacidadTerminal::STATUS_FINALIZADO
         ])->get();
-
 
         if ($capacidades->isEmpty()) {
             $this->warn('⚠️  No hay capacidades terminales activas.');
@@ -37,17 +36,14 @@ class ActulizarEstadoNotas extends Command
         $actualizados = 0;
 
         foreach ($capacidades as $capacidad) {
+
             $estadoAnterior = $capacidad->status;
 
             // Fechas clave
-            $fechaInicio = Carbon::parse($capacidad->fecha_inicio)->timezone('America/Lima')->startOfDay();
-            $fechaFin = Carbon::parse($capacidad->fecha_fin)->timezone('America/Lima')->endOfDay();
+            $fechaInicio = Carbon::parse($capacidad->fecha_inicio)->timezone('America/Lima')->endOfMinute();
 
-            // Fecha límite: fecha_fin + 1 día a las 23:59:59
-            $fechaLimite = Carbon::parse($capacidad->fecha_fin)
-                ->timezone('America/Lima')
-                ->addDay()
-                ->setTime(23, 59, 59);
+            // 🔥 AHORA usamos el atributo virtual del modelo
+            $fechaLimite = $capacidad->fecha_limite_subida;
 
             // Determinar nuevo estado
             if ($ahora->lt($fechaInicio)) {
@@ -61,24 +57,27 @@ class ActulizarEstadoNotas extends Command
                 $estadoTexto = '🔴 FINALIZADO';
             }
 
-            // Actualizar solo si cambió
-            if ($nuevoEstado !== $estadoAnterior) {
-                $capacidad->update(['status' => $nuevoEstado]);
-                $actualizados++;
-
-                $estadosTexto = CapacidadTerminal::STATUS; // ya tienes este array en el modelo
-
-                $estadoAnteriorTexto = $estadosTexto[$estadoAnterior] ?? 'Desconocido';
-                $nuevoEstadoTexto = $estadosTexto[$nuevoEstado] ?? 'Desconocido';
-
-                $this->info("📝 Capacidad: {$capacidad->nombre_capacidad}");
-                $this->info("   Grupo: {$capacidad->id_grupo}");
-                $this->info("   📅 Inicio: {$fechaInicio->format('Y-m-d')}");
-                $this->info("   📅 Fin: {$fechaFin->format('Y-m-d')}");
-                $this->info("   ⏰ Límite subida: {$fechaLimite->format('Y-m-d H:i:s')}");
-                $this->info("   Estado: {$estadoAnteriorTexto} → {$nuevoEstadoTexto} {$estadoTexto}");
-                $this->info('');
+            // Si no cambió, no registrar nada
+            if ($nuevoEstado === $estadoAnterior) {
+                continue;
             }
+
+            // Actualizar estado
+            $capacidad->update(['status' => $nuevoEstado]);
+            $actualizados++;
+
+            // Texto del estado
+            $estadosTexto = CapacidadTerminal::STATUS;
+            $estadoAnteriorTexto = $estadosTexto[$estadoAnterior] ?? 'Desconocido';
+            $nuevoEstadoTexto    = $estadosTexto[$nuevoEstado] ?? 'Desconocido';
+
+            // Log de consola
+            $this->info("📝 Capacidad: {$capacidad->nombre_capacidad}");
+            $this->info("   Grupo: {$capacidad->id_grupo}");
+            $this->info("   📅 Inicio: {$fechaInicio->format('Y-m-d')}");
+            $this->info("   ⏰ Límite subida: {$fechaLimite->format('Y-m-d H:i:s')}");
+            $this->info("   Estado: {$estadoAnteriorTexto} → {$nuevoEstadoTexto} {$estadoTexto}");
+            $this->info('');
         }
 
         $this->info('═══════════════════════════════════════════════');

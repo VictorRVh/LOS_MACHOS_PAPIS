@@ -137,7 +137,7 @@ const getResumenNotas = (est) => {
 // --- Slider ---
 const verNotasUnidad = async () => {
   if (!capacidadSeleccionada.value) {
-    showToast("Selecciona una Unidad Didactica primero.", "warning");
+    showToast("Selecciona una unidad Didactica primero.", "warning");
     return;
   }
 
@@ -257,7 +257,7 @@ const getEstadoCapacidadClass = computed(() => {
         <THead>
           <Th>#</Th>
           <Th>Apellidos y Nombres</Th>
-          <Th v-for="i in lengthUnit" :key="i">CT{{ i }}</Th>
+          <Th v-for="i in lengthUnit" :key="i">UD{{ i }}</Th>
           <Th>PUNTAJE</Th>
           <Th>PROMEDIO</Th>
           <Th>A-D-R</Th>
@@ -306,7 +306,7 @@ const getEstadoCapacidadClass = computed(() => {
 
     <!-- Slider -->
     <NotasEstudianteSlider v-if="slider" :show="slider" :idgroup="props.id" :id-capacidad-note="capacidadSeleccionada"
-      :idType="'capacidad'" :estado-capacidad="estadoCapacidad" @hide="onHideSlider" />
+      :idType="'capacidad'" :estado-capacidad="estadoCapacidad" :alumnos-notas="estudiantesNormalizados" @hide="onHideSlider" />
   </AuthorizationFallback>
 </template>
 

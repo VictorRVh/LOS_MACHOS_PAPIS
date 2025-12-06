@@ -27,12 +27,11 @@ const props = defineProps({
   idgroup: { type: String, required: true },
   idCapacidadNote: { type: String, required: true, default: "" },
   estadoCapacidad: { type: Object, default: null },
+  alumnosNotas: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(["hide"]);
-console.log("capaicdad: ", props.idCapacidadNote)
 
-const router = useRouter();
 const { store: saveNotas, saving } = useHttpRequest("nota_capacidad_terminal");
 const { showToast } = useModalToast();
 const userStore = useStudentsStore();
@@ -70,11 +69,11 @@ const mensajeAdvertencia = computed(() => {
 });
 
 const initialNotesData = () => {
-  return userStore.alumnosNotas.map((est) => ({
-    id_estudiante: est?.id,
-    fullName: `${est?.apellido_paterno} ${est?.apellido_materno}, ${est?.nombre}`,
-    nota: null,
-    matriculado: est?.matriculado
+  return props.alumnosNotas.map((est) => ({
+    id_estudiante: est.id_estudiante,
+    fullName: est.apellidos_nombres,
+    nota: est.capacidades?.find(c => c.id_capacidad === props.idCapacidadNote)?.nota_capacidad ?? null,
+    matriculado: est.matriculado
   }));
 };
 

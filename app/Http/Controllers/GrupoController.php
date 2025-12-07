@@ -360,7 +360,6 @@ class GrupoController extends Controller
         return response()->json($docentes);
     }
 
-
     public function gruposPorCicloAnioPeriodo(Request $request)
     {
         $request->validate([
@@ -369,84 +368,71 @@ class GrupoController extends Controller
             'id_periodo' => 'required|uuid',
         ]);
 
-        // Buscar IDs de programas (incluyendo rangos de año como 2025-2026)
+        // Programas por ciclo + año
         $programaIds = ProgramaEstudio::where('id_ciclo', $request->id_ciclo)
             ->where('año', 'like', '%' . $request->anio . '%')
             ->pluck('id');
 
-        // Cargar grupos y relaciones
+        // Grupos con relaciones
         $grupos = Grupo::with([
-            'programaEstudio:id,año,numero_rd',
-            'especialidad:id,id_especialidad,id_programa',
-            'especialidad.especialidadMadre:id,nombre_especialidad',
-            'modulo:id,numero_modulo,descripcion',
-            'periodo:id,nombre_periodo',
-            'convenio:id,nombre_institucion',
-            'docente:id,user_id,codigo_modular',
-            'docente.user:id,name,apellido_paterno,apellido_materno'
+            'programaEstudio:id,año,numero_rd,id_ciclo',
+            'especialidad.especialidadMadre',
+            'modulo',
+            'periodo',
+            'convenio',
+            'docente.user'
         ])
-            ->withCount(['matricula as matricula_count' => function ($query) {
-                $query->where('reserva', 0); // Solo contar los que NO son reserva
-            }])
+            ->withCount([
+                'matricula as cantidad_estudiantes' => function ($query) {
+                    $query->where('reserva', 0);
+                }
+            ])
             ->whereIn('id_programa', $programaIds)
             ->where('id_periodo', $request->id_periodo)
             ->get();
 
-        // Agrupar por especialidad y mapear módulos con datos extra
-        $resultado = $grupos->groupBy('especialidad.id')->map(function ($items) {
+        // FORMATO PLANO **COMPLETO**
+        $resultado = $grupos->map(function ($g) {
             return [
-                'especialidad' => [
-                    'id' => $items->first()->especialidad->id,
-                    'nombre' => $items->first()->especialidad->especialidadMadre->nombre_especialidad ?? null
-                ],
-                'modulos' => $items->map(function ($grupo) {
-                    return [
-                        'id_grupo'       => $grupo->id,
-                        'programa'       => [
-                            'id'     => $grupo->programaEstudio->id ?? null,
-                            'nombre' => $grupo->programaEstudio->numero_rd ?? null,
-                            'anio'   => $grupo->programaEstudio->año ?? null
-                        ],
-                        'especialidad'   => [
-                            'id'     => $grupo->especialidad->id ?? null,
-                            'nombre' => $grupo->especialidad->especialidadMadre->nombre_especialidad ?? null
-                        ],
-                        'modulo'         => [
-                            'id'           => $grupo->modulo->id ?? null,
-                            'numero'       => $grupo->modulo->numero_modulo ?? null,
-                            'descripcion'  => $grupo->modulo->descripcion ?? null
-                        ],
-                        'periodo'        => [
-                            'id'     => $grupo->periodo->id ?? null,
-                            'nombre' => $grupo->periodo->nombre_periodo ?? null
-                        ],
-                        'ciclo'          => [
-                            'id'     => $grupo->programaEstudio->id_ciclo ?? null
-                        ],
-                        'convenio'       => [
-                            'id'     => $grupo->convenio->id ?? null,
-                            'nombre' => $grupo->convenio->nombre_institucion ?? null
-                        ],
-                        'docente'        => [
-                            'id'     => $grupo->docente->id ?? null,
-                            'nombre' => $grupo->docente
-                                ? trim($grupo->docente->user->name . ' ' . $grupo->docente->user->apellido_paterno . ' ' . $grupo->docente->user->apellido_materno)
-                                : null
-                        ],
-                        'fecha_inicio'   => $grupo->fecha_inicio ?? null,
-                        'fecha_fin'      => $grupo->fecha_fin ?? null,
-                        'entrega_acta'   => $grupo->fecha_entrega_acta ?? null,
-                        'seccion'        => $grupo->seccion ?? null,
-                        'turno'          => $grupo->turno ?? null,
-                        'cantidad'       => $grupo->matricula_count
-                    ];
-                })->sortBy('modulo.numero')->values()
+                'id'          => $g->id,
 
+                // ---- IDs para autocompletar ----
+                'id_programa'    => $g->id_programa,
+                'id_especialidad' => $g->id_especialidad,
+                'id_modulo'      => $g->id_modulo,
+                'id_periodo'     => $g->id_periodo,
+                'id_convenio'    => $g->id_convenio,
+                'id_docente'     => $g->id_docente,
+                'ciclo_id'       => $g->programaEstudio->id_ciclo ?? null,
+
+                'status'         => $g->status,
+                'especialidad'   => $g->especialidad->especialidadMadre->nombre_especialidad ?? null,
+                'modulo'         => $g->modulo->descripcion ?? null,
+                'modulo_numero'  => $g->modulo->numero_modulo ?? null,
+                'periodo_nombre' => $g->periodo->nombre_periodo ?? null,
+                'convenio_nombre' => $g->convenio->nombre_institucion ?? null,
+
+                'seccion'        => $g->seccion,
+                'turno'          => $g->turno,
+
+                'docente' => $g->docente
+                    ? trim($g->docente->user->apellido_paterno . ' ' . $g->docente->user->apellido_materno . ', ' . $g->docente->user->name)
+                    : null,
+
+                // ---- FECHAS ----
+                'fecha_inicio'   => $g->fecha_inicio,
+                'fecha_fin'      => $g->fecha_fin,
+                'fecha_entrega_acta'   => $g->fecha_entrega_acta,
+
+                // ---- MATRÍCULA ----
+                'cantidad_estudiantes' => $g->cantidad_estudiantes,
             ];
         });
 
-        return response()->json($resultado->values());
+        return response()->json($resultado);
     }
+
+
 
 
     // NUEVO FORMATO PARA FILTRO DE GRUPOS

@@ -14,12 +14,12 @@
     @vite('resources/js/app.js')
 </head>
 
-<body class="box-border p-0 m-0 bg-light-bg text-light-color dark:bg-dark-bg dark:text-dark-color font-inter">
+<body class="box-border p-0 m-0 bg-light-bg text-light-color dark:bg-dark-bg dark:text-dark-color font-inter overflow-hidden">
     <noscript>
         <strong>Por favor activar js</strong>
     </noscript>
 
-    <div id="app"></div>
+    <div id="app" ></div>
 </body>
 
 </html>

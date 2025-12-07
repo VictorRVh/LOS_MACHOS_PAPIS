@@ -43,7 +43,7 @@ const { showToast } = useModalToast();
 if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
 
 const title = computed(() =>
-  props.grupo ? `Actualizar grupo "${props.grupo?.especialidad?.nombre} - ${props.grupo?.seccion}"` : 'Crear nuevo grupo'
+  props.grupo ? `Actualizar grupo "${props.grupo?.especialidad || ''} - ${props.grupo?.seccion}"`  : 'Crear nuevo grupo'
 );
 
 const initialFormData = () => ({
@@ -76,60 +76,62 @@ watch(
   async (isShown) => {
     if (!isShown) return;
 
-    // PRIMERO CARGAMOS LOS PROGRAMAS AL ABRIR EL MODAL
-    if (!programaStore.programa.length) await programaStore.loadPrograma();
+    console.log("Grupo recibido →", props.grupo);
 
-    // DAMOS FORMATO PARA EL SELECT
-    // console.log("verificamos- ", programaStore.programa.programas)
+    // Cargar listas base
+    if (!programaStore.programa.length) await programaStore.loadPrograma();
+    if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
+    if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
+
+    // Programas para el primer select
     programas.value = programaStore.programa.programas.map(p => ({
       id: p.id,
       name: p.nameCiclo,
-    })) ?? [];
+    }));
 
-    // 1) Asegurarnos que programas/convenios/docentes/períodos ya están cargados (si no, cargarlos)
-    if (!convenioStore.convenios.length) await convenioStore.loadConvenios();
-    if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
-    // await periodoStore.loadPeriodos();
-    
+    // 👉 SI ES EDICIÓN (YA NO USAS id_grupo, SOLO id)
+    if (props.grupo?.id) {
 
-    if (props.grupo?.id_grupo) {
+      const programaId = props.grupo.id_programa;
+      const especialidadId = props.grupo.id_especialidad;
 
-      // 2) Cargar las opciones dependientes en el orden correcto
-      const programaId = props.grupo.programa?.id || null;
-      const especialidadId = props.grupo.especialidad?.id || null;
-
+      // cargar especialidades
       if (programaId) {
         await grupoStore.loadEspecialidades(programaId);
       }
 
+      // cargar módulos
       if (especialidadId) {
         await grupoStore.loadModulos(especialidadId);
       }
 
-      // 3) Ahora setear formData (las options ya contienen los objetos)
+      // formData EXACTO a tus datos planos
       formData.value = {
-        id_programa: programaId,
-        id_especialidad: especialidadId,
-        id_modulo: props.grupo.modulo?.id || null,
-        id_periodo: props.grupo.periodo?.id || null,
-        id_convenio: props.grupo.convenio?.id || null,
-        fecha_inicio: props.grupo.fecha_inicio || null,
-        fecha_fin: props.grupo.fecha_fin || null,
-        fecha_entrega_acta: props.grupo.entrega_acta ?? null,
-        seccion: props.grupo.seccion ?? null,
-        turno: props.grupo.turno ?? null,
-        id_docente: props.grupo.docente?.id || null,
-        status: props.grupo.status ?? 0
+        id_programa: props.grupo.id_programa,
+        id_especialidad: props.grupo.id_especialidad,
+        id_modulo: props.grupo.id_modulo,
+        id_periodo: props.grupo.id_periodo,
+        id_convenio: props.grupo.id_convenio,
+        fecha_inicio: props.grupo.fecha_inicio,
+        fecha_fin: props.grupo.fecha_fin,
+        fecha_entrega_acta: props.grupo.fecha_entrega_acta,
+        seccion: props.grupo.seccion,
+        turno: turnos.find(t => t.value === props.grupo.turno) ?? null,
+        id_docente: props.grupo.id_docente,
+        status: props.grupo.status,
       };
 
+      // cargar docentes disponibles
       await loadDocentesDisponibles();
 
     } else {
+      // crear nuevo
       formData.value = initialFormData();
       formErrors.value = {};
     }
   }
 );
+
 
 const secciones = [
   { id: 'A', name: 'Sección A' },
@@ -162,6 +164,8 @@ const onPeriodoChange = async () => {
   await loadDocentesDisponibles();
 };
 
+
+
 const loadDocentesDisponibles = async () => {
   if (!formData.value.turno || !formData.value.id_periodo) return;
 
@@ -170,10 +174,10 @@ const loadDocentesDisponibles = async () => {
       ? formData.value.turno.value
       : formData.value.turno,
     id_periodo: formData.value.id_periodo,
-    id_grupo: props.grupo?.id_grupo ?? null,
-
+    id_grupo: props.grupo?.id ?? null,
   });
 };
+
 
 
 const schema = yup.object({
@@ -223,15 +227,15 @@ const onSubmit = async () => {
   }
   formErrors.value = {};
 
-  const response = props.grupo?.id_grupo
-    ? await updateGrupo(props.grupo?.id_grupo, data)
+  const response = props.grupo?.id
+    ? await updateGrupo(props.grupo?.id, data)
     : await createGrupo(data);
 
   if (response?.data.id) {
-    showToast(`Grupo ${props.grupo?.id_grupo ? "editado" : "creado"} exitosamente.`);
+    showToast(`Grupo ${props.grupo?.id ? "editado" : "creado"} exitosamente.`);
     grupoStore.loadGrupos();
 
-    if (!props.grupo?.id_grupo) {
+    if (!props.grupo?.id) {
       formData.value = initialFormData();
     }
     formErrors.value = {};

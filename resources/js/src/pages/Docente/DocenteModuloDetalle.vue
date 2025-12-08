@@ -20,7 +20,7 @@ const navLinks = [
   { text: 'Calificaciones', to: { name: 'docente.modulo.detalle.calificaciones', params: { id: groupId } } },
   { text: 'Prácticas', to: { name: 'docente.modulo.detalle.practicas', params: { id: groupId } } },
   { text: 'Alumnos', to: { name: 'docente.modulo.detalle.alumnos', params: { id: groupId } } },
-  { text: 'Capacidades Terminales', to: { name: 'docente.modulo.detalle.capacidades', params: { id: groupId } } },
+  { text: 'Unidades Didácticas', to: { name: 'docente.modulo.detalle.capacidades', params: { id: groupId } } },
 ];
 
 const tituloPrincipal = computed(() => {

@@ -18,30 +18,44 @@ class SesionesController extends Controller
         $sesiones = Sesiones::with(['calendarioAdmin', 'capacidadTerminal', 'entregaDocente'])->get();
         return response()->json($sesiones);
     }
-    public function indexOneSesion($idGrupo)
+
+    public function indexOneSesion(Request $request)
     {
-        // Buscar la entrega del grupo cuyo padre (admin) tenga tipo_entrega = 2
+
+        $idGrupo = $request->id_grupo;       // <-- AHORA COINCIDE
+        $tipoEntrega = $request->tipo_entrega; // <-- AHORA COINCIDE
+
+        if (!$idGrupo || !$tipoEntrega) {
+            return response()->json(['error' => 'Faltan parámetros'], 422);
+        }
+
+        if (!$idGrupo || !$tipoEntrega) {
+            return response()->json(['error' => 'Faltan parámetros'], 422);
+        }
+
         $entrega = EntregaDocente::select(
             'id',
             'fecha_inicio',
             'fecha_fin',
             'estado',
             'fecha_aplazada',
-            'dias_aplazados',
+            'dias_aplazados'
         )
             ->where('id_grupo', $idGrupo)
-            ->whereHas('entregaDocenteAdmin', function ($q) {
-                $q->where('tipo_entrega', 2); // Filtra por tipo de entrega = 2
+            ->whereHas('entregaDocenteAdmin', function ($q) use ($tipoEntrega) {
+                $q->where('tipo_entrega', $tipoEntrega);
             })
             ->first();
 
         if (!$entrega) {
-            return response()->json(['message' => 'No se encontró la programación de sesión'], 404);
+            return response()->json([
+                'message' => "No se encontró programación para el tipo {$tipoEntrega}"
+            ], 404);
         }
 
-        // Devuelve solo los campos seleccionados del modelo entrega_docente
         return response()->json($entrega);
     }
+
     public function indexListSesionesDocente($idEntrega)
     {
         // Traemos las capacidades con sus sesiones y dentro de ellas los calendarios

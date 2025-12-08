@@ -48,9 +48,8 @@ const initialFormData = () => ({
 
 const formData = ref(initialFormData());
 
-// ✅ Opciones estáticas + "Otro"
 const tiposEntrega = [
-  { id: "1", nombre: "Subida de notas" },
+  { id: "1", nombre: "Subida de unidades didácticas" },
   { id: "2", nombre: "Subida de sesiones" },
   { id: "3", nombre: "Subida de sílabo" },
   { id: "4", nombre: "Subida de materiales" },
@@ -177,14 +176,6 @@ const onSubmit = async () => {
   const now = new Date();
   const horaActual = now.toTimeString().slice(0, 8);
   const horaFin = "23:59:59";
-
-  // const formatDateTime = (fecha, hora) => {
-  //   const date = new Date(fecha);
-  //   const year = date.getFullYear();
-  //   const month = String(date.getMonth() + 1).padStart(2, "0");
-  //   const day = String(date.getDate()).padStart(2, "0");
-  //   return `${year}-${month}-${day} ${hora}`;
-  // };
 
   const formatDateTime = (fecha, hora) => {
     const [year, month, day] = fecha.split("-");

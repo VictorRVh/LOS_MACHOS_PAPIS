@@ -27,7 +27,12 @@ const holidays = ref([])
 
 // 🔹 Cargar sesión y programaciones
 if (!sesionStore?.sesion?.length) {
-  await sesionStore.loadSesion(props.id)
+  if (!sesionStore?.sesion?.length) {
+    await sesionStore.loadSesion({
+      id_grupo: props.id,
+      tipo_entrega: 2
+    });
+  }
 }
 if (!programacionSesion?.sesiones?.length) {
   await programacionSesion.loadSesiones(sesionStore?.sesion?.id)
@@ -122,13 +127,15 @@ const estadoTexto = computed(() => {
         <strong>
           {{ new Date(sesionStore?.sesion?.fecha_inicio).toLocaleDateString('es-PE', {
             day: '2-digit', month: 'long',
-            year:'numeric' }) }}
+            year: 'numeric'
+          }) }}
         </strong>
         al
         <strong>
           {{ new Date(sesionStore?.sesion?.fecha_fin).toLocaleDateString('es-PE', {
             day: '2-digit', month: 'long',
-            year:'numeric' }) }}
+            year: 'numeric'
+          }) }}
         </strong>
       </p>
     </div>

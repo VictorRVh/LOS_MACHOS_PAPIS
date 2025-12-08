@@ -26,7 +26,7 @@ const props = defineProps({
   show: { type: Boolean, default: () => false },
   grupo: { type: [Object, null], default: () => null },
 });
-const emit = defineEmits(['hide','updated']);
+const emit = defineEmits(['hide', 'updated']);
 
 const docenteStore = useDocenteStore();
 const programaStore = useProgramaStore();
@@ -125,7 +125,7 @@ watch(
       };
 
       if (props.grupo?.id) {
-        
+
         await loadDocentesDisponibles();
       }
 
@@ -173,7 +173,7 @@ const onModuloChange = async (moduloId) => {
 
 const loadDocentesDisponibles = async () => {
 
-  console.log("perido: ", formData.value.id_periodo," id_modulo: ", formData.value.id_modulo)
+  console.log("perido: ", formData.value.id_periodo, " id_modulo: ", formData.value.id_modulo)
   if (!formData.value.turno || !formData.value.id_periodo || !formData.value.id_modulo) return;
   await docenteStore.loadDocentesDisponibles({
     turno: typeof formData.value.turno === "object"
@@ -330,9 +330,19 @@ const onSubmit = async () => {
           <CheckBox v-model="formData.status" label="Habilitado" class="mt-8 pl-4 flex justify-center items-center" />
         </div>
 
-        <Button :title="grupo?.id_grupo ? 'Guardar Cambios' : 'Crear Grupo'"
-          :loading-title="grupo?.id_grupo ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
+        
+
+        <div class="flex gap-2 mt-1">
+          <Button :title="grupo?.id ? 'Guardar Cambios' : 'Crear Grupo'"
+          :loading-title="grupo?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full"
           :disabled="saving || updating" :loading="saving || updating" @click="onSubmit" />
+
+          <Button title="Cancelar" variant="outline" @click="emit('hide');"
+            class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer !mt-6 h-10" />
+        </div>
+
+
+
       </div>
     </AuthorizationFallback>
   </Slider>

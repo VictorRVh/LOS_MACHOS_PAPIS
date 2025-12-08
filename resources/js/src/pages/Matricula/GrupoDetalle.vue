@@ -10,7 +10,7 @@ import Td from '../../components/table/Td.vue';
 import Button from '../../components/ui/Button.vue';
 import AuthorizationFallback from '../../components/page/AuthorizationFallback.vue';
 
-import StudentInfoModal  from '../../components/page/Matricula/ViewModalSlider.vue'
+import StudentInfoModal from '../../components/page/Matricula/ViewModalSlider.vue'
 import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 import useGrupoStore from '../../store/Grupo/useGrupoStore';
 import { generatePdfMatricula } from '../../pdf/fichaMatricula';
@@ -26,11 +26,6 @@ import useTableData from "../../composables/tabla/useTableData";
 import useHttpRequest from "../../composables/useHttpRequest";
 
 import useExportAlumnos from "@/composables/tabla/useAlumnosMatricula";
-
-
-
-
-
 
 
 
@@ -142,11 +137,20 @@ const abrirModalReserva = (matricula) => {
 
 const confirmarReserva = async () => {
     try {
-        await matriculaStore.loadReservaMatricula(selectedMatricula.value.id_matricula)
+        const response = await matriculaStore.loadReservaMatricula(selectedMatricula.value.id_matricula)
         await matriculaStore.fetchMatriculadosPorGrupo(props?.id)
+
+       // console.log("los datos: ",response)
+        if (response?.success) {
+            showToast("Matrícula reservada exitosamente")
+        }
+        else {
+            showToast("Error al reservar matrícula","error")
+        }
+
     } catch (error) {
-        console.error(error)
-        alert('Error al reservar la matrícula')
+
+        showToast("Error al reservar matrícula","error")
     } finally {
         showReservaModal.value = false
     }

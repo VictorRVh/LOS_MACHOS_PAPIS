@@ -22,7 +22,8 @@ class Matricula extends Model
         'id_estudiante',
         'id_pago',
         'reserva',
-        'matriculado'
+        'matriculado',
+        'fecha_reserva'
     ];
 
     const STATUS_PENDIENTE              = 0;

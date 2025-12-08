@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('reserva')->default(false);
 
             $table->tinyInteger('matriculado')->default(1);
-
+            $table->date('fecha_reserva')->nullable();
             $table->foreign('id_grupo')->references('id')->on('grupo')->onDelete('cascade');
             $table->foreign('id_estudiante')->references('id')->on('estudiante')->onDelete('cascade');
             $table->foreign('id_pago')->references('id')->on('pagos')->onDelete('cascade');

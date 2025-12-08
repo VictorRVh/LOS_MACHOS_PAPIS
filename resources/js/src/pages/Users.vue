@@ -60,7 +60,7 @@ const { userData } = storeToRefs(userStore);
 const showUserModal = ref(false);
 
 const showRestorePassword = ref(false);
-const selectedUserId = ref(null);
+const selectedUser = ref(null);
 
 
 
@@ -78,7 +78,7 @@ const verUsuario = async (user) => {
 
 
 const Restarurar = (user) => {
-  selectedUserId.value = user.id;   // guardamos el ID del usuario seleccionado
+  selectedUser.value = user;   // guardamos el ID del usuario seleccionado
   showRestorePassword.value = true; // abrimos el slider/modal
 };
 
@@ -165,7 +165,7 @@ const {
 
     <UserSlider :show="slider" :user="sliderData" @hide="hideSlider" />
     <userInfoModal :show="showUserModal" :data="userData" @close="emitCloseModal" />
-    <RestaurarPasswordSlider :show="showRestorePassword" :userId="selectedUserId" @hide="showRestorePassword = false" />
+    <RestaurarPasswordSlider :show="showRestorePassword" :user="selectedUser" @hide="showRestorePassword = false" />
 
   </AuthorizationFallback>
 

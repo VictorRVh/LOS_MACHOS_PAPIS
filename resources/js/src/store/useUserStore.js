@@ -6,6 +6,7 @@ import useHttpRequest from '../composables/useHttpRequest';
 const useUserStore = defineStore('users', () => {
     const {
         index: getUsers,
+        show: getUserData,
         loading: usersLoading,
         initialLoading: usersFirstTimeLoading,
     } = useHttpRequest('/users');
@@ -13,6 +14,7 @@ const useUserStore = defineStore('users', () => {
     const user = ref(null);
     const userIdTemporal = ref(null);
     const users = ref([]);
+    const userData = ref(null);
     const requiereCambioPassword = ref(false);
 
     const setUser = (authUser) => {
@@ -30,9 +32,14 @@ const useUserStore = defineStore('users', () => {
         const response = await getUsers();
         users.value = response;
     };
+    const loadUserData = async (idUser) => {
+        const response = await getUserData(idUser);
+        userData.value = response;
+    };
 
     return {
         user,
+        userData,
         setUser,
         requiereCambioPassword,
         userIdTemporal,
@@ -42,6 +49,7 @@ const useUserStore = defineStore('users', () => {
         usersLoading,
         usersFirstTimeLoading,
         loadUsers,
+        loadUserData,
     };
 });
 

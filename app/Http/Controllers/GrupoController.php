@@ -304,61 +304,74 @@ class GrupoController extends Controller
         ]);
     }
 
-    public function docentesPorGrupo(Request $request)
+    public function docentesPorGrupo(Request $request) //  y seccioens mas lo trae aqui 
     {
         $request->validate([
             'turno' => 'required|string',
             'id_periodo' => 'required|string',
+            'id_modulo' => 'required|uuid|exists:modulos,id', // obligatorio para secciones
             'id_grupo' => 'nullable|string',
         ]);
 
+        $turno = $request->turno;
+        $idPeriodo = $request->id_periodo;
+        $idModulo = $request->id_modulo;
+        $idGrupoActual = $request->id_grupo;
 
-
-        // Docentes ocupados en este turno y periodo (excluyendo el grupo actual si existe)
-        $ocupados = Grupo::where('turno', $request->turno)
-            ->where('id_periodo', $request->id_periodo)
-            ->when($request->id_grupo, function ($query) use ($request) {
-                $query->where('id', '!=', $request->id_grupo);
-            })
+        // -----------------------------
+        // 1️⃣ DOCENTES (igual que tu función actual)
+        // -----------------------------
+        $ocupados = Grupo::where('turno', $turno)
+            ->where('id_periodo', $idPeriodo)
+            ->when($idGrupoActual, fn($q) => $q->where('id', '!=', $idGrupoActual))
             ->pluck('id_docente');
 
-        // Traer docentes que no estén ocupados
-        $docentes = Docente::with(['user' => function ($q) {
-            $q->select('id', 'name', 'apellido_paterno', 'apellido_materno')
-                ->where('is_deleted', 0);
-        }])
+        $docentes = Docente::with(['user' => fn($q) => $q->select('id', 'name', 'apellido_paterno', 'apellido_materno')->where('is_deleted', 0)])
             ->whereNotIn('id', $ocupados)
-            ->whereHas('user', function ($q) {
-                $q->where('is_deleted', 0);
-            })
+            ->whereHas('user', fn($q) => $q->where('is_deleted', 0))
             ->get();
 
-
-        if ($request->id_grupo) {
-            $grupoActual = Grupo::with('docente.user')->find($request->id_grupo);
-
-            if ($grupoActual && $grupoActual->docente) {
-                // Solo agregamos al docente si el turno y periodo son los mismos del grupo actual
-                if ($grupoActual->turno === $request->turno && $grupoActual->id_periodo === $request->id_periodo) {
-                    if (!$docentes->contains('id', $grupoActual->docente->id)) {
-                        $docentes->push($grupoActual->docente);
-                    }
+        if ($idGrupoActual) {
+            $grupoActual = Grupo::with('docente.user')->find($idGrupoActual);
+            if ($grupoActual && $grupoActual->docente && $grupoActual->turno === $turno && $grupoActual->id_periodo === $idPeriodo) {
+                if (!$docentes->contains('id', $grupoActual->docente->id)) {
+                    $docentes->push($grupoActual->docente);
                 }
             }
         }
 
-        // Mapear formato
-        $docentes = $docentes->map(function ($docente) {
-            return [
-                'id' => $docente->id,
-                'nombre' => $docente->user->name . ' ' .
-                    $docente->user->apellido_paterno . ' ' .
-                    $docente->user->apellido_materno,
-            ];
-        });
+        $docentes = $docentes->map(fn($d) => [
+            'id' => $d->id,
+            'nombre' => $d->user->name . ' ' . $d->user->apellido_paterno . ' ' . $d->user->apellido_materno,
+        ]);
 
-        return response()->json($docentes);
+        // -----------------------------
+        // 2️⃣ SECCIONES DISPONIBLES
+        // -----------------------------
+        $todasSecciones = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+        $seccionesOcupadas = Grupo::where('id_modulo', $idModulo)
+            ->where('id_periodo', $idPeriodo)
+            ->when($idGrupoActual, fn($q) => $q->where('id', '!=', $idGrupoActual))
+            ->pluck('seccion')
+            ->toArray();
+
+        $seccionesDisponibles = array_values(array_diff($todasSecciones, $seccionesOcupadas));
+
+        $secciones = collect($seccionesDisponibles)->map(fn($s) => [
+            'id' => $s,
+            'nombre' => "Sección $s"
+        ]);
+
+        // -----------------------------
+        // 3️⃣ RESPUESTA FINAL
+        // -----------------------------
+        return response()->json([
+            'docentes' => $docentes,
+            'secciones' => $secciones,
+        ]);
     }
+
 
     public function gruposPorCicloAnioPeriodo(Request $request)
     {

@@ -7,6 +7,7 @@ const useDocenteStore = defineStore('docentes', () => {
     const {
         index: getDocentes,
         loading: docentesLoading,
+        show: getDocenteData,
         initialLoading: docentesFirstTimeLoading,
     } = useHttpRequest('/docente');
 
@@ -34,6 +35,7 @@ const useDocenteStore = defineStore('docentes', () => {
     const docentesDisponibles = ref([]);
 
     const modulosAsignados = ref([]);
+    const docenteData = ref(null);
 
     const setDocente = (authDocente) => {
         docente.value = authDocente;
@@ -42,6 +44,12 @@ const useDocenteStore = defineStore('docentes', () => {
     const setRequiereCambioPassword = (valor) => {
         requiereCambioPassword.value = valor;
     };
+
+    const getDatosDocente = async (idDocente) => {
+        const response = await getDocenteData(idDocente);
+        docenteData.value = response;
+    };
+
 
     const loadDocentes = async () => {
         const response = await getDocentes();
@@ -58,11 +66,12 @@ const useDocenteStore = defineStore('docentes', () => {
         modulosAsignados.value = response;
     }
 
-    const loadDocentesDisponibles = async ({ turno, id_periodo, id_grupo }) => {
+    const loadDocentesDisponibles = async ({ turno, id_periodo, id_modulo, id_grupo }) => {
 
         const response = await getDocentesDisponibles({
             turno,
             id_periodo,
+            id_modulo,
             id_grupo
         });
 
@@ -72,9 +81,11 @@ const useDocenteStore = defineStore('docentes', () => {
     return {
         docente,
         setDocente,
+        docenteData,
         requiereCambioPassword,
         setRequiereCambioPassword,
         docentes,
+        getDatosDocente,
         docentesLoading,
         docentesFirstTimeLoading,
         loadDocentes,

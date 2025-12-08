@@ -28,6 +28,49 @@ class UserController extends Controller
 
         return response()->json($users);
     }
+    public function indexUserData($idUser)
+    {
+        try {
+            $user = User::where('is_deleted', 0)
+                ->where('id', $idUser)
+                ->first();
+
+            if (!$user) {
+                throw new \Exception('Error|Usuario no encontrado--404', 13333);
+            }
+
+            // Bloquear si el usuario es super-directora
+            if ($user->roles()->where('name', 'super-directora')->exists()) {
+                throw new \Exception('Error|No autorizado para ver este usuario--401', 13333);
+            }
+
+            // Datos limpios del usuario SIN permisos pero con estado de cuenta
+            $userData = [
+                'id' => $user->id,
+                'usuario' => $user->usuario, // login
+                'name' => $user->name,
+                'apellido_paterno' => $user->apellido_paterno,
+                'apellido_materno' => $user->apellido_materno,
+                'dni' => $user->dni,
+                'email' => $user->email,
+                'telefono' => $user->telefono,
+                'direccion' => $user->direccion,
+                'fecha_nacimiento' => $user->fecha_nacimiento,
+
+                // 🔥 ESTADO DE LA CUENTA
+                'password_cambiada' => $user->password_cambiada, // 0 = nunca cambió, 1 = ya cambió
+                'status' => $user->status,                       // activo / inactivo
+
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+
+            return response()->json($userData);
+        } catch (\Exception $error) {
+            return $this->errorResponse($error);
+        }
+    }
+
 
     public function index_filter_status()
     {

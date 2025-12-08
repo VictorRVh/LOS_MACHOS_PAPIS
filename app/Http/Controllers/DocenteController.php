@@ -26,7 +26,41 @@ class DocenteController extends Controller
 
         return response()->json($usuariosDocentes);
     }
+    public function indexDataDocente($idUsuario)
+    {
+        // Buscar el usuario por su ID
+        $user = User::find($idUsuario);
 
+        if (!$user) {
+            return response()->json(['message' => 'Usuario no encontrado'], 404);
+        }
+
+        // Buscar datos del docente
+        $docente = Docente::where('user_id', $idUsuario)->first();
+
+        // Combinar datos en un solo objeto
+        $data = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'usuario' => $user->usuario,
+            'dni' => $user->dni,
+            'apellido_paterno' => $user->apellido_paterno,
+            'apellido_materno' => $user->apellido_materno,
+            'fecha_nacimiento' => $user->fecha_nacimiento,
+            'email' => $user->email,
+            'telefono' => $user->telefono,
+            'direccion' => $user->direccion,
+            'status' => $user->status,
+            // Datos del docente (si existen)
+            'codigo_modular' => $docente->codigo_modular ?? null,
+            'especialidad' => $docente->especialidad ?? null,
+            'condicion' => $docente->condicion ?? null,
+            'escala_magisterial' => $docente->escala_magisterial ?? null,
+            'rd_nombramiento' => $docente->rd_nombramiento ?? null,
+        ];
+
+        return response()->json($data);
+    }
 
     // Crear un nuevo docente
     public function store(Request $request)

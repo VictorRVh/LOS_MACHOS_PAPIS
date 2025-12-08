@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 
 import SearchBar from "../components/head_table/headSearch.vue";
-
+import { storeToRefs } from "pinia";
 import Table from "../components/table/Table.vue";
 import THead from "../components/table/THead.vue";
 import TBody from "../components/table/TBody.vue";
@@ -23,6 +23,9 @@ import useSlider from "../composables/useSlider";
 import useModalToast from "../composables/useModalToast";
 import useHttpRequest from "../composables/useHttpRequest";
 import useTableData from "../composables/tabla/useTableData";
+
+import userInfoModal from "../components/page/Docente/infoUsuarioSlider.vue"
+import RestaurarPasswordSlider from "../components/page/RestaurarContraseña.vue";
 
 
 const userStore = useUserStore();
@@ -53,6 +56,31 @@ const onDelete = (user) => {
 // const usuarios = ref(userStore.users)
 const usuarios = computed(() => userStore.users);
 
+const { userData } = storeToRefs(userStore);
+const showUserModal = ref(false);
+
+const showRestorePassword = ref(false);
+const selectedUserId = ref(null);
+
+
+
+const emitCloseModal = () => (showUserModal.value = false);
+
+const verUsuario = async (user) => {
+  await userStore.loadUserData(user.id);
+
+  if (userStore.userData) {
+    showUserModal.value = true; // abrir modal automáticamente
+  } else {
+    showToast(`"${userStore.userData?.name}" No encontramos datos del docente`, "warning");
+  }
+};
+
+
+const Restarurar = (user) => {
+  selectedUserId.value = user.id;   // guardamos el ID del usuario seleccionado
+  showRestorePassword.value = true; // abrimos el slider/modal
+};
 
 
 const {
@@ -82,21 +110,13 @@ const {
         </div>
 
         <div class="flex-between flex-row-reverse my-5">
-          <SearchBar
-            :totalResultados="usuariosOrdenados.length"
-            :campoOrden="'apellido_paterno'"
-            @search="filtrarUsuarios"
-          />
+          <SearchBar :totalResultados="usuariosOrdenados.length" :campoOrden="'apellido_paterno'"
+            @search="filtrarUsuarios" />
 
           <div class="font-inter text-md w-full">Lista de usuarios</div>
         </div>
       </div>
-      <Table
-        :paginacion="true"
-        :current-page="pagina"
-        :total-pages="totalPaginas"
-        @changePage="pagina = $event"
-      >
+      <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
         <THead>
           <Th>N°</Th>
           <Th>Nombres</Th>
@@ -111,11 +131,9 @@ const {
 
         <TBody>
           <Tr v-for="(user, index) in usuariosPaginados" :key="index">
-            <Td
-              ><span class="text-gray-800 dark:text-gray-300">{{
-                (pagina - 1) * itemsPorPagina + index + 1
-              }}</span></Td
-            >
+            <Td><span class="text-gray-800 dark:text-gray-300">{{
+              (pagina - 1) * itemsPorPagina + index + 1
+                }}</span></Td>
             <Td>{{ user.name }}</Td>
             <Td>{{ user.apellido_paterno }} {{ user.apellido_materno }}</Td>
             <Td>{{ user.dni }}</Td>
@@ -127,26 +145,18 @@ const {
             </Td>
             <Td>{{ user.created_at.slice(0, 10) }}</Td>
             <Td>
-              <span
-                :class="
-                  user.status === 1
-                    ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
-                    : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
-                "
-                class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1"
-              >
+              <span :class="user.status === 1
+                ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
+                : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
+                " class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
                 <span v-if="user.status === 1"> Activo ✓ </span>
                 <span v-else="user.status === 0"> Inactivo X </span>
               </span>
             </Td>
             <Td class="text-center text-gray-600 dark:text-gray-200">
-              <MenuTable
-                :actions="{ view: true, edit: true, delete: true, download: false }"
-                entity-label="usuario"
-                @view="verGrupo(user)"
-                @edit="showSlider(true, user)"
-                @delete="onDelete(user)"
-              />
+              <MenuTable :actions="{ view: true, edit: true, delete: true, download: false, custom1: true }"
+                entity-label="usuario" :labels="{ custom1: 'Restaurar Contraseña' }" @view="verUsuario(user)"
+                @edit="showSlider(true, user)" @delete="onDelete(user)" @custom1="Restarurar(user)" />
             </Td>
           </Tr>
         </TBody>
@@ -154,6 +164,9 @@ const {
     </div>
 
     <UserSlider :show="slider" :user="sliderData" @hide="hideSlider" />
+    <userInfoModal :show="showUserModal" :data="userData" @close="emitCloseModal" />
+    <RestaurarPasswordSlider :show="showRestorePassword" :userId="selectedUserId" @hide="showRestorePassword = false" />
+
   </AuthorizationFallback>
 
 </template>

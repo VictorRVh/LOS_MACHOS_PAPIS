@@ -64,6 +64,11 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\UserController::class,
         'index',
     ])->middleware('permission:todo-acceso-usuarios|ver-usuarios');
+        Route::get('users/{id}', [
+        \App\Http\Controllers\UserController::class,
+        'indexUserData',
+    ])->middleware('permission:todo-acceso-usuarios|ver-usuarios');
+
     Route::get('users_active', [
         \App\Http\Controllers\UserController::class,
         'index_filter_status',
@@ -425,6 +430,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('docente', [
         \App\Http\Controllers\DocenteController::class,
         'index',
+    ])->middleware('permission:todo-acceso-docentes|ver-docentes');
+    Route::get('docente/{id}', [
+        \App\Http\Controllers\DocenteController::class,
+        'indexDataDocente',
     ])->middleware('permission:todo-acceso-docentes|ver-docentes');
 
     Route::post('docente', [

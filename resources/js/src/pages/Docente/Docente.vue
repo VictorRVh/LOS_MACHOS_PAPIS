@@ -27,6 +27,7 @@ import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import useTableData from "../../composables/tabla/useTableData";
 import ChangePasswordModal from "../../components/page/ChangePasswordModal.vue";
+import DocenteInfoModal from "../../components/page/Docente/infoDocenteSlider.vue";
 
 const docenteStore = useDocenteStore();
 
@@ -37,6 +38,10 @@ const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteDocente, deleting } = useHttpRequest("/docente");
 
 const showModal = ref(false);
+const { docenteData } = storeToRefs(docenteStore);
+
+const showDocenteModal = ref(false);
+
 
 const { requiereCambioPassword } = storeToRefs(docenteStore);
 
@@ -51,12 +56,24 @@ const onDelete = (docente) => {
     if (isDeleted) {
       showToast(`"${docente?.name}" eliminado correctamente...`);
       docenteStore.loadDocentes();
-    }   else {
-      showToast(`"${docente?.name}" no se pudo eliminar...`,"warning");
+    } else {
+      showToast(`"${docente?.name}" no se pudo eliminar...`, "warning");
 
     }
   });
 };
+
+const verDocente = async (docente) => {
+  await docenteStore.getDatosDocente(docente.id);
+
+  if (docenteStore.docenteData) {
+    showDocenteModal.value = true; // abrir modal automáticamente
+  } else {
+    showToast(`"${docente?.name}" No encontramos datos del docente`, "warning");
+  }
+};
+
+const emitCloseModal = () => (showDocenteModal.value = false);
 
 /// FILTAR USUARIOS
 // const usuarios = ref(docenteStore.docentes)
@@ -111,7 +128,7 @@ const {
         </THead>
 
         <TBody>
-          <Tr v-for="(docente, index) in usuariosPaginados" :key="index">
+          <Tr v-for="(docente, index) in usuariosPaginados" :key="docente.id">
             <Td><span class="text-gray-800 dark:text-gray-300">{{
               (pagina - 1) * itemsPorPagina + index + 1
                 }}</span></Td>
@@ -123,8 +140,8 @@ const {
             <Td>{{ docente.created_at.slice(0, 10) }}</Td>
             <Td>
               <span :class="docente.status === 1
-                  ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
-                  : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
+                ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
+                : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
                 " class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
                 <span v-if="docente.status === 1"> Activo ✓ </span>
                 <span v-else="docente.status === 0"> Inactivo X </span>
@@ -132,7 +149,7 @@ const {
             </Td>
             <Td class="text-center text-gray-600 dark:text-gray-200">
               <MenuTable :actions="{ view: true, edit: true, delete: true, download: false }" entity-label="Docente"
-                @view="verGrupo(docente)" @edit="showSlider(true, docente)" @delete="onDelete(docente)" />
+                @view="verDocente(docente)" @edit="showSlider(true, docente)" @delete="onDelete(docente)" />
             </Td>
           </Tr>
         </TBody>
@@ -140,6 +157,7 @@ const {
     </div>
 
     <DocenteSlider :show="slider" :docente="sliderData ?? null" @hide="hideSlider" />
+    <DocenteInfoModal :show="showDocenteModal" :data="docenteData" @close="emitCloseModal" />
   </AuthorizationFallback>
   <!--<ChangePasswordModal v-if="showModal" @success="onPasswordChanged" />-->
 </template>

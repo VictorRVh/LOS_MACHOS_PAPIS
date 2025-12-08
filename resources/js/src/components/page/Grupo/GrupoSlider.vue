@@ -26,7 +26,7 @@ const props = defineProps({
   show: { type: Boolean, default: () => false },
   grupo: { type: [Object, null], default: () => null },
 });
-const emit = defineEmits(['hide']);
+const emit = defineEmits(['hide','updated']);
 
 const docenteStore = useDocenteStore();
 const programaStore = useProgramaStore();
@@ -43,7 +43,7 @@ const { showToast } = useModalToast();
 if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
 
 const title = computed(() =>
-  props.grupo ? `Actualizar grupo "${props.grupo?.especialidad || ''} - ${props.grupo?.seccion}"`  : 'Crear nuevo grupo'
+  props.grupo ? `Actualizar grupo "${props.grupo?.especialidad || ''} - ${props.grupo?.seccion}"` : 'Crear nuevo grupo'
 );
 
 const initialFormData = () => ({
@@ -103,6 +103,9 @@ watch(
       // cargar módulos
       if (especialidadId) {
         await grupoStore.loadModulos(especialidadId);
+
+
+        //formData.value.id_modulo = props.grupo.id_modulo;
       }
 
       // formData EXACTO a tus datos planos
@@ -121,8 +124,11 @@ watch(
         status: props.grupo.status,
       };
 
-      // cargar docentes disponibles
-      await loadDocentesDisponibles();
+      if (props.grupo?.id) {
+        
+        await loadDocentesDisponibles();
+      }
+
 
     } else {
       // crear nuevo
@@ -133,13 +139,8 @@ watch(
 );
 
 
-const secciones = [
-  { id: 'A', name: 'Sección A' },
-  { id: 'B', name: 'Sección B' },
-  { id: 'C', name: 'Sección C' },
-  { id: 'D', name: 'Sección D' },
-  { id: 'E', name: 'Sección E' }
-];
+const secciones = ref([]);
+
 
 
 const onProgramaChange = async (programaId) => {
@@ -164,20 +165,29 @@ const onPeriodoChange = async () => {
   await loadDocentesDisponibles();
 };
 
+const onModuloChange = async (moduloId) => {
+  // módulo ya seleccionado, ahora sí podemos cargar docentes
+  await loadDocentesDisponibles();
+};
 
 
 const loadDocentesDisponibles = async () => {
-  if (!formData.value.turno || !formData.value.id_periodo) return;
 
+  console.log("perido: ", formData.value.id_periodo," id_modulo: ", formData.value.id_modulo)
+  if (!formData.value.turno || !formData.value.id_periodo || !formData.value.id_modulo) return;
   await docenteStore.loadDocentesDisponibles({
     turno: typeof formData.value.turno === "object"
       ? formData.value.turno.value
       : formData.value.turno,
     id_periodo: formData.value.id_periodo,
+    id_modulo: formData.value.id_modulo,
     id_grupo: props.grupo?.id ?? null,
   });
-};
 
+  secciones.value = docenteStore.docentesDisponibles?.secciones;
+  docenteStore.docentesDisponibles = docenteStore.docentesDisponibles?.docentes;
+
+};
 
 
 const schema = yup.object({
@@ -234,7 +244,7 @@ const onSubmit = async () => {
   if (response?.data.id) {
     showToast(`Grupo ${props.grupo?.id ? "editado" : "creado"} exitosamente.`);
     grupoStore.loadGrupos();
-
+    emit("updated");
     if (!props.grupo?.id) {
       formData.value = initialFormData();
     }
@@ -313,7 +323,7 @@ const onSubmit = async () => {
             :error="formErrors?.fecha_entrega_acta" />
           <FormLabelError label="Sección" :error="formErrors?.seccion" required>
 
-            <BaseSelectGrupo v-model="formData.seccion" :options="secciones" label="name"
+            <BaseSelectGrupo v-model="formData.seccion" :options="secciones" label="nombre"
               placeholder="Seleccione una sección" style="--vs-dropdown-max-height: 90px" />
           </FormLabelError>
 

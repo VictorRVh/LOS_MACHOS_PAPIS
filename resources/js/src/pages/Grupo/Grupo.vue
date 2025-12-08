@@ -101,7 +101,7 @@ const onDelete = (grupo) => {
     async (confirmed) => {
       if (!confirmed) return;
 
-      const isDeleted = await deleteGrupo(grupo.id_grupo);
+      const isDeleted = await deleteGrupo(grupo.id);
 
       if (isDeleted) {
         showToast("Grupo eliminado correctamente.");
@@ -247,7 +247,7 @@ const gruposAgrupados = computed(() => {
                 <td class="py-3">{{ grupo.modulo }}</td>
                 <td class="text-center py-3">{{ grupo.seccion }}</td>
                 <td class="text-center py-3">{{ grupo.turno }}</td>
-                <td class="py-3">{{ grupo.convenio }}</td>
+                <td class="py-3">{{ grupo.convenio_nombre }}</td>
                 <td class="text-center text-green-700 font-semibold py-3"> {{ grupo.cantidad_estudiantes }} </td>
                 <td class="py-3">{{ grupo.docente }}</td>
                 <td class="text-center py-3">
@@ -268,7 +268,7 @@ const gruposAgrupados = computed(() => {
         </div>
       </div>
     </div> <!-- Slider CRUD -->
-    <GrupoSlider :show="slider" :grupo="sliderData" @hide="hideSlider" />
+    <GrupoSlider :show="slider" :grupo="sliderData" @hide="hideSlider" @updated="filtrarPorSeleccion()"  />
   </AuthorizationFallback>
 </template>
 <style scoped>

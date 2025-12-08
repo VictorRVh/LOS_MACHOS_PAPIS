@@ -1,43 +1,30 @@
 <template>
   <div
-    class="rounded-2xl shadow-xl w-full overflow-hidden border
+    class="rounded-2xl shadow-xl w-full max-w-xl max-h-[80vh] overflow-y-auto border
     bg-white dark:bg-gray-800
     border-gray-200 dark:border-gray-700"
   >
 
     <!-- HEADER AZUL -->
-    <div v-if="showHeader" class="bg-cetpro h-28 relative">
-      <div
-        class="absolute left-1/2 transform -translate-x-1/2 -bottom-12
-        w-24 h-24 bg-white dark:bg-gray-700
-        rounded-full shadow-md flex items-center justify-center"
-      >
-        <img
-          :src="avatarSrc"
-          alt="avatar"
-          class="w-20 h-20 rounded-full object-cover"
-        />
-      </div>
-    </div>
 
     <!-- TITULO/TEXTO DEBAJO DEL AVATAR -->
-    <div class="text-center mt-14">
-      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">
+    <div class="text-center pt-3  pb-1 px-4 bg-cetpro">
+      <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
         {{ title }}
       </h2>
 
       <p
         v-if="subtitle"
-        class="text-gray-500 dark:text-gray-400 text-sm -mt-1"
+        class="text-gray-100 dark:text-gray-300 text-xs my-1"
       >
         {{ subtitle }}
       </p>
     </div>
 
     <!-- SECCIÓN DE INFORMACIÓN -->
-    <div class="px-4 mt-6">
+    <div class="px-4 mt-4">
       <div
-        class="py-2 rounded text-center font-medium
+        class="py-1 rounded text-center font-medium text-xs
         bg-gray-100 dark:bg-gray-700
         text-gray-700 dark:text-gray-200"
       >
@@ -46,7 +33,7 @@
     </div>
 
     <!-- LISTA -->
-    <div class="px-10 mt-4 space-y-3 text-sm">
+    <div class="px-6 mt-3 space-y-2 text-xs">
       <div
         v-for="(item, index) in info"
         :key="index"
@@ -57,7 +44,7 @@
           {{ item.label }}:
         </span>
 
-        <span class="text-right text-gray-800 dark:text-gray-200">
+        <span class="text-right text-gray-800 dark:text-gray-200 truncate max-w-[60%]">
           {{ item.value }}
         </span>
       </div>
@@ -73,7 +60,7 @@
       <button
         @click="$emit('close')"
         class="bg-green-600 hover:bg-green-700
-        text-white px-4 py-2 rounded-md"
+        text-white px-4 py-2 rounded-md text-sm"
       >
         Cerrar
       </button>
@@ -108,3 +95,14 @@ const avatarSrc = computed(() =>
   `https://ui-avatars.com/api/?name=${encodeURIComponent(props.avatarName)}&background=random&size=128`
 );
 </script>
+
+<style scoped>
+/* animación de entrada */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+</style>

@@ -83,7 +83,10 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\UserController::class,
         'update',
     ])->middleware('permission:todo-acceso-usuarios|editar-usuarios');
-
+        Route::patch('usersRestaurarPassword/{userId}', [
+        \App\Http\Controllers\UserController::class,
+        'restaurarPassword',
+    ])->middleware('permission:todo-acceso-usuarios|editar-usuarios');
     Route::delete('users/{userId}', [
         \App\Http\Controllers\UserController::class,
         'destroy',

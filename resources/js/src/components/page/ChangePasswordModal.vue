@@ -1,84 +1,77 @@
 <template>
-  <!-- Overlay de fondo -->
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300 ease-in-out">
-    
-    <!-- Contenedor del Modal -->
-    <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md m-4 transform transition-all duration-300 ease-in-out scale-95 opacity-0 animate-fade-in-scale">
-      
-      <!-- Encabezado con Insignia y Títulos -->
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+
+    <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md m-4 animate-fade-in-scale">
+
+      <!-- Título -->
       <div class="flex flex-col items-center text-center mb-6">
-        <!-- 
-          IMPORTANTE: Asegúrate de que tu imagen 'insignia.png' 
-          esté en la carpeta `public/img/` de tu proyecto.
-        -->
-        
         <h2 class="text-2xl font-bold text-gray-800">Crea tu nueva contraseña</h2>
-        <p class="text-sm text-gray-500 mt-1">Por tu seguridad, es necesario que establezcas una contraseña personal para tu cuenta.</p>
+        <p class="text-sm text-gray-500 mt-1">Por tu seguridad, establece una contraseña personal.</p>
       </div>
 
-      <!-- Formulario -->
       <form @submit.prevent="onSubmit" class="space-y-4">
-        
-        <!-- Campo Nueva Contraseña -->
+
+        <!-- Nueva contraseña -->
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
+
           <div class="relative">
+
+            <!-- Icono izquierda -->
             <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-              <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
-              </svg>
+              <LockClosedIcon class="h-5 w-5 text-gray-400" />
             </span>
-            <input
-              id="password"
-              v-model="form.password"
-              type="password"
-              class="block w-full border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition"
-              placeholder="Mínimo 6 caracteres"
-              required
-            />
+
+            <!-- Input -->
+            <input v-model="form.password" :type="showPass ? 'text' : 'password'" class="block w-full border-gray-300 rounded-lg pl-10 pr-10 py-2 
+                     focus:ring-2 focus:ring-cyan-500 transition" placeholder="Mínimo 6 caracteres" required />
+
+            <!-- Icono mostrar/ocultar -->
+            <button type="button" @click="showPass = !showPass"
+              class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
+              <EyeIcon v-if="!showPass" class="h-5 w-5" />
+              <EyeSlashIcon v-else class="h-5 w-5" />
+            </button>
           </div>
         </div>
 
-        <!-- Campo Confirmar Contraseña -->
+        <!-- Confirmar contraseña -->
         <div>
-          <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
+
           <div class="relative">
-             <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-              <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
-              </svg>
+
+            <!-- Icono izquierda -->
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+              <LockClosedIcon class="h-5 w-5 text-gray-400" />
             </span>
-            <input
-              id="password_confirmation"
-              v-model="form.password_confirmation"
-              type="password"
-              class="block w-full border-gray-300 rounded-lg pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition"
-              placeholder="Vuelve a escribir la contraseña"
-              required
-            />
+
+            <input v-model="form.password_confirmation" :type="showConfirm ? 'text' : 'password'" class="block w-full border-gray-300 rounded-lg pl-10 pr-10 py-2 
+                     focus:ring-2 focus:ring-cyan-500 transition" placeholder="Vuelve a escribir la contraseña"
+              required />
+
+            <!-- Icono mostrar/ocultar -->
+            <button type="button" @click="showConfirm = !showConfirm"
+              class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
+              <EyeIcon v-if="!showConfirm" class="h-5 w-5" />
+              <EyeSlashIcon v-else class="h-5 w-5" />
+            </button>
           </div>
         </div>
-        
-        <!-- Mensaje de Error -->
-        <div v-if="error" class="bg-red-50 border-l-4 border-red-400 text-red-700 p-3 rounded-md" role="alert">
+
+        <!-- Error -->
+        <div v-if="error" class="bg-red-50 border-l-4 border-red-400 text-red-700 p-3 rounded-md">
           <p class="text-sm">{{ error }}</p>
         </div>
       </form>
-      
-      <!-- Botones de Acción -->
+
+      <!-- Botones -->
       <div class="flex justify-end mt-8 gap-3">
-        <button
-          type="button"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition"
-          @click="closeModal"
-        >
+        <button type="button" class="px-4 py-2 bg-gray-100 rounded-lg" @click="closeModal">
           Cancelar
         </button>
-        <button
-          type="submit"
-          class="px-6 py-2 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 shadow-sm transition"
-          @click="onSubmit"
-        >
+
+        <button type="submit" class="px-6 py-2 bg-cyan-600 text-white rounded-lg" @click="onSubmit">
           Guardar y Continuar
         </button>
       </div>
@@ -91,15 +84,22 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import useUserStore from '@/store/useUserStore';
+import useModalToast from "../../composables/useModalToast";
+// IMPORTAR ICONOS OFICIALES (esto faltaba)
+import { EyeIcon, EyeSlashIcon, LockClosedIcon } from "@heroicons/vue/24/outline";
 
 const emit = defineEmits(['close', 'success']);
 const userStore = useUserStore();
-
+const { showToast } = useModalToast();
 const form = ref({
   password: '',
   password_confirmation: '',
 });
+
 const error = ref('');
+
+const showPass = ref(false);
+const showConfirm = ref(false);
 
 const closeModal = () => {
   form.value = { password: '', password_confirmation: '' };
@@ -116,7 +116,7 @@ const onSubmit = async () => {
   }
 
   if (form.value.password !== form.value.password_confirmation) {
-    error.value = 'Las contraseñas no coinciden. Por favor, verifica.';
+    error.value = 'Las contraseñas no coinciden.';
     return;
   }
 
@@ -128,27 +128,10 @@ const onSubmit = async () => {
     });
 
     emit('success', form.value.password);
+    showToast("Contraseña actualizada correctamente.");
     closeModal();
   } catch (err) {
-    error.value = err.response?.data?.message || 'Ocurrió un error al intentar cambiar la contraseña.';
+    error.value = err.response?.data?.message || 'Error al intentar cambiar la contraseña.';
   }
 };
 </script>
-
-<style>
-/* Animación para la entrada del modal */
-@keyframes fade-in-scale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-fade-in-scale {
-  animation: fade-in-scale 0.3s ease-out forwards;
-}
-</style>

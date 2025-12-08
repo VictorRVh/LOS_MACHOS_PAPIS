@@ -2,7 +2,7 @@
     <!-- Fondo oscuro -->
     <div v-if="show" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
         <!-- Modal -->
-        <div class="rounded-xl shadow-2xl w-full max-w-xl animate-fadeIn">
+        <div class="rounded-xl shadow-2xl  w-[500px] max-w-xl animate-fadeIn">
 
             <!-- Card con información -->
             <UserInfoCard v-if="data" :title="`${data.apellidos}, ${data.nombre}`"

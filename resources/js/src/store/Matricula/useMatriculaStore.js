@@ -128,6 +128,8 @@ const useMatriculaStore = defineStore('matricula', () => {
 
     const loadReservaMatricula = async (idMatricula) => {
         const response = await getReservaMatricula(idMatricula)
+        //console.log("store: ",response)
+        return response;
     };
 
 

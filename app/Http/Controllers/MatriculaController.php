@@ -621,14 +621,19 @@ class MatriculaController extends Controller
 
         // Alternar entre 0 y 1
         $matricula->reserva = !$matricula->reserva;
+
+        // Guardar fecha actual en Lima si se reserva, sino null si se quita
+        $matricula->fecha_reserva = $matricula->reserva ? now()->timezone('America/Lima') : null;
+
         $matricula->save();
 
         return response()->json([
             'success' => true,
             'message' => $matricula->reserva ? 'Matrícula reservada.' : 'Reserva quitada.',
-            'data' => $matricula
+           // 'data' => $matricula
         ]);
     }
+
 
     // LISTA DE RESERVAS DE MATRICULA
 

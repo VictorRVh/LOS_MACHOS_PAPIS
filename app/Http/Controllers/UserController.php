@@ -327,4 +327,55 @@ class UserController extends Controller
             return $this->errorResponse($error);
         }
     }
+
+    public function restaurarPassword(Request $request, $id)
+    {
+        try {
+
+            $user = User::find($id);
+
+            if (!$user) {
+                throw new \Exception('Error|Usuario no encontrado --404', 13333);
+            }
+
+            // 🔥 No permitir restaurar a super-directora
+            if ($user->roles()->where('name', 'super-directora')->exists()) {
+                throw new \Exception('Error|No autorizado para restaurar contraseña de este usuario--401', 13333);
+            }
+
+            // 🔥 NUEVA CONTRASEÑA (elige una)
+            // 1) Contraseña por defecto fija
+            // $newPassword = "12345678";
+
+            // 2) Contraseña igual al DNI del usuario
+            $newPassword = $request->password;
+
+            // 3) Contraseña aleatoria
+            // $newPassword = Str::random(10);
+
+            // Guardar contraseña restaurada
+            $user->password = Hash::make($newPassword);
+
+            // 🔥 MUY IMPORTANTE: marcar como que NO ha cambiado su contraseña
+            $user->password_cambiada = 0;
+
+            $user->save();
+
+            // Registrar actividad en tu sistema
+            $this->registrarActividad(
+                "Restauró la contraseña del usuario {$user->name} {$user->apellido_paterno} (DNI: {$user->dni})",
+                "Restaurado"
+            );
+
+             return response()->json([
+            'message' => 'Contraseña restaurada correctamente',
+            'user' => [
+                'id' => $user->id,
+                'nombre' => $user->name . ' ' . $user->apellido_paterno . ' ' . $user->apellido_materno,
+            ]
+        ]);
+        } catch (\Exception $error) {
+            return $this->errorResponse($error);
+        }
+    }
 }

@@ -5,15 +5,19 @@ import useHttpRequest from '../../composables/useHttpRequest';
 
 const useSesionesStore = defineStore('Sesiones', () => {
     const {
-        index: getSesiones,
+        indexWithParams: getSesiones,
         show: getSesionesOne,
         loading: sesionesLoading,
         initialLoading: sesionesFirstTimeLoading,
     } = useHttpRequest('/sesion_docente');
 
     const sesion = ref([]);
-    const loadSesion = async (idGrupo) => {
-        const res = await getSesionesOne(idGrupo);
+
+    const loadSesion = async ({ id_grupo, tipo_entrega }) => {
+        const res = await getSesiones({
+            id_grupo,
+            tipo_entrega
+        });
         sesion.value = res;
     };
 

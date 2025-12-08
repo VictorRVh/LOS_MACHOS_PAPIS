@@ -233,13 +233,13 @@ const publicarMasivo = async (prog) => {
       return showToast("No se puede publicar masivamente.", "warning");
     }
 
-    showToast("Publicación masiva realizada correctamente", "success");
+    showToast("Publicación para todos los grupos realizada correctamente", "success");
     modalPublicarAbierto.value = false;
     await fetchProgramaciones(selectedPeriodo.value);
 
   } catch (error) {
     console.error(error);
-    showToast("Error en la publicación masiva.", "error");
+    showToast("Error en la publicación para todos los grupos.", "error");
   } finally {
     updating.value = false;
   }

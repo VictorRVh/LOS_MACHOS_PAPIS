@@ -735,10 +735,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-sesiones-docente|ver-sesiones-docente');
 
-    Route::get('sesion_docente/{id}', [
+    Route::get('sesion_docente', [
         \App\Http\Controllers\SesionesController::class,
         'indexOneSesion',
     ])->middleware('permission:todo-acceso-sesiones-docente|ver-sesiones-docente');
+    
     Route::get('programacion_sesion_docente/{id}', [
         \App\Http\Controllers\SesionesController::class,
         'indexListSesionesDocente',

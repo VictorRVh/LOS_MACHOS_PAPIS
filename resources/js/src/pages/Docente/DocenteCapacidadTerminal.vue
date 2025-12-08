@@ -16,6 +16,7 @@ import CapacidadTerminalSlider from "../../components/page/CapacidadesTerminales
 import useCapacidadTerminalStore from "../../store/CapacidadTerminal/UseCapacidadTerminalStore";
 import useCapacidadTerminalCalificacionesStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
 import { ref, computed } from "vue";
+import useSesionesStore from "../../store/Sesion/useSesionStore";
 
 const props = defineProps({
   id: {
@@ -28,19 +29,45 @@ const props = defineProps({
   },
 });
 
+const sesionStore = useSesionesStore();
 const capacidadStore = useCapacidadTerminalStore();
 const calificacionCapacidad = useCapacidadTerminalCalificacionesStore();
+
+if (!sesionStore?.sesion?.length) {
+  await sesionStore.loadSesion({
+    id_grupo: props.id,
+    tipo_entrega: 1
+  });
+}
 
 if (!capacidadStore.capacidadTerminal?.length)
   await capacidadStore.loadCapacidadTerminal(props.id);
 
-console.log('denideideide', props.idModulo)
+// console.log('denideideide', props.idModulo)
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("capacidad-terminal-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteCapacidad, deleting } = useHttpRequest("/capacidad_terminal");
 
+const canEditCapacidades = computed(() => {
+  const sesion = sesionStore?.sesion;
+  if (!sesion) return false; // no hay sesión cargada
+
+  const ahora = new Date();
+  const fechaInicio = new Date(sesion.fecha_inicio);
+  const fechaFin = new Date(sesion.fecha_fin);
+
+  // Solo permitimos si estamos dentro del rango y no está finalizado
+  return (ahora >= fechaInicio && ahora <= fechaFin) && sesion.estado !== 4;
+});
+
 const onDelete = (capacidad) => {
+  if (!canEditCapacidades.value) {
+    console.log('NO SE PUEDE ELIMINAR')
+    showToast('No se puede eliminar esta unidad, la sesión está fuera de rango o finalizada.', 'warning');
+    return;
+  }
+
   if (deleting.value) return;
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
@@ -85,19 +112,67 @@ const indicesArray = computed(() => {
 
 });
 
+const estadoTexto = computed(() => {
+  if (!sesionStore?.sesion) return 'Sin programación'
+  switch (sesionStore?.sesion?.estado) {
+    case 0: return 'Pendiente'
+    case 1: return 'En curso'
+    case 2: return 'En curso'
+    case 3: return 'En curso'
+    case 4: return 'Finalizada'
+    default: return 'Desconocido'
+  }
+})
 
 </script>
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-capacidad-terminal-docente', 'ver-capacidad-terminal-docente']">
 
+    <div v-if="sesionStore?.sesion"
+      class="col-span-full bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-2 px-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+      <div>
+        <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200">
+          Programación de Unidades Didácticas
+        </h3>
+        <p class="text-sm text-gray-700 dark:text-gray-300">
+          Del
+          <strong>
+            {{
+              new Date(sesionStore?.sesion?.fecha_inicio).toLocaleDateString(
+                'es-PE',
+                { day: '2-digit', month: 'long', year: 'numeric' }
+              )
+            }}
+          </strong>
+          al
+          <strong>
+            {{
+              new Date(sesionStore?.sesion?.fecha_fin).toLocaleDateString(
+                'es-PE',
+                { day: '2-digit', month: 'long', year: 'numeric' }
+              )
+            }}
+          </strong>
+        </p>
+      </div>
+
+      <div class="px-3 py-1 rounded-full text-sm font-bold" :class="{
+        'bg-yellow-100 text-yellow-800': sesionStore?.sesion?.estado === 0,
+        'bg-green-100 text-green-800': sesionStore?.sesion?.estado === 1,
+        'bg-gray-200 text-gray-800': sesionStore?.sesion?.estado === 2,
+      }">
+        Estado: {{ estadoTexto }}
+      </div>
+    </div>
+
     <div class="flex flex-col lg:flex-row px-6 gap-6">
 
       <!-- FORMULARIO -->
       <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
 
-        <CapacidadTerminalSlider :show="slider" :idGrupo="id"
-          :indexCapacidades="indicesArray" :capacidad="sliderData" @hide="hideSlider" />
+        <CapacidadTerminalSlider :show="slider" :idGrupo="id" :indexCapacidades="indicesArray" :capacidad="sliderData"
+          @hide="hideSlider" />
       </div>
 
       <!-- TABLA -->
@@ -108,7 +183,6 @@ const indicesArray = computed(() => {
             <Th>Nombre Capacidad</Th>
             <Th>Fecha Inicio</Th>
             <Th>Fecha Fin</Th>
-            <!-- <Th>Estado</Th> -->
             <Th>Acciones</Th>
           </THead>
 
@@ -118,15 +192,9 @@ const indicesArray = computed(() => {
               <Td>{{ capacidad?.nombre_capacidad }}</Td>
               <Td>{{ capacidad?.fecha_inicio }}</Td>
               <Td>{{ capacidad?.fecha_fin }}</Td>
-              <!-- <Td>
-                <span class="px-2 py-1 rounded text-xs font-semibold"
-                  :class="capacidad.status === 1 ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'">
-                  {{ capacidad.status === 1 ? 'Activo' : 'Inactivo' }}
-                </span>
-              </Td> -->
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">
-                  <EditButton @click="showSlider(true, capacidad)" />
+                  <EditButton @click="showSlider(true, capacidad)" :disabled="!canEditCapacidades" />
                   <DeleteButton @click="onDelete(capacidad)" />
                 </div>
               </Td>

@@ -44,7 +44,10 @@ const asist = ref(false);
 const asistData = ref(null);
 
 if (!sesionStore?.sesion?.length) {
-  await sesionStore.loadSesion(props.id)
+  await sesionStore.loadSesion({
+    id_grupo: props.id,
+    tipo_entrega: 2
+  });
 }
 
 if (!programacionSesion?.sesiones?.length) {

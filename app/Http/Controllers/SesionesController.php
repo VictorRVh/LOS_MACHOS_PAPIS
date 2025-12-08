@@ -22,12 +22,8 @@ class SesionesController extends Controller
     public function indexOneSesion(Request $request)
     {
 
-        $idGrupo = $request->id_grupo;       // <-- AHORA COINCIDE
-        $tipoEntrega = $request->tipo_entrega; // <-- AHORA COINCIDE
-
-        if (!$idGrupo || !$tipoEntrega) {
-            return response()->json(['error' => 'Faltan parámetros'], 422);
-        }
+        $idGrupo = $request->id_grupo;
+        $tipoEntrega = $request->tipo_entrega; 
 
         if (!$idGrupo || !$tipoEntrega) {
             return response()->json(['error' => 'Faltan parámetros'], 422);
@@ -117,23 +113,23 @@ class SesionesController extends Controller
             'fechas.*' => 'date',
         ]);
 
-        // ✅ Ordenar y obtener fecha inicial y final
+        // Ordenar y obtener fecha inicial y final
         $fechas = collect($request->fechas)->sort()->values();
         $fecha_inicio = $fechas->first();
         $fecha_fin = $fechas->last();
 
-        // ✅ Determinar estado según la fecha actual
+        // Determinar estado según la fecha actual
         $hoy = now()->toDateString();
 
         if ($fecha_inicio > $hoy) {
             $status = 0; // Pendiente
         } elseif ($fecha_fin < $hoy) {
-            $status = 2; // Finalizada
+            $status = 3; // Finalizada
         } else {
             $status = 1; // En curso
         }
 
-        // ✅ Crear la sesión
+        // Crear la sesión
         $sesion = Sesiones::create([
             'nombre_sesion' => $request->nombre_sesion,
             'descripcion' => $request->descripcion,
@@ -144,16 +140,16 @@ class SesionesController extends Controller
             'status' => $status,
         ]);
 
-        // ✅ Registrar las fechas en calendario_admin relacionadas a esta sesión
+        // Registrar las fechas en calendario_admin relacionadas a esta sesión
         foreach ($fechas as $fecha) {
             CalendarioAdmin::create([
-                'id_sesion' => $sesion->id, // 🔹 relación directa
+                'id_sesion' => $sesion->id,
                 'fecha' => $fecha,
                 'laborable' => 0,
             ]);
         }
 
-        // ✅ Respuesta con la sesión y las fechas creadas
+        // Respuesta con la sesión y las fechas creadas
         return response()->json([
             'message' => 'Sesión creada correctamente',
             'sesion' => [

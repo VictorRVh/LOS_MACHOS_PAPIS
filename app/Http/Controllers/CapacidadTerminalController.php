@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CapacidadTerminal;
+use App\Models\EntregaDocente;
 use App\Models\Grupo;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -70,12 +71,50 @@ class CapacidadTerminalController extends Controller
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'id_grupo' => 'required|exists:grupo,id',
             'status' => 'required|in:0,1,2,3',
+            // 'tipo_entrega' => 'required|integer' 
         ]);
 
+        // Obtener la programación de la sesión
+        $sesion = EntregaDocente::where('id_grupo', $request->id_grupo)
+            ->whereHas('entregaDocenteAdmin', function ($q) use ($request) {
+                $q->where('tipo_entrega', $request->tipo_entrega ?? 1);
+            })
+            ->first();
+
+        if (!$sesion) {
+            return response()->json([
+                'error' => 'No existe programación para este grupo.'
+            ], 422);
+        }
+
+        // 1) Si está finalizado → prohibir
+        if ($sesion->estado == 4) {
+            // return response()->json([
+            //     'error' => 'La programacion esta finalizada. No se pueden crear nuevas capacidades.'
+            // ], 403);
+
+            return response()->json([
+                'errorCode' => 13333,
+                'errorMessage' => 'La programacion esta finalizada. No se pueden crear nuevas capacidades.',
+                // 'errorText' => $e->getMessage()
+            ], 500);
+        }
+
+        // 2) Validar rango de fechas
+        // $ahora = now();
+
+        // if ($ahora->lt($sesion->fecha_inicio) || $ahora->gt($sesion->fecha_fin)) {
+        //     return response()->json([
+        //         'error' => 'Fuera del periodo permitido. No se pueden crear capacidades.'
+        //     ], 403);
+        // }
+
+        // Si todo está OK → crear
         $capacidad = CapacidadTerminal::create($request->all());
 
         return response()->json($capacidad, 201);
     }
+
 
     // PUT/PATCH /api/capacidad-terminal/{id}
     public function update(Request $request, $id)

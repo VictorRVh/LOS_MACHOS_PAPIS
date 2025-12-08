@@ -38,8 +38,8 @@ class Sesiones extends Model
     const STATUS = [
         0 => 'Pendiente',
         1 => 'En curso',
-        2 => 'Finalizada',
-        3 => 'Anulada',
+        2 => 'Trabajada',
+        3 => 'No Trabajada',
     ];
 
     public function getStatusTextoAttribute()

@@ -69,15 +69,77 @@ class NominaMatriculasExport
         $sheet->getStyle('G10')->getFont()->setBold(true);
 
         // 3. Llenar datos
-        $fila = 17;
+        $filaInicio = 17;
+        $totalMatriculas = $matriculas->count();
+        $filasPlantilla = 30;
+
+        if ($totalMatriculas > $filasPlantilla) {
+            $filasAInsertar = $totalMatriculas - $filasPlantilla;
+            $filaModelo = $filaInicio;
+
+            // Obtener las celdas combinadas de la fila modelo
+            $mergedCells = [];
+            foreach ($sheet->getMergeCells() as $mergedCell) {
+                if (strpos($mergedCell, (string)$filaModelo) !== false) {
+                    $mergedCells[] = $mergedCell;
+                }
+            }
+
+            // Insertar filas
+            $sheet->insertNewRowBefore($filaInicio + $filasPlantilla, $filasAInsertar);
+
+            // Copiar estilos y celdas combinadas
+            for ($i = 0; $i < $filasAInsertar; $i++) {
+                $filaDestino = $filaInicio + $filasPlantilla + $i;
+
+                // Obtener el estilo de la fila modelo como array
+                $estiloArray = $sheet->getStyle("A{$filaModelo}:O{$filaModelo}")->exportArray();
+
+                // Aplicar el estilo a la fila destino
+                $sheet->getStyle("A{$filaDestino}:O{$filaDestino}")->applyFromArray($estiloArray);
+
+                // Copiar altura de fila
+                $alturaFila = $sheet->getRowDimension($filaModelo)->getRowHeight();
+                if ($alturaFila !== null) {
+                    $sheet->getRowDimension($filaDestino)->setRowHeight($alturaFila);
+                }
+
+                // Aplicar celdas combinadas
+                foreach ($mergedCells as $mergedCell) {
+                    preg_match('/([A-Z]+)(\d+):([A-Z]+)(\d+)/', $mergedCell, $matches);
+                    if (count($matches) === 5) {
+                        $colInicio = $matches[1];
+                        $colFin = $matches[3];
+                        $nuevoRango = "{$colInicio}{$filaDestino}:{$colFin}{$filaDestino}";
+                        $sheet->mergeCells($nuevoRango);
+                    }
+                }
+            }
+        }
+
+        // 4. Llenar datos de estudiantes
+        $fila = $filaInicio;
         foreach ($matriculas as $index => $matricula) {
             $est = $matricula->estudiante;
-            // $sheet->setCellValue("B{$fila}", str_pad($index + 1, 2, '0', STR_PAD_LEFT));
+
+            $sheet->setCellValue("B{$fila}", str_pad($index + 1, 2, '0', STR_PAD_LEFT));
             $sheet->setCellValue("C{$fila}", $est->nro_documento);
             $sheet->setCellValue("F{$fila}", "{$est->apellido_paterno} {$est->apellido_materno}, {$est->nombre}");
             $sheet->setCellValue("K{$fila}", $est->sexo);
             $sheet->setCellValue("L{$fila}", $est->fecha_nacimiento ?? '');
+
             $fila++;
+        }
+
+        // 5. Limpiar filas sobrantes
+        if ($totalMatriculas < $filasPlantilla) {
+            for ($i = $filaInicio + $totalMatriculas; $i < $filaInicio + $filasPlantilla; $i++) {
+                $sheet->setCellValue("B{$i}", '');
+                $sheet->setCellValue("C{$i}", '');
+                $sheet->setCellValue("F{$i}", '');
+                $sheet->setCellValue("K{$i}", '');
+                $sheet->setCellValue("L{$i}", '');
+            }
         }
 
         return $spreadsheet;

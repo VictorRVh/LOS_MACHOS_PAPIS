@@ -298,7 +298,7 @@ const EliminarMatricula = (idMatricula, nombre) => {
                     <Th class="text-center">Acciones</Th>
                 </THead>
 
-                <TBody>
+                <TBody :filas="matriculadosOrdenados.length">
                     <Tr v-for="(matricula, index) in matriculadosPaginados" :key="matricula.id_matricula"
                         class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
 

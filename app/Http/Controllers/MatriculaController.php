@@ -350,7 +350,37 @@ class MatriculaController extends Controller
     }
 
 
-    // END POINTS PARA MATRICULA
+
+    public function usarReservar($id)
+    {
+        // Buscar la matrícula
+        $matricula = Matricula::find($id);
+
+        if (!$matricula) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Matrícula no encontrada.'
+            ], 404);
+        }
+
+        // Solo se puede usar si reserva = 1
+        if ($matricula->reserva != 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta matrícula no está en estado de reserva.'
+            ], 400);
+        }
+
+        // Cambiar estado de reserva a 3 (usado)
+        $matricula->reserva = 3;
+        $matricula->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Reserva usada correctamente.',
+        ],204);
+    }
+
 
     public function getEspecialidadesPorPrograma($idPrograma)
     {
@@ -630,7 +660,7 @@ class MatriculaController extends Controller
         return response()->json([
             'success' => true,
             'message' => $matricula->reserva ? 'Matrícula reservada.' : 'Reserva quitada.',
-           // 'data' => $matricula
+            // 'data' => $matricula
         ]);
     }
 
@@ -681,8 +711,10 @@ class MatriculaController extends Controller
                 'pagos.aporte',
                 'especialidad_madre.nombre_especialidad as especialidad',
                 'modulos.descripcion as modulo',
-                'grupo.fecha_inicio',
-                'grupo.fecha_fin'
+                'grupo.turno',
+                'grupo.seccion',
+                'matricula.fecha_reserva',   // <-- agregar esto
+                'matricula.created_at'     // <-- agregar esto si quieres saber si ya confirmó matrícula
             )
             ->orderBy('estudiante.apellido_paterno', 'asc')
             ->get();

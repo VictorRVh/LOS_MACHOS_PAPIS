@@ -1005,6 +1005,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'reservar',
     ])->middleware('permission:ver-matriculas');
 
+    Route::delete('reserva/{id}', [
+        \App\Http\Controllers\MatriculaController::class,
+        'usarReservar',
+    ])->middleware('permission:ver-matriculas|editar-matriculas');
+
     Route::get('listaReserva', [
         \App\Http\Controllers\MatriculaController::class,
         'matriculadosConReserva',

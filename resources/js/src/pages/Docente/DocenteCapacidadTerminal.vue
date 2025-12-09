@@ -63,7 +63,7 @@ const canEditCapacidades = computed(() => {
 
 const onDelete = (capacidad) => {
   if (!canEditCapacidades.value) {
-    console.log('NO SE PUEDE ELIMINAR')
+    // console.log('NO SE PUEDE ELIMINAR')
     showToast('No se puede eliminar esta unidad, la sesión está fuera de rango o finalizada.', 'warning');
     return;
   }
@@ -129,7 +129,7 @@ const estadoTexto = computed(() => {
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-capacidad-terminal-docente', 'ver-capacidad-terminal-docente']">
 
-    <div v-if="sesionStore?.sesion"
+    <div v-if="sesionStore?.sesion.id"
       class="col-span-full bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-2 px-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
       <div>
         <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200">
@@ -164,6 +164,18 @@ const estadoTexto = computed(() => {
       }">
         Estado: {{ estadoTexto }}
       </div>
+    </div>
+
+    <div v-else
+      class="col-span-full bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-xl p-3 flex flex-col">
+
+      <h3 class="text-lg font-semibold text-red-800 dark:text-red-200">
+        No existe una programación para crear unidades didácticas
+      </h3>
+
+      <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+        Debe existir la programación para crear unidades. Solicítala a coordinación.
+      </p>
     </div>
 
     <div class="flex flex-col lg:flex-row px-6 gap-6">

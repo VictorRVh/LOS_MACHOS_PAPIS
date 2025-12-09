@@ -172,6 +172,7 @@ class SesionesController extends Controller
             $request->validate([
                 'nombre_sesion' => 'sometimes|string|max:255',
                 'descripcion' => 'nullable|string',
+                'id_capacidad' => 'sometimes|uuid|exists:capacidad_terminal,id',
                 'fechas' => 'required|array|min:1',
                 'fechas.*' => 'date',
             ]);
@@ -185,6 +186,7 @@ class SesionesController extends Controller
             $sesion->update([
                 'nombre_sesion' => $request->nombre_sesion,
                 'descripcion' => $request->descripcion,
+                'id_capacidad' => $request->id_capacidad,
                 'fecha_inicio' => $fecha_inicio,
                 'fecha_fin' => $fecha_fin,
             ]);
@@ -212,7 +214,6 @@ class SesionesController extends Controller
 
             // SI ALGO FALLA → ROLLBACK
             DB::rollBack();
-
 
             return response()->json([
                 'message' => 'Error al actualizar la sesión',

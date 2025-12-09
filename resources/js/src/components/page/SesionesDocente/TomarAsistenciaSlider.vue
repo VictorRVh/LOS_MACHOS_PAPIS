@@ -24,10 +24,6 @@ const emit = defineEmits(['hide']);
 const listaAlumnoAsistencia = useListaAlumnosAsistenciaStore();
 const matriculaStore = useMatriculaStore();
 
-// Si no está cargado, cárgalo (top-level await en script setup)
-if (!listaAlumnoAsistencia.sesionesPorEntrega?.estudiantes?.length) {
-  await listaAlumnoAsistencia.loadSesionesEntrega(props.grupoId);
-}
 
 const { showToast, showConfirmModal } = useModalToast();
 // Solo usamos useHttpRequest para el endpoint que guarda asistencias
@@ -134,13 +130,20 @@ const loadData = async () => {
   }
 };
 
-watch(() => props.show, (isVisible) => {
-  if (isVisible) {
+watch(
+  () => props.show,
+  async (isVisible) => {
+    if (!isVisible) return;
+
     isEditing.value = false;
-    // recargar por si cambió el store
-    loadData();
+    isLoadingData.value = true;
+
+    await listaAlumnoAsistencia.loadSesionesEntrega(props.grupoId);
+
+    await loadData();
   }
-});
+);
+
 
 const asistenciaYaTomada = computed(() => {
   return alumnos.value.some(e => e.asistencia_num !== 0);
@@ -431,7 +434,7 @@ const close = () => emit('hide');
             <div class="flex justify-end gap-3">
               <Button title="Cancelar" variant="secondary" @click="isEditing ? isEditing = false : close()" />
               <Button v-if="haySesion && !isEditing" :disabled="asistenciaYaTomada"
-                :class="{ 'opacity-50 cursor-not-allowed': asistenciaYaTomada }"
+                :class="{ 'opacity-50 cursor-not-allowed': YaTomada }"
                 :title="asistenciaYaTomada ? 'La asistencia ya fue registrada hoy' : 'Tomar Asistencia Hoy'"
                 @click="asistenciaYaTomada ? null : (isEditing = true)">
                 <template #icon>

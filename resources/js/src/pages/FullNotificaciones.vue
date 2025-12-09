@@ -93,7 +93,7 @@ onMounted(() => {
             {{ n.time }}
           </p>
 
-          <button @click="markOneAsRead(n)" type="button" class="text-amber-500 hover:text-amber-700">
+          <button v-if="!n.isRead" @click="markOneAsRead(n)" type="button" class="text-amber-500 hover:text-amber-700">
             Marcar como leído
           </button>
 

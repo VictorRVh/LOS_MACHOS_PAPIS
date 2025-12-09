@@ -41,18 +41,39 @@ const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteSesion, deleting } = useHttpRequest("/programacion_sesion_docente");
 
 const asist = ref(false);
-const asistData = ref(null);
+const holidays = ref([])
+const selectionEvents = ref([])
+const allEvents = ref([])
+const calendarKey = ref(0)
 
-if (!sesionStore?.sesion?.length) {
-  await sesionStore.loadSesion({
-    id_grupo: props.id,
-    tipo_entrega: 2
-  });
-}
+watch(
+  () => props.id,
+  async (nuevoId) => {
+    if (!nuevoId) return;
 
-if (!programacionSesion?.sesiones?.length) {
-  await programacionSesion.loadSesiones(sesionStore?.sesion?.id)
-}
+    // 1. LIMPIAR ANTES DE CARGAR
+    programacionSesion.sesiones = [];
+    sesionStore.sesion = null;
+
+    allEvents.value = [];
+    selectionEvents.value = [];
+    datesForSlider.value = [];
+    calendarKey.value++; // Rerender inmediato sin los eventos anteriores
+
+    // 2. CARGAR NUEVA DATA
+    await sesionStore.loadSesion({
+      id_grupo: nuevoId,
+      tipo_entrega: 2,
+    });
+
+    if (sesionStore.sesion?.id) {
+      await programacionSesion.loadSesiones(sesionStore.sesion.id);
+    }
+  },
+  { immediate: true }
+);
+
+const isFinalizado = computed(() => sesionStore?.sesion?.estado === 4)
 
 const Asistencia = () => {
   if (sesionStore?.sesion?.id) {
@@ -65,10 +86,7 @@ const Asistencia = () => {
 const ocultarSliderAsistencia = () => {
   asist.value = false;
 };
-const holidays = ref([])
-const selectionEvents = ref([])
-const allEvents = ref([])
-const calendarKey = ref(0)
+
 
 watch(
   () => programacionSesion.sesiones,
@@ -190,6 +208,11 @@ const clearSelection = () => {
 };
 
 const openSessionForm = () => {
+  if (isFinalizado.value) {
+    showToast("La programación está FINALIZADA. No puedes crear nuevas sesiones.", "warning");
+    return;
+  }
+
   if (!hasSelection.value) return;
 
   datesForSlider.value = [...selectedDates.value];
@@ -198,6 +221,12 @@ const openSessionForm = () => {
 };
 
 const confirmDelete = (bloque) => {
+
+  if (isFinalizado.value) {
+    showToast("No puedes eliminar sesiones porque la programación está FINALIZADA.", "warning");
+    return;
+  }
+
   if (deleting.value) return;
 
   showConfirmModal(
@@ -219,6 +248,11 @@ const verSesion = (bloque) => { }
 const isEditing = ref(false)
 
 const handleEdit = (bloque) => {
+  if (isFinalizado.value) {
+    showToast("Esta unidad didáctica está FINALIZADA. No se puede editar sesiones.", "warning");
+    return;
+  }
+
   clearSelection()
   isEditing.value = true
 
@@ -276,11 +310,11 @@ const onSliderHide = () => {
 </script>
 
 <template>
-  <div v-if="sesionStore?.sesion"
+  <div v-if="sesionStore?.sesion.id"
     class="col-span-full bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-2 px-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
     <div>
       <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200">
-        Programación de Sesión
+        Programación de Sesiones
       </h3>
       <p class="text-sm text-gray-700 dark:text-gray-300">
         Del
@@ -324,6 +358,18 @@ const onSliderHide = () => {
       </template>
     </BaseButton>
 
+  </div>
+
+  <div v-else
+    class="col-span-full bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-xl p-3 flex flex-col">
+
+    <h3 class="text-lg font-semibold text-red-800 dark:text-red-200">
+      No existe una programación para crear sesiones.
+    </h3>
+
+    <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+      Debe existir la programación de sesiones. Solicítala a coordinación.
+    </p>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-5 gap-2">

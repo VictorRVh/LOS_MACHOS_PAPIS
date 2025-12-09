@@ -72,7 +72,7 @@ class NotificarSesionesNoTrabajadas extends Command
                 NotificationService::enviar(
                     $director->id,
                     'Docente no trabajó sesión',
-                    "{$docente->name} {$docente->apellido_paterno} {$docente->apellido_materno} no trabajó ninguna fecha de la sesión '{$sesion->nombre_sesion}' del grupo {$especialidad} {$grupo->seccion}.",
+                    "{$docente->name} {$docente->apellido_paterno} {$docente->apellido_materno} no realizó la sesión '{$sesion->nombre_sesion}' del grupo {$especialidad} {$grupo->modulo->descripcion} sección {$grupo->seccion} turno {$grupo->turno}.",
                     "/sesiones-admin/{$sesion->id}"
                 );
             }

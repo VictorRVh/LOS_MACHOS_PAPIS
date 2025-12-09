@@ -46,14 +46,16 @@ const initialForm = () => ({
   archivo_sesion: null,
 });
 
+watch(() => props.show, async (isVisible) => {
+  if (!isVisible) return;
 
-if (!capacidadStore.capacidadTerminal?.capacidades?.length) {
-  await capacidadStore.loadCapacidadTerminal(props.idGrupo)
-}
+  if (!capacidadStore.capacidadTerminal?.capacidades?.length) {
+    await capacidadStore.loadCapacidadTerminal(props.idGrupo);
+  }
+});
 
 const form = ref(initialForm());
 const formErrors = ref({});
-const inputFile = ref(null);
 
 watch(
   () => props.show,

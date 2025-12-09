@@ -6,6 +6,7 @@ use App\Models\Matricula;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class NominaMatriculasExport
 {
@@ -74,43 +75,61 @@ class NominaMatriculasExport
         $filasPlantilla = 30;
 
         if ($totalMatriculas > $filasPlantilla) {
+
             $filasAInsertar = $totalMatriculas - $filasPlantilla;
             $filaModelo = $filaInicio;
 
-            // Obtener las celdas combinadas de la fila modelo
+            // Obtener celdas combinadas de la fila modelo
             $mergedCells = [];
-            foreach ($sheet->getMergeCells() as $mergedCell) {
-                if (strpos($mergedCell, (string)$filaModelo) !== false) {
-                    $mergedCells[] = $mergedCell;
+            foreach ($sheet->getMergeCells() as $merge) {
+                if (str_contains($merge, (string)$filaModelo)) {
+                    $mergedCells[] = $merge;
                 }
             }
 
-            // Insertar filas
+            // Insertar filas nuevas
             $sheet->insertNewRowBefore($filaInicio + $filasPlantilla, $filasAInsertar);
 
-            // Copiar estilos y celdas combinadas
+            $columnas = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
+
             for ($i = 0; $i < $filasAInsertar; $i++) {
+
                 $filaDestino = $filaInicio + $filasPlantilla + $i;
 
-                // Obtener el estilo de la fila modelo como array
-                $estiloArray = $sheet->getStyle("A{$filaModelo}:O{$filaModelo}")->exportArray();
+                foreach ($columnas as $col) {
 
-                // Aplicar el estilo a la fila destino
-                $sheet->getStyle("A{$filaDestino}:O{$filaDestino}")->applyFromArray($estiloArray);
+                    $celdaModelo = "{$col}{$filaModelo}";
+                    $celdaDestino = "{$col}{$filaDestino}";
+
+                    // Copiar estilo completo
+                    $sheet->duplicateStyle(
+                        $sheet->getStyle($celdaModelo),
+                        $celdaDestino
+                    );
+
+                    // Ajustar bordes a THIN
+                    $sheet->getStyle($celdaDestino)
+                        ->getBorders()
+                        ->getAllBorders()
+                        ->setBorderStyle(Border::BORDER_THIN);
+                }
 
                 // Copiar altura de fila
-                $alturaFila = $sheet->getRowDimension($filaModelo)->getRowHeight();
-                if ($alturaFila !== null) {
-                    $sheet->getRowDimension($filaDestino)->setRowHeight($alturaFila);
+                $altura = $sheet->getRowDimension($filaModelo)->getRowHeight();
+                if ($altura !== null) {
+                    $sheet->getRowDimension($filaDestino)->setRowHeight($altura);
                 }
 
                 // Aplicar celdas combinadas
-                foreach ($mergedCells as $mergedCell) {
-                    preg_match('/([A-Z]+)(\d+):([A-Z]+)(\d+)/', $mergedCell, $matches);
-                    if (count($matches) === 5) {
-                        $colInicio = $matches[1];
-                        $colFin = $matches[3];
-                        $nuevoRango = "{$colInicio}{$filaDestino}:{$colFin}{$filaDestino}";
+                foreach ($mergedCells as $merge) {
+
+                    preg_match('/([A-Z]+)(\d+):([A-Z]+)(\d+)/', $merge, $m);
+
+                    if ($m) {
+                        $colIni = $m[1];
+                        $colFin = $m[3];
+
+                        $nuevoRango = "{$colIni}{$filaDestino}:{$colFin}{$filaDestino}";
                         $sheet->mergeCells($nuevoRango);
                     }
                 }
@@ -120,6 +139,7 @@ class NominaMatriculasExport
         // 4. Llenar datos de estudiantes
         $fila = $filaInicio;
         foreach ($matriculas as $index => $matricula) {
+
             $est = $matricula->estudiante;
 
             $sheet->setCellValue("B{$fila}", str_pad($index + 1, 2, '0', STR_PAD_LEFT));

@@ -158,7 +158,7 @@ const gruposAgrupados = computed(() => {
             <Th class="border-b border-gray-300 dark:border-gray-300 w-[10px]">N° Estudiantes</Th>
             <Th class="border-b border-gray-300 dark:border-gray-300 w-[10px]">Acciones</Th>
           </THead>
-          <TBody> <template v-for="([especialidad, grupos]) in gruposAgrupados" :key="especialidad">
+          <TBody :filas="gruposOrdenados.length"> <template v-for="([especialidad, grupos]) in gruposAgrupados" :key="especialidad">
               <!-- ESPECIALIDAD -->
               <tr @click="toggleEspecialidad(especialidad)"
                 class="bg-cetpro dark:bg-cetpro-dark hover:bg-cetpro-dark/70 cursor-pointer border-b border-gray-400 dark:border-gray-600">

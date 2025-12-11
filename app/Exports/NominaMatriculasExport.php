@@ -90,7 +90,7 @@ class NominaMatriculasExport
             // Insertar filas nuevas
             $sheet->insertNewRowBefore($filaInicio + $filasPlantilla, $filasAInsertar);
 
-            $columnas = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
+            $columnas = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
 
             for ($i = 0; $i < $filasAInsertar; $i++) {
 
@@ -113,6 +113,12 @@ class NominaMatriculasExport
                         ->getAllBorders()
                         ->setBorderStyle(Border::BORDER_THIN);
                 }
+
+                $border = $sheet->getStyle("B{$filaDestino}:O{$filaDestino}")->getBorders();
+                // $border->getTop()->setBorderStyle(Border::BORDER_MEDIUM);
+                // $border->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
+                $border->getLeft()->setBorderStyle(Border::BORDER_MEDIUM);
+                $border->getRight()->setBorderStyle(Border::BORDER_MEDIUM);
 
                 // Copiar altura de fila
                 $altura = $sheet->getRowDimension($filaModelo)->getRowHeight();

@@ -15,10 +15,12 @@ import AuthorizationFallback from '../../components/page/AuthorizationFallback.v
 import useGrupoStore from '../../store/Grupo/useGrupoStore';
 import useCicloStore from '../../store/Ciclo/useCicloStore';
 import useTableData from "../../composables/tabla/useTableData";
+import usePeriodosStore from '../../store/Periodo/usePeriodoStore';
 
 const router = useRouter();
 const grupoStore = useGrupoStore();
 const cicloStore = useCicloStore();
+const periodoStore = usePeriodosStore();
 
 const gruposData = ref([]);
 const loading = ref(true);
@@ -28,16 +30,8 @@ const openEspecialidades = ref(new Set());
 
 onMounted(async () => {
   if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
+  if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
 });
-
-const onCicloChange = async () => {
-  selectedPeriodo.value = null;
-  if (selectedCiclo.value) {
-    await grupoStore.loadPeriodoCiclo(selectedCiclo.value);
-  } else {
-    grupoStore.periodoCiclo = [];
-  }
-};
 
 const filtrarPorSeleccion = async () => {
   if (!selectedCiclo.value || !selectedPeriodo.value) {
@@ -126,21 +120,21 @@ const gruposAgrupados = computed(() => {
           <div class="md:col-span-2 min-w-[250px]"> <label
               class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Ciclo</label>
             <BaseSelectGrupo v-model="selectedCiclo" :options="cicloStore.ciclo" label="nombre_ciclo"
-              placeholder="Seleccione un ciclo" @change="onCicloChange" />
+              placeholder="Seleccione un ciclo" />
           </div> <!-- PERIODO -->
           <div class="md:col-span-1 min-w-[100px]"> <label
               class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Periodo</label>
-            <BaseSelectGrupo v-model="selectedPeriodo" :options="grupoStore.periodoCiclo" label="nombre_periodo"
-              placeholder="Seleccione un periodo" :loading="grupoStore.periodoByCicloLoading"
-              :disabled="!selectedCiclo" />
+            <BaseSelectGrupo v-model="selectedPeriodo" :options="periodoStore.periodos" label="nombre_periodo"
+              placeholder="Seleccione un periodo" />
           </div> <!-- BOTÓN FILTRAR (columna fija para que NO DESAPAREZCA) -->
           <!-- BOTÓN FILTRAR (más pequeño sin romper el grid) -->
           <div class="md:col-span-1 flex items-end"> <button @click="filtrarPorSeleccion"
               class="w-[100px] bg-cetpro hover:bg-cetpro-dark text-white font-semibold py-2 px-2 rounded-md transition-colors duration-300 h-10 flex items-center justify-center text-sm">
               Filtrar </button> </div> <!-- BUSCADOR AL FINAL A LA DERECHA -->
-        
-              
-          <div class="md:col-span-3">
+
+
+          <div class="md:col-span-3"> <label
+              class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Buscar</label>
             <SearchBar :totalResultados="gruposOrdenados.length" :campoOrden="'modulo'" @search="filtrarGrupos" />
           </div>
         </div>
@@ -157,7 +151,8 @@ const gruposAgrupados = computed(() => {
             <Th class="border-b border-gray-300 dark:border-gray-300 w-[10px]">N° Estudiantes</Th>
             <Th class="border-b border-gray-300 dark:border-gray-300 w-[10px]">Acciones</Th>
           </THead>
-          <TBody :filas="gruposOrdenados.length"> <template v-for="([especialidad, grupos]) in gruposAgrupados" :key="especialidad">
+          <TBody :filas="gruposOrdenados.length"> <template v-for="([especialidad, grupos]) in gruposAgrupados"
+              :key="especialidad">
               <!-- ESPECIALIDAD -->
               <tr @click="toggleEspecialidad(especialidad)"
                 class="bg-cetpro dark:bg-cetpro-dark hover:bg-cetpro-dark/70 cursor-pointer border-b border-gray-400 dark:border-gray-600">

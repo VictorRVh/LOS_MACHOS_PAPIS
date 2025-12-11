@@ -166,11 +166,12 @@ onUnmounted(() => {
             <span>NUEVO CICLO</span>
           </button>
           <!-- BOTÓN DE BUSCAR ESTUDIANTE RESTAURADO -->
-          <button
+          <button @click="$router.push({ name: 'buscar.estudiante' })"
             class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-slate-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors">
             <img src="/img/busqueda-estudiante.png" class="h-6 w-6" alt="Buscar Estudiante">
             <span>BUSCAR ESTUDIANTE</span>
           </button>
+
         </div>
 
         <div class="flex flex-wrap items-center justify-end gap-2">

@@ -63,6 +63,9 @@ const estadoFinalizado = computed(() => {
     return estado === 4;
 });
 
+const title = computed(() => 'Habilitar plazo extra'
+);
+
 // Validación Yup
 const schema = computed(() =>
     yup.object().shape({
@@ -124,15 +127,15 @@ const onSubmit = async () => {
             <!-- SOLO SE MUESTRA SI LA FECHA FINAL YA PASÓ -->
             <div v-if="estadoFinalizado">
 
-                <p class="text-sm text-gray-600 dark:text-gray-400">
-                    Seleccione los días de prórroga para la entrega del grupo:
+                <p class="text-sm text-gray-600 dark:text-gray-400 pt-2">
+                    Seleccione los días de plazo para la entrega del grupo:
                     <span class="font-bold">
                         {{ grupo.grupo_detalle.nombre_especialidad }} - Sección
                         {{ grupo.grupo_detalle.seccion }}
                     </span>.
                 </p>
 
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 mt-2">
                     ¿Cúantos dias le darás plazo a este grupo?
                 </label>
 

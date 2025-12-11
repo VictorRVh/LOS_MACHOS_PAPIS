@@ -144,7 +144,7 @@ onBeforeUnmount(() =>
         <CalendarDaysIcon class="w-4 h-4" /> {{ mergedLabels.custom1 }}
       </button>
 
-      <hr class="my-1 mx-2 border-gray-300" />
+      <hr v-if="actions.view || actions.edit || actions.custom1 " class="my-1 mx-2 border-gray-300" />
 
       <button
         v-if="actions.deactivate"

@@ -20,8 +20,8 @@ export function generatePdfReservaMatricula(data) {
     //        1) TABLA DE 2 COLUMNAS
     // ============================================
     const tabla2 = [
-        ["Nombre del CETPRO", "CETPRO PUNO"],
-        ["Estudiante", data.apellidos_nombres],
+        ["Nombre de la institución:", "CETPRO PUNO"],
+
     ];
 
     autoTable(doc, {
@@ -30,20 +30,20 @@ export function generatePdfReservaMatricula(data) {
         theme: "grid",
         styles: { cellPadding: 3, fontSize: 11 },
         columnStyles: {
-            0: { cellWidth: 60 },
-            1: { cellWidth: 120 },
+            0: { cellWidth: 60, fontStyle: "bold" },
+            1: { cellWidth: 130 },
         }
     });
 
-    y = doc.lastAutoTable.finalY + 10;
+    y = doc.lastAutoTable.finalY;
 
     // ============================================
     //        2) TABLA DE 4 COLUMNAS
     // ============================================
+
     const tabla4 = [
-        ["DNI", data.nro_documento, "Edad", data.edad + " años"],
-        ["Estado civil", data.estado_civil, "Turno", data.turno],
-        ["Teléfono", data.telefono, "Correo", data.correo_electronico],
+        ["Estudiante:", data.apellidos_nombres],
+
     ];
 
     autoTable(doc, {
@@ -52,20 +52,18 @@ export function generatePdfReservaMatricula(data) {
         theme: "grid",
         styles: { cellPadding: 3, fontSize: 11 },
         columnStyles: {
-            0: { cellWidth: 40 },
-            1: { cellWidth: 50 },
-            2: { cellWidth: 40 },
-            3: { cellWidth: 60 },
+            0: { cellWidth: 40, fontStyle: "bold" },
+            1: { cellWidth: 150 },
         }
     });
 
-    y = doc.lastAutoTable.finalY + 10;
+    // ❗ IMPORTANTE — ESTO FALTABA
+    y = doc.lastAutoTable.finalY;
 
-    // ============================================
-    //        3) TABLA DE 6 COLUMNAS
-    // ============================================
     const tabla6 = [
-        ["Especialidad", data.especialidad, "Módulo", data.modulo, "Fecha reserva", data.fecha_reserva ?? "—"]
+        ["DNI:", data.nro_documento, "Teléfono:", data.telefono],
+        // ["Estado civil", data.estado_civil, "Turno", data.turno],
+        // ["Teléfono", data.telefono, "Correo", data.correo_electronico],
     ];
 
     autoTable(doc, {
@@ -74,26 +72,103 @@ export function generatePdfReservaMatricula(data) {
         theme: "grid",
         styles: { cellPadding: 3, fontSize: 11 },
         columnStyles: {
-            0: { cellWidth: 30 },
-            1: { cellWidth: 30 },
-            2: { cellWidth: 30 },
-            3: { cellWidth: 30 },
-            4: { cellWidth: 40 },
-            5: { cellWidth: 40 },
+            0: { cellWidth: 40, fontStyle: "bold" },
+            1: { cellWidth: 50 },
+            2: { cellWidth: 40, fontStyle: "bold" },
+            3: { cellWidth: 60 },
         }
     });
+
+    y = doc.lastAutoTable.finalY + 10;
+
+
+    const tabla8 = [
+        ["Especialidad:", data.especialidad, "Módulo:", data.modulo],
+        // ["Estado civil", data.estado_civil, "Turno", data.turno],
+        // ["Teléfono", data.telefono, "Correo", data.correo_electronico],
+    ];
+
+    autoTable(doc, {
+        startY: y,
+        body: tabla8,
+        theme: "grid",
+        styles: { cellPadding: 3, fontSize: 11 },
+        columnStyles: {
+            0: { cellWidth: 31, fontStyle: "bold" },
+            1: { cellWidth: 59 },
+            2: { cellWidth: 21, fontStyle: "bold" },
+            3: { cellWidth: 79 },
+        }
+    });
+
+    // ❗ IMPORTANTE — ESTO FALTABA
+    y = doc.lastAutoTable.finalY;
+
+
+    // ============================================
+    //        3) TABLA DE 6 COLUMNAS
+    // ============================================
+    const tabla10 = [
+        ["Sección:", data.seccion, "Turno:", data.turno, "Créditos:", data.creditos ?? "—"]
+    ];
+
+    autoTable(doc, {
+        startY: y,
+        body: tabla10,
+        theme: "grid",
+        styles: { cellPadding: 3, fontSize: 11 },
+        columnStyles: {
+            0: { cellWidth: 31, fontStyle: "bold" },
+            1: { cellWidth: 29 },
+            2: { cellWidth: 30, fontStyle: "bold" },
+            3: { cellWidth: 30 },
+            4: { cellWidth: 35, fontStyle: "bold" },
+            5: { cellWidth: 35 },
+        }
+    });
+function invertirFechaSimple(fecha) {
+    if (!fecha) return "—";
+
+    fecha = String(fecha).replaceAll("-", "/");
+
+    const [anio, mes, dia] = fecha.split("/");
+    return `${dia}/${mes}/${anio}`;
+}
+
+    // ❗ IMPORTANTE — ESTO FALTABA
+    y = doc.lastAutoTable.finalY;
+    const tabla12 = [
+        ["Fecha de matrícula:", new Date(data.created_at)
+            .toLocaleDateString('es-PE'), "Fecha de reserva:", invertirFechaSimple(data.fecha_reserva)],
+        // ["Estado civil", data.estado_civil, "Turno", data.turno],
+        // ["Teléfono", data.telefono, "Correo", data.correo_electronico],
+    ];
+
+    autoTable(doc, {
+        startY: y,
+        body: tabla12,
+        theme: "grid",
+        styles: { cellPadding: 3, fontSize: 11 },
+        columnStyles: {
+            0: { cellWidth: 55, fontStyle: "bold" },
+            1: { cellWidth: 40 },
+            2: { cellWidth: 55, fontStyle: "bold" },
+            3: { cellWidth: 40 },
+        }
+    });
+
 
     // ============================================
     //                  FIRMAS
     // ============================================
-    y = doc.lastAutoTable.finalY + 30;
+    y = doc.lastAutoTable.finalY + 50;
 
     doc.setFontSize(12);
     doc.text("_____________________________", 25, y);
-    doc.text("DIRECTOR", 55, y + 8);
+    doc.text("DIRECCIÓN / COORDINACIÓN", 28, y + 8);
 
     doc.text("_____________________________", 125, y);
-    doc.text("ESTUDIANTE", 150, y + 8);
+    doc.text("ESTUDIANTE", 145, y + 8);
 
     // ABRIR PDF
     const pdfBlob = doc.output("blob");

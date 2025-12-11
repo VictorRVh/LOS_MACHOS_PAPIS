@@ -160,7 +160,7 @@ const generarReporte = async () => {
       class="text-center py-20 text-gray-600 dark:text-gray-300">Cargando datos...</div>
 
     <div v-else-if="programacion">
-      <header class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+      <header class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
           <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">
             {{ programacion.nombre_programacion }}
@@ -185,7 +185,8 @@ const generarReporte = async () => {
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="grupo in programacionStore?.programacionSubidos?.grupos_programados" :key="grupo.id"
-          class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col transition-shadow">
+          class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-visible flex flex-col transition-shadow">
+
           <div class="p-4 border-b dark:border-gray-700 flex justify-between items-start">
             <div>
               <p class="text-sm font-bold text-cetpro dark:text-cetpro-light uppercase truncate">
@@ -197,14 +198,16 @@ const generarReporte = async () => {
                 Turno {{ grupo.grupo_detalle.turno }}
               </p>
             </div>
+          
 
-            <MenuTable :actions="{ edit: true, custom1: true, deactivate: true }" :labels="{
-              edit: 'Subir documento',
-              custom1: grupo.estado === 4 ? 'Habilitar plazo extra' : 'Observación',
-              deactivate: 'Desactivar grupo',
-            }" entityLabel="" @edit="() => openItemsModal(grupo)" @custom1="() => openPlazoModal(grupo)"
-              @deactivate="() => desactivarGrupo(grupo)" />
+              <MenuTable :actions="{ edit: true, custom1: true, deactivate: true }" :labels="{
+                edit: 'Subir documento',
+                custom1: grupo.estado === 4 ? 'Habilitar plazo extra' : 'Observación',
+                deactivate: 'Desactivar grupo',
+              }" entityLabel="" @edit="() => openItemsModal(grupo)" @custom1="() => openPlazoModal(grupo)"
+                @deactivate="() => desactivarGrupo(grupo)" />
 
+       
           </div>
 
           <div class="p-4 flex-grow space-y-2">

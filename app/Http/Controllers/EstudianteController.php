@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Estudiante;
+use App\Models\Matricula;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class EstudianteController extends Controller
@@ -264,5 +266,182 @@ class EstudianteController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function buscarHistorialEstudiante(Request $request)
+    {
+        // Validación
+        $request->validate([
+            'nro_documento' => 'required|string'
+        ]);
+
+        // Buscar estudiante
+        $estudiante = Estudiante::where('nro_documento', $request->nro_documento)->first();
+
+        if (!$estudiante) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Estudiante no encontrado'
+            ], 404);
+        }
+
+        // Obtener historial académico con JOINs completos
+        $informacionAcademica = DB::table('matricula as m')
+            ->join('grupo as g', 'm.id_grupo', '=', 'g.id')
+            ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
+            ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
+            ->join('periodo as p', 'g.id_periodo', '=', 'p.id')
+            ->join('modulos as mod', 'g.id_modulo', '=', 'mod.id')
+            ->join('programa_estudio as pe', 'g.id_programa', '=', 'pe.id')
+            // ->leftJoin('docente as d', 'g.id_docente', '=', 'd.id')
+            ->where('m.id_estudiante', $estudiante->id)
+
+            ->select(
+                // Matricula
+                'm.id as matricula_id',
+                'm.turno as matricula_turno',
+                'm.reserva',
+                'm.fecha_reserva',
+                'm.matriculado',
+
+                // Grupo
+                'g.id as grupo_id',
+                'g.seccion',
+                'g.turno as grupo_turno',
+                'g.fecha_inicio',
+                'g.fecha_fin',
+                'g.status as grupo_status',
+
+                // Especialidad
+                'em.id as especialidad_id',
+                'em.nombre_especialidad',
+                'ep.nro_modulos as total_modulos_especialidad',
+
+                // Programa
+                'pe.id as programa_id',
+                'pe.descripcion as nombre_programa',
+
+                // Periodo
+                'p.id as periodo_id',
+                'p.nombre_periodo',
+
+                // Módulo
+                'mod.id as modulo_id',
+                'mod.numero_modulo',
+                'mod.descripcion as modulo_descripcion',
+                'mod.creditos',
+                'mod.horas',
+                'mod.nro_capacidades',
+
+                // Docente
+                // 'd.id as docente_id',
+                // 'd.apellido_paterno as docente_apellido_paterno',
+                // 'd.apellido_materno as docente_apellido_materno',
+                // 'd.nombre as docente_nombre',
+            )
+            ->orderBy('p.nombre_periodo', 'desc')
+            ->orderBy('mod.numero_modulo', 'asc')
+            ->get();
+
+        // Construir estructura jerárquica
+        $especialidades = [];
+
+        foreach ($informacionAcademica as $registro) {
+
+            $espId = $registro->especialidad_id;
+
+            // Crear especialidad si no existe
+            if (!isset($especialidades[$espId])) {
+                $especialidades[$espId] = [
+                    'id' => $registro->especialidad_id,
+                    'nombre' => $registro->nombre_especialidad,
+                    'programa' => [
+                        'id' => $registro->programa_id,
+                        'nombre' => $registro->nombre_programa
+                    ],
+                    'total_modulos' => $registro->total_modulos_especialidad,
+                    'periodos' => []
+                ];
+            }
+
+            $periodoId = $registro->periodo_id;
+
+            // Crear periodo si no existe
+            if (!isset($especialidades[$espId]['periodos'][$periodoId])) {
+                $especialidades[$espId]['periodos'][$periodoId] = [
+                    'id' => $registro->periodo_id,
+                    'nombre' => $registro->nombre_periodo,
+                    'modulos' => []
+                ];
+            }
+
+            // Agregar módulo dentro del periodo
+            $especialidades[$espId]['periodos'][$periodoId]['modulos'][] = [
+                'matricula_id' => $registro->matricula_id,
+
+                'modulo' => [
+                    'id' => $registro->modulo_id,
+                    'numero' => $registro->numero_modulo,
+                    'descripcion' => $registro->modulo_descripcion,
+                    'creditos' => $registro->creditos,
+                    'horas' => $registro->horas,
+                    'nro_capacidades' => $registro->nro_capacidades
+                ],
+
+                'grupo' => [
+                    'id' => $registro->grupo_id,
+                    'seccion' => $registro->seccion,
+                    'turno' => $registro->grupo_turno,
+                    'fecha_inicio' => $registro->fecha_inicio,
+                    'fecha_fin' => $registro->fecha_fin,
+                    'status' => $registro->grupo_status
+                ],
+
+                // 'docente' => $registro->docente_id ? [
+                //     'id' => $registro->docente_id,
+                //     'nombre_completo' => trim(
+                //         "{$registro->docente_apellido_paterno} {$registro->docente_apellido_materno} {$registro->docente_nombre}"
+                //     )
+                // ] : null,
+
+                'matricula' => [
+                    'turno' => $registro->matricula_turno,
+                    'reserva' => (bool)$registro->reserva,
+                    'fecha_reserva' => $registro->fecha_reserva,
+                    'matriculado' => (bool)$registro->matriculado
+                ]
+            ];
+        }
+
+        // Convertir índices asociativos a índices numéricos
+        $especialidades = array_values($especialidades);
+        foreach ($especialidades as &$especialidad) {
+            $especialidad['periodos'] = array_values($especialidad['periodos']);
+        }
+
+        // Respuesta final
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'estudiante' => [
+                    'id' => $estudiante->id,
+                    'tipo_documento' => $estudiante->tipo_documento,
+                    'nro_documento' => $estudiante->nro_documento,
+                    'apellido_paterno' => $estudiante->apellido_paterno,
+                    'apellido_materno' => $estudiante->apellido_materno,
+                    'nombre' => $estudiante->nombre,
+                    'nombre_completo' => trim("{$estudiante->apellido_paterno} {$estudiante->apellido_materno} {$estudiante->nombre}"),
+                    'sexo' => $estudiante->sexo,
+                    'fecha_nacimiento' => $estudiante->fecha_nacimiento,
+                    'lugar_nacimiento' => [
+                        'pais' => $estudiante->pais_nacimiento,
+                        'departamento' => $estudiante->departamento_nacimiento,
+                        'provincia' => $estudiante->provincia_nacimiento,
+                        'distrito' => $estudiante->distrito_nacimiento
+                    ]
+                ],
+                'historial_academico' => $especialidades
+            ]
+        ]);
     }
 }

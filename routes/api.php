@@ -64,7 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\UserController::class,
         'index',
     ])->middleware('permission:todo-acceso-usuarios|ver-usuarios');
-        Route::get('users/{id}', [
+    Route::get('users/{id}', [
         \App\Http\Controllers\UserController::class,
         'indexUserData',
     ])->middleware('permission:todo-acceso-usuarios|ver-usuarios');
@@ -83,7 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\UserController::class,
         'update',
     ])->middleware('permission:todo-acceso-usuarios|editar-usuarios');
-        Route::patch('usersRestaurarPassword/{userId}', [
+    Route::patch('usersRestaurarPassword/{userId}', [
         \App\Http\Controllers\UserController::class,
         'restaurarPassword',
     ])->middleware('permission:todo-acceso-usuarios|editar-usuarios');
@@ -224,6 +224,10 @@ Route::middleware('auth:sanctum')->group(function () {
         'buscar',
     ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
 
+    Route::post('buscarEstudiante', [
+        \App\Http\Controllers\EstudianteController::class,
+        'buscarHistorialEstudiante',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-grupos');
 
     //RUTA PARA CILCLO ACADEMICO
     Route::get('ciclo_academico', [
@@ -742,7 +746,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\SesionesController::class,
         'indexOneSesion',
     ])->middleware('permission:todo-acceso-sesiones-docente|ver-sesiones-docente');
-    
+
     Route::get('programacion_sesion_docente/{id}', [
         \App\Http\Controllers\SesionesController::class,
         'indexListSesionesDocente',

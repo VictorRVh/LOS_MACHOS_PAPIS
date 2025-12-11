@@ -1010,12 +1010,10 @@ Route::middleware('auth:sanctum')->group(function () {
         'usarReservar',
     ])->middleware('permission:ver-matriculas|editar-matriculas');
 
-    Route::get('listaReserva', [
+    Route::get('listaReserva/{tipo}', [
         \App\Http\Controllers\MatriculaController::class,
         'matriculadosConReserva',
     ])->middleware('permission:ver-matriculas');
-
-
     // Alumnos matriculados (en modulo matricula)
     Route::get('matricula/{grupoId}', [
         \App\Http\Controllers\MatriculaController::class,

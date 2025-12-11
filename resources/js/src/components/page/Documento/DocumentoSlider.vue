@@ -59,15 +59,15 @@ const tiposEntrega = [
 
 yup.setLocale({
   mixed: {
-    required: 'Este campo es obligatorio.',
+    required: "Este campo es obligatorio.",
   },
   string: {
-    email: 'Debe ser un correo válido.',
+    email: "Debe ser un correo válido.",
   },
   date: {
-    min: 'La fecha no puede ser anterior a ${min}',
-    max: 'La fecha no puede ser posterior a ${max}',
-    typeError: 'Debe ser una fecha válida',
+    min: "La fecha no puede ser anterior a ${min}",
+    max: "La fecha no puede ser posterior a ${max}",
+    typeError: "Debe ser una fecha válida.",
   },
 });
 
@@ -124,9 +124,14 @@ watch(
       // 🔹 Si el tipo_entrega viene como número o string, asegurar formato correcto
       formData.value.tipo_entrega = String(newVal.tipo_entrega);
 
-      // 🔹 Buscar el nombre correspondiente según tipo_entrega
-      const tipo = tiposEntrega.find(t => t.id === formData.value.tipo_entrega);
-      formData.value.nombre_entrega = tipo ? tipo.nombre : (newVal.nombre_entrega || "");
+      // 🔹 Asignar nombre_entrega correctamente
+      if (formData.value.tipo_entrega === "99") {
+        // Si es "Otro", usar el nombre real que viene de la BD
+        formData.value.nombre_entrega = newVal.nombre_entrega || "";
+      } else {
+        const tipo = tiposEntrega.find(t => t.id === formData.value.tipo_entrega);
+        formData.value.nombre_entrega = tipo ? tipo.nombre : "";
+      }
 
       isEditing.value = true;
       formErrors.value = {};
@@ -151,14 +156,11 @@ const resetForm = () => {
 watch(
   () => formData.value.tipo_entrega,
   (val) => {
-    if (val == "99") {
-      // Otro → dejar nombre_entrega vacío para que lo escriba
-      formData.value.nombre_entrega = "";
-    } else {
-      // Valor normal → asignar el nombre automáticamente
+    if (val !== "99") {
       const tipo = tiposEntrega.find((t) => t.id === val);
       formData.value.nombre_entrega = tipo ? tipo.nombre : "";
     }
+
   }
 );
 
@@ -243,6 +245,7 @@ const onSubmit = async () => {
 
         <!-- Fechas -->
         <div class="grid grid-cols-2 gap-4">
+
           <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio *" type="date"
             :error="formErrors.fecha_inicio" />
           <FormInput v-model="formData.fecha_fin" label="Fecha de Fin *" type="date" :error="formErrors.fecha_fin" />

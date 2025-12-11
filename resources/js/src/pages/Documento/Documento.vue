@@ -327,7 +327,7 @@ const publicarPersonalizado = async (prog, gruposSeleccionados) => {
               <Th>Publicación</Th>
               <Th class="text-center">Acciones</Th>
             </THead>
-            <TBody>
+            <TBody :filas="programaciones.length">
               <Tr v-if="loading">
                 <Td colspan="5" class="text-center py-10">Cargando...</Td>
               </Tr>

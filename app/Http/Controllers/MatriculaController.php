@@ -667,7 +667,7 @@ class MatriculaController extends Controller
 
     // LISTA DE RESERVAS DE MATRICULA
 
-    public function matriculadosConReserva()
+    public function matriculadosConReserva($tipo)
     {
         $infoGrupos = DB::table('grupo')
             ->join('especialidad_programa', 'grupo.id_especialidad', '=', 'especialidad_programa.id')
@@ -692,7 +692,7 @@ class MatriculaController extends Controller
             ->join('especialidad_programa', 'grupo.id_especialidad', '=', 'especialidad_programa.id')
             ->join('especialidad_madre', 'especialidad_programa.id_especialidad', '=', 'especialidad_madre.id')
             ->join('modulos', 'grupo.id_modulo', '=', 'modulos.id')
-            ->where('matricula.reserva', 1) // solo los CON reserva
+            ->where('matricula.reserva', $tipo) // solo los CON reserva
             ->select(
                 'matricula.id as id_matricula',
                 DB::raw("CONCAT(estudiante.apellido_paterno, ' ', estudiante.apellido_materno, ', ', estudiante.nombre) as apellidos_nombres"),
@@ -711,8 +711,10 @@ class MatriculaController extends Controller
                 'pagos.aporte',
                 'especialidad_madre.nombre_especialidad as especialidad',
                 'modulos.descripcion as modulo',
+                'modulos.creditos as creditos',
                 'grupo.turno',
                 'grupo.seccion',
+                'matricula.reserva',   // <-- agregar esto
                 'matricula.fecha_reserva',   // <-- agregar esto
                 'matricula.created_at'     // <-- agregar esto si quieres saber si ya confirmó matrícula
             )

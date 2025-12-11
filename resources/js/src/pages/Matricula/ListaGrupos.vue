@@ -140,8 +140,7 @@ const gruposAgrupados = computed(() => {
               Filtrar </button> </div> <!-- BUSCADOR AL FINAL A LA DERECHA -->
         
               
-          <div class="md:col-span-3"> <label
-              class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Buscar</label>
+          <div class="md:col-span-3">
             <SearchBar :totalResultados="gruposOrdenados.length" :campoOrden="'modulo'" @search="filtrarGrupos" />
           </div>
         </div>

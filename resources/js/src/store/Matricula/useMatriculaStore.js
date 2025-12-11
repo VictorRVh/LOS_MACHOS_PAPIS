@@ -29,11 +29,6 @@ const useMatriculaStore = defineStore('matricula', () => {
         // initialLoading: especialidadByProgramtesFirstTimeLoading,
     } = useHttpRequest('/matriculados');
 
-    const {
-        update: updateMatricula,
-        // loading: especialidadByProgramLoading,
-        // initialLoading: especialidadByProgramtesFirstTimeLoading,
-    } = useHttpRequest('/cambiarMatricula');
 
     const {
         update: getReservaMatricula,
@@ -42,7 +37,7 @@ const useMatriculaStore = defineStore('matricula', () => {
     } = useHttpRequest('/reservaMatricula');
 
     const {
-        index: getListaReservaMatricula,
+        show: getListaReservaMatricula,
         // loading: especialidadByProgramLoading,
         // initialLoading: especialidadByProgramtesFirstTimeLoading,
     } = useHttpRequest('/listaReserva');
@@ -51,7 +46,6 @@ const useMatriculaStore = defineStore('matricula', () => {
     const matriculasEnGrupo = ref([]);
     const estudiantesConReserva = ref([]);
     const programasConEspecialidades = ref([]);
-    const gruposDisponiblesParaMatricula = ref([]);
     const estudiantesMatriculados = ref([]);
     const datosMatricula = ref([]);
 
@@ -59,36 +53,6 @@ const useMatriculaStore = defineStore('matricula', () => {
     const matriculadosPorGrupoExtendido = ref([]);
 
     const matriculasReservadas = ref([]);
-
-    const fetchGruposConMatriculados = async () => {
-        grupos.value = await get('/api/grupos-con-matriculados');
-    };
-
-    const fetchMatriculasPorGrupo = async (grupoId) => {
-        matriculasEnGrupo.value = [];
-        const response = await get(`/api/grupos/${grupoId}/matriculas`);
-        if (response) {
-            matriculasEnGrupo.value = response;
-        }
-    };
-
-    const fetchEstudiantesConReserva = async () => {
-        estudiantesConReserva.value = [];
-        const response = await get('/api/reservas');
-        if (response) estudiantesConReserva.value = response;
-    };
-
-    const fetchProgramasPorCiclo = async (cicloId) => {
-        programasConEspecialidades.value = [];
-        const response = await get(`/api/ciclo/${cicloId}/programas`);
-        if (response) programasConEspecialidades.value = response;
-    };
-
-    const fetchGruposPorEspecialidad = async (especialidadId) => {
-        gruposDisponiblesParaMatricula.value = [];
-        const response = await get(`/api/especialidad/${especialidadId}/grupos`);
-        if (response) gruposDisponiblesParaMatricula.value = response;
-    };
 
     const fetchEstudiantesPorGrupo = async (grupoId) => {
         const response = await getEstudiantesPorGrupo(grupoId)
@@ -111,7 +75,7 @@ const useMatriculaStore = defineStore('matricula', () => {
     }
 
     const loadCambioMatricula = async (idsMatriculas, nuevoGrupoId) => {
-        console.log('cambiando matrículas:', idsMatriculas, nuevoGrupoId);
+       // console.log('cambiando matrículas:', idsMatriculas, nuevoGrupoId);
         try {
             // siempre mando array
             const response = await axios.patch('/cambiarMatricula', {
@@ -133,23 +97,16 @@ const useMatriculaStore = defineStore('matricula', () => {
     };
 
 
-    const loadListaReserva = async () => {
-        const response = await getListaReservaMatricula();
+    const loadListaReserva = async ( idTipo = 1) => {
+        const response = await getListaReservaMatricula(idTipo);
         matriculasReservadas.value = response
     };
+
     return {
         grupos,
         matriculasEnGrupo,
         estudiantesConReserva,
         programasConEspecialidades,
-        gruposDisponiblesParaMatricula,
-        // loading,
-        fetchGruposConMatriculados,
-        fetchMatriculasPorGrupo,
-        fetchEstudiantesConReserva,
-        fetchProgramasPorCiclo,
-        fetchGruposPorEspecialidad,
-
         fetchEstudiantesPorGrupo,
         estudiantesMatriculados,
 

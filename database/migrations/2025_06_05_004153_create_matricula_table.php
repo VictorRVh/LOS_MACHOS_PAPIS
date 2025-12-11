@@ -18,7 +18,6 @@ return new class extends Migration
             $table->char('turno', 1)->nullable();
             $table->uuid('id_estudiante');
             $table->uuid('id_pago')->nullable();
-            $table->boolean('reserva')->default(false);
             $table->tinyInteger('reserva')->default(0);
             $table->tinyInteger('matriculado')->default(1);
             $table->date('fecha_reserva')->nullable();

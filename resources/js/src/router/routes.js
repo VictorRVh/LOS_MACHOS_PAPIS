@@ -83,7 +83,6 @@ export default [
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos'],
-            parent: null,
             breadcrumb: [{ text: 'Matrícula', to: { name: 'matricula.index' } }],
             submenu: () => [
                 { text: 'Matricular', to: { name: 'matricula.registrar' } },
@@ -111,22 +110,34 @@ export default [
                 component: () => import('../pages/Matricula/Reservas.vue'),
                 meta: { breadcrumb: [{ text: 'Reservas' }] }
             },
+
+            // 👉 DETALLE DE GRUPO (ALUMNOS) desde matrícula
             {
-                path: 'grupo/:id/alumnos',
-                name: 'matricula.grupo.alumnos',
+                path: 'grupos/:id/alumnos',
+                name: 'matricula.grupos.alumnos',
                 component: () => import('../pages/Matricula/GrupoDetalle.vue'),
                 props: true,
-                meta: { breadcrumb: [{ text: 'Grupo de Alumnos' }] }
+                meta: {
+                    parent: 'matricula.grupos',
+                    breadcrumb: async (route) => {
+                        const breadcrumbStore = useBreadcrumbStore();
+                        let item = await breadcrumbStore.findTextById(route.params.id);
+                        return {
+                            text: item?.name || "Cargando...",
+                            to: { name: "matricula.grupos.alumnos", params: { id: item?.id } }
+                        };
+                    }
+                }
             },
+
+
             {
-                path: '/matricula/:id/editar',
+                path: ':id/editar',
                 name: 'matricula.editar',
                 props: true,
-                 component: () => import('../components/page/Matricula/MatriculaEditarSlider.vue'),
+                component: () => import('../components/page/Matricula/MatriculaEditarSlider.vue'),
                 meta: { breadcrumb: [{ text: 'Editar Alumno' }] },
             }
-
-
         ]
     },
 

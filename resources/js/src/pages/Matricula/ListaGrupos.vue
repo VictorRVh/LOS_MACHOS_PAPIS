@@ -16,6 +16,8 @@ import useGrupoStore from '../../store/Grupo/useGrupoStore';
 import useCicloStore from '../../store/Ciclo/useCicloStore';
 import useTableData from "../../composables/tabla/useTableData";
 import usePeriodosStore from '../../store/Periodo/usePeriodoStore';
+import useModalToast from "../../composables/useModalToast";
+
 
 const router = useRouter();
 const grupoStore = useGrupoStore();
@@ -27,7 +29,7 @@ const loading = ref(true);
 const selectedCiclo = ref(null);
 const selectedPeriodo = ref(null);
 const openEspecialidades = ref(new Set());
-
+const { showToast, showConfirmModal } = useModalToast();
 onMounted(async () => {
   if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
   if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();
@@ -35,7 +37,11 @@ onMounted(async () => {
 
 const filtrarPorSeleccion = async () => {
   if (!selectedCiclo.value || !selectedPeriodo.value) {
-    alert('Seleccionar todos los filtros.');
+    showToast(
+      `Seleccionar todos los filtros.`,
+      "warning"
+    );
+
     return;
   }
 
@@ -56,7 +62,7 @@ const filtrarPorSeleccion = async () => {
 
 
 const verMatriculados = (grupo) => {
-  router.push({ name: 'matricula.grupo.alumnos', params: { id: grupo.id } });
+  router.push({ name: 'matricula.grupos.alumnos', params: { id: grupo.id } });
 };
 
 const descargarNomina = async (idGrupo) => {

@@ -29,8 +29,6 @@ import useExportAlumnos from "@/composables/tabla/useAlumnosMatricula";
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 
 
-
-
 const props = defineProps({
     id: { type: [String], required: true },
 });
@@ -54,7 +52,6 @@ const verEstudiante = (matricula) => {
     showInfoModal.value = true
 }
 
-
 onMounted(() => {
     loading.value = true;
     setTimeout(async () => {
@@ -68,6 +65,13 @@ onMounted(() => {
             "matricula.grupos",
             { name: 'matricula.grupos.alumnos', params: { id } }
         );
+        
+        // breadcrumb.setTextItemAuto(
+        //     `${matriculaStore?.matriculadosPorGrupo?.especialidad} | M: ${matriculaStore?.matriculadosPorGrupo?.modulo} | Grupo: ${matriculaStore?.matriculadosPorGrupo?.seccion}`,
+        //     id,
+        //     "matricula.grupos",
+        //     { name: 'matricula.grupos', params: { id } }
+        // );
 
     }, 100);
 });
@@ -186,7 +190,7 @@ const exportarFicha = async (matricula) => {
 
 const EditarMatricula = (idMatricula) => {
     // Redirige al componente de matrícula con el id para edición
-    router.push({ name: 'matricula.editar', params: { id: idMatricula } })
+    router.push({ name: 'matricula.grupos.alumnos.editar', params: { id: idMatricula } })
 }
 // Lista raw desde el store
 const listaMatriculados = computed(() => matriculados.value?.matriculados ?? []);

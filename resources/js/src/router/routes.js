@@ -81,6 +81,7 @@ export default [
         name: 'matricula.index',
         component: () => import('../pages/Matricula/Matricula.vue'),
         redirect: { name: 'matricula.registrar' },
+        props: true,
         meta: {
             layout: 'dashboard',
             permissions: ['todo-acceso-permisos'],
@@ -102,12 +103,18 @@ export default [
             {
                 path: 'grupos',
                 name: 'matricula.grupos',
+                props: true,
                 component: () => import('../pages/Matricula/ListaGrupos.vue'),
-                meta: { breadcrumb: [{ text: 'Lista por Grupos' }] }
+                meta: {
+                    layout: 'dashboard',
+                    permissions: ['todo-acceso-permisos'],
+                    breadcrumb: [{ text: 'Lista por Grupos', to: { name: 'matricula.grupos' } }]
+                }
             },
             {
                 path: 'reservas',
                 name: 'matricula.reservas',
+
                 component: () => import('../pages/Matricula/Reservas.vue'),
                 meta: { breadcrumb: [{ text: 'Reservas' }] }
             },
@@ -130,14 +137,22 @@ export default [
                     }
                 }
             },
-
-
             {
                 path: ':id/editar',
-                name: 'matricula.editar',
+                name: 'matricula.grupos.alumnos.editar',
                 props: true,
                 component: () => import('../components/page/Matricula/MatriculaEditarSlider.vue'),
-                meta: { breadcrumb: [{ text: 'Editar Alumno' }] },
+                meta: {
+                    parent: 'matricula.grupos.alumnos',
+                    breadcrumb: async (route) => {
+                        const breadcrumbStore = useBreadcrumbStore();
+                        let item = await breadcrumbStore.findTextById(route.params.id);
+                        return {
+                            text: item?.name || "Cargando...",
+                            to: { name: "matricula.grupos.alumnos.editar", params: { id: item?.id } }
+                        };
+                    }
+                },
             }
         ]
     },

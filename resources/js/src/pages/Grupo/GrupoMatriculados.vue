@@ -44,7 +44,7 @@ onMounted(() => {
 
 const editarMatricula = (matricula) => {
     alert(`Simulación: Redirigiendo a editar matrícula con ID ${matricula.id}`);
-    router.push({ name: 'matricula.editar', params: { id: matricula.id } });
+    router.push({ name: 'matricula.grupos.alumnos.editar', params: { id: matricula.id } });
 };
 
 const eliminarMatricula = (matricula) => {

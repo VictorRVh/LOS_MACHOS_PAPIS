@@ -9,6 +9,8 @@ import Step2 from './Steps/Step2.vue';
 import Step3 from './Steps/Step3.vue';
 import Button from '../../ui/Button.vue';
 import * as yup from "yup";
+import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
+
 
 const router = useRouter();
 const route = useRoute();
@@ -27,7 +29,7 @@ const formErrors = ref({});
 const nameGrupo = ref("");
 const idGrupo = ref("");
 
-
+const breadcrumb = useBreadcrumbStore();
 
 // Solo Step2 y Step3
 const formData = ref({
@@ -172,6 +174,22 @@ const editarEstudiante = async (idMatricula) => {
         idGrupo.value = data.id_grupo;
         matriculaId.value = idMatricula;
         isEditing.value = true;
+
+        // << al final de editarEstudiante() >>
+        breadcrumb.setTextItemAuto(
+            `${data.grupo_nombre}`,
+            data.id_grupo,
+            "matricula.grupos",
+            { name: 'matricula.grupos.alumnos', params: { id: data.id_grupo } }
+        );
+
+        breadcrumb.setTextItemAuto(
+            `Editar matrícula`,
+            props.id,
+            "matricula.grupos.alumnos",
+            { name: 'matricula.grupos.alumnos.editar', params: { id: props.id } }
+        );
+
 
         showToast("Datos cargados", "success");
     } catch (e) {

@@ -73,7 +73,7 @@ watch(
   { immediate: true }
 );
 
-const isFinalizado = computed(() => sesionStore?.sesion?.estado === 4)
+// const isFinalizado = computed(() => sesionStore?.sesion?.estado === 4)
 
 const Asistencia = () => {
   if (sesionStore?.sesion?.id) {
@@ -208,10 +208,10 @@ const clearSelection = () => {
 };
 
 const openSessionForm = () => {
-  if (isFinalizado.value) {
-    showToast("La programación está FINALIZADA. No puedes crear nuevas sesiones.", "warning");
-    return;
-  }
+  // if (isFinalizado.value) {
+  //   showToast("La programación está FINALIZADA. No puedes crear nuevas sesiones.", "warning");
+  //   return;
+  // }
 
   if (!hasSelection.value) return;
 
@@ -222,10 +222,10 @@ const openSessionForm = () => {
 
 const confirmDelete = (bloque) => {
 
-  if (isFinalizado.value) {
-    showToast("No puedes eliminar sesiones porque la programación está FINALIZADA.", "warning");
-    return;
-  }
+  // if (isFinalizado.value) {
+  //   showToast("No puedes eliminar sesiones porque la programación está FINALIZADA.", "warning");
+  //   return;
+  // }
 
   if (deleting.value) return;
 
@@ -248,10 +248,10 @@ const verSesion = (bloque) => { }
 const isEditing = ref(false)
 
 const handleEdit = (bloque) => {
-  if (isFinalizado.value) {
-    showToast("Esta unidad didáctica está FINALIZADA. No se puede editar sesiones.", "warning");
-    return;
-  }
+  // if (isFinalizado.value) {
+  //   showToast("Esta unidad didáctica está FINALIZADA. No se puede editar sesiones.", "warning");
+  //   return;
+  // }
 
   clearSelection()
   isEditing.value = true

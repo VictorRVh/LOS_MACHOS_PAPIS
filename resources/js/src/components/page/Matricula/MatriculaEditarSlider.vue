@@ -195,7 +195,7 @@ const onSubmit = async () => {
     if (response?.matricula?.id) {
         showToast(`Matrícula actualizada. para ${response?.matricula?.nombre_completo}`, 'success');
 
-        router.replace({ name: 'matricula.grupo.alumnos', params: { id: response?.matricula?.idGrupo } });
+        router.replace({ name: 'matricula.grupos.alumnos', params: { id: response?.matricula?.idGrupo } });
 
     } else {
         showToast('Error al guardar.', 'error');
@@ -239,7 +239,7 @@ onMounted(() => {
             <div class="flex justify-end gap-3 mt-4">
 
 
-                <Button slotted @click="router.replace({ name: 'matricula.grupo.alumnos', params: { id: idGrupo } })"
+                <Button slotted @click="router.replace({ name: 'matricula.grupos.alumnos', params: { id: idGrupo } })"
                     class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 ">
                     Cancelar
                 </Button>

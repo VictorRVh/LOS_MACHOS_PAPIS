@@ -200,13 +200,12 @@ const generarReporte = async () => {
             </div>
           
 
-              <MenuTable :actions="{ edit: true, custom1: true, deactivate: true }" :labels="{
+              <MenuTable :actions="{ edit: true, custom1: true, deactivate: false }" :labels="{
                 edit: 'Subir documento',
                 custom1: grupo.estado === 4 ? 'Habilitar plazo extra' : 'Observación',
                 deactivate: 'Desactivar grupo',
               }" entityLabel="" @edit="() => openItemsModal(grupo)" @custom1="() => openPlazoModal(grupo)"
                 @deactivate="() => desactivarGrupo(grupo)" />
-
        
           </div>
 

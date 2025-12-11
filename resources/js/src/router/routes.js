@@ -26,6 +26,7 @@ export default [
     { path: '/comision', name: 'comision', component: () => import('../pages/Comision/Comision.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comision' } }] }, },
 
     { path: '/comisionDocente', name: 'comsion.docente', component: () => import('../pages/Docente-menu/DocenteComsion.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comsion.docente' } }] }, },
+    { path: '/buscar-estudiante', name: 'buscar.estudiante', component: () => import('../pages/Estudiante/BuscarEstudiante.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'BuscarEstudiante', to: { name: 'buscar.estudiante' } }] }, },
 
     {
         path: '/programa',

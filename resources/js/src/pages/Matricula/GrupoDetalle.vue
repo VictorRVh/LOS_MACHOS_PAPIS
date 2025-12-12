@@ -26,7 +26,7 @@ import useTableData from "../../composables/tabla/useTableData";
 import useHttpRequest from "../../composables/useHttpRequest";
 
 import useExportAlumnos from "@/composables/tabla/useAlumnosMatricula";
-
+import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 
 
 const props = defineProps({
@@ -45,20 +45,35 @@ const router = useRouter();
 //variaalbes para mostra informacion del estudiante
 const showInfoModal = ref(false)
 const estudianteSeleccionado = ref(null)
-
+const breadcrumb = useBreadcrumbStore();
 
 const verEstudiante = (matricula) => {
     estudianteSeleccionado.value = matricula
     showInfoModal.value = true
 }
 
-
 onMounted(() => {
     loading.value = true;
     setTimeout(async () => {
         await matriculaStore.fetchMatriculadosPorGrupo(props?.id)
         loading.value = false;
-    }, 1000);
+        const id = props.id;
+
+        breadcrumb.setTextItemAuto(
+            `${matriculaStore?.matriculadosPorGrupo?.especialidad} | M: ${matriculaStore?.matriculadosPorGrupo?.modulo} | Grupo: ${matriculaStore?.matriculadosPorGrupo?.seccion}`,
+            id,
+            "matricula.grupos",
+            { name: 'matricula.grupos.alumnos', params: { id } }
+        );
+        
+        // breadcrumb.setTextItemAuto(
+        //     `${matriculaStore?.matriculadosPorGrupo?.especialidad} | M: ${matriculaStore?.matriculadosPorGrupo?.modulo} | Grupo: ${matriculaStore?.matriculadosPorGrupo?.seccion}`,
+        //     id,
+        //     "matricula.grupos",
+        //     { name: 'matricula.grupos', params: { id } }
+        // );
+
+    }, 100);
 });
 
 const matriculados = computed(() => matriculaStore.matriculadosPorGrupo)
@@ -140,17 +155,17 @@ const confirmarReserva = async () => {
         const response = await matriculaStore.loadReservaMatricula(selectedMatricula.value.id_matricula)
         await matriculaStore.fetchMatriculadosPorGrupo(props?.id)
 
-       // console.log("los datos: ",response)
+        // console.log("los datos: ",response)
         if (response?.success) {
             showToast("Matrícula reservada exitosamente")
         }
         else {
-            showToast("Error al reservar matrícula","error")
+            showToast("Error al reservar matrícula", "error")
         }
 
     } catch (error) {
 
-        showToast("Error al reservar matrícula","error")
+        showToast("Error al reservar matrícula", "error")
     } finally {
         showReservaModal.value = false
     }
@@ -175,7 +190,7 @@ const exportarFicha = async (matricula) => {
 
 const EditarMatricula = (idMatricula) => {
     // Redirige al componente de matrícula con el id para edición
-    router.push({ name: 'matricula.editar', params: { id: idMatricula } })
+    router.push({ name: 'matricula.grupos.alumnos.editar', params: { id: idMatricula } })
 }
 // Lista raw desde el store
 const listaMatriculados = computed(() => matriculados.value?.matriculados ?? []);

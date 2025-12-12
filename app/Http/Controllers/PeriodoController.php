@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CarpetasPeriodoDrive;
 use App\Models\Periodo;
+use App\Models\ProgramaEstudio;
 use Illuminate\Http\Request;
 use App\Traits\Helpers;
 use Illuminate\Support\Facades\DB;
@@ -240,5 +241,48 @@ class PeriodoController extends Controller
         return response()->json([
             'message' => 'Periodo anulado correctamente (no eliminado físicamente).',
         ], 204);
+    }
+
+    public function getAnios()
+    {
+        $registros = ProgramaEstudio::select('año')->distinct()->pluck('año');
+
+        $anios = [];
+
+        foreach ($registros as $valor) {
+
+            // Si es un rango (ej: "2031-2032")
+            if (strpos($valor, '-') !== false) {
+                [$inicio, $fin] = explode('-', $valor);
+
+                for ($i = (int)$inicio; $i <= (int)$fin; $i++) {
+                    $anios[] = $i;
+                }
+            } else {
+                $anios[] = (int)$valor;
+            }
+        }
+
+        // Eliminar duplicados y ordenar
+        $anios = array_unique($anios);
+        sort($anios);
+
+        // Convertir a array de objetos con "anio"
+        $resultado = array_map(function ($anio) {
+            return ['anio' => (string)$anio];
+        }, $anios);
+
+        return $resultado;
+    }
+
+    public function getPeriodosFiltrados($anio)
+    {
+        return DB::table('grupo')
+            ->join('periodo', 'periodo.id', '=', 'grupo.id_periodo')
+            ->join('programa_estudio', 'programa_estudio.id', '=', 'grupo.id_programa')
+            ->where('programa_estudio.año', $anio)
+            ->select('periodo.id', 'periodo.nombre_periodo')
+            ->distinct()
+            ->get();
     }
 }

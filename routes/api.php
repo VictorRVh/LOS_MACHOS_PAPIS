@@ -218,6 +218,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
+    Route::get('estudiantesEgresados', [
+        \App\Http\Controllers\EstudianteController::class,
+        'getEgresados',
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-grupos');
+
     //BUSCAR DNI
     Route::post('buscar-documento', [
         \App\Http\Controllers\EstudianteController::class,
@@ -372,6 +377,10 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-especialidades|eliminar-especialidades');
 
+    Route::get('especialidad_periodo/{id_periodo}', [
+        \App\Http\Controllers\EspecialidadMadreController::class,
+        'getEspecialidades',
+    ])->middleware('permission:todo-acceso-especialidades|ver-especialidades');
 
     // RUTA PARA PROGRAMA_ESTUDIO
     Route::get('programa_estudio', [
@@ -485,6 +494,15 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-periodos|eliminar-periodos');
 
+    Route::get('periodosAnios', [
+        \App\Http\Controllers\PeriodoController::class,
+        'getAnios',
+    ])->middleware('permission:todo-acceso-periodos|ver-periodos');
+
+    Route::get('periodosAniosFiltrado/{anio}', [
+        \App\Http\Controllers\PeriodoController::class,
+        'getPeriodosFiltrados',
+    ])->middleware('permission:todo-acceso-periodos|ver-periodos');
 
     // RUTA PARA MODULO
     Route::get('modulo', [
@@ -591,12 +609,12 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\GrupoController::class,
         'gruposDisponibles',
     ])->middleware('permission:todo-acceso-grupos|ver-grupos');
-    
+
     Route::get('gruposRecientes', [
         \App\Http\Controllers\GrupoController::class,
         'ultimosGrupos',
     ])->middleware('permission:todo-acceso-grupos|ver-grupos');
-    
+
     Route::get('gruposCulminados', [
         \App\Http\Controllers\GrupoController::class,
         'gruposCulminados',
@@ -947,7 +965,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\ActividadesRecientesController::class,
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
-    
+
     Route::get('actividades_recientes_fecha', [
         \App\Http\Controllers\ActividadesRecientesController::class,
         'indexByDate',

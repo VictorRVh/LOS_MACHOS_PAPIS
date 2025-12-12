@@ -6,6 +6,7 @@ use App\Models\CicloAcademico;
 use App\Models\EspecialidadMadre;
 use Illuminate\Http\Request;
 use App\Traits\Helpers;
+use Illuminate\Support\Facades\DB;
 
 class EspecialidadMadreController extends Controller
 {
@@ -126,5 +127,19 @@ class EspecialidadMadreController extends Controller
             'id_ciclo' => $ciclo->id,
             'especialidades' => $especialidades
         ]);
+    }
+
+    public function getEspecialidades($periodoId)
+    {
+        return DB::table('grupo')
+            ->join('especialidad_programa', 'especialidad_programa.id', '=', 'grupo.id_especialidad')
+            ->join('especialidad_madre', 'especialidad_madre.id', '=', 'especialidad_programa.id_especialidad')
+            ->where('grupo.id_periodo', $periodoId)
+            ->select(
+                'especialidad_madre.id as id_especialidad',
+                'especialidad_madre.nombre_especialidad'
+            )
+            ->distinct()
+            ->get();
     }
 }

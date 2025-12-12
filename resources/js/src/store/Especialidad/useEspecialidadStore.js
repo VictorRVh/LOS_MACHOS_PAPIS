@@ -35,6 +35,11 @@ const useEspecialidadStore = defineStore('especialidadStore', () => {
     initialLoading: initialGrupoEspecialidad,
   } = useHttpRequest('/grupoByEspecialidad');
 
+  const {
+    show: getEspecialidadPorPeriodoFiltrado,
+    loading: especialidadPorPeriodoLoading,
+  } = useHttpRequest('/especialidad_periodo');
+
   // Estado
   const especialidad = ref([]);
   const especialidadPrograma = ref([]);
@@ -45,6 +50,8 @@ const useEspecialidadStore = defineStore('especialidadStore', () => {
   // Estado de carga (puedes usar uno general o ambos separados si quieres más control)
   const especialidadLoading = ref(false);
   const especialidadFirstTimeLoading = ref(false);
+
+  const especialidadesFiltradas = ref([])
 
   // Carga de especialidades madre
   const loadEspecialidad = async () => {
@@ -67,11 +74,18 @@ const useEspecialidadStore = defineStore('especialidadStore', () => {
     gruposDisponibles.value = res;
   };
 
-   const loadEspecialidadCiclo = async (id) => {
+  const loadEspecialidadCiclo = async (id) => {
     // especialidadLoading.value = loadingCiclo.value;
     // especialidadFirstTimeLoading.value = initialCiclo.value;
     const res = await getEspecialidadCicloOne(id);
     especialidadCiclo.value = res;
+  };
+  
+  const loadEspecialidadesPorPeriodo = async (id) => {
+    // especialidadLoading.value = loadingCiclo.value;
+    // especialidadFirstTimeLoading.value = initialCiclo.value;
+    const res = await getEspecialidadPorPeriodoFiltrado(id);
+    especialidadesFiltradas.value = res;
   };
 
   return {
@@ -89,7 +103,11 @@ const useEspecialidadStore = defineStore('especialidadStore', () => {
     especialidadCiclo,
 
     especialidadByCicloLoading,
-    grupoByEspecialidadLoading
+    grupoByEspecialidadLoading,
+
+    loadEspecialidadesPorPeriodo,
+    especialidadesFiltradas,
+    especialidadPorPeriodoLoading
   };
 });
 

@@ -26,7 +26,9 @@ export default [
     { path: '/comision', name: 'comision', component: () => import('../pages/Comision/Comision.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comision' } }] }, },
 
     { path: '/comisionDocente', name: 'comsion.docente', component: () => import('../pages/Docente-menu/DocenteComsion.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comsion.docente' } }] }, },
-    { path: '/buscar-estudiante', name: 'buscar.estudiante', component: () => import('../pages/Estudiante/BuscarEstudiante.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'BuscarEstudiante', to: { name: 'buscar.estudiante' } }] }, },
+    { path: '/buscar-estudiante', name: 'buscar.estudiante', component: () => import('../pages/Estudiante/BuscarEstudiante.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Buscar estudiante', to: { name: 'buscar.estudiante' } }] }, },
+    { path: '/egresados', name: 'egresados', component: () => import('../pages/Estudiante/Egresados.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Egresados', to: { name: 'egresados' } }] }, },
+    { path: '/egresados/:id/:periodoId', name: 'egresadosLista', component: () => import('../pages/Estudiante/EgresadosLista.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Lista de Egresados', to: { name: 'egresadosLista' } }] }, },
 
     {
         path: '/programa',

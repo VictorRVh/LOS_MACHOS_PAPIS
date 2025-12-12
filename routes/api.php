@@ -1035,6 +1035,13 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-matriculas|eliminar-matriculas');
 
+
+    Route::get('ingresos/{id}', [
+        \App\Http\Controllers\GrupoController::class,
+        'IngresosByGrupo',
+    ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
+
+    
     //matricula Reserva
 
     Route::patch('reservaMatricula/{id}', [

@@ -538,7 +538,7 @@ class MatriculaController extends Controller
 
     public function getMatriculadosPorGrupoExtendido($idGrupo)
     {
-        // Datos de la especialidad, módulo y fechas
+        // Datos del grupo
         $infoGrupo = DB::table('grupo')
             ->join('especialidad_programa', 'grupo.id_especialidad', '=', 'especialidad_programa.id')
             ->join('especialidad_madre', 'especialidad_programa.id_especialidad', '=', 'especialidad_madre.id')
@@ -551,35 +551,46 @@ class MatriculaController extends Controller
                 'grupo.fecha_inicio',
                 'grupo.fecha_fin',
                 'grupo.id_periodo',
+                'grupo.seccion',
+                'grupo.turno',
                 'grupo.id'
             )
             ->first();
 
-        // Datos de los estudiantes matriculados SIN reserva
+        // Estudiantes
         $estudiantes = DB::table('matricula')
             ->join('estudiante', 'matricula.id_estudiante', '=', 'estudiante.id')
             ->leftJoin('pagos', 'matricula.id_pago', '=', 'pagos.id')
             ->where('matricula.id_grupo', $idGrupo)
             ->where(function ($q) {
                 $q->whereNull('matricula.reserva')
-                    ->orWhere('matricula.reserva', 0); // solo los SIN reserva
+                    ->orWhere('matricula.reserva', 0);
             })
             ->select(
                 'matricula.id as id_matricula',
-                DB::raw("CONCAT(estudiante.apellido_paterno, ' ', estudiante.apellido_materno, ', ', estudiante.nombre) as apellidos_nombres"),
+
+                // 🔥 SEPARADO: nombres y apellidos
+                'estudiante.nombre as nombre',
+                DB::raw("CONCAT(estudiante.apellido_paterno, ' ', estudiante.apellido_materno) as apellidos"),
+
+                'estudiante.tipo_documento',
+                'estudiante.nro_documento',
                 'estudiante.sexo',
                 DB::raw("TIMESTAMPDIFF(YEAR, estudiante.fecha_nacimiento, CURDATE()) as edad"),
                 'matricula.turno as condicion',
-                'estudiante.id as id_estudiante',
-                'estudiante.nro_documento',
+
                 'estudiante.fecha_nacimiento',
                 'estudiante.lugar_nacimiento as lugar',
                 'estudiante.estado_civil',
                 'estudiante.grado_instruccion',
-                'estudiante.celular_personal as telefono',
+
+                // 🔥 nombres corregidos tal como tu Excel pide
+                'estudiante.celular_personal as celular_personal',
                 'estudiante.correo_electronico',
+
                 'pagos.nro_recibo as nro_recibo',
-                'pagos.aporte'
+                'pagos.aporte',
+                'pagos.condicion'
             )
             ->orderBy('estudiante.apellido_paterno', 'asc')
             ->get();
@@ -589,12 +600,15 @@ class MatriculaController extends Controller
             'id_grupo'      => $infoGrupo->id ?? null,
             'id_periodo'    => $infoGrupo->id_periodo ?? null,
             'modulo'        => $infoGrupo->modulo ?? null,
+            'seccion'        => $infoGrupo->seccion ?? null,
+            'turno'        => $infoGrupo->turno ?? null,
             'duracion'      => $infoGrupo->duracion ?? null,
             'fecha_inicio'  => $infoGrupo->fecha_inicio ?? null,
             'fecha_fin'     => $infoGrupo->fecha_fin ?? null,
             'estudiantes'   => $estudiantes
         ]);
     }
+
 
     // CAMBIO DE GRUPOS A ESTUDIANTES
 

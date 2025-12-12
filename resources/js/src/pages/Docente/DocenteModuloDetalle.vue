@@ -18,9 +18,9 @@ const navLinks = [
   { text: 'Documentos', to: { name: 'docente.modulo.detalle.documentos', params: { id: groupId } } },
   { text: 'Sesiones y asistencia', to: { name: 'docente.modulo.detalle.asistencia', params: { id: groupId } } },
   { text: 'Calificaciones', to: { name: 'docente.modulo.detalle.calificaciones', params: { id: groupId } } },
+    { text: 'Unidades Didácticas', to: { name: 'docente.modulo.detalle.capacidades', params: { id: groupId } } },
   { text: 'Prácticas', to: { name: 'docente.modulo.detalle.practicas', params: { id: groupId } } },
   { text: 'Alumnos', to: { name: 'docente.modulo.detalle.alumnos', params: { id: groupId } } },
-  { text: 'Unidades Didácticas', to: { name: 'docente.modulo.detalle.capacidades', params: { id: groupId } } },
 ];
 
 const tituloPrincipal = computed(() => {

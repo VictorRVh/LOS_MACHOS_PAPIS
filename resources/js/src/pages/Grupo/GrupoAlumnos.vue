@@ -13,6 +13,7 @@ import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 import axios from 'axios';
 import Slider from '../../components/ui/Slider.vue';
 import useModalToast from '../../composables/useModalToast';
+import useExportAlumnos from '../../composables/tabla/useAlumnosMatricula.js';  // Importa el composable
 
 const props = defineProps({
   id: { type: [String, Number], required: true },
@@ -21,12 +22,23 @@ const props = defineProps({
 const { showConfirmModal, showToast } = useModalToast();
 const matriculaStore = useMatriculaStore();
 
-const matriculados = computed(() => matriculaStore.matriculadosPorGrupoExtendido);
-const loading = ref(false);
+const { exportarAlumnos } = useExportAlumnos();  // Obtén la función
+
+const loading = ref(true);
 const estudiantesSeleccionados = ref([]);
 
+// ✅ computed correcto
+const matriculados = computed(() => matriculaStore.matriculadosPorGrupoExtendido);
+
+// 🔥 Cargar los matriculados correctamente
+onMounted(async () => {
+  loading.value = true;
+  await matriculaStore.fetchMatriculadosPorGrupoExtendido(props.id);
+  loading.value = false;
+});
+
 /* ------------------------------------------
-   ✔ FIX PRINCIPAL: seleccionar todos
+   ✔ Seleccionar todos
 ------------------------------------------ */
 const todosSeleccionados = computed({
   get() {
@@ -37,27 +49,24 @@ const todosSeleccionados = computed({
   },
   set(valor) {
     if (valor) {
-      estudiantesSeleccionados.value = matriculados.value.estudiantes.map(e => e.id_matricula);
+      estudiantesSeleccionados.value =
+        matriculados.value.estudiantes.map(e => e.id_matricula);
     } else {
       estudiantesSeleccionados.value = [];
     }
   }
 });
 
-
-onMounted(() => {});
-
+// Modal
 const showModal = ref(false);
 const nuevoGrupoId = ref("");
 const saving = ref(false);
 
-watch(showModal, async () => {});
-
-
 const cambiarGrupo = async () => {
-  // tu lógica luego
+  // tu lógica...
 };
 
+// Método para exportar alumnos
 
 const descargarNomina = async (idGrupo) => {
   try {
@@ -75,24 +84,46 @@ const descargarNomina = async (idGrupo) => {
   } catch (error) {
     console.error("Error descargando reporte:", error);
   }
-}
+};
+
+const exportar = () => {
+  const data = {
+    especialidad: matriculados.value.especialidad,
+    modulo: matriculados.value.modulo,
+    seccion: matriculados.value.seccion,
+    turno: matriculados.value.turno,
+    docente: matriculados.value.docente ?? "No asignado",
+
+    matriculados: matriculados.value.estudiantes.map(e => ({
+      ...e,
+      nombre: `${e.nombre } ${e.apellidos }` // 👈 aquí envías el nombre como "nom"
+    }))
+  };
+
+  exportarAlumnos(data);
+};
+
+
+
 </script>
+
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-grupos']">
     <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
 
 
-      <div class="flex justify-start mb-4 ml-2">
+      <div class="flex justify-end mb-4  gap-6 ml-2">
         <Button title="Descargar nomina" @click="descargarNomina(props.id)" variant="secondary" />
+        <Button title="Exporta Alumos" @click="exportar()" variant="secondary" />
       </div>
 
       <Table>
         <THead>
-          <Th class="w-10 text-center">
+          <!-- <Th class="w-10 text-center">
             <input type="checkbox" v-model="todosSeleccionados"
               class="rounded border-gray-300 text-cetpro focus:ring-cetpro-light" />
-          </Th>
+          </Th> -->
           <Th>N°</Th>
           <Th>DNI</Th>
           <Th>Apellidos y Nombres</Th>
@@ -100,8 +131,6 @@ const descargarNomina = async (idGrupo) => {
           <Th>Edad</Th>
           <Th>Condición</Th>
           <Th>Fecha de Nacimiento</Th>
-          <Th>Lugar</Th>
-          <Th>Estado Civil</Th>
           <Th>Grado de Instrucción</Th>
           <Th>Teléfono</Th>
           <Th>Correo Electrónico</Th>
@@ -112,25 +141,25 @@ const descargarNomina = async (idGrupo) => {
         <TBody>
           <Tr v-for="(estudiante, index) in matriculados.estudiantes" :key="estudiante.nro_documento"
             class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-
+<!-- 
             <Td class="text-center">
               <input type="checkbox"
                 :value="estudiante.id_matricula"
                 v-model="estudiantesSeleccionados"
                 class="rounded border-gray-300 text-cetpro focus:ring-cetpro-light" />
-            </Td>
+            </Td> -->
 
             <Td>{{ index + 1 }}</Td>
             <Td>{{ estudiante.nro_documento }}</Td>
-            <Td>{{ estudiante.apellidos_nombres }}</Td>
+            <Td>{{ estudiante.nombre}}  {{ estudiante.apellidos }}</Td>
             <Td>{{ estudiante.sexo }}</Td>
             <Td>{{ estudiante.edad }}</Td>
             <Td>{{ estudiante.condicion }}</Td>
             <Td>{{ estudiante.fecha_nacimiento }}</Td>
-            <Td>{{ estudiante.lugar }}</Td>
-            <Td>{{ estudiante.estado_civil }}</Td>
+
+        
             <Td>{{ estudiante.grado_instruccion }}</Td>
-            <Td>{{ estudiante.telefono ?? '-' }}</Td>
+            <Td>{{ estudiante.celular_personal?? '-' }}</Td>
             <Td>{{ estudiante.correo_electronico ?? '-' }}</Td>
             <Td>{{ estudiante.nro_recibo }}</Td>
             <Td>{{ estudiante.aporte }}</Td>

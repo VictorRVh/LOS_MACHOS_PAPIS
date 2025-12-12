@@ -344,6 +344,17 @@ export default [
             breadcrumb: [{ text: 'Gestión de Documentos', to: { name: 'documentos' } }],
         }
     },
+     {
+        path: '/ingresos',
+        name: 'ingresos',
+        component: () => import('../pages/Ingresos/Ingreso.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['todo-acceso-permisos'],
+            breadcrumb: [{ text: 'Gestión de ingresos', to: { name: 'ingresos' } }],
+        }
+    },
+
     {
         path: '/programacion/:id',
         name: 'programacion.detalle',

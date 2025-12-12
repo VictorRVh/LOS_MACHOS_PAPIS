@@ -65,6 +65,7 @@ const icons = {
   ChatBubbleBottomCenterTextIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/ChatBubbleBottomCenterTextIcon')),
   XCircleIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/XCircleIcon')),
   ArrowDownOnSquareIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/ArrowDownOnSquareIcon')),
+  CurrencyDollarIcon: defineAsyncComponent(() => import('@heroicons/vue/24/outline/CurrencyDollarIcon')),
 };
 
 export function registerHeroIcons(app) {

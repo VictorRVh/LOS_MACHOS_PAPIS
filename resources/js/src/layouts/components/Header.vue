@@ -18,6 +18,32 @@ import {
     Bars3Icon
 } from '@heroicons/vue/24/outline';
 import useNotificacionesStore from '../../store/Notificaciones/UseNotificacionesStore';
+import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
+
+
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
+const handleGoBack = async () => {
+    const items = breadcrumb.itemsText;
+    if (!items.length) return;
+
+    // Tomamos el penúltimo item para retroceder
+    const lastIndex = items.length - 2;
+    if (lastIndex < 0) return; // nada que retroceder
+
+    const lastItem = items[lastIndex];
+    if (lastItem?.to) {
+        await router.push(lastItem.to); // navegamos
+    }
+
+    // Recortamos el breadcrumb actual
+    breadcrumb.goBack(lastIndex);
+};
+
+
+
+const breadcrumb = useBreadcrumbStore();
 
 const { isDarkMode, updateDarkMode } = inject('theme');
 const { pushToRoute } = useAppRouter();
@@ -178,12 +204,15 @@ const onLogout = async () => {
         </div>
 
         <div
-            class="flex h-14 items-center justify-between gap-4 px-4 sm:px-6 border-t border-gray-200 dark:border-gray-700">
+            class="flex h-14 items-center justify-between gap-2 px-2 sm:px-2 border-t border-gray-200 dark:border-gray-700">
             <div class="flex min-w-0 items-center gap-3">
-                <button @click="$router.back()"
-                    class="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <button @click="handleGoBack"
+                    class="flex items-center gap-1 p-1 px-4 rounded-md bg-cetpro hover:bg-cetpro-light dark:bg-cetpro-dark dark:hover:bg-cetpro-light text-white transition-colors">
                     <ArrowLeftIcon class="h-6 w-6 shrink-0" />
+                    <span class="text-sm font-medium">Atrás</span>
                 </button>
+
+
                 <div class="min-w-0 truncate">
                     <Breadcrumbs />
                 </div>

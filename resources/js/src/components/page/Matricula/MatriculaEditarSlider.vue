@@ -175,7 +175,20 @@ const editarEstudiante = async (idMatricula) => {
         matriculaId.value = idMatricula;
         isEditing.value = true;
 
+
+        breadcrumb.clear(); // limpia el trail actual
+
         // << al final de editarEstudiante() >>
+
+
+        // 2) Lista por Grupos (sin params) — hijo de Matrícula
+        breadcrumb.setTextItemAuto(
+            "Lista por Grupos",
+            "matricula.grupos",         // id único para este item
+            "matricula.index",          // parent = Matrícula (el id que usamos arriba)
+            { name: 'matricula.grupos' } // ruta a la lista (no pases id aquí)
+        );
+        
         breadcrumb.setTextItemAuto(
             `${data.grupo_nombre}`,
             data.id_grupo,
@@ -189,7 +202,6 @@ const editarEstudiante = async (idMatricula) => {
             "matricula.grupos.alumnos",
             { name: 'matricula.grupos.alumnos.editar', params: { id: props.id } }
         );
-
 
         showToast("Datos cargados", "success");
     } catch (e) {

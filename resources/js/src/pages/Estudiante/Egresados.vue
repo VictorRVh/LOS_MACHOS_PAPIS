@@ -214,7 +214,7 @@ const {
               </td>
 
               <td class="text-center py-3">
-                <MenuTable :actions="{ view: true }" @view="verEgresados(esp)" entity-label="especialidad" />
+                <MenuTable :actions="{ view: true }" @view="verEgresados(esp)" entity-label="egresados" />
               </td>
 
             </tr>

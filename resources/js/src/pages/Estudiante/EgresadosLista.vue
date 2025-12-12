@@ -30,13 +30,8 @@ onMounted(async () => {
 
     const result = await estudianteStore.loadEstudiantesEgresados(idEspecialidad, idPeriodo);
 
-    // if (!result) {
-    //     showToast("No se pudieron cargar los estudiantes.", "error");
-    // }
-
-    // forzar array vacío si es undefined
-    // especialidad.value = estudianteStore.especialidadActual || null;
-    estudiantes.value = estudianteStore.estudiantesEgresados;
+    especialidad.value = estudianteStore.estudiantesEgresados.especialidad ?? null;
+    estudiantes.value = estudianteStore.estudiantesEgresados.egresados ?? [];
 
     isLoading.value = false;
 });
@@ -44,12 +39,12 @@ onMounted(async () => {
 
 // -------- Tabla plana de estudiantes
 const estudiantesPlanos = computed(() => {
-    return estudiantes.value.map((e, index) => ({
+    return (estudiantes.value ?? []).map((e, index) => ({
         index: index + 1,
         id: e.id,
         dni: e.dni ?? "",
-        nombres: e.nombres ?? "",
-        apellidos: e.apellidos ?? "",
+        apellidos: `${e.apellido_paterno ?? ""} ${e.apellido_materno ?? ""}`.trim(),
+        nombres: e.nombre ?? "",
         telefono: e.telefono ?? "",
         correo: e.correo ?? "",
         fecha_registro: e.fecha_registro ?? "",
@@ -110,21 +105,21 @@ const {
                     <Th class="min-w-[120px]">DNI</Th>
                     <Th class="min-w-[200px]">Apellidos</Th>
                     <Th class="min-w-[200px]">Nombres</Th>
-                    <Th class="min-w-[150px]">Teléfono</Th>
+                    <!-- <Th class="min-w-[150px]">Teléfono</Th>
                     <Th class="min-w-[220px]">Correo</Th>
-                    <Th class="min-w-[160px]">Fecha Registro</Th>
+                    <Th class="min-w-[160px]">Fecha Registro</Th> -->
                 </THead>
 
                 <TBody>
                     <tr v-for="est in estudiantesPaginados" :key="est.id"
-                        class="border-b border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                        class="border-b border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/40 h-16">
                         <td class="text-center">{{ est.index }}</td>
                         <td>{{ est.dni }}</td>
                         <td>{{ est.apellidos }}</td>
                         <td>{{ est.nombres }}</td>
-                        <td>{{ est.telefono }}</td>
+                        <!-- <td>{{ est.telefono }}</td>
                         <td>{{ est.correo }}</td>
-                        <td>{{ est.fecha_registro }}</td>
+                        <td>{{ est.fecha_registro }}</td> -->
                     </tr>
                 </TBody>
             </Table>
@@ -136,9 +131,9 @@ const {
                         d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
                 </svg>
                 <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
-                    No se encontraron estudiantes
+                    No se encontraron egresados
                 </h3>
-                <p class="mt-1 text-sm text-gray-500">Esta especialidad no tiene estudiantes registrados.</p>
+                <p class="mt-1 text-sm text-gray-500">En esta especialidad no existen egresados todavía.</p>
             </div>
 
         </div>

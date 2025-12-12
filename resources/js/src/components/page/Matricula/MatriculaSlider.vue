@@ -176,16 +176,16 @@ const onSubmit = async () => {
         <div v-else>
             <ol class="flex items-center space-x-2 text-sm font-medium text-gray-500 dark:text-gray-400 sm:text-base">
                 <li class="flex items-center">
-                    <span :class="currentStep >= 1 ? 'text-blue-600 dark:text-blue-500' : ''">1 Datos Académicos</span>
+                    <span :class="currentStep >= 1 ? 'text-blue-600 dark:text-blue-500' : ''">1. Datos Académicos</span>
                     <span v-if="currentStep < 3" class="mx-2">»</span>
                 </li>
                 <li class="flex items-center">
-                    <span :class="currentStep >= 2 ? 'text-blue-600 dark:text-blue-500' : ''">2 Datos del
+                    <span :class="currentStep >= 2 ? 'text-blue-600 dark:text-blue-500' : ''">2. Datos del
                         Estudiante</span>
                     <span v-if="currentStep < 3" class="mx-2">»</span>
                 </li>
                 <li class="flex items-center">
-                    <span :class="currentStep >= 3 ? 'text-blue-600 dark:text-blue-500' : ''">3 Pago y
+                    <span :class="currentStep >= 3 ? 'text-blue-600 dark:text-blue-500' : ''">3. Pago y
                         Confirmación</span>
                 </li>
             </ol>

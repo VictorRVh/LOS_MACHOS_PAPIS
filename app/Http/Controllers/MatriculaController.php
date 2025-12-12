@@ -378,7 +378,7 @@ class MatriculaController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Reserva usada correctamente.',
-        ],204);
+        ], 204);
     }
 
 
@@ -782,14 +782,31 @@ class MatriculaController extends Controller
         $matricula = Matricula::with([
             'estudiante',
             'pago',
+            'grupo.modulo',
+            'grupo.especialidad.especialidadMadre'
         ])
-            ->select('id', 'id_grupo', 'id_estudiante', 'id_pago') // SOLO estos campos
+            ->select('id', 'id_grupo', 'id_estudiante', 'id_pago')
             ->where('id', $id)
             ->first();
 
         if (!$matricula) {
             return response()->json(['message' => 'Matrícula no encontrada'], 404);
         }
+
+        // Armamos el nombre del grupo
+        $grupo = $matricula->grupo;
+
+        $grupo_nombre = $grupo
+            ? $grupo->especialidad->especialidadMadre->nombre_especialidad
+            . " | M: " . $grupo->modulo->descripcion
+            . " | Grupo: " . $grupo->seccion
+            : null;
+
+        // Añadimos al response
+        $matricula->grupo_nombre = $grupo_nombre;
+
+        // Ocultar grupo COMPLETO del JSON
+        $matricula->makeHidden(['grupo']);
 
         return response()->json($matricula);
     }

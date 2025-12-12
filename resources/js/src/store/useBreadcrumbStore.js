@@ -55,6 +55,26 @@ export const useBreadcrumbStore = defineStore('breadcrumb', () => {
     itemsText.value = Array.isArray(newBase) ? [...newBase] : [];
   }
 
+  // ---------------------------------------------------------
+  //  🔥 NUEVO: elimina todos los breadcrumbs después del index
+  // ---------------------------------------------------------
+  function removeAfter(index) {
+    if (index >= 0) {
+      itemsText.value.splice(index + 1);
+    }
+  }
+
+  // ---------------------------------------------------------
+  // 🔥 NUEVO: retroceder al breadcrumb seleccionado
+  // ---------------------------------------------------------
+function goBack(index) {
+  if (index >= 0) {
+    removeAfter(index);
+  }
+}
+
+
+
   return {
     itemsText,
     setTextItemAuto,
@@ -62,5 +82,8 @@ export const useBreadcrumbStore = defineStore('breadcrumb', () => {
     clear,
     setBase,
     items: itemsText,
+    // Para la flecha de retroceder
+    goBack,
+    removeAfter,
   };
 });

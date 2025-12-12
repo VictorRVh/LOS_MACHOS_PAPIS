@@ -17,7 +17,7 @@ import TBody from '@/components/table/TBody.vue';
 import Tr from '@/components/table/Tr.vue';
 import Th from '@/components/table/Th.vue';
 import Td from '@/components/table/Td.vue';
-import BaseButton from '@/components/ui/Button.vue';
+
 import TomarAsistencia from '../../components/page/SesionesDocente/TomarAsistenciaSlider.vue';
 import MenuTable from "../../components/table/MenuTable.vue";
 import useExportExcel from "../../composables/sesiones/useExportExcel"

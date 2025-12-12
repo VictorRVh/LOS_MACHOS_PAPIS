@@ -14,6 +14,8 @@ import axios from 'axios';
 import Slider from '../../components/ui/Slider.vue';
 import useModalToast from '../../composables/useModalToast';
 import useExportAlumnos from '../../composables/tabla/useAlumnosMatricula.js';  // Importa el composable
+import BaseButton from "../../components/ui/Button.vue"
+import { generateCertificate } from "../../pdf/CertificadoPDF.js";
 
 const props = defineProps({
   id: { type: [String, Number], required: true },
@@ -96,14 +98,64 @@ const exportar = () => {
 
     matriculados: matriculados.value.estudiantes.map(e => ({
       ...e,
-      nombre: `${e.nombre } ${e.apellidos }` // 👈 aquí envías el nombre como "nom"
+      nombre: `${e.nombre} ${e.apellidos}` // 👈 aquí envías el nombre como "nom"
     }))
   };
 
   exportarAlumnos(data);
 };
 
+const dataPDF = {
+  logo: "/img/insignia.png",
+  photo: "/img/user.png",
+  photoMinisterio: "/img/logoMin.png",
+  name: "",
+  especialidad: "PELUQUERIA Y BARBERIA",
+  module: "CORTE DE CABELLO, DISEÑO DE BARBA, PEINADO",
+  unidades: [
+    {
+      unidad: "aquietendremos las los zapatos con los mios y otros",
+      capacidad:
+        "en esta parte de unidad veremos las cosas más simples de la zapatería con lo novedoso",
+      hora: "6",
+      credito: "17",
+    },
+  ],
+  startDate: "18/03/2024",
+  endDate: "19/07/2024",
+  credits: 20,
+  hours: 528,
+  location: "Huancané, 24 de diciembre de 2024",
+};
 
+
+
+
+const dataCertificate = ref([]); // Inicializamos como array vacío
+
+const generateSelectedCertificates = async () => {
+  if (selectedStudents.value.length === 0) {
+    showToast("Por favor, selecciona al menos un estudiante.");
+    return;
+  }
+
+  // Carga los certificados de los estudiantes seleccionados
+  const certificates = await Promise.all(
+    selectedStudents.value.map(async (studyId) => {
+      await userStore.loadCertificate(studyId, props.certifyId);
+      return userStore.certificate; // Retorna el certificado cargado
+    })
+  );
+
+  dataCertificate.value = certificates; // Asigna los certificados obtenidos
+
+  console.log("Certificados cargados:", dataCertificate.value[0][0]?.experiencias_formativas[0].nombre_experiencia
+  );
+    // console.log("Primer certificado:", dataCertificate.value[0][0]?.apellidos_nombres);
+  
+  generateCertificate(dataPDF ,dataCertificate.value);
+
+};
 
 </script>
 
@@ -128,20 +180,18 @@ const exportar = () => {
           <Th>DNI</Th>
           <Th>Apellidos y Nombres</Th>
           <Th>Sexo</Th>
-          <Th>Edad</Th>
-          <Th>Condición</Th>
+
           <Th>Fecha de Nacimiento</Th>
-          <Th>Grado de Instrucción</Th>
           <Th>Teléfono</Th>
           <Th>Correo Electrónico</Th>
-          <Th>Nro. Recibo</Th>
-          <Th>Aporte</Th>
+          <Th>Acciones</Th>
+
         </THead>
 
         <TBody>
           <Tr v-for="(estudiante, index) in matriculados.estudiantes" :key="estudiante.nro_documento"
             class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-<!-- 
+            <!-- 
             <Td class="text-center">
               <input type="checkbox"
                 :value="estudiante.id_matricula"
@@ -151,19 +201,27 @@ const exportar = () => {
 
             <Td>{{ index + 1 }}</Td>
             <Td>{{ estudiante.nro_documento }}</Td>
-            <Td>{{ estudiante.nombre}}  {{ estudiante.apellidos }}</Td>
+            <Td>{{ estudiante.nombre }} {{ estudiante.apellidos }}</Td>
             <Td>{{ estudiante.sexo }}</Td>
-            <Td>{{ estudiante.edad }}</Td>
-            <Td>{{ estudiante.condicion }}</Td>
             <Td>{{ estudiante.fecha_nacimiento }}</Td>
 
-        
-            <Td>{{ estudiante.grado_instruccion }}</Td>
-            <Td>{{ estudiante.celular_personal?? '-' }}</Td>
-            <Td>{{ estudiante.correo_electronico ?? '-' }}</Td>
-            <Td>{{ estudiante.nro_recibo }}</Td>
-            <Td>{{ estudiante.aporte }}</Td>
 
+            <Td>{{ estudiante.celular_personal ?? '-' }}</Td>
+            <Td>{{ estudiante.correo_electronico ?? '-' }}</Td>
+
+            <Td>
+
+              <BaseButton title="Certificado" @click="exportCertificado()"
+                class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
+                <template #icon>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                  </svg>
+                </template>
+              </BaseButton>
+            </Td>
           </Tr>
 
           <Tr v-if="matriculados.estudiantes?.length === 0 && !loading">

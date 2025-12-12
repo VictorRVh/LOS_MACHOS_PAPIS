@@ -170,8 +170,8 @@ watch(
 );
 
 const handleDateClick = ({ dateStr, date }) => {
-  // const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-  // if (isWeekend) return;
+  const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+  if (isWeekend) return;
 
   const isAlreadyScheduled = allEvents.value.some(event =>
     dateStr >= event.start && dateStr < event.end &&
@@ -310,7 +310,7 @@ const onSliderHide = () => {
 </script>
 
 <template>
-  <div v-if="sesionStore?.sesion.id"
+  <div v-if="sesionStore?.sesion?.id"
     class="col-span-full bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-2 px-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
     <div>
       <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200">
@@ -473,7 +473,7 @@ const onSliderHide = () => {
               </Td>
 
               <Td class="text-center text-gray-600 dark:text-gray-200">
-                <MenuTable :actions="{ view: true, edit: true, delete: true }" @view="verSesion(sesion)"
+                <MenuTable :actions="{ view: false, edit: true, delete: true }" @view="verSesion(sesion)"
                   @edit="handleEdit(sesion)" @delete="confirmDelete(sesion)" entity-label="sesión" />
               </Td>
             </Tr>

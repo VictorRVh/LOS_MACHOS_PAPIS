@@ -4,6 +4,7 @@ import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 import { UsersIcon, ArrowRightIcon } from '@heroicons/vue/24/outline';
 import useActividadesStore from '../store/ActividadesRecientes/UseActividadesRecientesStore';
 import PermissionBlock from '../components/page/AuthorizationStart.vue'
+import useGrupoStore from '../store/Grupo/useGrupoStore';
 
 const breadcrumbStore = useBreadcrumbStore();
 
@@ -17,6 +18,7 @@ const dateTo = ref(new Date().toISOString().slice(0, 10));
 
 /* -------------------- ACTIVIDADES -------------------- */
 const actividadesStore = useActividadesStore();
+const grupoStore = useGrupoStore();
 const allActivities = ref([]);
 
 /* -------------------- ROLES -------------------- */
@@ -34,6 +36,8 @@ const currentActivities = computed(() => {
 /* -------------------- GRUPOS -------------------- */
 const gruposRecientes = ref([]);
 const gruposCulminados = ref([]);
+
+const isFiltering = ref(false);
 
 const currentGrupos = computed(() => {
   return activeGroupsTab.value === 'recientes'
@@ -53,8 +57,17 @@ const setDateRange = (days) => {
   applyDateFilter();
 };
 
-const applyDateFilter = () => {
-  console.log(`Buscando actividades desde ${dateFrom.value} hasta ${dateTo.value}`);
+const applyDateFilter = async () => {
+  isFiltering.value = true; // <- 🔥 activar bandera
+  stopAutoUpdate();         // detener auto-update
+
+  await actividadesStore.loadActividadesPorFechas(dateFrom.value, dateTo.value);
+
+  allActivities.value = actividadesStore.actividadesRecientesPorFecha;
+
+  if (rolesTabs.value.length > 0) {
+    activeActivityTab.value = rolesTabs.value[0];
+  }
 };
 
 /* -------------------- AUTO-ACTUALIZACIÓN -------------------- */
@@ -83,15 +96,17 @@ const resetInactivityTimer = () => {
     stopAutoUpdate(); // parar por inactividad
   }, INACTIVITY_LIMIT);
 
-  if (!interval && document.visibilityState === 'visible') {
-    startAutoUpdate(); // reactivar si vuelve
+  if (!interval && document.visibilityState === 'visible' && !isFiltering.value) {
+    startAutoUpdate();  // solo si NO se está filtrando
   }
 };
 
 /* -------------------- HANDLER VISIBILITY -------------------- */
 const handleVisibilityChange = () => {
   if (document.visibilityState === 'visible') {
-    resetInactivityTimer();
+    if (!isFiltering.value) {
+      resetInactivityTimer();
+    }
   } else {
     stopAutoUpdate();
   }
@@ -107,16 +122,16 @@ onMounted(async () => {
   await actividadesStore.loadActividadesRecientes();
   allActivities.value = actividadesStore.actividadesRecientes;
 
+  await grupoStore.loadGruposRecientes();
+  gruposRecientes.value = grupoStore.gruposRecientes;
+
+  await grupoStore.loadGruposCulminados();
+  gruposCulminados.value = grupoStore.gruposCulminados;
+
   // activar primer rol automáticamente
   if (rolesTabs.value.length > 0) {
     activeActivityTab.value = rolesTabs.value[0];
   }
-
-  // grupos de prueba
-  gruposRecientes.value = [
-    { matriculados: 0, nro: 1243, modulo: 8, descripcion: 'MAQUILLAJE', seccion: 'UNICA', turno: 'TARDE', nominaRoute: '#' },
-    { matriculados: 4, nro: 1243, modulo: 7, descripcion: 'PELUQUERIA', seccion: 'UNICA', turno: 'TARDE', nominaRoute: '#' },
-  ];
 
   // iniciar lógica
   startAutoUpdate();
@@ -260,16 +275,13 @@ onUnmounted(() => {
               <tr>
                 <th scope="col"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Nro Matriculados</th>
+                  Especialidad</th>
                 <th scope="col"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Nro de Grupo</th>
+                  Nro de Módulo</th>
                 <th scope="col"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Nro de Modulo</th>
-                <th scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Descripcion</th>
+                  Modulo</th>
                 <th scope="col"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Seccion</th>
@@ -278,24 +290,31 @@ onUnmounted(() => {
                   Turno</th>
                 <th scope="col"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Nro Matriculados</th>
+                <th scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Opciones</th>
               </tr>
             </thead>
             <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
               <tr v-for="(grupo, index) in currentGrupos" :key="index"
                 class="hover:bg-gray-50 dark:hover:bg-slate-700/50">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"
-                  :class="grupo.matriculados > 0 ? 'text-green-600' : 'text-gray-900 dark:text-gray-200'">{{
-                    grupo.matriculados }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ grupo.nro }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ grupo.modulo }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ grupo.descripcion }}
+
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{
+                  grupo.nombre_especialidad }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ grupo.numero_modulo
+                }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ grupo.nombre_modulo
+                }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ grupo.seccion }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ grupo.turno }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                  :class="grupo.nro_matriculados > 0 ? 'text-green-600' : 'text-gray-900 dark:text-gray-200'">{{
+                    grupo.nro_matriculados }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <router-link :to="grupo.nominaRoute"
+                  <router-link v-if="grupo.nominaRoute" :to="grupo.nominaRoute"
                     class="flex items-center justify-center gap-1 text-white bg-cetpro hover:bg-opacity-90 rounded-md px-3 py-1.5">
                     <span>Nomina</span>
                     <ArrowRightIcon class="h-4 w-4" />

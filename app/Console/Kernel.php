@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('notas:actualizar-estado')->everyMinute();
         $schedule->command('entregas:notificar-incumplidos')->everyMinute();
         $schedule->command('sesiones:notificar-no-trabajadas')->everyMinute();
+        $schedule->command('grupos:desactivar')->everyMinute();
     }
 
     /**

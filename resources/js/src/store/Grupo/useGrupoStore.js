@@ -78,6 +78,18 @@ const useGrupoStore = defineStore('grupo', () => {
         // initialLoading: moduloByEspecialidadFirstTimeLoading,
     } = useHttpRequest('/infoGrupo');
 
+    const {
+        index: getGrupoRecientes,
+        loading: gruposRecientesLoading,
+        initialLoading: gruposRecientesFirstTimeLoading,
+    } = useHttpRequest('/gruposRecientes');
+    
+    const {
+        index: getGrupoCulminados,
+        loading: gruposCulminadosLoading,
+        initialLoading: gruposCulminadosFirstTimeLoading,
+    } = useHttpRequest('/gruposCulminados');
+
     // Datos
     const grupos = ref([]);
     const especialidades = ref([]);
@@ -95,6 +107,8 @@ const useGrupoStore = defineStore('grupo', () => {
     const gruposDisponibles = ref([])
 
     const infoGrupo = ref([])
+    const gruposRecientes = ref([])
+    const gruposCulminados = ref([])
 
     // Métodos
     const loadGrupos = async () => {
@@ -179,6 +193,16 @@ const useGrupoStore = defineStore('grupo', () => {
         infoGrupo.value = response;
     };
 
+    const loadGruposRecientes = async () => {
+        const response = await getGrupoRecientes()
+        gruposRecientes.value = response;
+    };
+    
+    const loadGruposCulminados = async () => {
+        const response = await getGrupoCulminados()
+        gruposCulminados.value = response;
+    };
+
     return {
         // Datos
         grupos,
@@ -235,7 +259,15 @@ const useGrupoStore = defineStore('grupo', () => {
         gruposDisponibles,
 
         loadInfoGrupo,
-        infoGrupo
+        infoGrupo,
+
+        loadGruposRecientes,
+        gruposRecientesLoading,
+        gruposRecientes,
+
+        loadGruposCulminados,
+        gruposCulminadosLoading,
+        gruposCulminados
 
     };
 });

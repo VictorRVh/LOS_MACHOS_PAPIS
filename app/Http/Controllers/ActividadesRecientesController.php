@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActividadesRecientes;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ActividadesRecientesController extends Controller
 {
@@ -38,7 +39,39 @@ class ActividadesRecientesController extends Controller
         return response()->json($actividades);
     }
 
+    public function indexByDate(Request $request)
+    {
+        $request->validate([
+            'fecha_inicio' => 'required|date',
+            'fecha_fin'    => 'required|date',
+        ]);
 
+        $fechaInicio = Carbon::parse($request->fecha_inicio)->startOfDay();
+        $fechaFin    = Carbon::parse($request->fecha_fin)->endOfDay();
+
+        $actividades = ActividadesRecientes::with(['usuario', 'rol'])
+            ->whereBetween('created_at', [$fechaInicio, $fechaFin])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($act) {
+
+                $nombreCompleto = trim(
+                    ($act->usuario->name ?? '') . ' ' .
+                        ($act->usuario->apellido_paterno ?? '') . ' ' .
+                        ($act->usuario->apellido_materno ?? '')
+                );
+
+                return [
+                    'role'   => $act->rol->name ?? 'sin-rol',
+                    'actor'  => strtoupper($act->rol->name ?? 'Usuario') . ' | ' . $nombreCompleto,
+                    'accion' => $act->accion,
+                    'detalle' => $act->descripcion,
+                    'created_at' => $act->created_at,
+                ];
+            });
+
+        return response()->json($actividades);
+    }
 
     // GET /api/actividades-recientes/{id}
     public function show($id)

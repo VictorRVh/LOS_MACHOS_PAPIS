@@ -9,7 +9,15 @@ const useActividadesStore = defineStore('actividades-recientes', () => {
         initialLoading: actividadesRecientesFirstTimeLoading,
     } = useHttpRequest('/actividades_recientes');
 
+    const {
+        indexWithParams: getActividadesRecientesFiltrado,
+        loading: actividadesRecientesFiltradoLoading,
+        initialLoading: actividadesRecientesFIltradoFirstTimeLoading,
+    } = useHttpRequest('/actividades_recientes_fecha');
+
+
     const actividadesRecientes = ref([]);
+    const actividadesRecientesPorFecha = ref([]);
 
     const timeAgo = (dateString) => {
         const now = new Date();
@@ -42,9 +50,9 @@ const useActividadesStore = defineStore('actividades-recientes', () => {
 
                 accionColor:
                     act.accion === 'Agregado' ? 'text-blue-500' :
-                    act.accion === 'Actualizado' ? 'text-green-500' :
-                    act.accion === 'Eliminado' ? 'text-red-500' :
-                    'text-gray-500',
+                        act.accion === 'Actualizado' ? 'text-green-500' :
+                            act.accion === 'Eliminado' ? 'text-red-500' :
+                                'text-gray-500',
 
                 detalle: act.detalle,
 
@@ -53,11 +61,43 @@ const useActividadesStore = defineStore('actividades-recientes', () => {
         });
     };
 
+    const loadActividadesPorFechas = async (fechaInicio, fechaFin) => {
+        const res = await getActividadesRecientesFiltrado({
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin,
+        });
+
+        actividadesRecientesPorFecha.value = res.map(act => {
+            const fullName = act?.actor || "Usuario";
+
+            return {
+                role: act?.role?.toLowerCase() ?? 'sin-rol',
+
+                actor: fullName,
+
+                accion: act.accion,
+
+                accionColor:
+                    act.accion === 'Agregado' ? 'text-blue-500' :
+                        act.accion === 'Actualizado' ? 'text-green-500' :
+                            act.accion === 'Eliminado' ? 'text-red-500' :
+                                'text-gray-500',
+
+                detalle: act.detalle,
+
+                tiempo: timeAgo(act.created_at),
+            };
+        });
+    };
+
+
     return {
         actividadesRecientes,
         loadActividadesRecientes,
         actividadesRecientesLoading,
         actividadesRecientesFirstTimeLoading,
+        loadActividadesPorFechas,
+        actividadesRecientesPorFecha
     };
 });
 

@@ -591,6 +591,16 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\GrupoController::class,
         'gruposDisponibles',
     ])->middleware('permission:todo-acceso-grupos|ver-grupos');
+    
+    Route::get('gruposRecientes', [
+        \App\Http\Controllers\GrupoController::class,
+        'ultimosGrupos',
+    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
+    
+    Route::get('gruposCulminados', [
+        \App\Http\Controllers\GrupoController::class,
+        'gruposCulminados',
+    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
 
     //RUTA PARA CAPACIDAD TERMINAL
     Route::get('capacidad_terminal', [
@@ -936,6 +946,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('actividades_recientes', [
         \App\Http\Controllers\ActividadesRecientesController::class,
         'index',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    
+    Route::get('actividades_recientes_fecha', [
+        \App\Http\Controllers\ActividadesRecientesController::class,
+        'indexByDate',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
 
     Route::post('actividades_recientes', [

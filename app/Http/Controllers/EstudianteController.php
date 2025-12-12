@@ -457,27 +457,45 @@ class EstudianteController extends Controller
         $especialidadMadreId = $request->query('especialidad');
         $periodoId = $request->query('periodo');
 
-        // 1. Obtener todos los especialidad_programa vinculados a la especialidad madre
+        // Obtener datos de la especialidad madre
+        $especialidadMadre = DB::table('especialidad_madre')
+            ->where('id', $especialidadMadreId)
+            ->first(['id', 'nombre_especialidad']);
+
+        // Obtener datos del periodo
+        $periodo = DB::table('periodo')
+            ->where('id', $periodoId)
+            ->first(['id', 'nombre_periodo']);
+
+        // 1. Obtener programas vinculados
         $especialidadesPrograma = DB::table('especialidad_programa')
             ->where('id_especialidad', $especialidadMadreId)
-            ->pluck('id'); // lista de ids
+            ->pluck('id');
 
         if ($especialidadesPrograma->isEmpty()) {
-            return response()->json([]);
+            return response()->json([
+                'especialidad' => $especialidadMadre,
+                'periodo' => $periodo,
+                'egresados' => []
+            ]);
         }
 
-        // 2. Obtener grupos culminados (status = 2) de esas especialidades y ese periodo
+        // 2. Obtener grupos culminados
         $grupos = DB::table('grupo')
             ->whereIn('id_especialidad', $especialidadesPrograma)
             ->where('id_periodo', $periodoId)
-            ->where('status', 2) // grupo culminado
+            ->where('status', 2)
             ->get();
 
         if ($grupos->isEmpty()) {
-            return response()->json([]);
+            return response()->json([
+                'especialidad' => $especialidadMadre,
+                'periodo' => $periodo,
+                'egresados' => []
+            ]);
         }
 
-        // 3. Identificar todos los módulos que requiere la especialidad → para validar egreso
+        // 3. Módulos requeridos
         $modulosRequeridos = DB::table('modulos')
             ->whereIn('id_especialidad', $especialidadesPrograma)
             ->pluck('id')
@@ -485,25 +503,28 @@ class EstudianteController extends Controller
 
         $totalModulos = count($modulosRequeridos);
 
-        // 4. Obtener estudiantes matriculados en esos grupos
-        $estudiantesPorGrupo = DB::table('matricula_grupo')
+        // 4. Matriculados
+        $matriculas = DB::table('matricula')
             ->whereIn('id_grupo', $grupos->pluck('id'))
             ->get();
 
-        if ($estudiantesPorGrupo->isEmpty()) {
-            return response()->json([]);
+        if ($matriculas->isEmpty()) {
+            return response()->json([
+                'especialidad' => $especialidadMadre,
+                'periodo' => $periodo,
+                'egresados' => []
+            ]);
         }
 
-        // Agrupar módulos cursados por estudiante
         $modulosCursados = [];
 
-        foreach ($estudiantesPorGrupo as $mat) {
+        foreach ($matriculas as $mat) {
             $modulosCursados[$mat->id_estudiante][] = $mat->id_grupo;
         }
 
         $egresados = [];
 
-        // 5. Validar si cada estudiante cursó todos los módulos
+        // 5. Validar módulos completados
         foreach ($modulosCursados as $estudianteId => $gruposDelEstudiante) {
 
             $modulosCompletados = DB::table('grupo')
@@ -524,12 +545,16 @@ class EstudianteController extends Controller
                         'nombre' => $estudiante->nombre,
                         'apellido_paterno' => $estudiante->apellido_paterno,
                         'apellido_materno' => $estudiante->apellido_materno,
-                        'dni' => $estudiante->dni,
+                        'dni' => $estudiante->nro_documento ?? $estudiante->dni,
                     ];
                 }
             }
         }
 
-        return response()->json($egresados);
+        return response()->json([
+            'especialidad' => $especialidadMadre,
+            'periodo' => $periodo,
+            'egresados' => $egresados
+        ]);
     }
 }

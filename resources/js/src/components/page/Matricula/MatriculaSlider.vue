@@ -158,7 +158,7 @@ const onSubmit = async () => {
     const response = await store(formData);
     if (response.data?.matricula?.id) {
         showToast('¡Matrícula realizada con éxito!', 'success');
-        router.push({ name: 'matricula.grupo.alumnos', params: { id: formData.id_grupo } });
+        router.push({ name: 'matricula.grupos.alumnos', params: { id: formData.id_grupo } });
     } else {
         showToast('Hubo un error al procesar la matrícula.', 'error');
     }

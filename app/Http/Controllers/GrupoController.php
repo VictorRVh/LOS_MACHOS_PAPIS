@@ -596,4 +596,67 @@ class GrupoController extends Controller
 
         return response()->json($grupos);
     }
+
+    public function ultimosGrupos()
+    {
+        $grupos = DB::table('grupo as g')
+            ->join('especialidad_programa as ep', 'ep.id', '=', 'g.id_especialidad')
+            ->join('especialidad_madre as em', 'em.id', '=', 'ep.id_especialidad')
+            ->join('modulos as m', 'm.id', '=', 'g.id_modulo')
+            ->leftJoin('matricula as ma', 'ma.id_grupo', '=', 'g.id')
+            ->select(
+                'g.id',
+                'em.nombre_especialidad',
+                'm.numero_modulo',
+                'm.descripcion as nombre_modulo',
+                'g.seccion',
+                'g.turno',
+                DB::raw('COUNT(ma.id) as nro_matriculados')
+            )
+            ->groupBy(
+                'g.id',
+                'em.nombre_especialidad',
+                'm.numero_modulo',
+                'm.descripcion',
+                'g.seccion',
+                'g.turno'
+            )
+            ->orderBy('g.created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        return response()->json($grupos);
+    }
+
+    public function gruposCulminados()
+    {
+        $grupos = DB::table('grupo as g')
+            ->join('especialidad_programa as ep', 'ep.id', '=', 'g.id_especialidad')
+            ->join('especialidad_madre as em', 'em.id', '=', 'ep.id_especialidad')
+            ->join('modulos as m', 'm.id', '=', 'g.id_modulo')
+            ->leftJoin('matricula as ma', 'ma.id_grupo', '=', 'g.id')
+            ->select(
+                'g.id',
+                'em.nombre_especialidad',
+                'm.numero_modulo',
+                'm.descripcion as nombre_modulo',
+                'g.seccion',
+                'g.turno',
+                DB::raw('COUNT(ma.id) as nro_matriculados')
+            )
+            ->where('g.status', 2) 
+            ->groupBy(
+                'g.id',
+                'em.nombre_especialidad',
+                'm.numero_modulo',
+                'm.descripcion',
+                'g.seccion',
+                'g.turno'
+            )
+            ->orderBy('g.created_at', 'desc')
+            ->take(2)
+            ->get();
+
+        return response()->json($grupos);
+    }
 }

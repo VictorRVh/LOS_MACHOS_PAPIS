@@ -121,7 +121,6 @@ const {
           <Th>Apellidos</Th>
           <Th>Dni</Th>
           <Th>Correo</Th>
-
           <Th>Fecha de Creación</Th>
           <Th>Estado</Th>
           <Th class="text-center">Acción</Th>

@@ -4,7 +4,7 @@ import usePermissions from '@/composables/usePermissions';
 import {
     UsersIcon, ShieldCheckIcon, KeyIcon, AcademicCapIcon, PresentationChartLineIcon,
     CalendarDaysIcon, NewspaperIcon, UserGroupIcon, RectangleStackIcon, IdentificationIcon, TagIcon, XMarkIcon, DocumentDuplicateIcon,
-    ClipboardDocumentListIcon
+    ClipboardDocumentListIcon,CurrencyDollarIcon
 } from '@heroicons/vue/24/outline';
 
 const { hasPermission } = usePermissions();
@@ -27,6 +27,7 @@ const navLinks = [
     { name: 'Mis Módulos', routeName: 'moduloAsignado', icon: AcademicCapIcon, permissions: ["ver-mis-modulos", "ver-estudiantes-asignados"] },
     { name: 'Comisión', routeName: 'comsion.docente', icon: AcademicCapIcon, permissions: ["ver-comsion-docente"] },
     { name: 'Egresados', routeName: 'egresados', icon: AcademicCapIcon, permissions: ["ver-grupos"] },
+    { name: 'Ingresos', routeName: 'ingresos', icon: CurrencyDollarIcon, permissions: ["ver-grupos"] },
 
 ];
 

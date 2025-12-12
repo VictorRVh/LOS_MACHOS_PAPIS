@@ -225,20 +225,13 @@ async function onSubmit() {
                     
                 </div>
             </div>
-
-            <div class="flex-between mt-6">
-                <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">
-                    Lista de Alumnos Asignados
-                </h2>
-            </div>
-
             <Table>
                 <THead>
                     <Th>N°</Th>
                     <Th>Apellidos y Nombres</Th>
                     <Th>Modalidad</Th>
                     <Th>Archivo</Th>
-                    <Th class="text-center">Acciones</Th>
+                    
                 </THead>
 
                 <TBody>
@@ -273,16 +266,7 @@ async function onSubmit() {
                                 <span v-else class="text-gray-400">—</span>
                             </Td>
 
-                            <Td class="text-center">
-                                <Button v-if="!existeExperiencia" title="Calificar" color="primary" size="sm"
-                                    @click="showToast('Debe registrar una experiencia formativa primero.', 'warning')" />
-
-                                <Button v-else-if="alumno.lugar !== null || alumno.documento_id !== null"
-                                    title="Ya calificado" color="secondary" size="sm" disabled />
-
-                                <Button v-else title="Calificar" color="primary" size="sm"
-                                    @click="abrirModal(alumno)" />
-                            </Td>
+                           
                         </template>
 
                     </Tr>

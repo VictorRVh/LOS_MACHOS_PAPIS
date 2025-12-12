@@ -644,7 +644,7 @@ class GrupoController extends Controller
                 'g.turno',
                 DB::raw('COUNT(ma.id) as nro_matriculados')
             )
-            ->where('g.status', 2) 
+            ->where('g.status', 2)
             ->groupBy(
                 'g.id',
                 'em.nombre_especialidad',
@@ -658,5 +658,91 @@ class GrupoController extends Controller
             ->get();
 
         return response()->json($grupos);
+    }
+
+    public function IngresosByGrupo($idPeriodo)
+    {
+        // 1. TRAER GRUPOS CON TODAS LAS RELACIONES
+        $grupos = Grupo::with([
+            'especialidad.especialidadMadre',
+            'modulo',
+            'docente.user:id,name,apellido_paterno,apellido_materno',
+            'matricula' => function ($q) {
+                $q->where('reserva', 0)->with('pago');
+            }
+        ])
+            ->where('id_periodo', $idPeriodo)
+            ->get();
+
+        if ($grupos->isEmpty()) {
+            return response()->json([]);
+        }
+
+        // 2. AGRUPACIÓN
+        $resultado = [];
+
+        foreach ($grupos as $g) {
+
+            // 🔰 ESPECIALIDAD MADRE
+            $especialidad = $g->especialidad->especialidadMadre->nombre_especialidad
+                ?? 'SIN ESPECIALIDAD';
+
+            // 🔰 MÓDULO
+            $moduloNumero = $g->modulo->numero_modulo;
+            $moduloNombre = $g->modulo->descripcion;
+
+            // 🔰 ALUMNOS
+            $cantidadEstudiantes = $g->matricula->count();
+
+            // 🔥 INGRESOS POR GRUPO (suma de aportes)
+            $ingresoGrupo = $g->matricula->sum(function ($m) {
+                return $m->pago->aporte ?? 0;
+            });
+
+            // 🔰 DOCENTE con apellidos completos
+            $docente = null;
+            if ($g->docente && $g->docente->user) {
+                $u = $g->docente->user;
+                $docente = trim("{$u->apellido_paterno} {$u->apellido_materno}, {$u->name}");
+            }
+
+            // ============================
+            // CREAR BLOQUES SI NO EXISTEN
+            // ============================
+            if (!isset($resultado[$especialidad])) {
+                $resultado[$especialidad] = [
+                    'especialidad' => $especialidad,
+                    'modulos' => []
+                ];
+            }
+
+            if (!isset($resultado[$especialidad]['modulos'][$moduloNumero])) {
+                $resultado[$especialidad]['modulos'][$moduloNumero] = [
+                    'modulo_numero' => $moduloNumero,
+                    'modulo' => $moduloNombre,
+                    'grupos' => []
+                ];
+            }
+
+            // ============================
+            // AÑADIR GRUPO
+            // ============================
+            $resultado[$especialidad]['modulos'][$moduloNumero]['grupos'][] = [
+                'id' => $g->id,
+                'seccion' => $g->seccion,
+                'turno' => $g->turno,
+
+                'docente' => $docente,
+
+                'modulo' => $moduloNombre,
+                'modulo_numero' => $moduloNumero,
+
+                'cantidad_estudiantes' => $cantidadEstudiantes,
+                'ingreso_grupo' => (float) $ingresoGrupo,
+            ];
+        }
+
+        // RETORNAR ORDENADO
+        return response()->json(array_values($resultado));
     }
 }

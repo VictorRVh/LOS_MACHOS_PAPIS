@@ -64,7 +64,7 @@ const onAnioChange = async () => {
 // ---- Filtrar por selección
 const filtrarPorSeleccion = async () => {
   if (!selectedCiclo.value || !selectedAnio.value || !selectedPeriodo.value) {
-    showToast("Debes seleccionar todos los filtros para buscar.", "warning");
+   // showToast("Debes seleccionar todos los filtros para buscar.", "warning");
     return;
   }
 
@@ -175,7 +175,6 @@ const gruposAgrupados = computed(() => {
 </script>
 
 <template>
-
   <AuthorizationFallback :permissions="['todo-acceso-grupos', 'ver-grupos']">
     <div class="p-4 md:p-6 space-y-2"> <!-- Header -->
       <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -271,18 +270,18 @@ const gruposAgrupados = computed(() => {
     <GrupoSlider :show="slider" :grupo="sliderData" @hide="hideSlider" @updated="filtrarPorSeleccion()"  />
   </AuthorizationFallback>
 </template>
+
 <style scoped>
+
 .list-enter-active,
 .list-leave-active {
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
-
 .list-enter-from,
 .list-leave-to {
   opacity: 0;
   transform: translateY(-20px);
 }
-
 .list-leave-active {
   position: absolute;
 }

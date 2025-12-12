@@ -33,92 +33,71 @@ class MatriculaController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction();
-
         try {
-            // Buscar estudiante por tipo y nro de documento
-            $estudiante = Estudiante::where('tipo_documento', $request->tipo_documento)
-                ->where('nro_documento', $request->nro_documento)
-                ->first();
-
-            if ($estudiante) {
-                // Actualizar datos si ya existe
-                $estudiante->update([
-                    'apellido_paterno'        => $request->apellido_paterno,
-                    'apellido_materno'        => $request->apellido_materno,
-                    'nombre'                  => $request->nombre,
-                    'sexo'                    => $request->sexo,
-                    'fecha_nacimiento'        => $request->fecha_nacimiento,
-                    'pais_nacimiento'         => $request->pais_nacimiento,
+            // Buscar o crear estudiante
+            $estudiante = Estudiante::updateOrCreate(
+                [
+                    'tipo_documento' => $request->tipo_documento,
+                    'nro_documento' => $request->nro_documento,
+                ],
+                [
+                    'apellido_paterno' => $request->apellido_paterno,
+                    'apellido_materno' => $request->apellido_materno,
+                    'nombre' => $request->nombre,
+                    'sexo' => $request->sexo,
+                    'fecha_nacimiento' => $request->fecha_nacimiento,
+                    'pais_nacimiento' => $request->pais_nacimiento,
                     'departamento_nacimiento' => $request->departamento_nacimiento,
-                    'provincia_nacimiento'    => $request->provincia_nacimiento,
-                    'distrito_nacimiento'     => $request->distrito_nacimiento,
-                    'lugar_nacimiento'        => $request->lugar_nacimiento,
-                    'direccion_residencia'    => $request->direccion_residencia,
-                    'correo_electronico'      => $request->correo_electronico,
-                    'celular_personal'        => $request->celular_personal,
-                    'estado_civil'            => $request->estado_civil,
-                    'grado_instruccion'       => $request->grado_instruccion,
-                    'trabaja'                 => $request->trabaja,
-                    'detalle_trabajo'         => $request->trabaja === 'Si' ? $request->detalle_trabajo : null,
-                    'carga_familiar'          => $request->carga_familiar,
-                    'detalle_carga_familiar'  => $request->carga_familiar === 'Si' ? $request->detalle_carga_familiar : null,
-                    'internet_casa'           => $request->internet_casa,
-                    'tipo_internet'           => $request->internet_casa === 'Si' ? $request->tipo_internet : null,
-                    'tipo_operador'           => $request->tipo_operador ?? null,
-                    'otro_operador'           => $request->otro_operador ?? null,
-                    'equipos_virtuales'       => $request->has('equipos_virtuales') ? json_encode($request->equipos_virtuales) : null,
-                    'discapacidad'            => $request->discapacidad,
-                    'tipo_discapacidad'       => $request->discapacidad === 'Si' ? $request->tipo_discapacidad : null,
-                    'celular_referencia'      => $request->celular_referencia,
-                    'parentesco_referencia'   => $request->parentesco_referencia,
-                    'lengua_materna'          => $request->lengua_materna,
-                    'anio_egreso'             => $request->anio_egreso,
-                ]);
-            } else {
-                // Crear nuevo estudiante si no existe
-                $estudiante = Estudiante::create([
-                    'tipo_documento'          => $request->tipo_documento,
-                    'nro_documento'           => $request->nro_documento,
-                    'apellido_paterno'        => $request->apellido_paterno,
-                    'apellido_materno'        => $request->apellido_materno,
-                    'nombre'                  => $request->nombre,
-                    'sexo'                    => $request->sexo,
-                    'fecha_nacimiento'        => $request->fecha_nacimiento,
-                    'pais_nacimiento'         => $request->pais_nacimiento,
-                    'departamento_nacimiento' => $request->departamento_nacimiento,
-                    'provincia_nacimiento'    => $request->provincia_nacimiento,
-                    'distrito_nacimiento'     => $request->distrito_nacimiento,
-                    'lugar_nacimiento'        => $request->lugar_nacimiento,
-                    'direccion_residencia'    => $request->direccion_residencia,
-                    'correo_electronico'      => $request->correo_electronico,
-                    'celular_personal'        => $request->celular_personal,
-                    'estado_civil'            => $request->estado_civil,
-                    'grado_instruccion'       => $request->grado_instruccion,
-                    'trabaja'                 => $request->trabaja,
-                    'detalle_trabajo'         => $request->trabaja === 'Si' ? $request->detalle_trabajo : null,
-                    'carga_familiar'          => $request->carga_familiar,
-                    'detalle_carga_familiar'  => $request->carga_familiar === 'Si' ? $request->detalle_carga_familiar : null,
-                    'internet_casa'           => $request->internet_casa,
-                    'tipo_internet'           => $request->internet_casa === 'Si' ? $request->tipo_internet : null,
-                    'equipos_virtuales'       => $request->has('equipos_virtuales') ? json_encode($request->equipos_virtuales) : null,
-                    'discapacidad'            => $request->discapacidad,
-                    'tipo_discapacidad'       => $request->discapacidad === 'Si' ? $request->tipo_discapacidad : null,
-                    'celular_referencia'      => $request->celular_referencia,
-                    'parentesco_referencia'   => $request->parentesco_referencia,
-                    'lengua_materna'          => $request->lengua_materna,
-                    'anio_egreso'             => $request->anio_egreso,
-                ]);
-            }
-
+                    'provincia_nacimiento' => $request->provincia_nacimiento,
+                    'distrito_nacimiento' => $request->distrito_nacimiento,
+                    'lugar_nacimiento' => $request->lugar_nacimiento,
+                    'direccion_residencia' => $request->direccion_residencia,
+                    'correo_electronico' => $request->correo_electronico,
+                    'celular_personal' => $request->celular_personal,
+                    'estado_civil' => $request->estado_civil,
+                    'grado_instruccion' => $request->grado_instruccion,
+                    'trabaja' => $request->trabaja,
+                    'detalle_trabajo' => $request->trabaja === 'Si' ? $request->detalle_trabajo : null,
+                    'carga_familiar' => $request->carga_familiar,
+                    'detalle_carga_familiar' => $request->carga_familiar === 'Si' ? $request->detalle_carga_familiar : null,
+                    'internet_casa' => $request->internet_casa,
+                    'tipo_internet' => $request->internet_casa === 'Si' ? $request->tipo_internet : null,
+                    'tipo_operador' => $request->tipo_operador ?? null,
+                    'otro_operador' => $request->otro_operador ?? null,
+                    'equipos_virtuales' => $request->has('equipos_virtuales') ? json_encode($request->equipos_virtuales) : null,
+                    'discapacidad' => $request->discapacidad,
+                    'tipo_discapacidad' => $request->discapacidad === 'Si' ? $request->tipo_discapacidad : null,
+                    'celular_referencia' => $request->celular_referencia,
+                    'parentesco_referencia' => $request->parentesco_referencia,
+                    'lengua_materna' => $request->lengua_materna,
+                    'anio_egreso' => $request->anio_egreso,
+                ]
+            );
+            // Validar matrícula existente en el mismo grupo
             $matriculaExistente = Matricula::where('id_estudiante', $estudiante->id)
                 ->where('id_grupo', $request->id_grupo)
-                ->first();
+                ->exists();
 
             if ($matriculaExistente) {
                 return response()->json([
                     'errorCode' => 13333,
                     'errorMessage' => 'El estudiante ya está matriculado en este grupo',
-                    //'errorText' => ''
+                ], 400);
+            }
+
+            $grupo = Grupo::findOrFail($request->id_grupo);
+
+            $moduloEnTurno = Matricula::where('id_estudiante', $estudiante->id)
+                ->whereHas('grupo', function ($query) use ($grupo) {
+                    $query->where('turno', $grupo->turno)
+                        ->where('id_periodo', $grupo->id_periodo);
+                })
+                ->exists();
+
+            if ($moduloEnTurno) {
+                return response()->json([
+                    'errorCode' => 13333,
+                    'errorMessage' => 'El estudiante ya pertenece a este módulo y este turno para el mismo período',
                 ], 400);
             }
 
@@ -132,24 +111,17 @@ class MatriculaController extends Controller
 
             // Crear matrícula
             $matricula = Matricula::create([
-                // 'id_grupo' => $request->id_grupo ?? $request->grupo['value'], // desde el select
-                'id_grupo' => $request->id_grupo, // desde el select
+                'id_grupo' => $request->id_grupo,
                 'turno' => $request->turno,
                 'id_estudiante' => $estudiante->id,
                 'id_pago' => $pago->id,
                 'reserva' => $request->reserva ?? 0,
             ]);
-            // Datos para actividad
-            $grupo = Grupo::with(['modulo', 'especialidad.especialidadMadre'])
-                ->find($request->id_grupo);
-
-            $nombreCompleto = "{$estudiante->apellido_paterno} {$estudiante->apellido_materno}, {$estudiante->nombre}";
-
-            $descripcionGrupo = "{$grupo->seccion} | Turno: {$grupo->turno} | "
-                . "Módulo: {$grupo->modulo->descripcion} | "
-                . "Especialidad: {$grupo->especialidad->especialidadMadre->nombre_especialidad}";
 
             // Registrar actividad
+            $grupo = Grupo::with(['modulo', 'especialidad.especialidadMadre'])->find($request->id_grupo);
+            $nombreCompleto = "{$estudiante->apellido_paterno} {$estudiante->apellido_materno}, {$estudiante->nombre}";
+            $descripcionGrupo = "{$grupo->seccion} | Turno: {$grupo->turno} | Módulo: {$grupo->modulo->descripcion} | Especialidad: {$grupo->especialidad->especialidadMadre->nombre_especialidad}";
             $this->registrarActividad(
                 "Registró matrícula del estudiante: {$nombreCompleto} en el grupo {$descripcionGrupo}",
                 "Registrado"

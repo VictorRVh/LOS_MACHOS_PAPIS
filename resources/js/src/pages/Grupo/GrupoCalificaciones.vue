@@ -84,24 +84,31 @@ const getEstadoClass = (estado) =>
 
 // --- 🔥 Función resumen: total, promedio, estado y clases ---
 const getResumenNotas = (est) => {
-  const total = est.capacidades.reduce(
-    (sum, c) => sum + Number(c.nota_capacidad ?? 0),
-    0
-  );
+  const notas = est.capacidades.map(c => c.nota_capacidad);
 
-  const promedio = est.capacidades.length
-    ? total / est.capacidades.length
-    : 0;
+  const todasVacias = notas.every(n => n === null);
+
+  // --- Caso: SIN NOTA ---
+  if (todasVacias) {
+    return {
+      total: "--",
+      promedio: "--",
+      estado: "sin nota",
+      promedioClass: "text-gray-400 ",
+      estadoClass: "text-gray-400",
+    };
+  }
+
+  // --- Caso normal: hay notas ---
+  const total = notas.reduce((sum, n) => sum + Number(n ?? 0), 0);
+  const promedio = total / est.capacidades.length;
 
   const estado = promedio >= 11 ? "APROBADO" : "DESAPROBADO";
 
-  // --- Formateo del promedio ---
   const promedioTexto =
     Number.isInteger(promedio)
-      ? promedio === 0
-        ? "00" // si el promedio es 0 exacto
-        : promedio.toString().padStart(2, "0") // entero normal
-      : promedio.toFixed(1).replace(/\.0$/, "").padStart(4, "0"); // con decimal
+      ? promedio.toString().padStart(2, "0")
+      : promedio.toFixed(1);
 
   return {
     total: total.toString().padStart(2, "0"),
@@ -111,72 +118,59 @@ const getResumenNotas = (est) => {
       promedio < 11
         ? "text-red-600 dark:text-red-500 font-bold"
         : "text-green-600 dark:text-green-400 font-bold",
-    estadoClass: getEstadoClass(estado),
+    estadoClass:
+      estado === "APROBADO"
+        ? "text-green-600 dark:text-green-400"
+        : "text-red-600 dark:text-red-400",
   };
 };
+
 
 </script>
 
 <template>
-  <AuthorizationFallback
-    :permissions="[
-      'todo-acceso-capacidad-terminal-notas-docente',
-      'ver-capacidad-terminal-notas-docente',
-    ]"
-  >
+  <AuthorizationFallback :permissions="[
+    'todo-acceso-capacidad-terminal-notas-docente',
+    'ver-capacidad-terminal-notas-docente',
+  ]">
     <div class="space-y-4">
       <!-- Cabecera -->
       <div class="flex justify-between items-center">
         <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300">
           Lista de estudiantes con notas
         </h3>
-      
 
-      <!-- Barra de búsqueda -->
-      <div class="flex justify-end">
-        <SearchBar
-          :totalResultados="estudiantesOrdenados.length"
-          @search="filtrarEstudiantes"
-        />
-      </div>
+
+        <!-- Barra de búsqueda -->
+        <div class="flex justify-end">
+          <SearchBar :totalResultados="estudiantesOrdenados.length" @search="filtrarEstudiantes" />
+        </div>
       </div>
 
       <!-- Tabla -->
-      <Table
-        :paginacion="true"
-        :current-page="pagina"
-        :total-pages="totalPaginas"
-        @changePage="pagina = $event"
-      >
+      <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
         <THead>
           <Th>#</Th>
           <Th>Apellidos y Nombres</Th>
-          <Th v-for="i in lengthUnit" :key="i">CT{{ i }}</Th>
-          <Th>PUNTAJE</Th>
-          <Th>PROMEDIO</Th>
-          <Th>A-D-R</Th>
+          <Th v-for="i in lengthUnit" :key="i" class="text-center">CT{{ i }}</Th>
+          <Th class="text-center">PUNTAJE</Th>
+          <Th class="text-center">PROMEDIO</Th>
+          <Th class="text-center">A-D-R</Th>
         </THead>
 
         <TBody>
-          <Tr
-            v-for="(est, index) in estudiantesPaginados"
-            :key="est.id_estudiante ?? index"
-          >
+          <Tr v-for="(est, index) in estudiantesPaginados" :key="est.id_estudiante ?? index">
             <!-- N° -->
             <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
 
             <!-- Nombre -->
-            <Td class="font-medium whitespace-nowrap">
+            <Td class=" whitespace-nowrap">
               {{ est.apellidos_nombres }}
             </Td>
 
             <!-- Notas por CT -->
-            <Td
-              v-for="(cap, i) in est.capacidades"
-              :key="i"
-              class="text-center"
-              :class="getNotaClass(cap.nota_capacidad)"
-            >
+            <Td v-for="(cap, i) in est.capacidades" :key="i" class="text-center"
+              :class="getNotaClass(cap.nota_capacidad)">
               {{ cap.nota_capacidad ?? "--" }}
             </Td>
 
@@ -186,17 +180,11 @@ const getResumenNotas = (est) => {
                 {{ getResumenNotas(est).total }}
               </Td>
 
-              <Td
-                class="text-center font-semibold"
-                :class="getResumenNotas(est).promedioClass"
-              >
+              <Td class="text-center font-semibold" :class="getResumenNotas(est).promedioClass">
                 {{ getResumenNotas(est).promedio }}
               </Td>
 
-              <Td
-                class="font-bold text-center"
-                :class="getResumenNotas(est).estadoClass"
-              >
+              <Td class="text-center" :class="getResumenNotas(est).estadoClass">
                 {{ getResumenNotas(est).estado }}
               </Td>
             </template>

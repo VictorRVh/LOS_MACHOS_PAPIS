@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 
 import useHttpRequest from '../../composables/useHttpRequest';
 
-const useEstudianteStore = defineStore('estudianteGrupoNotas', () => {
+const useEstudianteGrupoStore = defineStore('estudianteGrupoNotas', () => {
     const {
         // index: getEstudiante,
         show: getEstudianteGrupoNotas,
@@ -25,4 +25,4 @@ const useEstudianteStore = defineStore('estudianteGrupoNotas', () => {
     };
 });
 
-export default useEstudianteStore;
+export default useEstudianteGrupoStore;

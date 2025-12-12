@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EspecialidadPrograma;
 use App\Models\Estudiante;
 use App\Models\Matricula;
+use App\Models\Modulo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -443,5 +445,91 @@ class EstudianteController extends Controller
                 'historial_academico' => $especialidades
             ]
         ]);
+    }
+
+    public function getEgresados(Request $request)
+    {
+        $request->validate([
+            'especialidad' => 'required|uuid',
+            'periodo' => 'required|uuid',
+        ]);
+
+        $especialidadMadreId = $request->query('especialidad');
+        $periodoId = $request->query('periodo');
+
+        // 1. Obtener todos los especialidad_programa vinculados a la especialidad madre
+        $especialidadesPrograma = DB::table('especialidad_programa')
+            ->where('id_especialidad', $especialidadMadreId)
+            ->pluck('id'); // lista de ids
+
+        if ($especialidadesPrograma->isEmpty()) {
+            return response()->json([]);
+        }
+
+        // 2. Obtener grupos culminados (status = 2) de esas especialidades y ese periodo
+        $grupos = DB::table('grupo')
+            ->whereIn('id_especialidad', $especialidadesPrograma)
+            ->where('id_periodo', $periodoId)
+            ->where('status', 2) // grupo culminado
+            ->get();
+
+        if ($grupos->isEmpty()) {
+            return response()->json([]);
+        }
+
+        // 3. Identificar todos los módulos que requiere la especialidad → para validar egreso
+        $modulosRequeridos = DB::table('modulos')
+            ->whereIn('id_especialidad', $especialidadesPrograma)
+            ->pluck('id')
+            ->toArray();
+
+        $totalModulos = count($modulosRequeridos);
+
+        // 4. Obtener estudiantes matriculados en esos grupos
+        $estudiantesPorGrupo = DB::table('matricula_grupo')
+            ->whereIn('id_grupo', $grupos->pluck('id'))
+            ->get();
+
+        if ($estudiantesPorGrupo->isEmpty()) {
+            return response()->json([]);
+        }
+
+        // Agrupar módulos cursados por estudiante
+        $modulosCursados = [];
+
+        foreach ($estudiantesPorGrupo as $mat) {
+            $modulosCursados[$mat->id_estudiante][] = $mat->id_grupo;
+        }
+
+        $egresados = [];
+
+        // 5. Validar si cada estudiante cursó todos los módulos
+        foreach ($modulosCursados as $estudianteId => $gruposDelEstudiante) {
+
+            $modulosCompletados = DB::table('grupo')
+                ->whereIn('id', $gruposDelEstudiante)
+                ->pluck('id_modulo')
+                ->unique()
+                ->toArray();
+
+            if (count(array_intersect($modulosRequeridos, $modulosCompletados)) == $totalModulos) {
+
+                $estudiante = DB::table('estudiante')
+                    ->where('id', $estudianteId)
+                    ->first();
+
+                if ($estudiante) {
+                    $egresados[] = [
+                        'id' => $estudiante->id,
+                        'nombre' => $estudiante->nombre,
+                        'apellido_paterno' => $estudiante->apellido_paterno,
+                        'apellido_materno' => $estudiante->apellido_materno,
+                        'dni' => $estudiante->dni,
+                    ];
+                }
+            }
+        }
+
+        return response()->json($egresados);
     }
 }

@@ -470,7 +470,7 @@ class GrupoController extends Controller
         // Filtrar por el nombre del periodo que comience con el año
         $periodos = Periodo::where('nombre_periodo', 'LIKE', "{$anio}-%")
             ->where('status', 1)
-            // ->where('is_deleted', 0)
+            ->where('is_deleted', 0)
             ->get();
 
         return response()->json($periodos);

@@ -14,18 +14,16 @@ import MenuTable from "../../components/table/MenuTable.vue";
 import CreateButton from "../../components/ui/CreateButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 
-import GrupoSlider from "../../components/page/Grupo/GrupoSlider.vue";
 import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
-import useGrupoStore from "../../store/Grupo/useGrupoStore";
-import useCicloStore from "../../store/Ciclo/useCicloStore";
 import useTableData from "../../composables/tabla/useTableData";
 import useEspecialidadStore from "../../store/Especialidad/useEspecialidadStore";
 import useEstudianteStore from "../../store/Estudiante/UseEstudianteStore";
 import usePeriodosStore from "../../store/Periodo/usePeriodoStatusStore";
+import { exportarCensoEducativo } from "../../pdf/reporteCenso";
 
 const especialidadStore = useEspecialidadStore();
 const estudianteStore = useEstudianteStore();
@@ -55,6 +53,10 @@ onMounted(async () => {
   anios.value = periodoStore.periodosAnios;
 
 });
+
+const descargarReporte = async () => {
+  await exportarCensoEducativo();
+};
 
 const onAnioChange = async () => {
   // 1. Limpiar valor seleccionado
@@ -122,7 +124,7 @@ const verEgresados = (esp) => {
   router.push({
     name: "egresadosLista",
     params: {
-      id: esp.id_especialidad,      
+      id: esp.id_especialidad,
       periodoId: periodoSeleccionado.value
     }
   });
@@ -233,6 +235,10 @@ const {
           </h3>
           <p class="mt-1 text-sm text-gray-500">Intenta con otro periodo.</p>
         </div>
+
+        <button @click="descargarReporte" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+          Descargar Excel
+        </button>
 
       </div>
 

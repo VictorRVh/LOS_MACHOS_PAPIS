@@ -151,6 +151,35 @@ class CapacidadTerminal extends Model
         return $ahora->gt($fechaLimite) && $this->status_nota == 0;
     }
 
+    public static function validarRangoFechasGrupo(array $data): ?string
+    {
+        $grupo = Grupo::find($data['id_grupo']);
+
+        if (!$grupo) {
+            return 'El grupo no existe.';
+        }
+
+        $inicioGrupo = Carbon::parse($grupo->fecha_inicio)->startOfDay();
+        $finGrupo    = Carbon::parse($grupo->fecha_entrega_acta)->endOfDay();
+
+        $inicioCap = Carbon::parse($data['fecha_inicio']);
+        $finCap    = Carbon::parse($data['fecha_fin']);
+
+        if ($inicioCap->lt($inicioGrupo)) {
+            return 'La fecha de inicio de la capacidad no puede ser menor a la fecha de inicio del grupo.';
+        }
+
+        if ($finCap->gt($finGrupo)) {
+            return 'La fecha fin de la capacidad no puede superar la fecha de entrega de acta del grupo.';
+        }
+
+        if ($finCap->lt($inicioCap)) {
+            return 'La fecha fin no puede ser menor a la fecha de inicio.';
+        }
+
+        return null; // ✅ OK
+    }
+
     // public function getFechaInicioAttribute($value)
     // {
     //     return Carbon::parse($value)->format('d/m/Y H:i');
@@ -165,6 +194,8 @@ class CapacidadTerminal extends Model
     // {
     //     return Carbon::parse($value)->format('d/m/Y H:i');
     // }
+
+
 
     public function grupo()
     {

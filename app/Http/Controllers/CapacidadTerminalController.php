@@ -64,17 +64,17 @@ class CapacidadTerminalController extends Controller
     // POST /api/capacidad-terminal
     public function store(Request $request)
     {
+        // 1️⃣ Validación básica
         $request->validate([
             'numero_capacidad' => 'required|string|max:255',
             'nombre_capacidad' => 'required|string|max:255',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'id_grupo' => 'required|exists:grupo,id',
-            'status' => 'required|in:0,1,2,3',
-            // 'tipo_entrega' => 'required|integer' 
+            'fecha_inicio'     => 'required|date',
+            'fecha_fin'        => 'required|date|after_or_equal:fecha_inicio',
+            'id_grupo'         => 'required|exists:grupo,id',
+            'status'           => 'required|in:0,1,2,3',
         ]);
 
-        // Obtener la programación de la sesión
+        // 2️⃣ Programación
         $sesion = EntregaDocente::where('id_grupo', $request->id_grupo)
             ->whereHas('entregaDocenteAdmin', function ($q) use ($request) {
                 $q->where('tipo_entrega', $request->tipo_entrega ?? 1);
@@ -83,38 +83,43 @@ class CapacidadTerminalController extends Controller
 
         if (!$sesion) {
             return response()->json([
-                'error' => 'No existe programación para este grupo.'
+                'errorCode' => 13333,
+                'errorMessage' => 'No existe programación para este grupo.'
             ], 422);
         }
 
-        // 1) Si está finalizado → prohibir
         if ($sesion->estado == 4) {
-            // return response()->json([
-            //     'error' => 'La programacion esta finalizada. No se pueden crear nuevas capacidades.'
-            // ], 403);
-
             return response()->json([
                 'errorCode' => 13333,
-                'errorMessage' => 'La programacion esta finalizada. No se pueden crear nuevas capacidades.',
-                // 'errorText' => $e->getMessage()
+                'errorMessage' =>
+                'La programación está finalizada. No se pueden crear nuevas capacidades.'
             ], 500);
         }
 
-        // 2) Validar rango de fechas
-        // $ahora = now();
+        // 3️⃣ 👉 VALIDACIONES DEL MODELO
+        $error = CapacidadTerminal::validarRangoFechasGrupo($request->all());
 
-        // if ($ahora->lt($sesion->fecha_inicio) || $ahora->gt($sesion->fecha_fin)) {
+        if ($error) {
+            return response()->json([
+                'errorCode' => 13333,
+                'errorMessage' => $error
+            ], 422);
+        }
+
+        // $errorAplazada = CapacidadTerminal::validarFechaAplazada($request->all());
+
+        // if ($errorAplazada) {
         //     return response()->json([
-        //         'error' => 'Fuera del periodo permitido. No se pueden crear capacidades.'
-        //     ], 403);
+        //         'errorCode' => 13333,
+        //         'errorMessage' => $errorAplazada
+        //     ], 422);
         // }
 
-        // Si todo está OK → crear
+        // 4️⃣ Crear
         $capacidad = CapacidadTerminal::create($request->all());
 
         return response()->json($capacidad, 201);
     }
-
 
     // PUT/PATCH /api/capacidad-terminal/{id}
     public function update(Request $request, $id)

@@ -24,7 +24,11 @@ const props = defineProps({
     load: {
         type: String,
         required: true,
-    }
+    },
+    accion: {
+        type: String,
+        required: true,
+    },
 });
 
 const emit = defineEmits(["hided"]);
@@ -38,8 +42,13 @@ const { updateFormData, updating } = useHttpRequest("/capacidad_terminal_aplazar
 
 const formErrors = ref({});
 const formData = ref({
-    observacion: "",
     dias_aplazados: null,
+});
+
+const modalTitle = computed(() => {
+    return props.accion === "rectificar"
+        ? "Rectificar entrega"
+        : "Aplazar entrega";
 });
 
 // Cargar datos cuando cambie la capacidad
@@ -48,7 +57,6 @@ watch(
     (c) => {
         if (c) {
             formData.value = {
-                observacion: c.observacion || "",
                 dias_aplazados: c.dias_aplazados || null,
             };
         }
@@ -113,20 +121,23 @@ const onSubmit = async () => {
 </script>
 
 <template>
-    <Slider :show="show" title="Aplazar entrega" @hide="emit('hided')">
+    <Slider :show="show" :title="modalTitle" @hide="emit('hide')">
         <AuthorizationFallback :permissions="['ver-grupos']">
 
-            <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            <!-- <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
                 Aplazando la capacidad:
+                <span class="font-bold">{{ capacidad.nombre_capacidad }}</span>
+            </p> -->
+
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                {{ accion === 'rectificar' ? 'Rectificando' : 'Aplazando' }} la capacidad:
                 <span class="font-bold">{{ capacidad.nombre_capacidad }}</span>
             </p>
 
-            <FormInput v-model="formData.observacion" label="Observación (Opcional)"
-                placeholder="Escribe una observación..." :error-message="formErrors.observacion" />
 
             <div class="mt-4">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    ¿Cuántos días deseas aplazar?
+                    ¿Cuántos días desea ampliar?
                 </label>
 
                 <fieldset class="grid grid-cols-3 sm:grid-cols-5 gap-3">

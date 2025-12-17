@@ -24,6 +24,7 @@ import useEspecialidadStore from "../../store/Especialidad/useEspecialidadStore"
 import useEstudianteStore from "../../store/Estudiante/UseEstudianteStore";
 import usePeriodosStore from "../../store/Periodo/usePeriodoStatusStore";
 import { exportarCensoEducativo } from "../../pdf/reporteCenso";
+import axios from "axios";
 
 const especialidadStore = useEspecialidadStore();
 const estudianteStore = useEstudianteStore();
@@ -129,6 +130,53 @@ const verEgresados = (esp) => {
     }
   });
 };
+
+const generarReporte = async () => {
+  try {
+    const response = await axios.get('/reporte-censo', {
+      responseType: 'blob',
+    });
+
+    // 🔹 Detectar si el backend devolvió error JSON
+    const contentType = response.headers['content-type'];
+    if (contentType.includes('application/json')) {
+      const text = await response.data.text();
+      const error = JSON.parse(text);
+      showToast(error.error || 'Error al generar el reporte', 'error');
+      return;
+    }
+
+    // 🔹 Obtener nombre del archivo desde headers
+    let filename = 'censo_educativo.xlsx';
+    const disposition = response.headers['content-disposition'];
+
+    if (disposition && disposition.includes('filename=')) {
+      filename = disposition
+        .split('filename=')[1]
+        .replace(/"/g, '');
+    }
+
+    // 🔹 Descargar archivo
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+  } catch (error) {
+    console.error('Error:', error);
+    showToast('Ocurrió un error al generar el reporte.', 'error');
+  }
+};
+
 
 
 // ---- Configuración de tabla
@@ -236,9 +284,12 @@ const {
           <p class="mt-1 text-sm text-gray-500">Intenta con otro periodo.</p>
         </div>
 
-        <button @click="descargarReporte" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-          Descargar Excel
-        </button>
+        <div class="mt-4 md:mt-0 flex items-center gap-3">
+          <Button class="bg-cetpro hover:bg-cetpro-dark text-white px-4 py-2 rounded-lg text-sm shadow"
+            @click="generarReporte">
+            Generar reporte
+          </Button>
+        </div>
 
       </div>
 

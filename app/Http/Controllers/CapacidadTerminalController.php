@@ -22,17 +22,33 @@ class CapacidadTerminalController extends Controller
 
     public function indexGrupo($id)
     {
-        $capacidades = CapacidadTerminal::where('id_grupo', $id)
-            ->orderBy('fecha_inicio', 'desc')
+        // 1️⃣ Capacidades con programación activa (eager loading)
+        $capacidades = CapacidadTerminal::with('grupo.entregaDocenteActiva')
+            ->where('id_grupo', $id)
+            ->orderByRaw('CAST(numero_capacidad AS UNSIGNED) ASC')
             ->get();
 
+        // 2️⃣ Número de capacidades del módulo
         $nroCapacidades = Grupo::join('modulos', 'grupo.id_modulo', '=', 'modulos.id')
             ->where('grupo.id', $id)
             ->value('modulos.nro_capacidades');
 
+        // 3️⃣ Programación (una sola vez)
+        $entrega = $capacidades->first()?->grupo?->entregaDocenteActiva;
+
+        $canEdit = false;
+
+        if ($entrega) {
+            $now = now('America/Lima');
+
+            $canEdit = $now->between($entrega->fecha_inicio, $entrega->fecha_fin)
+                && $entrega->estado === EntregaDocente::STATUS_ACTIVO;
+        }
+
         return response()->json([
             'nro_capacidades' => $nroCapacidades,
-            'capacidades' => $capacidades
+            'can_edit' => $canEdit,
+            'capacidades' => $capacidades->makeHidden(['grupo']),
         ]);
     }
 
@@ -61,9 +77,13 @@ class CapacidadTerminalController extends Controller
 
         return response()->json($capacidad);
     }
+
     // POST /api/capacidad-terminal
     public function store(Request $request)
     {
+        $now = now('America/Lima');
+
+
         // 1️⃣ Validación básica
         $request->validate([
             'numero_capacidad' => 'required|string|max:255',
@@ -88,12 +108,15 @@ class CapacidadTerminalController extends Controller
             ], 422);
         }
 
-        if ($sesion->estado == 4) {
+        if (
+            !$now->between($sesion->fecha_inicio, $sesion->fecha_fin) ||
+            $sesion->estado !== EntregaDocente::STATUS_ACTIVO
+        ) {
             return response()->json([
                 'errorCode' => 13333,
                 'errorMessage' =>
-                'La programación está finalizada. No se pueden crear nuevas capacidades.'
-            ], 500);
+                'La programación no permite crear capacidades en este momento.'
+            ], 403);
         }
 
         // 3️⃣ 👉 VALIDACIONES DEL MODELO
@@ -124,17 +147,23 @@ class CapacidadTerminalController extends Controller
     // PUT/PATCH /api/capacidad-terminal/{id}
     public function update(Request $request, $id)
     {
-        $capacidad = CapacidadTerminal::find($id);
+        $capacidad = CapacidadTerminal::with('grupo.entregaDocenteActiva')->find($id);
 
         if (!$capacidad) {
             return response()->json(['message' => 'Capacidad no encontrada'], 404);
+        }
+
+        // 🔒 VALIDAR PROGRAMACIÓN
+        if (!$capacidad->canEdit()) {
+            return response()->json([
+                'message' => 'La programación no permite modificar capacidades'
+            ], 403);
         }
 
         $request->validate([
             'nombre_capacidad' => 'sometimes|string|max:255',
             'fecha_inicio' => 'sometimes|date',
             'fecha_fin' => 'sometimes|date|after_or_equal:fecha_inicio',
-            'id_grupo' => 'sometimes|exists:grupo,id',
         ]);
 
         $capacidad->update($request->all());

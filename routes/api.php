@@ -531,6 +531,11 @@ Route::middleware('auth:sanctum')->group(function () {
     ])->middleware('permission:todo-acceso-modulos|eliminar-modulos');
 
 
+    Route::get('certificado/{idMatricula}', [
+        \App\Http\Controllers\GrupoController::class,
+        'dataCertificado',
+    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
+
     // RUTA PARA GRUPO
     Route::get('grupo', [
         \App\Http\Controllers\GrupoController::class,

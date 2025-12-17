@@ -745,4 +745,81 @@ class GrupoController extends Controller
         // RETORNAR ORDENADO
         return response()->json(array_values($resultado));
     }
+
+    public function dataCertificado($idMatricula)
+    {
+        // ===============================
+        // DATOS PRINCIPALES DEL CERTIFICADO
+        // ===============================
+        $matricula = DB::table('matricula as m')
+            ->join('estudiante as e', 'e.id', '=', 'm.id_estudiante')
+            ->join('grupo as g', 'g.id', '=', 'm.id_grupo')
+            ->join('modulos as mo', 'mo.id', '=', 'g.id_modulo')
+            ->join('especialidad_programa as ep', 'ep.id', '=', 'g.id_especialidad')
+            ->join('especialidad_madre as em', 'em.id', '=', 'ep.id_especialidad')
+            ->where('m.id', $idMatricula)
+            ->select(
+                DB::raw("
+                CONCAT(
+                    e.apellido_paterno, ' ',
+                    e.apellido_materno, ' ',
+                    e.nombre
+                ) as apellidos_nombres
+            "),
+                'em.nombre_especialidad as especialidad',
+
+                // 🔥 MÓDULO → UNIDAD DE COMPETENCIA
+                'mo.descripcion as unidad_competencia',
+                   'mo.creditos',
+                   'mo.horas',
+                'g.fecha_inicio',
+                'g.fecha_fin',
+                'g.id as id_grupo',
+                'e.id as id_estudiante'
+            )
+            ->first();
+
+        if (!$matricula) {
+            return response()->json(['message' => 'Matrícula no encontrada'], 404);
+        }
+
+        // ===============================
+        // CAPACIDADES TERMINALES → UNIDADES DIDÁCTICAS
+        // ===============================
+        $unidadesDidacticas = DB::table('capacidad_terminal as ct')
+            ->leftJoin('nota_capacidad_terminal as nct', function ($q) use ($matricula) {
+                $q->on('nct.id_capacidad', '=', 'ct.id')
+                    ->where('nct.id_estudiante', $matricula->id_estudiante)
+                    ->where('nct.id_grupo', $matricula->id_grupo);
+            })
+            ->where('ct.id_grupo', $matricula->id_grupo)
+            ->orderBy('ct.numero_capacidad')
+            ->select(
+                'ct.numero_capacidad as numero_unidad',
+                'ct.nombre_capacidad as nombre_unidad',
+                'ct.fecha_inicio',
+                'ct.fecha_fin',
+                DB::raw('IFNULL(nct.nota_capacidad, "") as nota')
+            )
+            ->get();
+
+        // ===============================
+        // RESPUESTA FINAL (PEDAGÓGICA)
+        // ===============================
+        return response()->json([
+            'apellidos_nombres' => $matricula->apellidos_nombres,
+            'especialidad'      => $matricula->especialidad,
+
+            // ✅ CORRECTO
+            'unidad_competencia' => $matricula->unidad_competencia,
+            'horas' => $matricula->creditos,
+            'creditos' => $matricula->horas,
+
+            'fecha_inicio'      => $matricula->fecha_inicio,
+            'fecha_fin'         => $matricula->fecha_fin,
+
+            // ✅ CORRECTO
+            'unidades_didacticas' => $unidadesDidacticas,
+        ]);
+    }
 }

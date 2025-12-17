@@ -136,15 +136,12 @@ const dataPDF = {
 
 
 
-
-const dataCertificate = ref([]); // Inicializamos como array vacío
-
-const dataCertificate = ref([]);
+const dataCertificate = ref(null);
 
 const generateSelectedCertificates = async (idMatricula) => {
   await dataAlumnoCertificado.loadCertificados(idMatricula);
 
-  dataCertificate.value = dataAlumnoCertificado.certificates;
+  dataCertificate.value = dataAlumnoCertificado.certificados;
 
   if (dataCertificate.value.length) {
     console.log(

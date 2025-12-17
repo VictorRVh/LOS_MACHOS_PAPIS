@@ -59,9 +59,9 @@ function obtenerFechaActual() {
 export function generateCertificate(data, certificado) {
   const doc = new jsPDF("landscape", "mm", "a4");
 
- agregarFondo(doc, "/img/iconosArchivo/fondo-certificado.svg");
+ agregarFondo(doc, "/img/iconosArchivo/fondoCertificado.png");
 
-
+    console.log("datos; ",certificado)
   const posY = 20;
 
   // ===== ENCABEZADO =====
@@ -80,17 +80,17 @@ export function generateCertificate(data, certificado) {
   doc.text("CERTIFICADO MODULAR", 148.5, posY + 45, { align: "center" });
 
   // ===== LOGOS =====
-  if (data.photoMinisterio) {
-    doc.addImage(data.photoMinisterio, "PNG", 120, 20, 40, 10);
-  }
+  // if (data.photoMinisterio) {
+  //   doc.addImage(data.photoMinisterio, "PNG", 120, 20, 40, 10);
+  // }
 
-  if (data.logo) {
-    doc.addImage(data.logo, "PNG", 20, 25, 30, 30);
-  }
+  // if (data.logo) {
+  //   doc.addImage(data.logo, "PNG", 20, 25, 30, 30);
+  // }
 
-  if (data.photo) {
-    doc.addImage(data.photo, "PNG", 255, 25, 20, 25);
-  }
+  // if (data.photo) {
+  //   doc.addImage(data.photo, "PNG", 255, 25, 20, 25);
+  // }
 
   // ===== TEXTO PRINCIPAL =====
   doc.setFontSize(16);
@@ -99,7 +99,7 @@ export function generateCertificate(data, certificado) {
 
   doc.setFont("times", "bold");
   doc.text(
-    certificado[0]?.apellidos_nombres || "NOMBRE DEL BENEFICIARIO",
+    certificado?.apellidos_nombres || "NOMBRE DEL BENEFICIARIO",
     60,
     posY + 70
   );
@@ -113,7 +113,7 @@ export function generateCertificate(data, certificado) {
 
   doc.setFont("times", "bold");
   doc.text(
-    certificado[0]?.unidad_competencia?.toUpperCase() || "NOMBRE DEL MÓDULO",
+    certificado?.unidad_competencia?.toUpperCase() || "NOMBRE DEL MÓDULO",
     148.5,
     posY + 90,
     { align: "center" }
@@ -128,7 +128,7 @@ export function generateCertificate(data, certificado) {
 
   doc.setFont("times", "bold");
   doc.text(
-    certificado[0]?.especialidad?.toUpperCase() || "NOMBRE DEL PROGRAMA",
+    certificado?.especialidad?.toUpperCase() || "NOMBRE DEL PROGRAMA",
     148.5,
     posY + 110,
     { align: "center" }
@@ -138,24 +138,24 @@ export function generateCertificate(data, certificado) {
   let sumCreditos = 0;
   let sumHoras = 0;
 
-  certificado[0]?.unidades_didacticas?.forEach(u => {
+  certificado?.unidades_didacticas?.forEach(u => {
     sumCreditos += u.credito || 0;
     sumHoras += u.hora || 0;
   });
 
-  if (certificado[0]?.experiencias_formativas?.[0]) {
-    sumCreditos += certificado[0].experiencias_formativas[0].creditos_exp || 0;
-    sumHoras += certificado[0].experiencias_formativas[0].horas_exp || 0;
+  if (certificado?.experiencias_formativas?.[0]) {
+    sumCreditos += certificado.experiencias_formativas[0].creditos_exp || 0;
+    sumHoras += certificado.experiencias_formativas[0].horas_exp || 0;
   }
 
   const rangoFechas = formatDateRangeFromSlash(
-    certificado[0]?.fecha_inicio,
-    certificado[0]?.fecha_fin
+    certificado?.fecha_inicio,
+    certificado?.fecha_fin
   );
 
   doc.setFont("times", "italic");
   doc.text(`
-    Desarrollado del ${rangoFechas}, con un total de ${certificado[0]?.creditos} créditos, equivalente a ${certificado[0]?.horas} horas.`,
+    Desarrollado del ${rangoFechas}, con un total de ${certificado?.creditos} créditos, equivalente a ${certificado?.horas} horas.`,
     20,
     posY + 125
   );
@@ -183,7 +183,7 @@ export function generateCertificate(data, certificado) {
 
   const headers = [["N°", "Unidades Didácticas", "Calificación"]];
 
-  const rows = certificado[0].unidades_didacticas.map((u) => [
+  const rows = certificado.unidades_didacticas.map((u) => [
     u.numero_unidad,
     u.nombre_unidad,
     u.nota || "-"

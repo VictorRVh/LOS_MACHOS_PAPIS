@@ -8,13 +8,16 @@ import Th from '../../components/table/Th.vue';
 import Td from '../../components/table/Td.vue';
 import Button from '../../components/ui/Button.vue';
 import AuthorizationFallback from '../../components/page/AuthorizationFallback.vue';
-import { generatePdfMatricula } from '../../pdf/fichaMatricula';
+
 import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 import axios from 'axios';
 import Slider from '../../components/ui/Slider.vue';
 import useModalToast from '../../composables/useModalToast';
 import useExportAlumnos from '../../composables/tabla/useAlumnosMatricula.js';  // Importa el composable
 import BaseButton from "../../components/ui/Button.vue"
+
+import useCertificado from "../../store/Grupo/useCertificadoStore.js"
+
 import { generateCertificate } from "../../pdf/CertificadoPDF.js";
 
 const props = defineProps({
@@ -24,10 +27,13 @@ const props = defineProps({
 const { showConfirmModal, showToast } = useModalToast();
 const matriculaStore = useMatriculaStore();
 
+const dataAlumnoCertificado = useCertificado();
+
 const { exportarAlumnos } = useExportAlumnos();  // Obtén la función
 
 const loading = ref(true);
 const estudiantesSeleccionados = ref([]);
+
 
 // ✅ computed correcto
 const matriculados = computed(() => matriculaStore.matriculadosPorGrupoExtendido);
@@ -133,29 +139,23 @@ const dataPDF = {
 
 const dataCertificate = ref([]); // Inicializamos como array vacío
 
-const generateSelectedCertificates = async () => {
-  if (selectedStudents.value.length === 0) {
-    showToast("Por favor, selecciona al menos un estudiante.");
-    return;
+const dataCertificate = ref([]);
+
+const generateSelectedCertificates = async (idMatricula) => {
+  await dataAlumnoCertificado.loadCertificados(idMatricula);
+
+  dataCertificate.value = dataAlumnoCertificado.certificates;
+
+  if (dataCertificate.value.length) {
+    console.log(
+      "Certificados cargados:",
+      dataCertificate.value
+    );
   }
 
-  // Carga los certificados de los estudiantes seleccionados
-  const certificates = await Promise.all(
-    selectedStudents.value.map(async (studyId) => {
-      await userStore.loadCertificate(studyId, props.certifyId);
-      return userStore.certificate; // Retorna el certificado cargado
-    })
-  );
-
-  dataCertificate.value = certificates; // Asigna los certificados obtenidos
-
-  console.log("Certificados cargados:", dataCertificate.value[0][0]?.experiencias_formativas[0].nombre_experiencia
-  );
-    // console.log("Primer certificado:", dataCertificate.value[0][0]?.apellidos_nombres);
-  
-  generateCertificate(dataPDF ,dataCertificate.value);
-
+  generateCertificate(dataPDF, dataCertificate.value);
 };
+
 
 </script>
 
@@ -211,7 +211,7 @@ const generateSelectedCertificates = async () => {
 
             <Td>
 
-              <BaseButton title="Certificado" @click="exportCertificado()"
+              <BaseButton title="Certificado" @click="generateSelectedCertificates(estudiante.id_matricula)"
                 class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
                 <template #icon>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

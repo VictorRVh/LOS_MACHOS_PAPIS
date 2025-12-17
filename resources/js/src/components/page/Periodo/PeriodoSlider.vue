@@ -76,8 +76,8 @@ const schema = yup.object().shape({
     .string()
     .required("El periodo es obligatorio.")
     .matches(
-      /^\d{4}-(I|II|III|IV)$/,
-      "Formato inválido. Usa: 2024-I, 2024-II, 2024-III o 2024-IV"
+      /^\d{4}-(I|II|III|IV|SUB)$/,
+      "Formato inválido. Usa: 2025-I, 2025-II, 2025-III, 2025-IV o 2025-SUB"
     ),
   status: yup.boolean().required(),
 });
@@ -112,7 +112,7 @@ const onPeriodoInput = (e) => {
   let value = e.target.value.toUpperCase();
 
   // 1. Permitir números, guion, I y V
-  value = value.replace(/[^0-9IV-]/g, "");
+  value = value.replace(/[^0-9IVSUB-]/g, "");
 
   // 2. Insertar guion automáticamente después de 4 dígitos si no se está borrando
   if (/^\d{4}$/.test(value) && e.inputType !== "deleteContentBackward") {
@@ -124,20 +124,14 @@ const onPeriodoInput = (e) => {
     const [year, period = ""] = value.split("-");
 
     // Mantener solo I y V
-    let clean = period.replace(/[^IV]/g, "");
+    let clean = period.replace(/[^IVSUB]/g, "").slice(0, 3);
 
-    // Limitar a max 3 caracteres (III) o 2 si es IV
-    if (clean.length > 3) clean = clean.slice(0, 3);
+    const validOptions = ["I", "II", "III", "IV", "SUB"];
 
-    // Aceptar solo opciones válidas:
-    // I, II, III, IV
-    const validOptions = ["I", "II", "III", "IV"];
-
-    // Si no coincide con ninguna opción válida, limpiar lo inválido
     if (!validOptions.some(opt => opt.startsWith(clean))) {
-      // ejemplo: si escribe "V" → limpiar
       clean = "";
     }
+
 
     value = `${year}-${clean}`;
   }
@@ -153,7 +147,7 @@ const onPeriodoInput = (e) => {
 <template>
   <AuthorizationFallback :permissions="requiredPermissions">
     <div class="mt-4 px-4 space-y-2 font-inter max-w-lg mx-auto">
-      
+
       <h3 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
         {{ isEditing ? "Editar periodo" : "Agregar nuevo periodo" }}
       </h3>

@@ -177,7 +177,35 @@ const generarReporte = async () => {
   }
 };
 
+const generarReporteActa = async () => {
+  try {
+    const idAdmin = '2946189c-883f-40f6-91e6-bee16fba575d';
 
+    const response = await axios.get(
+      `/reporte-acta-evaluacion/${idAdmin}`,
+      { responseType: 'blob' }
+    );
+
+    const url = window.URL.createObjectURL(
+      new Blob([response.data])
+    );
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Reporte_Entregas_${new Date()
+      .toISOString()
+      .slice(0, 10)}.xlsx`;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+  } catch (error) {
+    console.error('Error:', error);
+    showToast("Ocurrió un error al generar el reporte.", "error");
+  }
+};
 
 // ---- Configuración de tabla
 const {
@@ -287,6 +315,13 @@ const {
         <div class="mt-4 md:mt-0 flex items-center gap-3">
           <Button class="bg-cetpro hover:bg-cetpro-dark text-white px-4 py-2 rounded-lg text-sm shadow"
             @click="generarReporte">
+            Generar reporte
+          </Button>
+        </div>
+
+        <div class="mt-4 md:mt-0 flex items-center gap-3">
+          <Button class="bg-cetpro hover:bg-cetpro-dark text-white px-4 py-2 rounded-lg text-sm shadow"
+            @click="generarReporteActa()">
             Generar reporte
           </Button>
         </div>

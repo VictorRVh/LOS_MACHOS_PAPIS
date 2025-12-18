@@ -75,39 +75,39 @@ class PeriodoController extends Controller
                 'status' => $request->status,
             ]);
 
-            // // 2️⃣ Carpeta madre fija en Google Drive
-            // $parentFolderId = '0AHvmdsLWgTWyUk9PVA';
+            // 2️⃣ Carpeta madre fija en Google Drive
+            $parentFolderId = '0AJvk3zt0rp4dUk9PVA'; 
 
-            // $driveController = new GoogleDriveController();
+            $driveController = new GoogleDriveController();
 
-            // $folderRequest = new Request([
-            //     'folderName'     => $periodo->nombre_periodo,
-            //     'parentFolderId' => $parentFolderId,
-            // ]);
+            $folderRequest = new Request([
+                'folderName'     => $periodo->nombre_periodo,
+                'parentFolderId' => $parentFolderId,
+            ]);
 
-            // // 3️⃣ Crear carpeta del periodo en Drive
-            // $response = $driveController->createFolder($folderRequest);
+            // 3️⃣ Crear carpeta del periodo en Drive
+            $response = $driveController->createFolder($folderRequest);
 
-            // if ($response->status() !== 201) {
+            if ($response->status() !== 201) {
 
-            //     \Log::error("Error creando carpeta del periodo en Drive: " . $response->getContent());
+                \Log::error("Error creando carpeta del periodo en Drive: " . $response->getContent());
 
 
-            //     return response()->json([
-            //         'errorCode' => 13333,
-            //         'errorMessage' => 'Error creando carpeta del periodo en Drive',
-            //         'errorText' => $response->getContent()
-            //     ], 500);
-            // }
+                return response()->json([
+                    'errorCode' => 13333,
+                    'errorMessage' => 'Error creando carpeta del periodo en Drive',
+                    'errorText' => $response->getContent()
+                ], 500);
+            }
 
-            // $data = $response->getData();
+            $data = $response->getData();
 
             // 4️⃣ Guardar en carpetas_periodo_drive
-            // CarpetasPeriodoDrive::create([
-            //     'id_periodo'      => $periodo->id,
-            //     'drive_folder_id' => $data->id,
-            //     'nombre_carpeta'  => $periodo->nombre_periodo,
-            // ]);
+            CarpetasPeriodoDrive::create([
+                'id_periodo'      => $periodo->id,
+                'drive_folder_id' => $data->id,
+                'nombre_carpeta'  => $periodo->nombre_periodo,
+            ]);
 
             // 5️⃣ Registrar actividad
             $this->registrarActividad(

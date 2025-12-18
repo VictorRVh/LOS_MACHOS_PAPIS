@@ -507,6 +507,8 @@ class MatriculaController extends Controller
                 'g.id as id_grupo',
                 'em.nombre_especialidad as especialidad',
                 'mo.descripcion as modulo',
+                'mo.creditos',
+                'mo.horas',
                 'p.nombre_periodo as periodo',
                 DB::raw("CONCAT(DATE_FORMAT(g.fecha_inicio, '%d/%m/%Y'), ' - ', DATE_FORMAT(g.fecha_fin, '%d/%m/%Y')) as periodo_clases")
             )

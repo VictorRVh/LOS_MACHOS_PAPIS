@@ -50,14 +50,14 @@ export function generatePdfMatricula(data) {
       [
         { content: "Distrito", styles: sL },
         { content: "Puno", styles: sD },
-        { content: "Créditos Totales", styles: sL },
-        { content: "—", styles: sD }, // Aquí puedes poner data.ficha.total_creditos si existe
+        { content: "Créditos", styles: sL },
+        { content: data?.ficha?.creditos || "—", styles: sD },
       ],
       [
         { content: "Programa de estudios", styles: sL },
         { content: data?.ficha?.especialidad || "—", styles: sD },
-        { content: "Horas Totales", styles: sL },
-        { content: "—", styles: sD }, // Aquí puedes poner data.ficha.total_horas si existe
+        { content: "Horas", styles: sL },
+        { content: data?.ficha?.horas || "—", styles: sD },
       ],
       [
         { content: "Módulo", styles: sL },
@@ -107,15 +107,11 @@ export function generatePdfMatricula(data) {
     theme: "grid",
     styles: { fontSize: 8, cellPadding: 1.5, lineColor: [0, 0, 0], lineWidth: 0.2 },
     headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
-    columnStyles: { 
-      0: { cellWidth: 15 }, 
-      1: { cellWidth: 222 }, 
-      2: { cellWidth: 40 } 
-    },
+    columnStyles: { 0: { cellWidth: 15 }, 1: { cellWidth: 222 }, 2: { cellWidth: 40 } },
     margin: { left: 10, right: 10 },
   });
-
-  /*doc.text("UNIDADES DIDÁCTICAS DE SUBSANACIÓN", 148.5, doc.lastAutoTable.finalY + 7, { align: "center" });
+/*
+  doc.text("UNIDADES DIDÁCTICAS DE SUBSANACIÓN", 148.5, doc.lastAutoTable.finalY + 7, { align: "center" });
 
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 10,
@@ -124,17 +120,12 @@ export function generatePdfMatricula(data) {
     theme: "grid",
     styles: { fontSize: 8, cellPadding: 1.5, lineColor: [0, 0, 0], lineWidth: 0.2, halign: "center" },
     headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
-    columnStyles: { 
-      0: { cellWidth: 15 }, 
-      1: { cellWidth: 222 }, 
-      2: { cellWidth: 40 } 
-    },
+    columnStyles: { 0: { cellWidth: 15 }, 1: { cellWidth: 222 }, 2: { cellWidth: 40 } },
     margin: { left: 10, right: 10 },
   });
 */
   const fY = doc.lastAutoTable.finalY + 25;
   doc.setFontSize(8);
-  
   doc.line(40, fY, 90, fY);
   doc.text("Director", 65, fY + 4, { align: "center" });
   doc.text("Sello, firma, post firma", 65, fY + 8, { align: "center" });

@@ -68,7 +68,7 @@ class RegistroMatriculaInstitucionalExport
             ->join('modulos as m', 'g.id_modulo', '=', 'm.id')
             ->join('matricula as ma', function ($q) {
                 $q->on('ma.id_grupo', '=', 'g.id')
-                  ->where('ma.reserva', 0);
+                    ->where('ma.reserva', 0);
             })
             ->join('estudiante as e', 'e.id', '=', 'ma.id_estudiante')
             ->where('g.id_periodo', $this->idPeriodo)
@@ -95,7 +95,12 @@ class RegistroMatriculaInstitucionalExport
         // =============================
         $fila = 6;
 
+        dd($registros);
+
         foreach ($registros as $r) {
+            // $sheet = $spreadsheet->getSheetByName('FICHA');
+
+
             $sheet->fromArray([
                 // $institucion['region'],
                 // $institucion['ugel'],

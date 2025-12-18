@@ -76,6 +76,16 @@ class Matricula extends Model
         return $this->hasMany(MatriculaHistorial::class, 'id_matricula');
     }
 
+    public function notasCapacidades()
+    {
+        return $this->hasMany(
+            NotaCapacidadTerminal::class,
+            'id_estudiante',
+            'id_estudiante'
+        );
+    }
+
+
     // FUNCION PARA REALIZAR CAMBIOS DE ESTADO Y CONECTAR CON LA NUEVA TABLA DE HISTORIAL_MATRICULA
 
     public function registrarCambioEstado($nuevoEstado, $motivo = null)

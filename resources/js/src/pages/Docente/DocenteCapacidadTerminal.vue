@@ -43,22 +43,39 @@ if (!sesionStore?.sesion?.length) {
 if (!capacidadStore.capacidadTerminal?.length)
   await capacidadStore.loadCapacidadTerminal(props.id);
 
-// console.log('denideideide', props.idModulo)
-
 const { slider, sliderData, showSlider, hideSlider } = useSlider("capacidad-terminal-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteCapacidad, deleting } = useHttpRequest("/capacidad_terminal");
 
+const sesion = computed(() => sesionStore?.sesion);
+
+const hasAplazamiento = computed(() => {
+  return !!sesion.value?.fecha_aplazada;
+});
+
+const formatFecha = (fecha) => {
+  return new Date(fecha).toLocaleDateString('es-PE', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+};
+
 const canEditCapacidades = computed(() => {
   const sesion = sesionStore?.sesion;
-  if (!sesion) return false; // no hay sesión cargada
+  if (!sesion) return false;
 
   const ahora = new Date();
-  const fechaInicio = new Date(sesion.fecha_inicio);
-  const fechaFin = new Date(sesion.fecha_fin);
 
-  // Solo permitimos si estamos dentro del rango y no está finalizado
-  return (ahora >= fechaInicio && ahora <= fechaFin) && sesion.estado !== 4;
+  const fechaInicio = new Date(sesion.fecha_inicio);
+
+  const fechaLimite = sesion.fecha_aplazada
+    ? new Date(sesion.fecha_aplazada)
+    : new Date(sesion.fecha_fin);
+
+  if (sesion.estado === 4) return false;
+
+  return ahora >= fechaInicio && ahora <= fechaLimite;
 });
 
 const onDelete = (capacidad) => {
@@ -135,27 +152,34 @@ const estadoTexto = computed(() => {
         <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200">
           Programación de Unidades Didácticas
         </h3>
+
         <p class="text-sm text-gray-700 dark:text-gray-300">
           Del
           <strong>
-            {{
-              new Date(sesionStore?.sesion?.fecha_inicio).toLocaleDateString(
-                'es-PE',
-                { day: '2-digit', month: 'long', year: 'numeric' }
-              )
-            }}
+            {{ formatFecha(sesion.fecha_inicio) }}
           </strong>
           al
-          <strong>
-            {{
-              new Date(sesionStore?.sesion?.fecha_fin).toLocaleDateString(
-                'es-PE',
-                { day: '2-digit', month: 'long', year: 'numeric' }
-              )
-            }}
-          </strong>
+
+          <!-- SI HAY APLAZAMIENTO -->
+          <template v-if="hasAplazamiento">
+            <strong class="line-through text-red-400 mx-1">
+              {{ formatFecha(sesion.fecha_fin) }}
+            </strong>
+
+            <strong class="text-green-600 dark:text-green-400">
+              {{ formatFecha(sesion.fecha_aplazada) }}
+            </strong>
+          </template>
+
+          <!-- SI NO HAY APLAZAMIENTO -->
+          <template v-else>
+            <strong>
+              {{ formatFecha(sesion.fecha_fin) }}
+            </strong>
+          </template>
         </p>
       </div>
+
 
       <div class="px-3 py-1 rounded-full text-sm font-bold" :class="{
         'bg-yellow-100 text-yellow-800': sesionStore?.sesion?.estado === 0,

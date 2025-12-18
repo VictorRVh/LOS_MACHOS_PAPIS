@@ -1046,7 +1046,7 @@ Route::middleware('auth:sanctum')->group(function () {
         'IngresosByGrupo',
     ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
 
-    
+
     //matricula Reserva
 
     Route::patch('reservaMatricula/{id}', [
@@ -1132,6 +1132,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reporte-entregas-docentes', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'generarExcel',
+    ])->middleware('permission:ver-ciclo-programa');
+
+    Route::get('/reporte-censo', [
+        \App\Http\Controllers\ReporteController::class,
+        'generarExcelCenso',
     ])->middleware('permission:ver-ciclo-programa');
 });
 

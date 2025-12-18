@@ -34,7 +34,11 @@ class CapacidadTerminal extends Model
         'fecha_aplazada' => 'date:Y-m-d',
     ];
 
-    protected $appends = ['puede_reactivar', 'puede_aplazar'];
+    protected $appends = ['puede_reactivar', 'puede_aplazar', 'accion_disponible'];
+    protected $hidden = [
+        'grupo'
+    ];
+
 
     protected static function boot()
     {
@@ -137,9 +141,14 @@ class CapacidadTerminal extends Model
         $ahora = Carbon::now('America/Lima');
         $fechaLimite = $this->fecha_limite_subida;
 
-        // Solo si tiene nota registrada Y está dentro del límite
-        return $this->status_nota == 1 && $ahora->lte($fechaLimite);
+        return
+            $this->status_nota == 1 &&
+            (
+                $ahora->lte($fechaLimite)
+                || $this->status == 1
+            );
     }
+
 
     // Puede solicitar APLAZAMIENTO (fuera del límite, sin nota)
     public function getPuedeAplazarAttribute()
@@ -147,8 +156,42 @@ class CapacidadTerminal extends Model
         $ahora = Carbon::now('America/Lima');
         $fechaLimite = $this->fecha_limite_subida;
 
-        // Solo si YA pasó el límite Y no tiene nota registrada
-        return $ahora->gt($fechaLimite) && $this->status_nota == 0;
+        return
+            $this->status_nota == 0 &&
+            (
+                $ahora->gt($fechaLimite)
+                || $this->status == 4
+            );
+    }
+
+    public function getPuedeRectificarAttribute()
+    {
+        $ahora = Carbon::now('America/Lima');
+        $fechaLimite = $this->fecha_limite_subida;
+
+        return
+            $this->status_nota == 1 &&
+            (
+                $ahora->gt($fechaLimite)
+                || $this->status == 4
+            );
+    }
+
+    public function getAccionDisponibleAttribute()
+    {
+        if ($this->puede_aplazar) {
+            return 'aplazar';
+        }
+
+        if ($this->puede_rectificar) {
+            return 'rectificar';
+        }
+
+        if ($this->puede_reactivar) {
+            return 'reactivar';
+        }
+
+        return null;
     }
 
     public static function validarRangoFechasGrupo(array $data): ?string
@@ -180,6 +223,21 @@ class CapacidadTerminal extends Model
         return null; // ✅ OK
     }
 
+    // ESTOY CREANDO 2 METODOS DE CANEDIT() PARA QUE PUEDA REUTILIZARSE EL CANEDIT()
+    public function canEdit(): bool
+    {
+        $entrega = $this->grupo?->entregaDocenteActiva;
+
+        if (!$entrega) {
+            return false;
+        }
+
+        $now = now('America/Lima');
+
+        return $now->between($entrega->fecha_inicio, $entrega->fecha_fin)
+            && $entrega->estado === EntregaDocente::STATUS_ACTIVO;
+    }
+
     // public function getFechaInicioAttribute($value)
     // {
     //     return Carbon::parse($value)->format('d/m/Y H:i');
@@ -194,8 +252,6 @@ class CapacidadTerminal extends Model
     // {
     //     return Carbon::parse($value)->format('d/m/Y H:i');
     // }
-
-
 
     public function grupo()
     {

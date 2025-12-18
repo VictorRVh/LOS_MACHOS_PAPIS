@@ -58,13 +58,19 @@ class Grupo extends Model
         return self::STATUS[$this->status] ?? 'Desconocido';
     }
 
+    public function entregaDocenteActiva()
+    {
+        return $this->hasOne(EntregaDocente::class, 'id_grupo')
+            ->where('estado', EntregaDocente::STATUS_ACTIVO);
+    }
+
     public function estudiantes()
     {
         return $this->belongsToMany(
             Estudiante::class,
-            'matricula',        
-            'id_grupo',         
-            'id_estudiante' 
+            'matricula',
+            'id_grupo',
+            'id_estudiante'
         );
     }
 
@@ -136,5 +142,10 @@ class Grupo extends Model
     public function carpetasEntrega()
     {
         return $this->hasMany(CarpetasEntregaDrive::class, 'id_grupo');
+    }
+
+    public function entregasDocente()
+    {
+        return $this->hasMany(EntregaDocente::class, 'id_grupo');
     }
 }

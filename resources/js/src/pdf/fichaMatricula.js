@@ -2,178 +2,152 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export function generatePdfMatricula(data) {
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: "a4",
+  });
 
-  const doc = new jsPDF();
+  const logoUrl = "/img/LogoMinisterio.png";
+  try {
+    doc.addImage(logoUrl, "PNG", 15, 10, 70, 15);
+  } catch (e) {
+    console.error("Error cargando logo");
+  }
 
-  doc.addImage(
-    "img/choclon.jpg",    // Fuente de la imagen
-    "JPEG",                // Formato de la imagen
-    10,                   // Posición X (desde la izquierda)
-    10,                   // Posición Y (desde arriba)
-    40,                   // Ancho de la imagen
-    15,                   // Alto de la imagen
-    null,                 // Nombre opcional para el recurso de imagen (puede ser nulo)
-    {                    // Opciones adicionales
-      align: 'left',      // Alineación (si aplicable)
-      rotation: 45        // Rotación en grados
-    }
-  );
-  // Título
-  // Cabecera
-  doc.setFontSize(18);
+  doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.text("FICHA DE MATRICULA", 105, 15, { align: "center" });
+  doc.text("ANEXO N° 1", 148.5, 10, { align: "center" });
+  doc.setFontSize(14);
+  doc.text("FICHA DE REGISTRO DE MATRÍCULA", 148.5, 17, { align: "center" });
   doc.setFontSize(12);
-  doc.text("AÑO 2025", 105, 22, { align: "center" });
+  doc.text(`AÑO: ${data?.ficha?.periodo || "2025"}`, 148.5, 24, { align: "center" });
+
+  const sL = { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: "normal", lineWidth: 0.2, lineColor: [0, 0, 0] };
+  const sD = { textColor: [0, 0, 255], fontStyle: "bold", lineWidth: 0.2, lineColor: [0, 0, 0] };
 
   autoTable(doc, {
     startY: 30,
-    head: [],
     body: [
       [
-        { content: "Nombre del CETPRO", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "CETPRO PUNO", styles: { lineWidth: 0.25, lineColor: [0, 0, 0], halign: 'center' } },
-        { content: "DRE", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "PUNO", styles: { lineWidth: 0.25, lineColor: [0, 0, 0], halign: 'center' } },
-        ""
+        { content: "Nombre del CETPRO", styles: sL },
+        { content: "CETPRO PUNO", styles: sD },
+        { content: "DRE", styles: sL },
+        { content: "PUNO", styles: sD },
       ],
       [
-        { content: "Código Modular", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "469452", styles: { lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "Tipo de Gestión", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "Pública", styles: { lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        ""
+        { content: "Código modular", styles: sL },
+        { content: "469452", styles: sD },
+        { content: "Tipo de Gestión", styles: sL },
+        { content: "Pública", styles: sD },
       ],
       [
-        { content: "Departamento", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "Puno", styles: { lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "Provincia", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "Puno", styles: { lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        ""
+        { content: "Departamento", styles: sL },
+        { content: "Puno", styles: sD },
+        { content: "Provincia", styles: sL },
+        { content: "Puno", styles: sD },
       ],
       [
-        { content: "Distrito", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "Puno", styles: { lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "R.D.", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "RD N° 07592 - 2024 - UGEL 06", styles: { lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        ""
+        { content: "Distrito", styles: sL },
+        { content: "Puno", styles: sD },
+        { content: "Créditos Totales", styles: sL },
+        { content: "—", styles: sD }, // Aquí puedes poner data.ficha.total_creditos si existe
       ],
       [
-        { content: "Programa de estudios", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: data.ficha.especialidad, styles: { lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "Período Lectivo", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: data.ficha.periodo_clases, styles: { lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        ""
+        { content: "Programa de estudios", styles: sL },
+        { content: data?.ficha?.especialidad || "—", styles: sD },
+        { content: "Horas Totales", styles: sL },
+        { content: "—", styles: sD }, // Aquí puedes poner data.ficha.total_horas si existe
       ],
       [
-        { content: "Módulo Formativo", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: data.ficha.modulo, styles: { lineWidth: 0.25, lineColor: [0, 0, 0], halign: 'center' } },
-        { content: "Periódo de Clase", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "POR DEFINIR", styles: { lineWidth: 0.25, lineColor: [0, 0, 0], halign: 'center' } },
-        ""
+        { content: "Módulo", styles: sL },
+        { content: data?.ficha?.modulo || "—", styles: sD },
+        { content: "Período lectivo", styles: sL },
+        { content: data?.ficha?.periodo_clases || "—", styles: sD },
       ],
       [
-        { content: "Nivel Formativo", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "AUXILIAR TÉCNICO", styles: { lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "Periódo Académico", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: data.ficha.periodo, styles: { lineWidth: 0.25, lineColor: [0, 0, 0], halign: 'center' } },
-        ""
+        { content: "Nivel formativo", styles: sL },
+        { content: "AUXILIAR TÉCNICO", styles: sD },
+        { content: "Período académico", styles: sL },
+        { content: data?.ficha?.periodo || "—", styles: sD },
       ],
       [
-        { content: "Tipo de Plan de estudios", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: "MODULAR", styles: { lineWidth: 0.25, lineColor: [0, 0, 0], halign: 'center' } },
-        { content: "Número de Documento", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: data.ficha.nro_documento, styles: { lineWidth: 0.25, lineColor: [0, 0, 0], halign: 'center' } },
-        ""
+        { content: "Tipo de plan de estudio", styles: sL },
+        { content: "MODULAR", styles: sD },
+        { content: "Número de documento", styles: sL },
+        { content: data?.ficha?.nro_documento || "—", styles: sD },
       ],
       [
-        { content: "Nombres y Apellidos", styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], lineWidth: 0.25, lineColor: [0, 0, 0] } },
-        { content: data.ficha.estudiante, colSpan: 3, styles: { lineWidth: 0.25, lineColor: [0, 0, 0], halign: 'center' } },
-        ""
+        { content: "Apellidos y Nombres", styles: sL },
+        { content: data?.ficha?.estudiante || "—", colSpan: 3, styles: sD },
       ],
     ],
-    theme: 'plain',
-    styles: {
-      fontSize: 10,
-      cellPadding: 2,
-      halign: 'center',
-      valign: 'middle',
-      textColor: [0, 0, 0] // Color de texto negro por defecto
-    },
-    margin: { top: 10, bottom: 10 },
-    columnStyles: {
-      0: { cellWidth: 'auto' },
-      1: { cellWidth: 'auto' },
-      2: { cellWidth: 'auto' },
-      3: { cellWidth: 'auto' },
-      4: { cellWidth: 'auto' }
-    }
+    theme: "grid",
+    styles: { fontSize: 9, cellPadding: 1.2 },
+    columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 95 }, 2: { cellWidth: 45 }, 3: { cellWidth: 92 } },
+    margin: { left: 10, right: 10 },
   });
 
-  doc.setFontSize(14);
-  doc.text("CAPACIDADES TERMINALES", 105, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 125, { align: "center" });
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text("UNIDADES DIDÁCTICAS / MÓDULOS", 148.5, doc.lastAutoTable.finalY + 7, { align: "center" });
 
-
-  const headerUnits = [
-    { content: 'N°', styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } },
-    { content: 'UNIDAD DIDÁCTICA', styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } },
-    { content: 'CRÉDITO', styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } },
-    { content: 'HORA', styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } },
-    { content: 'CONDICIÓN', styles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } },
-  ];
-
-
-
-  // 2DA TABLA
   autoTable(doc, {
-    startY: doc.lastAutoTable.finalY + 15,
-    head: [headerUnits],
-    body: data.capacidades_terminales.map((capacidad, index) => [
-      { content: (index + 1).toString(), styles: { halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } }, // Numeración
-      { content: capacidad.nombre_capacidad, styles: { halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } },
-      // { content: capacidad.credito.toString(), styles: { halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } },
-      { content: '4', styles: { halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } },
-      // { content: capacidad.hora.toString(), styles: { halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } },
-      { content: '10', styles: { halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } },
-      { content: 'G', styles: { halign: 'center', lineWidth: 0.25, lineColor: [0, 0, 0] } },
+    startY: doc.lastAutoTable.finalY + 10,
+    head: [[
+      { content: "N°", styles: { halign: "center" } },
+      { content: "MÓDULO", styles: { halign: "center" } },
+      { content: "CONDICIÓN", styles: { halign: "center" } }
+    ]],
+    body: (data?.capacidades_terminales || []).map((cap, i) => [
+      { content: (i + 1).toString(), styles: { halign: "center" } },
+      { content: cap.nombre_capacidad || "—", styles: { textColor: [0, 0, 255] } },
+      { content: "G", styles: { halign: "center", textColor: [0, 0, 255] } },
     ]),
-    theme: 'plain',
-    styles: {
-      fontSize: 10,
-      cellPadding: 2,
-      halign: 'center',
-      valign: 'middle',
+    theme: "grid",
+    styles: { fontSize: 8, cellPadding: 1.5, lineColor: [0, 0, 0], lineWidth: 0.2 },
+    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
+    columnStyles: { 
+      0: { cellWidth: 15 }, 
+      1: { cellWidth: 222 }, 
+      2: { cellWidth: 40 } 
     },
-    margin: { top: 10, bottom: 10 },
-    columnStyles: {
-      0: { cellWidth: 'auto' }, // Configuración de la columna de numeración
-      1: { cellWidth: 'auto' },
-      2: { cellWidth: 'auto' },
-      3: { cellWidth: 'auto' },
-      4: { cellWidth: 'auto' }
-    }
+    margin: { left: 10, right: 10 },
   });
 
+  /*doc.text("UNIDADES DIDÁCTICAS DE SUBSANACIÓN", 148.5, doc.lastAutoTable.finalY + 7, { align: "center" });
 
-  // Agregar las líneas para las firmas al final del documento
-  const yPosition = doc.lastAutoTable.finalY + 25; // Ajusta el margen según sea necesario
+  autoTable(doc, {
+    startY: doc.lastAutoTable.finalY + 10,
+    head: [["N°", "MÓDULO", "CONDICIÓN"]],
+    body: [["1", "—", "—"]],
+    theme: "grid",
+    styles: { fontSize: 8, cellPadding: 1.5, lineColor: [0, 0, 0], lineWidth: 0.2, halign: "center" },
+    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
+    columnStyles: { 
+      0: { cellWidth: 15 }, 
+      1: { cellWidth: 222 }, 
+      2: { cellWidth: 40 } 
+    },
+    margin: { left: 10, right: 10 },
+  });
+*/
+  const fY = doc.lastAutoTable.finalY + 25;
+  doc.setFontSize(8);
+  
+  doc.line(40, fY, 90, fY);
+  doc.text("Director", 65, fY + 4, { align: "center" });
+  doc.text("Sello, firma, post firma", 65, fY + 8, { align: "center" });
 
-  // Línea para la firma del director
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  doc.text("______________________________", 20, yPosition); // Posición X e Y de la línea
-  doc.text("DIRECTOR", 40, yPosition + 10); // Texto debajo de la línea
+  doc.line(123, fY, 173, fY);
+  doc.text("Coordinador Académico", 148.5, fY + 4, { align: "center" });
+  doc.text("Sello, firma, post firma", 148.5, fY + 8, { align: "center" });
 
-  // Línea para la firma del estudiante
-  doc.text("______________________________", 120, yPosition); // Posición X e Y de la línea
-  doc.text("ESTUDIANTE", 145, yPosition + 10); // Texto debajo de la línea
+  doc.line(207, fY, 257, fY);
+  doc.text("Estudiante", 232, fY + 4, { align: "center" });
+  doc.text("Sello, firma, post firma", 232, fY + 8, { align: "center" });
 
-  // Obtener el PDF como un Blob
-  const pdfBlob = doc.output('blob');
-
-  // Crear una URL para el Blob
+  const pdfBlob = doc.output("blob");
   const pdfUrl = URL.createObjectURL(pdfBlob);
-
-  // Abrir el PDF en una nueva pestaña
-  window.open(pdfUrl, '_blank');
+  window.open(pdfUrl, "_blank");
 }

@@ -285,4 +285,5 @@ class PeriodoController extends Controller
             ->distinct()
             ->get();
     }
+    
 }

@@ -33,6 +33,7 @@ const calificacionCapacidad = useCapacidadTerminalCalificacionesStore();
 
 const showModal = ref(false);
 const capacidadSeleccionada = ref(null);
+const accionModal = ref("");
 
 // 🧠 Cargar capacidades
 if (!capacidadStore.capacidadTerminal?.length) {
@@ -60,11 +61,9 @@ const indicesArray = computed(() => {
   );
 });
 
-const abrirModal = (capacidad, tipo) => {
-  capacidadSeleccionada.value = {
-    ...capacidad,
-    tipo_aplazamiento: tipo, // esto indica al modal qué acción realizar
-  };
+const abrirModal = (capacidad, accion) => {
+  capacidadSeleccionada.value = capacidad;
+  accionModal.value = accion;
   showModal.value = true;
 };
 
@@ -74,8 +73,8 @@ const reactivarNota = async (capacidad) => {
 
     showToast("Nota reactivada para edición.", "success");
 
-     await capacidadStore.loadCapacidadTerminal(props.id)
-     
+    await capacidadStore.loadCapacidadTerminal(props.id)
+
   } catch (e) {
     console.error(e);
     showToast("Error al reactivar la nota.", "error");
@@ -123,28 +122,52 @@ const reactivarNota = async (capacidad) => {
               <Td>{{ index + 1 }}</Td>
               <Td>{{ capacidad?.nombre_capacidad }}</Td>
               <Td>{{ capacidad?.fecha_inicio }}</Td>
-              <Td>{{ capacidad?.fecha_fin }}</Td>
+              <Td>
+                <template v-if="capacidad.fecha_aplazada">
+                  <span class="line-through text-gray-400">
+                    {{ capacidad.fecha_fin }}
+                  </span>
+                  <br />
+                  <span class="text-blue-600 font-semibold">
+                    {{ capacidad.fecha_aplazada }}
+                  </span>
+                </template>
+
+                <template v-else>
+                  {{ capacidad.fecha_fin }}
+                </template>
+              </Td>
               <Td>
                 <!-- Solo reactiva nota -->
               <td>
                 <!-- Reactivar Nota -->
-                <button v-if="!capacidad.puede_aplazar && capacidad.status_nota === 1" @click="reactivarNota(capacidad)"
-                  class="px-3 py-1.5 rounded-md text-sm font-medium 
+                <button v-if="capacidad.accion_disponible === 'reactivar'" @click="reactivarNota(capacidad)" class="px-3 py-1.5 rounded-md text-sm font-medium 
            bg-blue-600 text-white hover:bg-blue-700 
            dark:bg-blue-500 dark:hover:bg-blue-600 
            transition-all duration-150 shadow-sm 
            flex items-center gap-1">
-                  🔄 Reactivar
+                  Reactivar
                 </button>
 
                 <!-- Aplazar Fecha -->
-                <button v-if="capacidad.puede_aplazar" @click="abrirModal(capacidad, 'aplazamiento_real')" class="px-3 py-1.5 rounded-md text-sm font-medium 
+                <button v-else-if="capacidad.accion_disponible === 'aplazar'" @click="abrirModal(capacidad, 'aplazar')"
+                  class="px-3 py-1.5 rounded-md text-sm font-medium 
+           bg-red-500 text-white hover:bg-red-600 
+           dark:bg-red-400 dark:hover:bg-red-500
+           transition-all duration-150 shadow-sm 
+           flex items-center gap-1 mt-1">
+                  Aplazar
+                </button>
+
+                <button v-else-if="capacidad.accion_disponible === 'rectificar'"
+                  @click="abrirModal(capacidad, 'rectificar')" class="px-3 py-1.5 rounded-md text-sm font-medium 
            bg-amber-500 text-white hover:bg-amber-600 
            dark:bg-amber-400 dark:hover:bg-amber-500
            transition-all duration-150 shadow-sm 
            flex items-center gap-1 mt-1">
-                  ⏳ Aplazar
+                  Rectificar
                 </button>
+
               </td>
 
               </Td>
@@ -152,8 +175,8 @@ const reactivarNota = async (capacidad) => {
             </Tr>
           </TBody>
         </Table>
-        <CapacidadTerminalPlazo :show="showModal" :capacidad="capacidadSeleccionada" :load="props.id"
-          @hided="showModal = false" />
+        <CapacidadTerminalPlazo :show="showModal" :capacidad="capacidadSeleccionada" :accion="accionModal"
+          :load="props.id" @hided="showModal = false" />
 
       </div>
     </div>

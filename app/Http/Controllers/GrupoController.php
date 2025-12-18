@@ -102,7 +102,7 @@ class GrupoController extends Controller
                 );
             }
 
-            // 2️⃣ Crear el grupo SOLO si existe carpeta de periodo
+            // 2️⃣ Crear el git grupo SOLO si existe carpeta de periodo
             $grupo = Grupo::create($request->all());
 
             $modulo = Modulo::find($request->id_modulo);

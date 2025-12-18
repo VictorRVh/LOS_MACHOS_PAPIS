@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\NominaCensoEducativoExport;
+use App\Exports\RegistroMatriculaInstitucionalExport;
 use App\Exports\NominaMatriculasExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Matricula;
@@ -59,6 +60,49 @@ class ReporteController extends Controller
 
             return response()->json([
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function exportMatriculaInstitucional($idPeriodo)
+    {
+        try {
+            // 1️⃣ Crear export por PERIODO
+            $export = new RegistroMatriculaInstitucionalExport($idPeriodo);
+
+            // 2️⃣ CONSTRUIR EL SPREADSHEET (ESTO FALTABA)
+            $spreadsheet = $export->build();
+
+            // 3️⃣ Writer
+            $writer = new Xlsx($spreadsheet);
+
+            // 4️⃣ Nombre del archivo
+            $fileName = "matricula_institucional_periodo.xlsx";
+
+            // 5️⃣ Descargar
+            return new \Symfony\Component\HttpFoundation\StreamedResponse(
+                function () use ($writer) {
+                    $writer->save('php://output');
+                },
+                200,
+                [
+                    'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+                    'Cache-Control'       => 'max-age=0',
+                ]
+            );
+        } catch (\Throwable $e) {
+
+            \Log::error('Error exportando matrícula institucional', [
+                'periodo' => $idPeriodo,
+                'error'   => $e->getMessage(),
+                'linea'   => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'error'   => 'Error al generar el reporte de matrícula institucional',
+                'detalle' => $e->getMessage(),
             ], 500);
         }
     }

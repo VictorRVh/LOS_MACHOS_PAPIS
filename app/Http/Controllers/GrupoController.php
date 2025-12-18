@@ -90,17 +90,17 @@ class GrupoController extends Controller
         try {
 
             // // 1️⃣ Verificar que exista carpeta del periodo
-            // $carpetaPeriodo = CarpetasPeriodoDrive::where('id_periodo', $request->id_periodo)->first();
+            $carpetaPeriodo = CarpetasPeriodoDrive::where('id_periodo', $request->id_periodo)->first();
 
-            // if (!$carpetaPeriodo) {
+            if (!$carpetaPeriodo) {
 
-            //     \Log::warning("No existe carpeta de periodo para id_periodo: " . $request->id_periodo);
+                \Log::warning("No existe carpeta de periodo para id_periodo: " . $request->id_periodo);
 
-            //     throw new \Exception(
-            //         'No existe carpeta del periodo en Drive',
-            //         13333
-            //     );
-            // }
+                throw new \Exception(
+                    'No existe carpeta del periodo en Drive',
+                    13333
+                );
+            }
 
             // 2️⃣ Crear el grupo SOLO si existe carpeta de periodo
             $grupo = Grupo::create($request->all());
@@ -114,33 +114,33 @@ class GrupoController extends Controller
                 "Creado"
             );
 
-            // // 3️⃣ Crear subcarpeta del grupo en Drive
-            // $folderName = "Grupo {$grupo->seccion} | Turno: {$grupo->turno} | Módulo: {$modulo->descripcion} | Especialidad: {$especialidad->especialidadMadre->nombre_especialidad}";
+            // 3️⃣ Crear subcarpeta del grupo en Drive
+            $folderName = "Grupo {$grupo->seccion} | Turno: {$grupo->turno} | Módulo: {$modulo->descripcion} | Especialidad: {$especialidad->especialidadMadre->nombre_especialidad}";
 
-            // $driveController = new GoogleDriveController();
-            // $response = $driveController->createFolder(new Request([
-            //     'folderName' => $folderName,
-            //     'parentFolderId' => $carpetaPeriodo->drive_folder_id,
-            // ]));
+            $driveController = new GoogleDriveController();
+            $response = $driveController->createFolder(new Request([
+                'folderName' => $folderName,
+                'parentFolderId' => $carpetaPeriodo->drive_folder_id,
+            ]));
 
-            // if ($response->status() !== 201) {
+            if ($response->status() !== 201) {
 
-            //     \Log::error("Error creando subcarpeta del grupo en Drive: " . $response->getContent());
+                \Log::error("Error creando subcarpeta del grupo en Drive: " . $response->getContent());
 
-            //     throw new \Exception(
-            //         'Error creando subcarpeta del grupo en Drive',
-            //         13333
-            //     );
-            // }
+                throw new \Exception(
+                    'Error creando subcarpeta del grupo en Drive',
+                    13333
+                );
+            }
 
-            // $data = $response->getData();
-            // $driveFolderId = $data->id ?? null;
+            $data = $response->getData();
+            $driveFolderId = $data->id ?? null;
 
-            // CarpetasGrupoDrive::create([
-            //     'id_grupo' => $grupo->id,
-            //     'drive_folder_id' => $driveFolderId,
-            //     'nombre_carpeta'  => $folderName,
-            // ]);
+            CarpetasGrupoDrive::create([
+                'id_grupo' => $grupo->id,
+                'drive_folder_id' => $driveFolderId,
+                'nombre_carpeta'  => $folderName,
+            ]);
 
             DB::commit();
 
@@ -812,8 +812,8 @@ class GrupoController extends Controller
 
             // ✅ CORRECTO
             'unidad_competencia' => $matricula->unidad_competencia,
-            'horas' => $matricula->creditos,
-            'creditos' => $matricula->horas,
+            'horas' => $matricula->horas,
+            'creditos' => $matricula->creditos,
 
             'fecha_inicio'      => $matricula->fecha_inicio,
             'fecha_fin'         => $matricula->fecha_fin,

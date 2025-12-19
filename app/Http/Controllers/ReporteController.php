@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exports\NominaCensoEducativoExport;
-use App\Exports\RegistroMatriculaInstitucionalExport;
 use App\Exports\NominaMatriculasExport;
+use App\Exports\RegistroMatriculaInstitucionalExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Matricula;
 
@@ -64,7 +64,6 @@ class ReporteController extends Controller
         }
     }
 
-
     public function exportMatriculaInstitucional($idPeriodo)
     {
         try {
@@ -105,5 +104,23 @@ class ReporteController extends Controller
                 'detalle' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function actaEvaluacionExcel($idGrupo)
+    {
+        $export = new \App\Exports\ReporteActaEvaluacionExport($idGrupo);
+        $spreadsheet = $export->build();
+
+        $writer = new Xlsx($spreadsheet);
+
+        $fileName = "acta_evaluacion_{$idGrupo}.xlsx";
+
+        // Descargar como respuesta HTTP
+        return new StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=\"$fileName\"",
+        ]);
     }
 }

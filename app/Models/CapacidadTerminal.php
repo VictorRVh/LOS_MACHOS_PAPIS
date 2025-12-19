@@ -91,7 +91,7 @@ class CapacidadTerminal extends Model
         return $ahora->lte($fechaLimite);
     }
 
-    // ✅ NUEVO: Obtener fecha límite de subida
+    // NUEVO: Obtener fecha límite de subida
     public function getFechaLimiteSubidaAttribute()
     {
         // Fecha límite original (fecha_fin + 1 día a las 23:59)
@@ -115,7 +115,7 @@ class CapacidadTerminal extends Model
             : $limiteNormal;
     }
 
-    // ✅ NUEVO: Obtener mensaje de estado de subida
+    // NUEVO: Obtener mensaje de estado de subida
     public function getMensajeSubidaNotasAttribute(): string
     {
         if ($this->status === self::STATUS_PENDIENTE) {
@@ -220,10 +220,9 @@ class CapacidadTerminal extends Model
             return 'La fecha fin no puede ser menor a la fecha de inicio.';
         }
 
-        return null; // ✅ OK
+        return null;
     }
 
-    // ESTOY CREANDO 2 METODOS DE CANEDIT() PARA QUE PUEDA REUTILIZARSE EL CANEDIT()
     public function canEdit(): bool
     {
         $entrega = $this->grupo?->entregaDocenteActiva;
@@ -232,10 +231,19 @@ class CapacidadTerminal extends Model
             return false;
         }
 
+        if ($entrega->estado !== EntregaDocente::STATUS_ACTIVO) {
+            return false;
+        }
+
         $now = now('America/Lima');
 
-        return $now->between($entrega->fecha_inicio, $entrega->fecha_fin)
-            && $entrega->estado === EntregaDocente::STATUS_ACTIVO;
+        $fechaInicio = $entrega->fecha_inicio;
+
+        $fechaLimite = $entrega->fecha_aplazada
+            ? $entrega->fecha_aplazada
+            : $entrega->fecha_fin;
+
+        return $now->between($fechaInicio, $fechaLimite);
     }
 
     // public function getFechaInicioAttribute($value)

@@ -352,7 +352,6 @@ const EliminarMatricula = (idMatricula, nombre) => {
                                 @custom1="abrirModalReserva(matricula)"
                                 @delete="EliminarMatricula(matricula.id_matricula, `${matricula.nombre}, ${matricula.apellidos}`)"
                                 @download="exportarFicha(matricula.id_estudiante)" />
-
                         </Td>
 
 

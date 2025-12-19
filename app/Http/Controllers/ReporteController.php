@@ -78,7 +78,7 @@ class ReporteController extends Controller
             $writer = new Xlsx($spreadsheet);
 
             // 4️⃣ Nombre del archivo
-            $fileName = "matricula_institucional_periodo.xlsx";
+            $fileName = "matricula_institucional_periodo_{$idPeriodo}.xlsx";
 
             // 5️⃣ Descargar
             return new \Symfony\Component\HttpFoundation\StreamedResponse(

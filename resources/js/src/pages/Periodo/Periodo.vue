@@ -51,26 +51,18 @@ const onDelete = (periodo) => {
 
 
 const descargarDocumento = async (idPeriodo) => {
-  const response = await axios.get(
-    `/api/reportes/matriculaInstitucional/${idPeriodo}`,
-    { responseType: 'blob' }
-  )
-
-  const blob = new Blob([response.data], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  })
-
-  const url = window.URL.createObjectURL(blob)
-  const link = document.createElement('a')
-
-  link.href = url
-  link.download = `matricula_institucional_periodo_${idPeriodo}.xlsx`
-  document.body.appendChild(link)
-  link.click()
-
-  document.body.removeChild(link)
-  window.URL.revokeObjectURL(url)
-}
+  try {
+    const response = await axios.get(`reportes/matriculaInstitucional/${idPeriodo}`, { responseType: "blob" });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "reportenuwco.xlsx");
+    document.body.appendChild(link);
+    link.click();
+  } catch (error) {
+    console.error("Error descargando reporte:", error);
+  }
+};
 
 
 </script>

@@ -5,6 +5,7 @@ namespace App\Exports;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class RegistroMatriculaInstitucionalExport
 {
@@ -17,40 +18,23 @@ class RegistroMatriculaInstitucionalExport
 
     public function build(): Spreadsheet
     {
-        // =============================
-        // 1️⃣ CARGAR PLANTILLA
-        // =============================
+        // 1️⃣ Cargar plantilla
         $spreadsheet = IOFactory::load(
             storage_path('app/templates/Registro_Matricula_Institucional.xlsx')
         );
+
         $sheet = $spreadsheet->getActiveSheet();
+
+        // 2️⃣ Datos estáticos de institución
         $institucion = [
             'region'         => 'PUNO',
             'ugel'           => 'PUNO',
             'codigo_modular' => '0000000',
             'nombre'         => 'CETPRO PUNO',
         ];
-        // $sheet->fromArray([
-        //     'REGIÓN',
-        //     'UGEL',
-        //     'CÓDIGO MODULAR',
-        //     'NOMBRE DEL CETPRO',
-        //     'PROGRAMA / ESPECIALIDAD',
-        //     'CICLO',
-        //     'N° RESOLUCIÓN',
-        //     'MÓDULO',
-        //     'TIPO DOCUMENTO',
-        //     'N° DOCUMENTO',
-        //     'APELLIDO PATERNO',
-        //     'APELLIDO MATERNO',
-        //     'NOMBRES',
-        //     'SEXO',
-        //     'FECHA DE NACIMIENTO',
-        // ], null, 'A1');
 
-        // =============================
-        // 4️⃣ CONSULTA REAL (CON CICLO)
-        // =============================
+
+        // 3️⃣ Consulta
         $registros = DB::table('grupo as g')
             ->join('programa_estudio as pe', 'g.id_programa', '=', 'pe.id')
             ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
@@ -81,25 +65,27 @@ class RegistroMatriculaInstitucionalExport
             ->orderBy('e.apellido_paterno')
             ->get();
 
-        // =============================
-        // 5️⃣ LLENADO
-        // =============================
 
+        $periodoNombre = DB::table('periodo')
+            ->where('id', $this->idPeriodo)
+            ->value('nombre_periodo');
+
+        // 📝 Título dinámico
+        $nameTitle = "REGISTRO DE MATRÍCULA INSTITUCIONAL {$periodoNombre}";
+
+        // 📌 Imprimir título en Excel
+        $sheet->setCellValue('C1', $nameTitle);
+        // 4️⃣ Llenado (fila correcta según plantilla)
         $fila = 5;
 
-        dd($registros);
-
         foreach ($registros as $r) {
-            // $sheet = $spreadsheet->getSheetByName('FICHA');
-
-
             $sheet->fromArray([
                 $institucion['region'],
                 $institucion['ugel'],
                 $institucion['codigo_modular'],
                 $institucion['nombre'],
                 $r->nombre_especialidad,
-                $r->nombre_ciclo, // 🔥 AQUÍ VA EL CICLO REAL
+                $r->nombre_ciclo,
                 $r->numero_rd,
                 $r->modulo,
                 $r->tipo_documento,
@@ -112,15 +98,14 @@ class RegistroMatriculaInstitucionalExport
                     ? date('d/m/Y', strtotime($r->fecha_nacimiento))
                     : '',
             ], null, "B{$fila}");
+            $sheet->getStyle("B{$fila}:P{$fila}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                ->setVertical(Alignment::VERTICAL_CENTER);
 
             $fila++;
         }
-        // =============================
-        // AUTO AJUSTE
-        // =============================
-        foreach (range('A', 'O') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
+
+
         return $spreadsheet;
     }
 }

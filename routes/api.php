@@ -473,7 +473,11 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\PeriodoController::class,
         'index',
     ])->middleware('permission:todo-acceso-periodos|ver-periodos');
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 96547f3fa547df0c0895a0945356745f8105211f
     Route::get('reportes/matriculaInstitucional/{id}', [
         \App\Http\Controllers\ReporteController::class,
         'exportMatriculaInstitucional',
@@ -1142,6 +1146,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reporte-censo', [
         \App\Http\Controllers\ReporteController::class,
         'generarExcelCenso',
+    ])->middleware('permission:ver-ciclo-programa');
+
+    Route::get('/reporte-acta-evaluacion/{idGrupo}', [
+        \App\Http\Controllers\ReporteController::class,
+        'actaEvaluacionExcel',
     ])->middleware('permission:ver-ciclo-programa');
 });
 

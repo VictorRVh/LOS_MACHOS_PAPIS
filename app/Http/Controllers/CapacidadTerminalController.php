@@ -153,7 +153,7 @@ class CapacidadTerminalController extends Controller
             return response()->json(['message' => 'Capacidad no encontrada'], 404);
         }
 
-        // 🔒 VALIDAR PROGRAMACIÓN
+        // VALIDAR PROGRAMACIÓN
         if (!$capacidad->canEdit()) {
             return response()->json([
                 'message' => 'La programación no permite modificar capacidades'

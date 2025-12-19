@@ -16,16 +16,10 @@ const usePeriodosStore = defineStore('Periodos', () => {
         const res = await getPeriodos();
         periodos.value = res;
     };
-
-    const loadExportMatriculasInst = async (idPeriodo) => {
-        const res = await exportMatriculaInstitucinal(idPeriodo);
-        //  periodos.value = res;
-    };
-
+    
     return {
         periodos,
         loadPeriodos,
-        loadExportMatriculasInst,
         periodosLoading,
         periodosFirstTimeLoading,
     };

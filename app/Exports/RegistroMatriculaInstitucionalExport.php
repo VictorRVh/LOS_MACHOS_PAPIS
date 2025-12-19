@@ -23,22 +23,13 @@ class RegistroMatriculaInstitucionalExport
         $spreadsheet = IOFactory::load(
             storage_path('app/templates/Registro_Matricula_Institucional.xlsx')
         );
-
         $sheet = $spreadsheet->getActiveSheet();
-
-        // =============================
-        // 2️⃣ DATOS INSTITUCIONALES (FIJOS)
-        // =============================
         $institucion = [
-            'region'         => 'TU REGIÓN',
-            'ugel'           => 'TU UGEL',
+            'region'         => 'PUNO',
+            'ugel'           => 'PUNO',
             'codigo_modular' => '0000000',
-            'nombre'         => 'NOMBRE DEL CETPRO',
+            'nombre'         => 'CETPRO PUNO',
         ];
-
-        // =============================
-        // 3️⃣ CABECERAS
-        // =============================
         // $sheet->fromArray([
         //     'REGIÓN',
         //     'UGEL',
@@ -93,14 +84,15 @@ class RegistroMatriculaInstitucionalExport
         // =============================
         // 5️⃣ LLENADO
         // =============================
-        $fila = 6;
+
+        $fila = 5;
 
         foreach ($registros as $r) {
             $sheet->fromArray([
-                // $institucion['region'],
-                // $institucion['ugel'],
-                // $institucion['codigo_modular'],
-                // $institucion['nombre'],
+                $institucion['region'],
+                $institucion['ugel'],
+                $institucion['codigo_modular'],
+                $institucion['nombre'],
                 $r->nombre_especialidad,
                 $r->nombre_ciclo, // 🔥 AQUÍ VA EL CICLO REAL
                 $r->numero_rd,
@@ -114,18 +106,16 @@ class RegistroMatriculaInstitucionalExport
                 $r->fecha_nacimiento
                     ? date('d/m/Y', strtotime($r->fecha_nacimiento))
                     : '',
-            ], null, "A{$fila}");
+            ], null, "B{$fila}");
 
             $fila++;
         }
-
         // =============================
-        // 6️⃣ AUTO AJUSTE
+        // AUTO AJUSTE
         // =============================
         foreach (range('A', 'O') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
-
         return $spreadsheet;
     }
 }

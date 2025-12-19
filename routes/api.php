@@ -473,6 +473,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\PeriodoController::class,
         'index',
     ])->middleware('permission:todo-acceso-periodos|ver-periodos');
+    
     Route::get('reportes/matriculaInstitucional/{id}', [
         \App\Http\Controllers\ReporteController::class,
         'exportMatriculaInstitucional',

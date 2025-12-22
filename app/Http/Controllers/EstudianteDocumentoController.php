@@ -41,6 +41,49 @@ class EstudianteDocumentoController extends Controller
         ], 201);
     }
 
+    public function verificarCertificado($codigo)
+    {
+        $documento = EstudianteDocumento::with([
+            'matricula.estudiante',
+            'matricula.grupo.modulo',
+            'matricula.grupo.especialidad.especialidadMadre',
+            'matricula.grupo.periodo',
+        ])->where('id', $codigo)->first();
+
+        if (!$documento) {
+            return response()->json([
+                'estado'  => false,
+                'mensaje' => 'Documento NO válido',
+            ], 404);
+        }
+
+        $matricula = $documento->matricula;
+        $grupo = $matricula->grupo;
+
+        return response()->json([
+            'estado'  => true,
+            'mensaje' => 'Documento válido',
+            'data' => [
+                'codigo'     => $documento->codigo,
+                'documento'  => match ($documento->tipo_documento) {
+                    1 => 'Constancia de Estudios',
+                    2 => 'Certificado de Estudios',
+                    3 => 'Certificado sin notas',
+                    default => 'Documento académico',
+                },
+                'estudiante' => trim(
+                    $matricula->estudiante->apellido_paterno . ' ' .
+                        $matricula->estudiante->apellido_materno . ' ' .
+                        $matricula->estudiante->nombre
+                ),
+                'especialidad' => $grupo->especialidad->especialidadMadre->nombre_especialidad ?? null,
+                'modulo'       => $grupo->modulo->descripcion ?? null,
+                'periodo'      => $grupo->periodo->nombre_periodo ?? null,
+                'fecha_emision' => $documento->fecha_emision->format('d/m/Y'),
+            ],
+        ]);
+    }
+
     /**
      * Display the specified resource.
      */

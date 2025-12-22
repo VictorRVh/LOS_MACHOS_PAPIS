@@ -1,6 +1,34 @@
 import jsPDF from "jspdf";
+import QRCode from "qrcode";
+import useHttpRequest from "../composables/useHttpRequest";
+import useModalToast from "../composables/useModalToast";
 
-export function generateConstanciaEstudiante(data) {
+const { store: createCertificado, saving, update: updateCertificado, updating } = useHttpRequest(
+  "/estudiante-documento")
+const { showConfirmModal, showToast } = useModalToast();
+
+export async function generateConstanciaEstudiante(data) {
+
+  // 1  es CONSTANCIA
+  // 2  es certificado
+  // 3  certificado sin notas
+  console.log(data)
+  try {
+    const payload = {
+      id_matricula: data.id_matricula,
+      tipo_documento: 1, // CONSTANCIA DE ESTUDIOS
+      fecha_emision: new Date().toISOString().slice(0, 10),
+    };
+
+    // 2️⃣ Guardar en BD
+    const response = await createCertificado(payload);
+    if (!response?.success) {
+      showToast(`"${data?.estudiante?.toUpperCase()}" No se pudo generar la constancia`, "warning");
+    }
+
+ 
+
+
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -8,21 +36,21 @@ export function generateConstanciaEstudiante(data) {
   });
 
   const pageWidth = 210;
-  const marginL = 25; 
+  const marginL = 25;
   const marginR = 20;
   const contentWidth = pageWidth - marginL - marginR;
-  
+
   const logoMin = "/img/LogoMinisterio.png";
   const logoCetpro = "/img/cetprologoHorizontal.png";
 
 
   // --- 1. ENCABEZADO REESTRUCTURADO (ALTURA EQUILIBRADA) ---
-  const headerY = 12; 
+  const headerY = 12;
   const headerH = 10;
 
   try {
     // Logo 1: CETPRO (Izquierda)
-    doc.addImage(logoCetpro, "PNG", marginL, headerY, 40, headerH); 
+    doc.addImage(logoCetpro, "PNG", marginL, headerY, 40, headerH);
     // Logo 2: Ministerio (Derecha)
     doc.addImage(logoMin, "PNG", pageWidth - marginR - 45, headerY, 45, headerH);
   } catch (e) {
@@ -46,7 +74,7 @@ export function generateConstanciaEstudiante(data) {
   const photoX = pageWidth - marginR - 25;
   const photoY = 55;
   doc.setLineWidth(0.2);
-  doc.rect(photoX, photoY, 25, 32); 
+  doc.rect(photoX, photoY, 25, 32);
   doc.setFontSize(7);
   doc.text("FOTOGRAFÍA", photoX + 12.5, photoY + 14, { align: "center" });
 
@@ -57,7 +85,7 @@ export function generateConstanciaEstudiante(data) {
   // --- 3. CUERPO DEL DOCUMENTO (TEXTO JUSTIFICADO Y LIMPIO) ---
   doc.setFontSize(11);
   doc.setFont("times", "normal");
-  
+
   doc.text("EL/LA DIRECTOR(A) DEL CETPRO PUNO QUE SUSCRIBE, POR LA PRESENTE:", marginL, 95);
   doc.setFont("times", "bold");
   doc.text("HACE CONSTAR QUE:", marginL, 103);
@@ -69,17 +97,17 @@ export function generateConstanciaEstudiante(data) {
   const periodo = data?.periodo || "—";
 
   doc.setFont("times", "normal");
-  
+
   // Párrafo Legal
   const parrafoLegal = `Al amparo de la Ley N° 28044 (Ley General de Educación), su Reglamento D.S. N° 011-2012-ED y la R.V.M. N° 188-2020-MINEDU; se certifica la situación académica del siguiente administrado, según consta en los folios de matrícula de nuestra institución:`;
   const splitLegal = doc.splitTextToSize(parrafoLegal, contentWidth);
   doc.text(splitLegal, marginL, 110, { align: "justify", maxWidth: contentWidth });
-  
+
   // Datos del Estudiante (Con Negritas)
   doc.text("El/la estudiante:", marginL, 122);
   doc.setFont("times", "bold");
   doc.text(nombre, marginL + 30, 122);
-  
+
   doc.setFont("times", "normal");
   doc.text("identificado(a) con DNI N°:", marginL, 128);
   doc.setFont("times", "bold");
@@ -112,8 +140,8 @@ export function generateConstanciaEstudiante(data) {
 
   // --- 6. ÁREA DE FIRMA Y SELLO DE COORDINACIÓN ---
   const firmaY = 230;
-  
-  
+
+
   doc.setLineWidth(0.6);
   doc.line(75, firmaY, 135, firmaY);
   doc.setFontSize(11);
@@ -121,12 +149,34 @@ export function generateConstanciaEstudiante(data) {
   doc.setFontSize(10);
   doc.text("CETPRO PUNO", pageWidth / 2, firmaY + 10, { align: "center" });
 
+
+  // --- QR ---
+  const qrUrl =
+    `http://127.0.0.1:8000/verificarCertificado/${data?.id_matricula}`;
+
+  const qrBase64 = await QRCode.toDataURL(qrUrl, {
+    width: 300,
+    margin: 1,
+    errorCorrectionLevel: "H",
+  });
+
+  const qrSize = 30;
+  const qrX = pageWidth - marginR - qrSize;
+  const qrY = 205;
+
+  doc.addImage(qrBase64, "PNG", qrX, qrY, qrSize, qrSize);
+  doc.setFontSize(7);
+  doc.text("Verificación QR", qrX + qrSize / 2, qrY + qrSize + 4, {
+    align: "center",
+  });
+
+
   // --- 7. CLÁUSULA LEGAL (AL PIE DE PÁGINA - PROTECCIÓN JURÍDICA) ---
   const footerY = 255;
   doc.setFontSize(8);
   doc.setFont("times", "bold");
   doc.text("CLÁUSULA DE EXONERACIÓN Y VERACIDAD:", marginL, footerY);
-  
+
   doc.setFont("times", "italic");
   const clausula = `La presente constancia se expide con base exclusiva en los registros existentes en el archivo académico de la institución a la fecha de su emisión. Conforme al Principio de Presunción de Veracidad (Art. IV, Num. 1.7 de la Ley N° 27444), la institución se deslinda de toda responsabilidad legal por el uso indebido, alteraciones fraudulentas o falsificaciones que terceros pudieren realizar sobre este documento. La institución no asume perjuicios por demandas derivadas de la interpretación subjetiva de este certificado por parte de entidades externas o particulares.`;
   const splitClausula = doc.splitTextToSize(clausula, contentWidth);
@@ -140,4 +190,11 @@ export function generateConstanciaEstudiante(data) {
   const pdfBlob = doc.output('blob');
   const pdfUrl = URL.createObjectURL(pdfBlob);
   window.open(pdfUrl, '_blank');
+
+   } catch (error) {
+    showToast(
+      `"${data?.estudiante?.toUpperCase()}" No se pudo generar la constancia`,
+      "warning"
+    );
+  }
 }

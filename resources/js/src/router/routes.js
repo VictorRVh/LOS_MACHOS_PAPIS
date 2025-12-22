@@ -8,6 +8,15 @@ import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 
 export default [
     { path: '/', name: 'login', component: () => import('../pages/Login.vue'), meta: { layout: 'full', permissions: [], }, },
+    {
+        path: '/verificarCertificado/:codigo',
+        name: 'verificarCertificado',
+        props: true,
+        component: () => import('../pages/Estudiante/VerificarCertificado.vue'),
+        meta: {
+            public: true   // 👈 MUY IMPORTANTE
+        }
+    },
     { path: '/start', name: 'start', component: () => import('../pages/Start.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Inicio', to: { name: 'start' } }] }, },
     { path: '/groups', name: 'groups', alias: ['/matricula'], component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
     { path: '/programs', name: 'programs', alias: ['/matricula'], component: () => import('../pages/Users.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], }, },
@@ -344,7 +353,7 @@ export default [
             breadcrumb: [{ text: 'Gestión de Documentos', to: { name: 'documentos' } }],
         }
     },
-     {
+    {
         path: '/ingresos',
         name: 'ingresos',
         component: () => import('../pages/Ingresos/Ingreso.vue'),

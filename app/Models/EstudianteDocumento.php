@@ -13,7 +13,7 @@ class EstudianteDocumento extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $table = 'modulos';
+    protected $table = 'estudiante_documento';
 
     protected $fillable = [
         'id',

@@ -22,7 +22,7 @@ class EstudianteDocumentoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_estudiante' => 'required|uuid|exists:estudiantes,id',
+            'id_estudiante' => 'required|uuid|exists:estudiante,id',
             'tipo_documento' => 'required|integer',
             'fecha_emision' => 'required|date',
         ]);

@@ -234,6 +234,12 @@ Route::middleware('auth:sanctum')->group(function () {
         'buscarHistorialEstudiante',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-grupos');
 
+
+    Route::post('estudiante-documento', [
+        \App\Http\Controllers\EstudianteDocumentoController::class,
+        'store',
+    ])->middleware('permission:todo-acceso-permisos|ver-grupos');
+
     //RUTA PARA CILCLO ACADEMICO
     Route::get('ciclo_academico', [
         \App\Http\Controllers\CicloAcademicoController::class,
@@ -473,7 +479,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\PeriodoController::class,
         'index',
     ])->middleware('permission:todo-acceso-periodos|ver-periodos');
-    
+
     Route::get('reportes/matriculaInstitucional/{id}', [
         \App\Http\Controllers\ReporteController::class,
         'exportMatriculaInstitucional',

@@ -48,18 +48,18 @@ class EntregaDocenteAdminController extends Controller
 
         if (!$gruposExistentes) {
 
-            throw new \Exception('Error|No puedes Crear esta programació, por que aun no tieene grupos en este periodo--404', 13333);
+            throw new \Exception('No puedes Crear esta programacion, por que aun no tieene grupos en este periodo.', 13333);
         }
 
         // CUANDO LA FECHA DE INICIO COINCIDE CON LA DE HOY
         $estadoInicial = EntregaDocenteAdmin::STATUS_PENDIENTE;
 
         // Convertir ambas fechas a solo YYYY-MM-DD
-        $fechaInicio = Carbon::parse($request->fecha_inicio)->toDateString();
-        $hoy = Carbon::now()->toDateString();
+        $fechaInicio = Carbon::parse($request->fecha_inicio)->startOfDay();
+        $hoy = Carbon::now()->startOfDay();
 
-        if ($fechaInicio === $hoy) {
-            $estadoInicial = EntregaDocente::STATUS_ACTIVO;
+        if ($fechaInicio->lessThanOrEqualTo($hoy)) {
+            $estadoInicial = EntregaDocenteAdmin::STATUS_ACTIVO;
         }
 
         // Crear la entrega admin
@@ -106,11 +106,22 @@ class EntregaDocenteAdminController extends Controller
         $estadoInicial = EntregaDocenteAdmin::STATUS_PENDIENTE;
 
         // Convertir ambas fechas a solo YYYY-MM-DD
-        $fechaInicio = Carbon::parse($request->fecha_inicio)->toDateString();
-        $hoy = Carbon::now()->toDateString();
+        // $fechaInicio = Carbon::parse($request->fecha_inicio)->toDateString();
+        // $hoy = Carbon::now()->toDateString();
 
-        if ($fechaInicio === $hoy) {
-            $estadoInicial = EntregaDocente::STATUS_ACTIVO;
+        // if ($fechaInicio === $hoy) {
+        //     $estadoInicial = EntregaDocente::STATUS_ACTIVO;
+        // }
+
+        // Estado por defecto
+        $estadoInicial = EntregaDocenteAdmin::STATUS_PENDIENTE;
+
+        $fechaInicio = Carbon::parse($request->fecha_inicio)->startOfDay();
+        $hoy = Carbon::now()->startOfDay();
+
+        // Si la fecha de inicio es hoy o anterior → ACTIVO
+        if ($fechaInicio->lessThanOrEqualTo($hoy)) {
+            $estadoInicial = EntregaDocenteAdmin::STATUS_ACTIVO;
         }
 
         // Actualizar los datos en la tabla principal

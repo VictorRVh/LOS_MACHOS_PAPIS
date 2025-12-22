@@ -27,8 +27,8 @@ class EstudianteDocumentoController extends Controller
             'fecha_emision' => 'nullable|date',
         ]);
 
-        $documento = EstudianteDocumento::create([
-            'id_matricula' => $request->id_estudiante,
+        EstudianteDocumento::create([
+            'id_matricula' => $request->id_matricula,
             'tipo_documento' => $request->tipo_documento,
             'fecha_emision' => $request->fecha_emision,
             'id_autor' => auth()->id()

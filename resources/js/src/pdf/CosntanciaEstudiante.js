@@ -74,7 +74,7 @@ export function generateConstanciaEstudiante(data) {
   const parrafoLegal = `Al amparo de la Ley N° 28044 (Ley General de Educación), su Reglamento D.S. N° 011-2012-ED y la R.V.M. N° 188-2020-MINEDU; se certifica la situación académica del siguiente administrado, según consta en los folios de matrícula de nuestra institución:`;
   const splitLegal = doc.splitTextToSize(parrafoLegal, contentWidth);
   doc.text(splitLegal, marginL, 110, { align: "justify", maxWidth: contentWidth });
-
+  
   // Datos del Estudiante (Con Negritas)
   doc.text("El/la estudiante:", marginL, 122);
   doc.setFont("times", "bold");

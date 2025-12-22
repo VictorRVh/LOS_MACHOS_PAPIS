@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\DocumentoEstudianteController;
+
+use App\Http\Controllers\EstudianteDocumentoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoogleDriveController;
 
@@ -10,7 +11,7 @@ Route::get('/google/callback', [GoogleDriveController::class, 'handleGoogleCallb
 
 Route::get(
     '/verificar-certificado/{codigo}',
-    [DocumentoEstudianteController::class, 'verificarCertificado']
+    [EstudianteDocumentoController::class, 'verificarCertificado']
 );
 
 Route::get(

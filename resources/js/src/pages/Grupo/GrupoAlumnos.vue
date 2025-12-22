@@ -102,6 +102,7 @@ const imprimirConstancia = (estudiante) => {
     nro_documento: estudiante.nro_documento,
     especialidad: matriculados.value.especialidad,
     modulo: matriculados.value.modulo,
+    id_matricula: estudiante.id_matricula,
     periodo: matriculados.value.periodo || "2025"
   };
   generateConstanciaEstudiante(dataParaConstancia);

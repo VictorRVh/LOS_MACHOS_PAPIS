@@ -85,6 +85,11 @@ class Matricula extends Model
         );
     }
 
+    public function estudianteDocumento()
+    {
+        return $this->hasMany(EstudianteDocumento::class, 'id_matricula');
+    }
+
 
     // FUNCION PARA REALIZAR CAMBIOS DE ESTADO Y CONECTAR CON LA NUEVA TABLA DE HISTORIAL_MATRICULA
 

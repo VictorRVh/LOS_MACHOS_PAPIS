@@ -102,9 +102,4 @@ class Estudiante extends Model
     {
         return $this->hasMany(egresados::class, 'id_estudiante');
     }
-
-    public function estudianteDocumento()
-    {
-        return $this->hasMany(EstudianteDocumento::class, 'id_estudiante');
-    }
 }

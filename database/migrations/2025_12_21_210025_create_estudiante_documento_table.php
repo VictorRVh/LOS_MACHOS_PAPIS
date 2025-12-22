@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('estudiante_documento', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('id_estudiante');
+            $table->uuid('id_matricula');
             $table->tinyInteger('tipo_documento');
             $table->dateTime('fecha_emision')->nullable();
 
             $table->unsignedBigInteger('id_autor');
             
-            $table->foreign('id_estudiante')->references('id')->on('estudiante')->onDelete('cascade');
+            $table->foreign('id_matricula')->references('id')->on('matricula')->onDelete('cascade');
             $table->foreign('id_autor')->references('id')->on('users')->onDelete('cascade');
 
             $table->timestamps();

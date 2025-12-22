@@ -152,7 +152,7 @@ export async function generateConstanciaEstudiante(data) {
 
   // --- QR ---
   const qrUrl =
-    `http://127.0.0.1:8000/verificarCertificado/${data?.id_matricula}`;
+    `http://127.0.0.1:8000/verificarCertificado/${data.id_matricula}`;
 
   const qrBase64 = await QRCode.toDataURL(qrUrl, {
     width: 300,

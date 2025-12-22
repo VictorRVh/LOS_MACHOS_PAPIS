@@ -48,7 +48,7 @@ class EstudianteDocumentoController extends Controller
             'matricula.grupo.modulo',
             'matricula.grupo.especialidad.especialidadMadre',
             'matricula.grupo.periodo',
-        ])->where('id', $codigo)->first();
+        ])->where('id_matricula', $codigo)->first();
 
         if (!$documento) {
             return response()->json([

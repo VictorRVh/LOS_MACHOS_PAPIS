@@ -312,7 +312,7 @@ const {
           <p class="mt-1 text-sm text-gray-500">Intenta con otro periodo.</p>
         </div>
 
-        <div class="mt-4 md:mt-0 flex items-center gap-3">
+        <!-- <div class="mt-4 md:mt-0 flex items-center gap-3">
           <Button class="bg-cetpro hover:bg-cetpro-dark text-white px-4 py-2 rounded-lg text-sm shadow"
             @click="generarReporte">
             Generar reporte
@@ -324,7 +324,7 @@ const {
             @click="generarReporteActa()">
             Generar reporte
           </Button>
-        </div>
+        </div> -->
 
       </div>
 

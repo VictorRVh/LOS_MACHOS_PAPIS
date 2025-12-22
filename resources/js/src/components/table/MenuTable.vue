@@ -21,7 +21,8 @@ const defaultLabels = {
   view: "Ver",
   edit: "Editar",
   delete: "Eliminar",
-  download: "Descargar",
+  download: "Descargar Nomina",
+  report: "Descargar Acta",
   custom1: "Acción personalizada",
   deactivate: "Desactivar",
 };
@@ -36,6 +37,7 @@ const emit = defineEmits([
   "edit",
   "delete",
   "download",
+  "report",
   "custom1",
   "deactivate",
 ]);
@@ -105,72 +107,54 @@ onBeforeUnmount(() =>
 <template>
   <!-- ⭐ la celda PONE relative aquí ⭐ -->
   <div class="relative inline-block text-left">
-    <button
-      ref="buttonRef"
-      @click="toggleMenu"
-      class="text-xl text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-    >
+    <button ref="buttonRef" @click="toggleMenu"
+      class="text-xl text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
       <EllipsisVerticalIcon class="h-5 w-5" />
     </button>
 
-    <div
-      v-if="isOpen"
-      ref="menuRef"
-      :style="menuStyles"
-      class="absolute w-[190px] bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-gray-300 dark:ring-gray-700 py-1 text-sm"
-    >
-      <button
-        v-if="actions.view"
-        @click="emitAndClose('view')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
-      >
+    <div v-if="isOpen" ref="menuRef" :style="menuStyles"
+      class="absolute w-[190px] bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-gray-300 dark:ring-gray-700 py-1 text-sm">
+      <button v-if="actions.view" @click="emitAndClose('view')"
+        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
         <EyeIcon class="w-4 h-4" /> {{ mergedLabels.view }} {{ entityLabel }}
       </button>
 
-      <button
-        v-if="actions.edit"
-        @click="emitAndClose('edit')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
-      >
+      <button v-if="actions.edit" @click="emitAndClose('edit')"
+        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
         <PencilSquareIcon class="w-4 h-4" /> {{ mergedLabels.edit }}
         {{ entityLabel }}
       </button>
 
-      <button
-        v-if="actions.custom1"
-        @click="emitAndClose('custom1')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
-      >
+      <button v-if="actions.custom1" @click="emitAndClose('custom1')"
+        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
         <CalendarDaysIcon class="w-4 h-4" /> {{ mergedLabels.custom1 }}
       </button>
 
-      <hr v-if="actions.view || actions.edit || actions.custom1 " class="my-1 mx-2 border-gray-300" />
+      <hr v-if="actions.view || actions.edit || actions.custom1" class="my-1 mx-2 border-gray-300" />
 
-      <button
-        v-if="actions.deactivate"
-        @click="emitAndClose('deactivate')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
-      >
+      <button v-if="actions.deactivate" @click="emitAndClose('deactivate')"
+        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
         <ExclamationTriangleIcon class="w-4 h-4" /> {{ mergedLabels.deactivate }}
         {{ entityLabel }}
       </button>
 
-      <button
-        v-if="actions.delete"
-        @click="emitAndClose('delete')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
-      >
+      <button v-if="actions.delete" @click="emitAndClose('delete')"
+        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
         <TrashIcon class="w-4 h-4" /> {{ mergedLabels.delete }} {{ entityLabel }}
       </button>
 
-      <button
-        v-if="actions.download"
-        @click="emitAndClose('download')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
-      >
+      <button v-if="actions.download" @click="emitAndClose('download')"
+        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
         <ArrowDownTrayIcon class="w-4 h-4" /> {{ mergedLabels.download }}
         {{ entityLabel }}
       </button>
+
+      <button v-if="actions.report" @click="emitAndClose('report')"
+        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
+        <ArrowDownTrayIcon class="w-4 h-4" />
+        {{ mergedLabels.report }} {{ entityLabel }}
+      </button>
+
     </div>
   </div>
 </template>

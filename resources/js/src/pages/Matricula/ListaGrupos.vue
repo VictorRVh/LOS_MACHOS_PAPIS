@@ -79,6 +79,36 @@ const descargarNomina = async (idGrupo) => {
   }
 };
 
+const descargarActa = async (idAdmin) => {
+  try {
+    // const idAdmin = '2946189c-883f-40f6-91e6-bee16fba575d';
+
+    const response = await axios.get(
+      `/reporte-acta-evaluacion/${idAdmin}`,
+      { responseType: 'blob' }
+    );
+
+    const url = window.URL.createObjectURL(
+      new Blob([response.data])
+    );
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Acta_Evaluacion_${new Date()
+      .toISOString()
+      .slice(0, 10)}.xlsx`;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+  } catch (error) {
+    console.error('Error:', error);
+    showToast("Ocurrió un error al generar el reporte.", "error");
+  }
+};
+
 const toggleEspecialidad = (especialidadNombre) => {
   const newSet = new Set(openEspecialidades.value);
   newSet.has(especialidadNombre) ? newSet.delete(especialidadNombre) : newSet.add(especialidadNombre);
@@ -180,9 +210,9 @@ const gruposAgrupados = computed(() => {
                 <td class="text-center border-b border-gray-300 dark:border-gray-700 text-green-700 font-semibold py-3">
                   {{ grupo.cantidad_estudiantes }}</td>
                 <td class="text-center border-b border-gray-300 dark:border-gray-700 py-3">
-                  <MenuTable :actions="{ view: true, download: true }"
-                    :labels="{ view: 'Ver Alumnos', download: 'Descargar Nomina' }" @view="verMatriculados(grupo)"
-                    @download="descargarNomina(grupo.id)" />
+                  <MenuTable :actions="{ view: true, download: true, report: true }"
+                    :labels="{ view: 'Ver Alumnos', download: 'Descargar Nomina', report: 'Descargar Acta/Evaluación' }" @view="verMatriculados(grupo)"
+                    @download="descargarNomina(grupo.id)" @report="descargarActa(grupo.id)"/>
                 </td>
               </tr>
             </template>

@@ -22,7 +22,7 @@ class ReporteActaEvaluacionExport
     public function build(): Spreadsheet
     {
         $spreadsheet = IOFactory::load(
-            storage_path('app/templates/ACTA-EVALUACION.xlsx')
+            storage_path('app/templates/ACTA-EVALUACION-ULTIMA.xlsx')
         );
 
         $grupo = Grupo::with([
@@ -51,29 +51,30 @@ class ReporteActaEvaluacionExport
             ->get();
 
 
-        $this->llenarDatosGenerales($spreadsheet, $grupo);
+        // $this->llenarDatosGenerales($spreadsheet, $grupo);
         $this->llenarDatosGeneralesActa($spreadsheet, $grupo);
-        $this->llenarTitulosCapacidades($spreadsheet, $capacidades);
+        $this->llenarTitulosCapacidadesCaras($spreadsheet, $capacidades);
+        $this->llenarTitulosCapacidadesReves($spreadsheet, $capacidades);
         $this->llenarModuloDocenteReves($spreadsheet, $grupo);
-        $this->llenarNomina($spreadsheet, $matriculas);
+        // $this->llenarNomina($spreadsheet, $matriculas);
         $this->llenarNotas($spreadsheet, $matriculas, $capacidades);
 
         return $spreadsheet;
     }
 
-    private function llenarDatosGenerales(Spreadsheet $spreadsheet, $grupo): void
-    {
-        $sheet = $spreadsheet->getSheetByName('DATOS');
+    // private function llenarDatosGenerales(Spreadsheet $spreadsheet, $grupo): void
+    // {
+    //     $sheet = $spreadsheet->getSheetByName('DATOS');
 
-        $sheet->setCellValue('R10', $grupo->especialidad->especialidadMadre->nombre_especialidad);
-        // $sheet->setCellValue('C6', $grupo->programaEstudio->numero_rd);
-        $sheet->setCellValue('E11', $grupo->modulo->descripcion);
-        // $sheet->setCellValue('C8', $grupo->periodo->nombre_periodo);
-        $sheet->setCellValue('H12', $grupo->fecha_inicio);
-        $sheet->setCellValue('R12', $grupo->fecha_fin);
-        $sheet->setCellValue('AB12', $grupo->turno);
-        $sheet->setCellValue('AK12', $grupo->seccion);
-    }
+    //     $sheet->setCellValue('R10', $grupo->especialidad->especialidadMadre->nombre_especialidad);
+    //     // $sheet->setCellValue('C6', $grupo->programaEstudio->numero_rd);
+    //     $sheet->setCellValue('E11', $grupo->modulo->descripcion);
+    //     // $sheet->setCellValue('C8', $grupo->periodo->nombre_periodo);
+    //     $sheet->setCellValue('H12', $grupo->fecha_inicio);
+    //     $sheet->setCellValue('R12', $grupo->fecha_fin);
+    //     $sheet->setCellValue('AB12', $grupo->turno);
+    //     $sheet->setCellValue('AK12', $grupo->seccion);
+    // }
 
     private function llenarDatosGeneralesActa(
         Spreadsheet $spreadsheet,
@@ -94,7 +95,7 @@ class ReporteActaEvaluacionExport
             // FORMATEO DE FECHAS
             // =============================
             $fechaInicio = $grupo->fecha_inicio
-                ? Carbon::parse($grupo->fecha_inicio)->format('d/m/Y')
+                ? Carbon::parse($grupo->fecha_inicio)   ->format('d/m/Y')
                 : '';
 
             $fechaFin = $grupo->fecha_fin
@@ -153,32 +154,32 @@ class ReporteActaEvaluacionExport
         }
     }
 
-    private function llenarNomina(Spreadsheet $spreadsheet, $matriculas): void
-    {
-        $sheet = $spreadsheet->getSheetByName('NOMINA');
+    // private function llenarNomina(Spreadsheet $spreadsheet, $matriculas): void
+    // {
+    //     $sheet = $spreadsheet->getSheetByName('NOMINA');
 
-        $filaInicio = 15;
+    //     $filaInicio = 15;
 
-        foreach ($matriculas as $i => $matricula) {
+    //     foreach ($matriculas as $i => $matricula) {
 
-            $fila = $filaInicio + $i;
-            $est = $matricula->estudiante;
+    //         $fila = $filaInicio + $i;
+    //         $est = $matricula->estudiante;
 
-            // $sheet->setCellValue("B{$fila}", $i + 1);
-            // $sheet->setCellValue("B{$fila}", $est->nro_documento);
-            $this->escribirDocumentoPorDigitos(
-                $sheet,
-                $est->nro_documento,
-                'B',
-                $fila
-            );
+    //         // $sheet->setCellValue("B{$fila}", $i + 1);
+    //         // $sheet->setCellValue("B{$fila}", $est->nro_documento);
+    //         $this->escribirDocumentoPorDigitos(
+    //             $sheet,
+    //             $est->nro_documento,
+    //             'B',
+    //             $fila
+    //         );
 
-            $sheet->setCellValue(
-                "O{$fila}",
-                "{$est->apellido_paterno} {$est->apellido_materno}, {$est->nombre}"
-            );
-        }
-    }
+    //         $sheet->setCellValue(
+    //             "O{$fila}",
+    //             "{$est->apellido_paterno} {$est->apellido_materno}, {$est->nombre}"
+    //         );
+    //     }
+    // }
 
     private function llenarModuloDocenteReves(Spreadsheet $spreadsheet, $grupo): void
     {
@@ -192,16 +193,18 @@ class ReporteActaEvaluacionExport
             $sheet->setCellValue('B32', $grupo->modulo?->descripcion ?? '');
 
             // Docente
-            $docenteNombre = $grupo->docente?->nombre ?? '';
-            $docenteApellido = $grupo->docente?->apellido ?? '';
-            $sheet->setCellValue('X32', trim("$docenteNombre $docenteApellido"));
+            $docenteNombre = $grupo->docente?->user->name ?? '';
+            $docenteApellidoPaterno = $grupo->docente?->user->apellido_paterno ?? '';
+            $docenteApellidoMaterno = $grupo->docente?->user->apellido_materno ?? '';
+            $sheet->setCellValue('X32', trim("$docenteNombre $docenteApellidoPaterno $docenteApellidoMaterno"));
+            $sheet->setCellValue('U42', trim("Prof. $docenteNombre $docenteApellidoPaterno $docenteApellidoMaterno"));
 
             // Fecha actual
             $sheet->setCellValue('C41', Carbon::now()->format('d/m/Y'));
         }
     }
 
-    private function llenarTitulosCapacidades(
+    private function llenarTitulosCapacidadesCaras(
         Spreadsheet $spreadsheet,
         $capacidades
     ): void {
@@ -209,6 +212,34 @@ class ReporteActaEvaluacionExport
         $hojas = ['CARA1', 'CARA2'];
         $filaTitulo = 7;
         $colInicio = 'R';
+
+        foreach ($hojas as $nombreHoja) {
+
+            $sheet = $spreadsheet->getSheetByName($nombreHoja);
+            $colIndex = Coordinate::columnIndexFromString($colInicio);
+
+            foreach ($capacidades as $i => $capacidad) {
+
+                if ($i >= 10) break; // máximo 10 capacidades
+
+                $col = Coordinate::stringFromColumnIndex($colIndex + $i);
+
+                $sheet->setCellValue(
+                    "{$col}{$filaTitulo}",
+                    $capacidad->nombre_capacidad
+                );
+            }
+        }
+    }
+
+    private function llenarTitulosCapacidadesReves(
+        Spreadsheet $spreadsheet,
+        $capacidades
+    ): void {
+
+        $hojas = ['REVES1', 'REVES2'];
+        $filaTitulo = 6;
+        $colInicio = 'Y';
 
         foreach ($hojas as $nombreHoja) {
 

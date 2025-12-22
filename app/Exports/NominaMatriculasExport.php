@@ -20,7 +20,7 @@ class NominaMatriculasExport
     public function build(): Spreadsheet
     {
         // 1. Cargar plantilla
-        $spreadsheet = IOFactory::load(storage_path('php artisan storage:linkapp/templates/nomina_matricula_tres.xlsx'));
+        $spreadsheet = IOFactory::load(storage_path('app/templates/nomina_matricula_tres.xlsx'));
         $sheet = $spreadsheet->getActiveSheet();
 
         // 2. Obtener datos

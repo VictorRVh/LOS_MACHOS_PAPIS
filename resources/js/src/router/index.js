@@ -71,7 +71,12 @@ router.beforeEach(async (to, from, next) => {
         breadcrumbStore.setBase(uniqueCrumbs);
     }
 
-    
+
+    // ✅ AQUÍ ESTÁ LA CLAVE
+    if (to.meta?.public) {
+        return next(); // 🔓 NO auth, NO verify, NO token
+    }
+
     const { isUserAuthenticated } = useAuth();
     if (from.name === to?.name) {
         return next();

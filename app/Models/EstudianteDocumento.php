@@ -17,7 +17,7 @@ class EstudianteDocumento extends Model
 
     protected $fillable = [
         'id',
-        'id_estudiante',
+        'id_matricula',
         'tipo_documento',
         'fecha_emision',
         'id_autor',
@@ -38,9 +38,9 @@ class EstudianteDocumento extends Model
         });
     }
 
-    public function estudiante()
+    public function matricula()
     {
-        return $this->belongsTo(Estudiante::class, 'id_estudiante');
+        return $this->belongsTo(Matricula::class, 'id_matricula');
     }
 
     public function autor()

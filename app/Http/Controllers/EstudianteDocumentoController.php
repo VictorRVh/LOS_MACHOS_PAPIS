@@ -22,20 +22,21 @@ class EstudianteDocumentoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_estudiante' => 'required|uuid|exists:estudiante,id',
+            'id_matricula' => 'required|uuid|exists:matricula,id',
             'tipo_documento' => 'required|integer',
-            'fecha_emision' => 'required|date',
+            'fecha_emision' => 'nullable|date',
         ]);
 
         $documento = EstudianteDocumento::create([
-            'id_estudiante' => $request->id_estudiante,
+            'id_matricula' => $request->id_estudiante,
             'tipo_documento' => $request->tipo_documento,
             'fecha_emision' => $request->fecha_emision,
             'id_autor' => auth()->id()
         ]);
 
         return response()->json([
-            'message' => 'Documento registrado correctamente',
+            // 'message' => 'Documento generado correctamente',
+            'success' => 'true',
             // 'data' => $documento,
         ], 201);
     }

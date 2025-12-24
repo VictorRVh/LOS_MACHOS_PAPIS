@@ -123,4 +123,22 @@ class ReporteController extends Controller
             'Content-Disposition' => "attachment; filename=\"$fileName\"",
         ]);
     }
+    
+    public function consolidadoExcel($idGrupo)
+    {
+        $export = new \App\Exports\ReporteConsolidadoNotasExport($idGrupo);
+        $spreadsheet = $export->build();
+
+        $writer = new Xlsx($spreadsheet);
+
+        $fileName = "consolidado_{$idGrupo}.xlsx";
+
+        // Descargar como respuesta HTTP
+        return new StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=\"$fileName\"",
+        ]);
+    }
 }

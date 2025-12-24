@@ -23,6 +23,7 @@ const defaultLabels = {
   delete: "Eliminar",
   download: "Descargar Nomina",
   report: "Descargar Acta",
+  reportConsol: "Descargar Consolidad",
   custom1: "Acción personalizada",
   deactivate: "Desactivar",
 };
@@ -38,6 +39,7 @@ const emit = defineEmits([
   "delete",
   "download",
   "report",
+  "reportConsol",
   "custom1",
   "deactivate",
 ]);
@@ -143,17 +145,24 @@ onBeforeUnmount(() =>
         <TrashIcon class="w-4 h-4" /> {{ mergedLabels.delete }} {{ entityLabel }}
       </button>
 
-      <button v-if="actions.download" @click="emitAndClose('download')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
-        <ArrowDownTrayIcon class="w-4 h-4" /> {{ mergedLabels.download }}
-        {{ entityLabel }}
-      </button>
-
       <button v-if="actions.report" @click="emitAndClose('report')"
         class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
         <ArrowDownTrayIcon class="w-4 h-4" />
         {{ mergedLabels.report }} {{ entityLabel }}
       </button>
+
+      <button v-if="actions.download" @click="emitAndClose('download')"
+        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
+        <ArrowDownTrayIcon class="w-4 h-4" />
+        {{ mergedLabels.download }} {{ entityLabel }}
+      </button>
+
+      <button v-if="actions.reportConsol" @click="emitAndClose('reportConsol')"
+        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
+        <ArrowDownTrayIcon class="w-4 h-4" />
+        {{ mergedLabels.reportConsol }} {{ entityLabel }}
+      </button>
+
 
     </div>
   </div>

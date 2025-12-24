@@ -209,8 +209,8 @@ const schema = yup.object({
 
   fecha_entrega_acta: yup
     .date()
-    .required("La fecha de entrega del acta es obligatoria")
-    .min(yup.ref("fecha_fin"), "La entrega del acta debe ser después de la fecha de fin"),
+    .required("La fecha de entrega del acta es obligatoria"),
+    // .min(yup.ref("fecha_fin"), "La entrega del acta debe ser después de la fecha de fin"),
   seccion: yup
     .string()
     .required("La sección es obligatoria")

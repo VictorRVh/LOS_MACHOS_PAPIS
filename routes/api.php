@@ -1154,6 +1154,11 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\ReporteController::class,
         'actaEvaluacionExcel',
     ])->middleware('permission:ver-ciclo-programa');
+    
+    Route::get('/reporte-consolidado/{idGrupo}', [
+        \App\Http\Controllers\ReporteController::class,
+        'consolidadoExcel',
+    ])->middleware('permission:ver-ciclo-programa');
 });
 
 Route::get('reportes/nomina/grupo/{idGrupo}', [

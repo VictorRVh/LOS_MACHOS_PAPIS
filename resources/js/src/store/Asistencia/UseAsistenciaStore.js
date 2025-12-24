@@ -6,8 +6,8 @@ import useHttpRequest from '../../composables/useHttpRequest';
 const useAsistenciaStore = defineStore('Asistencia', () => {
     const {
         //index: getAsistencia,
-        // show : getAsistencia,
-        // loading: asistenciaLoading,
+        show: getAsistenciaAlumnos,
+        loading: asistenciaAlumnosLoading,
         // initialLoading: AsistenciaFirstTimeLoading,
     } = useHttpRequest('/asistencia');
 
@@ -19,16 +19,25 @@ const useAsistenciaStore = defineStore('Asistencia', () => {
     } = useHttpRequest('/sesiones_asistencia');
 
     const sesionesPorEntrega = ref([]);
+    const asistenciaEstudents = ref([]);
 
     const loadSesionesEntrega = async (idEntrega) => {
         const res = await getSesionesEntrega(idEntrega);
         sesionesPorEntrega.value = res;
     };
+    const loadAsistenciaEstudents = async (idGrupo) => {
+        const res = await getAsistenciaAlumnos(idGrupo);
+        asistenciaEstudents.value = res;
+    };
+
 
     return {
         loadSesionesEntrega,
+        loadAsistenciaEstudents,
         sesionesPorEntrega,
         asistenciaLoading,
+        asistenciaEstudents,
+        asistenciaAlumnosLoading,
         asistenciaFirstTimeLoading
 
     };

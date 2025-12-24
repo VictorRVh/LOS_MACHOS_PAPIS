@@ -273,4 +273,12 @@ class AsistenciaController extends Controller
                 : 'No se encontró una sesión para la fecha actual, mostrando datos del grupo.'
         ]);
     }
+
+    public function listAsistenciaEstudiantes($idGrupo)
+    {
+
+        return response()->json([
+           'mundo' => "espera s"
+        ]);
+    }
 }

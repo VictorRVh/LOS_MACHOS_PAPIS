@@ -88,12 +88,12 @@ export async function generateConstanciaEstudiante(data) {
 
     doc.setFont("times", "normal");
     const parrafoLegal = `Al amparo de la Ley N° 28044 (Ley General de Educación), su Reglamento D.S. N° 011-2012-ED y la R.V.M. N° 188-2020-MINEDU; se certifica la situación académica del siguiente administrado, según consta en los folios de matrícula de nuestra institución:`;
-    
+
     const splitLegal = doc.splitTextToSize(parrafoLegal, contentWidth);
     doc.text(splitLegal, marginL, 110, { align: "justify", maxWidth: contentWidth });
 
     // --- DATOS DEL ESTUDIANTE ---
-    let cursorY = 132; 
+    let cursorY = 132;
     const lineHeight = 8;
 
     doc.text("El/la estudiante:", marginL, cursorY);
@@ -111,9 +111,9 @@ export async function generateConstanciaEstudiante(data) {
     doc.text("Se encuentra con MATRÍCULA VIGENTE, cursando el programa de:", marginL, cursorY);
 
     // --- 4. TABLA TÉCNICA ---
-    const tabY = cursorY + 14; 
+    const tabY = cursorY + 14;
     const tabX = marginL + 15;
-    
+
     doc.setFont("times", "bold");
     doc.text("PROGRAMA DE ESTUDIOS :", tabX, tabY);
     doc.text("MÓDULO FORMATIVO        :", tabX, tabY + 8);
@@ -126,7 +126,7 @@ export async function generateConstanciaEstudiante(data) {
 
     // --- 5. CIERRE Y FECHA (CORREGIDO PARA NO CHOCAR) ---
     // Subimos el texto final un poco más cerca de la tabla
-    const cierreY = tabY + 30; 
+    const cierreY = tabY + 30;
     const textoFinal = "Se expide la presente a solicitud de la parte interesada para los fines que estime conveniente.";
     doc.text(textoFinal, marginL, cierreY);
 
@@ -134,7 +134,7 @@ export async function generateConstanciaEstudiante(data) {
     const hoy = new Date();
     const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
     const fechaTexto = `Puno, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
-    
+
     doc.setFont("times", "bold");
     // Colocamos la fecha 10mm debajo del texto de cierre
     doc.text(fechaTexto, pageWidth - marginR, cierreY + 10, { align: "right" });
@@ -145,7 +145,11 @@ export async function generateConstanciaEstudiante(data) {
     const zonaFirmaY = 225; // Bajamos la firma y el QR a la zona inferior
 
     // --- QR CON MARCO ---
-    const qrUrl = `http://127.0.0.1:8000/verificarCertificado/${data.id_matricula}`;
+    // const qrUrl = `http://127.0.0.1:8000/verificarCertificado/${data.id_matricula}`;
+
+    const qrUrl =
+      `https://choclon.com/verificarCertificado/${data?.id_matricula}`;
+
     const qrBase64 = await QRCode.toDataURL(qrUrl, {
       width: 300,
       margin: 1,
@@ -156,25 +160,25 @@ export async function generateConstanciaEstudiante(data) {
     const padding = 3; // Margen interno del cuadro
     const qrX = pageWidth - marginR - qrSize - padding;
     // Alineamos el cuadro del QR para que su centro vertical coincida aprox con la firma
-    const qrY = zonaFirmaY - 15; 
+    const qrY = zonaFirmaY - 15;
 
     // Dibujamos el Marco del QR
     doc.setLineWidth(0.3);
     doc.setDrawColor(0);
-    doc.rect(qrX - padding, qrY - padding, qrSize + (padding*2), qrSize + (padding*2) + 5);
+    doc.rect(qrX - padding, qrY - padding, qrSize + (padding * 2), qrSize + (padding * 2) + 5);
 
     // Imagen QR
     doc.addImage(qrBase64, "PNG", qrX, qrY, qrSize, qrSize);
-    
+
     // Texto QR
     doc.setFontSize(6);
-    doc.text("Verificación QR", qrX + (qrSize/2), qrY + qrSize + 4, { align: "center" });
+    doc.text("Verificación QR", qrX + (qrSize / 2), qrY + qrSize + 4, { align: "center" });
 
     // --- FIRMA CENTRAL ---
     doc.setLineWidth(0.6);
     // La línea de firma alineada visualmente con el QR
-    doc.line(75, zonaFirmaY, 135, zonaFirmaY); 
-    
+    doc.line(75, zonaFirmaY, 135, zonaFirmaY);
+
     doc.setFontSize(11);
     doc.setFont("times", "bold");
     doc.text("DIRECCIÓN GENERAL", pageWidth / 2, zonaFirmaY + 5, { align: "center" });

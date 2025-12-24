@@ -123,6 +123,11 @@ class Grupo extends Model
     {
         return $this->hasMany(NotaCapacidadTerminal::class, 'id_grupo');
     }
+    
+    public function capacidadTerminal()
+    {
+        return $this->hasMany(CapacidadTerminal::class, 'id_grupo');
+    }
 
     public function notaExperienciaFormativa()
     {

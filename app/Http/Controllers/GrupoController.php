@@ -78,7 +78,7 @@ class GrupoController extends Controller
             'id_convenio'         => 'nullable|uuid|exists:convenios,id',
             'fecha_inicio'        => 'required|date',
             'fecha_fin'           => 'required|date|after_or_equal:fecha_inicio',
-            'fecha_entrega_acta'  => 'nullable|date|after:fecha_fin',
+            'fecha_entrega_acta'  => 'nullable|date',
             'seccion'             => 'required|string|max:10',
             'turno'               => 'required|string|max:10',
             'id_docente'          => 'nullable',

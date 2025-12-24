@@ -76,7 +76,7 @@ class PeriodoController extends Controller
             ]);
 
             // 2️⃣ Carpeta madre fija en Google Drive
-            $parentFolderId = '0AJvk3zt0rp4dUk9PVA'; 
+            $parentFolderId = '0AJvk3zt0rp4dUk9PVA';
 
             $driveController = new GoogleDriveController();
 
@@ -277,13 +277,10 @@ class PeriodoController extends Controller
 
     public function getPeriodosFiltrados($anio)
     {
-        return DB::table('grupo')
-            ->join('periodo', 'periodo.id', '=', 'grupo.id_periodo')
-            ->join('programa_estudio', 'programa_estudio.id', '=', 'grupo.id_programa')
-            ->where('programa_estudio.año', $anio)
-            ->select('periodo.id', 'periodo.nombre_periodo')
-            ->distinct()
-            ->get();
+        return DB::table('periodo')
+            ->where('is_deleted', 0)
+            ->where('nombre_periodo', 'like', $anio . '-%')
+            ->orderBy('nombre_periodo')
+            ->get(['id', 'nombre_periodo']);
     }
-    
 }

@@ -831,7 +831,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('asistencia', [
         \App\Http\Controllers\AsistenciaController::class,
         'store',
-    ])->middleware('permission:ver-grupos|ver-mis-modulos|todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:ver-grupos|ver-mis-modulos|todo-acceso-mis-modulos');
+
+    Route::get('asistencia/{idGrupo}', [
+        \App\Http\Controllers\AsistenciaController::class,
+        'listAsistenciaEstudiantes',
+    ])->middleware('permission:ver-grupos|ver-mis-modulos|todo-acceso-mis-modulos');
 
     Route::patch('asistencia/{id}', [
         \App\Http\Controllers\AsistenciaController::class,

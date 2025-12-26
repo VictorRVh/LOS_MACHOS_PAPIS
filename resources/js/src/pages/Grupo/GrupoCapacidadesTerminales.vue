@@ -108,7 +108,7 @@ const reactivarNota = async (capacidad) => {
             <Th>Nombre Capacidad</Th>
             <Th>Fecha Inicio</Th>
             <Th>Fecha Fin</Th>
-            <Th>¿Aplazar?</Th>
+            <Th>Acciones</Th>
           </THead>
 
           <TBody>

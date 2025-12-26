@@ -37,9 +37,19 @@ const capacidadSeleccionada = ref(null);
 const estadoCapacidad = ref(null);
 
 // --- Carga inicial ---
-if (!userStore.estudiantes?.length) await userStore.loadEstudiantes(props.id);
-if (!capacidadStore?.capacidadTerminal?.capacidades?.length)
-  await capacidadStore.loadCapacidadTerminal(props.id);
+watch(
+  () => props.id,
+  async (id) => {
+    if (!id) return;
+
+    if (capacidadStore.grupoActual !== id) {
+      await capacidadStore.loadCapacidadTerminal(id);
+    }
+
+    await userStore.loadEstudiantes(id);
+  },
+  { immediate: true }
+);
 
 // --- Reactividad ---
 const { estudiantes } = storeToRefs(userStore);
@@ -306,7 +316,8 @@ const getEstadoCapacidadClass = computed(() => {
 
     <!-- Slider -->
     <NotasEstudianteSlider v-if="slider" :show="slider" :idgroup="props.id" :id-capacidad-note="capacidadSeleccionada"
-      :idType="'capacidad'" :estado-capacidad="estadoCapacidad" :alumnos-notas="estudiantesNormalizados" @hide="onHideSlider" />
+      :idType="'capacidad'" :estado-capacidad="estadoCapacidad" :alumnos-notas="estudiantesNormalizados"
+      @hide="onHideSlider" />
   </AuthorizationFallback>
 </template>
 

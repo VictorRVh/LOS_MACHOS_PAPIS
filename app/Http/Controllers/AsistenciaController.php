@@ -296,17 +296,23 @@ class AsistenciaController extends Controller
             ->first();
 
         // ======================================================
-        // 2) ASISTENCIAS
+        // 2) ASISTENCIAS (ACTIVOS Y RETIRADOS)
         // ======================================================
         $registros = DB::table('asistencia as a')
-            ->join('estudiante as e', 'e.id', '=', 'a.id_estudiante')
+            ->join('matricula as m', function ($join) use ($idGrupo) {
+                $join->on('m.id_estudiante', '=', 'a.id_estudiante')
+                    ->where('m.id_grupo', '=', $idGrupo);
+            })
+            ->join('estudiante as e', 'e.id', '=', 'm.id_estudiante')
             ->join('calendario_admin as c', 'c.id', '=', 'a.id_calendario')
             ->where('a.id_grupo', $idGrupo)
+            ->whereIn('m.matriculado', [1, 2]) // ✅ 1 = ACTIVO, 2 = RETIRADO
             ->select(
                 'a.id_estudiante',
                 'a.fecha_actual',
                 'a.asistencia',
                 'a.observacion',
+                'm.matriculado as estado_matricula',
                 DB::raw("CONCAT(e.apellido_paterno,' ',e.apellido_materno,' ',e.nombre) as nombre_completo")
             )
             ->orderBy('nombre_completo', 'asc')
@@ -335,9 +341,10 @@ class AsistenciaController extends Controller
                 }
 
                 return [
-                    'id_estudiante' => $items->first()->id_estudiante,
-                    'nombre_completo' => $items->first()->nombre_completo,
-                    'asistencias' => $asistencias
+                    'id_estudiante'     => $items->first()->id_estudiante,
+                    'nombre_completo'   => $items->first()->nombre_completo,
+                    'estado_matricula'  => $items->first()->estado_matricula,
+                    'asistencias'       => $asistencias
                 ];
             })
             ->values();

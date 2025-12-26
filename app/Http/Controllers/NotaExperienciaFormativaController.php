@@ -62,7 +62,7 @@ class NotaExperienciaFormativaController extends Controller
                 'documento'      => $fileData->id,
                 'id_estudiante'  => $request->id_estudiante,
                 'id_grupo'       => $request->id_grupo,
-                'observacion'       => $request->observacion,
+                'observacion'    => $request->input('observacion', ''),
                 'status'         => 1,
             ]);
 

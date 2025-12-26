@@ -109,7 +109,7 @@ const existeExperiencia = computed(() => {
 const formData = ref({
     tipo_practicas: null,
     documento: null,
-    observacion: ""
+    // observacion: ""
 });
 
 function abrirModal(alumno) {
@@ -189,7 +189,7 @@ async function onSubmit() {
         form.append("id_grupo", props.id);
         form.append("tipo_practicas", formData.value.tipo_practicas);
         form.append("file", formData.value.documento);
-        form.append("observacion", observacion.value || "");
+        // form.append("observacion", observacion.value || "");
         form.append("parentFolderId", idPracticasDrive.value);
 
         await guardarNotaExperienciaFormativa(form);
@@ -317,11 +317,11 @@ async function onSubmit() {
 
                     <FormInputFile v-model="formData.documento" label="Documento (Informe o Evidencia) *" />
 
-                    <label for="observacion"
+                    <!-- <label for="observacion"
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observación
                         General</label>
                     <textarea id="observacion" v-model="formData.observacion" rows="2"
-                        class="w-full text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        class="w-full text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea> -->
 
                     <div v-if="formData.documento" class="mt-3">
                         <div

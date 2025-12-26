@@ -108,7 +108,7 @@ const onSubmit = async () => {
 
         if (response) {
             showToast("Plazo aplicado correctamente.", "success");
-            emit("hide");
+            emit("hided");
 
             await capacidadStore.loadCapacidadTerminal(props.load)
 
@@ -121,7 +121,7 @@ const onSubmit = async () => {
 </script>
 
 <template>
-    <Slider :show="show" :title="modalTitle" @hide="emit('hide')">
+    <Slider :show="show" :title="modalTitle" @hide="emit('hided')">
         <AuthorizationFallback :permissions="['ver-grupos']">
 
             <!-- <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
@@ -130,7 +130,7 @@ const onSubmit = async () => {
             </p> -->
 
             <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                {{ accion === 'rectificar' ? 'Rectificando' : 'Aplazando' }} la capacidad:
+                {{ accion === 'rectificar' ? 'Rectificando' : 'Aplazando' }} la unidad:
                 <span class="font-bold">{{ capacidad.nombre_capacidad }}</span>
             </p>
 

@@ -78,60 +78,96 @@ class NotaCapacidadTerminalController extends Controller
 
     public function index_grupo_alumnos($idGrupo)
     {
-        // Estudiantes matriculados (sin reserva)
+        /* =====================================================
+     * 1. Estudiantes matriculados (sin reserva)
+     * ===================================================== */
         $estudiantes = DB::table('matricula')
             ->join('estudiante', 'matricula.id_estudiante', '=', 'estudiante.id')
             ->where('matricula.id_grupo', $idGrupo)
             ->where(function ($q) {
-                $q->whereNull('matricula.reserva')->orWhere('matricula.reserva', 0);
+                $q->whereNull('matricula.reserva')
+                    ->orWhere('matricula.reserva', 0);
             })
             ->select(
                 'estudiante.id as id_estudiante',
                 'matricula.matriculado',
-                DB::raw("CONCAT(estudiante.apellido_paterno, ' ', estudiante.apellido_materno, ', ', estudiante.nombre) as apellidos_nombres")
+                DB::raw("
+                CONCAT(
+                    estudiante.apellido_paterno, ' ',
+                    estudiante.apellido_materno, ', ',
+                    estudiante.nombre
+                ) as apellidos_nombres
+            ")
             )
             ->orderBy('estudiante.apellido_paterno', 'asc')
             ->get();
 
-        // Capacidades terminales activas
+
+        /* =====================================================
+     * 2. Capacidades (unidades) activas del grupo
+     * ===================================================== */
         $capacidades = DB::table('capacidad_terminal')
             ->where('id_grupo', $idGrupo)
-            ->where('status', 1)
-            ->select('id as id_capacidad', 'numero_capacidad', 'nombre_capacidad')
+            ->select(
+                'id as id_capacidad',
+                'numero_capacidad',
+                'nombre_capacidad',
+                // 'status',
+                // 'status_nota'
+            )
             ->orderBy('numero_capacidad', 'asc')
             ->get();
 
-        // Construir la lista de estudiantes con sus capacidades y notas (si existen)
-        $resultado = $estudiantes->map(function ($est) use ($capacidades, $idGrupo) {
-            $capConNotas = $capacidades->map(function ($cap) use ($est, $idGrupo) {
-                // Buscar si ya existe nota para este estudiante y capacidad
-                $nota = DB::table('nota_capacidad_terminal')
-                    ->where('id_grupo', $idGrupo)
-                    ->where('id_estudiante', $est->id_estudiante)
-                    ->where('id_capacidad', $cap->id_capacidad)
-                    ->select('id', 'nota_capacidad')
-                    ->first();
+
+        /* =====================================================
+     * 3. TODAS las notas del grupo (una sola consulta)
+     * ===================================================== */
+        $notas = DB::table('nota_capacidad_terminal')
+            ->where('id_grupo', $idGrupo)
+            ->select(
+                'id_estudiante',
+                'id_capacidad',
+                'nota_capacidad'
+            )
+            ->get()
+            ->groupBy(function ($n) {
+                return $n->id_estudiante . '-' . $n->id_capacidad;
+            });
+
+
+        /* =====================================================
+     * 4. Construir respuesta final normalizada
+     * ===================================================== */
+        $resultado = $estudiantes->map(function ($est) use ($capacidades, $notas) {
+
+            $capConNotas = $capacidades->map(function ($cap) use ($est, $notas) {
+
+                $key = $est->id_estudiante . '-' . $cap->id_capacidad;
+                $nota = $notas->get($key)?->first();
 
                 return [
-                    'id_capacidad' => $cap->id_capacidad,
+                    'id_capacidad'     => $cap->id_capacidad,
                     'numero_capacidad' => $cap->numero_capacidad,
                     // 'nombre_capacidad' => $cap->nombre_capacidad,
-                    // 'id_nota' => $nota->id ?? null,
-                    'nota_capacidad' => $nota->nota_capacidad ?? null,
+                    'nota_capacidad'   => $nota->nota_capacidad ?? null,
                 ];
             });
 
             return [
-                'id_estudiante' => $est->id_estudiante,
-                'apellidos_nombres' => $est->apellidos_nombres,
-                'matriculado' => $est->matriculado,
-                'capacidades' => $capConNotas
+                'id_estudiante'      => $est->id_estudiante,
+                'apellidos_nombres'  => $est->apellidos_nombres,
+                'matriculado'        => $est->matriculado,
+                'capacidades'        => $capConNotas,
             ];
         });
 
-        // Respuesta final
+
+        /* =====================================================
+     * 5. Response
+     * ===================================================== */
         return response()->json($resultado);
     }
+
 
 
     // GET /api/nota-capacidad-terminal/{id}
@@ -194,7 +230,7 @@ class NotaCapacidadTerminalController extends Controller
             }
 
             $capacidad->status_nota = 1;
-            $capacidad->save(); 
+            $capacidad->save();
 
             DB::commit();
 

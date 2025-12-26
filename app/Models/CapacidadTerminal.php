@@ -213,7 +213,8 @@ class CapacidadTerminal extends Model
         }
 
         if ($finCap->gt($finGrupo)) {
-            return 'La fecha fin de la capacidad no puede superar la fecha de entrega de acta del grupo.';
+            // Aquí se agrega la fecha de entrega del acta en el mensaje de error
+            return 'La fecha fin de la capacidad no puede superar la fecha de entrega de acta del grupo. La fecha de entrega de acta es: ' . $finGrupo->toDateString();
         }
 
         if ($finCap->lt($inicioCap)) {

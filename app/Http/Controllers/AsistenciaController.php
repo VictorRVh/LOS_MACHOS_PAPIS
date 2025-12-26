@@ -273,4 +273,92 @@ class AsistenciaController extends Controller
                 : 'No se encontró una sesión para la fecha actual, mostrando datos del grupo.'
         ]);
     }
+    public function ListAsistenciaEstudiantes($idGrupo)
+    {
+        // ======================================================
+        // 1) INFO DEL GRUPO
+        // ======================================================
+        $grupo = DB::table('grupo as g')
+            ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
+            ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
+            ->join('modulos as m', 'g.id_modulo', '=', 'm.id')
+            ->leftJoin('docente as d', 'g.id_docente', '=', 'd.id')
+            ->leftJoin('users as u', 'd.user_id', '=', 'u.id')
+            ->where('g.id', $idGrupo)
+            ->select(
+                'g.id',
+                'em.nombre_especialidad as especialidad',
+                'm.descripcion as modulo',
+                'g.seccion',
+                'g.turno',
+                DB::raw("CONCAT(u.apellido_paterno,' ',u.apellido_materno,' ',u.name) as docente")
+            )
+            ->first();
+
+        // ======================================================
+        // 2) ASISTENCIAS
+        // ======================================================
+        $registros = DB::table('asistencia as a')
+            ->join('estudiante as e', 'e.id', '=', 'a.id_estudiante')
+            ->join('calendario_admin as c', 'c.id', '=', 'a.id_calendario')
+            ->where('a.id_grupo', $idGrupo)
+            ->select(
+                'a.id_estudiante',
+                'a.fecha_actual',
+                'a.asistencia',
+                'a.observacion',
+                DB::raw("CONCAT(e.apellido_paterno,' ',e.apellido_materno,' ',e.nombre) as nombre_completo")
+            )
+            ->orderBy('nombre_completo', 'asc')
+            ->orderBy('a.fecha_actual', 'asc')
+            ->get();
+
+        // ======================================================
+        // 3) FECHAS ÚNICAS (COLUMNAS)
+        // ======================================================
+        $fechas = $registros
+            ->pluck('fecha_actual')
+            ->unique()
+            ->values();
+
+        // ======================================================
+        // 4) AGRUPAR POR ESTUDIANTE (FORMATO PARA EXCEL)
+        // ======================================================
+        $historial = $registros
+            ->groupBy('id_estudiante')
+            ->map(function ($items) {
+
+                $asistencias = [];
+
+                foreach ($items as $a) {
+                    $asistencias[$a->fecha_actual] = $a->asistencia;
+                }
+
+                return [
+                    'id_estudiante' => $items->first()->id_estudiante,
+                    'nombre_completo' => $items->first()->nombre_completo,
+                    'asistencias' => $asistencias
+                ];
+            })
+            ->values();
+
+        // ======================================================
+        // 5) RESPUESTA FINAL
+        // ======================================================
+        return response()->json([
+            'id_grupo' => $idGrupo,
+
+            // 🟩 INFO GRUPO
+            'especialidad' => $grupo->especialidad ?? null,
+            'modulo'       => $grupo->modulo ?? null,
+            'seccion'      => $grupo->seccion ?? null,
+            'turno'        => $grupo->turno ?? null,
+            'docente'      => $grupo->docente ?? null,
+
+            // 🟩 ASISTENCIAS
+            'fechas' => $fechas,
+            'asistenciaEstudents' => $historial,
+            'total_estudiantes' => $historial->count()
+        ]);
+    }
 }

@@ -88,15 +88,17 @@ export default function useExportAsistenciaAlumnos() {
             // ======================================================
             // 5) CABECERA (FECHAS)
             // ======================================================
-            const fechasFormateadas = fechas.map(f =>
-                new Date(f).toLocaleDateString("es-PE")
-            );
+            const fechasFormateadas = fechas.map(f => {
+                const [year, month, day] = f.split("-");
+                return `${day}/${month}/${year}`;
+            });
+
 
             worksheet.getRow(rowIndex).values = [
                 "N°",
                 "Alumno",
                 ...fechasFormateadas,
-                "% Asist."
+
             ];
 
             worksheet.getRow(rowIndex).eachCell(cell => {
@@ -125,25 +127,42 @@ export default function useExportAsistenciaAlumnos() {
                 const asistencias = fechas.map(fecha => {
                     const estado = alumno.asistencias?.[fecha] ?? 0;
 
-                    return estado === 1 ? "✔"
-                         : estado === 2 ? "✖"
-                         : estado === 3 ? "T"
-                         : estado === 4 ? "P"
-                         : "";
+                    return estado === 1 ? "P"
+                        : estado === 2 ? "F"
+                            : estado === 3 ? "T"
+                                : estado === 4 ? "E"//permiso
+                                    : "";
                 });
 
-                const total = asistencias.length;
-                const asistio = asistencias.filter(a => a === "✔").length;
-                const porcentaje = total
-                    ? `${Math.round((asistio / total) * 100)}%`
-                    : "0%";
+                // const total = asistencias.length;
+                // const asistio = asistencias.filter(a => a === "P").length;
+                // const porcentaje = total
+                //     ? `${Math.round((asistio / total) * 100)}%`
+                //     : "0%";
 
-                worksheet.addRow([
+                // 👉 Crear fila
+                const row = worksheet.addRow([
                     index + 1,
                     alumno.nombre_completo,
                     ...asistencias,
-                    porcentaje
                 ]);
+
+                // 👉 Si está RETIRADO (estado = 2), pintar toda la fila de rojo
+                if (alumno.estado_matricula === 2) {
+                    row.eachCell((cell) => {
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFFFC7CE' } // rojo claro (estilo Excel)
+                        };
+
+                        cell.font = {
+                            color: { argb: 'FF9C0006' }, // rojo oscuro
+                            bold: true
+                        };
+                    });
+                }
+
             });
 
             // ======================================================

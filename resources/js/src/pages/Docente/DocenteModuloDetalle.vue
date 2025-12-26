@@ -40,7 +40,7 @@ onMounted(async () => {
       await grupoStore.loadInfoGrupo(groupId);
     }
     infoGrupo.value = grupoStore.infoGrupo;
-    breadcrumb.setTextItemAuto(`${infoGrupo?.value?.especialidad} | M: ${infoGrupo?.value?.modulo} | Grupo: ${infoGrupo?.value?.seccion}`, groupId, "grupo", { name: 'grupo.detalle', params: { groupId } });
+    breadcrumb.setTextItemAuto(`${infoGrupo?.value?.especialidad} | M: ${infoGrupo?.value?.modulo} | Grupo: ${infoGrupo?.value?.seccion}`, groupId, "moduloAsignado", { name: 'docente.modulo.detalle', params: { groupId } });
   } catch (error) {
     console.error("Error al cargar la información del grupo:", error);
     errorAlCargar.value = true;

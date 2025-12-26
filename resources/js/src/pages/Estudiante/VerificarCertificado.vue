@@ -111,10 +111,8 @@ onMounted(async () => {
                                     {{ valido ? 'Documento Auténtico' : 'Documento No Válido' }}
                                 </h1>
                                 <p class="mt-2 text-base text-gray-600 dark:text-gray-400">{{ mensaje }}</p>
-
                                 <div v-if="valido" class="mt-8 border-t border-gray-200 pt-6 dark:border-gray-700">
                                     <dl class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 text-left">
-
                                         <div class="sm:col-span-2">
                                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Documento
                                             </dt>

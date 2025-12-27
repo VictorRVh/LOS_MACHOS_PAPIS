@@ -434,53 +434,60 @@ const close = () => emit('hide');
 
           <footer v-if="!isLoadingData && alumnos.length > 0"
             class="p-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-b-lg">
+            <!-- Observación -->
             <div v-if="isEditing" class="mb-4">
-              <label for="observacion"
-                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observación
-                General</label>
+              <label for="observacion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Observación General
+              </label>
               <textarea id="observacion" v-model="observacionGeneral" rows="2"
                 class="w-full text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
             </div>
 
+            <!-- Botones -->
+            <div class="flex items-center justify-between gap-4">
 
+              <!-- LADO IZQUIERDO -->
+              <div class="flex gap-3">
+                <BaseButton title="Historial de asistencia" @click="exportarAlumnosAsistencia(grupoId)"
+                  class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
+                  <template #icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                      stroke="currentColor" class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                  </template>
+                </BaseButton>
+              </div>
 
-            <div class="flex justify-start gap-3">
-              <BaseButton title="Asistencia" @click="exportarAlumnosAsistencia(grupoId)"
-                class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
-                <template #icon>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-                  </svg>
+              <!-- LADO DERECHO -->
+              <div class="flex gap-3 items-center">
+                <Button  :class="'bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer !mt-6 h-10'" title="Cancelar" variant="primary"  @click="isEditing ? isEditing = false : close()" />
 
-                </template>
-              </BaseButton>
-            </div>
+                <Button v-if="haySesion && !isEditing" :disabled="asistenciaYaTomada"
+                  :class="{ 'opacity-50 cursor-not-allowed': asistenciaYaTomada }" :title="asistenciaYaTomada
+                    ? 'La asistencia ya fue registrada hoy'
+                    : 'Tomar Asistencia Hoy'" @click="asistenciaYaTomada ? null : (isEditing = true)">
+                  <template #icon>
+                    <PencilSquareIcon class="w-5 h-5" />
+                  </template>
+                </Button>
 
-            <div class="flex justify-end gap-3">
-              <Button title="Cancelar" variant="secondary" @click="isEditing ? isEditing = false : close()" />
-              <Button v-if="haySesion && !isEditing" :disabled="asistenciaYaTomada"
-                :class="{ 'opacity-50 cursor-not-allowed': YaTomada }"
-                :title="asistenciaYaTomada ? 'La asistencia ya fue registrada hoy' : 'Tomar Asistencia Hoy'"
-                @click="asistenciaYaTomada ? null : (isEditing = true)">
-                <template #icon>
-                  <PencilSquareIcon class="w-5 h-5" />
-                </template>
-              </Button>
+                <p v-else-if="!haySesion" class="text-gray-500 italic">
+                  No hay sesión programada para hoy.
+                </p>
 
+                <Button v-else title="Guardar Asistencias" :loading="isSaving" loading-title="Guardando..."
+                  @click="onSubmit">
+                  <template #icon>
+                    <ClipboardDocumentCheckIcon class="w-5 h-5" />
+                  </template>
+                </Button>
+              </div>
 
-              <p v-else-if="!haySesion" class="text-gray-500 italic pt-2">
-                No hay sesión programada para hoy.
-              </p>
-              <Button v-else title="Guardar Asistencias" :loading="isSaving" loading-title="Guardando..."
-                @click="onSubmit">
-                <template #icon>
-                  <ClipboardDocumentCheckIcon class="w-5 h-5" />
-                </template>
-              </Button>
             </div>
           </footer>
+
         </div>
       </div>
     </Transition>

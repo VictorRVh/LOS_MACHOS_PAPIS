@@ -435,13 +435,7 @@ const close = () => emit('hide');
           <footer v-if="!isLoadingData && alumnos.length > 0"
             class="p-4 flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-b-lg">
             <!-- Observación -->
-            <div v-if="isEditing" class="mb-4">
-              <label for="observacion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Observación General
-              </label>
-              <textarea id="observacion" v-model="observacionGeneral" rows="2"
-                class="w-full text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
-            </div>
+            
 
             <!-- Botones -->
             <div class="flex items-center justify-between gap-4">
@@ -460,30 +454,31 @@ const close = () => emit('hide');
                 </BaseButton>
               </div>
 
-              <!-- LADO DERECHO -->
-              <div class="flex gap-3 items-center">
-                <Button  :class="'bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer !mt-6 h-10'" title="Cancelar" variant="primary"  @click="isEditing ? isEditing = false : close()" />
+               <div class="flex gap-3 items-center">
+              <Button class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10
+           text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12
+           cursor-pointer h-10" title="Cancelar" variant="primary" @click="isEditing ? isEditing = false : close()" />
 
-                <Button v-if="haySesion && !isEditing" :disabled="asistenciaYaTomada"
-                  :class="{ 'opacity-50 cursor-not-allowed': asistenciaYaTomada }" :title="asistenciaYaTomada
-                    ? 'La asistencia ya fue registrada hoy'
-                    : 'Tomar Asistencia Hoy'" @click="asistenciaYaTomada ? null : (isEditing = true)">
-                  <template #icon>
-                    <PencilSquareIcon class="w-5 h-5" />
-                  </template>
-                </Button>
+              <Button v-if="haySesion && !isEditing" :disabled="asistenciaYaTomada"
+                :class="{ 'opacity-50 cursor-not-allowed': asistenciaYaTomada }" :title="asistenciaYaTomada
+                  ? 'La asistencia ya fue registrada hoy'
+                  : 'Tomar Asistencia Hoy'" @click="asistenciaYaTomada ? null : (isEditing = true)">
+                <template #icon>
+                  <PencilSquareIcon class="w-5 h-5" />
+                </template>
+              </Button>
 
-                <p v-else-if="!haySesion" class="text-gray-500 italic">
-                  No hay sesión programada para hoy.
-                </p>
+              <p v-else-if="!haySesion" class="text-gray-500 italic">
+                No hay sesión programada para hoy.
+              </p>
 
-                <Button v-else title="Guardar Asistencias" :loading="isSaving" loading-title="Guardando..."
-                  @click="onSubmit">
-                  <template #icon>
-                    <ClipboardDocumentCheckIcon class="w-5 h-5" />
-                  </template>
-                </Button>
-              </div>
+              <Button v-else title="Guardar Asistencias" :loading="isSaving" loading-title="Guardando..."
+                @click="onSubmit">
+                <template #icon>
+                  <ClipboardDocumentCheckIcon class="w-5 h-5" />
+                </template>
+              </Button>
+            </div>
 
             </div>
           </footer>

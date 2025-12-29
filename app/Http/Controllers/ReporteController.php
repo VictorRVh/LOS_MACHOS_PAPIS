@@ -144,7 +144,7 @@ class ReporteController extends Controller
 
     public function RegistroMatricula_RegistroEvaluacionPorModulo($idGrupo)
     {
-        $export = new \App\Exports\ReporteConsolidadoNotasExport($idGrupo);
+        $export = new \App\Exports\ReporteRegistroMatriculaAndEvaluacionExport($idGrupo);
         $spreadsheet = $export->build();
 
         $writer = new Xlsx($spreadsheet);

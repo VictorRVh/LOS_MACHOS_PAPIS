@@ -12,7 +12,7 @@ import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 import axios from 'axios';
 import Slider from '../../components/ui/Slider.vue';
 import useModalToast from '../../composables/useModalToast';
-import useExportAlumnos from '../../composables/tabla/useAlumnosMatricula.js';  
+import useExportAlumnos from '../../composables/tabla/useAlumnosMatricula.js';
 import BaseButton from "../../components/ui/Button.vue"
 
 import useCertificado from "../../store/Grupo/useCertificadoStore.js"
@@ -99,7 +99,7 @@ const exportar = () => {
 // FUNCIÓN PARA GENERAR LA CONSTANCIA
 const imprimirConstancia = (estudiante) => {
   const dataParaConstancia = {
-    estudiante: `${estudiante.nombre} ${estudiante.apellidos}`,
+    estudiante: ` ${estudiante.nombre} ${estudiante.apellidos}`,
     nro_documento: estudiante.nro_documento,
     especialidad: matriculados.value.especialidad,
     modulo: matriculados.value.modulo,
@@ -114,17 +114,36 @@ const generateSelectedCertificates = async (idMatricula) => {
   try {
     await dataAlumnoCertificado.loadCertificados(idMatricula);
     const data = dataAlumnoCertificado.certificados;
-    
-    if(data) {
-        generateCertificadoModular(data);
+
+    if (data) {
+      generateCertificadoModular(data);
     } else {
-        showToast("No se encontraron datos para el certificado", "warning");
+      showToast("No se encontraron datos para el certificado", "warning");
     }
   } catch (error) {
     console.error(error);
     showToast("Error al generar el certificado modular", "error");
   }
 };
+
+const exportarMatriculaEvaluaciones = async (idGrupo) => {
+  try {
+    const response = await axios.get(
+      `/reportes/registroMatriculaConEvaluaciones/${idGrupo}`,
+      { responseType: "blob" }
+    );
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "Restro de matriculas y evaluaciones.xlsx");
+    document.body.appendChild(link);
+    link.click();
+  } catch (error) {
+    console.error("Error descargando reporte:", error);
+  }
+};
+
+
 </script>
 
 <template>
@@ -133,6 +152,8 @@ const generateSelectedCertificates = async (idMatricula) => {
       <div class="flex justify-end mb-4 gap-6 ml-2">
         <Button title="Descargar nomina" @click="descargarNomina(props.id)" variant="secondary" />
         <Button title="Exporta Alumos" @click="exportar()" variant="secondary" />
+        <Button title="Exporta registro de matrículas y evaluaciones" @click="exportarMatriculaEvaluaciones(props.id)"
+          variant="secondary" />
       </div>
 
       <Table>
@@ -141,10 +162,10 @@ const generateSelectedCertificates = async (idMatricula) => {
           <Th>DNI</Th>
           <Th>Apellidos y Nombres</Th>
           <Th>Sexo</Th>
-          <Th>Fecha de Nacimiento</Th>
+          <Th>F. Nacimiento</Th>
           <Th>Teléfono</Th>
           <Th>Correo Electrónico</Th>
-          <Th>Acciones</Th>
+          <Th class="text-center">Acciones</Th>
         </THead>
 
         <TBody>
@@ -164,8 +185,10 @@ const generateSelectedCertificates = async (idMatricula) => {
                 <BaseButton title="Constancia" @click="imprimirConstancia(estudiante)"
                   class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow">
                   <template #icon>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                      stroke="currentColor" class="size-5">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                     </svg>
                   </template>
                 </BaseButton>
@@ -201,10 +224,12 @@ const generateSelectedCertificates = async (idMatricula) => {
     <Slider :show="showModal" title="Cambiar Grupo" @hide="showModal = false">
       <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
       <div class="mt-4 space-y-3">
-        <p class="text-gray-600 dark:text-gray-300">Estás a punto de mover <strong>{{ estudiantesSeleccionados.length }}</strong> estudiantes.</p>
+        <p class="text-gray-600 dark:text-gray-300">Estás a punto de mover <strong>{{ estudiantesSeleccionados.length
+            }}</strong> estudiantes.</p>
         <div class="flex justify-end gap-2 mt-6">
           <Button title="Cancelar" variant="secondary" @click="showModal = false" />
-          <Button title="Confirmar" variant="primary" :disabled="!nuevoGrupoId || saving" :loading="saving" @click="cambiarGrupo" />
+          <Button title="Confirmar" variant="primary" :disabled="!nuevoGrupoId || saving" :loading="saving"
+            @click="cambiarGrupo" />
         </div>
       </div>
     </Slider>

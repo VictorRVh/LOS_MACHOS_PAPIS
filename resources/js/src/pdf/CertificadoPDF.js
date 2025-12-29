@@ -1,229 +1,219 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-function agregarFondo(doc, imagen) {
-  if (!imagen) return;
-
-  doc.addImage(
-    imagen,
-    "PNG",   // o "JPG"
-    0,
-    0,
-    297,     // ancho A4 horizontal
-    210      // alto A4 horizontal
-  );
-}
-
-
-
-// ===== FUNCIÓN PARA FORMATEAR FECHAS =====
-function formatDateRangeFromSlash(startDate, endDate) {
-  const months = [
-    "enero", "febrero", "marzo", "abril", "mayo", "junio",
-    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-  ];
-
-  const parseDate = (date) => {
-    if (!date) return {};
-    const [year, month, day] = date.split("-").map(Number);
-    return { day, month: months[month - 1], year };
-  };
-
-  const start = parseDate(startDate);
-  const end = parseDate(endDate);
-
-  if (start.year === end.year) {
-    if (start.month === end.month) {
-      return ` ${start.day} al ${end.day} de ${start.month} del ${start.year} `;
-    }
-    return  `${start.day} de ${start.month} al ${end.day} de ${end.month} del ${start.year} `;
-  }
-
-  return ` ${start.day} de ${start.month} del ${start.year} al ${end.day} de ${end.month} del ${end.year} `;
-}
-
-// ===== FUNCIÓN FECHA ACTUAL =====
+// ===== FUNCIÓN FECHA ACTUAL FORMAL =====
 function obtenerFechaActual() {
   const meses = [
     "enero", "febrero", "marzo", "abril", "mayo", "junio",
     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
   ];
-
-  const ciudad = "Puno";
   const fecha = new Date();
-
-  return ` ${ciudad}, ${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()} `;
+  // Formato: "Puno, 22 de diciembre de 2025"
+  return `Puno, ${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
 }
 
-// ===== GENERAR CERTIFICADO =====
+// ===== GENERAR CERTIFICADO (FINAL) =====
 export function generateCertificate(data, certificado) {
-  const doc = new jsPDF("landscape", "mm", "a4");
-
- agregarFondo(doc, "/img/iconosArchivo/fondoCertificado.png");
-
-    console.log("datos; ",certificado)
-  const posY = 20;
-
-  // ===== ENCABEZADO =====
-  doc.setFont("times", "bold");
-  doc.setFontSize(16);
-  doc.text(
-    "CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA PÚBLICO",
-    148.5,
-    posY + 20,
-    { align: "center" }
-  );
-
-  doc.text('"PUNO"', 148.5, posY + 30, { align: "center" });
-
-  doc.setFontSize(23);
-  doc.text("CERTIFICADO MODULAR", 148.5, posY + 45, { align: "center" });
-
-  // ===== LOGOS =====
-  // if (data.photoMinisterio) {
-  //   doc.addImage(data.photoMinisterio, "PNG", 120, 20, 40, 10);
-  // }
-
-  // if (data.logo) {
-  //   doc.addImage(data.logo, "PNG", 20, 25, 30, 30);
-  // }
-
-  // if (data.photo) {
-  //   doc.addImage(data.photo, "PNG", 255, 25, 20, 25);
-  // }
-
-  // ===== TEXTO PRINCIPAL =====
-  doc.setFontSize(16);
-  doc.setFont("times", "italic");
-  doc.text("Otorgado a:", 20, posY + 70);
-
-  doc.setFont("times", "bold");
-  doc.text(
-    certificado?.apellidos_nombres || "NOMBRE DEL BENEFICIARIO",
-    60,
-    posY + 70
-  );
-
-  doc.setFont("times", "italic");
-  doc.text(
-    "Por haber aprobado satisfactoriamente el módulo formativo:",
-    20,
-    posY + 80
-  );
-
-  doc.setFont("times", "bold");
-  doc.text(
-    certificado?.unidad_competencia?.toUpperCase() || "NOMBRE DEL MÓDULO",
-    148.5,
-    posY + 90,
-    { align: "center" }
-  );
-
-  doc.setFont("times", "italic");
-  doc.text(
-    "Correspondiente al Programa de Estudios:",
-    20,
-    posY + 100
-  );
-
-  doc.setFont("times", "bold");
-  doc.text(
-    certificado?.especialidad?.toUpperCase() || "NOMBRE DEL PROGRAMA",
-    148.5,
-    posY + 110,
-    { align: "center" }
-  );
-
-  // ===== CÁLCULOS =====
-  let sumCreditos = 0;
-  let sumHoras = 0;
-
-  certificado?.unidades_didacticas?.forEach(u => {
-    sumCreditos += u.credito || 0;
-    sumHoras += u.hora || 0;
+  
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4",
   });
 
-  if (certificado?.experiencias_formativas?.[0]) {
-    sumCreditos += certificado.experiencias_formativas[0].creditos_exp || 0;
-    sumHoras += certificado.experiencias_formativas[0].horas_exp || 0;
-  }
+  const pageWidth = 210;
+  const marginL = 20;
+  const marginR = 20;
+  
+  // Variables de datos (Fallback para evitar errores)
+  const nombreEstudiante = certificado?.apellidos_nombres || ".......................................................";
+  const nombreEspecialidad = certificado?.especialidad?.toUpperCase() || ".......................................................";
+  const nombreModuloGeneral = certificado?.unidad_competencia || ""; 
 
-  const rangoFechas = formatDateRangeFromSlash(
-    certificado?.fecha_inicio,
-    certificado?.fecha_fin
-  );
+  // ==========================================
+  // 1. ENCABEZADO Y LOGOS (ALINEADOS)
+  // ==========================================
+  const headerY = 15;
+  const logoMin = "/img/LogoMinisterio.png"; 
+  const logoCetpro = "/img/insignia.png";    
 
-  doc.setFont("times", "italic");
-  doc.text(`
-    Desarrollado del ${rangoFechas}, con un total de ${certificado?.creditos} créditos, equivalente a ${certificado?.horas} horas.`,
-    20,
-    posY + 125
-  );
+  // -- LOGO MINEDU (Izquierda) --
+  // Ajuste Y (+2) para centrarlo visualmente con la insignia
+  try {
+    doc.addImage(logoMin, "PNG", marginL, headerY + 2, 50, 13); 
+  } catch (e) { console.warn("Falta logo Minedu"); }
 
+  // -- INSIGNIA (Centro Exacto) --
+  const insigniaW = 18; 
+  const insigniaH = 18; 
+  try {
+    const insigniaX = (pageWidth / 2) - (insigniaW / 2);
+    doc.addImage(logoCetpro, "PNG", insigniaX, headerY, insigniaW, insigniaH);
+  } catch (e) { console.warn("Falta insignia"); }
 
-  // ===== FECHA Y FIRMA =====
-  doc.setFontSize(13);
-  doc.text(obtenerFechaActual(), 240, posY + 170, { align: "center" });
+  // -- FOTO (Derecha) --
+  const fotoSizeW = 23;
+  const fotoSizeH = 18;
+  const fotoX = pageWidth - marginR - fotoSizeW;
+  
+  doc.setLineWidth(0.2);
+  doc.rect(fotoX, headerY, fotoSizeW, fotoSizeH);
+  doc.setFontSize(8);
+  doc.setFont("times", "normal");
+  doc.text("FOTO", fotoX + (fotoSizeW/2), headerY + (fotoSizeH/2), { align: "center" });
 
-  doc.text(
-    "(Firma, post firma y sello)",
-    148.5,
-    posY + 185,
-    { align: "center" }
-  );
-
-
-
-
-  doc.addPage();
+  // ==========================================
+  // 2. TÍTULOS
+  // ==========================================
+  let cursorY = headerY + 30; // Espacio seguro tras logos
 
   doc.setFont("times", "bold");
-  doc.setFontSize(18);
-  doc.text("RELACIÓN DE UNIDADES DIDÁCTICAS", 148.5, 25, { align: "center" });
+  doc.setFontSize(14);
+  doc.text("CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA", pageWidth / 2, cursorY, { align: "center" });
+  
+  cursorY += 6;
+  doc.setFontSize(16);
+  doc.text('"CETPRO PUNO"', pageWidth / 2, cursorY, { align: "center" }); 
 
-  const headers = [["N°", "Unidades Didácticas", "Calificación"]];
+  cursorY += 25;
+  doc.setFontSize(20);
+  doc.text("CERTIFICADO DE ESTUDIOS", pageWidth / 2, cursorY, { align: "center" });
 
-  const rows = certificado.unidades_didacticas.map((u) => [
-    u.numero_unidad,
-    u.nombre_unidad,
-    u.nota || "-"
+  // ==========================================
+  // 3. CUERPO DEL TEXTO
+  // ==========================================
+  cursorY += 20;
+  doc.setFontSize(12);
+  doc.setFont("times", "normal"); 
+
+  const labelX = marginL;          
+  const valueX = marginL + 35;     
+
+  // Línea 1
+  doc.text("El   CETPRO", labelX, cursorY);
+  doc.setFont("times", "bold");
+  doc.text("PUNO", valueX, cursorY); 
+
+  // Línea 2
+  cursorY += 12;
+  doc.setFont("times", "normal");
+  doc.text("certifica que", labelX, cursorY);
+  doc.setFont("times", "bold");
+  doc.text(nombreEstudiante, valueX, cursorY);
+
+  // Línea 3
+  cursorY += 12;
+  doc.setFont("times", "normal");
+  doc.text("ha cursado las unidades didácticas, que se indican en el programa de estudios:", labelX, cursorY);
+
+  // Línea 4 (Especialidad)
+  cursorY += 10;
+  doc.setFont("times", "bold");
+  doc.text(nombreEspecialidad, pageWidth / 2, cursorY, { align: "center" });
+  
+  // Subrayado de especialidad
+  doc.setLineWidth(0.4);
+  doc.line(marginL, cursorY + 2, pageWidth - marginR, cursorY + 2);
+
+  // Línea 5
+  cursorY += 10;
+  doc.setFont("times", "normal");
+  doc.text("Los resultados finales de las evaluaciones fueron las siguientes:", marginL, cursorY);
+
+  // ==========================================
+  // 4. TABLA (SIN OBSERVACIONES)
+  // ==========================================
+  cursorY += 6;
+
+  // Datos para la tabla: [Módulo, Unidad, Créditos, Nota, Año, Periodo]
+  const tableRows = (certificado?.unidades_didacticas || []).map((u) => [
+    nombreModuloGeneral, 
+    u.nombre_unidad || "-",       
+    u.credito || "0",             
+    u.nota || "-",                
+    new Date().getFullYear(),     
+    "2025-I"                      
   ]);
 
   autoTable(doc, {
-    startY: 35,
-    margin: { left: 25 },
-    head: headers,
-    body: rows,
-
-    theme: "grid", // 👈 importante
-
+    startY: cursorY,
+    margin: { left: marginL, right: marginR },
+    
+    // Encabezados
+    head: [
+      [
+        "Módulo",
+        "Unidad \ndidáctica",
+        "Número \nde \ncréditos",
+        "Calificación",
+        "Año",
+        "Periodo \nacadémico"
+      ]
+    ],
+    body: tableRows,
+    
+    theme: "grid", 
     styles: {
-      fontSize: 13,
+      font: "times",
+      fontSize: 9,
+      textColor: 0, 
+      lineColor: 0, 
+      lineWidth: 0.1,
+      valign: "middle",
+      halign: "center",
+      cellPadding: 3, 
+    },
+    
+    headStyles: {
+      fillColor: 255, // Blanco
+      textColor: 0,   // Negro
+      fontStyle: "bold",
       halign: "center",
       valign: "middle",
-      cellPadding: 6,
-      lineWidth: 0.3,
-      lineColor: [0, 0, 0],
-      fillColor: [255, 255, 255], // 👈 filas blancas
-      textColor: 0,
+      lineWidth: 0.1,
+      lineColor: 0,
     },
 
-    headStyles: {
-      fillColor: [255, 255, 255], // 👈 encabezado blanco
-      textColor: 0,
-      fontStyle: "bold",
-    },
-
+    // Anchos optimizados (Total ~170mm)
     columnStyles: {
-      0: { cellWidth: 25 },
-      1: { cellWidth: 180 },
-      2: { cellWidth: 40 },
+      0: { cellWidth: 35 },                 // Módulo
+      1: { cellWidth: 70, halign: "left" }, // Unidad (Ancho aumentado)
+      2: { cellWidth: 20 },                 // Créditos
+      3: { cellWidth: 20 },                 // Calificación
+      4: { cellWidth: 15 },                 // Año
+      5: { cellWidth: 20 },                 // Periodo
     },
   });
 
+  // ==========================================
+  // 5. PIE DE PÁGINA
+  // ==========================================
+  
+  let finalY = doc.lastAutoTable.finalY + 20; 
+  
+  if (finalY > 260) {
+      doc.addPage();
+      finalY = 40;
+  }
 
+  // Fecha
+  doc.setFont("times", "normal");
+  doc.setFontSize(11);
+  doc.text(`Lugar y fecha:   ${obtenerFechaActual()}`, pageWidth / 2, finalY, { align: "center" });
 
-  // ===== ABRIR PARA IMPRIMIR =====
+  // Firma
+  const firmaY = finalY + 40;
+  doc.setLineWidth(0.5);
+  doc.line((pageWidth/2) - 40, firmaY, (pageWidth/2) + 40, firmaY); 
+
+  doc.setFont("times", "bold");
+  doc.text("DIRECTOR(A)", pageWidth / 2, firmaY + 5, { align: "center" });
+  
+  doc.setFont("times", "normal");
+  doc.setFontSize(10);
+  doc.text("(Firma, post firma y sello)", pageWidth / 2, firmaY + 10, { align: "center" });
+
+  // Output
   const pdfBlob = doc.output("blob");
   const pdfUrl = URL.createObjectURL(pdfBlob);
   window.open(pdfUrl, "_blank");

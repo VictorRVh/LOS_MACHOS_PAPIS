@@ -276,7 +276,7 @@ const getEstadoCapacidadClass = computed(() => {
         <TBody>
           <Tr v-for="(est, index) in estudiantesPaginados" :key="est.id_estudiante ?? index">
             <!-- Si está retirado -->
-            <template v-if="est.matriculado === 0">
+            <template v-if="est.matriculado === 2">
               <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
               <Td class="font-medium whitespace-nowrap">{{ est.apellidos_nombres }}</Td>
               <Td :colspan="lengthUnit + 3" class="text-center">

@@ -260,7 +260,7 @@ async function onSubmit() {
                     <Tr v-for="(alumno, index) in alumnos" :key="alumno.id_estudiante">
 
                         <!-- Alumno está retirado -->
-                        <template v-if="alumno.matriculado == 0">
+                        <template v-if="alumno.matriculado == 2">
                             <Td>{{ index + 1 }}</Td>
                             <Td class="font-medium whitespace-nowrap">{{ alumno.apellidos_nombres }}</Td>
                             <Td :colspan="3" class="text-center">

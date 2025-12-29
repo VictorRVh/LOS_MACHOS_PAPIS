@@ -391,7 +391,7 @@ const close = () => emit('hide');
                   <td v-else class="py-2 px-3">
                     <div class="flex items-center justify-center gap-1.5 flex-shrink-0">
 
-                      <template v-if="alumno.retirado">
+                      <template v-if="alumno.matriculado === 2">
                         <div
                           class="px-3 py-1 rounded-full flex items-center gap-2 text-xs font-bold bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed select-none">
                           <ArrowLeftOnRectangleIcon class="w-4 h-4" />

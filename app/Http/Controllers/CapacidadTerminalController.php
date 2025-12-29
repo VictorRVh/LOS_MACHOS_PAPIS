@@ -229,7 +229,7 @@ class CapacidadTerminalController extends Controller
         $capacidad = CapacidadTerminal::findOrFail($id);
         $dias = $request->dias_aplazados ?? 1;
 
-        $capacidad->fecha_aplazada = Carbon::now('America/Lima')->startOfMinute()->addDays($dias);
+        $capacidad->fecha_aplazada = Carbon::now('America/Lima')->addDays($dias)->endOfDay();
         $capacidad->status = CapacidadTerminal::STATUS_ACTIVO;
         $capacidad->status_nota = 2;
         $capacidad->save();

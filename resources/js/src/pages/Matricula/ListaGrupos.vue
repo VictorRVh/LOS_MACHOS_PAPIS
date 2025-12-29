@@ -242,7 +242,7 @@ const gruposAgrupados = computed(() => {
                   {{ grupo.cantidad_estudiantes }}</td>
                 <td class="text-center border-b border-gray-300 dark:border-gray-700 py-3">
                   <MenuTable :actions="{ view: true, download: true, report: true, reportConsol: true }"
-                    :labels="{ view: 'Ver Alumnos', download: 'Descargar Nomina', report: 'Descargar Acta/Evaluación', reportConsol: 'Descargar Consolidado' }" @view="verMatriculados(grupo)"
+                    :labels="{ view: 'Ver Alumnos', download: 'Descargar Nomina', report: 'Descargar Acta', reportConsol: 'Descargar Consolidado' }" @view="verMatriculados(grupo)"
                     @download="descargarNomina(grupo.id)" @report="descargarActa(grupo.id)" @report-consol="descargarConsolidado(grupo.id)"/>
                 </td>
               </tr>

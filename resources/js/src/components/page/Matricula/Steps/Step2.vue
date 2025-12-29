@@ -11,7 +11,6 @@ import useModalToast from '../../../../composables/useModalToast';
 import useHttpRequest from '../../../../composables/useHttpRequest';
 
 
-
 const { showConfirmModal, showToast } = useModalToast();
 const { store: busquedaDni, saving, update: updateModulo, updating } = useHttpRequest(
     "/buscar-documento"

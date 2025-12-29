@@ -30,13 +30,18 @@ class NominaMatriculasExport
 
         $matriculas = Matricula::where('id_grupo', $this->idGrupo)
             ->where('matricula.reserva', 0)
-            ->with('estudiante')
+            ->with([
+                'estudiante',
+                'pago',
+                'grupo.modulo'
+            ])
             ->join('estudiante as e', 'matricula.id_estudiante', '=', 'e.id')
             ->orderBy('e.apellido_paterno', 'asc')
             ->orderBy('e.apellido_materno', 'asc')
             ->orderBy('e.nombre', 'asc')
-            ->select('matricula.*') // importante para evitar conflictos
+            ->select('matricula.*')
             ->get();
+
 
 
         $especialidad = $matriculas->first()?->grupo?->especialidad?->especialidadMadre?->nombre_especialidad ?? '';
@@ -45,6 +50,8 @@ class NominaMatriculasExport
         $turno = $matriculas->first()?->grupo?->turno ?? '';
         $periodo = $matriculas->first()?->grupo?->periodo?->nombre_periodo ?? '';
         $seccion = $matriculas->first()?->grupo?->seccion;
+        $nroCapacidades = $matriculas->first()?->grupo?->modulo?->nro_capacidades ?? '';
+        $nroCreditos    = $matriculas->first()?->grupo?->modulo?->creditos ?? '';
 
         // Unir celdas de G10 a Q10
         $sheet->mergeCells('F10:I10');
@@ -151,8 +158,26 @@ class NominaMatriculasExport
             $sheet->setCellValue("B{$fila}", str_pad($index + 1, 2, '0', STR_PAD_LEFT));
             $sheet->setCellValue("C{$fila}", $est->nro_documento);
             $sheet->setCellValue("F{$fila}", "{$est->apellido_paterno} {$est->apellido_materno}, {$est->nombre}");
-            $sheet->setCellValue("K{$fila}", $est->sexo);
+            // $sheet->setCellValue("K{$fila}", $est->sexo);
+
+            $sexoExcel = match (strtoupper($est->sexo)) {
+                'M' => 'H',
+                'F' => 'M',
+                default => $est->sexo ?? '—',
+            };
+
+            $sheet->setCellValue("K{$fila}", $sexoExcel);
+
             $sheet->setCellValue("L{$fila}", $est->fecha_nacimiento ?? '');
+
+            $sheet->setCellValue(
+                "M{$fila}",
+                $matricula->pago?->condicion ?? '—'
+            );
+
+            $sheet->setCellValue("N{$fila}", $nroCapacidades);
+
+            $sheet->setCellValue("O{$fila}", $nroCreditos);
 
             $fila++;
         }

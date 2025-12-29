@@ -18,6 +18,17 @@ const formData = computed({
     set: (value) => emit('update:modelValue', value),
 });
 
+const condiciones = [
+    { label: 'G | Gratuito', value: 'G' },
+    { label: 'P | Pagante', value: 'P' },
+    { label: 'B | Beca', value: 'B' },
+    { label: 'S | Semibeca', value: 'S' }
+]
+
+const onChangeCondicion = (option) => {
+    formData.value.condicion = option?.value ?? null
+}
+
 </script>
 
 <template>
@@ -30,13 +41,15 @@ const formData = computed({
         <div class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormLabelError label="Condición">
-                    <vSelect v-model="formData.condicion"
-                        :options="['G | Gratuito', 'P | Pagante', 'B | Beca', 'S | Semibeca']" :clearable="false" />
+                    <vSelect :model-value="formData.condicion" :options="condiciones" label="label" :clearable="false"
+                        @update:modelValue="onChangeCondicion" />
+
                 </FormLabelError>
                 <FormInput v-model="formData.nro_recibo" label="N° Recibo / Voucher" />
                 <FormInput v-model="formData.aporte" label="Aporte S/." type="number" step="0.01" />
             </div>
-            <div v-if="!edit" class="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div v-if="!edit"
+                class="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                 <div class="flex items-center">
                     <InformationCircleIcon class="h-6 w-6 text-blue-500 mr-3" />
                     <div>
@@ -59,7 +72,7 @@ const formData = computed({
                     <li>
                         <span class="font-semibold text-gray-700 dark:text-gray-300">Detalles de grupo: </span>
                         <span class="text-gray-600 dark:text-gray-400"> {{ props.nameGrupo || 'No seleccionado'
-                            }}</span>
+                        }}</span>
                     </li>
                 </ul>
             </div>

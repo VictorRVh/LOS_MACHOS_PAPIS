@@ -267,7 +267,7 @@ export default [
                 'ver-mis-modulos',
                 'ver-estudiantes-asignados',
             ],
-            breadcrumb: [{ text: 'Modulos Asignado', to: { name: 'moduloAsignado' } }],
+            breadcrumb: [{ text: 'Modulos Asignados', to: { name: 'moduloAsignado' } }],
         }
     },
     {

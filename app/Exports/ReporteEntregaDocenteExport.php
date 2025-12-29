@@ -27,6 +27,7 @@ class ReporteEntregaDocenteExport
 
         // 🔹 Obtener datos de la tabla (antes para obtener info de especialidad y módulo)
         $entregas = EntregaDocente::with([
+            'entregaDocenteAdmin',
             'grupo.especialidad.especialidadMadre',
             'grupo.modulo'
         ])
@@ -34,13 +35,18 @@ class ReporteEntregaDocenteExport
             ->get();
 
         // 🔹 Obtener el primer grupo para extraer especialidad y módulo
-        $primerGrupo = $entregas->first()?->grupo;
+        $primerEntrega = $entregas->first();
+        $primerGrupo   = $primerEntrega?->grupo;
+        $nombreTipoEntrega = $primerEntrega?->entregaDocenteAdmin?->nombre_entrega ?? 'Sin tipo de entrega';
         $nombreEspecialidad = $primerGrupo?->especialidad?->especialidadMadre?->nombre_especialidad ?? 'Sin especialidad';
         $nombreModulo = $primerGrupo?->modulo?->descripcion ?? 'Sin módulo';
 
         // 🔹 Título principal
         $sheet->mergeCells('A1:H1');
-        $sheet->setCellValue('A1', 'REPORTE DE ENTREGA DE DOCENTES');
+        $sheet->setCellValue(
+            'A1',
+            'REPORTE DE ENTREGA DE DOCENTES - ' . strtoupper($nombreTipoEntrega)
+        );
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
@@ -79,7 +85,7 @@ class ReporteEntregaDocenteExport
                 : null);
             $sheet->setCellValue("D{$fila}", $entrega->fecha_inicio);
             $sheet->setCellValue("E{$fila}", $entrega->fecha_fin);
-            $sheet->setCellValue("F{$fila}", $entrega->cumplio == 1 ? 'Cumplió' : 'No cumplió');
+            $sheet->setCellValue("F{$fila}", $entrega->cumplio == 1 ? 'Si' : 'No');
             $sheet->setCellValue("G{$fila}", $entrega->fecha_aplazada ?? '—');
             $sheet->setCellValue("H{$fila}", $entrega->dias_aplazados ?? '—');
 

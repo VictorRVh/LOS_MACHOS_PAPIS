@@ -122,11 +122,11 @@ const schema = yup.object().shape({
     numero_capacidad: yup
         .string()
         .nullable()
-        .required("El numero de la capacidad es obligatorio."),
+        .required("El numero de la unidad es obligatorio."),
     nombre_capacidad: yup
         .string()
         .nullable()
-        .required("El nombre de la capacidad es obligatorio."),
+        .required("El nombre de la unidad es obligatorio."),
     fecha_inicio: yup.date().required("La fecha de inicio es requerida.").typeError("Debe ingresar una fecha válida"),
     fecha_fin: yup.date()
         .required("La fecha de fin es requerida.")
@@ -190,7 +190,7 @@ const onSubmit = async () => {
         <div class="mt-2 space-y-3 font-inter">
             <FormLabelError label="Número de Unidad Didactica" required :error="formErrors?.numero_capacidad">
                 <BaseSelectModulo v-model="formData.numero_capacidad" :options="props.indexCapacidades" label="name"
-                    placeholder="Número de capacidad" />
+                    placeholder="Número de la unidad" />
             </FormLabelError>
 
 
@@ -209,7 +209,7 @@ const onSubmit = async () => {
             </div> -->
 
             <div class="flex gap-2 mt-3">
-                <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Capacidad'"
+                <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Unidad'"
                     :loading-title="isEditing ? 'Guardando...' : 'Creando...'" :disabled="saving || updating"
                     :loading="saving || updating" @click="onSubmit" class="!w-full" />
                 <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"

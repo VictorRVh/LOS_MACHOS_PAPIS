@@ -52,7 +52,7 @@ export function generateCertificadoModular(data) {
   const fechaFin = formatearFecha(data?.fecha_fin);
 
   // ----------------------------------------------------------------
-  // PRIMERA CARA (NO TOCAR)
+  // PRIMERA CARA (INTACTA)
   // ----------------------------------------------------------------
   doc.setLineWidth(0.3);
   doc.rect(15, 10, 50, 12);
@@ -148,7 +148,7 @@ export function generateCertificadoModular(data) {
   doc.addPage();
 
   // ----------------------------------------------------------------
-  // SEGUNDA CARA (MODIFICADA SEGÚN REQUERIMIENTOS)
+  // SEGUNDA CARA
   // ----------------------------------------------------------------
 
   try {
@@ -168,22 +168,24 @@ export function generateCertificadoModular(data) {
 
   const unidades = data?.unidades_didacticas || [];
   const bodyRows = [];
+  
+  // Calculamos cuantas filas ocupará el modulo: Cantidad de unidades + 1 fila para experiencias
+  // Si no hay unidades, ponemos 1 fila de aviso + 1 fila experiencias = 2
+  const filasUnidades = unidades.length > 0 ? unidades.length : 1;
+  const totalRowSpan = filasUnidades + 1; 
 
   if (unidades.length > 0) {
     unidades.forEach((u, i) => {
       const row = [];
       
-      // COLUMNA 1: Módulo (Combinada)
-      // Si es la primera fila, agregamos el texto y el rowSpan
+      // COLUMNA 1: Módulo (Solo se define en la primera iteración con rowSpan)
       if (i === 0) {
         row.push({
           content: modulo,
-          rowSpan: unidades.length, // Combina celdas verticalmente según cantidad de unidades
+          rowSpan: totalRowSpan, 
           styles: { valign: 'middle', halign: 'center' }
         });
       }
-      // Nota: jspdf-autotable entiende que si hay un rowSpan, no debe dibujar celdas en esa columna para las filas siguientes.
-      // Por eso en las filas siguientes (i > 0) no agregamos el primer elemento al array.
 
       // COLUMNA 2: Unidad didáctica
       row.push(u.nombre_unidad || "-");
@@ -194,21 +196,27 @@ export function generateCertificadoModular(data) {
       bodyRows.push(row);
     });
   } else {
-    // Caso por defecto si no hay unidades
-    bodyRows.push([modulo, "SIN UNIDADES", "-"]);
+    // Si no hay unidades, creamos la estructura base
+    bodyRows.push([
+      {
+        content: modulo,
+        rowSpan: totalRowSpan,
+        styles: { valign: 'middle', halign: 'center' }
+      },
+      "SIN UNIDADES REGISTRADAS",
+      "-"
+    ]);
   }
 
-  // AGREGAR LA FILA DE EXPERIENCIAS FORMATIVAS AL FINAL DE LA TABLA
+  // AGREGAMOS LA FILA DE EXPERIENCIAS DENTRO DE LA MISMA ESTRUCTURA
+  // Nota: Como la columna 1 (Modulo) tiene rowSpan activo desde arriba, 
+  // en esta fila SOLO definimos las columnas siguientes (Unidad y Nota).
   bodyRows.push([
     { 
       content: "Experiencias formativas en situaciones reales de trabajo", 
-      colSpan: 2, // Ocupa las columnas 1 (Modulo - espacio vacío o alineado) y 2 (Unidad)
-      styles: { halign: 'right', fontStyle: 'bold' }
+      styles: { halign: 'right' } // Alineado a la derecha para diferenciarlo de las unidades
     },
-    { 
-      content: data?.nota_experiencias || "-", // Asegúrate de tener este dato o pon "-"
-      styles: { halign: 'center' }
-    }
+    data?.nota_experiencias || "-"
   ]);
 
   autoTable(doc, {
@@ -231,7 +239,7 @@ export function generateCertificadoModular(data) {
       textColor: 0,
       cellPadding: 3,
       valign: 'middle',
-      halign: 'center' // Por defecto centrado
+      halign: 'center'
     },
     headStyles: {
       fillColor: 255,
@@ -243,24 +251,21 @@ export function generateCertificadoModular(data) {
       valign: 'middle'
     },
     columnStyles: {
-      0: { cellWidth: 50 },                 // Modulo
-      1: { cellWidth: 'auto', halign: 'left' }, // Unidad didáctica (Izquierda)
-      2: { cellWidth: 25 }                  // Calificación
+      0: { cellWidth: 50 },                     // Módulo
+      1: { cellWidth: 'auto', halign: 'left' }, // Unidad didáctica (alineación izquierda por defecto)
+      2: { cellWidth: 25 }                      // Calificación
     }
   });
 
-  // CUADRO DE INSTITUCIÓN (Debajo de la tabla)
-  const finalY = doc.lastAutoTable.finalY; // Obtiene donde terminó la tabla
+  const finalY = doc.lastAutoTable.finalY;
   
-  // Dibujar el rectángulo para la institución
+  // Rectángulo inferior para Institución
   doc.setLineWidth(0.1);
   doc.rect(mL, finalY, W - mL - mR, 9);
   
   doc.setFont("times", "bold");
   doc.setFontSize(8);
   doc.text("Institución(es) en que realizó la experiencia", mL + 2, finalY + 5);
-  // Aquí puedes agregar el nombre de la institución si viene en la data, ej:
-  // doc.setFont("times", "normal");
   // doc.text(data?.institucion || "", mL + 70, finalY + 5);
 
   const firmaY2 = 170;

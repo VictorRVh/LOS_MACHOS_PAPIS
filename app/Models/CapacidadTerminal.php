@@ -247,21 +247,6 @@ class CapacidadTerminal extends Model
         return $now->between($fechaInicio, $fechaLimite);
     }
 
-    // public function getFechaInicioAttribute($value)
-    // {
-    //     return Carbon::parse($value)->format('d/m/Y H:i');
-    // }
-
-    // public function getFechaInicioFormateadaAttribute()
-    // {
-    //     return Carbon::parse($this->fecha_inicio)->format('d/m/Y');
-    // }
-
-    // public function getFechaFinAttribute($value)
-    // {
-    //     return Carbon::parse($value)->format('d/m/Y H:i');
-    // }
-
     public function grupo()
     {
         return $this->belongsTo(Grupo::class, 'id_grupo');

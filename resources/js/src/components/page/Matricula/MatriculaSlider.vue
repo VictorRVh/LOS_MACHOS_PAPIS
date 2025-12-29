@@ -121,7 +121,7 @@ const stepSchemas = {
 // Validar paso actual
 const validateCurrentStep = async () => {
     const schema = stepSchemas[currentStep.value];
-    console.log("errroes: ", schema)
+    // console.log("errroes: ", schema)
     try {
         await schema.validate(formData, { abortEarly: false });
         stepErrors[currentStep.value] = {}; // limpiar errores si todo ok

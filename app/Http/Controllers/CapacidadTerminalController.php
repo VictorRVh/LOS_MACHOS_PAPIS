@@ -83,8 +83,6 @@ class CapacidadTerminalController extends Controller
     {
         $now = now('America/Lima');
 
-
-        // 1️⃣ Validación básica
         $request->validate([
             'numero_capacidad' => 'required|string|max:255',
             'nombre_capacidad' => 'required|string|max:255',
@@ -94,7 +92,7 @@ class CapacidadTerminalController extends Controller
             'status'           => 'required|in:0,1,2,3',
         ]);
 
-        // 2️⃣ Programación
+        // 1️⃣ Obtener programación
         $sesion = EntregaDocente::where('id_grupo', $request->id_grupo)
             ->whereHas('entregaDocenteAdmin', function ($q) use ($request) {
                 $q->where('tipo_entrega', $request->tipo_entrega ?? 1);
@@ -114,12 +112,11 @@ class CapacidadTerminalController extends Controller
         ) {
             return response()->json([
                 'errorCode' => 13333,
-                'errorMessage' =>
-                'La programación no permite crear capacidades en este momento.'
+                'errorMessage' => 'La programación no permite crear unidades en este momento.'
             ], 403);
         }
 
-        // 3️⃣ 👉 VALIDACIONES DEL MODELO
+        // 2️⃣ Validaciones del modelo
         $error = CapacidadTerminal::validarRangoFechasGrupo($request->all());
 
         if ($error) {
@@ -129,17 +126,30 @@ class CapacidadTerminalController extends Controller
             ], 422);
         }
 
-        // $errorAplazada = CapacidadTerminal::validarFechaAplazada($request->all());
+        // 3️⃣ Control de cantidad de capacidades
+        $grupo = Grupo::with('modulo')->find($request->id_grupo);
 
-        // if ($errorAplazada) {
-        //     return response()->json([
-        //         'errorCode' => 13333,
-        //         'errorMessage' => $errorAplazada
-        //     ], 422);
-        // }
+        $totalActual = CapacidadTerminal::where('id_grupo', $request->id_grupo)->count();
+        $nroPermitido = $grupo->modulo->nro_capacidades ?? 0;
 
-        // 4️⃣ Crear
+        if ($totalActual >= $nroPermitido) {
+            return response()->json([
+                'errorCode' => 13333,
+                'errorMessage' => 'Ya se alcanzó el número máximo de unidades para este módulo.'
+            ], 422);
+        }
+
+        // 4️⃣ Crear capacidad
         $capacidad = CapacidadTerminal::create($request->all());
+
+        // 5️⃣ Verificar si ya se completaron todas
+        $totalFinal = CapacidadTerminal::where('id_grupo', $request->id_grupo)->count();
+
+        if ($totalFinal == $nroPermitido) {
+            $sesion->update([
+                'cumplio' => 1
+            ]);
+        }
 
         return response()->json($capacidad, 201);
     }
@@ -174,13 +184,42 @@ class CapacidadTerminalController extends Controller
     // DELETE /api/capacidad-terminal/{id}
     public function destroy($id)
     {
-        $capacidad = CapacidadTerminal::find($id);
+        $capacidad = CapacidadTerminal::with('grupo.entregaDocenteActiva')->find($id);
 
         if (!$capacidad) {
             return response()->json(['message' => 'Capacidad no encontrada'], 404);
         }
 
-        $capacidad->delete();
+        // 🔒 Validar ventana de edición
+        if (!$capacidad->canEdit()) {
+            return response()->json([
+                'message' => 'La programación no permite eliminar capacidades'
+            ], 403);
+        }
+
+        $grupoId = $capacidad->id_grupo;
+
+        DB::transaction(function () use ($capacidad, $grupoId) {
+            $capacidad->delete();
+
+            // Recalcular cumplio
+            $grupo = Grupo::with('modulo')->find($grupoId);
+
+            if ($grupo && $grupo->modulo) {
+                $total = CapacidadTerminal::where('id_grupo', $grupoId)->count();
+                $permitido = $grupo->modulo->nro_capacidades ?? 0;
+
+                $entrega = EntregaDocente::where('id_grupo', $grupoId)
+                    ->where('estado', EntregaDocente::STATUS_ACTIVO)
+                    ->first();
+
+                if ($entrega) {
+                    $entrega->update([
+                        'cumplio' => $total === $permitido ? 1 : 0
+                    ]);
+                }
+            }
+        });
 
         return response()->json(['message' => 'Capacidad eliminada correctamente'], 204);
     }

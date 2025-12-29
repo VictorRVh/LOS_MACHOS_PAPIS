@@ -2,112 +2,152 @@
 
 namespace App\Exports;
 
-use App\Models\EntregaDocente;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class ReporteRegistroMatriculaAndEvaluacionExport
 {
-    protected $idAdmin;
+    protected $idGrupo;
 
-    public function __construct($idAdmin)
+    public function __construct($idGrupo)
     {
-        $this->idAdmin = $idAdmin;
+        $this->idGrupo = $idGrupo;
     }
 
-    public function generarReporte()
+    public function build()
     {
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Reporte Entregas');
+        $spreadsheet = IOFactory::load(
+            storage_path('app/templates/REGISTRO DE MATRICULA Y REGISTRO DE EVALUACIÓN POR MÓDULO.xlsx')
+        );
 
-        // 🔹 Obtener datos de la tabla (antes para obtener info de especialidad y módulo)
-        $entregas = EntregaDocente::with([
-            'grupo.especialidad.especialidadMadre',
-            'grupo.modulo'
-        ])
-            ->where('id_admin', $this->idAdmin)
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Asistencias');
+
+        /*
+        |--------------------------------------------------------------------------
+        | 1. ESTUDIANTES ORDENADOS
+        |--------------------------------------------------------------------------
+        */
+        $estudiantes = DB::table('asistencia as a')
+            ->join('estudiante as u', 'u.id', '=', 'a.id_estudiante')
+            ->where('a.id_grupo', $this->idGrupo)
+            ->select(
+                'u.id',
+                DB::raw("CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo")
+            )
+            ->distinct()
+            ->orderBy('nombre_completo')
             ->get();
 
-        // 🔹 Obtener el primer grupo para extraer especialidad y módulo
-        $primerGrupo = $entregas->first()?->grupo;
-        $nombreEspecialidad = $primerGrupo?->especialidad?->especialidadMadre?->nombre_especialidad ?? 'Sin especialidad';
-        $nombreModulo = $primerGrupo?->modulo?->descripcion ?? 'Sin módulo';
+        /*
+        |--------------------------------------------------------------------------
+        | 2. EXTENDER PLANTILLA (SIN MERGES)
+        |--------------------------------------------------------------------------
+        */
+        $filaInicio = 6;
+        $filasPlantilla = 26;
+        $totalEstudiantes = $estudiantes->count();
 
-        // 🔹 Título principal
-        $sheet->mergeCells('A1:H1');
-        $sheet->setCellValue('A1', 'REPORTE DE ENTREGA DE DOCENTES');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        if ($totalEstudiantes > $filasPlantilla) {
 
-        // 🔹 Especialidad (fila 2)
-        $sheet->mergeCells('A2:H2');
-        $sheet->setCellValue('A2', 'Especialidad: ' . $nombreEspecialidad);
-        $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
-        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            $filasAInsertar = $totalEstudiantes - $filasPlantilla;
+            $filaModelo = $filaInicio;
 
-        // 🔹 Módulo (fila 3)
-        $sheet->mergeCells('A3:H3');
-        $sheet->setCellValue('A3', 'Módulo: ' . $nombreModulo);
-        $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(12);
-        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            // Insertar filas nuevas
+            $sheet->insertNewRowBefore(
+                $filaInicio + $filasPlantilla,
+                $filasAInsertar
+            );
 
-        // 🔹 Encabezados de columnas (ahora en fila 5)
-        $sheet->fromArray([
-            ['#', 'Grupo', 'Docente', 'Fecha Inicio', 'Fecha Fin', '¿Cumplió?', 'Fecha Aplazada', 'Días Aplazados']
-        ], null, 'A5');
+            // Columnas reales de tu tabla (ajusta si usas más)
+            $columnas = range('C', 'U');
 
-        $sheet->getStyle('A5:H5')->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '800000']],
-        ]);
+            for ($i = 0; $i < $filasAInsertar; $i++) {
 
-        // 🔹 Llenar datos (empezando en fila 6)
-        $fila = 6;
-        $contador = 1;
+                $filaDestino = $filaInicio + $filasPlantilla + $i;
 
-        foreach ($entregas as $entrega) {
-            $sheet->setCellValue("A{$fila}", $contador++);
-            $sheet->setCellValue("B{$fila}", $entrega->grupo->seccion ?? 'Sin nombre');
-            $sheet->setCellValue("C{$fila}", $entrega->grupo->docente
-                ? trim($entrega->grupo->docente->user->name . ' ' . $entrega->grupo->docente->user->apellido_paterno . ' ' . $entrega->grupo->docente->user->apellido_materno)
-                : null);
-            $sheet->setCellValue("D{$fila}", $entrega->fecha_inicio);
-            $sheet->setCellValue("E{$fila}", $entrega->fecha_fin);
-            $sheet->setCellValue("F{$fila}", $entrega->cumplio == 1 ? 'Cumplió' : 'No cumplió');
-            $sheet->setCellValue("G{$fila}", $entrega->fecha_aplazada ?? '—');
-            $sheet->setCellValue("H{$fila}", $entrega->dias_aplazados ?? '—');
+                foreach ($columnas as $col) {
+
+                    $celdaModelo  = "{$col}{$filaModelo}";
+                    $celdaDestino = "{$col}{$filaDestino}";
+
+                    // Copiar estilos
+                    $sheet->duplicateStyle(
+                        $sheet->getStyle($celdaModelo),
+                        $celdaDestino
+                    );
+
+                    // Bordes
+                    $sheet->getStyle($celdaDestino)
+                        ->getBorders()
+                        ->getAllBorders()
+                        ->setBorderStyle(Border::BORDER_THIN);
+                }
+
+                // Copiar altura de fila
+                $altura = $sheet->getRowDimension($filaModelo)->getRowHeight();
+                if ($altura !== null) {
+                    $sheet->getRowDimension($filaDestino)->setRowHeight($altura);
+                }
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | 3. FALTAS POR ESTUDIANTE (D → DERECHA)
+        |--------------------------------------------------------------------------
+        */
+        $fila = $filaInicio;
+
+        foreach ($estudiantes as $estudiante) {
+
+            $fechasFalta = DB::table('asistencia')
+                ->where('id_grupo', $this->idGrupo)
+                ->where('id_estudiante', $estudiante->id)
+                ->where('asistencia', 2)
+                ->orderBy('fecha_actual')
+                ->pluck('fecha_actual')
+                ->toArray();
+
+            $columna = 'D';
+
+            if (empty($fechasFalta)) {
+
+                $sheet->setCellValue("{$columna}{$fila}", '—');
+                $sheet->getStyle("{$columna}{$fila}")
+                    ->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            } else {
+
+                foreach ($fechasFalta as $fecha) {
+
+                    $excelDate = Date::stringToExcel(date('Y-m-d', strtotime($fecha)));
+
+                    $sheet->setCellValueExplicit(
+                        "{$columna}{$fila}",
+                        $excelDate,
+                        \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_NUMERIC
+                    );
+
+                    $sheet->getStyle("{$columna}{$fila}")
+                        ->getNumberFormat()
+                        ->setFormatCode('dd/mm');
+
+                    $sheet->getStyle("{$columna}{$fila}")
+                        ->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+
+                    $columna++;
+                }
+            }
 
             $fila++;
         }
 
-        // 🔹 Auto ajustar columnas
-        foreach (range('A', 'H') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        // 🔹 Bordes (ahora desde fila 5 hasta la última)
-        $sheet->getStyle("A5:H" . ($fila - 1))->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000']
-                ]
-            ]
-        ]);
-
-        // 🔹 Generar el archivo en memoria y retornarlo
-        $writer = new Xlsx($spreadsheet);
-
-        ob_start();
-        $writer->save('php://output');
-        $contenido = ob_get_clean();
-
-        return $contenido;
+        return $spreadsheet;
     }
 }

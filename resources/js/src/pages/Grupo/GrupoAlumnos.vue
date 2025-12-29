@@ -80,6 +80,24 @@ const descargarNomina = async (idGrupo) => {
   }
 };
 
+const exportarMatriculaEvaluaciones = async (idGrupo) => {
+  try {
+    const response = await axios.get(
+      `/reportes/registroMatriculaConEvaluaciones/${idGrupo}`,
+      { responseType: "blob" }
+    );
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "Restro de matriculas y evaluaciones.xlsx");
+    document.body.appendChild(link);
+    link.click();
+  } catch (error) {
+    console.error("Error descargando reporte:", error);
+  }
+};
+
+
 const exportar = () => {
   const data = {
     especialidad: matriculados.value.especialidad,
@@ -144,7 +162,8 @@ const generateSelectedCertificates = async (idMatricula) => {
     <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
       <div class="flex justify-end mb-4 gap-6 ml-2">
         <Button title="Descargar nomina" @click="descargarNomina(props.id)" variant="secondary" />
-        <Button title="Exporta Alumos" @click="exportar()" variant="secondary" />
+        <Button title="Exporta alumos" @click="exportar()" variant="secondary" />
+        <Button title="Exporta registro de matrículas y evaluaciones" @click="exportarMatriculaEvaluaciones(props.id)" variant="secondary" />
       </div>
 
       <Table>
@@ -153,10 +172,10 @@ const generateSelectedCertificates = async (idMatricula) => {
           <Th>DNI</Th>
           <Th>Apellidos y Nombres</Th>
           <Th>Sexo</Th>
-          <Th>Fecha de Nacimiento</Th>
+          <Th>F. Nacimiento</Th>
           <Th>Teléfono</Th>
           <Th>Correo Electrónico</Th>
-          <Th>Acciones</Th>
+          <Th class="text-center">Acciones</Th>
         </THead>
 
         <TBody>

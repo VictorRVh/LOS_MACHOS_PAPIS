@@ -237,7 +237,7 @@ async function onSubmit() {
                 <TBody>
                     <Tr v-for="(alumno, index) in alumnos" :key="alumno.id_estudiante">
 
-                        <template v-if="alumno.matriculado == 0">
+                        <template v-if="alumno.matriculado == 2">
                             <Td>{{ index + 1 }}</Td>
                             <Td class="font-medium whitespace-nowrap">{{ alumno.apellidos_nombres }}</Td>
                             <Td :colspan="3" class="text-center">

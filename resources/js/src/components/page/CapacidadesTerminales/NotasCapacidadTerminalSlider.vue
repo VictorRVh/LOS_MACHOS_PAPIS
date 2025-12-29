@@ -256,7 +256,7 @@ const fechaLimiteFormateada = computed(() => {
               <Td>{{ user.fullName }}</Td>
 
               <!-- Si el alumno está retirado -->
-              <template v-if="user.matriculado === 0">
+              <template v-if="user.matriculado == 2">
                 <Td class="text-center">
                   <span class="px-3 py-1 rounded bg-red-100 text-red-700 font-semibold text-sm uppercase tracking-wide">
                     RETIRADO POR INASISTENCIA

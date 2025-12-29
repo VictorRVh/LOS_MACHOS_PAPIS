@@ -41,12 +41,12 @@ class PermissionTableSeeder extends Seeder
             'icono-docentes',
 
            // PERMISOS DE COMVENIOS
-            'todo-acceso-convenios',
-            'ver-convenios',
-            'crear-convenios',
-            'editar-convenios',
-            'eliminar-convenios',
-            'icono-convenios',
+            'todo-acceso-modalidades',
+            'ver-modalidades',
+            'crear-modalidades',
+            'editar-modalidades',
+            'eliminar-modalidades',
+            'icono-modalidades',
 
             // PERMISOS DE PERIODO
             'todo-acceso-periodos',
@@ -65,12 +65,12 @@ class PermissionTableSeeder extends Seeder
             'icono-administrativos',
 
             // PERMISOS DE ESPECIALIDADES
-            'todo-acceso-especialidades',
-            'ver-especialidades',
-            'crear-especialidades',
-            'editar-especialidades',
-            'eliminar-especialidades',
-            'icono-especialidades',
+            'todo-acceso-programas-de-estudio',
+            'ver-programas-de-estudio',
+            'crear-programas-de-estudio',
+            'editar-programas-de-estudio',
+            'eliminar-programas-de-estudio',
+            'icono-programas-de-estudio',
 
             // PERMISOS DE ESPECIALIDADES
             'todo-acceso-comisiones',

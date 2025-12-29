@@ -47,7 +47,7 @@ const onDelete = (especialidad) => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-especialidades', 'ver-especialidades']">
+  <AuthorizationFallback :permissions="['todo-acceso-programas-de-estudio', 'ver-programas-de-estudio']">
     <!-- TU CABECERA ORIGINAL, INTACTA -->
     <div class="flex justify-between items-center p-4">
       <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Programas de estudio</h2>

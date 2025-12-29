@@ -319,8 +319,6 @@ class ReporteRegistroMatriculaAndEvaluacionExport
 
                 $col++;
             }
-
-
             $fila++;
         }
 

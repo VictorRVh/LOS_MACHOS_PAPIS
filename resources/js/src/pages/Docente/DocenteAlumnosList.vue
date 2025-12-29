@@ -104,6 +104,23 @@ const exportar = () => {
 };
 
 
+const exportarMatriculaEvaluaciones = async (idGrupo) => {
+  try {
+    const response = await axios.get(
+      `/reportes/registroMatriculaConEvaluaciones/${idGrupo}`,
+      { responseType: "blob" }
+    );
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "Restro de matriculas y evaluaciones.xlsx");
+    document.body.appendChild(link);
+    link.click();
+  } catch (error) {
+    console.error("Error descargando reporte:", error);
+  }
+};
+
 
 </script>
 
@@ -116,6 +133,9 @@ const exportar = () => {
       <div class="flex justify-end mb-4  gap-6 ml-2">
         <Button title="Descargar nomina" @click="descargarNomina(props.id)" variant="secondary" />
         <Button title="Exporta Alumos" @click="exportar()" variant="secondary" />
+        <Button title="Exporta registro de matrículas y evaluaciones" @click="exportarMatriculaEvaluaciones(props.id)"
+          variant="secondary" />
+
       </div>
 
       <Table>

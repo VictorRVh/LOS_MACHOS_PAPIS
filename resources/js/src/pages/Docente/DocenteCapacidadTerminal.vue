@@ -15,7 +15,7 @@ import useHttpRequest from "../../composables/useHttpRequest";
 import CapacidadTerminalSlider from "../../components/page/CapacidadesTerminales/CapacidadTerminalSlider.vue";
 import useCapacidadTerminalStore from "../../store/CapacidadTerminal/UseCapacidadTerminalStore";
 import useCapacidadTerminalCalificacionesStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import useSesionesStore from "../../store/Sesion/useSesionStore";
 
 const props = defineProps({
@@ -33,12 +33,12 @@ const sesionStore = useSesionesStore();
 const capacidadStore = useCapacidadTerminalStore();
 const calificacionCapacidad = useCapacidadTerminalCalificacionesStore();
 
-if (!sesionStore?.sesion?.length) {
+onMounted(async () => {
   await sesionStore.loadSesion({
     id_grupo: props.id,
     tipo_entrega: 1
   });
-}
+})
 
 if (!capacidadStore.capacidadTerminal?.length)
   await capacidadStore.loadCapacidadTerminal(props.id);

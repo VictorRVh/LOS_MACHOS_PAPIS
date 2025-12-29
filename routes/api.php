@@ -179,22 +179,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('convenio', [
         \App\Http\Controllers\ConveniosController::class,
         'index',
-    ])->middleware('permission:todo-acceso-convenios|ver-convenios');
+    ])->middleware('permission:todo-acceso-modalidades|ver-modalidades');
 
     Route::post('convenio', [
         \App\Http\Controllers\ConveniosController::class,
         'store',
-    ])->middleware('permission:todo-acceso-convenios|crear-convenios');
+    ])->middleware('permission:todo-acceso-modalidades|crear-modalidades');
 
     Route::patch('convenio/{id}', [
         \App\Http\Controllers\ConveniosController::class,
         'update',
-    ])->middleware('permission:todo-acceso-convenios|editar-convenios');
+    ])->middleware('permission:todo-acceso-modalidades|editar-modalidades');
 
     Route::delete('convenio/{convenioId}', [
         \App\Http\Controllers\ConveniosController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-convenios|eliminar-convenios');
+    ])->middleware('permission:todo-acceso-modalidades|eliminar-modalidades');
 
 
     //RUTA DE ESTUDIANTE
@@ -355,38 +355,38 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('programacion_grupo/{id_grupo}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'programacionesPorGrupo',
-    ])->middleware('permission:todo-acceso-especialidades|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-programas-de-estudio|ver-mis-modulos');
 
     // RUTA PARA ESPECIALIDAD_MADRE
     Route::get('especialidad_madre', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'index',
-    ])->middleware('permission:todo-acceso-especialidades|ver-especialidades');
+    ])->middleware('permission:todo-acceso-programas-de-estudio|ver-programas-de-estudio');
 
     Route::get('especialidad_ciclo/{id_ciclo}', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'getEspecialidadesPorCiclo',
-    ])->middleware('permission:todo-acceso-especialidades|ver-especialidades');
+    ])->middleware('permission:todo-acceso-programas-de-estudio|ver-programas-de-estudio');
 
     Route::post('especialidad_madre', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'store',
-    ])->middleware('permission:todo-acceso-especialidades|crear-especialidades');
+    ])->middleware('permission:todo-acceso-programas-de-estudio|crear-programas-de-estudio');
 
     Route::patch('especialidad_madre/{id}', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'update',
-    ])->middleware('permission:todo-acceso-especialidades|editar-especialidades');
+    ])->middleware('permission:todo-acceso-programas-de-estudio|editar-programas-de-estudio');
 
     Route::delete('especialidad_madre/{id}', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-especialidades|eliminar-especialidades');
+    ])->middleware('permission:todo-acceso-programas-de-estudio|eliminar-programas-de-estudio');
 
     Route::get('especialidad_periodo/{id_periodo}', [
         \App\Http\Controllers\EspecialidadMadreController::class,
         'getEspecialidades',
-    ])->middleware('permission:todo-acceso-especialidades|ver-especialidades');
+    ])->middleware('permission:todo-acceso-programas-de-estudio|ver-programas-de-estudio');
 
     // RUTA PARA PROGRAMA_ESTUDIO
     Route::get('programa_estudio', [
@@ -1130,7 +1130,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('grupoByPeriodo/{idPeriodo}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'obtenerGruposPorPeriodo',
-    ])->middleware('permission:ver-especialidades');
+    ])->middleware('permission:ver-programas-de-estudio');
 
     // PARA DOCENTES MODULOS ASIGNADOS
     Route::get('modulosAsignados', [

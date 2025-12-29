@@ -49,7 +49,7 @@ const onDelete = (convenio) => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-convenios', 'ver-convenios']">
+  <AuthorizationFallback :permissions="['todo-acceso-modalidades', 'ver-modalidades']">
     <div class="flex justify-between items-center p-4">
       <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Modalidad</h2>
     </div>

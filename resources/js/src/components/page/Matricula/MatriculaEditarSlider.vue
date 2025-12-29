@@ -67,7 +67,7 @@ const formData = ref({
     lengua_materna: '',
 
     // --- STEP 3 ---
-    condicion: 'G | Gratuito',
+    condicion: '',
     nro_recibo: '',
     aporte: '',
     anio_egreso: ''

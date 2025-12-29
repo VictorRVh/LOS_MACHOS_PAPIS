@@ -96,7 +96,7 @@ const exportar = () => {
 
     matriculados: matriculados.value.estudiantes.map(e => ({
       ...e,
-      nombre: `${e.nombre} ${e.apellidos }` // 👈 aquí envías el nombre como "nom"
+      nombre: `${e.nombre} ${e.apellidos}` // 👈 aquí envías el nombre como "nom"
     }))
   };
 
@@ -109,7 +109,7 @@ const exportar = () => {
 
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-alumnos-docente','ver-alumnos-docente']">
+  <AuthorizationFallback :permissions="['todo-acceso-alumnos-docente', 'ver-alumnos-docente']">
     <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
 
 
@@ -138,7 +138,7 @@ const exportar = () => {
         <TBody>
           <Tr v-for="(estudiante, index) in matriculados.estudiantes" :key="estudiante.nro_documento"
             class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-<!-- 
+            <!-- 
             <Td class="text-center">
               <input type="checkbox"
                 :value="estudiante.id_matricula"
@@ -148,14 +148,14 @@ const exportar = () => {
 
             <Td>{{ index + 1 }}</Td>
             <Td>{{ estudiante.nro_documento }}</Td>
-            <Td>{{ estudiante.nombre}}  {{ estudiante.apellidos }}</Td>
+            <Td> {{ estudiante.apellidos }} {{ estudiante.nombre }} </Td>
             <Td>{{ estudiante.sexo }}</Td>
 
             <Td>{{ estudiante.fecha_nacimiento }}</Td>
 
-        
-        
-            <Td>{{ estudiante.celular_personal?? '-' }}</Td>
+
+
+            <Td>{{ estudiante.celular_personal ?? '-' }}</Td>
             <Td>{{ estudiante.correo_electronico ?? '-' }}</Td>
 
 

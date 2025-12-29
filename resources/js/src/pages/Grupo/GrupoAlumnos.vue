@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, computed, ref, watch } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import Table from '../../components/table/Table.vue';
 import THead from '../../components/table/THead.vue';
 import TBody from '../../components/table/TBody.vue';
@@ -8,7 +8,6 @@ import Th from '../../components/table/Th.vue';
 import Td from '../../components/table/Td.vue';
 import Button from '../../components/ui/Button.vue';
 import AuthorizationFallback from '../../components/page/AuthorizationFallback.vue';
-
 import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 import axios from 'axios';
 import Slider from '../../components/ui/Slider.vue';
@@ -17,16 +16,18 @@ import useExportAlumnos from '../../composables/tabla/useAlumnosMatricula.js';
 import BaseButton from "../../components/ui/Button.vue"
 
 import useCertificado from "../../store/Grupo/useCertificadoStore.js"
-import { generateCertificate } from "../../pdf/CertificadoPDF.js";
 
-// IMPORTACIÓN DE TU NUEVA CONSTANCIA
+// IMPORTACIÓN DEL NUEVO CERTIFICADO MODULAR
+import { generateCertificadoModular } from "../../pdf/CertificadoModular.js";
+
+// IMPORTACIÓN DE CONSTANCIA
 import { generateConstanciaEstudiante } from "../../pdf/CosntanciaEstudiante.js";
 
 const props = defineProps({
   id: { type: [String, Number], required: true },
 });
 
-const { showConfirmModal, showToast } = useModalToast();
+const { showToast } = useModalToast();
 const matriculaStore = useMatriculaStore();
 const dataAlumnoCertificado = useCertificado();
 const { exportarAlumnos } = useExportAlumnos();
@@ -80,24 +81,6 @@ const descargarNomina = async (idGrupo) => {
   }
 };
 
-const exportarMatriculaEvaluaciones = async (idGrupo) => {
-  try {
-    const response = await axios.get(
-      `/reportes/registroMatriculaConEvaluaciones/${idGrupo}`,
-      { responseType: "blob" }
-    );
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "Restro de matriculas y evaluaciones.xlsx");
-    document.body.appendChild(link);
-    link.click();
-  } catch (error) {
-    console.error("Error descargando reporte:", error);
-  }
-};
-
-
 const exportar = () => {
   const data = {
     especialidad: matriculados.value.especialidad,
@@ -126,34 +109,21 @@ const imprimirConstancia = (estudiante) => {
   generateConstanciaEstudiante(dataParaConstancia);
 };
 
-const dataPDF = {
-  logo: "/img/insignia.png",
-  photo: "/img/user.png",
-  photoMinisterio: "/img/logoMin.png",
-  name: "",
-  especialidad: "PELUQUERIA Y BARBERIA",
-  module: "CORTE DE CABELLO, DISEÑO DE BARBA, PEINADO",
-  unidades: [
-    {
-      unidad: "aquietendremos las los zapatos con los mios y otros",
-      capacidad: "en esta parte de unidad veremos las cosas más simples de la zapatería con lo novedoso",
-      hora: "6",
-      credito: "17",
-    },
-  ],
-  startDate: "18/03/2024",
-  endDate: "19/07/2024",
-  credits: 20,
-  hours: 528,
-  location: "Huancané, 24 de diciembre de 2024",
-};
-
-const dataCertificate = ref(null);
-
+// FUNCIÓN PARA GENERAR EL CERTIFICADO MODULAR
 const generateSelectedCertificates = async (idMatricula) => {
-  await dataAlumnoCertificado.loadCertificados(idMatricula);
-  dataCertificate.value = dataAlumnoCertificado.certificados;
-  generateCertificate(dataPDF, dataCertificate.value);
+  try {
+    await dataAlumnoCertificado.loadCertificados(idMatricula);
+    const data = dataAlumnoCertificado.certificados;
+    
+    if(data) {
+        generateCertificadoModular(data);
+    } else {
+        showToast("No se encontraron datos para el certificado", "warning");
+    }
+  } catch (error) {
+    console.error(error);
+    showToast("Error al generar el certificado modular", "error");
+  }
 };
 </script>
 
@@ -162,8 +132,7 @@ const generateSelectedCertificates = async (idMatricula) => {
     <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
       <div class="flex justify-end mb-4 gap-6 ml-2">
         <Button title="Descargar nomina" @click="descargarNomina(props.id)" variant="secondary" />
-        <Button title="Exporta alumos" @click="exportar()" variant="secondary" />
-        <Button title="Exporta registro de matrículas y evaluaciones" @click="exportarMatriculaEvaluaciones(props.id)" variant="secondary" />
+        <Button title="Exporta Alumos" @click="exportar()" variant="secondary" />
       </div>
 
       <Table>
@@ -172,10 +141,10 @@ const generateSelectedCertificates = async (idMatricula) => {
           <Th>DNI</Th>
           <Th>Apellidos y Nombres</Th>
           <Th>Sexo</Th>
-          <Th>F. Nacimiento</Th>
+          <Th>Fecha de Nacimiento</Th>
           <Th>Teléfono</Th>
           <Th>Correo Electrónico</Th>
-          <Th class="text-center">Acciones</Th>
+          <Th>Acciones</Th>
         </THead>
 
         <TBody>
@@ -201,7 +170,8 @@ const generateSelectedCertificates = async (idMatricula) => {
                   </template>
                 </BaseButton>
 
-                <BaseButton title="Certificado" @click="generateSelectedCertificates(estudiante.id_matricula)"
+                <!-- BOTÓN CERTIFICADO MODULAR -->
+                <BaseButton title="Certificado Modular" @click="generateSelectedCertificates(estudiante.id_matricula)"
                   class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
                   <template #icon>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

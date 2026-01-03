@@ -755,6 +755,60 @@ Route::middleware('auth:sanctum')->group(function () {
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 
 
+    // RUTA PARA COMPETENCIAS (COMPETENCIAS TECNICAS Y EMPLEABILIDAD)
+    Route::get('competencias', [
+        \App\Http\Controllers\CompetenciaController::class,
+        'index',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+
+    Route::get('competencias/{id_grupo}', [
+        \App\Http\Controllers\CompetenciaController::class,
+        'indexExperienciaFormativa',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+
+    Route::get('competencias/{id_grupo}', [
+        \App\Http\Controllers\CompetenciaController::class,
+        'indexExperienciaFormativaFolderDrive',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+
+    Route::post('competencias', [
+        \App\Http\Controllers\CompetenciaController::class,
+        'store',
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos|ver-mis-modulos');
+
+    Route::patch('competencias/{id}', [
+        \App\Http\Controllers\CompetenciaController::class,
+        'update',
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos|ver-mis-modulos');
+
+    Route::delete('competencias/{id}', [
+        \App\Http\Controllers\CompetenciaController::class,
+        'destroy',
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+
+
+    // RUTA PARA CAPACIDADES TERMINALES-COMPETENCIA
+    Route::get('capacidad_terminal_competencia', [
+        \App\Http\Controllers\CapacidadTerminalCompetenciaController::class,
+        'index',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+
+    Route::post('capacidad_terminal_competencia', [
+        \App\Http\Controllers\CapacidadTerminalCompetenciaController::class,
+        'store',
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos|ver-mis-modulos');
+
+    Route::patch('capacidad_terminal_competencia/{id}', [
+        \App\Http\Controllers\CapacidadTerminalCompetenciaController::class,
+        'update',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+
+    Route::delete('capacidad_terminal_competencia/{id}', [
+        \App\Http\Controllers\CapacidadTerminalCompetenciaController::class,
+        'destroy',
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+
+
     // RUTA PARA NOTA DE EXPERIENCIA FORMATIVA
     Route::get('nota_experiencia_formativa', [
         \App\Http\Controllers\NotaExperienciaFormativaController::class,
@@ -1159,7 +1213,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\ReporteController::class,
         'actaEvaluacionExcel',
     ])->middleware('permission:ver-ciclo-programa');
-    
+
     Route::get('/reporte-consolidado/{idGrupo}', [
         \App\Http\Controllers\ReporteController::class,
         'consolidadoExcel',

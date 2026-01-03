@@ -10,8 +10,8 @@ class Modulo extends Model
 {
     use HasFactory;
 
-    public $incrementing = false; 
-    protected $keyType = 'string'; 
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $table = 'modulos';
 
@@ -44,5 +44,10 @@ class Modulo extends Model
     public function grupo()
     {
         return $this->hasMany(Grupo::class, 'id_modulo');
+    }
+
+    public function competencias()
+    {
+        return $this->hasMany(Competencia::class, 'id_modulo');
     }
 }

@@ -44,7 +44,10 @@ const idPracticasDrive = ref(null)
 const nuevaExperiencia = ref({
     fecha_inicio: "",
     fecha_fin: "",
+<<<<<<< HEAD
+=======
     creditos: "",
+>>>>>>> fa50eb356fdfb5288d30bb9d425aa168d8386a36
     horas: "",
 });
 
@@ -74,7 +77,10 @@ onMounted(async () => {
                     id: exp.id,
                     fecha_inicio: exp.fecha_inicio,
                     fecha_fin: exp.fecha_fin,
+<<<<<<< HEAD
+=======
                     creditos: exp.creditos,
+>>>>>>> fa50eb356fdfb5288d30bb9d425aa168d8386a36
                     horas: exp.horas,
                 };
                 idExperienciaFormativa.value = exp.id;
@@ -83,7 +89,10 @@ onMounted(async () => {
                     id: null,
                     fecha_inicio: "",
                     fecha_fin: "",
+<<<<<<< HEAD
+=======
                     creditos: "",
+>>>>>>> fa50eb356fdfb5288d30bb9d425aa168d8386a36
                     horas: "",
                 };
                 idExperienciaFormativa.value = null;
@@ -129,7 +138,10 @@ async function guardarExperiencia() {
     if (
         !nuevaExperiencia.value.fecha_inicio ||
         !nuevaExperiencia.value.fecha_fin ||
+<<<<<<< HEAD
+=======
         !nuevaExperiencia.value.creditos ||
+>>>>>>> fa50eb356fdfb5288d30bb9d425aa168d8386a36
         !nuevaExperiencia.value.horas
     ) {
         showToast("Todos los campos son obligatorios", "error");
@@ -226,11 +238,17 @@ async function onSubmit() {
 
             <div class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
                 <h3 class="font-bold text-lg text-cetpro mb-3">Registrar Nueva Experiencia Formativa</h3>
+<<<<<<< HEAD
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <FormInput type="date" v-model="nuevaExperiencia.fecha_inicio" label="Fecha Inicio" required />
+                    <FormInput type="date" v-model="nuevaExperiencia.fecha_fin" label="Fecha Fin" required />
+=======
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <FormInput type="date" v-model="nuevaExperiencia.fecha_inicio" label="Fecha Inicio" required />
                     <FormInput type="date" v-model="nuevaExperiencia.fecha_fin" label="Fecha Fin" required />
                     <FormInput v-model="nuevaExperiencia.creditos" label="Creditos" type="number" min="1"
                         placeholder="Ej. 10" required />
+>>>>>>> fa50eb356fdfb5288d30bb9d425aa168d8386a36
                     <FormInput v-model="nuevaExperiencia.horas" label="Horas" type="number" min="1"
                         placeholder="Ej. 120" required />
                     <div class="flex justify-end mt-6">

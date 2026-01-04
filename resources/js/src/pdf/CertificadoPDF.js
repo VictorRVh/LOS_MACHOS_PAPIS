@@ -26,8 +26,8 @@ export function generateCertificate(data, certificado) {
   const marginR = 20;
   
   // Variables de datos (Fallback para evitar errores)
-  const nombreEstudiante = certificado?.apellidos_nombres || ".......................................................";
-  const nombreEspecialidad = certificado?.especialidad?.toUpperCase() || ".......................................................";
+  const nombreEstudiante = certificado?.apellidos_nombres || "Victor Raul Valdez Huanacuni";
+  const nombreEspecialidad = certificado?.especialidad?.toUpperCase() || "Peluqueria";
   const nombreModuloGeneral = certificado?.unidad_competencia || ""; 
 
   // ==========================================

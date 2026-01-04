@@ -18,7 +18,7 @@ import BaseButton from "../../components/ui/Button.vue"
 import useCertificado from "../../store/Grupo/useCertificadoStore.js"
 
 // IMPORTACIÓN DEL NUEVO CERTIFICADO MODULAR
-import { generateCertificadoModular } from "../../pdf/CertificadoModular.js";
+import { generateCertificate } from "../../pdf/CertificadoPDF.js";
 
 // IMPORTACIÓN DE CONSTANCIA
 import { generateConstanciaEstudiante } from "../../pdf/CosntanciaEstudiante.js";
@@ -116,7 +116,7 @@ const generateSelectedCertificates = async (idMatricula) => {
     const data = dataAlumnoCertificado.certificados;
 
     if (data) {
-      generateCertificadoModular(data);
+      generateCertificate(data);
     } else {
       showToast("No se encontraron datos para el certificado", "warning");
     }

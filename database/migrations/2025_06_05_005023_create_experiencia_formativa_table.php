@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nombre_experiencia');
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
+            $table->integer('creditos');
             $table->integer('horas');
             $table->uuid('id_grupo');
             $table->tinyInteger('status')->default(0);

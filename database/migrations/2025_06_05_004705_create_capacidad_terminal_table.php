@@ -17,6 +17,12 @@ return new class extends Migration
             $table->string('nombre_capacidad');
             $table->dateTime('fecha_inicio');
             $table->dateTime('fecha_fin');
+<<<<<<< HEAD
+=======
+            $table->string('creditos_teoricos');
+            $table->string('creditos_practicos');
+            $table->string('horas');
+>>>>>>> fa50eb356fdfb5288d30bb9d425aa168d8386a36
             $table->dateTime('fecha_aplazada')->nullable();
             $table->uuid('id_grupo');
             $table->tinyInteger('status')->default(0);

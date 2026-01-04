@@ -20,6 +20,7 @@ class ExperienciaFormativa extends Model
         'nombre_experiencia',
         'fecha_inicio',
         'fecha_fin',
+        'creditos',
         'horas',
         'id_grupo',
         'status'

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Competencia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class CompetenciaController extends Controller
@@ -22,6 +23,47 @@ class CompetenciaController extends Controller
         return response()->json(
             $query->get()
         );
+    }
+
+    public function getCompetenciasPorGrupo($grupoId)
+    {
+        // Obtener el módulo asociado al grupo
+        $grupo = DB::table('grupo')
+            ->where('id', $grupoId)
+            ->first();
+
+        if (!$grupo) {
+            return collect(); // vacío si no existe
+        }
+
+        // Obtener las competencias del módulo
+        $competencias = DB::table('competencias')
+            ->where('id_modulo', $grupo->id_modulo)
+            ->orderBy('created_at')
+            ->get();
+
+        if ($competencias->isEmpty()) {
+            return collect();
+        }
+
+        // Obtener las capacidades terminales asociadas a las competencias
+        $competenciasIds = $competencias->pluck('id');
+
+        $capacidades = DB::table('capacidades_terminales_competencia')
+            ->whereIn('id_competencia', $competenciasIds)
+            ->orderBy('created_at')
+            ->get()
+            ->groupBy('id_competencia');
+
+        // Armar estructura final
+        $resultado = $competencias->map(function ($competencia) use ($capacidades) {
+            $competencia->capacidad_terminal_competencia =
+                $capacidades->get($competencia->id, collect());
+
+            return $competencia;
+        });
+
+        return $resultado;
     }
 
     /**

@@ -761,14 +761,9 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
 
-    Route::get('competencias/{id_grupo}', [
+    Route::get('competencias_index/{grupoId}', [
         \App\Http\Controllers\CompetenciaController::class,
-        'indexExperienciaFormativa',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
-
-    Route::get('competencias/{id_grupo}', [
-        \App\Http\Controllers\CompetenciaController::class,
-        'indexExperienciaFormativaFolderDrive',
+        'getCompetenciasPorGrupo',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
 
     Route::post('competencias', [
@@ -791,6 +786,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('capacidad_terminal_competencia', [
         \App\Http\Controllers\CapacidadTerminalCompetenciaController::class,
         'index',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+    
+    Route::get('capacidad_terminal_competencia_index/{competenciaId}', [
+        \App\Http\Controllers\CapacidadTerminalCompetenciaController::class,
+        'getCapacidadesPorCompetencia',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
 
     Route::post('capacidad_terminal_competencia', [

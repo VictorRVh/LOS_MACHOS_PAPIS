@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CapacidadTerminalCompetencia;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CapacidadTerminalCompetenciaController extends Controller
 {
@@ -21,6 +22,26 @@ class CapacidadTerminalCompetenciaController extends Controller
         return response()->json(
             $query->orderBy('created_at')->get()
         );
+    }
+
+    public function getCapacidadesPorCompetencia($competenciaId)
+    {
+        // Verificar que exista la competencia
+        $competencia = DB::table('competencias')
+            ->where('id', $competenciaId)
+            ->first();
+
+        if (!$competencia) {
+            return collect(); // vacío si no existe
+        }
+
+        // Obtener capacidades terminales de la competencia
+        $capacidades = DB::table('capacidades_terminales_competencia')
+            ->where('id_competencia', $competenciaId)
+            ->orderBy('created_at')
+            ->get();
+
+        return $capacidades;
     }
 
     /**

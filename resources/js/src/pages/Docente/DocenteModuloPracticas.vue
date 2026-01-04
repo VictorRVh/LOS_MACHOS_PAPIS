@@ -44,6 +44,7 @@ const idPracticasDrive = ref(null)
 const nuevaExperiencia = ref({
     fecha_inicio: "",
     fecha_fin: "",
+    creditos: "",
     horas: "",
 });
 
@@ -73,6 +74,7 @@ onMounted(async () => {
                     id: exp.id,
                     fecha_inicio: exp.fecha_inicio,
                     fecha_fin: exp.fecha_fin,
+                    creditos: exp.creditos,
                     horas: exp.horas,
                 };
                 idExperienciaFormativa.value = exp.id;
@@ -81,6 +83,7 @@ onMounted(async () => {
                     id: null,
                     fecha_inicio: "",
                     fecha_fin: "",
+                    creditos: "",
                     horas: "",
                 };
                 idExperienciaFormativa.value = null;
@@ -126,6 +129,7 @@ async function guardarExperiencia() {
     if (
         !nuevaExperiencia.value.fecha_inicio ||
         !nuevaExperiencia.value.fecha_fin ||
+        !nuevaExperiencia.value.creditos ||
         !nuevaExperiencia.value.horas
     ) {
         showToast("Todos los campos son obligatorios", "error");
@@ -222,9 +226,11 @@ async function onSubmit() {
 
             <div class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
                 <h3 class="font-bold text-lg text-cetpro mb-3">Registrar Nueva Experiencia Formativa</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <FormInput type="date" v-model="nuevaExperiencia.fecha_inicio" label="Fecha Inicio" required />
                     <FormInput type="date" v-model="nuevaExperiencia.fecha_fin" label="Fecha Fin" required />
+                    <FormInput v-model="nuevaExperiencia.creditos" label="Creditos" type="number" min="1"
+                        placeholder="Ej. 10" required />
                     <FormInput v-model="nuevaExperiencia.horas" label="Horas" type="number" min="1"
                         placeholder="Ej. 120" required />
                     <div class="flex justify-end mt-6">

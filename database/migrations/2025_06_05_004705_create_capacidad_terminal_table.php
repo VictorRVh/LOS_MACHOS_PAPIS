@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('creditos_teoricos');
             $table->string('creditos_practicos');
             $table->string('horas');
-            $table->string('numero_capacidad');
             $table->dateTime('fecha_aplazada')->nullable();
             $table->uuid('id_grupo');
             $table->tinyInteger('status')->default(0);

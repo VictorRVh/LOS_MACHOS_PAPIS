@@ -23,12 +23,9 @@ class CapacidadTerminal extends Model
         'fecha_inicio',
         'fecha_fin',
         'fecha_aplazada',
-<<<<<<< HEAD
-=======
         'creditos_teoricos',
         'creditos_practicos',
         'horas',
->>>>>>> fa50eb356fdfb5288d30bb9d425aa168d8386a36
         'id_grupo',
         'status',
         'status_nota'

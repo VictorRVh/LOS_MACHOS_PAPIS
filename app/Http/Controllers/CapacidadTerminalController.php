@@ -88,11 +88,8 @@ class CapacidadTerminalController extends Controller
             'nombre_capacidad' => 'required|string|max:255',
             'fecha_inicio'     => 'required|date',
             'fecha_fin'        => 'required|date|after_or_equal:fecha_inicio',
-<<<<<<< HEAD
-=======
             'creditos_teoricos' => 'required|string|max:255',
             'creditos_practicos' => 'required|string|max:255',
->>>>>>> fa50eb356fdfb5288d30bb9d425aa168d8386a36
             'id_grupo'         => 'required|exists:grupo,id',
             'status'           => 'required|in:0,1,2,3',
         ]);
@@ -179,11 +176,8 @@ class CapacidadTerminalController extends Controller
             'nombre_capacidad' => 'sometimes|string|max:255',
             'fecha_inicio' => 'sometimes|date',
             'fecha_fin' => 'sometimes|date|after_or_equal:fecha_inicio',
-<<<<<<< HEAD
-=======
             'creditos_teoricos' => 'sometimes|string|max:255',
             'creditos_practicos' => 'sometimes|string|max:255',
->>>>>>> fa50eb356fdfb5288d30bb9d425aa168d8386a36
         ]);
 
         $capacidad->update($request->all());

@@ -168,10 +168,7 @@ class ExperienciaFormativaController extends Controller
                 'nombre_experiencia' => $experiencia->nombre_experiencia,
                 'fecha_inicio' => $experiencia->fecha_inicio,
                 'fecha_fin' => $experiencia->fecha_fin,
-<<<<<<< HEAD
-=======
                 'creditos' => $experiencia->creditos,
->>>>>>> fa50eb356fdfb5288d30bb9d425aa168d8386a36
                 'horas' => $experiencia->horas,
                 'id_grupo' => $experiencia->id_grupo,
                 'drive_folder_id' => $driveFolderId,
@@ -210,10 +207,7 @@ class ExperienciaFormativaController extends Controller
                 'nombre_experiencia' => $experiencia->nombre_experiencia,
                 'fecha_inicio' => $experiencia->fecha_inicio,
                 'fecha_fin' => $experiencia->fecha_fin,
-<<<<<<< HEAD
-=======
                 'creditos' => $experiencia->creditos,
->>>>>>> fa50eb356fdfb5288d30bb9d425aa168d8386a36
                 'horas' => $experiencia->horas,
                 'id_grupo' => $experiencia->id_grupo,
                 'drive_folder_id' => optional($carpeta)->drive_folder_id,

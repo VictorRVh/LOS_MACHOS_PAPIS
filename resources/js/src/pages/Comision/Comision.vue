@@ -85,9 +85,7 @@ const selectedRole = ref(null);
 function showPermissionsModal(comision) {
 
   selectedRole.value = comision;
-
   // console.log('comision selec', selectedRole.value)
-
   showModal.value = true;
 }
 </script>

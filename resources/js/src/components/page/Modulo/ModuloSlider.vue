@@ -1,11 +1,11 @@
 <script setup>
-import { computed, nextTick, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
+import * as yup from "yup";
 
 import useValidation from "../../../composables/useValidation";
 import useHttpRequest from "../../../composables/useHttpRequest";
 import useModalToast from "../../../composables/useModalToast";
 
-import * as yup from "yup";
 import FormInput from "../../ui/FormInput.vue";
 import FormLabelError from "../../ui/FormLabelError.vue";
 import Button from "../../ui/Button.vue";
@@ -13,7 +13,6 @@ import AuthorizationFallback from "../AuthorizationFallback.vue";
 import BaseSelectModulo from "../../ui/BaseSelectCiclo.vue";
 
 import useModuloStore from "../../../store/Modulos/useModulosStore";
-
 const props = defineProps({
     show: {
         type: Boolean,
@@ -28,37 +27,38 @@ const props = defineProps({
         default: () => null,
     },
     especialidad: {
-        type: Array,
+        type: String,
         default: () => []
     },
 });
-const emit = defineEmits(["hide"]);
 
+const emit = defineEmits(["hide"]);
 const moduloStore = useModuloStore();
 
-const { store: createModulo, saving, update: updateModulo, updating } = useHttpRequest(
-    "/modulo"
-);
+const { store: createModulo, saving, update: updateModulo, updating } =
+    useHttpRequest("/modulo");
+
 const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
-const requiredPermissions = computed(() => {
-    if (!props.role?.id) return ["todo-acceso-modulos", "crear-modulos"];
-    else return ["todo-acceso-modulos", "editar-modulos"];
+const requiredPermissions = computed(() => [
+    "todo-acceso-modulos",
+    props.modulo?.id ? "editar-modulos" : "crear-modulos"
+]);
+
+/* =========================
+   FORM DATA
+========================= */
+const initialFormData = () => ({
+    numero_modulo: null,
+    descripcion: null,
+    creditos: null,
+    horas: null,
+    nro_capacidades: null,
+    id_especialidad: props.especialidad,
+
+    competencias: []
 });
-
-const initialFormData = () => {
-    return {
-        numero_modulo: null,
-        descripcion: null,
-        creditos: null,
-        horas: null,
-        nro_capacidades: null,
-        id_especialidad: props.especialidad,
-
-        nro_capacidades: null,
-    };
-};
 
 const formData = ref(initialFormData());
 const formErrors = ref({});
@@ -71,6 +71,26 @@ const onCancelEdit = () => {
     emit("hide");
 };
 
+
+/* =========================
+   COMPETENCIAS DINÁMICAS
+========================= */
+const addCompetencia = () => {
+    formData.value.competencias.push({
+        tipo: null,
+        descripcion: ""
+    });
+};
+
+const removeCompetencia = (index) => {
+    if (formData.value.competencias.length > 0) {
+        formData.value.competencias.splice(index, 1);
+    }
+};
+
+/* =========================
+   WATCH EDIT
+========================= */
 watch(
     () => props.modulo,
     (newRole) => {
@@ -90,52 +110,57 @@ watch(
     { immediate: true }
 );
 
-const schema = yup.object().shape({
-    numero_modulo: yup
-        .number()
-        .typeError("El número de módulo debe ser un valor numérico")
-        .required("El número de módulo es obligatorio")
-        .positive("El número de módulo debe ser positivo")
-        .integer("El número de módulo debe ser un número entero"),
-    descripcion: yup.string().required("El nombre de módulo es obligatoria"),
-    creditos: yup.number().required("Los créditos son obligatorios"),
-    horas: yup.number().required("Las horas son obligatorias"),
-    id_especialidad: yup.string().required("La especialidad es obligatoria"),
-    nro_capacidades: yup.number().required("El número de unidades es obligatorio"),
+/* =========================
+   VALIDACIÓN
+========================= */
+const schema = yup.object({
+    numero_modulo: yup.number().required(),
+    descripcion: yup.string().required(),
+    creditos: yup.number().required(),
+    horas: yup.number().required(),
+    nro_capacidades: yup.number().required(),
+    id_especialidad: yup.string().required(),
+
+    competencias: yup.array().of(
+        yup.object({
+            tipo: yup.string().required("Ingrese el tipo"),
+            descripcion: yup
+                .string()
+                .required("Ingrese descripción")
+                .max(225)
+        })
+    )
 });
 
+/* =========================
+   SUBMIT
+========================= */
 const onSubmit = async () => {
-
     if (saving.value || updating.value) return;
 
-    let data = {
-        ...formData.value,
-    };
-
-    const { validated, errors } = await runYupValidation(schema, data);
+    const { validated, errors } = await runYupValidation(schema, formData.value);
     if (!validated) {
         formErrors.value = errors;
+        console.log(formErrors.value)
         return;
     }
-    formErrors.value = {};
-
-    console.log('modulo.id:', props.modulo?.id);
-
 
     const response = props.modulo?.id
-        ? await updateModulo(props.modulo?.id, data)
-        : await createModulo(data);
+        ? await updateModulo(props.modulo.id, formData.value)
+        : await createModulo(formData.value);
 
     if (response?.id) {
-        showToast(`Modulo ${props.modulo?.id ? "editado" : "creado"} exitosamente.`);
-        moduloStore.loadModuloById(props.especialidad)
+        showToast(`Módulo ${props.modulo?.id ? "editado" : "creado"} correctamente`);
+        moduloStore.loadModuloById(props.especialidad);
+        emit("hide");
         formData.value = initialFormData();
         formErrors.value = {};
-
-        emit("hide");
     }
 };
+
+
 </script>
+
 
 <template>
     <AuthorizationFallback :permissions="requiredPermissions">
@@ -166,6 +191,54 @@ const onSubmit = async () => {
                 :error="formErrors?.nro_capacidades" required type="number" />
 
 
+
+            <!-- ===================== -->
+            <!-- COMPETENCIAS -->
+            <!-- ===================== -->
+
+            <div class="space-y-3">
+
+                <!-- Header -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                        <ClipboardDocumentListIcon class="w-5 h-5 text-cetpro" />
+                        <h4 class="font-semibold">Competencias</h4>
+                    </div>
+
+                    <!-- Add -->
+                    <button title="Agregar una nueva competencia" type="button" @click="addCompetencia"
+                        class="flex items-center gap-1 text-sm text-cetpro hover:text-cetpro-dark transition">
+                        <PlusIcon class="w-4 h-4" />
+                        <span>Agregar</span>
+                    </button>
+                </div>
+
+                <!-- Cards -->
+                <div v-for="(competencia, index) in formData.competencias" :key="index" class="relative rounded-xl border border-gray-200 dark:border-gray-700
+               bg-gray-50 dark:bg-gray-900 p-4 space-y-3">
+                    <!-- Eliminar -->
+                    <button title="Eliminar" v-if="formData.competencias.length > 0" type="button"
+                        @click="removeCompetencia(index)"
+                        class="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition">
+                        <TrashIcon class="w-4 h-4" />
+                    </button>
+
+                    <!-- Tipo -->
+
+                    <FormInput v-model="competencia.tipo" label="Nombre de la competencia" />
+                    <!-- Descripción -->
+                    <FormInput v-model="competencia.descripcion" type="textarea" label="Descripción" :maxlength="225" />
+
+                    <!-- Contador -->
+                    <div class="flex justify-end">
+                        <span class="text-xs" :class="competencia.descripcion.length > 200
+                            ? 'text-red-500'
+                            : 'text-gray-400'">
+                            {{ competencia.descripcion.length }}/225
+                        </span>
+                    </div>
+                </div>
+            </div>
 
             <div class="w-full space-y-3">
 

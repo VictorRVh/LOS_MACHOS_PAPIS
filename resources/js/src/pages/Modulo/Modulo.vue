@@ -16,6 +16,7 @@ import useHttpRequest from "../../composables/useHttpRequest";
 import ModuloSlider from "../../components/page/Modulo/ModuloSlider.vue";
 import useModuloStore from "../../store/Modulos/useModulosStore";
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
+import ViewCompetenciasModal from "../../components/page/Modulo/ViewCompetencia.vue";
 
 
 const moduloStore = useModuloStore();
@@ -37,21 +38,21 @@ const props = defineProps({
 if (!moduloStore?.moduloFiltrado?.length) await moduloStore.loadModuloById(props.idEspecialidadPrograma)
 
 const idPrograma = moduloStore?.moduloFiltrado?.especialidad_programa?.id_programa;
-  // 👇 1. Primero registras el programa (padre)
-  breadcrumb.setTextItemAuto(
-     `${moduloStore?.moduloFiltrado?.especialidad_programa?.nombre_ciclo ||''} ${moduloStore?.moduloFiltrado?.especialidad_programa?.anio ||''} `,
-    idPrograma,
-    'programa',
-    { name: 'especialidadPrograma', params: { idPrograma } }
-  );
+// 👇 1. Primero registras el programa (padre)
+breadcrumb.setTextItemAuto(
+  `${moduloStore?.moduloFiltrado?.especialidad_programa?.nombre_ciclo || ''} ${moduloStore?.moduloFiltrado?.especialidad_programa?.anio || ''} `,
+  idPrograma,
+  'programa',
+  { name: 'especialidadPrograma', params: { idPrograma } }
+);
 
-  // 👇 2. Luego la especialidad (hijo)
-  breadcrumb.setTextItemAuto(
-    `Especialidad ${moduloStore?.moduloFiltrado?.especialidad_programa?.nombre_especialidad ||''} | Módulos`,
-    props.idEspecialidadPrograma,
-    'especialidadPrograma',
-    { name: 'modulo', params: { idEspecialidadPrograma: props.idEspecialidadPrograma } }
-  );
+// 👇 2. Luego la especialidad (hijo)
+breadcrumb.setTextItemAuto(
+  `Especialidad ${moduloStore?.moduloFiltrado?.especialidad_programa?.nombre_especialidad || ''} | Módulos`,
+  props.idEspecialidadPrograma,
+  'especialidadPrograma',
+  { name: 'modulo', params: { idEspecialidadPrograma: props.idEspecialidadPrograma } }
+);
 
 // Generar los módulos dinámicamente
 const indexModulos = ref([]);
@@ -99,6 +100,21 @@ const onDelete = (modulo) => {
   });
 };
 
+
+const showCompetenciasModal = ref(false);
+const moduloSeleccionado = ref(null);
+
+const openCompetencias = (modulo) => {
+  moduloSeleccionado.value = modulo;
+  showCompetenciasModal.value = true;
+};
+
+const closeCompetencias = () => {
+  showCompetenciasModal.value = false;
+  moduloSeleccionado.value = null;
+};
+
+
 </script>
 
 <template>
@@ -106,7 +122,7 @@ const onDelete = (modulo) => {
 
     <div class="flex  px-6 py-6">
       <div class="w-1/2">
-        
+
         <ModuloSlider :show="slider" :modulo="sliderData" :especialidad="props.idEspecialidadPrograma"
           :indexModulo="indicesArray" @hide="hideSlider" />
       </div>
@@ -119,6 +135,7 @@ const onDelete = (modulo) => {
             <Th>Modulo</Th>
             <Th>Creditos</Th>
             <Th>Horas</Th>
+            <Th>Competencias</Th>
             <Th class="text-center">Acciones</Th>
           </THead>
 
@@ -128,6 +145,12 @@ const onDelete = (modulo) => {
               <Td>{{ modulo?.descripcion }}</Td>
               <Td>{{ modulo?.creditos }}</Td>
               <Td>{{ modulo?.horas }}</Td>
+              <Td> <!-- 👇 NUEVO BOTÓN -->
+                <button class="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                  title="Ver competencias" @click="openCompetencias(modulo)">
+                  Competencias
+                </button>
+              </Td>
               <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">
                   <EditButton @click="showSlider(true, modulo)" />
@@ -138,6 +161,7 @@ const onDelete = (modulo) => {
           </TBody>
         </Table>
       </div>
+      <ViewCompetenciasModal :show="showCompetenciasModal" :modulo="moduloSeleccionado" @close="closeCompetencias" />
 
     </div>
   </AuthorizationFallback>

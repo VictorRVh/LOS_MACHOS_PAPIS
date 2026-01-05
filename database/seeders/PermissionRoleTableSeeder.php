@@ -27,7 +27,7 @@ class PermissionRoleTableSeeder extends Seeder
                 'permission_id' => $i,
                 'created_at' => now(),
             ];
-            
+
             $permissionRole[] = [
                 'role_id' => 4,
                 'permission_id' => $i,
@@ -67,7 +67,14 @@ class PermissionRoleTableSeeder extends Seeder
             // 'eliminar-alumnos-docente',
 
             // comsiones ...  
-            'ver-comsion-docente'
+            'ver-comision-docente',
+
+            //Competencias 
+            'todo-acceso-competencias-docente',
+            'ver-competencias-docente',
+            'crear-competencias-docente',
+            'editar-competencias-docente',
+            'eliminar-competencias-docente',
 
         ];
 

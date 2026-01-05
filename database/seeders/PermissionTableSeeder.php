@@ -183,13 +183,20 @@ class PermissionTableSeeder extends Seeder
             'eliminar-sesiones-docente',
 
             // ver comsiones 
-            'ver-comsion-docente',
+            'ver-comision-docente',
                 
 
             'ver-perfil-docente',
             'editar-perfil-docente',
             'ver-mis-modulos',
             'ver-estudiantes-asignados',
+
+                 //Competencias
+            'todo-acceso-competencias-docente',
+            'ver-competencias-docente',
+            'crear-competencias-docente',
+            'editar-competencias-docente',
+            'eliminar-competencias-docente',
 
         ];
 

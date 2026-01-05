@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Competencia;
 use App\Models\Modulo;
 use App\Traits\Helpers;
 use Illuminate\Http\Request;
 use App\Models\EspecialidadPrograma;
+use Illuminate\Support\Facades\DB;
 
 class ModuloController extends Controller
 {
@@ -23,30 +25,79 @@ class ModuloController extends Controller
 
 
     // Crear un nuevo módulo
+
     public function store(Request $request)
     {
         $request->validate([
-            'numero_modulo' => 'required|string|max:10',
-            'descripcion' => 'nullable|string',
-            'creditos' => 'required|integer|min:0',
-            'horas' => 'required|integer|min:0',
-            'id_especialidad' => 'required|exists:especialidad_programa,id',
-            'nro_capacidades' => 'required|integer|min:0',
+            'numero_modulo'    => 'required|string|max:10',
+            'descripcion'      => 'nullable|string',
+            'creditos'         => 'required|integer|min:0',
+            'horas'            => 'required|integer|min:0',
+            'id_especialidad'  => 'required|exists:especialidad_programa,id',
+            'nro_capacidades'  => 'required|integer|min:0',
+
+            // competencias (opcional)
+            'competencias'                 => 'nullable|array',
+            'competencias.*.tipo'            => 'required|string',
+            'competencias.*.descripcion'   => 'required|string|max:225',
         ]);
 
-        $modulo = Modulo::create($request->all());
-        $this->registrarActividad(
-            "Creó el módulo N° '{$modulo->numero_modulo}' para la especialidad '{$modulo->especialidadPrograma->especialidadMadre->nombre_especialidad}'",
-            "Creado"
-        );
-        return response()->json($modulo, 201);
+        DB::beginTransaction();
+
+        try {
+            /* =====================
+           1️⃣ CREAR MÓDULO
+        ====================== */
+            $modulo = Modulo::create(
+                $request->only([
+                    'numero_modulo',
+                    'descripcion',
+                    'creditos',
+                    'horas',
+                    'id_especialidad',
+                    'nro_capacidades',
+                ])
+            );
+
+            /* =====================
+           2️⃣ CREAR COMPETENCIAS
+        ====================== */
+            if ($request->filled('competencias')) {
+                foreach ($request->competencias as $competencia) {
+                    Competencia::create([
+                        'id_modulo'   => $modulo->id,
+                        'tipo'        => $competencia['tipo'], // tipo de competencia
+                        'descripcion' => $competencia['descripcion'],
+                    ]);
+                }
+            }
+
+            /* =====================
+           3️⃣ LOG ACTIVIDAD
+        ====================== */
+            $this->registrarActividad(
+                "Creó el módulo N° '{$modulo->numero_modulo}' para la especialidad '{$modulo->especialidadPrograma->especialidadMadre->nombre_especialidad}'",
+                "Creado"
+            );
+
+            DB::commit();
+
+            return response()->json($modulo->load('competencias'), 201);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Error al crear el módulo',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // Mostrar un módulo específico
     public function show($id)
     {
-        // Buscar los módulos con todas las relaciones necesarias
+        // Buscar los módulos con todas las relaciones necesarias + competencias
         $registros = Modulo::with([
+            'competencias', // 👈 AQUI
             'especialidadPrograma.programaEstudio:id,año,id_ciclo',
             'especialidadPrograma.programaEstudio.ciclo:id,nombre_ciclo',
             'especialidadPrograma.especialidadMadre:id,nombre_especialidad'
@@ -67,7 +118,6 @@ class ModuloController extends Controller
                 return response()->json(['message' => 'No se encontró la especialidad asociada'], 404);
             }
 
-            // Devolver sin módulos, pero con los nombres jerárquicos
             return response()->json([
                 'especialidad_programa' => [
                     'id' => $especialidadPrograma->id,
@@ -85,20 +135,17 @@ class ModuloController extends Controller
         // Si SÍ hay módulos
         $especialidadPrograma = $registros->first()->especialidadPrograma;
 
-        if ($especialidadPrograma) {
-            $especialidadPrograma = [
-                'id' => $especialidadPrograma->id,
-                'id_especialidad' => $especialidadPrograma->id_especialidad,
-                'id_programa' => $especialidadPrograma->id_programa,
-                'nro_modulos' => $especialidadPrograma->nro_modulos,
-                'anio' => $especialidadPrograma->programaEstudio?->año,
-                'nombre_ciclo' => $especialidadPrograma->programaEstudio?->ciclo?->nombre_ciclo,
+        $especialidadPrograma = [
+            'id' => $especialidadPrograma->id,
+            'id_especialidad' => $especialidadPrograma->id_especialidad,
+            'id_programa' => $especialidadPrograma->id_programa,
+            'nro_modulos' => $especialidadPrograma->nro_modulos,
+            'anio' => $especialidadPrograma->programaEstudio?->año,
+            'nombre_ciclo' => $especialidadPrograma->programaEstudio?->ciclo?->nombre_ciclo,
+            'nombre_especialidad' => $especialidadPrograma->especialidadMadre?->nombre_especialidad,
+        ];
 
-                'nombre_especialidad' => $especialidadPrograma->especialidadMadre?->nombre_especialidad,
-            ];
-        }
-
-        // Armar los módulos
+        // Armar los módulos + competencias
         $modulos = $registros->map(function ($modulo) {
             return [
                 'id' => $modulo->id,
@@ -107,6 +154,15 @@ class ModuloController extends Controller
                 'creditos' => $modulo->creditos,
                 'horas' => $modulo->horas,
                 'nro_capacidades' => $modulo->nro_capacidades,
+
+                // 👇 COMPETENCIAS DEL MÓDULO
+                'competencias' => $modulo->competencias->map(function ($competencia) {
+                    return [
+                        'id' => $competencia->id,
+                        'tipo' => $competencia->tipo,
+                        'descripcion' => $competencia->descripcion,
+                    ];
+                }),
             ];
         });
 
@@ -117,82 +173,119 @@ class ModuloController extends Controller
         ]);
     }
 
+
     // Actualizar un módulo
     public function update(Request $request, $id)
     {
         $modulo = Modulo::findOrFail($id);
 
-        $request->validate([
-            'numero_modulo' => 'sometimes|string|max:10',
-            'descripcion' => 'sometimes|nullable|string',
-            'creditos' => 'sometimes|integer|min:0',
-            'horas' => 'sometimes|integer|min:0',
-            'id_especialidad' => 'sometimes|exists:especialidad_programa,id',
-            'nro_capacidades' => 'sometimes|integer|min:0',
-        ]);
+        DB::transaction(function () use ($request, $modulo) {
 
-        // Alias bonitos
-        $alias = [
-            'numero_modulo' => 'Número del módulo',
-            'descripcion'   => 'Descripción',
-            'creditos'      => 'Créditos',
-            'horas'         => 'Horas',
-        ];
+            // =========================
+            // VALIDACIÓN
+            // =========================
+            $request->validate([
+                'numero_modulo'   => 'sometimes|string|max:10',
+                'descripcion'     => 'sometimes|nullable|string',
+                'creditos'        => 'sometimes|integer|min:0',
+                'horas'           => 'sometimes|integer|min:0',
+                'id_especialidad' => 'sometimes|exists:especialidad_programa,id',
+                'nro_capacidades' => 'sometimes|integer|min:0',
 
-        // Valores ANTES
-        $antes = $modulo->only(array_keys($alias));
+                'competencias'               => 'sometimes|array',
+                'competencias.*.tipo'          => 'required|string', // tipo
+                'competencias.*.descripcion' => 'required|string|max:225',
+            ]);
 
-        // Actualizar
-        $modulo->update($request->all());
+            // =========================
+            // ALIAS PARA ACTIVIDAD
+            // =========================
+            $alias = [
+                'numero_modulo' => 'Número del módulo',
+                'descripcion'   => 'Descripción',
+                'creditos'      => 'Créditos',
+                'horas'         => 'Horas',
+                'nro_capacidades' => 'N° de capacidades',
+            ];
 
-        // Detectar cambios (solo nombres con alias)
-        $cambios = [];
+            $antes = $modulo->only(array_keys($alias));
 
-        foreach ($antes as $campo => $valorAnterior) {
-            if ($modulo->$campo != $valorAnterior) {
-                $cambios[] = $alias[$campo];
+            // =========================
+            // ACTUALIZAR MÓDULO
+            // =========================
+            $modulo->update($request->except('competencias'));
+
+            // =========================
+            // 🔥 ELIMINAR COMPETENCIAS
+            // =========================
+            Competencia::where('id_modulo', $modulo->id)->delete();
+
+            // =========================
+            // 🔥 CREAR NUEVAS
+            // =========================
+            if ($request->filled('competencias')) {
+                foreach ($request->competencias as $competencia) {
+                    Competencia::create([
+                        'id_modulo'   => $modulo->id,
+                        'tipo'        => $competencia['tipo'], // 👈 tipo
+                        'descripcion' => $competencia['descripcion'],
+                    ]);
+                }
             }
-        }
 
-        // Mensaje
-        $descripcionCambios = empty($cambios)
-            ? "sin cambios importantes"
-            : "campos modificados: " . implode(", ", $cambios);
+            // =========================
+            // DETECTAR CAMBIOS
+            // =========================
+            $cambios = [];
 
-        // ACTIVIDAD
-        $this->registrarActividad(
-            "Actualizó el módulo '{$modulo->numero_modulo}' de la especialidad '{$modulo->especialidadPrograma->especialidadMadre->nombre_especialidad}' ({$descripcionCambios})",
-            "Actualizado"
-        );
+            foreach ($antes as $campo => $valorAnterior) {
+                if ($modulo->$campo != $valorAnterior) {
+                    $cambios[] = $alias[$campo];
+                }
+            }
 
-        return response()->json($modulo);
+            $descripcionCambios = empty($cambios)
+                ? "sin cambios importantes"
+                : "campos modificados: " . implode(", ", $cambios);
+
+            // =========================
+            // ACTIVIDAD
+            // =========================
+            $this->registrarActividad(
+                "Actualizó el módulo '{$modulo->numero_modulo}' de la especialidad '{$modulo->especialidadPrograma->especialidadMadre->nombre_especialidad}' ({$descripcionCambios})",
+                "Actualizado"
+            );
+        });
+
+        return response()->json($modulo->load('competencias'));
     }
-
-
-
-
     // Eliminar un módulo
     public function destroy($id)
     {
-        $modulo = Modulo::find($id);
+        $modulo = Modulo::with('competencias')->find($id);
 
         if (!$modulo) {
-            return response()->json(['message' => 'Modulo no encontrado'], 404);
+            return response()->json(['message' => 'Módulo no encontrado'], 404);
         }
 
+        DB::transaction(function () use ($modulo) {
 
-        $nombreModulo = $modulo->numero_modulo;
-        $nombreEspecialidad = $modulo->especialidadPrograma->especialidadMadre->nombre_especialidad ?? "desconocida";
+            $nombreModulo = $modulo->numero_modulo;
+            $nombreEspecialidad = $modulo->especialidadPrograma->especialidadMadre->nombre_especialidad ?? "desconocida";
 
+            // 🔥 ELIMINAR COMPETENCIAS
+            $modulo->competencias()->delete();
 
-        $modulo->delete();
-        // ACTIVIDAD
-        // ACTIVIDAD
-        $this->registrarActividad(
-            "Eliminó el módulo '{$nombreModulo}' de la especialidad '{$nombreEspecialidad}'",
-            "Eliminado"
-        );
+            // 🔥 ELIMINAR MÓDULO
+            $modulo->delete();
 
-        return response()->json(['message' => 'Modulo eliminado correctamente'], 204);
+            // ACTIVIDAD
+            $this->registrarActividad(
+                "Eliminó el módulo '{$nombreModulo}' de la especialidad '{$nombreEspecialidad}'",
+                "Eliminado"
+            );
+        });
+
+        return response()->json(['message' => 'Módulo eliminado correctamente'], 204);
     }
 }

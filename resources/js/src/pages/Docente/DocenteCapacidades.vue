@@ -17,8 +17,6 @@ import useCapacidadTerminalStore from "../../store/CapacidadTerminal/UseCapacida
 import useCapacidadTerminalCalificacionesStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
 import { ref, computed, onMounted } from "vue";
 import useSesionesStore from "../../store/Sesion/useSesionStore";
-import MenuTable from "../../components/table/MenuTable.vue";
-
 
 const props = defineProps({
   id: {
@@ -217,42 +215,29 @@ const estadoTexto = computed(() => {
       <div class="w-full lg:w-2/3">
         <Table>
           <THead>
-            <Th class="w-[10px]">#</Th>
-
-            <!-- 🔥 ESTA ES LA FLEXIBLE -->
-            <Th class="w-auto">Nombre Capacidad</Th>
-
-            <Th>Horas</Th>
-            <Th>Créditos T - P</Th>
+            <Th>#</Th>
+            <Th>Nombre Capacidad</Th>
             <Th>Fecha Inicio</Th>
             <Th>Fecha Fin</Th>
             <Th>Acciones</Th>
           </THead>
 
-          <TBody :filas="capacidadStore.capacidadTerminal.capacidades.length">
+          <TBody>
             <Tr v-for="(capacidad, index) in capacidadStore.capacidadTerminal.capacidades" :key="capacidad.id">
-              <Td class="text-center">{{ index + 1 }}</Td>
-              <Td class="text-center">{{ capacidad?.nombre_capacidad }}</Td>
-              <Td class="text-center">{{ capacidad?.horas }}</Td>
-              <Td class="text-center">{{ capacidad?.creditos_teoricos }} - {{ capacidad?.creditos_practicos }}</Td>
-          
-              <Td class="text-center">{{ capacidad?.fecha_inicio }}</Td>
-              <Td class="text-center">{{ capacidad?.fecha_fin }}</Td>
-              <!-- <Td class="align-middle">
+              <Td>{{ index + 1 }}</Td>
+              <Td>{{ capacidad?.nombre_capacidad }}</Td>
+              <Td>{{ capacidad?.fecha_inicio }}</Td>
+              <Td>{{ capacidad?.fecha_fin }}</Td>
+              <Td class="align-middle">
                 <div class="flex items-center justify-center gap-1">
                   <EditButton @click="showSlider(true, capacidad)" :disabled="!canEditCapacidades" />
                   <DeleteButton @click="onDelete(capacidad)" />
                 </div>
-              </Td> -->
-              <Td class="text-center text-gray-600 dark:text-gray-200">
-                <MenuTable :actions="{ view: false, edit: true, delete: true, download: false }" entity-label="Unidad"
-                  @edit="showSlider(true, capacidad)" @delete="onDelete(capacidad)" />
               </Td>
             </Tr>
           </TBody>
         </Table>
       </div>
-
     </div>
   </AuthorizationFallback>
 </template>

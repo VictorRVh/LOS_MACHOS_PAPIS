@@ -759,27 +759,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('competencias', [
         \App\Http\Controllers\CompetenciaController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-competencias|ver-permisos|ver-competencias');
 
     Route::get('competencias_index/{grupoId}', [
         \App\Http\Controllers\CompetenciaController::class,
         'getCompetenciasPorGrupo',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-competencias |ver-competencias');
 
     Route::post('competencias', [
         \App\Http\Controllers\CompetenciaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-competencias |crear-competencias');
 
     Route::patch('competencias/{id}', [
         \App\Http\Controllers\CompetenciaController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-competencias |editar-competencias');
 
     Route::delete('competencias/{id}', [
         \App\Http\Controllers\CompetenciaController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-acceso-competencias |eliminar-competencias');
 
 
     // RUTA PARA CAPACIDADES TERMINALES-COMPETENCIA

@@ -85,7 +85,7 @@ watch(
                 const num = String(i + 1).padStart(2, "0");
                 return {
                     id: num,
-                    name: `Unidad Didáctica ${num}`,
+                    name: `Unidad Didactica ${num}`,
                 };
             });
         }
@@ -127,25 +127,6 @@ const schema = yup.object().shape({
         .string()
         .nullable()
         .required("El nombre de la unidad es obligatorio."),
-    creditos_teoricos: yup
-        .number()
-        .typeError("Los créditos teóricos deben ser un número.")
-        .positive("Los créditos teóricos deben ser mayores a 0.")
-        .integer("Los créditos teóricos deben ser un número entero.")
-        .required("Los créditos teóricos son obligatorias."),
-    creditos_practicos: yup
-        .number()
-        .typeError("Los créditos prácticos deben ser un número.")
-        .positive("Los créditos prácticos deben ser mayores a 0.")
-        .integer("Los créditos prácticos deben ser un número entero.")
-        .required("Los créditos prácticos son obligatorias."),
-    horas: yup
-        .number()
-        .typeError("Las horas deben ser un número.")
-        .positive("Las horas deben ser mayores a 0.")
-        .integer("Las horas deben ser un número entero.")
-        .required("Las horas son obligatorias."),
-
     fecha_inicio: yup.date().required("La fecha de inicio es requerida.").typeError("Debe ingresar una fecha válida"),
     fecha_fin: yup.date()
         .required("La fecha de fin es requerida.")
@@ -190,7 +171,7 @@ const onSubmit = async () => {
         formData.value = initialFormData();
         formErrors.value = {};
         showToast(
-            `Unidad Didáctica ${isEditing.value ? "editada" : "creada"} exitosamente.`
+            `Unidad Didactica ${isEditing.value ? "editada" : "creada"} exitosamente.`
         );
         await capacidadStore.loadCapacidadTerminal(props.idGrupo);
         await calificacionCapacidad.loadCapacidadTerminal(props.idGrupo);
@@ -202,39 +183,19 @@ const onSubmit = async () => {
 <template>
     <AuthorizationFallback :permissions="requiredPermissions">
         <h2 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-            {{ capacidad?.id ? "Editar Unidad Didáctica" : "Agregar Unidad Didáctica" }}
+            {{ capacidad?.id ? "Editar Unidad Didactica" : "Agregar Unidad Didactica" }}
         </h2>
         <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
 
         <div class="mt-2 space-y-3 font-inter">
-            <FormInput v-model="formData.nombre_capacidad" :focus="show" label="Nombre de la unidad didáctica"
+            <FormLabelError label="Número de Unidad Didactica" required :error="formErrors?.numero_capacidad">
+                <BaseSelectModulo v-model="formData.numero_capacidad" :options="props.indexCapacidades" label="name"
+                    placeholder="Número de la unidad" />
+            </FormLabelError>
+
+
+            <FormInput v-model="formData.nombre_capacidad" :focus="show" label="Nombre de la Unidad Didactica"
                 :error="formErrors?.nombre_capacidad" required />
-            <div class="flex gap-2">
-                <!-- 3/4 -->
-                <div class="w-3/4">
-                    <FormLabelError label="Número de unidad didáctica" required
-                        :error="formErrors?.numero_capacidad">
-                        <BaseSelectModulo v-model="formData.numero_capacidad" :options="props.indexCapacidades"
-                            label="name" placeholder="seleccione" />
-                    </FormLabelError>
-                </div>
-
-                <!-- 1/4 -->
-                <div class="w-1/4">
-                    <FormInput v-model="formData.horas" :focus="show" label="Horas" :error="formErrors?.horas"
-                        required />
-                </div>
-            </div>
-
-            <div class="flex gap-2">
-
-                <FormInput v-model="formData.creditos_teoricos" :focus="show" label="Crédito teórico"
-                    :error="formErrors?.creditos_teoricos" required />
-
-                <FormInput v-model="formData.creditos_practicos" :focus="show" label="Crédito práctico"
-                    :error="formErrors?.creditos_practicos" required />
-
-            </div>
 
             <div class="flex gap-2">
                 <FormInput type="date" v-model="formData.fecha_inicio" label="Fecha de inicio"

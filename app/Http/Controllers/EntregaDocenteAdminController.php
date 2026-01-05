@@ -480,28 +480,42 @@ class EntregaDocenteAdminController extends Controller
 
     public function obtenerGruposPorPeriodo($idPeriodo)
     {
-        $grupos = Grupo::with(['periodo', 'modulo', 'docente'])
+        $grupos = Grupo::with([
+            'periodo',
+            'modulo',
+            'docente.user',
+            'especialidad.especialidadMadre'
+        ])
             ->where('id_periodo', $idPeriodo)
-            // ->where('status', 1) // si aplica
             ->get();
 
-        // Formatear nombre_grupo
         $gruposFormateados = $grupos->map(function ($grupo) {
 
+            // 🔹 NUEVO: especialidad
+            $especialidad = $grupo->especialidad->especialidadMadre->nombre_especialidad
+                ?? 'SIN ESPECIALIDAD';
+
             $periodo = $grupo->periodo->nombre_periodo ?? 'SIN PERIODO';
-            $modulo = $grupo->modulo->descripcion ?? 'SIN MÓDULO';
+            $modulo  = $grupo->modulo->descripcion ?? 'SIN MÓDULO';
 
             $seccion = $grupo->seccion ?? '-';
-            $turno = $grupo->turno ?? '-';
+            $turno   = $grupo->turno ?? '-';
             $seccionTurno = "{$seccion}{$turno}";
 
             $docente = $grupo->docente
-                ? trim($grupo->docente->user->name . ' ' . $grupo->docente->user->apellido_paterno . ' ' . $grupo->docente->user->apellido_materno)
-                : null;
+                ? trim(
+                    $grupo->docente->user->name . ' ' .
+                        $grupo->docente->user->apellido_paterno . ' ' .
+                        $grupo->docente->user->apellido_materno
+                )
+                : 'SIN DOCENTE';
 
             return [
                 'id' => $grupo->id,
-                'nombre_grupo' => "{$periodo} | {$modulo} | {$seccionTurno} | {$docente}"
+
+                // 🔥 SOLO SE AUMENTA AQUÍ
+                'nombre_grupo' =>
+                "{$especialidad} | {$modulo} |Sección: '{$seccion}' - {$turno} | {$docente}"
             ];
         });
 

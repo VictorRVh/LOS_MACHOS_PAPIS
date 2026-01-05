@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class CapacidadTerminalCompetencia extends Model
+class CapacidadCompetencia extends Model
 {
     use HasFactory;
 
-    protected $table = 'capacidades_terminales_competencia';
+    protected $table = 'capacidades_competencias';
 
     // UUID settings
     protected $keyType = 'string';
@@ -19,6 +19,7 @@ class CapacidadTerminalCompetencia extends Model
     protected $fillable = [
         'id',
         'id_competencia',
+        'id_capacidad_terminal',
         'sigla',
         'descripcion',
     ];
@@ -46,5 +47,10 @@ class CapacidadTerminalCompetencia extends Model
     public function competencia()
     {
         return $this->belongsTo(Competencia::class, 'id_competencia');
+    }
+    
+    public function capacidadTerminal()
+    {
+        return $this->belongsTo(CapacidadTerminal::class, 'id_capacidad_terminal');
     }
 }

@@ -95,7 +95,7 @@ class ReporteActaEvaluacionExport
             // FORMATEO DE FECHAS
             // =============================
             $fechaInicio = $grupo->fecha_inicio
-                ? Carbon::parse($grupo->fecha_inicio)   ->format('d/m/Y')
+                ? Carbon::parse($grupo->fecha_inicio)->format('d/m/Y')
                 : '';
 
             $fechaFin = $grupo->fecha_fin
@@ -269,6 +269,7 @@ class ReporteActaEvaluacionExport
         $totalMatriculados = 0;
         $totalAprobados = 0;
         $totalDesaprobados = 0;
+        $totalRetirados = 0;
 
         foreach ($matriculas as $index => $matricula) {
 
@@ -280,6 +281,7 @@ class ReporteActaEvaluacionExport
                 $sheet = $spreadsheet->getSheetByName('CARA1');
                 $fila = 19 + $index;
                 $colNotasInicio = 'R';
+                $colRetirado = 'R';
                 $colSuma = 'AB';
                 $colPromedio = 'AC';
             } elseif ($index <= 29) {
@@ -287,6 +289,7 @@ class ReporteActaEvaluacionExport
                 $sheet = $spreadsheet->getSheetByName('REVES1');
                 $fila = 18 + ($index - 20);
                 $colNotasInicio = 'Y';
+                $colRetirado = 'Y';
                 $colSuma = 'AI';
                 $colPromedio = 'AJ';
             } elseif ($index <= 49) {
@@ -294,6 +297,7 @@ class ReporteActaEvaluacionExport
                 $sheet = $spreadsheet->getSheetByName('CARA2');
                 $fila = 19 + ($index - 30);
                 $colNotasInicio = 'R';
+                $colRetirado = 'R';
                 $colSuma = 'AB';
                 $colPromedio = 'AC';
             } elseif ($index <= 59) {
@@ -301,6 +305,7 @@ class ReporteActaEvaluacionExport
                 $sheet = $spreadsheet->getSheetByName('REVES2');
                 $fila = 18 + ($index - 50);
                 $colNotasInicio = 'Y';
+                $colRetirado = 'Y';
                 $colSuma = 'AI';
                 $colPromedio = 'AJ';
             } else {
@@ -308,6 +313,7 @@ class ReporteActaEvaluacionExport
             }
 
             $est = $matricula->estudiante;
+            $esRetirado = ((int) $matricula->matriculado === 2);
 
             $sheet->setCellValue(
                 "C{$fila}",
@@ -337,6 +343,18 @@ class ReporteActaEvaluacionExport
                 "Q{$fila}",
                 "{$est->apellido_paterno} {$est->apellido_materno}, {$est->nombre}"
             );
+
+            if ($esRetirado) {
+
+                // Escribir RETIRADO en la columna indicada
+                $sheet->setCellValue(
+                    "{$colRetirado}{$fila}",
+                    'RETIRADO'
+                );
+
+                $totalRetirados++;
+                continue; // NO procesar notas
+            }
 
             // =============================
             // NOTAS + SUMA + PROMEDIO
@@ -379,11 +397,12 @@ class ReporteActaEvaluacionExport
                 $contadorNotas > 0 ? round($sumaNotas / $contadorNotas, 2) : ''
             );
 
-            if ($contadorNotas > 0) {
-                $totalMatriculados++;
+            $totalMatriculados++;
 
-                $promedioEstudiante = $sumaNotas / $contadorNotas;
-                if ($promedioEstudiante >= 11) {
+            if ($contadorNotas > 0) {
+                $promedio = $sumaNotas / $contadorNotas;
+
+                if ($promedio >= 11) {
                     $totalAprobados++;
                 } else {
                     $totalDesaprobados++;

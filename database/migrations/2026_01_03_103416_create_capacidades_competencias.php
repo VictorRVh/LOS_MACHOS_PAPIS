@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('capacidades_terminales_competencia', function (Blueprint $table) {
+        Schema::create('capacidades_competencias', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
             // UUID que viene de la tabla modulos
             $table->uuid('id_competencia');
+            $table->uuid('id_capacidad_terminal');
 
             $table->string('sigla')->nullable();
 
@@ -25,6 +26,7 @@ return new class extends Migration
 
             // Si deseas clave foránea real (recomendado)
             $table->foreign('id_competencia')->references('id')->on('competencias')->onDelete('cascade');
+            $table->foreign('id_capacidad_terminal')->references('id')->on('capacidad_terminal')->onDelete('cascade');
         });
     }
 

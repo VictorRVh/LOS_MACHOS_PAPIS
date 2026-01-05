@@ -47,8 +47,8 @@ class Competencia extends Model
         return $this->belongsTo(Modulo::class, 'id_modulo');
     }
 
-    public function capacidadTerminalCompetencia()
+    public function capacidadCompetencia()
     {
-        return $this->hasMany(CapacidadTerminalCompetencia::class, 'id_competencia');
+        return $this->hasMany(CapacidadCompetencia::class, 'id_competencia');
     }
 }

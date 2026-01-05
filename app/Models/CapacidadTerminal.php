@@ -264,4 +264,9 @@ class CapacidadTerminal extends Model
     {
         return $this->hasMany(NotaCapacidadTerminal::class, 'id_capacidad');
     }
+    
+    public function capacidadCompetencia()
+    {
+        return $this->hasMany(CapacidadCompetencia::class, 'id_capacidad_terminal');
+    }
 }

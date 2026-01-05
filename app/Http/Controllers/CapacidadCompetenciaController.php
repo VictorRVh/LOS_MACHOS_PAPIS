@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CapacidadTerminalCompetencia;
+use App\Models\CapacidadCompetencia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class CapacidadTerminalCompetenciaController extends Controller
+class CapacidadCompetenciaController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = CapacidadTerminalCompetencia::with('competencia');
+        $query = CapacidadCompetencia::with('competencia');
 
         if ($request->filled('id_competencia')) {
             $query->where('id_competencia', $request->id_competencia);
@@ -51,11 +51,12 @@ class CapacidadTerminalCompetenciaController extends Controller
     {
         $data = $request->validate([
             'id_competencia' => ['required', 'uuid', 'exists:competencias,id'],
+            'id_capacidad_terminal' => ['required', 'uuid', 'exists:capacidad_terminal,id'],
             'sigla' => ['nullable', 'string', 'max:20'],
             'descripcion' => ['required', 'string'],
         ]);
 
-        $capacidad = CapacidadTerminalCompetencia::create($data);
+        $capacidad = CapacidadCompetencia::create($data);
 
         return response()->json([
             'message' => 'Capacidad terminal creada correctamente',
@@ -68,7 +69,7 @@ class CapacidadTerminalCompetenciaController extends Controller
      */
     public function show(string $id)
     {
-        $capacidad = CapacidadTerminalCompetencia::with('competencia')
+        $capacidad = CapacidadCompetencia::with('competencia')
             ->findOrFail($id);
 
         return response()->json($capacidad);
@@ -79,7 +80,7 @@ class CapacidadTerminalCompetenciaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $capacidad = CapacidadTerminalCompetencia::findOrFail($id);
+        $capacidad = CapacidadCompetencia::findOrFail($id);
 
         $data = $request->validate([
             'sigla' => ['nullable', 'string', 'max:20'],
@@ -99,7 +100,7 @@ class CapacidadTerminalCompetenciaController extends Controller
      */
     public function destroy(string $id)
     {
-        $capacidad = CapacidadTerminalCompetencia::findOrFail($id);
+        $capacidad = CapacidadCompetencia::findOrFail($id);
         $capacidad->delete();
 
         return response()->json([

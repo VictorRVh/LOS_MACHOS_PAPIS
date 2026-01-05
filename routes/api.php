@@ -759,7 +759,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('competencias', [
         \App\Http\Controllers\CompetenciaController::class,
         'index',
-    ])->middleware('permission:todo-acceso-competencias|ver-permisos|ver-competencias');
+    ])->middleware('permission:todo-acceso-mo|ver-permisos|ver-competencias');
 
     Route::get('competencias_index/{grupoId}', [
         \App\Http\Controllers\CompetenciaController::class,
@@ -779,11 +779,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('competencias/{id}', [
         \App\Http\Controllers\CompetenciaController::class,
         'destroy',
-<<<<<<< HEAD
-    ])->middleware('permission:todo-acceso-competencias |eliminar-competencias');
-=======
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-mis-modulos');
->>>>>>> 049f2f2c79b4dcbcafa87260717ca68112890bfe
 
 
     // RUTA PARA CAPACIDADES TERMINALES-COMPETENCIA

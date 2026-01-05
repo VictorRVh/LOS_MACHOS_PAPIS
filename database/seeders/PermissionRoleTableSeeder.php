@@ -70,11 +70,11 @@ class PermissionRoleTableSeeder extends Seeder
             'ver-comision-docente',
 
             //Competencias 
-            'todo-acceso-competencias-docente',
-            'ver-competencias-docente',
-            'crear-competencias-docente',
-            'editar-competencias-docente',
-            'eliminar-competencias-docente',
+            'todo-acceso-capacidades-docente',
+            'ver-capacidades-docente',
+            'crear-capacidades-docente',
+            'editar-capacidades-docente',
+            'eliminar-capacidades-docente',
 
         ];
 

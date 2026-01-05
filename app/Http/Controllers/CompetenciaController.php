@@ -49,7 +49,7 @@ class CompetenciaController extends Controller
         // Obtener las capacidades terminales asociadas a las competencias
         $competenciasIds = $competencias->pluck('id');
 
-        $capacidades = DB::table('capacidades_terminales_competencia')
+        $capacidades = DB::table('capacidades_competencias')
             ->whereIn('id_competencia', $competenciasIds)
             ->orderBy('created_at')
             ->get()

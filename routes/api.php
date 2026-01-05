@@ -779,32 +779,36 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('competencias/{id}', [
         \App\Http\Controllers\CompetenciaController::class,
         'destroy',
+<<<<<<< HEAD
     ])->middleware('permission:todo-acceso-competencias |eliminar-competencias');
+=======
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-mis-modulos');
+>>>>>>> 049f2f2c79b4dcbcafa87260717ca68112890bfe
 
 
     // RUTA PARA CAPACIDADES TERMINALES-COMPETENCIA
-    Route::get('capacidad_terminal_competencia', [
-        \App\Http\Controllers\CapacidadTerminalCompetenciaController::class,
+    Route::get('capacidad_competencia', [
+        \App\Http\Controllers\CapacidadCompetenciaController::class,
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
     
-    Route::get('capacidad_terminal_competencia_index/{competenciaId}', [
-        \App\Http\Controllers\CapacidadTerminalCompetenciaController::class,
+    Route::get('capacidad_competencia_index/{competenciaId}', [
+        \App\Http\Controllers\CapacidadCompetenciaController::class,
         'getCapacidadesPorCompetencia',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
 
-    Route::post('capacidad_terminal_competencia', [
-        \App\Http\Controllers\CapacidadTerminalCompetenciaController::class,
+    Route::post('capacidad_competencia', [
+        \App\Http\Controllers\CapacidadCompetenciaController::class,
         'store',
     ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos|ver-mis-modulos');
 
-    Route::patch('capacidad_terminal_competencia/{id}', [
-        \App\Http\Controllers\CapacidadTerminalCompetenciaController::class,
+    Route::patch('capacidad_competencia/{id}', [
+        \App\Http\Controllers\CapacidadCompetenciaController::class,
         'update',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
 
-    Route::delete('capacidad_terminal_competencia/{id}', [
-        \App\Http\Controllers\CapacidadTerminalCompetenciaController::class,
+    Route::delete('capacidad_competencia/{id}', [
+        \App\Http\Controllers\CapacidadCompetenciaController::class,
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
 

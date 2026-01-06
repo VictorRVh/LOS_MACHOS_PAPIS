@@ -54,9 +54,13 @@ class GrupoController extends Controller
             // 'modulo'       => $grupo->modulo
             //     ? $grupo->modulo->numero_modulo . ': ' . $grupo->modulo->descripcion
             //     : null,
+            'id_modulo'       => $grupo->modulo
+                ? $grupo->modulo->id
+                : null,
             'modulo'       => $grupo->modulo
                 ? $grupo->modulo->descripcion
                 : null,
+
             'seccion'      => $grupo->seccion,
             'turno'        => $grupo->turno,
             'docente'      => $grupo->docente && $grupo->docente->user

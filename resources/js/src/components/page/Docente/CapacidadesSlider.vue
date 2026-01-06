@@ -1,32 +1,49 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import FormInput from "../../ui/FormInput.vue";
+import FormLabelError from "../../ui/FormLabelError.vue";
 import Button from "../../ui/Button.vue";
 import AuthorizationFallback from "../../../components/page/AuthorizationFallback.vue";
 import useValidation from "../../../composables/useValidation";
 import useHttpRequest from "../../../composables/useHttpRequest";
 import useModalToast from "../../../composables/useModalToast";
+import useCapacidadesStore from "../../../store/CapacidadTerminal/UseCapacidadUnidadesStore";
+import useCompetenciasStore from "../../../store/CapacidadTerminal/UseCompetenciasStore";
+import BaseSelectGrupo from "../../ui/BaseSelectGrupo.vue";
 import * as yup from "yup";
 
 /* =========================
-   PROPS & EMITS
+   PROPS
 ========================= */
 const props = defineProps({
-    show: {
-        type: Boolean,
-        default: false,
-    },
+    show: Boolean,
     capacidad: {
-        type: [Object, null],
-        default: () => null,
+        type: Object,
+        default: null,
     },
-    idCompetencia: {
-        type: [Number, String],
-        required: true,
+    idGrupo: {
+        type: String,
+        required: true, // para UNIDADES
+    },
+    idModulo: {
+        type: String,
+        required: true, // SOLO para COMPETENCIAS
     },
 });
 
 const emit = defineEmits(["hide"]);
+
+/* =========================
+   STORES
+========================= */
+const capacidadesStore = useCapacidadesStore();
+const competenciasStore = useCompetenciasStore();
+
+/* =========================
+   DATA
+========================= */
+const unidades = ref([]);
+const capacidades = ref([]);
 
 /* =========================
    COMPOSABLES
@@ -39,46 +56,55 @@ const {
     saving,
     update: updateCompetencia,
     updating,
-} = useHttpRequest("/capacidades-terminales-competencia");
+} = useHttpRequest("/capacidad_competencia");
 
 /* =========================
-   PERMISOS
-========================= */
-const requiredPermissions = computed(() => {
-    if (!props.capacidad?.id) {
-        return [
-            "todo-acceso-capacidad-terminal-docente",
-            "crear-capacidad-terminal-docente",
-        ];
-    }
-    return [
-        "todo-acceso-capacidad-terminal-docente",
-        "editar-capacidad-terminal-docente",
-    ];
-});
-
-/* =========================
-   FORM DATA
+   FORM
 ========================= */
 const initialFormData = () => ({
-    id_competencia: props.idCompetencia,
-    sigla: "",
+    id_capacidad_terminal: null,
+    id_competencia: null,
     descripcion: "",
 });
 
 const formData = ref(initialFormData());
 const formErrors = ref({});
-
 const isEditing = computed(() => !!props.capacidad?.id);
 
 /* =========================
-   WATCH EDIT MODE
+   PERMISOS
+========================= */
+const requiredPermissions = computed(() =>
+    isEditing.value
+        ? ["todo-acceso-capacidad-terminal-docente", "editar-capacidad-terminal-docente"]
+        : ["todo-acceso-capacidad-terminal-docente", "crear-capacidad-terminal-docente"]
+);
+
+/* =========================
+   LOAD DATA
+========================= */
+onMounted(async () => {
+    // 🔹 UNIDADES (por id)
+    await capacidadesStore.loadUnidadesDidacticas(props.idGrupo);
+    unidades.value = capacidadesStore.unidadesDidacticas;
+
+    // 🔹 COMPETENCIAS (SOLO por idModulo)
+    await competenciasStore.loadCompetencias(props.idModulo);
+    capacidades.value = competenciasStore.competencias;
+});
+
+/* =========================
+   WATCH EDIT
 ========================= */
 watch(
     () => props.capacidad,
-    (newCapacidad) => {
-        if (props.show && newCapacidad?.id) {
-            formData.value = { ...initialFormData(), ...newCapacidad };
+    (data) => {
+        if (props.show && data?.id) {
+            formData.value = {
+                id_capacidad_terminal: data.id_capacidad_terminal,
+                id_competencia: data.id_competencia,
+                descripcion: data.descripcion,
+            };
             formErrors.value = {};
         }
     },
@@ -86,22 +112,12 @@ watch(
 );
 
 /* =========================
-   VALIDACIÓN YUP
+   VALIDACIÓN
 ========================= */
-yup.setLocale({
-    mixed: {
-        required: "Este campo es obligatorio.",
-    },
-});
-
-const schema = yup.object().shape({
-    sigla: yup
-        .string()
-        .required("La sigla es obligatoria.")
-        .max(10, "Máximo 10 caracteres."),
-    descripcion: yup
-        .string()
-        .required("La descripción es obligatoria."),
+const schema = yup.object({
+    id_capacidad_terminal: yup.string().required("Debe seleccionar una unidad."),
+    id_competencia: yup.string().required("Debe seleccionar una capacidad."),
+    descripcion: yup.string().required("La descripción es obligatoria."),
 });
 
 /* =========================
@@ -116,27 +132,19 @@ const onCancel = () => {
 const onSubmit = async () => {
     if (saving.value || updating.value) return;
 
-    const data = { ...formData.value };
-
-    const { validated, errors } = await runYupValidation(schema, data);
+    const { validated, errors } = await runYupValidation(schema, formData.value);
     if (!validated) {
         formErrors.value = errors;
         return;
     }
 
-    formErrors.value = {};
-
     const response = isEditing.value
-        ? await updateCompetencia(props.capacidad.id, data)
-        : await createCompetencia(data);
+        ? await updateCompetencia(props.capacidad.id, formData.value)
+        : await createCompetencia(formData.value);
 
     if (response?.id) {
-        showToast(
-            `Competencia ${isEditing.value ? "editada" : "creada"} exitosamente.`
-        );
-
-        formData.value = initialFormData();
-        emit("hide");
+        showToast(`Competencia ${isEditing.value ? "editada" : "creada"} correctamente`);
+        onCancel();
     }
 };
 </script>
@@ -150,37 +158,38 @@ const onSubmit = async () => {
         <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
 
         <div class="space-y-3 font-inter">
-            <FormInput
-                v-model="formData.sigla"
-                label="Sigla"
-                required
-                :error="formErrors?.sigla"
-            />
+            <!-- CAPACIDAD / COMPETENCIA -->
+            <FormLabelError label="Competencias" required :error="formErrors?.id_competencia">
+                <BaseSelectGrupo v-model="formData.id_competencia" :options="capacidades" label="tipo" value="id"
+                    placeholder="Seleccione una capacidad" />
+            </FormLabelError>
+            <!-- UNIDAD DIDÁCTICA -->
+            <FormLabelError label="Unidad didáctica" required :error="formErrors?.id_capacidad_terminal">
+                <BaseSelectGrupo v-model="formData.id_capacidad_terminal" :options="unidades" label="descripcion"
+                    value="id" placeholder="Seleccione una unidad" />
+            </FormLabelError>
 
-            <FormInput
-                v-model="formData.descripcion"
-                label="Descripción"
-                required
-                :error="formErrors?.descripcion"
-            />
+
+
+            <!-- DESCRIPCIÓN -->
+            <FormInput v-model="formData.descripcion" label="Descripción" type="textarea" :maxlength="225" required
+                :error="formErrors?.descripcion" />
+            <!-- Contador -->
+            <div class="flex justify-end">
+                <span class="text-xs" :class="formData.descripcion.length > 200
+                    ? 'text-red-500'
+                    : 'text-gray-400'">
+                    {{ formData.descripcion.length }}/225
+                </span>
+            </div>
 
             <div class="flex gap-2 mt-4">
-                <Button
-                    :title="isEditing ? 'Guardar cambios' : 'Crear competencia'"
-                    :loading-title="isEditing ? 'Guardando...' : 'Creando...'"
-                    :loading="saving || updating"
-                    :disabled="saving || updating"
-                    class="!w-full"
-                    @click="onSubmit"
-                />
+                <Button :title="isEditing ? 'Guardar cambios' : 'Crear competencia'"
+                    :loading-title="isEditing ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
+                    :disabled="saving || updating" class="!w-full" @click="onSubmit" />
 
-                <Button
-                    v-if="isEditing"
-                    title="Cancelar"
-                    variant="outline"
-                    class="bg-red-500 hover:bg-red-600 text-white"
-                    @click="onCancel"
-                />
+                <Button v-if="isEditing" title="Cancelar" variant="outline"
+                    class="bg-red-500 hover:bg-red-600 text-white" @click="onCancel" />
             </div>
         </div>
     </AuthorizationFallback>

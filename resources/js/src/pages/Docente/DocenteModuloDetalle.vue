@@ -11,18 +11,8 @@ const isLoading = ref(true);
 const errorAlCargar = ref(false);
 
 const groupId = route.params.id;
+const id_modulo = ref(null);
 const breadcrumb = useBreadcrumbStore();
-
-
-const navLinks = [
-  { text: 'Documentos', to: { name: 'docente.modulo.detalle.documentos', params: { id: groupId } } },
-  { text: 'Sesiones y asistencia', to: { name: 'docente.modulo.detalle.asistencia', params: { id: groupId } } },
-  { text: 'Calificaciones', to: { name: 'docente.modulo.detalle.calificaciones', params: { id: groupId } } },
-  { text: 'Unidades Didácticas', to: { name: 'docente.modulo.detalle.unidades', params: { id: groupId } } },
-  { text: 'Capacidades', to: { name: 'docente.modulo.detalle.capacidades', params: { id: groupId } } },
-  { text: 'Prácticas', to: { name: 'docente.modulo.detalle.practicas', params: { id: groupId } } },
-  { text: 'Alumnos', to: { name: 'docente.modulo.detalle.alumnos', params: { id: groupId } } },
-];
 
 const tituloPrincipal = computed(() => {
   if (!infoGrupo.value) return 'Grupo';
@@ -41,7 +31,9 @@ onMounted(async () => {
       await grupoStore.loadInfoGrupo(groupId);
     }
     infoGrupo.value = grupoStore.infoGrupo;
+    id_modulo.value = grupoStore?.infoGrupo?.id_modulo;
     breadcrumb.setTextItemAuto(`${infoGrupo?.value?.especialidad} | M: ${infoGrupo?.value?.modulo} | Grupo: ${infoGrupo?.value?.seccion}`, groupId, "moduloAsignado", { name: 'docente.modulo.detalle', params: { groupId } });
+
   } catch (error) {
     console.error("Error al cargar la información del grupo:", error);
     errorAlCargar.value = true;
@@ -49,6 +41,25 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
+
+console.log(id_modulo.value)
+const dataReady = computed(() => !!id_modulo.value);
+
+const navLinks = computed(() => {
+  if (!dataReady.value) return [];
+
+  return [
+    { text: 'Documentos', to: { name: 'docente.modulo.detalle.documentos', params: { id: groupId } } },
+    { text: 'Sesiones y asistencia', to: { name: 'docente.modulo.detalle.asistencia', params: { id: groupId } } },
+    { text: 'Calificaciones', to: { name: 'docente.modulo.detalle.calificaciones', params: { id: groupId } } },
+    { text: 'Unidades Didácticas', to: { name: 'docente.modulo.detalle.unidades', params: { id: groupId } } },
+    { text: 'Capacidades', to: { name: 'docente.modulo.detalle.capacidades', params: { id: groupId, idModulo: id_modulo.value } } },
+    { text: 'Prácticas', to: { name: 'docente.modulo.detalle.practicas', params: { id: groupId } } },
+    { text: 'Alumnos', to: { name: 'docente.modulo.detalle.alumnos', params: { id: groupId } } },
+  ];
+});
+
+
 </script>
 
 <template>

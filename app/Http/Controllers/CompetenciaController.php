@@ -25,46 +25,20 @@ class CompetenciaController extends Controller
         );
     }
 
-    public function getCompetenciasPorGrupo($grupoId)
+    public function getCompetenciasPorModulo(string $idModulo)
     {
-        // Obtener el módulo asociado al grupo
-        $grupo = DB::table('grupo')
-            ->where('id', $grupoId)
-            ->first();
-
-        if (!$grupo) {
-            return collect(); // vacío si no existe
-        }
-
-        // Obtener las competencias del módulo
-        $competencias = DB::table('competencias')
-            ->where('id_modulo', $grupo->id_modulo)
+        return DB::table('competencias')
+            ->select(
+                'id',
+                'tipo',
+                'descripcion',
+              //  'created_at'
+            )
+            ->where('id_modulo', $idModulo)
             ->orderBy('created_at')
             ->get();
-
-        if ($competencias->isEmpty()) {
-            return collect();
-        }
-
-        // Obtener las capacidades terminales asociadas a las competencias
-        $competenciasIds = $competencias->pluck('id');
-
-        $capacidades = DB::table('capacidades_competencias')
-            ->whereIn('id_competencia', $competenciasIds)
-            ->orderBy('created_at')
-            ->get()
-            ->groupBy('id_competencia');
-
-        // Armar estructura final
-        $resultado = $competencias->map(function ($competencia) use ($capacidades) {
-            $competencia->capacidad_terminal_competencia =
-                $capacidades->get($competencia->id, collect());
-
-            return $competencia;
-        });
-
-        return $resultado;
     }
+
 
     /**
      * Store a newly created resource in storage.

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\CapacidadCompetencia;
+use App\Models\CapacidadTerminal;
+use App\Models\Grupo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -24,25 +26,59 @@ class CapacidadCompetenciaController extends Controller
         );
     }
 
-    public function getCapacidadesPorCompetencia($competenciaId)
+    public function getCapacidadesPorCompetencia($idGrupo)
     {
-        // Verificar que exista la competencia
-        $competencia = DB::table('competencias')
-            ->where('id', $competenciaId)
-            ->first();
+        // 1️⃣ Validar grupo
+        $grupo = Grupo::find($idGrupo);
 
-        if (!$competencia) {
-            return collect(); // vacío si no existe
+        if (!$grupo) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Grupo no encontrado'
+            ], 404);
         }
 
-        // Obtener capacidades terminales de la competencia
-        $capacidades = DB::table('capacidades_terminales_competencia')
-            ->where('id_competencia', $competenciaId)
-            ->orderBy('created_at')
+        // 2️⃣ Unidades didácticas del grupo
+        $unidades = CapacidadTerminal::where('id_grupo', $idGrupo)
+            ->orderByRaw('CAST(numero_capacidad AS UNSIGNED) ASC')
             ->get();
 
-        return $capacidades;
+        if ($unidades->isEmpty()) {
+            return response()->json([
+                'ok' => true,
+                'data' => []
+            ]);
+        }
+
+        // 3️⃣ Capacidades de todas las unidades
+        $capacidades = DB::table('capacidades')
+            ->whereIn('id_capacidad_terminal', $unidades->pluck('id'))
+            ->orderBy('created_at')
+            ->get()
+            ->groupBy('id_capacidad_terminal');
+
+        // 4️⃣ Armar respuesta FINAL
+        $resultado = $unidades->map(function ($unidad) use ($capacidades) {
+            return [
+                'id' => $unidad->id,
+              //  'numero' => $unidad->numero_capacidad,
+                'nombre' => $unidad->nombre_capacidad,
+             //    'fecha_inicio' => $unidad->fecha_inicio,
+             //   'fecha_fin' => $unidad->fecha_fin,
+             //   'creditos_teoricos' => $unidad->creditos_teoricos,
+             //   'creditos_practicos' => $unidad->creditos_practicos,
+             //   'status' => $unidad->status,
+                'capacidades' => $capacidades->get($unidad->id, collect())
+            ];
+        });
+
+        return response()->json([
+            'ok' => true,
+            'grupo_id' => $idGrupo,
+            'unidades' => $resultado
+        ]);
     }
+
 
     /**
      * Crear capacidad terminal

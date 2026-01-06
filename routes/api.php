@@ -650,6 +650,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'indexGrupo',
     ])->middleware('permission:todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
 
+    Route::get('unidades_didacticas/{id}', [
+        \App\Http\Controllers\CapacidadTerminalController::class,
+        'indexUnidadDidactica',
+    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
+
     Route::get('nro_capacidades/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'nroCapacidades',
@@ -765,10 +770,10 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-mo|ver-permisos|ver-competencias');
 
-    Route::get('competencias_index/{grupoId}', [
+    Route::get('competencias_index/{idModulo}', [
         \App\Http\Controllers\CompetenciaController::class,
-        'getCompetenciasPorGrupo',
-    ])->middleware('permission:todo-acceso-competencias |ver-competencias');
+        'getCompetenciasPorModulo',
+    ])->middleware('permission:todo-acceso-competencias |ver-competencias|ver-mis-modulos');
 
     Route::post('competencias', [
         \App\Http\Controllers\CompetenciaController::class,
@@ -792,7 +797,7 @@ Route::middleware('auth:sanctum')->group(function () {
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
 
-    Route::get('capacidad_competencia_index/{competenciaId}', [
+    Route::get('capacidad_competencia_index/{idGrupo}', [
         \App\Http\Controllers\CapacidadCompetenciaController::class,
         'getCapacidadesPorCompetencia',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
@@ -869,7 +874,6 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy',
     ])->middleware('permission:todo-acceso-sesiones-docente|eliminar-sesiones-docente');
 
-
     // RUTA PARA ASISTENCIA
     Route::get('asistencia', [
         \App\Http\Controllers\AsistenciaController::class,
@@ -927,7 +931,6 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\EntregasRealizadasController::class,
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-mis-modulos');
-
 
     //RUTA PARA EGRESADOS
     Route::get('egresados', [

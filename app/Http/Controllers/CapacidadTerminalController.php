@@ -77,6 +77,27 @@ class CapacidadTerminalController extends Controller
 
         return response()->json($capacidad);
     }
+    public function indexUnidadDidactica($idGrupo)
+    {
+        // Verificar que el grupo exista
+        $grupo = Grupo::find($idGrupo);
+
+        if (!$grupo) {
+            return response()->json([
+                'message' => 'Grupo no encontrado'
+            ], 404);
+        }
+
+        // Obtener SOLO las unidades didácticas del grupo
+        $unidades = CapacidadTerminal::where('id_grupo', $idGrupo)
+            ->orderByRaw('CAST(numero_capacidad AS UNSIGNED) ASC')
+            ->get([
+                'id',
+                'nombre_capacidad as descripcion'
+            ]);
+
+        return response()->json($unidades);
+    }
 
     // POST /api/capacidad-terminal
     public function store(Request $request)

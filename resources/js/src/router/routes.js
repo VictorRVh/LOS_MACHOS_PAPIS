@@ -295,7 +295,7 @@ export default [
                 { text: 'Calificaciones', to: { name: 'docente.modulo.detalle.calificaciones', params: { id: route.params.id } } },
                 { text: 'Prácticas', to: { name: 'docente.modulo.detalle.practicas', params: { id: route.params.id } } },
                 { text: 'Alumnos', to: { name: 'docente.modulo.detalle.alumnos', params: { id: route.params.id } } },
-                { text: 'capacidades', to: { name: 'docente.modulo.detalle.capacidades', params: { id: route.params.id } } },
+                { text: 'Capacidades', to: { name: 'docente.modulo.detalle.capacidades', params: { id: route.params.id, idModulo: route.params.idModulo} } },
                 { text: 'Unidades Didácticas', to: { name: 'docente.modulo.detalle.unidades', params: { id: route.params.id } } },
             ]
         },
@@ -336,14 +336,14 @@ export default [
                 meta: { parent: 'docente.modulo.detalle', breadcrumb: { text: 'Alumnos' } }
             },
             {
-                path: 'capacidades',
+                path: 'capacidades/:idModulo',
                 name: 'docente.modulo.detalle.capacidades',
                 component: () => import('../pages/Docente/DocenteCapacidades.vue'),
                 props: true,
                 meta: { parent: 'docente.modulo.detalle', breadcrumb: { text: 'Capacidades' } }
             },
             {
-                path: 'capacidades',
+                path: 'unidades',
                 name: 'docente.modulo.detalle.unidades',
                 component: () => import('../pages/Docente/DocenteCapacidadTerminal.vue'),
                 props: true,

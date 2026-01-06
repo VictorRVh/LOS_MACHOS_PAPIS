@@ -21,6 +21,8 @@ class EstudianteDocumento extends Model
         'tipo_documento',
         'fecha_emision',
         'id_autor',
+        'codigo',
+        'duplicado'
     ];
 
      protected $casts = [

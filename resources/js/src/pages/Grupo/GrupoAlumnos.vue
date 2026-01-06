@@ -22,6 +22,7 @@ import { generateCertificate } from "../../pdf/CertificadoPDF.js";
 
 // IMPORTACIÓN DE CONSTANCIA
 import { generateConstanciaEstudiante } from "../../pdf/CosntanciaEstudiante.js";
+import useCertificadoStore from '../../store/Grupo/useCertificadoStore.js';
 
 const props = defineProps({
   id: { type: [String, Number], required: true },
@@ -29,11 +30,17 @@ const props = defineProps({
 
 const { showToast } = useModalToast();
 const matriculaStore = useMatriculaStore();
+const certificadoStore = useCertificadoStore();
 const dataAlumnoCertificado = useCertificado();
 const { exportarAlumnos } = useExportAlumnos();
 
 const loading = ref(true);
 const estudiantesSeleccionados = ref([]);
+
+const showCertificadoModal = ref(false);
+const codigoCertificado = ref('');
+const selectedMatriculaId = ref(null);
+const esDuplicado = ref(false);
 
 const matriculados = computed(() => matriculaStore.matriculadosPorGrupoExtendido);
 
@@ -110,13 +117,13 @@ const imprimirConstancia = (estudiante) => {
 };
 
 // FUNCIÓN PARA GENERAR EL CERTIFICADO MODULAR
-const generateSelectedCertificates = async (idMatricula) => {
+const generateSelectedCertificates = async (idMatricula, codigo) => {
   try {
     await dataAlumnoCertificado.loadCertificados(idMatricula);
     const data = dataAlumnoCertificado.certificados;
 
     if (data) {
-      generateCertificate(data);
+      generateCertificate(data, codigo);
     } else {
       showToast("No se encontraron datos para el certificado", "warning");
     }
@@ -143,6 +150,31 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
   }
 };
 
+const openCertificadoModal = async (matriculaId) => {
+  selectedMatriculaId.value = matriculaId;
+  codigoCertificado.value = '';
+
+  const response = await certificadoStore.loadCheckCertificados({
+    id_matricula: matriculaId,
+    tipo_documento: 3,
+  });
+
+  esDuplicado.value = response.existe;
+
+  showCertificadoModal.value = true;
+};
+
+const emitirCertificado = () => {
+  // if (!codigoCertificado.value) return;
+
+  generateSelectedCertificates(
+    selectedMatriculaId.value,
+    codigoCertificado.value
+  );
+
+  showCertificadoModal.value = false;
+};
+
 
 </script>
 
@@ -151,7 +183,7 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
     <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
       <div class="flex justify-end mb-4 gap-6 ml-2">
         <Button title="Descargar nomina" @click="descargarNomina(props.id)" variant="secondary" />
-        <Button title="Exporta Alumos" @click="exportar()" variant="secondary" />
+        <Button title="Exportar Alumnos" @click="exportar()" variant="secondary" />
         <Button title="Exporta registro de matrículas y evaluaciones" @click="exportarMatriculaEvaluaciones(props.id)"
           variant="secondary" />
       </div>
@@ -194,7 +226,7 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
                 </BaseButton>
 
                 <!-- BOTÓN CERTIFICADO MODULAR -->
-                <BaseButton title="Certificado Modular" @click="generateSelectedCertificates(estudiante.id_matricula)"
+                <BaseButton title="Certificado Modular" @click="openCertificadoModal(estudiante.id_matricula)"
                   class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
                   <template #icon>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -225,7 +257,7 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
       <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
       <div class="mt-4 space-y-3">
         <p class="text-gray-600 dark:text-gray-300">Estás a punto de mover <strong>{{ estudiantesSeleccionados.length
-            }}</strong> estudiantes.</p>
+        }}</strong> estudiantes.</p>
         <div class="flex justify-end gap-2 mt-6">
           <Button title="Cancelar" variant="secondary" @click="showModal = false" />
           <Button title="Confirmar" variant="primary" :disabled="!nuevoGrupoId || saving" :loading="saving"
@@ -233,5 +265,41 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
         </div>
       </div>
     </Slider>
+
+    <!-- MODAL CERTIFICADO -->
+    <div v-if="showCertificadoModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md p-6">
+        <h2 class="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">
+          Emitir Certificado Modular
+        </h2>
+
+        <!-- AVISO DUPLICADO -->
+        <div v-if="esDuplicado" class="mb-4 p-3 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
+          ⚠️ Este certificado ya fue emitido.
+          Se marcará como <b>DUPLICADO</b>.
+        </div>
+
+        <!-- INPUT SOLO SI NO ES DUPLICADO -->
+        <div v-if="!esDuplicado" class="mb-4">
+          <label class="block text-sm font-medium mb-1">
+            Código del certificado
+          </label>
+          <input v-model="codigoCertificado" type="text" placeholder="Ej: CM-2026-001"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500" />
+        </div>
+
+        <!-- ACCIONES -->
+        <div class="flex justify-end gap-2">
+          <button @click="showCertificadoModal = false" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
+            Cancelar
+          </button>
+
+          <button @click="emitirCertificado" class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white">
+            {{ esDuplicado ? 'Emitir duplicado' : 'Emitir' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
   </AuthorizationFallback>
 </template>

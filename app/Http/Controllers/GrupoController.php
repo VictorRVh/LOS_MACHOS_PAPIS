@@ -759,6 +759,7 @@ class GrupoController extends Controller
             ->join('especialidad_madre as em', 'em.id', '=', 'ep.id_especialidad')
             ->where('m.id', $idMatricula)
             ->select(
+                'm.id as id_matricula',
                 DB::raw("
                 CONCAT(
                     e.apellido_paterno, ' ',
@@ -770,8 +771,8 @@ class GrupoController extends Controller
 
                 // 🔥 MÓDULO → UNIDAD DE COMPETENCIA
                 'mo.descripcion as unidad_competencia',
-                   'mo.creditos',
-                   'mo.horas',
+                'mo.creditos',
+                'mo.horas',
                 'g.fecha_inicio',
                 'g.fecha_fin',
                 'g.id as id_grupo',
@@ -807,6 +808,7 @@ class GrupoController extends Controller
         // RESPUESTA FINAL (PEDAGÓGICA)
         // ===============================
         return response()->json([
+            'id_matricula' => $matricula->id_matricula,
             'apellidos_nombres' => $matricula->apellidos_nombres,
             'especialidad'      => $matricula->especialidad,
 

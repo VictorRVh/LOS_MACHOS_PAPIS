@@ -1,5 +1,8 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import useHttpRequest from "../composables/useHttpRequest";
+
+const { store: createCertificado } = useHttpRequest("/estudiante-documento");
 
 // ===== FUNCIÓN FECHA ACTUAL FORMAL =====
 function obtenerFechaActual() {
@@ -13,8 +16,24 @@ function obtenerFechaActual() {
 }
 
 // ===== GENERAR CERTIFICADO (FINAL) =====
-export function generateCertificate(data, certificado) {
-  
+export async function generateCertificate(data, codigo, certificado) {
+
+  const payload = {
+    id_matricula: data.id_matricula,
+    tipo_documento: 3, // CONSTANCIA DE ESTUDIOS
+    fecha_emision: new Date().toISOString().slice(0, 10),
+    codigo: codigo
+  };
+
+  // 2️⃣ Guardar en BD
+  const response = await createCertificado(payload);
+  if (!response?.success) {
+    showToast(
+      `"${data?.estudiante?.toUpperCase()}" No se pudo generar la constancia`,
+      "warning"
+    );
+  }
+
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -24,28 +43,28 @@ export function generateCertificate(data, certificado) {
   const pageWidth = 210;
   const marginL = 20;
   const marginR = 20;
-  
+
   // Variables de datos (Fallback para evitar errores)
   const nombreEstudiante = certificado?.apellidos_nombres || "Victor Raul Valdez Huanacuni";
   const nombreEspecialidad = certificado?.especialidad?.toUpperCase() || "Peluqueria";
-  const nombreModuloGeneral = certificado?.unidad_competencia || ""; 
+  const nombreModuloGeneral = certificado?.unidad_competencia || "";
 
   // ==========================================
   // 1. ENCABEZADO Y LOGOS (ALINEADOS)
   // ==========================================
   const headerY = 15;
-  const logoMin = "/img/LogoMinisterio.png"; 
-  const logoCetpro = "/img/insignia.png";    
+  const logoMin = "/img/LogoMinisterio.png";
+  const logoCetpro = "/img/insignia.png";
 
   // -- LOGO MINEDU (Izquierda) --
   // Ajuste Y (+2) para centrarlo visualmente con la insignia
   try {
-    doc.addImage(logoMin, "PNG", marginL, headerY + 2, 50, 13); 
+    doc.addImage(logoMin, "PNG", marginL, headerY + 2, 50, 13);
   } catch (e) { console.warn("Falta logo Minedu"); }
 
   // -- INSIGNIA (Centro Exacto) --
-  const insigniaW = 18; 
-  const insigniaH = 18; 
+  const insigniaW = 18;
+  const insigniaH = 18;
   try {
     const insigniaX = (pageWidth / 2) - (insigniaW / 2);
     doc.addImage(logoCetpro, "PNG", insigniaX, headerY, insigniaW, insigniaH);
@@ -55,12 +74,12 @@ export function generateCertificate(data, certificado) {
   const fotoSizeW = 23;
   const fotoSizeH = 18;
   const fotoX = pageWidth - marginR - fotoSizeW;
-  
+
   doc.setLineWidth(0.2);
   doc.rect(fotoX, headerY, fotoSizeW, fotoSizeH);
   doc.setFontSize(8);
   doc.setFont("times", "normal");
-  doc.text("FOTO", fotoX + (fotoSizeW/2), headerY + (fotoSizeH/2), { align: "center" });
+  doc.text("FOTO", fotoX + (fotoSizeW / 2), headerY + (fotoSizeH / 2), { align: "center" });
 
   // ==========================================
   // 2. TÍTULOS
@@ -70,10 +89,10 @@ export function generateCertificate(data, certificado) {
   doc.setFont("times", "bold");
   doc.setFontSize(14);
   doc.text("CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA", pageWidth / 2, cursorY, { align: "center" });
-  
+
   cursorY += 6;
   doc.setFontSize(16);
-  doc.text('"CETPRO PUNO"', pageWidth / 2, cursorY, { align: "center" }); 
+  doc.text('"CETPRO PUNO"', pageWidth / 2, cursorY, { align: "center" });
 
   cursorY += 25;
   doc.setFontSize(20);
@@ -84,15 +103,15 @@ export function generateCertificate(data, certificado) {
   // ==========================================
   cursorY += 20;
   doc.setFontSize(12);
-  doc.setFont("times", "normal"); 
+  doc.setFont("times", "normal");
 
-  const labelX = marginL;          
-  const valueX = marginL + 35;     
+  const labelX = marginL;
+  const valueX = marginL + 35;
 
   // Línea 1
   doc.text("El   CETPRO", labelX, cursorY);
   doc.setFont("times", "bold");
-  doc.text("PUNO", valueX, cursorY); 
+  doc.text("PUNO", valueX, cursorY);
 
   // Línea 2
   cursorY += 12;
@@ -110,7 +129,7 @@ export function generateCertificate(data, certificado) {
   cursorY += 10;
   doc.setFont("times", "bold");
   doc.text(nombreEspecialidad, pageWidth / 2, cursorY, { align: "center" });
-  
+
   // Subrayado de especialidad
   doc.setLineWidth(0.4);
   doc.line(marginL, cursorY + 2, pageWidth - marginR, cursorY + 2);
@@ -127,18 +146,18 @@ export function generateCertificate(data, certificado) {
 
   // Datos para la tabla: [Módulo, Unidad, Créditos, Nota, Año, Periodo]
   const tableRows = (certificado?.unidades_didacticas || []).map((u) => [
-    nombreModuloGeneral, 
-    u.nombre_unidad || "-",       
-    u.credito || "0",             
-    u.nota || "-",                
-    new Date().getFullYear(),     
-    "2025-I"                      
+    nombreModuloGeneral,
+    u.nombre_unidad || "-",
+    u.credito || "0",
+    u.nota || "-",
+    new Date().getFullYear(),
+    "2025-I"
   ]);
 
   autoTable(doc, {
     startY: cursorY,
     margin: { left: marginL, right: marginR },
-    
+
     // Encabezados
     head: [
       [
@@ -151,19 +170,19 @@ export function generateCertificate(data, certificado) {
       ]
     ],
     body: tableRows,
-    
-    theme: "grid", 
+
+    theme: "grid",
     styles: {
       font: "times",
       fontSize: 9,
-      textColor: 0, 
-      lineColor: 0, 
+      textColor: 0,
+      lineColor: 0,
       lineWidth: 0.1,
       valign: "middle",
       halign: "center",
-      cellPadding: 3, 
+      cellPadding: 3,
     },
-    
+
     headStyles: {
       fillColor: 255, // Blanco
       textColor: 0,   // Negro
@@ -188,12 +207,12 @@ export function generateCertificate(data, certificado) {
   // ==========================================
   // 5. PIE DE PÁGINA
   // ==========================================
-  
-  let finalY = doc.lastAutoTable.finalY + 20; 
-  
+
+  let finalY = doc.lastAutoTable.finalY + 20;
+
   if (finalY > 260) {
-      doc.addPage();
-      finalY = 40;
+    doc.addPage();
+    finalY = 40;
   }
 
   // Fecha
@@ -204,11 +223,11 @@ export function generateCertificate(data, certificado) {
   // Firma
   const firmaY = finalY + 40;
   doc.setLineWidth(0.5);
-  doc.line((pageWidth/2) - 40, firmaY, (pageWidth/2) + 40, firmaY); 
+  doc.line((pageWidth / 2) - 40, firmaY, (pageWidth / 2) + 40, firmaY);
 
   doc.setFont("times", "bold");
   doc.text("DIRECTOR(A)", pageWidth / 2, firmaY + 5, { align: "center" });
-  
+
   doc.setFont("times", "normal");
   doc.setFontSize(10);
   doc.text("(Firma, post firma y sello)", pageWidth / 2, firmaY + 10, { align: "center" });

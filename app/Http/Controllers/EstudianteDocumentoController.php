@@ -19,26 +19,49 @@ class EstudianteDocumentoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function emitirCertificado(Request $request)
     {
         $request->validate([
-            'id_matricula' => 'required|uuid|exists:matricula,id',
+            'id_matricula' => 'required|uuid',
             'tipo_documento' => 'required|integer',
-            'fecha_emision' => 'nullable|date',
+            'codigo' => 'nullable|string',
         ]);
 
-        EstudianteDocumento::create([
-            'id_matricula' => $request->id_matricula,
-            'tipo_documento' => $request->tipo_documento,
-            'fecha_emision' => $request->fecha_emision,
-            'id_autor' => auth()->id()
-        ]);
+        $certificado = EstudianteDocumento::where('id_matricula', $request->id_matricula)
+            ->where('tipo_documento', $request->tipo_documento)
+            ->first();
+
+        if ($certificado) {
+            // 🔁 DUPLICADO → actualizar (NO tocar código)
+            $certificado->update([
+                'duplicado' => 1,
+                'fecha_emision' => now(),
+                'id_autor' => auth()->id(),
+            ]);
+        } else {
+            // 🆕 PRIMERA VEZ → código obligatorio
+            if (!$request->codigo) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El código es obligatorio para la primera emisión'
+                ], 422);
+            }
+
+            $certificado = EstudianteDocumento::create([
+                'id_matricula' => $request->id_matricula,
+                'tipo_documento' => $request->tipo_documento,
+                'codigo' => $request->codigo,
+                'duplicado' => 0,
+                'fecha_emision' => now(),
+                'id_autor' => auth()->id(),
+            ]);
+        }
 
         return response()->json([
-            // 'message' => 'Documento generado correctamente',
-            'success' => 'true',
-            // 'data' => $documento,
-        ], 201);
+            'success' => true,
+            'duplicado' => $certificado->duplicado,
+            'certificado_id' => $certificado->id,
+        ]);
     }
 
     public function verificarCertificado($codigo)
@@ -106,5 +129,21 @@ class EstudianteDocumentoController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function existeCertificado(Request $request)
+    {
+        $request->validate([
+            'id_matricula' => 'required|uuid',
+            'tipo_documento' => 'required|integer',
+        ]);
+
+        $existe = EstudianteDocumento::where('id_matricula', $request->id_matricula)
+            ->where('tipo_documento', $request->tipo_documento)
+            ->exists();
+
+        return response()->json([
+            'existe' => $existe
+        ]);
     }
 }

@@ -8,12 +8,24 @@ const useCertificadoStore = defineStore('Certificado_estudio', () => {
         loading: certificadosLoading,
         initialLoading: certificadosFirstTimeLoading,
     } = useHttpRequest('/certificado');
+    
+    const {
+        indexWithParams: getCheckCertificados,
+        loading: CheckCertificadosLoading,
+        initialLoading: CheckCertificadosFirstTimeLoading,
+    } = useHttpRequest('/estudianteDocumentoValidar');
 
     const certificados = ref([]);
+    const certificadosCheck = ref([]);
 
     const loadCertificados = async (idEstudiante) => {
-            const res = await getCertificados(idEstudiante);
-            certificados.value = res;
+        const res = await getCertificados(idEstudiante);
+        certificados.value = res;
+    };
+
+    const loadCheckCertificados = async ({id_matricula, tipo_documento}) => {
+        const res = await getCheckCertificados({id_matricula, tipo_documento});
+        return res;
     };
 
     return {
@@ -21,6 +33,8 @@ const useCertificadoStore = defineStore('Certificado_estudio', () => {
         loadCertificados,
         certificadosLoading,
         certificadosFirstTimeLoading,
+
+        loadCheckCertificados
     };
 });
 

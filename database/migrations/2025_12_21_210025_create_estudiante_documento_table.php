@@ -18,7 +18,10 @@ return new class extends Migration
             $table->dateTime('fecha_emision')->nullable();
 
             $table->unsignedBigInteger('id_autor');
-            
+
+            $table->string('codigo')->nullable();
+            $table->tinyInteger('duplicado')->default(0);
+
             $table->foreign('id_matricula')->references('id')->on('matricula')->onDelete('cascade');
             $table->foreign('id_autor')->references('id')->on('users')->onDelete('cascade');
 

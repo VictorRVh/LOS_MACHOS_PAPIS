@@ -234,10 +234,14 @@ Route::middleware('auth:sanctum')->group(function () {
         'buscarHistorialEstudiante',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-grupos');
 
-
     Route::post('estudiante-documento', [
         \App\Http\Controllers\EstudianteDocumentoController::class,
-        'store',
+        'emitirCertificado',
+    ])->middleware('permission:todo-acceso-permisos|ver-grupos');
+
+    Route::get('estudianteDocumentoValidar', [
+        \App\Http\Controllers\EstudianteDocumentoController::class,
+        'existeCertificado',
     ])->middleware('permission:todo-acceso-permisos|ver-grupos');
 
     //RUTA PARA CILCLO ACADEMICO
@@ -787,7 +791,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\CapacidadCompetenciaController::class,
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
-    
+
     Route::get('capacidad_competencia_index/{competenciaId}', [
         \App\Http\Controllers\CapacidadCompetenciaController::class,
         'getCapacidadesPorCompetencia',

@@ -38,8 +38,9 @@ export function generateCertificadoModular(data) {
   const mL = 20;
   const mR = 20;
 
+  // Rutas de imágenes
   const logoMin = "/img/LogoMinisterio.png";
-  const logoCetpro = "/img/CETPRO_Image.png";
+  const logoCetpro = "/img/CetproLOGOO.png";
 
   const estudiante = (data?.apellidos_nombres || "").toUpperCase();
   const modulo = (data?.unidad_competencia || "").toUpperCase(); 
@@ -51,78 +52,49 @@ export function generateCertificadoModular(data) {
   const fechaFin = formatearFecha(data?.fecha_fin);
 
   // ==========================================
-  // PRIMERA PÁGINA (INTACTA)
+  // PRIMERA PÁGINA 
   // ==========================================
   
-  const drawFieldLine = (label, value, y) => {
-    doc.setFont("times", "normal");
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.text(label, mL, y);
-    const labelWidth = doc.getTextWidth(label);
-    const lineStartX = mL + labelWidth + 2;
-    const lineEndX = W - mR;
-    doc.setDrawColor(100); 
-    doc.setLineWidth(0.1); 
-    doc.line(lineStartX, y + 1, lineEndX, y + 1);
-    if (value) {
-      doc.setFont("times", "bold");
-      doc.setTextColor(0, 0, 0);
-      const centerLine = lineStartX + ((lineEndX - lineStartX) / 2);
-      doc.text(value, centerLine, y, { align: "center" });
-    }
-  };
-
-  const drawInlineField = (label, value, x, y, minLineWidth = 30) => {
-    doc.setFont("times", "normal");
-    doc.setFontSize(12);
-    doc.text(label, x, y);
-    const labelW = doc.getTextWidth(label);
-    const lineStartX = x + labelW + 2;
-    const valueW = doc.getTextWidth(value);
-    const lineLength = Math.max(valueW + 15, minLineWidth); 
-    const lineEndX = lineStartX + lineLength;
-    doc.setDrawColor(100);
-    doc.setLineWidth(0.1);
-    doc.line(lineStartX, y + 1, lineEndX, y + 1);
-    doc.setFont("times", "bold");
-    const centerLine = lineStartX + (lineLength / 2);
-    doc.text(value, centerLine, y, { align: "center" });
-    return lineEndX + 2; 
-  };
-  
   const row1_Y = 12;
-  doc.setDrawColor(0);
-  doc.setLineWidth(0.3);
-  doc.rect(15, row1_Y, 50, 12);
+  
+  // 1. CÓDIGO REGISTRO
   doc.setFont("times", "bold");
-  doc.setFontSize(7);
-  doc.text("Código de Registro Institucional", 17, row1_Y + 4);
-  doc.setFontSize(9);
-  doc.text("N.° _______________", 17, row1_Y + 9);
+  doc.setTextColor(100); 
+  doc.setFontSize(8);
+  doc.text("Código de Registro Institucional", mL, row1_Y + 4);
+  doc.setTextColor(0); 
+  doc.setFontSize(10);
+  doc.text("N.° _______________", mL, row1_Y + 9);
 
+  // 2. LOGO MINISTERIO
   try {
     doc.addImage(logoMin, "PNG", (W / 2) - 25, row1_Y, 50, 12);
   } catch(e){}
 
+  // 3. LOGO CETPRO (RESTAURADO SIN RECORTE PARA QUE APAREZCA SÍ O SÍ)
   const row2_Y = 35;
-  const logoSize = 25;
+  const logoW = 23; 
+  const logoH = 26; 
+  const logoX = mL + 5;
+  
+  try {
+    // Método simple para asegurar visibilidad
+    doc.addImage(logoCetpro, "PNG", logoX, row2_Y, logoW, logoH);
+  } catch(e){
+    // Fallback: si no carga la imagen, dibuja un rectangulo vacio para saber donde va
+    doc.rect(logoX, row2_Y, logoW, logoH);
+  }
+
+  // 4. FOTO
   const photoW = 25;
   const photoH = 30;
-
-  try {
-    doc.addImage(logoCetpro, "PNG", mL + 5, row2_Y, logoSize, logoSize);
-    doc.setFontSize(6);
-    doc.setFont("times", "bold");
-    doc.text("LOGO DEL", mL + 5 + (logoSize/2), row2_Y + logoSize + 3, { align: "center" });
-    doc.text("CETPRO", mL + 5 + (logoSize/2), row2_Y + logoSize + 6, { align: "center" });
-  } catch(e){}
-
+  doc.setDrawColor(0);
   doc.setLineWidth(0.2);
   doc.rect(W - mR - photoW, row2_Y, photoW, photoH);
   doc.setFontSize(8);
   doc.text("FOTO", W - mR - (photoW/2), row2_Y + (photoH/2), { align: "center" });
 
+  // 5. TÍTULOS
   const textY = row2_Y + 8; 
   doc.setFont("times", "bold");
   doc.setFontSize(16); 
@@ -131,48 +103,46 @@ export function generateCertificadoModular(data) {
   doc.text('"CETPRO PUNO"', W / 2, textY + 10, { align: "center" });
 
   let curY = 75; 
-  doc.setFontSize(28); 
+  doc.setFontSize(30); 
   doc.text("CERTIFICADO MODULAR", W / 2, curY, { align: "center" });
 
+  // 6. DATOS
   curY += 25;
-  drawFieldLine("Otorgado a:", estudiante, curY);
-  curY += 14;
-  drawFieldLine("Por haber aprobado satisfactoriamente el módulo formativo:", modulo, curY);
-  curY += 14;
-  drawFieldLine("Correspondiente al programa de estudios:", especialidad, curY);
-  curY += 14;
-  let currentX = mL;
-  currentX = drawInlineField("desarrollado del", fechaIni, currentX, curY, 45);
-  currentX = drawInlineField(" al", fechaFin, currentX, curY, 45);
-  currentX = drawInlineField(", con un total de", totalCreditos.toString(), currentX, curY, 15);
+  const printField = (label, value, y) => {
+    doc.setFont("times", "normal");
+    doc.setFontSize(10); 
+    doc.setTextColor(100); 
+    doc.text(label, mL, y);
+    doc.setFont("times", "bold");
+    doc.setFontSize(14); 
+    doc.setTextColor(0); 
+    doc.text(value, (W + mL)/2, y, { align: "center" });
+  };
+
+  printField("Otorgado a:", estudiante, curY);
+  curY += 15;
+  printField("Por haber aprobado satisfactoriamente el módulo formativo:", modulo, curY);
+  curY += 15;
+  printField("Correspondiente al programa de estudios:", especialidad, curY);
+  
+  curY += 15;
   doc.setFont("times", "normal");
-  doc.text(" créditos,", currentX, curY);
-  curY += 14;
-  currentX = mL;
-  currentX = drawInlineField("equivalente a", totalHoras.toString(), currentX, curY, 20);
-  doc.setFont("times", "normal");
-  doc.text(" horas.", currentX, curY);
+  doc.setFontSize(11);
+  doc.setTextColor(50); 
+  const textoResumen = `desarrollado del ${fechaIni} al ${fechaFin}, con un total de ${totalCreditos} créditos, equivalente a ${totalHoras} horas.`;
+  doc.text(textoResumen, mL, curY);
 
   const pieY = 175;
   doc.setFont("times", "normal");
   doc.setFontSize(11);
+  doc.setTextColor(0);
   doc.text(`Lugar y fecha:   ${obtenerFechaEmision()}`, W - mR, pieY + 20, { align: "right" });
 
-  doc.setDrawColor(0);
-  doc.setLineWidth(0.5); 
-  doc.line((W / 2) - 40, pieY, (W / 2) + 40, pieY);
-  doc.setFont("times", "bold");
-  doc.setFontSize(11);
-  doc.text("DIRECTOR(A)", W / 2, pieY + 5, { align: "center" });
-  doc.setFont("times", "normal");
-  doc.setFontSize(10);
-  doc.text("(Firma, post firma y sello)", W / 2, pieY + 10, { align: "center" });
 
+  // ==========================================
+  // SEGUNDA PÁGINA 
+  // ==========================================
   doc.addPage();
-
-  // ==========================================
-  // SEGUNDA PÁGINA
-  // ==========================================
 
   try {
     doc.addImage(logoMin, "PNG", mL, 10, 40, 10);
@@ -199,24 +169,24 @@ export function generateCertificadoModular(data) {
         row.push({
           content: modulo,
           rowSpan: unidades.length, 
-          styles: { valign: 'middle', halign: 'center' }
+          styles: { valign: 'middle', halign: 'center', fontStyle: 'bold' }
         });
       }
       row.push(u.nombre_unidad || "-");
+      row.push(u.creditos || "1");
+      row.push(u.horas || "16");
+      row.push(u.capacidades || "Reconoce los biotipos cutáneos...");
       row.push(u.nota || "-");
       bodyRows.push(row);
     });
   } else {
-    bodyRows.push([
-      { content: modulo, styles: { valign: 'middle', halign: 'center' } },
-      "SIN UNIDADES", "-"
-    ]);
+    bodyRows.push([modulo, "-", "-", "-", "-", "-"]);
   }
 
   bodyRows.push([
     { 
       content: "Experiencias formativas en situaciones reales de trabajo", 
-      colSpan: 2, 
+      colSpan: 5, 
       styles: { halign: 'left', fontStyle: 'bold' } 
     },
     data?.nota_experiencias || "-"
@@ -225,71 +195,71 @@ export function generateCertificadoModular(data) {
   autoTable(doc, {
     startY: 38,
     margin: { left: mL, right: mR },
-    head: [["Módulo", "Unidad didáctica", "Calificación"]],
+    head: [[
+      "Unidad de Competencia", 
+      "Unidad didáctica", 
+      "N° de\nCréditos", 
+      "Horas", 
+      "Capacidades", 
+      "Calificación"
+    ]],
     body: bodyRows,
     theme: 'plain',
     styles: {
       font: "times",
-      fontSize: 9,
-      lineColor: 200, 
+      fontSize: 8,
+      lineColor: 150, 
       lineWidth: 0.1,
-      cellPadding: 4,
+      cellPadding: 3,
       valign: 'middle',
-      halign: 'center'
+      halign: 'center',
+      textColor: 0
     },
     headStyles: {
-      fillColor: 245,
+      fillColor: 220,
       textColor: 0,
       fontStyle: 'bold',
       lineWidth: 0.1,
-      lineColor: 150,
+      lineColor: 0,
+      halign: 'center'
     },
     columnStyles: {
-      0: { cellWidth: 50, lineWidth: 0.1, lineColor: 150 },
-      1: { cellWidth: 'auto', halign: 'left', lineWidth: 0.1, lineColor: 150 },
-      2: { cellWidth: 25, lineWidth: 0.1, lineColor: 150 }
+      0: { cellWidth: 40, lineWidth: 0.1, lineColor: 150 }, 
+      1: { cellWidth: 45, halign: 'left', lineWidth: 0.1, lineColor: 150 }, 
+      2: { cellWidth: 15, lineWidth: 0.1, lineColor: 150 }, 
+      3: { cellWidth: 15, lineWidth: 0.1, lineColor: 150 }, 
+      4: { cellWidth: 'auto', halign: 'left', lineWidth: 0.1, lineColor: 150 }, 
+      5: { cellWidth: 20, lineWidth: 0.1, lineColor: 150 } 
     }
   });
 
   const finalY = doc.lastAutoTable.finalY;
   
   // ===============================================
-  // CUADRO DE INSTITUCIÓN PEGADO Y DIVIDIDO
+  // CUADRO DE INSTITUCIÓN
   // ===============================================
-  // No sumamos gap, usamos finalY directamente para que esté PEGADO
   const boxWidth = W - mL - mR;
-  const boxHeight = 16; 
-  const headerHeight = 7; // Altura de la fila del título
+  const headerHeight = 7; 
+  const contentHeight = 10;
   
   doc.setDrawColor(0);
-  doc.setLineWidth(0.1);
+  doc.setLineWidth(0.2);
   
-  // 1. Dibujar el recuadro exterior
-  doc.rect(mL, finalY, boxWidth, boxHeight);
-  
-  // 2. Título
+  // 1. Cabecera del cuadro (Título)
+  doc.rect(mL, finalY, boxWidth, headerHeight);
   doc.setFont("times", "bold");
   doc.setFontSize(9);
   doc.text("Institución(es) en que realizó la experiencia:", mL + 2, finalY + 5);
   
-  // 3. LÍNEA DIVISORIA EN MEDIO (Separa título de contenido)
-  const lineY = finalY + headerHeight;
-  doc.line(mL, lineY, mL + boxWidth, lineY);
-  
-  // 4. Contenido (Punto de lista)
+  // 2. Cuerpo del cuadro (Nombre del CETPRO)
+  const contentY = finalY + headerHeight;
+  doc.rect(mL, contentY, boxWidth, contentHeight);
   doc.setFont("times", "normal");
-  doc.text("• CENTRO DE EDUCACION TECNICO PRODUCTIVA PUNO", mL + 5, lineY + 6);
+  doc.text("• CENTRO DE EDUCACION TECNICO PRODUCTIVA PUNO", mL + 5, contentY + 6);
 
-  // Firma
-  const firmaY2 = 170;
-  doc.setLineWidth(0.5);
-  doc.line((W / 2) - 40, firmaY2, (W / 2) + 40, firmaY2);
-  doc.setFont("times", "bold");
-  doc.setFontSize(11);
-  doc.text("DIRECTOR(A)", W / 2, firmaY2 + 5, { align: "center" });
-  doc.setFont("times", "normal");
-  doc.setFontSize(10);
-  doc.text("(Firma, post firma y sello)", W / 2, firmaY2 + 10, { align: "center" });
+  // 3. COD (FUERA DEL CUADRO, ABAJO A LA IZQUIERDA)
+  const footerY = contentY + contentHeight + 5; // 5mm de separación
+  doc.text("N.° _______________", mL, footerY);
 
   const pdfBlob = doc.output("blob");
   const pdfUrl = URL.createObjectURL(pdfBlob);

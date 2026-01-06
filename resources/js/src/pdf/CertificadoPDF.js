@@ -35,7 +35,7 @@ export function generateCertificate(data, certificado) {
   // ==========================================
   const headerY = 15;
   const logoMin = "/img/LogoMinisterio.png"; 
-  const logoCetpro = "/img/insignia.png";    
+  const logoCetpro = "/img/cetproLOGOO.png";    
 
   // -- LOGO MINEDU (Izquierda) --
   // Ajuste Y (+2) para centrarlo visualmente con la insignia

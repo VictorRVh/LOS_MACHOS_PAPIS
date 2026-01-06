@@ -35,34 +35,48 @@ export async function generateConstanciaEstudiante(data) {
     const contentWidth = pageWidth - marginL - marginR;
 
     const logoMin = "/img/LogoMinisterio.png";
-    const logoCetpro = "/img/cetprologoHorizontal.png";
+    //const logoCetpro = "/img/cetprologoHorizontal.png";
+    const logoCetpro = "/img/CetproLOGOO.png";
 
-    // --- 1. ENCABEZADO ---
-    const headerY = 12;
-    const headerH = 10;
+    // --- 1. ENCABEZADO (ALINEADO Y REDUCIDO) ---
+    // Definimos una Y base para que logos y texto estén en la misma fila
+    const headerY = 12; 
+    
+    // Reducimos tamaño de logos (Ancho reducido, Alto reducido a 8-9mm)
+    const logoH = 9; 
+    const logoW_L = 30; // Antes 40
+    const logoW_R = 35; // Antes 45
 
     try {
-      doc.addImage(logoCetpro, "PNG", marginL, headerY, 40, headerH);
-      doc.addImage(logoMin, "PNG", pageWidth - marginR - 45, headerY, 45, headerH);
+      // Logos alineados verticalmente con el texto
+      doc.addImage(logoCetpro, "PNG", marginL+5, headerY-5, logoW_L-13, logoH+10);
+      doc.addImage(logoMin, "PNG", pageWidth - marginR - logoW_R, headerY, logoW_R+2, logoH);
     } catch (e) {
       console.error("Error cargando logos");
     }
 
+    // Texto CENTRADO entre los logos (Subimos Y para alinear)
     doc.setFont("times", "bold");
-    doc.setFontSize(10);
-    doc.text("CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA", pageWidth / 2, 32, { align: "center" });
-    doc.setFontSize(18);
-    doc.text('"CETPRO PUNO"', pageWidth / 2, 40, { align: "center" });
-    doc.setFontSize(8);
+    doc.setFontSize(9);
+    doc.text("CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA", pageWidth / 2, headerY + 2, { align: "center" });
+    
+    doc.setFontSize(16);
+    doc.text('"CETPRO PUNO"', pageWidth / 2, headerY + 8, { align: "center" }); // Centrado visualmente
+    
+    doc.setFontSize(7);
     doc.setFont("times", "normal");
-    doc.text("R.D. N° 07592-2024-UGEL 06 | CÓDIGO MODULAR: 469452", pageWidth / 2, 45, { align: "center" });
+    doc.text("R.D. N° 07592-2024-UGEL 06 | CÓDIGO MODULAR: 469452", pageWidth / 2, headerY + 12, { align: "center" });
 
+    // Línea separadora (Subida para pegar el encabezado)
+    const lineY = headerY + 16;
     doc.setLineWidth(0.5);
-    doc.line(marginL, 48, pageWidth - marginR, 48);
+    doc.line(marginL, lineY, pageWidth - marginR, lineY);
 
-    // --- 2. FOTO Y TÍTULO ---
+    // --- 2. FOTO Y TÍTULO (RE-COORDENADAS HACIA ARRIBA) ---
+    // Subimos la foto y el título porque el encabezado ahora es más compacto
     const photoX = pageWidth - marginR - 25;
-    const photoY = 55;
+    const photoY = lineY + 8; // Pegado a la línea (aprox Y=36)
+    
     doc.setLineWidth(0.2);
     doc.rect(photoX, photoY, 25, 32);
     doc.setFontSize(7);
@@ -70,15 +84,19 @@ export async function generateConstanciaEstudiante(data) {
 
     doc.setFont("times", "bold");
     doc.setFontSize(22);
-    doc.text("CONSTANCIA DE ESTUDIOS", pageWidth / 2, 75, { align: "center" });
+    // Título alineado con la foto
+    doc.text("CONSTANCIA DE ESTUDIOS", pageWidth / 2, photoY + 20, { align: "center" });
 
     // --- 3. CUERPO DEL DOCUMENTO ---
     doc.setFontSize(11);
     doc.setFont("times", "normal");
 
-    doc.text("EL/LA DIRECTOR(A) DEL CETPRO PUNO QUE SUSCRIBE, POR LA PRESENTE:", marginL, 95);
+    // Inicio del texto (Subido desde 95 a 80 para cerrar hueco)
+    const textStartY = photoY + 42; 
+
+    doc.text("EL/LA DIRECTOR(A) DEL CETPRO PUNO QUE SUSCRIBE, POR LA PRESENTE:", marginL, textStartY);
     doc.setFont("times", "bold");
-    doc.text("HACE CONSTAR QUE:", marginL, 103);
+    doc.text("HACE CONSTAR QUE:", marginL, textStartY + 8);
 
     const nombre = data?.estudiante?.toUpperCase() || "—";
     const dni = data?.nro_documento || "—";
@@ -90,10 +108,11 @@ export async function generateConstanciaEstudiante(data) {
     const parrafoLegal = `Al amparo de la Ley N° 28044 (Ley General de Educación), su Reglamento D.S. N° 011-2012-ED y la R.V.M. N° 188-2020-MINEDU; se certifica la situación académica del siguiente administrado, según consta en los folios de matrícula de nuestra institución:`;
 
     const splitLegal = doc.splitTextToSize(parrafoLegal, contentWidth);
-    doc.text(splitLegal, marginL, 110, { align: "justify", maxWidth: contentWidth });
+    doc.text(splitLegal, marginL, textStartY + 15, { align: "justify", maxWidth: contentWidth });
 
     // --- DATOS DEL ESTUDIANTE ---
-    let cursorY = 132;
+    // Ajustamos cursor basado en el nuevo inicio
+    let cursorY = textStartY + 38; 
     const lineHeight = 8;
 
     doc.text("El/la estudiante:", marginL, cursorY);
@@ -124,67 +143,49 @@ export async function generateConstanciaEstudiante(data) {
     doc.text(modulo, tabX + 65, tabY + 8);
     doc.text(periodo, tabX + 65, tabY + 16);
 
-    // --- 5. CIERRE Y FECHA (CORREGIDO PARA NO CHOCAR) ---
-    // Subimos el texto final un poco más cerca de la tabla
+    // --- 5. CIERRE Y FECHA ---
     const cierreY = tabY + 30;
     const textoFinal = "Se expide la presente a solicitud de la parte interesada para los fines que estime conveniente.";
     doc.text(textoFinal, marginL, cierreY);
 
-    // La fecha va inmediatamente después del texto, no al fondo de la hoja
     const hoy = new Date();
     const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
     const fechaTexto = `Puno, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
 
     doc.setFont("times", "bold");
-    // Colocamos la fecha 10mm debajo del texto de cierre
     doc.text(fechaTexto, pageWidth - marginR, cierreY + 10, { align: "right" });
 
-
     // --- 6. ZONA DE FIRMA Y QR (FIJA AL FONDO) ---
-    // Establecemos una zona fija inferior para que no choque con nada
-    const zonaFirmaY = 225; // Bajamos la firma y el QR a la zona inferior
+    const zonaFirmaY = 225;
 
-    // --- QR CON MARCO ---
-    // const qrUrl = `http://127.0.0.1:8000/verificarCertificado/${data.id_matricula}`;
-
-    const qrUrl =
-      `https://choclon.com/verificarCertificado/${data?.id_matricula}`;
-
+    const qrUrl = `https://choclon.com/verificarCertificado/${data?.id_matricula}`;
     const qrBase64 = await QRCode.toDataURL(qrUrl, {
       width: 300,
       margin: 1,
       errorCorrectionLevel: "H",
     });
 
-    const qrSize = 26; // Tamaño del QR
-    const padding = 3; // Margen interno del cuadro
+    const qrSize = 26;
+    const padding = 3;
     const qrX = pageWidth - marginR - qrSize - padding;
-    // Alineamos el cuadro del QR para que su centro vertical coincida aprox con la firma
     const qrY = zonaFirmaY - 15;
 
-    // Dibujamos el Marco del QR
     doc.setLineWidth(0.3);
     doc.setDrawColor(0);
     doc.rect(qrX - padding, qrY - padding, qrSize + (padding * 2), qrSize + (padding * 2) + 5);
 
-    // Imagen QR
     doc.addImage(qrBase64, "PNG", qrX, qrY, qrSize, qrSize);
-
-    // Texto QR
     doc.setFontSize(6);
     doc.text("Verificación QR", qrX + (qrSize / 2), qrY + qrSize + 4, { align: "center" });
 
     // --- FIRMA CENTRAL ---
     doc.setLineWidth(0.6);
-    // La línea de firma alineada visualmente con el QR
     doc.line(75, zonaFirmaY, 135, zonaFirmaY);
-
     doc.setFontSize(11);
     doc.setFont("times", "bold");
     doc.text("DIRECCIÓN GENERAL", pageWidth / 2, zonaFirmaY + 5, { align: "center" });
     doc.setFontSize(10);
     doc.text("CETPRO PUNO", pageWidth / 2, zonaFirmaY + 10, { align: "center" });
-
 
     // --- 7. CLÁUSULA LEGAL (PIE DE PÁGINA) ---
     const footerY = 258;
@@ -197,7 +198,6 @@ export async function generateConstanciaEstudiante(data) {
     const splitClausula = doc.splitTextToSize(clausula, contentWidth);
     doc.text(splitClausula, marginL, footerY + 4, { align: "justify", maxWidth: contentWidth, lineHeightFactor: 1.1 });
 
-    // Pie final
     doc.setFontSize(7);
     doc.setTextColor(150);
     doc.text("Validación académica según RVM N° 188-2020-MINEDU. Documento oficial.", pageWidth / 2, 288, { align: "center" });

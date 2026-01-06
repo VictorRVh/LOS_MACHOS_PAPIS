@@ -1236,6 +1236,11 @@ Route::get('reportes/registroMatriculaConEvaluaciones/{idGrupo}', [
     'RegistroMatricula_RegistroEvaluacionPorModulo',
 ]);
 
+Route::get('reportes/certificadosPorPeriodo/{idPeriodo}', [
+    \App\Http\Controllers\ReporteController::class,
+    'exportCertificadosPorPeriodo',
+]);
+
 Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
     Route::get('/files/{fileId}', [GoogleDriveController::class, 'listFilesNew']);
     Route::post('/folder', [GoogleDriveController::class, 'createFolder']);

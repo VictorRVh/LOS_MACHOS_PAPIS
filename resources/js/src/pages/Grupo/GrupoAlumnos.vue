@@ -313,7 +313,7 @@ const emitirCertificado = () => {
 
         <!-- AVISO DUPLICADO -->
         <div v-if="esDuplicado" class="mb-4 p-3 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
-          ⚠️ Este certificado ya fue emitido.
+          Este certificado ya fue emitido.
           Se marcará como <b>DUPLICADO</b>.
         </div>
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\NominaCensoEducativoExport;
 use App\Exports\NominaMatriculasExport;
 use App\Exports\RegistroMatriculaInstitucionalExport;
+use App\Exports\ReporteCertificadosPeriodoExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Matricula;
 
@@ -157,6 +158,22 @@ class ReporteController extends Controller
         }, 200, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => "attachment; filename=\"$fileName\"",
+        ]);
+    }
+
+    public function exportCertificadosPorPeriodo($idPeriodo)
+    {
+        $export = new ReporteCertificadosPeriodoExport($idPeriodo);
+        $spreadsheet = $export->build();
+
+        $fileName = "Registro_Certificados_Periodo_{$idPeriodo}.xlsx";
+
+        return new StreamedResponse(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
         ]);
     }
 }

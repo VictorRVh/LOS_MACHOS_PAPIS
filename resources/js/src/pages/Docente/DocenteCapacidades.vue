@@ -12,7 +12,7 @@ import AuthorizationFallback from "../../components/page/AuthorizationFallback.v
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
-import CapacidadTerminalSlider from "../../components/page/CapacidadesTerminales/CapacidadTerminalSlider.vue";
+import CapacidadTerminalSlider from "../../components/page/Docente/CapacidadesSlider.vue";
 import useCapacidadTerminalStore from "../../store/CapacidadTerminal/UseCapacidadTerminalStore";
 import useCapacidadTerminalCalificacionesStore from "../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
 import { ref, computed, onMounted } from "vue";
@@ -146,61 +146,7 @@ const estadoTexto = computed(() => {
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-capacidad-terminal-docente', 'ver-capacidad-terminal-docente']">
 
-    <div v-if="sesionStore?.sesion.id"
-      class="col-span-full bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-2 px-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-      <div>
-        <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200">
-          Programación de Unidades Didácticas
-        </h3>
-
-        <p class="text-sm text-gray-700 dark:text-gray-300">
-          Del
-          <strong>
-            {{ formatFecha(sesion.fecha_inicio) }}
-          </strong>
-          al
-
-          <!-- SI HAY APLAZAMIENTO -->
-          <template v-if="hasAplazamiento">
-            <strong class="line-through text-red-400 mx-1">
-              {{ formatFecha(sesion.fecha_fin) }}
-            </strong>
-
-            <strong class="text-green-600 dark:text-green-400">
-              {{ formatFecha(sesion.fecha_aplazada) }}
-            </strong>
-          </template>
-
-          <!-- SI NO HAY APLAZAMIENTO -->
-          <template v-else>
-            <strong>
-              {{ formatFecha(sesion.fecha_fin) }}
-            </strong>
-          </template>
-        </p>
-      </div>
-
-
-      <div class="px-3 py-1 rounded-full text-sm font-bold" :class="{
-        'bg-yellow-100 text-yellow-800': sesionStore?.sesion?.estado === 0,
-        'bg-green-100 text-green-800': sesionStore?.sesion?.estado === 1,
-        'bg-gray-200 text-gray-800': sesionStore?.sesion?.estado === 2,
-      }">
-        Estado: {{ estadoTexto }}
-      </div>
-    </div>
-
-    <div v-else
-      class="col-span-full bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-xl p-3 flex flex-col">
-
-      <h3 class="text-lg font-semibold text-red-800 dark:text-red-200">
-        No existe una programación para crear unidades didácticas
-      </h3>
-
-      <p class="text-sm text-red-700 dark:text-red-300 mt-1">
-        Debe existir la programación para crear unidades. Solicítala a coordinación.
-      </p>
-    </div>
+    
 
     <div class="flex flex-col lg:flex-row px-6 gap-6">
 

@@ -5,14 +5,12 @@ import Button from "../../ui/Button.vue";
 import AuthorizationFallback from "../../../components/page/AuthorizationFallback.vue";
 import useValidation from "../../../composables/useValidation";
 import useHttpRequest from "../../../composables/useHttpRequest";
-import CheckBox from "../../ui/CheckBox.vue";
 import useModalToast from "../../../composables/useModalToast";
 import * as yup from "yup";
-import useCapacidadTerminalStore from "../../../store/CapacidadTerminal/UseCapacidadTerminalStore";
-import useCapacidadTerminalCalificacionStore from "../../../store/Estudiante/UseEstudianteCapacidadGrupoStore";
-import BaseSelectModulo from "../../ui/BaseSelectCiclo.vue";
-import FormLabelError from "../../ui/FormLabelError.vue";
 
+/* =========================
+   PROPS & EMITS
+========================= */
 const props = defineProps({
     show: {
         type: Boolean,
@@ -22,117 +20,98 @@ const props = defineProps({
         type: [Object, null],
         default: () => null,
     },
-    idGrupo: {
-        type: String,
+    idCompetencia: {
+        type: [Number, String],
         required: true,
-    },
-    indexCapacidades: {
-        type: [Object, null],
-        default: () => null,
     },
 });
 
 const emit = defineEmits(["hide"]);
 
-const capacidadStore = useCapacidadTerminalStore();
-const calificacionCapacidad = useCapacidadTerminalCalificacionStore();
-
-const { store: createCapacidad, saving, update: updateCapacidad, updating } =
-    useHttpRequest("/capacidad_terminal");
+/* =========================
+   COMPOSABLES
+========================= */
 const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
+const {
+    store: createCompetencia,
+    saving,
+    update: updateCompetencia,
+    updating,
+} = useHttpRequest("/capacidades-terminales-competencia");
+
+/* =========================
+   PERMISOS
+========================= */
 const requiredPermissions = computed(() => {
-    if (!props.capacidad?.id)
-        return ["todo-acceso-capacidad-terminal-docente", "crear-capacidad-terminal-docente"];
-    return ["todo-acceso-capacidad-terminal-docente", "editar-capacidad-terminal-docente"];
+    if (!props.capacidad?.id) {
+        return [
+            "todo-acceso-capacidad-terminal-docente",
+            "crear-capacidad-terminal-docente",
+        ];
+    }
+    return [
+        "todo-acceso-capacidad-terminal-docente",
+        "editar-capacidad-terminal-docente",
+    ];
 });
 
-const capacidades = ref([]);
-
+/* =========================
+   FORM DATA
+========================= */
 const initialFormData = () => ({
-    numero_capacidad: "",
-    nombre_capacidad: "",
-    fecha_inicio: "",
-    fecha_fin: "",
-    id_grupo: props.idGrupo,
-    status: 0,
+    id_competencia: props.idCompetencia,
+    sigla: "",
+    descripcion: "",
 });
 
 const formData = ref(initialFormData());
 const formErrors = ref({});
+
 const isEditing = computed(() => !!props.capacidad?.id);
 
-const onCancelEdit = () => {
-    formData.value = initialFormData();
-    formErrors.value = {};
-    emit("hide");
-};
-
-// cuando se recibe una capacidad para editar
+/* =========================
+   WATCH EDIT MODE
+========================= */
 watch(
-    [() => props.capacidad, () => props.capacidades],
-    ([newCapacidad, newCapacidades]) => {
-
+    () => props.capacidad,
+    (newCapacidad) => {
         if (props.show && newCapacidad?.id) {
             formData.value = { ...initialFormData(), ...newCapacidad };
             formErrors.value = {};
-        }
-
-        const total = parseInt(newCapacidades, 10);
-        if (!isNaN(total) && total > 0) {
-            capacidades.value = Array.from({ length: total }, (_, i) => {
-                const num = String(i + 1).padStart(2, "0");
-                return {
-                    id: num,
-                    name: `Unidad Didactica ${num}`,
-                };
-            });
         }
     },
     { immediate: true }
 );
 
-// Lista de módulos ya creados (simulada)
-const capacidadesCreadas = ref([])
-
-// Opciones filtradas: excluye las ya creadas
-const filteredCapacidades = computed(() => {
-    return capacidades.value.filter(
-        cap => !capacidadesCreadas.value.includes(cap.id)
-    )
-})
-
+/* =========================
+   VALIDACIÓN YUP
+========================= */
 yup.setLocale({
     mixed: {
-        required: 'Este campo es obligatorio.',
-    },
-    string: {
-        email: 'Debe ser un correo válido.',
-    },
-    date: {
-        min: 'La fecha no puede ser anterior a ${min}',
-        max: 'La fecha no puede ser posterior a ${max}',
-        typeError: 'Debe ser una fecha válida',
+        required: "Este campo es obligatorio.",
     },
 });
 
-// Validación con Yup
 const schema = yup.object().shape({
-    numero_capacidad: yup
+    sigla: yup
         .string()
-        .nullable()
-        .required("El numero de la unidad es obligatorio."),
-    nombre_capacidad: yup
+        .required("La sigla es obligatoria.")
+        .max(10, "Máximo 10 caracteres."),
+    descripcion: yup
         .string()
-        .nullable()
-        .required("El nombre de la unidad es obligatorio."),
-    fecha_inicio: yup.date().required("La fecha de inicio es requerida.").typeError("Debe ingresar una fecha válida"),
-    fecha_fin: yup.date()
-        .required("La fecha de fin es requerida.")
-        .min(yup.ref("fecha_inicio"), "La fecha de fin no puede ser anterior a la de inicio.")
-        .typeError("Debe ingresar una fecha válida"),
+        .required("La descripción es obligatoria."),
 });
+
+/* =========================
+   ACTIONS
+========================= */
+const onCancel = () => {
+    formData.value = initialFormData();
+    formErrors.value = {};
+    emit("hide");
+};
 
 const onSubmit = async () => {
     if (saving.value || updating.value) return;
@@ -147,34 +126,16 @@ const onSubmit = async () => {
 
     formErrors.value = {};
 
-
-    const now = new Date();
-    const horaActual = now.toTimeString().slice(0, 8);
-    const horaFin = "23:59:59";
-
-    const formatDateTime = (fecha, hora) => {
-        const [year, month, day] = fecha.split("-");
-        return `${year}-${month}-${day} ${hora}`;
-    };
-
-    data.fecha_inicio = formatDateTime(data.fecha_inicio, horaActual);
-    data.fecha_fin = formatDateTime(data.fecha_fin, horaFin);
-
-    const response = props.capacidad?.id
-        ? await updateCapacidad(props.capacidad.id, data)
-        : await createCapacidad(data);
+    const response = isEditing.value
+        ? await updateCompetencia(props.capacidad.id, data)
+        : await createCompetencia(data);
 
     if (response?.id) {
-
-        capacidadesCreadas.value.push(data.numero_capacidad);
+        showToast(
+            `Competencia ${isEditing.value ? "editada" : "creada"} exitosamente.`
+        );
 
         formData.value = initialFormData();
-        formErrors.value = {};
-        showToast(
-            `Unidad Didactica ${isEditing.value ? "editada" : "creada"} exitosamente.`
-        );
-        await capacidadStore.loadCapacidadTerminal(props.idGrupo);
-        await calificacionCapacidad.loadCapacidadTerminal(props.idGrupo);
         emit("hide");
     }
 };
@@ -183,37 +144,43 @@ const onSubmit = async () => {
 <template>
     <AuthorizationFallback :permissions="requiredPermissions">
         <h2 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-            {{ capacidad?.id ? "Editar Unidad Didactica" : "Agregar Unidad Didactica" }}
+            {{ isEditing ? "Editar Competencia" : "Agregar Competencia" }}
         </h2>
+
         <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
 
-        <div class="mt-2 space-y-3 font-inter">
-            <FormLabelError label="Número de Unidad Didactica" required :error="formErrors?.numero_capacidad">
-                <BaseSelectModulo v-model="formData.numero_capacidad" :options="props.indexCapacidades" label="name"
-                    placeholder="Número de la unidad" />
-            </FormLabelError>
+        <div class="space-y-3 font-inter">
+            <FormInput
+                v-model="formData.sigla"
+                label="Sigla"
+                required
+                :error="formErrors?.sigla"
+            />
 
+            <FormInput
+                v-model="formData.descripcion"
+                label="Descripción"
+                required
+                :error="formErrors?.descripcion"
+            />
 
-            <FormInput v-model="formData.nombre_capacidad" :focus="show" label="Nombre de la Unidad Didactica"
-                :error="formErrors?.nombre_capacidad" required />
+            <div class="flex gap-2 mt-4">
+                <Button
+                    :title="isEditing ? 'Guardar cambios' : 'Crear competencia'"
+                    :loading-title="isEditing ? 'Guardando...' : 'Creando...'"
+                    :loading="saving || updating"
+                    :disabled="saving || updating"
+                    class="!w-full"
+                    @click="onSubmit"
+                />
 
-            <div class="flex gap-2">
-                <FormInput type="date" v-model="formData.fecha_inicio" label="Fecha de inicio"
-                    :error="formErrors?.fecha_inicio" required />
-                <FormInput type="date" v-model="formData.fecha_fin" label="Fecha de fin" :error="formErrors?.fecha_fin"
-                    required />
-            </div>
-
-            <!-- <div>
-                <CheckBox v-model="formData.status" label="Estado" class="flex items-center" />
-            </div> -->
-
-            <div class="flex gap-2 mt-3">
-                <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Unidad'"
-                    :loading-title="isEditing ? 'Guardando...' : 'Creando...'" :disabled="saving || updating"
-                    :loading="saving || updating" @click="onSubmit" class="!w-full" />
-                <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"
-                    class="bg-red-500 hover:bg-red-600 text-white px-4" />
+                <Button
+                    v-if="isEditing"
+                    title="Cancelar"
+                    variant="outline"
+                    class="bg-red-500 hover:bg-red-600 text-white"
+                    @click="onCancel"
+                />
             </div>
         </div>
     </AuthorizationFallback>

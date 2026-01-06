@@ -148,7 +148,7 @@ const closeCompetencias = () => {
               <Td> <!-- 👇 NUEVO BOTÓN -->
                 <button class="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
                   title="Ver competencias" @click="openCompetencias(modulo)">
-                  Competencias
+                  Ver competencias
                 </button>
               </Td>
               <Td class="align-middle">

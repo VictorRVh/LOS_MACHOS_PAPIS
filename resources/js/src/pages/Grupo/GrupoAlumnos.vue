@@ -24,6 +24,10 @@ import { generateCertificate } from "../../pdf/CertificadoPDF.js";
 import { generateConstanciaEstudiante } from "../../pdf/CosntanciaEstudiante.js";
 import useCertificadoStore from '../../store/Grupo/useCertificadoStore.js';
 
+// IMPORTACIÓN DE CONSTANCIA DE EGRESADO (NUEVO)
+// Asumo que la función exportada se llama generateConstanciaEgresado, ajusta si es diferente en tu archivo JS
+import { generateConstanciaEgresado } from "../../pdf/ConstanciaEgresado.js"; 
+
 const props = defineProps({
   id: { type: [String, Number], required: true },
 });
@@ -103,7 +107,7 @@ const exportar = () => {
   exportarAlumnos(data);
 };
 
-// FUNCIÓN PARA GENERAR LA CONSTANCIA
+// FUNCIÓN PARA GENERAR LA CONSTANCIA DE ESTUDIANTE
 const imprimirConstancia = (estudiante) => {
   const dataParaConstancia = {
     estudiante: ` ${estudiante.nombre} ${estudiante.apellidos}`,
@@ -114,6 +118,25 @@ const imprimirConstancia = (estudiante) => {
     periodo: matriculados.value.periodo || "2025"
   };
   generateConstanciaEstudiante(dataParaConstancia);
+};
+
+// FUNCIÓN PARA GENERAR LA CONSTANCIA DE EGRESADO (NUEVO)
+const imprimirConstanciaEgresado = (estudiante) => {
+  // Preparamos los datos combinando info del estudiante y del grupo (matriculados)
+  const dataParaEgresado = {
+    estudiante: `${estudiante.nombre} ${estudiante.apellidos}`,
+    nro_documento: estudiante.nro_documento,
+    especialidad: matriculados.value.especialidad,
+    modulo: matriculados.value.modulo,
+    fecha_inicio: matriculados.value.fecha_inicio,
+    fecha_fin: matriculados.value.fecha_fin,
+    horas: matriculados.value.horas, // Si tienes las horas en el grupo
+    creditos: matriculados.value.creditos, // Si tienes créditos
+    periodo: matriculados.value.periodo || "2025"
+  };
+  
+  // Llamamos a la función importada
+  generateConstanciaEgresado(dataParaEgresado);
 };
 
 // FUNCIÓN PARA GENERAR EL CERTIFICADO MODULAR
@@ -149,6 +172,7 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
     console.error("Error descargando reporte:", error);
   }
 };
+<<<<<<< HEAD
 
 const openCertificadoModal = async (matriculaId) => {
   selectedMatriculaId.value = matriculaId;
@@ -176,6 +200,8 @@ const emitirCertificado = () => {
 };
 
 
+=======
+>>>>>>> 69d5670934ac5103672d0e22f38c788dcde48c45
 </script>
 
 <template>
@@ -212,15 +238,27 @@ const emitirCertificado = () => {
             <Td>{{ estudiante.correo_electronico ?? '-' }}</Td>
 
             <Td>
-              <div class="flex gap-2">
-                <!-- BOTÓN CONSTANCIA -->
-                <BaseButton title="Constancia" @click="imprimirConstancia(estudiante)"
+              <div class="flex gap-2 justify-center">
+                
+                <!-- BOTÓN CONSTANCIA ESTUDIANTE -->
+                <BaseButton title="Constancia Est." @click="imprimirConstancia(estudiante)"
                   class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow">
                   <template #icon>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                       stroke="currentColor" class="size-5">
                       <path stroke-linecap="round" stroke-linejoin="round"
                         d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                  </template>
+                </BaseButton>
+
+                <!-- NUEVO BOTÓN: CONSTANCIA DE EGRESADO -->
+                <BaseButton title="Constancia Egresado" @click="imprimirConstanciaEgresado(estudiante)"
+                  class="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow">
+                  <template #icon>
+                    <!-- Icono tipo Birrete/Graduación -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.905 59.905 0 0 1 12 3.493a59.902 59.902 0 0 1 10.499 5.516 50.548 50.548 0 0 0-2.658.813m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
                     </svg>
                   </template>
                 </BaseButton>

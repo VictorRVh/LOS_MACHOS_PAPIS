@@ -30,6 +30,7 @@ const selectedCiclo = ref(null);
 const selectedPeriodo = ref(null);
 const openEspecialidades = ref(new Set());
 const { showToast, showConfirmModal } = useModalToast();
+
 onMounted(async () => {
   if (!cicloStore.ciclo?.length) await cicloStore.loadCiclo();
   if (!periodoStore.periodos?.length) await periodoStore.loadPeriodos();

@@ -234,9 +234,17 @@ Route::middleware('auth:sanctum')->group(function () {
         'buscarHistorialEstudiante',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-grupos');
 
+
+    //CERTICADO DEL ESTUDIANTE
     Route::post('estudiante-documento', [
         \App\Http\Controllers\EstudianteDocumentoController::class,
         'emitirCertificado',
+    ])->middleware('permission:todo-acceso-permisos|ver-grupos');
+    
+    //CONSTANCIA DEL ESTUDIANTE
+    Route::post('estudiante-constancia', [
+        \App\Http\Controllers\EstudianteDocumentoController::class,
+        'emitirConstancia',
     ])->middleware('permission:todo-acceso-permisos|ver-grupos');
 
     Route::get('estudianteDocumentoValidar', [
@@ -1233,6 +1241,11 @@ Route::get('reportes/nomina/grupo/{idGrupo}', [
 Route::get('reportes/registroMatriculaConEvaluaciones/{idGrupo}', [
     \App\Http\Controllers\ReporteController::class,
     'RegistroMatricula_RegistroEvaluacionPorModulo',
+]);
+
+Route::get('reportes/certificadosPorPeriodo/{idPeriodo}', [
+    \App\Http\Controllers\ReporteController::class,
+    'exportCertificadosPorPeriodo',
 ]);
 
 Route::middleware('auth:sanctum')->prefix('drive')->group(function () {

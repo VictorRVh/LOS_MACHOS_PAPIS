@@ -3,7 +3,7 @@ import QRCode from "qrcode";
 import useHttpRequest from "../composables/useHttpRequest";
 import useModalToast from "../composables/useModalToast";
 
-const { store: createCertificado } = useHttpRequest("/estudiante-documento");
+const { store: createCertificado } = useHttpRequest("/estudiante-constancia");
 const { showConfirmModal, showToast } = useModalToast();
 
 export async function generateConstanciaEstudiante(data) {

@@ -64,6 +64,28 @@ class EstudianteDocumentoController extends Controller
         ]);
     }
 
+    public function emitirConstancia(Request $request)
+    {
+        $request->validate([
+            'id_matricula' => 'required|uuid',
+            'tipo_documento' => 'required|integer',
+        ]);
+
+        $constancia = EstudianteDocumento::create([
+            'id_matricula' => $request->id_matricula,
+            'tipo_documento' => $request->tipo_documento,
+            'codigo' => null,
+            'duplicado' => 0,
+            'fecha_emision' => now(),
+            'id_autor' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'certificado_id' => $constancia->id,
+        ]);
+    }
+
     public function verificarCertificado($codigo)
     {
         $documento = EstudianteDocumento::with([

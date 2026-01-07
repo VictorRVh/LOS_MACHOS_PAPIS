@@ -172,6 +172,36 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
     console.error("Error descargando reporte:", error);
   }
 };
+<<<<<<< HEAD
+=======
+
+const openCertificadoModal = async (matriculaId) => {
+  selectedMatriculaId.value = matriculaId;
+  codigoCertificado.value = '';
+
+  const response = await certificadoStore.loadCheckCertificados({
+    id_matricula: matriculaId,
+    tipo_documento: 3,
+  });
+
+  esDuplicado.value = response.existe;
+
+  showCertificadoModal.value = true;
+};
+
+const emitirCertificado = () => {
+  // if (!codigoCertificado.value) return;
+
+  generateSelectedCertificates(
+    selectedMatriculaId.value,
+    codigoCertificado.value
+  );
+
+  showCertificadoModal.value = false;
+};
+
+
+>>>>>>> db25fbc86c74883c4fb5b6cbcf9a173dd586c915
 </script>
 
 <template>
@@ -283,7 +313,7 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
 
         <!-- AVISO DUPLICADO -->
         <div v-if="esDuplicado" class="mb-4 p-3 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
-          ⚠️ Este certificado ya fue emitido.
+          Este certificado ya fue emitido.
           Se marcará como <b>DUPLICADO</b>.
         </div>
 

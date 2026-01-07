@@ -53,13 +53,8 @@ export async function generateCertificate(data, codigo, certificado) {
   // 1. ENCABEZADO Y LOGOS (ALINEADOS)
   // ==========================================
   const headerY = 15;
-<<<<<<< HEAD
-  const logoMin = "/img/LogoMinisterio.png";
-  const logoCetpro = "/img/insignia.png";
-=======
   const logoMin = "/img/LogoMinisterio.png"; 
   const logoCetpro = "/img/cetproLOGOO.png";    
->>>>>>> 69d5670934ac5103672d0e22f38c788dcde48c45
 
   // -- LOGO MINEDU (Izquierda) --
   // Ajuste Y (+2) para centrarlo visualmente con la insignia

@@ -35,7 +35,7 @@ class ReporteCertificadosPeriodoExport
             ->whereHas('matricula.grupo', function ($q) {
                 $q->where('id_periodo', $this->idPeriodo);
             })
-            // ->where('duplicado', 1)
+            ->where('tipo_documento', 3)
             ->orderBy('fecha_emision')
             ->get();
 

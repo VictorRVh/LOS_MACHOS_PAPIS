@@ -75,6 +75,7 @@ const descargarReporteCertificado = async (idPeriodo) => {
     const link = document.createElement("a");
 
     link.href = url;
+    link.setAttribute("download", "reporte-certificados.xlsx");
     document.body.appendChild(link);
     link.click();
 

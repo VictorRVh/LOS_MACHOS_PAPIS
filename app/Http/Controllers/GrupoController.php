@@ -761,6 +761,8 @@ class GrupoController extends Controller
             ->join('modulos as mo', 'mo.id', '=', 'g.id_modulo')
             ->join('especialidad_programa as ep', 'ep.id', '=', 'g.id_especialidad')
             ->join('especialidad_madre as em', 'em.id', '=', 'ep.id_especialidad')
+            ->join('programa_estudio as pe', 'pe.id', '=', 'g.id_programa')
+            ->join('ciclo_academico as ca', 'ca.id', '=', 'pe.id_ciclo')
             ->where('m.id', $idMatricula)
             ->select(
                 'm.id as id_matricula',
@@ -780,7 +782,8 @@ class GrupoController extends Controller
                 'g.fecha_inicio',
                 'g.fecha_fin',
                 'g.id as id_grupo',
-                'e.id as id_estudiante'
+                'e.id as id_estudiante',
+                'ca.nombre_ciclo as ciclo_academico',
             )
             ->first();
 
@@ -815,6 +818,7 @@ class GrupoController extends Controller
             'id_matricula' => $matricula->id_matricula,
             'apellidos_nombres' => $matricula->apellidos_nombres,
             'especialidad'      => $matricula->especialidad,
+            'ciclo_academico' => $matricula->ciclo_academico,
 
             // ✅ CORRECTO
             'unidad_competencia' => $matricula->unidad_competencia,

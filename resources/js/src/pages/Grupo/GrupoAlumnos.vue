@@ -27,6 +27,7 @@ import useCertificadoStore from '../../store/Grupo/useCertificadoStore.js';
 // IMPORTACIÓN DE CONSTANCIA DE EGRESADO (NUEVO)
 // Asumo que la función exportada se llama generateConstanciaEgresado, ajusta si es diferente en tu archivo JS
 import { generateConstanciaEgresado } from "../../pdf/ConstanciaEgresado.js"; 
+import { generateCertificadoModular } from '../../pdf/CertificadoModular.js';
 
 const props = defineProps({
   id: { type: [String, Number], required: true },
@@ -146,7 +147,7 @@ const generateSelectedCertificates = async (idMatricula, codigo) => {
     const data = dataAlumnoCertificado.certificados;
 
     if (data) {
-      generateCertificate(data, codigo);
+      generateCertificadoModular(data, codigo);
     } else {
       showToast("No se encontraron datos para el certificado", "warning");
     }

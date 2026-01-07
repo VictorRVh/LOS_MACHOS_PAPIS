@@ -753,7 +753,7 @@ class GrupoController extends Controller
     public function dataCertificado($idMatricula)
     {
         // ===============================
-        // DATOS PRINCIPALES DEL CERTIFICADO
+        // DATOS PRINCIPALES
         // ===============================
         $matricula = DB::table('matricula as m')
             ->join('estudiante as e', 'e.id', '=', 'm.id_estudiante')
@@ -774,16 +774,13 @@ class GrupoController extends Controller
                 ) as apellidos_nombres
             "),
                 'em.nombre_especialidad as especialidad',
-
-                // 🔥 MÓDULO → UNIDAD DE COMPETENCIA
                 'mo.descripcion as unidad_competencia',
-                'mo.creditos',
                 'mo.horas',
                 'g.fecha_inicio',
                 'g.fecha_fin',
                 'g.id as id_grupo',
                 'e.id as id_estudiante',
-                'ca.nombre_ciclo as ciclo_academico',
+                'ca.nombre_ciclo as ciclo_academico'
             )
             ->first();
 
@@ -792,9 +789,9 @@ class GrupoController extends Controller
         }
 
         // ===============================
-        // CAPACIDADES TERMINALES → UNIDADES DIDÁCTICAS
+        // UNIDADES DIDÁCTICAS (con nota)
         // ===============================
-        $unidadesDidacticas = DB::table('capacidad_terminal as ct')
+        $unidades = DB::table('capacidad_terminal as ct')
             ->leftJoin('nota_capacidad_terminal as nct', function ($q) use ($matricula) {
                 $q->on('nct.id_capacidad', '=', 'ct.id')
                     ->where('nct.id_estudiante', $matricula->id_estudiante)
@@ -803,32 +800,73 @@ class GrupoController extends Controller
             ->where('ct.id_grupo', $matricula->id_grupo)
             ->orderBy('ct.numero_capacidad')
             ->select(
+                'ct.id as id_unidad',
                 'ct.numero_capacidad as numero_unidad',
                 'ct.nombre_capacidad as nombre_unidad',
-                'ct.fecha_inicio',
-                'ct.fecha_fin',
+                // 'ct.fecha_inicio',
+                // 'ct.fecha_fin',
+                'ct.horas',
+                DB::raw('(ct.creditos_teoricos + ct.creditos_practicos) as creditos'),
                 DB::raw('IFNULL(nct.nota_capacidad, "") as nota')
             )
             ->get();
 
+        $competencias = DB::table('competencias')
+            ->where('id_modulo', function ($q) use ($matricula) {
+                $q->select('id_modulo')
+                    ->from('grupo')
+                    ->where('id', $matricula->id_grupo)
+                    ->limit(1);
+            })
+            ->orderBy('nombre')
+            ->pluck('descripcion')
+            ->values();
+
+
         // ===============================
-        // RESPUESTA FINAL (PEDAGÓGICA)
+        // CRÉDITOS TOTALES (SUMA REAL)
+        // ===============================
+        $totalCreditos = $unidades->sum('creditos');
+        $totalHoras = $unidades->sum('horas');
+
+        // ===============================
+        // CAPACIDADES (solo texto)
+        // ===============================
+        $capacidades = DB::table('capacidades_competencias')
+            ->whereIn('id_capacidad_terminal', $unidades->pluck('id_unidad'))
+            ->select('id_capacidad_terminal', 'descripcion')
+            ->orderBy('sigla')
+            ->get()
+            ->groupBy('id_capacidad_terminal');
+
+        // ===============================
+        // UNIR UNIDADES + CAPACIDADES
+        // ===============================
+        $unidadesDidacticas = $unidades->map(function ($unidad) use ($capacidades) {
+
+            $unidad->capacidades = $capacidades[$unidad->id_unidad] ?? collect();
+            $unidad->capacidades = $unidad->capacidades->pluck('descripcion')->values();
+
+            unset($unidad->id_unidad);
+            return $unidad;
+        });
+
+        // ===============================
+        // RESPUESTA FINAL
         // ===============================
         return response()->json([
-            'id_matricula' => $matricula->id_matricula,
-            'apellidos_nombres' => $matricula->apellidos_nombres,
-            'especialidad'      => $matricula->especialidad,
-            'ciclo_academico' => $matricula->ciclo_academico,
+            'id_matricula'        => $matricula->id_matricula,
+            'apellidos_nombres'   => $matricula->apellidos_nombres,
+            'especialidad'        => $matricula->especialidad,
+            'ciclo_academico'     => $matricula->ciclo_academico,
+            'unidad_competencia'  => $competencias,
+            'modulo' => $matricula->unidad_competencia,
+            'horas_totales'       => $totalHoras,
+            // 🔥 AHORA SÍ ES CORRECTO
+            'creditos_totales'    => $totalCreditos,
 
-            // ✅ CORRECTO
-            'unidad_competencia' => $matricula->unidad_competencia,
-            'horas' => $matricula->horas,
-            'creditos' => $matricula->creditos,
-
-            'fecha_inicio'      => $matricula->fecha_inicio,
-            'fecha_fin'         => $matricula->fecha_fin,
-
-            // ✅ CORRECTO
+            'fecha_inicio'        => $matricula->fecha_inicio,
+            'fecha_fin'           => $matricula->fecha_fin,
             'unidades_didacticas' => $unidadesDidacticas,
         ]);
     }

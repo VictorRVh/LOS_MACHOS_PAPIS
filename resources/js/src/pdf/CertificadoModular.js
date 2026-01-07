@@ -65,10 +65,11 @@ export async function generateCertificadoModular(data, codigo) {
   const logoCetpro = "/img/CetproLOGOO.png";
 
   const estudiante = (data?.apellidos_nombres || "").toUpperCase();
-  const modulo = (data?.unidad_competencia || "").toUpperCase();
+  const modulo = (data?.modulo || "").toUpperCase();
+    const unidad_competencia = (data?.unidad_competencia || "");
   const especialidad = (data?.especialidad || "").toUpperCase();
-  const totalCreditos = data?.creditos || "0";
-  const totalHoras = data?.horas || "0";
+  const totalCreditos = data?.creditos_totales || "0";
+  const totalHoras = data?.horas_totales || "0";
 
   const fechaIni = formatearFecha(data?.fecha_inicio);
   const fechaFin = formatearFecha(data?.fecha_fin);
@@ -132,7 +133,7 @@ export async function generateCertificadoModular(data, codigo) {
   curY += 25;
   const printField = (label, value, y) => {
     doc.setFont("times", "normal");
-    doc.setFontSize(10);
+    doc.setFontSize(12);
     doc.setTextColor(100);
     doc.text(label, mL, y);
     doc.setFont("times", "bold");
@@ -189,7 +190,7 @@ export async function generateCertificadoModular(data, codigo) {
       const row = [];
       if (i === 0) {
         row.push({
-          content: modulo,
+          content: unidad_competencia,
           rowSpan: unidades.length,
           styles: { valign: 'middle', halign: 'center', fontStyle: 'bold' }
         });
@@ -281,7 +282,7 @@ export async function generateCertificadoModular(data, codigo) {
 
   // 3. COD (FUERA DEL CUADRO, ABAJO A LA IZQUIERDA)
   const footerY = contentY + contentHeight + 5; // 5mm de separación
-  doc.text("N.° _______________", mL, footerY);
+  doc.text(`N.° ${codigoFinal}`, mL, footerY);
 
   const pdfBlob = doc.output("blob");
   const pdfUrl = URL.createObjectURL(pdfBlob);

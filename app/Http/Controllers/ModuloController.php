@@ -39,6 +39,7 @@ class ModuloController extends Controller
             // competencias (opcional)
             'competencias'                 => 'nullable|array',
             'competencias.*.tipo'            => 'required|string',
+            'competencias.*.nombre'            => 'required|string',
             'competencias.*.descripcion'   => 'required|string|max:225',
         ]);
 
@@ -67,6 +68,7 @@ class ModuloController extends Controller
                     Competencia::create([
                         'id_modulo'   => $modulo->id,
                         'tipo'        => $competencia['tipo'], // tipo de competencia
+                        'nombre'        => $competencia['nombre'], // tipo de competencia
                         'descripcion' => $competencia['descripcion'],
                     ]);
                 }
@@ -160,6 +162,7 @@ class ModuloController extends Controller
                     return [
                         'id' => $competencia->id,
                         'tipo' => $competencia->tipo,
+                        'nombre' => $competencia->nombre,
                         'descripcion' => $competencia->descripcion,
                     ];
                 }),
@@ -194,6 +197,7 @@ class ModuloController extends Controller
 
                 'competencias'               => 'sometimes|array',
                 'competencias.*.tipo'          => 'required|string', // tipo
+                'competencias.*.nombre'          => 'required|string', // tipo
                 'competencias.*.descripcion' => 'required|string|max:225',
             ]);
 
@@ -228,6 +232,7 @@ class ModuloController extends Controller
                     Competencia::create([
                         'id_modulo'   => $modulo->id,
                         'tipo'        => $competencia['tipo'], // 👈 tipo
+                        'nombre'        => $competencia['nombre'], // 👈 tipo
                         'descripcion' => $competencia['descripcion'],
                     ]);
                 }

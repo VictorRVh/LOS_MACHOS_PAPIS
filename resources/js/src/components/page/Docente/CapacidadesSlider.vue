@@ -143,7 +143,7 @@ const onSubmit = async () => {
         : await createCompetencia(formData.value);
 
     if (response?.id) {
-        showToast(`Competencia ${isEditing.value ? "editada" : "creada"} correctamente`);
+        showToast(`Capacidad ${isEditing.value ? "editada" : "creada"} correctamente`);
         onCancel();
     }
 };
@@ -152,15 +152,15 @@ const onSubmit = async () => {
 <template>
     <AuthorizationFallback :permissions="requiredPermissions">
         <h2 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-            {{ isEditing ? "Editar Competencia" : "Agregar Competencia" }}
+            {{ isEditing ? "Editar Capacidad" : "Agregar Capacidad" }}
         </h2>
 
         <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
 
         <div class="space-y-3 font-inter">
             <!-- CAPACIDAD / COMPETENCIA -->
-            <FormLabelError label="Competencias" required :error="formErrors?.id_competencia">
-                <BaseSelectGrupo v-model="formData.id_competencia" :options="capacidades" label="tipo" value="id"
+            <FormLabelError label="Capacidades" required :error="formErrors?.id_competencia">
+                <BaseSelectGrupo v-model="formData.id_competencia" :options="capacidades" label="nombre" value="id"
                     placeholder="Seleccione una capacidad" />
             </FormLabelError>
             <!-- UNIDAD DIDÁCTICA -->
@@ -172,7 +172,7 @@ const onSubmit = async () => {
 
 
             <!-- DESCRIPCIÓN -->
-            <FormInput v-model="formData.descripcion" label="Descripción" type="textarea" :maxlength="225" required
+            <FormInput v-model="formData.descripcion" label="Descripción de la capacidad" type="textarea" :maxlength="225" required
                 :error="formErrors?.descripcion" />
             <!-- Contador -->
             <div class="flex justify-end">
@@ -184,7 +184,7 @@ const onSubmit = async () => {
             </div>
 
             <div class="flex gap-2 mt-4">
-                <Button :title="isEditing ? 'Guardar cambios' : 'Crear competencia'"
+                <Button :title="isEditing ? 'Guardar cambios' : 'Crear Capacidad'"
                     :loading-title="isEditing ? 'Guardando...' : 'Creando...'" :loading="saving || updating"
                     :disabled="saving || updating" class="!w-full" @click="onSubmit" />
 

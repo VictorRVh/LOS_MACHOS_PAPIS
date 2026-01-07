@@ -17,11 +17,16 @@ const props = defineProps({
 const emit = defineEmits(["close"]);
 const emitClose = () => emit("close");
 
+
+
 /* =========================
    MAPEAR COMPETENCIAS
 ========================= */
 const infoList = computed(() => {
   if (!props.modulo?.competencias?.length) {
+
+    console.log(props.modulo)
+    
     return [
       {
         label: "Sin competencias",
@@ -31,7 +36,7 @@ const infoList = computed(() => {
   }
 console.log("modulo: ",props.modulo)
   return props.modulo.competencias.map((c, index) => ({
-    label: `${index + 1}. ${c.tipo}`,
+    label: `${index + 1}. ${c.nombre}`,
     value: c.descripcion || "Sin descripción"
   }));
 });

@@ -172,36 +172,6 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
     console.error("Error descargando reporte:", error);
   }
 };
-<<<<<<< HEAD
-
-const openCertificadoModal = async (matriculaId) => {
-  selectedMatriculaId.value = matriculaId;
-  codigoCertificado.value = '';
-
-  const response = await certificadoStore.loadCheckCertificados({
-    id_matricula: matriculaId,
-    tipo_documento: 3,
-  });
-
-  esDuplicado.value = response.existe;
-
-  showCertificadoModal.value = true;
-};
-
-const emitirCertificado = () => {
-  // if (!codigoCertificado.value) return;
-
-  generateSelectedCertificates(
-    selectedMatriculaId.value,
-    codigoCertificado.value
-  );
-
-  showCertificadoModal.value = false;
-};
-
-
-=======
->>>>>>> 69d5670934ac5103672d0e22f38c788dcde48c45
 </script>
 
 <template>

@@ -29,16 +29,16 @@ class CompetenciaController extends Controller
     {
         return DB::table('competencias')
             ->select(
-                'id',
                 'tipo',
-                'descripcion',
-              //  'created_at'
+                DB::raw('MIN(id) as id'),
+                DB::raw('MIN(nombre) as nombre'),
+                DB::raw('MIN(descripcion) as descripcion')
             )
             ->where('id_modulo', $idModulo)
-            ->orderBy('created_at')
+            ->groupBy('tipo')
+            ->orderBy('tipo')
             ->get();
     }
-
 
     /**
      * Store a newly created resource in storage.

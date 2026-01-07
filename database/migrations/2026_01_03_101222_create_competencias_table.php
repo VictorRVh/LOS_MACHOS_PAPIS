@@ -19,6 +19,7 @@ return new class extends Migration
 
             // Tipo de competencia
             $table->char('tipo');
+            $table->char('nombre');
 
             // Descripción del tipo de competencia
             $table->text('descripcion');

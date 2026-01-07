@@ -38,51 +38,35 @@ class CapacidadCompetenciaController extends Controller
             ], 404);
         }
 
-        // 2️⃣ Unidades didácticas del grupo
-        $unidades = CapacidadTerminal::where('id_grupo', $idGrupo)
-            ->orderByRaw('CAST(numero_capacidad AS UNSIGNED) ASC')
+        // 2️⃣ Query PLANO correcto
+        $data = DB::table('capacidades_competencias as cc')
+            ->join(
+                'capacidad_terminal as ct',
+                'cc.id_capacidad_terminal',
+                '=',
+                'ct.id'
+            )
+            ->join(
+                'competencias as c',
+                'cc.id_competencia',
+                '=',
+                'c.id'
+            )
+            ->where('ct.id_grupo', $idGrupo)
+            ->orderBy('ct.numero_capacidad')
+            ->orderBy('cc.created_at')
+            ->select(
+                'cc.id',
+                'cc.descripcion',              // ✔ columna real
+                'ct.nombre_capacidad as unidad',
+                'c.nombre',      // ✔ SOLO aquí va competencia
+                'c.tipo'      // ✔ SOLO aquí va competencia
+            )
             ->get();
 
-        if ($unidades->isEmpty()) {
-            return response()->json([
-                'ok' => true,
-                'data' => []
-            ]);
-        }
-
-        // 3️⃣ Capacidades de todas las unidades
-        $capacidades = DB::table('capacidades')
-            ->whereIn('id_capacidad_terminal', $unidades->pluck('id'))
-            ->orderBy('created_at')
-            ->get()
-            ->groupBy('id_capacidad_terminal');
-
-        // 4️⃣ Armar respuesta FINAL
-        $resultado = $unidades->map(function ($unidad) use ($capacidades) {
-            return [
-                'id' => $unidad->id,
-              //  'numero' => $unidad->numero_capacidad,
-                'nombre' => $unidad->nombre_capacidad,
-             //    'fecha_inicio' => $unidad->fecha_inicio,
-             //   'fecha_fin' => $unidad->fecha_fin,
-             //   'creditos_teoricos' => $unidad->creditos_teoricos,
-             //   'creditos_practicos' => $unidad->creditos_practicos,
-             //   'status' => $unidad->status,
-                'capacidades' => $capacidades->get($unidad->id, collect())
-            ];
-        });
-
-        return response()->json([
-            'ok' => true,
-            'grupo_id' => $idGrupo,
-            'unidades' => $resultado
-        ]);
+        return response()->json($data->values());
     }
 
-
-    /**
-     * Crear capacidad terminal
-     */
     public function store(Request $request)
     {
         $data = $request->validate([

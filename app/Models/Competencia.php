@@ -19,6 +19,7 @@ class Competencia extends Model
     protected $fillable = [
         'id',
         'id_modulo',
+        'nombre',
         'tipo',
         'descripcion',
     ];

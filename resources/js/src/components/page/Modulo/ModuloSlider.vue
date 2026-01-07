@@ -10,7 +10,7 @@ import FormInput from "../../ui/FormInput.vue";
 import FormLabelError from "../../ui/FormLabelError.vue";
 import Button from "../../ui/Button.vue";
 import AuthorizationFallback from "../AuthorizationFallback.vue";
-import BaseSelectModulo from "../../ui/BaseSelectCiclo.vue";
+import BaseSelectModulo from "../../ui/BaseSelectGrupo.vue";
 
 import useModuloStore from "../../../store/Modulos/useModulosStore";
 const props = defineProps({
@@ -78,6 +78,7 @@ const onCancelEdit = () => {
 const addCompetencia = () => {
     formData.value.competencias.push({
         tipo: null,
+        nombre: null,
         descripcion: ""
     });
 };
@@ -109,6 +110,13 @@ watch(
     },
     { immediate: true }
 );
+
+
+const competenciasOptions = ref([
+  { id: "c4ca4238a0b923820dcc509a6f75849b", nombre: "Competencias técnicas" },
+  { id: "c81e728d9d4c2f636f067f89cc14862c", nombre: "Competencias para la empleabilidad" },
+]);
+
 
 /* =========================
    VALIDACIÓN
@@ -144,6 +152,15 @@ const onSubmit = async () => {
         console.log(formErrors.value)
         return;
     }
+   
+        // 🔥 AQUÍ
+    formData.value.competencias = formData.value.competencias.map(c => {
+        const found = competenciasOptions.value.find(opt => opt.id === c.tipo);
+        return {
+            ...c,
+            nombre: found ? found.nombre : null
+        };
+    });
 
     const response = props.modulo?.id
         ? await updateModulo(props.modulo.id, formData.value)
@@ -215,7 +232,7 @@ const onSubmit = async () => {
 
                 <!-- Cards -->
                 <div v-for="(competencia, index) in formData.competencias" :key="index" class="relative rounded-xl border border-gray-200 dark:border-gray-700
-               bg-gray-50 dark:bg-gray-900 p-4 space-y-3">
+               bg-gray-50 dark:bg-gray-900 p-3 space-y-1">
                     <!-- Eliminar -->
                     <button title="Eliminar" v-if="formData.competencias.length > 0" type="button"
                         @click="removeCompetencia(index)"
@@ -224,8 +241,11 @@ const onSubmit = async () => {
                     </button>
 
                     <!-- Tipo -->
-
-                    <FormInput v-model="competencia.tipo" label="Nombre de la competencia" />
+                    <FormLabelError label="Competencia" required>
+                        <BaseSelectModulo v-model="competencia.tipo" :options="competenciasOptions" label="nombre"
+                            placeholder="Seleccione una competencia"
+                            />
+                    </FormLabelError>
                     <!-- Descripción -->
                     <FormInput v-model="competencia.descripcion" type="textarea" label="Descripción" :maxlength="225" />
 

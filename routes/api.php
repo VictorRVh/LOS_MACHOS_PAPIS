@@ -789,8 +789,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\CompetenciaController::class,
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-mis-modulos');
-
-
+    
     // RUTA PARA CAPACIDADES TERMINALES-COMPETENCIA
     Route::get('capacidad_competencia', [
         \App\Http\Controllers\CapacidadCompetenciaController::class,

@@ -58,9 +58,11 @@ class CapacidadCompetenciaController extends Controller
             ->select(
                 'cc.id',
                 'cc.descripcion',              // ✔ columna real
+                'ct.id as id_unidad',
                 'ct.nombre_capacidad as unidad',
-                'c.nombre',      // ✔ SOLO aquí va competencia
-                'c.tipo'      // ✔ SOLO aquí va competencia
+                'c.nombre as competencia',      // ✔ SOLO aquí va competencia
+                'c.tipo as tipo_competencia',      // ✔ SOLO aquí va competencia
+                'c.id as id_competencia'      // ✔ SOLO aquí va competencia
             )
             ->get();
 
@@ -124,7 +126,7 @@ class CapacidadCompetenciaController extends Controller
         $capacidad->delete();
 
         return response()->json([
-            'message' => 'Capacidad terminal eliminada correctamente'
-        ]);
+            'message' => 'Capacidad eliminada correctamente'
+        ],204);
     }
 }

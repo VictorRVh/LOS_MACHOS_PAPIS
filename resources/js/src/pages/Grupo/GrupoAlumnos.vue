@@ -172,8 +172,6 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
     console.error("Error descargando reporte:", error);
   }
 };
-<<<<<<< HEAD
-=======
 
 const openCertificadoModal = async (matriculaId) => {
   selectedMatriculaId.value = matriculaId;
@@ -201,7 +199,6 @@ const emitirCertificado = () => {
 };
 
 
->>>>>>> db25fbc86c74883c4fb5b6cbcf9a173dd586c915
 </script>
 
 <template>
@@ -317,7 +314,6 @@ const emitirCertificado = () => {
           Se marcará como <b>DUPLICADO</b>.
         </div>
 
-        <!-- INPUT SOLO SI NO ES DUPLICADO -->
         <div v-if="!esDuplicado" class="mb-4">
           <label class="block text-sm font-medium mb-1">
             Código del certificado

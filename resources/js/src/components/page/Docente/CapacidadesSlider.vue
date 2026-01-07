@@ -98,18 +98,21 @@ onMounted(async () => {
 ========================= */
 watch(
     () => props.capacidad,
-    (data) => {
-        if (props.show && data?.id) {
-            formData.value = {
-                id_capacidad_terminal: data.id_capacidad_terminal,
-                id_competencia: data.id_competencia,
-                descripcion: data.descripcion,
-            };
-            formErrors.value = {};
-        }
+    async (data) => {
+        if (!props.show || !data?.id) return;
+        console.log("ID competencia recibida:", data.id_competencia);
+        console.log("Opciones competencias:", capacidades.value);
+
+        // Asignar valores (IDs correctos)
+        formData.value.id_capacidad_terminal = data.id_capacidad_terminal;
+        formData.value.id_competencia = data.id_competencia;
+        formData.value.descripcion = data.descripcion;
+
+        formErrors.value = {};
     },
     { immediate: true }
 );
+
 
 /* =========================
    VALIDACIÓN
@@ -160,8 +163,9 @@ const onSubmit = async () => {
         <div class="space-y-3 font-inter">
             <!-- CAPACIDAD / COMPETENCIA -->
             <FormLabelError label="Capacidades" required :error="formErrors?.id_competencia">
-                <BaseSelectGrupo v-model="formData.id_competencia" :options="capacidades" label="nombre" value="id"
+                <BaseSelectGrupo v-model="formData.id_competencia" :options="capacidades" label="nombre" value="tipo"
                     placeholder="Seleccione una capacidad" />
+
             </FormLabelError>
             <!-- UNIDAD DIDÁCTICA -->
             <FormLabelError label="Unidad didáctica" required :error="formErrors?.id_capacidad_terminal">
@@ -172,8 +176,8 @@ const onSubmit = async () => {
 
 
             <!-- DESCRIPCIÓN -->
-            <FormInput v-model="formData.descripcion" label="Descripción de la capacidad" type="textarea" :maxlength="225" required
-                :error="formErrors?.descripcion" />
+            <FormInput v-model="formData.descripcion" label="Descripción de comtencia" type="textarea" :maxlength="225"
+                required :error="formErrors?.descripcion" />
             <!-- Contador -->
             <div class="flex justify-end">
                 <span class="text-xs" :class="formData.descripcion.length > 200

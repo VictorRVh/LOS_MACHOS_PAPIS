@@ -822,7 +822,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('capacidad_competencia/{id}', [
         \App\Http\Controllers\CapacidadCompetenciaController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-acceso-modulos|ver-mis-modulos');
 
 
     // RUTA PARA NOTA DE EXPERIENCIA FORMATIVA

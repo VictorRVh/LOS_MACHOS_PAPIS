@@ -1,20 +1,17 @@
 <script setup>
+import { ref, onMounted, computed } from "vue";
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
 import TBody from "../../components/table/TBody.vue";
-import Tr from "../../components/table/Tr.vue";
-import Th from "../../components/table/Th.vue";
-import Td from "../../components/table/Td.vue";
+import EditButton from "../../components/ui/EditButton.vue";
+import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 import CapacidaddesSlider from "../../components/page/Docente/CapacidadesSlider.vue";
-
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import useCapacidadesStore from "../../store/CapacidadTerminal/UseCapacidadesStore";
 import useSesionesStore from "../../store/Sesion/useSesionStore";
-
-import { ref, onMounted } from "vue";
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -24,52 +21,73 @@ const props = defineProps({
 const sesionStore = useSesionesStore();
 const capacidadStore = useCapacidadesStore();
 
-// Set reactivo para controlar unidades abiertas
-const openCapacidades = ref(new Set());
+const openCompetencias = ref(new Set());
 
-// Función para abrir/cerrar unidades
-const toggleCapacidad = (id) => {
-  if (openCapacidades.value.has(id)) {
-    openCapacidades.value.delete(id);
-  } else {
-    openCapacidades.value.add(id);
-  }
-  // Reasignamos para que Vue detecte el cambio
-  openCapacidades.value = new Set(openCapacidades.value);
-};
-
-// Slider y modales
 const { slider, sliderData, showSlider, hideSlider } = useSlider("capacidad-terminal-crud");
 const { showConfirmModal, showToast } = useModalToast();
-const { destroy: deleteCapacidad, deleting } = useHttpRequest("/capacidad_terminal");
+const { destroy: deleteCapacidad, deleting } = useHttpRequest("/capacidad_competencia");
 
-// Función para formatear fechas
-const formatFecha = (fecha) =>
-  new Date(fecha).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
+// Agrupar capacidades por competencia → unidad
+const competencias = computed(() => {
+  const mapCompetencia = new Map();
 
-// Función para eliminar capacidades
+  capacidadStore.capacidades.forEach((item) => {
+    // Padre: competencia
+    if (!mapCompetencia.has(item.competencia)) {
+      mapCompetencia.set(item.competencia, {
+        nombre: item.competencia,
+        id: item.id_competencia, // usamos tipo_competencia como id único
+        unidades: new Map(),
+      });
+    }
+
+    const comp = mapCompetencia.get(item.competencia);
+
+    // Hijo: unidad
+    if (!comp.unidades.has(item.id_unidad)) {
+      comp.unidades.set(item.id_unidad, {
+        nombre: item.unidad,
+        id: item.id_unidad,
+        descripciones: [],
+      });
+    }
+
+    // Descripciones
+    comp.unidades.get(item.id_unidad).descripciones.push({
+      id: item.id,
+      descripcion: item.descripcion,
+    });
+  });
+
+  // Convertir mapas a arrays
+  return Array.from(mapCompetencia.values()).map((comp) => ({
+    ...comp,
+    unidades: Array.from(comp.unidades.values()),
+  }));
+});
+
+// Toggle competencia (abre todas las unidades)
+const toggleCompetencia = (id) => {
+  if (openCompetencias.value.has(id)) openCompetencias.value.delete(id);
+  else openCompetencias.value.add(id);
+  openCompetencias.value = new Set(openCompetencias.value);
+};
+
+// Eliminar capacidad
 const onDelete = async (capacidad) => {
-  if (!canEditCapacidades?.value) {
-    showToast('No se puede eliminar esta unidad, la sesión está fuera de rango o finalizada.', 'warning');
-    return;
-  }
-
   if (deleting.value) return;
-
   showConfirmModal(null, async (confirmed) => {
     if (!confirmed) return;
-
-    const isDeleted = await deleteCapacidad(capacidad?.id);
+    const isDeleted = await deleteCapacidad(capacidad.id);
     if (isDeleted) {
-      showToast(`Capacidad "${capacidad?.nombre_capacidad}" eliminada exitosamente.`);
-      await capacidadStore.loadCapacidadTerminal(props.id);
+      showToast(`Capacidad eliminada exitosamente.`);
+      await capacidadStore.loadCapacidades(props.id);
     } else {
-      showToast("No se pudo Eliminar la capacidad. Intenta nuevamente.", "error");
+      showToast("No se pudo eliminar la capacidad. Intenta nuevamente.", "error");
     }
   });
 };
 
-// Cargar datos al montar
 onMounted(async () => {
   await sesionStore.loadSesion({ id_grupo: props.id, tipo_entrega: 1 });
   if (!capacidadStore.capacidades?.length) {
@@ -80,62 +98,65 @@ onMounted(async () => {
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-capacidad-terminal-docente', 'ver-capacidad-terminal-docente']">
-
-
     <div class="flex flex-col lg:flex-row px-6 gap-6">
 
       <!-- FORMULARIO -->
       <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-
-        <CapacidaddesSlider :show="slider" :idGrupo="id" :idModulo="idModulo" :indexCapacidades="indicesArray"
-          :capacidad="sliderData" @hide="hideSlider" />
+        <CapacidaddesSlider :show="slider" :idGrupo="id" :idModulo="idModulo" :capacidad="sliderData"
+          @hide="hideSlider" />
       </div>
 
       <!-- TABLA -->
       <div class="w-full lg:w-2/3">
         <Table class="w-full">
           <THead class="hidden">
-            <Th></Th>
+            <th></th>
           </THead>
-
           <TBody>
-            <template v-for="unidad in capacidadStore.capacidades" :key="unidad.id">
-
-              <!-- HEADER UNIDAD -->
-              <tr @click="toggleCapacidad(unidad.id)" class="bg-cetpro dark:bg-cetpro-dark cursor-pointer
-               hover:bg-cetpro-dark transition-colors border-b">
+            <!-- ITERAR COMPETENCIAS -->
+            <template v-for="comp in competencias" :key="comp.id">
+              <!-- HEADER COMPETENCIA -->
+              <tr @click="toggleCompetencia(comp.id)"
+                class="bg-cetpro dark:bg-cetpro-dark cursor-pointer hover:bg-cetpro-dark transition-colors border-b">
                 <td colspan="8" class="px-4 py-3">
-                  <div class="flex items-center justify-between font-bold uppercase text-sm">
-                    <span>Unidad {{ unidad.unidad }}</span>
-
+                  <div class="flex items-center justify-between text-white font-bold uppercase text-sm">
+                    <span>{{ comp.nombre }}</span>
                     <ChevronDownIcon class="h-5 w-5 transition-transform"
-                      :class="{ 'rotate-180': openCapacidades.has(unidad.id) }" />
+                      :class="{ 'rotate-180': openCompetencias.has(comp.id) }" />
                   </div>
                 </td>
               </tr>
 
-              <!-- CONTENIDO UNIDAD -->
-              <tr v-if="openCapacidades.has(unidad.id)">
-                <td colspan="8" class="bg-white dark:bg-gray-800 px-6 py-4 space-y-4">
+              <!-- UNIDADES Y DESCRIPCIONES (si competencia abierta) -->
+              <tr v-if="openCompetencias.has(comp.id)">
+                <td colspan="8" class="bg-white dark:bg-gray-800 px-6 py-4">
+                  <div class="flex flex-col gap-4">
+                    <template v-for="unidad in comp.unidades" :key="unidad.id">
+                      <div class="font-semibold text-gray-800 dark:text-gray-200">{{ unidad.nombre }}</div>
 
-                  <!-- CAPACIDAD -->
-                  <div class="border-l-4 border-cetpro pl-4">
-                    <p class="font-semibold text-sm">
-                      {{ unidad.nombre }}
-                    </p>
-
-                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                      {{ unidad.descripcion }}
-                    </p>
+                      <div class="ml-6 flex flex-col gap-2">
+                        <div v-for="desc in unidad.descripciones" :key="desc.id"
+                          class="flex justify-between items-center border-l-4 border-cetpro pl-4">
+                          <p class="text-sm text-gray-600 dark:text-gray-300">{{ desc.descripcion }}</p>
+                          <div class="flex items-center gap-2">
+                            <EditButton @click="showSlider(true, {
+                              id: desc.id,
+                              descripcion: desc.descripcion,
+                              id_competencia: comp.id,        // tipo_competencia
+                              id_capacidad_terminal: unidad.id // id_unidad
+                            })" />
+                            <DeleteButton @click="onDelete(desc)" />
+                          </div>
+                        </div>
+                      </div>
+                    </template>
                   </div>
-
                 </td>
               </tr>
 
             </template>
           </TBody>
         </Table>
-
       </div>
     </div>
   </AuthorizationFallback>

@@ -59,8 +59,9 @@ class EstudianteDocumentoController extends Controller
 
         return response()->json([
             'success' => true,
+            'codigo' => $certificado->codigo,
             'duplicado' => $certificado->duplicado,
-            'certificado_id' => $certificado->id,
+            // 'certificado_id' => $certificado->id,
         ]);
     }
 

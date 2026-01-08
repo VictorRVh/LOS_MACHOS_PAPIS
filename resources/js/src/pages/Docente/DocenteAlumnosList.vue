@@ -132,7 +132,7 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
 
       <div class="flex justify-end mb-4  gap-6 ml-2">
         <Button title="Descargar nomina" @click="descargarNomina(props.id)" variant="secondary" />
-        <Button title="" @click="exportar()" variant="secondary" />
+        <Button title="Alumnos" @click="exportar()" variant="secondary" />
         <Button title="Exporta registro de matrículas y evaluaciones" @click="exportarMatriculaEvaluaciones(props.id)"
           variant="secondary" />
 

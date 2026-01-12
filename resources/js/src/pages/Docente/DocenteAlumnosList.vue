@@ -172,9 +172,6 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
             <Td>{{ estudiante.sexo }}</Td>
 
             <Td>{{ estudiante.fecha_nacimiento }}</Td>
-
-
-
             <Td>{{ estudiante.celular_personal ?? '-' }}</Td>
             <Td>{{ estudiante.correo_electronico ?? '-' }}</Td>
 

@@ -111,6 +111,7 @@ class CapacidadTerminalController extends Controller
             'fecha_fin'        => 'required|date|after_or_equal:fecha_inicio',
             'creditos_teoricos' => 'required|string|max:255',
             'creditos_practicos' => 'required|string|max:255',
+            'horas'               => 'required|string|max:255',
             'id_grupo'         => 'required|exists:grupo,id',
             'status'           => 'required|in:0,1,2,3',
         ]);
@@ -163,7 +164,36 @@ class CapacidadTerminalController extends Controller
         }
 
         // 4️⃣ Crear capacidad
-        $capacidad = CapacidadTerminal::create($request->all());
+        // $capacidad = CapacidadTerminal::create($request->all());
+
+        $fechaInicio = Carbon::parse($request->fecha_inicio)->startOfDay();
+        $fechaFin    = Carbon::parse($request->fecha_fin)->endOfDay();
+
+        // 📌 Determinar STATUS automáticamente
+        if ($fechaInicio->gt($now)) {
+            // Aún no inicia
+            $status = 0;
+        } elseif ($fechaInicio->lte($now) && $fechaFin->gte($now)) {
+            // En ejecución
+            $status = 1;
+        } elseif ($fechaInicio->lt($now) && $fechaFin->lt($now)) {
+            // Finalizado
+            $status = 4;
+        }
+
+        // 🔹 Crear capacidad con status calculado
+        $capacidad = CapacidadTerminal::create([
+            'numero_capacidad'   => $request->numero_capacidad,
+            'nombre_capacidad'   => $request->nombre_capacidad,
+            'fecha_inicio'       => $request->fecha_inicio,
+            'fecha_fin'          => $request->fecha_fin,
+            'creditos_teoricos'  => $request->creditos_teoricos,
+            'creditos_practicos' => $request->creditos_practicos,
+            'horas'              => $request->horas,
+            'id_grupo'           => $request->id_grupo,
+            'status'             => $status,
+        ]);
+
 
         // 5️⃣ Verificar si ya se completaron todas
         $totalFinal = CapacidadTerminal::where('id_grupo', $request->id_grupo)->count();

@@ -20,7 +20,7 @@ const hasCetpro = computed(() => !!cetpro.value?.id);
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-cetpro', 'ver-cetpro']">
+  <AuthorizationFallback :permissions="['ver-informacion-cetpro']">
     <div class="p-6 space-y-4">
 
       <h2 class="text-2xl font-bold text-cetpro dark:text-cetpro-light">

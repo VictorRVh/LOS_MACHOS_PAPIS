@@ -395,7 +395,7 @@ export default [
     {
         path: '/cetpro',
         name: 'cetpro.index',
-        component: () => import('../pages/Notificacion.vue'),
+        component: () => import('../pages/InfoCetpro.vue'),
         meta: {
             layout: 'dashboard',
             permissions: [],

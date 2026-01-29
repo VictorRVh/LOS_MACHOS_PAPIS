@@ -92,9 +92,11 @@ const {
   ordenados: usuariosOrdenados,
   filtrar: filtrarUsuarios
 } = useTableData(usuarios, {
-  defaultOrderBy: "apellido_paterno",
+  defaultOrderBy: "created_at",
   searchFields: ["name", "apellido_paterno", "dni"]
 });
+
+orderDirection.value = "asc";
 
 </script>
 

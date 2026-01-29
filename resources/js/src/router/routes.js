@@ -409,8 +409,8 @@ export default [
         component: () => import('../pages/Estadistica/Estadistica.vue'),
         meta: {
             layout: 'dashboard',
-            permissions: [],
-            breadcrumb: [{ text: 'Todas las Notificaciones', to: { name: 'notificaciones.index' } }]
+            permissions: ['todo-acceso-permisos'],
+            breadcrumb: [{ text: 'Estadísticas', to: { name: 'estadistica' } }]
         }
     },
 

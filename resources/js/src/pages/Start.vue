@@ -9,7 +9,6 @@ import useGrupoStore from '../store/Grupo/useGrupoStore';
 // IMPORTAR GENERADOR CENSO
 import { generateCenso9B } from '../pdf/Censo9B.js';
 
-const breadcrumbStore = useBreadcrumbStore();
 
 /* -------------------- TABS -------------------- */
 const activeGroupsTab = ref('recientes');
@@ -122,10 +121,6 @@ const handleCensoClick = () => {
 
 /* -------------------- LIFECYCLE -------------------- */
 onMounted(async () => {
-  breadcrumbStore.setBase([
-    { text: 'Programa de Estudio', to: { name: 'programa.estudio' } },
-    { text: 'Grupos' }
-  ]);
 
   await actividadesStore.loadActividadesRecientes();
   allActivities.value = actividadesStore.actividadesRecientes;

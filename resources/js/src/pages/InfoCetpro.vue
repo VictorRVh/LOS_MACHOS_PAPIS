@@ -1,10 +1,10 @@
 <script setup>
 import { computed } from "vue";
-import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
-import Button from "../../components/ui/Button.vue";
-import useSlider from "../../composables/useSlider";
-import useCetproStore from "../../store/Cetpro/useCetproStore";
-import CetproForm from "../../components/page/CetproForm.vue";
+import AuthorizationFallback from "../components/page/AuthorizationFallback.vue";
+import Button from "../components/ui/Button.vue";
+import useSlider from "../composables/useSlider";
+import useCetproStore from "../store/useCetproStore";
+import CetproForm from "../components/page/infoCetproSlider.vue";
 
 const cetproStore = useCetproStore();
 

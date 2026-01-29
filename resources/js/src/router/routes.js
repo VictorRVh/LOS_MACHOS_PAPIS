@@ -293,7 +293,7 @@ export default [
                 { text: 'Calificaciones', to: { name: 'docente.modulo.detalle.calificaciones', params: { id: route.params.id } } },
                 { text: 'Prácticas', to: { name: 'docente.modulo.detalle.practicas', params: { id: route.params.id } } },
                 { text: 'Alumnos', to: { name: 'docente.modulo.detalle.alumnos', params: { id: route.params.id } } },
-                { text: 'Capacidades', to: { name: 'docente.modulo.detalle.capacidades', params: { id: route.params.id, idModulo: route.params.idModulo} } },
+                { text: 'Capacidades', to: { name: 'docente.modulo.detalle.capacidades', params: { id: route.params.id, idModulo: route.params.idModulo } } },
                 { text: 'Unidades Didácticas', to: { name: 'docente.modulo.detalle.unidades', params: { id: route.params.id } } },
             ]
         },
@@ -391,6 +391,29 @@ export default [
             breadcrumb: [{ text: 'Todas las Notificaciones', to: { name: 'notificaciones.index' } }]
         }
     },
+
+    {
+        path: '/cetpro',
+        name: 'cetpro.index',
+        component: () => import('../pages/Notificacion.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: [],
+            breadcrumb: [{ text: 'Todas las Notificaciones', to: { name: 'notificaciones.index' } }]
+        }
+    },
+
+    {
+        path: '/estadistica',
+        name: 'estadistica',
+        component: () => import('../pages/Estadistica/Estadistica.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: [],
+            breadcrumb: [{ text: 'Todas las Notificaciones', to: { name: 'notificaciones.index' } }]
+        }
+    },
+
 
 
 

@@ -1,6 +1,4 @@
-import useProgramaStore from '../store/Programa/useProgramaStore';
-import useEspecialidadProgramaStore from '../store/EspecialidadPrograma/useEspecialidadProgramaStore';
-import useGrupoStore from '../store/Grupo/useGrupoStore';
+
 
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 
@@ -28,7 +26,7 @@ export default [
     { path: '/roles/confirmar', name: 'roles.confirmar', component: () => import('../pages/Confirmar.vue'), meta: { layout: 'dashboard', breadcrumb: [{ text: 'Roles', to: { name: 'roles' } }, { text: 'Crear', to: { name: 'roles.crear' } }, { text: 'Confirmar' }] } },
     { path: '/permissions', name: 'permissions', component: () => import('../pages/newPermission.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Permisos', to: { name: 'permissions' } }] }, },
     { path: '/docente', name: 'docente', component: () => import('../pages/Docente/Docente.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Docentes', to: { name: 'docente' } }] }, },
-    { path: '/convenio', name: 'convenio', component: () => import('../pages/Convenio/Convenio.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Convenios', to: { name: 'convenio' } }] }, },
+    { path: '/convenio', name: 'convenio', component: () => import('../pages/Convenio/Convenio.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Modalidades', to: { name: 'Modalidad' } }] }, },
     { path: '/periodo', name: 'periodo', component: () => import('../pages/Periodo/Periodo.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Periodos', to: { name: 'periodo' } }] }, },
     { path: '/administrativos', name: 'administrativos', component: () => import('../pages/Administrativo/Administrativo.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Administrativos', to: { name: 'administrativos' } }] }, },
     { path: '/especialidad', name: 'especialidad', component: () => import('../pages/Especialidad/Especialidad.vue'), meta: { layout: 'dashboard', permissions: ['todo-acceso-permisos'], breadcrumb: [{ text: 'Especialidades', to: { name: 'especialidad' } }] }, },

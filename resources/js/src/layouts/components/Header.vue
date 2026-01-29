@@ -45,6 +45,12 @@ const handleGoBack = async () => {
 
 const breadcrumb = useBreadcrumbStore();
 
+
+const showBackButton = computed(() => {
+    return breadcrumb.itemsText.length > 1;
+});
+
+
 const { isDarkMode, updateDarkMode } = inject('theme');
 const { pushToRoute } = useAppRouter();
 const userStore = useUserStore();
@@ -62,7 +68,7 @@ const notificationsContainer = ref(null);
 
 onMounted(async () => {
     await notificacionesStore.loadNotificaciones();
-    // await notificacionesStore.loadNotificacionesPendientes();
+    //await notificacionesStore.loadNotificacionesPendientes();
 });
 
 const RolUser = computed(() => userStore.user?.roles?.[0]?.name?.toUpperCase() || 'USUARIO');
@@ -72,12 +78,6 @@ const userFullName = computed(() => {
     const { name, apellido_paterno, apellido_materno } = userStore.user;
     return [name, apellido_paterno, apellido_materno].filter(Boolean).join(' ');
 });
-
-const quickCreateActions = [
-    { label: 'Nuevo Usuario', icon: UserPlusIcon, route: { name: 'user.create' } },
-    { label: 'Nuevo Rol', icon: KeyIcon, route: { name: 'role.create' } },
-    { label: 'Nuevo Programa', icon: AcademicCapIcon, route: { name: 'program.create' } },
-];
 
 const externalLinks = ref([
     {
@@ -132,6 +132,7 @@ const onLogout = async () => {
         await pushToRoute({ name: 'login' });
     }
 };
+
 </script>
 
 <template>
@@ -206,12 +207,11 @@ const onLogout = async () => {
         <div
             class="flex h-14 items-center justify-between gap-2 px-2 sm:px-2 border-t border-gray-200 dark:border-gray-700">
             <div class="flex min-w-0 items-center gap-3">
-                <button @click="handleGoBack"
+                <button v-if="showBackButton" @click="handleGoBack"
                     class="flex items-center gap-1 p-1 px-4 rounded-md bg-cetpro hover:bg-cetpro-light dark:bg-cetpro-dark dark:hover:bg-cetpro-light text-white transition-colors">
                     <ArrowLeftIcon class="h-6 w-6 shrink-0" />
                     <span class="text-sm font-medium">Atrás</span>
                 </button>
-
 
                 <div class="min-w-0 truncate">
                     <Breadcrumbs />
@@ -219,33 +219,7 @@ const onLogout = async () => {
             </div>
 
             <div class="flex items-center gap-2">
-                <div ref="createMenuContainer" class="relative group">
-                    <button @click="isCreateMenuOpen = !isCreateMenuOpen"
-                        class="flex items-center p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-                        <img src="/img/mas.png" class="h-6 w-6" alt="Crear Nuevo" />
-                    </button>
-                    <div
-                        class="absolute bottom-full mb-2 hidden group-hover:block w-max bg-gray-800 text-white text-xs rounded py-1 px-2">
-                        Crear Nuevo
-                    </div>
-                    <Transition enter-active-class="transition ease-out duration-100"
-                        enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
-                        leave-active-class="transition ease-in duration-75"
-                        leave-from-class="transform opacity-100 scale-100"
-                        leave-to-class="transform opacity-0 scale-95">
-                        <div v-if="isCreateMenuOpen"
-                            class="absolute right-0 top-full mt-2 w-56 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                            <div class="py-1">
-                                <a v-for="action in quickCreateActions" :key="action.label"
-                                    @click="navigateToAction(action)"
-                                    class="cursor-pointer flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <component :is="action.icon" class="h-5 w-5" />
-                                    <span>{{ action.label }}</span>
-                                </a>
-                            </div>
-                        </div>
-                    </Transition>
-                </div>
+
                 <div class="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
                 <template v-for="link in externalLinks" :key="link.id">
                     <a v-if="link.show" :href="link.href" target="_blank" rel="noopener noreferrer"

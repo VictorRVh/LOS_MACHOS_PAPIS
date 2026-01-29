@@ -4,7 +4,7 @@ import usePermissions from '@/composables/usePermissions';
 import {
     UsersIcon, ShieldCheckIcon, KeyIcon, AcademicCapIcon, PresentationChartLineIcon,
     CalendarDaysIcon, NewspaperIcon, UserGroupIcon, RectangleStackIcon, IdentificationIcon, TagIcon, XMarkIcon, DocumentDuplicateIcon,
-    ClipboardDocumentListIcon,CurrencyDollarIcon
+    ClipboardDocumentListIcon, CurrencyDollarIcon, Cog8ToothIcon
 } from '@heroicons/vue/24/outline';
 
 const { hasPermission } = usePermissions();
@@ -28,6 +28,8 @@ const navLinks = [
     { name: 'Comisión', routeName: 'comsion.docente', icon: AcademicCapIcon, permissions: ["ver-comsion-docente"] },
     { name: 'Egresados', routeName: 'egresados', icon: AcademicCapIcon, permissions: ["ver-grupos"] },
     { name: 'Ingresos', routeName: 'ingresos', icon: CurrencyDollarIcon, permissions: ["ver-grupos"] },
+    { name: 'Ajustes', routeName: 'cetpro.index', icon: Cog8ToothIcon, permissions: ["ver-informacion-cetpro"] },
+
 
 ];
 

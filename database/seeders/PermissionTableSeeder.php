@@ -15,6 +15,9 @@ class PermissionTableSeeder extends Seeder
     {
         $permissions = [
             'ver-actividades',
+            'ver-informacion-cetpro',
+            
+
             'todo-acceso-usuarios',
             'ver-usuarios',
             'crear-usuarios',
@@ -32,7 +35,7 @@ class PermissionTableSeeder extends Seeder
             'ver-permisos',
             'icono-permisos',
 
-           //
+            //
             // PERMISOS DE LOS DOCENTES
             'todo-acceso-docentes',
             'ver-docentes',
@@ -41,7 +44,7 @@ class PermissionTableSeeder extends Seeder
             'eliminar-docentes',
             'icono-docentes',
 
-           // PERMISOS DE COMVENIOS
+            // PERMISOS DE COMVENIOS
             'todo-acceso-modalidades',
             'ver-modalidades',
             'crear-modalidades',
@@ -80,8 +83,8 @@ class PermissionTableSeeder extends Seeder
             'editar-comisiones',
             'eliminar-comisiones',
             'icono-comisiones',
-            
-/////////////////////////////////////////////PROGRAMA DE ESTUDIOS//////////////////////////////////////////
+
+            /////////////////////////////////////////////PROGRAMA DE ESTUDIOS//////////////////////////////////////////
             // PERMISOS DE MODULOS
             'todo-acceso-modulos',
             'ver-modulos',
@@ -99,7 +102,7 @@ class PermissionTableSeeder extends Seeder
             'icono-ciclo-programa',
 
             //
-            
+
             // PERMISOS DE PROGRAMAS
             'todo-acceso-ciclo-academico',
             'ver-ciclo-academico',
@@ -121,7 +124,7 @@ class PermissionTableSeeder extends Seeder
             'editar-matriculas',
             'eliminar-matriculas',
             'icono-matriculas',
-            
+
             // PERMISOS DE DE PROGRAMACION ADMIN 
             'todo-acceso-documento-programado',
             'ver-documento-programado',
@@ -129,8 +132,8 @@ class PermissionTableSeeder extends Seeder
             'editar-documento-programado',
             'eliminar-documento-programado',
             'icono-documento-programado',
-            
-             // PERMISOS DE DE PROGRAMACION PARA DOCENTES
+
+            // PERMISOS DE DE PROGRAMACION PARA DOCENTES
             'todo-acceso-programacion-documentos-subidos',
             'ver-programacion-documentos-subidos',
             'crear-programacion-documentos-subidos',
@@ -145,20 +148,20 @@ class PermissionTableSeeder extends Seeder
             ///////////////////////////////////////
 
             // PERMISOSPARA ELADMIN..PARA QUE PUEDA VISUALIZAR LOS DATOS DEL DOCENTE
-             // (CALENDARIZACION,CAPACIDADDES TERMINALES, NOTAS, ASISTENCIA)
-             'ver-sesiones-docente',
-             'ver-capacidad-terminal-docente',
-             'ver-capacidad-terminal-notas-docente',
+            // (CALENDARIZACION,CAPACIDADDES TERMINALES, NOTAS, ASISTENCIA)
+            'ver-sesiones-docente',
+            'ver-capacidad-terminal-docente',
+            'ver-capacidad-terminal-notas-docente',
 
-             ///////////////////////////////////////
-             ///////////////////////////////////////
-             ///////////////////////////////////////
-             ///////////////////////////////////////
-             
+            ///////////////////////////////////////
+            ///////////////////////////////////////
+            ///////////////////////////////////////
+            ///////////////////////////////////////
 
-                         // PERMISOS DE DE PROGRAMACION PARA DOCENTES
+
+            // PERMISOS DE DE PROGRAMACION PARA DOCENTES
             'todo-acceso-capacidad-terminal-docente',
-        /// 'ver-capacidad-terminal-docente',
+            /// 'ver-capacidad-terminal-docente',
             'crear-capacidad-terminal-docente',
             'editar-capacidad-terminal-docente',
             'eliminar-capacidad-terminal-docente',
@@ -171,9 +174,9 @@ class PermissionTableSeeder extends Seeder
 
             'todo-acceso-alumnos-docente',
             'ver-alumnos-docente',
-           // 'crear-alumnos-docente',
+            // 'crear-alumnos-docente',
             'editar-alumnos-docente',
-           // 'eliminar-alumnos-docente',
+            // 'eliminar-alumnos-docente',
 
             'todo-acceso-sesiones-docente',
             //'ver-sesiones-docente',
@@ -183,14 +186,14 @@ class PermissionTableSeeder extends Seeder
 
             // ver comsiones 
             'ver-comision-docente',
-                
+
 
             'ver-perfil-docente',
             'editar-perfil-docente',
             'ver-mis-modulos',
             'ver-estudiantes-asignados',
 
-                 //Competencias
+            //Competencias
             'todo-acceso-capacidades-docente',
             'ver-capacidades-docente',
             'crear-capacidades-docente',

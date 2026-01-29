@@ -219,18 +219,15 @@ const onLogout = async () => {
             </div>
 
             <div class="flex items-center gap-2">
-<<<<<<< HEAD
-
-=======
                 <div ref="createMenuContainer" class="relative group">
-                    <!-- <button @click="isCreateMenuOpen = !isCreateMenuOpen"
+                    <button @click="isCreateMenuOpen = !isCreateMenuOpen"
                         class="flex items-center p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
                         <img src="/img/mas.png" class="h-6 w-6" alt="Crear Nuevo" />
                     </button>
                     <div
                         class="absolute bottom-full mb-2 hidden group-hover:block w-max bg-gray-800 text-white text-xs rounded py-1 px-2">
                         Crear Nuevo
-                    </div> -->
+                    </div>
                     <Transition enter-active-class="transition ease-out duration-100"
                         enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
                         leave-active-class="transition ease-in duration-75"
@@ -249,7 +246,6 @@ const onLogout = async () => {
                         </div>
                     </Transition>
                 </div>
->>>>>>> f940465bc577d71165ab951a0dac927f4d9cf84d
                 <div class="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
                 <template v-for="link in externalLinks" :key="link.id">
                     <a v-if="link.show" :href="link.href" target="_blank" rel="noopener noreferrer"

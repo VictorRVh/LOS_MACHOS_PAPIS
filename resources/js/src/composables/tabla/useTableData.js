@@ -5,7 +5,7 @@ export default function useTableData(items, {
   searchFields = []
 } = {}) {
   const query = ref("");
-  const orderDirection = ref("asc"); 
+  const orderDirection = ref("asc");
   const orderBy = ref(defaultOrderBy);
 
   const pagina = ref(1);
@@ -58,10 +58,17 @@ export default function useTableData(items, {
 
   const ordenados = computed(() => {
     const array = [...filtrados.value];
+
     return array.sort((a, b) => {
-      // Tomamos todo el apellido completo (compuesto)
+      if (orderBy.value === "created_at") {
+        return orderDirection.value === "asc"
+          ? new Date(a.created_at) - new Date(b.created_at)
+          : new Date(b.created_at) - new Date(a.created_at);
+      }
+
       const aVal = (a[orderBy.value] ?? "").toString().toLowerCase();
       const bVal = (b[orderBy.value] ?? "").toString().toLowerCase();
+
       return orderDirection.value === "asc"
         ? aVal.localeCompare(bVal, undefined, { numeric: true })
         : bVal.localeCompare(aVal, undefined, { numeric: true });

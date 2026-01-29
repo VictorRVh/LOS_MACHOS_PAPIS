@@ -78,7 +78,7 @@ watch(
 );
 
 const schema = yup.object().shape({
-  nombre_institucion: yup.string().nullable().required('El nombre del convenio es obligatorio.'),
+  nombre_institucion: yup.string().nullable().required('El nombre de la modalidad es obligatorio.'),
   descripcion: yup
     .string()
     .nullable()          // permite null
@@ -160,7 +160,7 @@ const onSubmit = async () => {
 
         <div class="flex gap-2 mt-1">
           <!-- Botón Guardar: ancho completo -->
-          <Button :title="convenio?.id ? 'Guardar Cambios' : 'Crear Convenio'"
+          <Button :title="convenio?.id ? 'Guardar Cambios' : 'Crear Modalidad'"
             :loading-title="role?.id ? 'Guardando...' : 'Creando...'" :loading="saving || updating" key="submit-btn"
             @click="onSubmit" class="!w-full" />
 

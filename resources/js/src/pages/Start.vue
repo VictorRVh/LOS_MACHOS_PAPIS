@@ -159,7 +159,7 @@ onUnmounted(() => {
 
 
 <template>
-  <PermissionBlock :permissions="['ver-permisos']">
+  <PermissionBlock :permissions="['ver-actividades']">
 
     <div class="p-4 sm:p-6 lg:p-8 space-y-2 font-sans bg-gray-50 dark:bg-slate-900">
 

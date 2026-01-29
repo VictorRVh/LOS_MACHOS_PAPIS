@@ -219,7 +219,37 @@ const onLogout = async () => {
             </div>
 
             <div class="flex items-center gap-2">
+<<<<<<< HEAD
 
+=======
+                <div ref="createMenuContainer" class="relative group">
+                    <!-- <button @click="isCreateMenuOpen = !isCreateMenuOpen"
+                        class="flex items-center p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+                        <img src="/img/mas.png" class="h-6 w-6" alt="Crear Nuevo" />
+                    </button>
+                    <div
+                        class="absolute bottom-full mb-2 hidden group-hover:block w-max bg-gray-800 text-white text-xs rounded py-1 px-2">
+                        Crear Nuevo
+                    </div> -->
+                    <Transition enter-active-class="transition ease-out duration-100"
+                        enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
+                        leave-active-class="transition ease-in duration-75"
+                        leave-from-class="transform opacity-100 scale-100"
+                        leave-to-class="transform opacity-0 scale-95">
+                        <div v-if="isCreateMenuOpen"
+                            class="absolute right-0 top-full mt-2 w-56 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                            <div class="py-1">
+                                <a v-for="action in quickCreateActions" :key="action.label"
+                                    @click="navigateToAction(action)"
+                                    class="cursor-pointer flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    <component :is="action.icon" class="h-5 w-5" />
+                                    <span>{{ action.label }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    </Transition>
+                </div>
+>>>>>>> f940465bc577d71165ab951a0dac927f4d9cf84d
                 <div class="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
                 <template v-for="link in externalLinks" :key="link.id">
                     <a v-if="link.show" :href="link.href" target="_blank" rel="noopener noreferrer"

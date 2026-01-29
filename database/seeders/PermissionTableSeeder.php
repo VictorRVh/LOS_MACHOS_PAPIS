@@ -14,6 +14,7 @@ class PermissionTableSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
+            'ver-actividades',
             'todo-acceso-usuarios',
             'ver-usuarios',
             'crear-usuarios',
@@ -106,8 +107,6 @@ class PermissionTableSeeder extends Seeder
             'editar-ciclo-academico',
             'eliminar-ciclo-academico',
             'icono-ciclo-academico',
-
-            
 
             'todo-acceso-grupos',
             'ver-grupos',

@@ -240,7 +240,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\EstudianteDocumentoController::class,
         'emitirCertificado',
     ])->middleware('permission:todo-acceso-permisos|ver-grupos');
-    
+
     //CONSTANCIA DEL ESTUDIANTE
     Route::post('estudiante-constancia', [
         \App\Http\Controllers\EstudianteDocumentoController::class,
@@ -797,7 +797,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\CompetenciaController::class,
         'destroy',
     ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-mis-modulos');
-    
+
     // RUTA PARA CAPACIDADES TERMINALES-COMPETENCIA
     Route::get('capacidad_competencia', [
         \App\Http\Controllers\CapacidadCompetenciaController::class,
@@ -1231,6 +1231,16 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\ReporteController::class,
         'consolidadoExcel',
     ])->middleware('permission:ver-ciclo-programa');
+
+    Route::get('cetprodata', [
+        \App\Http\Controllers\DatosCetproController::class,
+        'show',
+    ])->middleware('permission:ver-informacion-cetpro');
+
+    Route::post('cetprodata', [
+        \App\Http\Controllers\DatosCetproController::class,
+        'store',
+    ])->middleware('permission:editar-informacion-cetpro');
 });
 
 Route::get('reportes/nomina/grupo/{idGrupo}', [
@@ -1246,6 +1256,12 @@ Route::get('reportes/registroMatriculaConEvaluaciones/{idGrupo}', [
 Route::get('reportes/certificadosPorPeriodo/{idPeriodo}', [
     \App\Http\Controllers\ReporteController::class,
     'exportCertificadosPorPeriodo',
+]);
+
+// ESTADISTICAS 
+Route::get('estadistica101', [
+    \App\Http\Controllers\EstadisticaController::class,
+    'estadistica101Data',
 ]);
 
 Route::middleware('auth:sanctum')->prefix('drive')->group(function () {

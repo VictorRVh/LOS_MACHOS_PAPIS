@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import AuthorizationFallback from "../components/page/AuthorizationFallback.vue";
 import Button from "../components/ui/Button.vue";
 import useSlider from "../composables/useSlider";
@@ -8,10 +8,9 @@ import CetproForm from "../components/page/infoCetproSlider.vue";
 
 const cetproStore = useCetproStore();
 
-// cargar CETPRO (solo uno)
-if (!cetproStore.cetpro) {
+onMounted(async () => {
   await cetproStore.loadCetpro();
-}
+});
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("cetpro-form");
 
@@ -21,65 +20,152 @@ const hasCetpro = computed(() => !!cetpro.value?.id);
 
 <template>
   <AuthorizationFallback :permissions="['ver-informacion-cetpro']">
-    <div class="p-6 space-y-4">
 
-      <h2 class="text-2xl font-bold text-cetpro dark:text-cetpro-light">
-        Información del CETPRO
-      </h2>
+    <div class="p-6">
 
       <!-- CARD -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 space-y-3">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow ">
 
-        <!-- CUANDO EXISTE CETPRO -->
-        <template v-if="hasCetpro">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <!-- HEADER -->
+        <div
+          class="px-6 py-4 -b bg-gray-50 dark:bg-gray-900
+                 text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2"
+        >
+          ⚙ DATOS DEL CENTRO DE EDUCACIÓN TÉCNICO – PRODUCTIVA
+        </div>
 
-            <div><b>CETPRO:</b> {{ cetpro.cetpro }}</div>
-            <div><b>Tipo de gestión:</b> {{ cetpro.tipo_gestion }}</div>
+        <!-- BODY -->
+        <div class="p-6">
 
-            <div><b>R.D. Autorización:</b> {{ cetpro.rd_autorizacion }}</div>
-            <div><b>R.D. Conversión:</b> {{ cetpro.rd_conversion || "-" }}</div>
+          <!-- SI EXISTE -->
+          <template v-if="hasCetpro">
 
-            <div><b>UGEL:</b> {{ cetpro.ugel }}</div>
-            <div><b>DRE:</b> {{ cetpro.dre }}</div>
+            <div class="space-y-4 text-sm">
 
-            <div><b>Región:</b> {{ cetpro.region }}</div>
-            <div><b>Provincia:</b> {{ cetpro.provincia }}</div>
-            <div><b>Distrito:</b> {{ cetpro.distrito }}</div>
+              <!-- FILA -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex">
+                  <div class="w-48 text-right pr-4 font-medium text-gray-600">CETPRO</div>
+                  <div class="flex-1  rounded px-3 py-2 bg-gray-50">
+                    {{ cetpro.cetpro }}
+                  </div>
+                </div>
 
-            <div class="md:col-span-2">
-              <b>Dirección:</b> {{ cetpro.direccion }} {{ cetpro.numero }}
+                <div class="flex">
+                  <div class="w-48 text-right pr-4 font-medium text-gray-600">Tipo de Gestión</div>
+                  <div class="flex-1  rounded px-3 py-2 bg-gray-50">
+                    {{ cetpro.tipo_gestion }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex">
+                  <div class="w-48 text-right pr-4 font-medium text-gray-600">R.D. Autorización</div>
+                  <div class="flex-1  rounded px-3 py-2 bg-gray-50">
+                    {{ cetpro.rd_autorizacion }}
+                  </div>
+                </div>
+
+                <div class="flex">
+                  <div class="w-48 text-right pr-4 font-medium text-gray-600">R.D. Conversión</div>
+                  <div class="flex-1  rounded px-3 py-2 bg-gray-50">
+                    {{ cetpro.rd_conversion || "—" }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex">
+                  <div class="w-48 text-right pr-4 font-medium text-gray-600">UGEL</div>
+                  <div class="flex-1  rounded px-3 py-2 bg-gray-50">
+                    {{ cetpro.ugel }}
+                  </div>
+                </div>
+
+                <div class="flex">
+                  <div class="w-48 text-right pr-4 font-medium text-gray-600">DRE</div>
+                  <div class="flex-1  rounded px-3 py-2 bg-gray-50">
+                    {{ cetpro.dre }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flex">
+                  <div class="w-48 text-right pr-4 font-medium text-gray-600">Región</div>
+                  <div class="flex-1  rounded px-3 py-2 bg-gray-50">
+                    {{ cetpro.region }}
+                  </div>
+                </div>
+
+                <div class="flex">
+                  <div class="w-48 text-right pr-4 font-medium text-gray-600">Provincia</div>
+                  <div class="flex-1  rounded px-3 py-2 bg-gray-50">
+                    {{ cetpro.provincia }}
+                  </div>
+                </div>
+
+                <div class="flex">
+                  <div class="w-48 text-right pr-4 font-medium text-gray-600">Distrito</div>
+                  <div class="flex-1  rounded px-3 py-2 bg-gray-50">
+                    {{ cetpro.distrito }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex">
+                  <div class="w-48 text-right pr-4 font-medium text-gray-600">Lugar</div>
+                  <div class="flex-1  rounded px-3 py-2 bg-gray-50">
+                    {{ cetpro.lugar }}
+                  </div>
+                </div>
+
+                <div class="flex">
+                  <div class="w-48 text-right pr-4 font-medium text-gray-600">Dirección</div>
+                  <div class="flex-1  rounded px-3 py-2 bg-gray-50">
+                    {{ cetpro.direccion }} {{ cetpro.numero }}
+                  </div>
+                </div>
+              </div>
+
             </div>
-          </div>
 
-          <div class="pt-4">
-            <Button
-              title="Editar información"
-              @click="showSlider(true, cetpro)"
-            />
-          </div>
-        </template>
+            <!-- BOTÓN -->
+            <div class="flex justify-end pt-6 -t mt-6">
+              <Button
+                title="Editar información"
+                @click="showSlider(true, cetpro)"
+              />
+            </div>
 
-        <!-- CUANDO NO EXISTE CETPRO -->
-        <template v-else>
-          <p class="text-gray-500 italic">
-            No se ha registrado información del CETPRO.
-          </p>
+          </template>
 
-          <Button
-            title="Agregar información del CETPRO"
-            @click="showSlider(true, null)"
-          />
-        </template>
+          <!-- SI NO EXISTE -->
+          <template v-else>
+            <div class="text-center py-12 text-gray-500 italic">
+              No se ha registrado información del CETPRO.
+            </div>
 
+            <div class="flex justify-center">
+              <Button
+                title="Registrar información del CETPRO"
+                @click="showSlider(true, null)"
+              />
+            </div>
+          </template>
+
+        </div>
       </div>
 
-      <!-- FORMULARIO (SLIDER / MODAL) -->
+      <!-- SLIDER -->
       <CetproForm
         :show="slider"
         :cetpro="sliderData"
         @hide="hideSlider"
       />
     </div>
+
   </AuthorizationFallback>
 </template>

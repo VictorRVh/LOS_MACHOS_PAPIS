@@ -8,7 +8,7 @@ const useCetproStore = defineStore('cetpro-informacion', () => {
         index: getCetpro,
         loading: cetproLoading,
         initialLoading: cetproFirstTimeLoading,
-    } = useHttpRequest('/convenio');
+    } = useHttpRequest('/cetprodata');
 
     const cetpro = ref([]);
     const loadCetpro = async () => {

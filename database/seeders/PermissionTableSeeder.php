@@ -16,7 +16,8 @@ class PermissionTableSeeder extends Seeder
         $permissions = [
             'ver-actividades',
             'ver-informacion-cetpro',
-            
+            'editar-informacion-cetpro',
+
 
             'todo-acceso-usuarios',
             'ver-usuarios',

@@ -112,6 +112,7 @@ const existeExperiencia = computed(() => {
 const formData = ref({
     tipo_practicas: null,
     documento: null,
+    nota: 0,
     // observacion: ""
 });
 
@@ -178,6 +179,13 @@ async function guardarExperiencia() {
 }
 
 async function onSubmit() {
+    const nota = parseFloat(formData.value.nota);
+
+    if (isNaN(nota) || nota < 0 || nota > 20) {
+        showToast("La nota debe estar entre 0 y 20.", "error");
+        return; // 🚫 NO ENVÍA NADA
+    }
+
     if (!formData.value.tipo_practicas || !formData.value.documento) {
         showToast("Debe seleccionar la modalidad y adjuntar el documento.", "warning");
         return;
@@ -193,6 +201,7 @@ async function onSubmit() {
         form.append("id_grupo", props.id);
         form.append("tipo_practicas", formData.value.tipo_practicas);
         form.append("file", formData.value.documento);
+        form.append("nota", formData.value.nota);
         // form.append("observacion", observacion.value || "");
         form.append("parentFolderId", idPracticasDrive.value);
 
@@ -217,7 +226,15 @@ async function onSubmit() {
         saving.value = false;
     }
 }
+const onNotaInput = (event, idx) => {
+    let value = event.target.value
+        .replace(/[^0-9.]/g, "")   // solo números y punto
+        .replace(/(\..*)\./g, "$1"); // evitar dos puntos
+    const match = value.match(/^(\d{0,2})(?:\.(\d{0,1}))?/);
+    value = match ? match[0] : "";
 
+    listNotes.value[idx].nota = value;
+};
 </script>
 
 <template>
@@ -248,17 +265,13 @@ async function onSubmit() {
 
             </div>
 
-            <div class="flex-between mt-6">
-                <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">
-                    Lista de Alumnos Asignados
-                </h2>
-            </div>
 
             <Table>
                 <THead>
                     <Th>N°</Th>
                     <Th>Apellidos y Nombres</Th>
                     <Th>Modalidad</Th>
+                    <Th>Nota</Th>
                     <Th>Archivo</Th>
                     <Th class="text-center">Acciones</Th>
                 </THead>
@@ -282,6 +295,7 @@ async function onSubmit() {
                             <Td>{{ index + 1 }}</Td>
                             <Td>{{ alumno.apellidos_nombres }}</Td>
                             <Td>{{ alumno.tipo_practicas_texto }}</Td>
+                            <Td>{{ alumno.nota }}</Td>
                             <Td class="text-center">
                                 <a v-if="alumno.documento_url" :href="alumno.documento_url" target="_blank"
                                     class="inline-flex items-center justify-center text-blue-600 hover:text-blue-800"
@@ -309,20 +323,37 @@ async function onSubmit() {
                 </TBody>
             </Table>
 
-            <!--  Modal para calificar -->
             <Slider :show="showModal" title="Registrar Nota de Prácticas" @hide="showModal = false">
                 <div class="space-y-4">
                     <h3 class="font-semibold text-lg text-gray-700 dark:text-gray-200">
                         Alumno: {{ selectedAlumno?.apellidos_nombres }}
                     </h3>
 
-                    <FormLabelError label="Modalidad" required :error="formErrors?.lugar">
-                        <BaseSelectCiclo v-model="formData.tipo_practicas" :options="modalidadPracticas" label="label"
-                            placeholder="Seleccione la modalidad" />
-                    </FormLabelError>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                        <!-- MODALIDAD (más ancho) -->
+                        <div class="md:col-span-3">
+                            <FormLabelError label="Modalidad" required :error="formErrors?.tipo_practicas">
+                                <BaseSelectCiclo v-model="formData.tipo_practicas" :options="modalidadPracticas"
+                                    label="label" placeholder="Seleccione la modalidad" />
+                            </FormLabelError>
+                        </div>
+
+                        <!-- NOTA (más pequeña) -->
+                        <FormInput label="Nota" v-model="formData.nota" type="text" maxlength="4" :input-class="[
+                            'text-center',
+                            'bg-gray-100',
+                            formData.nota === '' || formData.nota === null
+                                ? 'text-gray-500'
+                                : parseFloat(formData.nota) < 0 || parseFloat(formData.nota) > 20
+                                    ? 'text-red-600 font-bold'
+                                    : parseFloat(formData.nota) < 11
+                                        ? 'text-black-500 font-bold'
+                                        : 'text-black-600 font-bold',
+                        ]" @input="onNotaInput" required />
+                    </div>
 
                     <FormInputFile v-model="formData.documento" label="Documento (Informe o Evidencia) *" />
-
                     <!-- <label for="observacion"
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observación
                         General</label>

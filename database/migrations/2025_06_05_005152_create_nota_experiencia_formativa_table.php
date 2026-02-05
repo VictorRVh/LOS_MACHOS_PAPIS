@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('id_experiencia');
             $table->tinyInteger('tipo_practicas');
-            // $table->string('lugar');
+            $table->string('nota');
             $table->string('documento');
             $table->string('observacion');
             $table->uuid('id_estudiante');

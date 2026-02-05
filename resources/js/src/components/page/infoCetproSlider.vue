@@ -8,6 +8,10 @@ import Slider from "../ui/Slider.vue";
 import useValidation from "../../composables/useValidation";
 import useHttpRequest from "../../composables/useHttpRequest";
 import useModalToast from "../../composables/useModalToast";
+import useCetproStore from "../../store/useCetproStore";
+
+
+
 import * as yup from "yup";
 
 const props = defineProps({
@@ -18,7 +22,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["hide"]);
-
+const cetproStore = useCetproStore();
 /**
  * Endpoint único (create / update)
  */
@@ -118,6 +122,7 @@ const onSubmit = async () => {
     if (response) {
         showToast("Datos del CETPRO guardados correctamente");
         emit("hide");
+         await cetproStore.loadCetpro();
     }
 };
 </script>

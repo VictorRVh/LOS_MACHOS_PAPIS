@@ -23,6 +23,7 @@ class NotaExperienciaFormativa extends Model
         'observacion',
         'id_estudiante',
         'id_grupo',
+        'nota',
         'status',
     ];
     

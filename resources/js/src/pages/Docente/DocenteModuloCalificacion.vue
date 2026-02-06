@@ -117,32 +117,61 @@ const getEstadoClass = (estado) =>
 
 // --- Resumen: total, promedio, estado ---
 const getResumenNotas = (est) => {
-  const total = est.capacidades.reduce(
-    (sum, c) => sum + Number(c.nota_capacidad ?? 0),
-    0
-  );
-  const promedio = est.capacidades.length
-    ? total / est.capacidades.length
+  // 1. Notas válidas de capacidades
+  const notas = est.capacidades
+    .map(c => Number(c.nota_capacidad))
+    .filter(n => !isNaN(n));
+
+  // 2. Nota de experiencia (como una unidad más)
+  const notaExperiencia =
+    est.nota_experiencia !== null &&
+    est.nota_experiencia !== "" &&
+    !isNaN(est.nota_experiencia)
+      ? Number(est.nota_experiencia)
+      : null;
+
+  if (notaExperiencia !== null) {
+    notas.push(notaExperiencia); // 👈 cuenta igual que una UD
+  }
+
+  // 3. Promedio general
+  const promedio = notas.length
+    ? notas.reduce((a, b) => a + b, 0) / notas.length
     : 0;
+
+  // 4. Estado
   const estado = promedio >= 11 ? "APROBADO" : "DESAPROBADO";
 
-  const promedioTexto = Number.isInteger(promedio)
-    ? promedio === 0
-      ? "00"
-      : promedio.toString().padStart(2, "0")
-    : promedio.toFixed(1).replace(/\.0$/, "").padStart(4, "0");
+  // 5. Formato
+  const promedioTexto = promedio
+    ? promedio.toFixed(1).replace(/\.0$/, "")
+    : "00";
 
   return {
-    total: total.toString().padStart(2, "0"),
+    nota_experiencia:
+      notaExperiencia !== null
+        ? notaExperiencia.toString().padStart(2, "0")
+        : "--",
+
+    total: notas
+      .reduce((a, b) => a + b, 0)
+      .toString()
+      .padStart(2, "0"),
+
     promedio: promedioTexto,
+
     estado,
+
     promedioClass:
       promedio < 11
         ? "text-red-600 dark:text-red-500 font-bold"
         : "text-green-600 dark:text-green-400 font-bold",
+
     estadoClass: getEstadoClass(estado),
   };
 };
+
+
 
 // --- Slider ---
 const verNotasUnidad = async () => {
@@ -268,6 +297,7 @@ const getEstadoCapacidadClass = computed(() => {
           <Th>#</Th>
           <Th>Apellidos y Nombres</Th>
           <Th v-for="i in lengthUnit" :key="i">UD{{ i }}</Th>
+          <Th>EFSRT</Th>
           <Th>PUNTAJE</Th>
           <Th>PROMEDIO</Th>
           <Th>A-D-R</Th>
@@ -297,6 +327,7 @@ const getEstadoCapacidadClass = computed(() => {
                 {{ cap.nota_capacidad ?? "--" }}
               </Td>
 
+              <Td class="text-center font-semibold">{{ getResumenNotas(est).nota_experiencia }}</Td>
               <!-- Totales -->
               <template v-if="getResumenNotas(est)">
                 <Td class="text-center font-semibold">{{ getResumenNotas(est).total }}</Td>

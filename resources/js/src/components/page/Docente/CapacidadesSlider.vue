@@ -10,6 +10,9 @@ import useModalToast from "../../../composables/useModalToast";
 import useCapacidadesStore from "../../../store/CapacidadTerminal/UseCapacidadUnidadesStore";
 import useCompetenciasStore from "../../../store/CapacidadTerminal/UseCompetenciasStore";
 import BaseSelectGrupo from "../../ui/BaseSelectGrupo.vue";
+
+
+
 import * as yup from "yup";
 
 /* =========================
@@ -31,7 +34,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(["hide"]);
+const emit = defineEmits(["hide","saved"]);
 
 /* =========================
    STORES
@@ -145,9 +148,11 @@ const onSubmit = async () => {
         ? await updateCompetencia(props.capacidad.id, formData.value)
         : await createCompetencia(formData.value);
 
-    if (response?.id) {
+    if (response?.data?.id) {
         showToast(`Capacidad ${isEditing.value ? "editada" : "creada"} correctamente`);
+        emit("saved");
         onCancel();
+        
     }
 };
 </script>
@@ -162,7 +167,7 @@ const onSubmit = async () => {
 
         <div class="space-y-3 font-inter">
             <!-- CAPACIDAD / COMPETENCIA -->
-            <FormLabelError label="Capacidades" required :error="formErrors?.id_competencia">
+            <FormLabelError label="Unidad de competencia" required :error="formErrors?.id_competencia">
                 <BaseSelectGrupo v-model="formData.id_competencia" :options="capacidades" label="nombre" value="tipo"
                     placeholder="Seleccione una capacidad" />
 
@@ -176,7 +181,7 @@ const onSubmit = async () => {
 
 
             <!-- DESCRIPCIÓN -->
-            <FormInput v-model="formData.descripcion" label="Descripción de comtencia" type="textarea" :maxlength="225"
+            <FormInput v-model="formData.descripcion" label="Descripción de la capacidad" type="textarea" :maxlength="225"
                 required :error="formErrors?.descripcion" />
             <!-- Contador -->
             <div class="flex justify-end">

@@ -48,6 +48,7 @@ const competencias = computed(() => {
       comp.unidades.set(item.id_unidad, {
         nombre: item.unidad,
         id: item.id_unidad,
+        indice_unidad:  item.indice_unidad,
         descripciones: [],
       });
     }
@@ -94,6 +95,11 @@ onMounted(async () => {
     await capacidadStore.loadCapacidades(props.id);
   }
 });
+
+const reloadCapacidades = async () => {
+  await capacidadStore.loadCapacidades(props.id);
+};
+
 </script>
 
 <template>
@@ -103,7 +109,7 @@ onMounted(async () => {
       <!-- FORMULARIO -->
       <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
         <CapacidaddesSlider :show="slider" :idGrupo="id" :idModulo="idModulo" :capacidad="sliderData"
-          @hide="hideSlider" />
+          @hide="hideSlider" @saved="reloadCapacidades" />
       </div>
 
       <!-- TABLA -->
@@ -132,7 +138,7 @@ onMounted(async () => {
                 <td colspan="8" class="bg-white dark:bg-gray-800 px-6 py-4">
                   <div class="flex flex-col gap-4">
                     <template v-for="unidad in comp.unidades" :key="unidad.id">
-                      <div class="font-semibold text-gray-800 dark:text-gray-200">{{ unidad.nombre }}</div>
+                      <div class="font-semibold text-gray-800 dark:text-gray-200">Unidad {{ unidad.indice_unidad }} :  {{ unidad.nombre }}</div>
 
                       <div class="ml-6 flex flex-col gap-2">
                         <div v-for="desc in unidad.descripciones" :key="desc.id"

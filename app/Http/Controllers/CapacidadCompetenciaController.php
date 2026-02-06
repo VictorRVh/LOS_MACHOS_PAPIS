@@ -59,6 +59,7 @@ class CapacidadCompetenciaController extends Controller
                 'cc.id',
                 'cc.descripcion',              // ✔ columna real
                 'ct.id as id_unidad',
+                'ct.numero_capacidad as indice_unidad',
                 'ct.nombre_capacidad as unidad',
                 'c.nombre as competencia',      // ✔ SOLO aquí va competencia
                 'c.tipo as tipo_competencia',      // ✔ SOLO aquí va competencia

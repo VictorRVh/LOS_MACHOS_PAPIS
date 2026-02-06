@@ -134,11 +134,25 @@ class NotaCapacidadTerminalController extends Controller
                 return $n->id_estudiante . '-' . $n->id_capacidad;
             });
 
+        /* =====================================================
+        * 3.1 TODAS las notas de experiencia formativa del grupo
+        * ===================================================== */
+        $notasExperiencia = DB::table('nota_experiencia_formativa')
+            ->where('id_grupo', $idGrupo)
+            ->where('status', 1)
+            ->select(
+                'id_estudiante',
+                'nota'
+            )
+            ->get()
+            ->keyBy('id_estudiante');
+
+
 
         /* =====================================================
      * 4. Construir respuesta final normalizada
      * ===================================================== */
-        $resultado = $estudiantes->map(function ($est) use ($capacidades, $notas) {
+        $resultado = $estudiantes->map(function ($est) use ($capacidades, $notas, $notasExperiencia) {
 
             $capConNotas = $capacidades->map(function ($cap) use ($est, $notas) {
 
@@ -148,27 +162,26 @@ class NotaCapacidadTerminalController extends Controller
                 return [
                     'id_capacidad'     => $cap->id_capacidad,
                     'numero_capacidad' => $cap->numero_capacidad,
-                    // 'nombre_capacidad' => $cap->nombre_capacidad,
                     'nota_capacidad'   => $nota->nota_capacidad ?? null,
                 ];
             });
 
+            // 👉 Nota de experiencia formativa
+            $notaExp = $notasExperiencia->get($est->id_estudiante);
+
             return [
-                'id_estudiante'      => $est->id_estudiante,
-                'apellidos_nombres'  => $est->apellidos_nombres,
-                'matriculado'        => $est->matriculado,
-                'capacidades'        => $capConNotas,
+                'id_estudiante'     => $est->id_estudiante,
+                'apellidos_nombres' => $est->apellidos_nombres,
+                'matriculado'       => $est->matriculado,
+                'nota_experiencia'  => $notaExp->nota ?? null,
+                'capacidades'       => $capConNotas,
             ];
         });
-
-
         /* =====================================================
-     * 5. Response
-     * ===================================================== */
+            * 5. Response
+        * ===================================================== */
         return response()->json($resultado);
     }
-
-
 
     // GET /api/nota-capacidad-terminal/{id}
     public function show($id)

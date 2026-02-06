@@ -82,7 +82,6 @@ const hasCetpro = computed(() => !!cetpro.value?.id);
                     {{ cetpro.ugel }}
                   </div>
                 </div>
-
                 <div class="flex">
                   <div class="w-48 text-right pr-4 font-medium text-gray-600">DRE</div>
                   <div class="flex-1  rounded px-3 py-2 bg-gray-50">

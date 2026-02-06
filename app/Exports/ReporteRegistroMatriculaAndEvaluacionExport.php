@@ -45,6 +45,94 @@ class ReporteRegistroMatriculaAndEvaluacionExport
      */
     private function insertarFechasAsistenciaCabecera($sheet): void
     {
+
+        $data = DB::table('grupo as g')
+
+            ->join('programa_estudio as pe', 'pe.id', '=', 'g.id_programa')
+            ->join('ciclo_academico as ca', 'ca.id', '=', 'pe.id_ciclo')
+            ->join('modulos as m', 'm.id', '=', 'g.id_modulo')
+            ->join('periodo as p', 'p.id', '=', 'g.id_periodo')
+            ->join('especialidad_programa as ep', 'ep.id', '=', 'g.id_especialidad')
+            ->join('especialidad_madre as em', 'em.id', '=', 'ep.id_especialidad')
+            ->leftJoin('docente as d', 'd.id', '=', 'g.id_docente')
+            ->leftJoin('users as u', 'u.id', '=', 'd.user_id')
+            ->leftJoin('capacidad_terminal as ct', 'ct.id_grupo', '=', 'g.id')
+
+            ->where('g.id', $this->idGrupo)
+
+            ->select(
+                // 🔹 PROGRAMA
+                'pe.año as programa_estudios',
+                'ca.nombre_ciclo as ciclo_formativo',
+                // 🔹 MÓDULO
+                'm.descripcion as modulo_formativo',
+
+                // 🔹 ESPECIALIDAD
+                'em.nombre_especialidad as formacion',
+
+                // 🔹 PERIODO
+                'p.nombre_periodo as periodo_academico',
+
+                // 🔹 GRUPO
+                'g.seccion',
+                'g.turno',
+
+                // 🔹 DOCENTE
+                DB::raw("CONCAT(u.apellido_paterno,' ',u.apellido_materno,', ',u.name) as docente"),
+
+                // 🔹 HORAS Y CRÉDITOS (SUMA REAL)
+                DB::raw('SUM(ct.horas) as horas_totales'),
+                DB::raw('SUM(ct.creditos_teoricos) as horas_teoricas'),
+                DB::raw('SUM(ct.creditos_practicos) as horas_practicas'),
+                DB::raw('SUM(ct.creditos_teoricos + ct.creditos_practicos) as creditos')
+            )
+            ->groupBy(
+                'pe.año',
+                'm.descripcion',
+                'ca.nombre_ciclo',
+                'em.nombre_especialidad',
+                'p.nombre_periodo',
+                'g.seccion',
+                'g.turno',
+                'u.apellido_paterno',
+                'u.apellido_materno',
+                'u.name'
+            )
+            ->first();
+
+        if ($data) {
+
+            // PROGRAMA DE ESTUDIOS
+            $sheet->setCellValue('AF13', $data->formacion);
+
+            // MÓDULO FORMATIVO
+            $sheet->setCellValue('AF16', $data->ciclo_formativo);
+
+            // FORMACIÓN (ESPECIALIDAD)
+            $sheet->setCellValue('AI18', "");
+
+            // MODALIDAD (si es fijo puedes dejarlo así)
+            $sheet->setCellValue('Ak20', 'Presencial');
+
+            // PERIODO ACADÉMICO
+            $sheet->setCellValue('AJ22', $data->periodo_academico);
+            $sheet->setCellValue('AI8', $data->periodo_academico);
+            // CRÉDITOS
+            $sheet->setCellValue('AH24', $data->creditos);
+
+            // HORAS TEÓRICAS
+            $sheet->setCellValue('AF26', "HORAS TEÓRICAS " . $data->horas_teoricas . " /HORAS PRÁCTICAS:" . $data->horas_practicas);
+
+            // DOCENTE
+            $sheet->setCellValue('AH28', $data->docente);
+
+            // SECCIÓN
+            $sheet->setCellValue('AF31', "SECCIÓN: " . $data->seccion);
+
+            // TURNO
+            $sheet->setCellValue('AK31', "TURNO: " . $data->turno);
+        }
+
         $fechasAsistencia = DB::table('asistencia')
             ->where('id_grupo', $this->idGrupo)
             ->select('fecha_actual')

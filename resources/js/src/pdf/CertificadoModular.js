@@ -142,18 +142,42 @@ export async function generateCertificadoModular(data, codigo) {
     doc.text(value, (W + mL) / 2, y, { align: "center" });
   };
 
-  printField("Otorgado a:", estudiante, curY);
-  curY += 15;
-  printField("Por haber aprobado satisfactoriamente el módulo formativo:", modulo, curY);
-  curY += 15;
-  printField("Correspondiente al programa de estudios:", especialidad, curY);
 
-  curY += 15;
-  doc.setFont("times", "normal");
-  doc.setFontSize(11);
-  doc.setTextColor(50);
+
+  /////////////////////////////////////
+  ////////////////////
+      // Texto principal
+
+      const posY = 30;
+
+    doc.setFontSize(16);
+    doc.setFont("times", "italic");
+    doc.text("Otorgado a:", 20, posY + 60);
+
+    doc.setFont("times", "bold");
+
+    doc.text(estudiante || "NOMBRE DEL BENEFICIARIO", 60, posY + 60);
+
+
+    doc.setFont("times", "italic");
+    doc.text("Por haber aprobado satisfactoriamente el módulo formativo:", 20, posY + 70);
+
+    doc.setFont("times", "bold");
+    doc.text(modulo || "NOMBRE DEL MÓDULO", 148.5, posY + 80, { align: "center" });
+
+    doc.setFont("times", "italic");
+    doc.text("Correspondiente al Programa de Estudios:", 20, posY + 90);
+
+    doc.setFont("times", "bold");
+    doc.text(especialidad || "NOMBRE DE ESPECIALIDAD", 148.5, posY + 100, { align: "center" });
+   ///////////////////////
+   ////////////////////////
+
+  curY += 45;
+  doc.setFont("times", "italic");
+  //doc.setTextColor(50);
   const textoResumen = `desarrollado del ${fechaIni} al ${fechaFin}, con un total de ${totalCreditos} créditos, equivalente a ${totalHoras} horas.`;
-  doc.text(textoResumen, mL, curY);
+  doc.text(textoResumen, mL,curY);
 
   const pieY = 175;
   doc.setFont("times", "normal");

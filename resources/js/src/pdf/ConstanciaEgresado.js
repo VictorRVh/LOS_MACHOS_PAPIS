@@ -100,7 +100,7 @@ export async function generateConstanciaEgresado(data) {
     doc.text("LA DIRECCIÓN DEL CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA", width / 2, 85, { align: "center" });
     
     doc.setFontSize(18);
-    doc.text("CETPRO PUNO", width / 2, 95, { align: "center" });
+    doc.text("CETPRO ILAVE", width / 2, 95, { align: "center" });
 
     // --- 3. CUERPO JUSTIFICADO CON NEGRITAS ---
     let cursorY = 115;
@@ -188,7 +188,7 @@ export async function generateConstanciaEgresado(data) {
     const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
     // Forzamos 2026 como en tu imagen o usamos dinámico
     const anio = 2026; // hoy.getFullYear(); 
-    const fechaTexto = `Puno, 3 de enero de ${anio}`; // Ojo: Hardcodeé el día para igualar tu imagen, cambia a dinámico si quieres.
+    const fechaTexto = `ILAVE, 3 de enero de ${anio}`; // Ojo: Hardcodeé el día para igualar tu imagen, cambia a dinámico si quieres.
 
     cursorY += 40;
     doc.setFont(fontBold, "bold");

@@ -11,8 +11,8 @@ function obtenerFechaActual() {
     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
   ];
   const fecha = new Date();
-  // Formato: "Puno, 22 de diciembre de 2025"
-  return `Puno, ${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
+  // Formato: "ILAVE, 22 de diciembre de 2025"
+  return `ILAVE, ${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
 }
 
 // ===== GENERAR CERTIFICADO (FINAL) =====
@@ -92,7 +92,7 @@ export async function generateCertificate(data, codigo, certificado) {
 
   cursorY += 6;
   doc.setFontSize(16);
-  doc.text('"CETPRO PUNO"', pageWidth / 2, cursorY, { align: "center" });
+  doc.text('"CETPRO ILAVE"', pageWidth / 2, cursorY, { align: "center" });
 
   cursorY += 25;
   doc.setFontSize(20);
@@ -111,7 +111,7 @@ export async function generateCertificate(data, codigo, certificado) {
   // Línea 1
   doc.text("El   CETPRO", labelX, cursorY);
   doc.setFont("times", "bold");
-  doc.text("PUNO", valueX, cursorY);
+  doc.text("ILAVE", valueX, cursorY);
 
   // Línea 2
   cursorY += 12;

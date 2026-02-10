@@ -31,9 +31,9 @@ export function generatePdfMatricula(data) {
     body: [
       [
         { content: "Nombre del CETPRO", styles: sL },
-        { content: "CETPRO PUNO", styles: sD },
+        { content: "CETPRO ILAVE", styles: sD },
         { content: "DRE", styles: sL },
-        { content: "PUNO", styles: sD },
+        { content: "ILAVE", styles: sD },
       ],
       [
         { content: "Código modular", styles: sL },
@@ -43,13 +43,13 @@ export function generatePdfMatricula(data) {
       ],
       [
         { content: "Departamento", styles: sL },
-        { content: "Puno", styles: sD },
+        { content: "ILAVE", styles: sD },
         { content: "Provincia", styles: sL },
-        { content: "Puno", styles: sD },
+        { content: "ILAVE", styles: sD },
       ],
       [
         { content: "Distrito", styles: sL },
-        { content: "Puno", styles: sD },
+        { content: "ILAVE", styles: sD },
         { content: "Créditos", styles: sL },
         { content: data?.ficha?.creditos || "—", styles: sD },
       ],

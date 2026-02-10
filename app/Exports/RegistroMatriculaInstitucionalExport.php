@@ -27,10 +27,10 @@ class RegistroMatriculaInstitucionalExport
 
         // 2️⃣ Datos estáticos de institución
         $institucion = [
-            'region'         => 'PUNO',
-            'ugel'           => 'PUNO',
+            'region'         => 'ILAVE',
+            'ugel'           => 'ILAVE',
             'codigo_modular' => '0000000',
-            'nombre'         => 'CETPRO PUNO',
+            'nombre'         => 'CETPRO ILAVE',
         ];
 
 

@@ -61,7 +61,7 @@ export async function generateConstanciaEstudiante(data) {
     doc.text("CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA", pageWidth / 2, headerY + 2, { align: "center" });
     
     doc.setFontSize(16);
-    doc.text('"CETPRO PUNO"', pageWidth / 2, headerY + 8, { align: "center" }); // Centrado visualmente
+    doc.text('"CETPRO ILAVE"', pageWidth / 2, headerY + 8, { align: "center" }); // Centrado visualmente
     
     doc.setFontSize(7);
     doc.setFont("times", "normal");
@@ -94,7 +94,7 @@ export async function generateConstanciaEstudiante(data) {
     // Inicio del texto (Subido desde 95 a 80 para cerrar hueco)
     const textStartY = photoY + 42; 
 
-    doc.text("EL/LA DIRECTOR(A) DEL CETPRO PUNO QUE SUSCRIBE, POR LA PRESENTE:", marginL, textStartY);
+    doc.text("EL/LA DIRECTOR(A) DEL CETPRO ILAVE QUE SUSCRIBE, POR LA PRESENTE:", marginL, textStartY);
     doc.setFont("times", "bold");
     doc.text("HACE CONSTAR QUE:", marginL, textStartY + 8);
 
@@ -150,7 +150,7 @@ export async function generateConstanciaEstudiante(data) {
 
     const hoy = new Date();
     const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-    const fechaTexto = `Puno, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+    const fechaTexto = `ILAVE, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
 
     doc.setFont("times", "bold");
     doc.text(fechaTexto, pageWidth - marginR, cierreY + 10, { align: "right" });
@@ -185,7 +185,7 @@ export async function generateConstanciaEstudiante(data) {
     doc.setFont("times", "bold");
     doc.text("DIRECCIÓN GENERAL", pageWidth / 2, zonaFirmaY + 5, { align: "center" });
     doc.setFontSize(10);
-    doc.text("CETPRO PUNO", pageWidth / 2, zonaFirmaY + 10, { align: "center" });
+    doc.text("CETPRO ILAVE", pageWidth / 2, zonaFirmaY + 10, { align: "center" });
 
     // --- 7. CLÁUSULA LEGAL (PIE DE PÁGINA) ---
     const footerY = 258;

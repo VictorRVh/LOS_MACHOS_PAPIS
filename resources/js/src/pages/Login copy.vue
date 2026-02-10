@@ -176,7 +176,7 @@ const onPasswordChanged = async (newPassword) => {
         <img src="/img/insignia.png" alt="Insignia CETPRO" class="w-20 h-20 mb-6 opacity-90" />
         <h1 class="text-6xl font-extrabold tracking-tight leading-tight">Gestión</h1>
         <h2 class="text-6xl font-extrabold tracking-tight leading-tight">Académica</h2>
-        <p class="text-slate-100 max-w-md mt-6">Plataforma oficial del Centro de Educación Técnico-Productiva de Puno.</p>
+        <p class="text-slate-100 max-w-md mt-6">Plataforma oficial del Centro de Educación Técnico-Productiva de ILAVE.</p>
       </div>
 
       <div class="relative z-10 text-slate-200">
@@ -295,7 +295,7 @@ const onPasswordChanged = async (newPassword) => {
         </form>
 
         <footer class="w-full text-center text-xs text-gray-400 pt-8 mt-6">
-          © 2025 Todos los derechos reservados. CETPRO Puno.
+          © 2025 Todos los derechos reservados. CETPRO ILAVE.
         </footer>
 
         <!-- Modal -->
@@ -485,7 +485,7 @@ onUnmounted(() => {
             </div>
             <div ref="artContainer" class="art-piece"></div>
              <p class="institution-name">
-                Centro de Educación Técnico-Productiva de Puno.
+                Centro de Educación Técnico-Productiva de ILAVE.
             </p>
         </div>
 
@@ -519,7 +519,7 @@ onUnmounted(() => {
                     <span v-else class="loader"></span>
                 </button>
             </form>
-            <footer class="form-footer">© {{ new Date().getFullYear() }} CETPRO Puno.</footer>
+            <footer class="form-footer">© {{ new Date().getFullYear() }} CETPRO ILAVE.</footer>
         </div>
         <ChangePasswordModal v-if="showModal" @success="onPasswordChanged" @close="showModal = false" />
     </main>

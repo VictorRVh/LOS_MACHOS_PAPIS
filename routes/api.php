@@ -1264,6 +1264,11 @@ Route::get('estadistica101', [
     'estadistica101Data',
 ]);
 
+Route::get('estadistica104', [
+    \App\Http\Controllers\EstadisticaController::class,
+    'matriculadosRetiradosPorCarrera',
+]);
+
 Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
     Route::get('/files/{fileId}', [GoogleDriveController::class, 'listFilesNew']);
     Route::post('/folder', [GoogleDriveController::class, 'createFolder']);

@@ -109,18 +109,19 @@ class EspecialidadMadreController extends Controller
         //     'especialidades' => $ciclo->especialidades
         // ]);
 
-        $ciclo = CicloAcademico::with('especialidades')->find($idCiclo);
+        $ciclo = CicloAcademico::find($idCiclo);
 
         if (!$ciclo) {
             return response()->json(['mensaje' => 'Ciclo no encontrado'], 404);
         }
 
-        $especialidades = $ciclo->especialidades->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'nombre_especialidad' => $item->nombre_especialidad
-            ];
-        });
+        // CORRECCIÓN: Filtrar solo especialidades activas (is_deleted = 0)
+        $especialidades = DB::table('especialidad_madre')
+            ->where('id_ciclo', $idCiclo)
+            ->where('is_deleted', 0)
+            ->select('id', 'nombre_especialidad')
+            ->orderBy('nombre_especialidad')
+            ->get();
 
         return response()->json([
             'ciclo' => $ciclo->nombre_ciclo,

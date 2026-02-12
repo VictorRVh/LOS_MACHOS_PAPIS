@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('id_experiencia');
             $table->tinyInteger('tipo_practicas');
-            $table->string('nota');
+            $table->string('nota')->nullable();
             $table->string('documento');
             $table->string('observacion');
             $table->uuid('id_estudiante');
@@ -23,16 +23,16 @@ return new class extends Migration
             $table->tinyInteger('status')->default(0);
 
             $table->foreign('id_experiencia')
-                  ->references('id')->on('experiencia_formativa')
-                  ->onDelete('cascade');
+                ->references('id')->on('experiencia_formativa')
+                ->onDelete('cascade');
 
             $table->foreign('id_estudiante')
-                  ->references('id')->on('estudiante')
-                  ->onDelete('cascade');
+                ->references('id')->on('estudiante')
+                ->onDelete('cascade');
 
             $table->foreign('id_grupo')
-                  ->references('id')->on('grupo')
-                  ->onDelete('cascade');
+                ->references('id')->on('grupo')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }

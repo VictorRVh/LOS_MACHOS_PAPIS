@@ -9,10 +9,13 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\ReferenceHelper;
 
 class ReporteRegistroMatriculaAndEvaluacionExport
 {
     protected $idGrupo;
+    protected $filasExtraAsistencia = 0;
+
 
     public function __construct($idGrupo)
     {
@@ -126,6 +129,7 @@ class ReporteRegistroMatriculaAndEvaluacionExport
             // DOCENTE
             $sheet->setCellValue('AH28', $data->docente);
 
+
             // SECCIÓN
             $sheet->setCellValue('AF31', "SECCIÓN: " . $data->seccion);
 
@@ -133,38 +137,144 @@ class ReporteRegistroMatriculaAndEvaluacionExport
             $sheet->setCellValue('AK31', "TURNO: " . $data->turno);
         }
 
-        $fechasAsistencia = DB::table('asistencia')
+        $estudiantes = DB::table('matricula')
+            ->join('estudiante', 'matricula.id_estudiante', '=', 'estudiante.id')
+            ->where('matricula.id_grupo', $this->idGrupo)
+            ->where(function ($q) {
+                $q->whereNull('matricula.reserva')
+                    ->orWhere('matricula.reserva', 0);
+            })
+            ->select(
+                'estudiante.id',
+                'estudiante.nro_documento',
+                DB::raw("CONCAT(
+                estudiante.apellido_paterno, ' ',
+                estudiante.apellido_materno, ', ',
+                estudiante.nombre
+            ) AS nombre_completo")
+            )
+            ->orderBy('estudiante.apellido_paterno')
+            ->orderBy('estudiante.apellido_materno')
+            ->orderBy('estudiante.nombre')
+            ->get();
+
+        // Obtener SOLO faltas
+        $faltas = DB::table('asistencia')
             ->where('id_grupo', $this->idGrupo)
-            ->select('fecha_actual')
-            ->distinct()
+            ->where('asistencia', '2') // ⚠️ cambia si tu campo es diferente
             ->orderBy('fecha_actual')
-            ->pluck('fecha_actual')
-            ->toArray();
+            ->get()
+            ->groupBy('id_estudiante');
 
-        $filaCabecera = 6;
-        $colInicio = 'D';
-        $colIndex = Coordinate::columnIndexFromString($colInicio);
+        $filaInicio = 6;          // donde empiezan los estudiantes
+        $filasPlantilla = 26;     // tu plantilla soporta 26
+        $totalMatriculas = $estudiantes->count();
 
-        foreach ($fechasAsistencia as $i => $fecha) {
+        // 🔥 EXTENDER SI HAY MÁS DE 26
+        if ($totalMatriculas > $filasPlantilla) {
 
-            if ($i >= 16) break; // máximo hasta columna S (D=4, S=19, diferencia=15+1=16)
+            $filasAInsertar = $totalMatriculas - $filasPlantilla;
 
-            $col = Coordinate::stringFromColumnIndex($colIndex + $i);
-            $excelDate = Date::stringToExcel(date('Y-m-d', strtotime($fecha)));
+            $this->filasExtraAsistencia = $filasAInsertar;
+            $filaModelo = $filaInicio + $filasPlantilla - 1;
 
-            $sheet->setCellValueExplicit(
-                "{$col}{$filaCabecera}",
-                $excelDate,
-                DataType::TYPE_NUMERIC
-            );
 
-            $sheet->getStyle("{$col}{$filaCabecera}")
-                ->getNumberFormat()
-                ->setFormatCode('dd/mm');
+            // Detectar merges de la fila modelo
+            $mergedCells = [];
+            foreach ($sheet->getMergeCells() as $merge) {
+                if (preg_match("/[A-Z]+{$filaModelo}:[A-Z]+{$filaModelo}/", $merge)) {
 
-            $sheet->getStyle("{$col}{$filaCabecera}")
-                ->getAlignment()
-                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $mergedCells[] = $merge;
+                }
+            }
+
+            // Insertar debajo de la última fila del bloque
+            $sheet->insertNewRowBefore($filaModelo + 1, $filasAInsertar);
+
+            $columnas = range('B', 'U');
+
+
+            for ($i = 0; $i < $filasAInsertar; $i++) {
+
+                $filaNueva = $filaModelo  + 1 + $i;
+
+                foreach ($columnas as $col) {
+
+                    $celdaModelo  = "{$col}{$filaModelo}";
+                    $celdaDestino = "{$col}{$filaNueva}";
+
+                    // Copiar estilo
+                    $sheet->duplicateStyle(
+                        $sheet->getStyle($celdaModelo),
+                        $celdaDestino
+                    );
+
+                    $celda = $sheet->getCell($celdaModelo);
+
+                    if ($celda->isFormula()) {
+
+                        $formulaOriginal = $celda->getValue();
+
+                        $formulaAjustada = ReferenceHelper::getInstance()
+                            ->updateFormulaReferences(
+                                $formulaOriginal,
+                                $celdaModelo,
+                                0, // columnas
+                                $filaNueva - $filaModelo // diferencia de filas
+                            );
+
+                        $sheet->setCellValue($celdaDestino, $formulaAjustada);
+                    } else {
+
+                        // 🔥 SI ES COLUMNA C (índice)
+                        if ($col === 'C') {
+
+                            $filaAnterior = $filaNueva - 1;
+                            $indiceAnterior = $sheet->getCell("C{$filaAnterior}")->getValue();
+
+                            $sheet->setCellValue($celdaDestino, $indiceAnterior + 1);
+                        }
+                    }
+                }
+            }
+        }
+
+
+        // ahora sí empezamos a escribir
+        $fila = $filaInicio;
+        $colBase = Coordinate::columnIndexFromString('D');
+
+
+        foreach ($estudiantes as $estudiante) {
+
+            $colIndex = $colBase;
+            $contador = 0; // 🔥 contador de faltas
+
+            $faltasEstudiante = $faltas->get($estudiante->id);
+
+            if ($faltasEstudiante) {
+
+                foreach ($faltasEstudiante as $falta) {
+
+                    if ($contador >= 16) break; // 🔥 máximo 16 inasistencias
+
+                    $col = Coordinate::stringFromColumnIndex($colIndex);
+
+                    $sheet->setCellValue(
+                        "{$col}{$fila}",
+                        date('d/m', strtotime($falta->fecha_actual))
+                    );
+
+                    $sheet->getStyle("{$col}{$fila}")
+                        ->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $colIndex++;
+                    $contador++; // 🔥 aumentamos contador
+                }
+            }
+
+            $fila++;
         }
     }
 
@@ -193,8 +303,15 @@ class ReporteRegistroMatriculaAndEvaluacionExport
             ->orderBy('estudiante.apellido_paterno')
             ->get();
 
-        $filaInicio = 37;
-        $filasPlantilla = 62;
+        $notasExperiencia = DB::table('nota_experiencia_formativa')
+            ->where('id_grupo', $this->idGrupo)
+            ->get()
+            ->keyBy('id_estudiante');
+
+
+        $filaInicio = 37 + $this->filasExtraAsistencia;
+
+        $filasPlantilla = 26;
         $totalEstudiantes = $estudiantes->count();
 
         // Extender plantilla si hay más estudiantes que filas
@@ -212,7 +329,7 @@ class ReporteRegistroMatriculaAndEvaluacionExport
             ->groupBy(fn($n) => $n->id_estudiante . '-' . $n->id_capacidad);
 
         // Llenar datos
-        $this->llenarListaEstudiantesConNotas($sheet, $estudiantes, $capacidades, $notas, $filaInicio);
+        $this->llenarListaEstudiantesConNotas($sheet, $estudiantes, $capacidades, $notas, $notasExperiencia, $filaInicio);
     }
 
     /**
@@ -224,39 +341,91 @@ class ReporteRegistroMatriculaAndEvaluacionExport
         int $filasPlantilla,
         int $totalEstudiantes
     ): void {
+
         $filasAInsertar = $totalEstudiantes - $filasPlantilla;
-        $filaModelo = $filaInicio;
+        $filaModelo = $filaInicio + $filasPlantilla - 1;
 
-        $sheet->insertNewRowBefore(
-            $filaInicio + $filasPlantilla,
-            $filasAInsertar
-        );
+        // ✅ 1. GUARDAR merges ANTES de insertar
+        $merges = $sheet->getMergeCells();
 
-        $columnas = range('C', 'AH'); // Ajusta según tus necesidades
+        // ✅ 2. Deshacer merges
+        foreach ($merges as $merge) {
+            $sheet->unmergeCells($merge);
+        }
+
+        // ✅ 3. Insertar filas
+        $sheet->insertNewRowBefore($filaModelo + 1, $filasAInsertar);
+
+        // ✅ 4. Volver a aplicar merges desplazados
+        foreach ($merges as $merge) {
+
+            if (preg_match("/([A-Z]+)(\d+):([A-Z]+)(\d+)/", $merge, $matches)) {
+
+                $col1 = $matches[1];
+                $row1 = (int)$matches[2];
+                $col2 = $matches[3];
+                $row2 = (int)$matches[4];
+
+                // Si el merge estaba debajo del bloque, desplazarlo
+                if ($row1 > $filaModelo) {
+                    $row1 += $filasAInsertar;
+                    $row2 += $filasAInsertar;
+                }
+
+                $sheet->mergeCells("{$col1}{$row1}:{$col2}{$row2}");
+            }
+        }
+
+        // 🔥 Ahora copiar estilos
+        $columnas = range('C', 'AH');
 
         for ($i = 0; $i < $filasAInsertar; $i++) {
 
-            $filaDestino = $filaInicio + $filasPlantilla + $i;
+            $filaNueva = $filaModelo + 1 + $i;
+            // 🔥 Generar índice automático en columna B
+            $filaAnterior = $filaNueva - 1;
+            $indiceAnterior = $sheet->getCell("B{$filaAnterior}")->getValue();
+
+            if (is_numeric($indiceAnterior)) {
+                $sheet->setCellValue("B{$filaNueva}", $indiceAnterior + 1);
+            }
 
             foreach ($columnas as $col) {
 
+                $celdaModelo  = "{$col}{$filaModelo}";
+                $celdaDestino = "{$col}{$filaNueva}";
+
                 $sheet->duplicateStyle(
-                    $sheet->getStyle("{$col}{$filaModelo}"),
-                    "{$col}{$filaDestino}"
+                    $sheet->getStyle($celdaModelo),
+                    $celdaDestino
                 );
 
-                $sheet->getStyle("{$col}{$filaDestino}")
-                    ->getBorders()
-                    ->getAllBorders()
-                    ->setBorderStyle(Border::BORDER_THIN);
+                $celda = $sheet->getCell($celdaModelo);
+
+                if ($celda->isFormula()) {
+
+                    $formulaOriginal = $celda->getValue();
+
+                    $formulaAjustada = ReferenceHelper::getInstance()
+                        ->updateFormulaReferences(
+                            $formulaOriginal,
+                            $celdaModelo,
+                            0,
+                            $filaNueva - $filaModelo
+                        );
+
+                    $sheet->setCellValue($celdaDestino, $formulaAjustada);
+                }
             }
 
             $altura = $sheet->getRowDimension($filaModelo)->getRowHeight();
             if ($altura !== null) {
-                $sheet->getRowDimension($filaDestino)->setRowHeight($altura);
+                $sheet->getRowDimension($filaNueva)->setRowHeight($altura);
             }
         }
     }
+
+
 
     /**
      * Llena los datos de cada estudiante: número, DNI, nombre y notas
@@ -266,6 +435,7 @@ class ReporteRegistroMatriculaAndEvaluacionExport
         $estudiantes,
         $capacidades,
         $notas,
+        $notasExperiencia,
         int $filaInicio
     ): void {
         $fila = $filaInicio;
@@ -295,6 +465,31 @@ class ReporteRegistroMatriculaAndEvaluacionExport
 
             // V en adelante: Notas por capacidad
             $this->llenarNotasCapacidades($sheet, $estudiante, $capacidades, $notas, $fila);
+
+
+            // 📌 Columna después de la última capacidad
+            $colExperiencia = Coordinate::stringFromColumnIndex(
+                Coordinate::columnIndexFromString('AG')
+            );
+
+            // Obtener nota de experiencia del estudiante
+            $notaExp = $notasExperiencia->get($estudiante->id)?->nota;
+
+            // Escribir nota
+            $sheet->setCellValue("{$colExperiencia}{$fila}", $notaExp ?? '—');
+            $sheet->getStyle("{$colExperiencia}{$fila}")
+                ->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            // Color (igual que capacidades)
+            if ($notaExp !== null) {
+                $color = ($notaExp < 11) ? 'FF0000' : '000000';
+                $sheet->getStyle("{$colExperiencia}{$fila}")
+                    ->getFont()
+                    ->getColor()
+                    ->setRGB($color);
+            }
+
 
             $fila++;
         }

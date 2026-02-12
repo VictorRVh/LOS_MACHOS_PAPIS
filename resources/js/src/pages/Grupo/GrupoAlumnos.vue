@@ -166,7 +166,7 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "Restro de matriculas y evaluaciones.xlsx");
+    link.setAttribute("download", "Registro de matriculas y evaluaciones.xlsx");
     document.body.appendChild(link);
     link.click();
   } catch (error) {

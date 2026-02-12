@@ -822,6 +822,16 @@ class GrupoController extends Controller
             ->pluck('descripcion')
             ->values();
 
+        // ===============================
+        // EXPERIENCIA FORMATIVA (SOLO NOTA)
+        // ===============================
+        $notaExperiencia = DB::table('nota_experiencia_formativa')
+            ->where('id_estudiante', $matricula->id_estudiante)
+            ->where('id_grupo', $matricula->id_grupo)
+            ->orderByDesc('tipo_practicas') // toma la FINAL si existe
+            ->value('nota'); // devuelve un solo valor
+
+
 
         // ===============================
         // CRÉDITOS TOTALES (SUMA REAL)
@@ -868,6 +878,9 @@ class GrupoController extends Controller
             'fecha_inicio'        => $matricula->fecha_inicio,
             'fecha_fin'           => $matricula->fecha_fin,
             'unidades_didacticas' => $unidadesDidacticas,
+
+            // 🔥 NUEVO
+            'experiencia_formativa' => $notaExperiencia,
         ]);
     }
 }

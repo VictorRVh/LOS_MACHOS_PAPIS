@@ -66,7 +66,7 @@ export async function generateCertificadoModular(data, codigo) {
 
   const estudiante = (data?.apellidos_nombres || "").toUpperCase();
   const modulo = (data?.modulo || "").toUpperCase();
-    const unidad_competencia = (data?.unidad_competencia || "");
+  const unidad_competencia = (data?.unidad_competencia || "");
   const especialidad = (data?.especialidad || "").toUpperCase();
   const totalCreditos = data?.creditos_totales || "0";
   const totalHoras = data?.horas_totales || "0";
@@ -146,38 +146,38 @@ export async function generateCertificadoModular(data, codigo) {
 
   /////////////////////////////////////
   ////////////////////
-      // Texto principal
+  // Texto principal
 
-      const posY = 30;
+  const posY = 30;
 
-    doc.setFontSize(16);
-    doc.setFont("times", "italic");
-    doc.text("Otorgado a:", 20, posY + 60);
+  doc.setFontSize(16);
+  doc.setFont("times", "italic");
+  doc.text("Otorgado a:", 20, posY + 60);
 
-    doc.setFont("times", "bold");
+  doc.setFont("times", "bold");
 
-    doc.text(estudiante || "NOMBRE DEL BENEFICIARIO", 60, posY + 60);
+  doc.text(estudiante || "NOMBRE DEL BENEFICIARIO", 60, posY + 60);
 
 
-    doc.setFont("times", "italic");
-    doc.text("Por haber aprobado satisfactoriamente el módulo formativo:", 20, posY + 70);
+  doc.setFont("times", "italic");
+  doc.text("Por haber aprobado satisfactoriamente el módulo formativo:", 20, posY + 70);
 
-    doc.setFont("times", "bold");
-    doc.text(modulo || "NOMBRE DEL MÓDULO", 148.5, posY + 80, { align: "center" });
+  doc.setFont("times", "bold");
+  doc.text(modulo || "NOMBRE DEL MÓDULO", 148.5, posY + 80, { align: "center" });
 
-    doc.setFont("times", "italic");
-    doc.text("Correspondiente al Programa de Estudios:", 20, posY + 90);
+  doc.setFont("times", "italic");
+  doc.text("Correspondiente al Programa de Estudios:", 20, posY + 90);
 
-    doc.setFont("times", "bold");
-    doc.text(especialidad || "NOMBRE DE ESPECIALIDAD", 148.5, posY + 100, { align: "center" });
-   ///////////////////////
-   ////////////////////////
+  doc.setFont("times", "bold");
+  doc.text(especialidad || "NOMBRE DE ESPECIALIDAD", 148.5, posY + 100, { align: "center" });
+  ///////////////////////
+  ////////////////////////
 
   curY += 45;
   doc.setFont("times", "italic");
   //doc.setTextColor(50);
   const textoResumen = `desarrollado del ${fechaIni} al ${fechaFin}, con un total de ${totalCreditos} créditos, equivalente a ${totalHoras} horas.`;
-  doc.text(textoResumen, mL,curY);
+  doc.text(textoResumen, mL, curY);
 
   const pieY = 175;
   doc.setFont("times", "normal");
@@ -219,13 +219,20 @@ export async function generateCertificadoModular(data, codigo) {
           styles: { valign: 'middle', halign: 'center', fontStyle: 'bold' }
         });
       }
+
+      const capacidadesTexto = Array.isArray(u.capacidades)
+        ? u.capacidades.join(", ")
+        : (u.capacidades || "-");
+
       row.push(u.nombre_unidad || "-");
       row.push(u.creditos || "1");
       row.push(u.horas || "16");
-      row.push(u.capacidades || "Reconoce los biotipos cutáneos...");
+      row.push(capacidadesTexto);
       row.push(u.nota || "-");
+
       bodyRows.push(row);
     });
+
   } else {
     bodyRows.push([modulo, "-", "-", "-", "-", "-"]);
   }
@@ -236,7 +243,7 @@ export async function generateCertificadoModular(data, codigo) {
       colSpan: 5,
       styles: { halign: 'left', fontStyle: 'bold' }
     },
-    data?.nota_experiencias || "-"
+    data?.experiencia_formativa || "-"
   ]);
 
   autoTable(doc, {

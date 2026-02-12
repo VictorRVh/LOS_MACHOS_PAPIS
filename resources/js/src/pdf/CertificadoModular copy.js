@@ -8,7 +8,7 @@ function obtenerFechaActual() {
     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
   ];
   const fecha = new Date();
-  return `ILAVE, ${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
+  return `Puno, ${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
 }
 
 function formatearFecha(fechaStr) {
@@ -93,7 +93,7 @@ export function generateCertificadoModular(data) {
   
   cursorY += 8;
   doc.setFontSize(16);
-  doc.text('"CETPRO ILAVE"', pageWidth / 2, cursorY, { align: "center" });
+  doc.text('"CETPRO PUNO"', pageWidth / 2, cursorY, { align: "center" });
 
   cursorY += 15;
   doc.setFontSize(18);

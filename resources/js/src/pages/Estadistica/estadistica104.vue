@@ -67,8 +67,8 @@ const data = computed(() => estadisticaStore.estadistica104 || []);
             <th rowspan="3" class="p-3 border-r border-gray-700">Código</th>
             <th rowspan="3" class="p-3 border-r border-gray-700 text-left">Denominación de la Carrera</th>
             <th colspan="4" class="p-2 border-b border-r border-gray-700 bg-gray-700">Total General</th>
-            <th colspan="4" class="p-2 border-b border-r border-gray-700 bg-cetpro">Ciclo Básico</th>
-            <th colspan="4" class="p-2 bg-cetpro-dark border-b border-gray-700">Ciclo Medio</th>
+            <th colspan="4" class="p-2 border-b border-r border-gray-700 bg-cetpro">Ciclo Auxiliar Tecnico</th>
+            <th colspan="4" class="p-2 bg-cetpro-dark border-b border-gray-700">Ciclo Tecnico</th>
           </tr>
           <tr class="bg-gray-100 text-gray-700 font-bold border-b border-gray-200">
             <th colspan="2" class="p-1 border-r">Matric.</th>

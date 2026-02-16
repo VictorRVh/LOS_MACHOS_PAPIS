@@ -15,17 +15,33 @@ const consultarDatos = () => {
   );
 };
 
-const data = computed(() => estadisticaStore.estadistica101 || {
-  aprobados: {
-    total: 0,
-    auxiliar_tecnico: { H: 0, M: 0 },
-    tecnico: { H: 0, M: 0 }
-  },
-  retirados: {
-    total: 0,
-    auxiliar_tecnico: { H: 0, M: 0 },
-    tecnico: { H: 0, M: 0 }
-  }
+const data = computed(() => {
+  const source = estadisticaStore.estadistica101;
+
+  return {
+    aprobados: {
+      total: source?.aprobados?.total ?? 0,
+      auxiliar_tecnico: {
+        H: source?.aprobados?.auxiliar_tecnico?.H ?? 0,
+        M: source?.aprobados?.auxiliar_tecnico?.M ?? 0,
+      },
+      tecnico: {
+        H: source?.aprobados?.tecnico?.H ?? 0,
+        M: source?.aprobados?.tecnico?.M ?? 0,
+      }
+    },
+    retirados: {
+      total: source?.retirados?.total ?? 0,
+      auxiliar_tecnico: {
+        H: source?.retirados?.auxiliar_tecnico?.H ?? 0,
+        M: source?.retirados?.auxiliar_tecnico?.M ?? 0,
+      },
+      tecnico: {
+        H: source?.retirados?.tecnico?.H ?? 0,
+        M: source?.retirados?.tecnico?.M ?? 0,
+      }
+    }
+  };
 });
 
 </script>
@@ -73,8 +89,8 @@ const data = computed(() => estadisticaStore.estadistica101 || {
             <th class="p-4 border-r">SITUACIÓN</th>
             <th class="p-4 border-r">TOTAL GENERAL</th>
             <th colspan="2" class="p-4 border-r bg-gray-700">TOTAL</th>
-            <th colspan="2" class="p-4 border-r bg-cetpro">BÁSICO</th>
-            <th colspan="2" class="p-4 bg-cetpro-dark">MEDIO</th>
+            <th colspan="2" class="p-4 border-r bg-cetpro">AUXILIAR TECNICO</th>
+            <th colspan="2" class="p-4 bg-cetpro-dark">TECNICO</th>
           </tr>
           <tr class="bg-gray-100 text-gray-600">
             <th></th>

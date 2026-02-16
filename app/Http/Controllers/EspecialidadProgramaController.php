@@ -46,7 +46,10 @@ class EspecialidadProgramaController extends Controller
         $programa = ProgramaEstudio::with([
             'ciclo:id,nombre_ciclo',
             'especialidadPrograma' => function ($q) {
-                $q->orderBy('created_at', 'asc'); // 👈 ordena las especialidades por fecha de creación
+                $q->whereHas('especialidadMadre', function ($q2) {
+                    $q2->where('is_deleted', 0);
+                })
+                    ->orderBy('created_at', 'asc');
             },
             'especialidadPrograma.especialidadMadre:id,nombre_especialidad'
         ])->find($id);
@@ -58,7 +61,7 @@ class EspecialidadProgramaController extends Controller
         if ($programa->especialidadPrograma->isEmpty()) {
             return response()->json([
                 'ciclo' => $programa->ciclo,
-                'message' => 'No se encontraron especialidades asociadas a este programa'
+                'message' => 'No se encontraron especialidades activas para este programa'
             ]);
         }
 
@@ -76,44 +79,43 @@ class EspecialidadProgramaController extends Controller
         ]);
     }
 
-
     // Actualizar
-public function update(Request $request, $id)
-{
-    $registro = EspecialidadPrograma::find($id);
+    public function update(Request $request, $id)
+    {
+        $registro = EspecialidadPrograma::find($id);
 
-    if (!$registro) {
-        return response()->json(['message' => 'No encontrado'], 404);
+        if (!$registro) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
+
+        $request->validate([
+            'id_especialidad' => 'sometimes|exists:especialidad_madre,id',
+            'id_programa' => 'sometimes|exists:programa_estudio,id',
+            'nro_modulos' => 'sometimes|integer|min:0'
+        ]);
+
+        // Guardar valores antes del cambio
+        $antes_nro_modulos = $registro->nro_modulos;
+
+        // Actualizar
+        $registro->update($request->all());
+
+        // Guardar después del cambio
+        $despues_nro_modulos = $registro->nro_modulos;
+
+        // Detectar solo cambio en n° de módulos
+        $mensajeCambio = ($antes_nro_modulos != $despues_nro_modulos)
+            ? "y módulos de {$antes_nro_modulos} a {$despues_nro_modulos}"
+            : " ";
+
+        // ACTIVIDAD (se mantiene lo que ya tenías)
+        $this->registrarActividad(
+            "Actualizó la especialidad '{$registro->especialidadMadre->nombre_especialidad}' del programa '{$registro->programaEstudio->año}' ({$mensajeCambio})",
+            "Actualizado"
+        );
+
+        return response()->json($registro);
     }
-
-    $request->validate([
-        'id_especialidad' => 'sometimes|exists:especialidad_madre,id',
-        'id_programa' => 'sometimes|exists:programa_estudio,id',
-        'nro_modulos' => 'sometimes|integer|min:0'
-    ]);
-
-    // Guardar valores antes del cambio
-    $antes_nro_modulos = $registro->nro_modulos;
-
-    // Actualizar
-    $registro->update($request->all());
-
-    // Guardar después del cambio
-    $despues_nro_modulos = $registro->nro_modulos;
-
-    // Detectar solo cambio en n° de módulos
-    $mensajeCambio = ($antes_nro_modulos != $despues_nro_modulos)
-        ? "y módulos de {$antes_nro_modulos} a {$despues_nro_modulos}"
-        : " ";
-
-    // ACTIVIDAD (se mantiene lo que ya tenías)
-    $this->registrarActividad(
-        "Actualizó la especialidad '{$registro->especialidadMadre->nombre_especialidad}' del programa '{$registro->programaEstudio->año}' ({$mensajeCambio})",
-        "Actualizado"
-    );
-
-    return response()->json($registro);
-}
 
 
     // Eliminar

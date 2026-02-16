@@ -270,4 +270,74 @@ class EstadisticaController extends Controller
             'matriculas_sastreria' => $matriculasSastreria,
         ]);
     }
+
+    public function matriculadosPorCicloYSexo(Request $request)
+    {
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin    = $request->input('fecha_fin');
+
+        $query = DB::table('especialidad_madre')
+            ->join('especialidad_programa', 'especialidad_programa.id_especialidad', '=', 'especialidad_madre.id')
+            ->join('grupo', 'grupo.id_especialidad', '=', 'especialidad_programa.id')
+            ->join('programa_estudio', 'grupo.id_programa', '=', 'programa_estudio.id')
+            ->join('ciclo_academico', 'programa_estudio.id_ciclo', '=', 'ciclo_academico.id')
+            ->join('matricula', 'matricula.id_grupo', '=', 'grupo.id')
+            ->join('estudiante', 'matricula.id_estudiante', '=', 'estudiante.id')
+            ->where('especialidad_madre.is_deleted', 0)
+            ->where('matricula.matriculado', 1);
+
+        if ($fechaInicio) {
+            $query->whereDate('matricula.created_at', '>=', $fechaInicio);
+        }
+
+        if ($fechaFin) {
+            $query->whereDate('matricula.created_at', '<=', $fechaFin);
+        }
+
+        $rows = $query->select(
+            'especialidad_madre.id as especialidad_id',
+            'especialidad_madre.nombre_especialidad as especialidad',
+            'ciclo_academico.nombre_ciclo as ciclo',
+            'estudiante.sexo',
+            DB::raw('COUNT(*) as total')
+        )
+            ->groupBy(
+                'especialidad_madre.id',
+                'especialidad_madre.nombre_especialidad',
+                'ciclo_academico.nombre_ciclo',
+                'estudiante.sexo'
+            )
+            ->orderBy('especialidad_madre.nombre_especialidad')
+            ->get();
+
+        /* ------------------------------------------------------------
+       ARMADO DE RESPUESTA
+    ------------------------------------------------------------ */
+
+        $resultado = [];
+
+        foreach ($rows as $row) {
+            $id = $row->especialidad_id;
+
+            if (!isset($resultado[$id])) {
+                $resultado[$id] = [
+                    'nombre' => $row->especialidad,
+                    'auxiliar_tecnico' => ['H' => 0, 'M' => 0],
+                    'tecnico'  => ['H' => 0, 'M' => 0],
+                ];
+            }
+
+            // Sexo
+            $sexo = strtoupper($row->sexo) === 'M' ? 'H' : 'M';
+
+            // Ciclo → nivel
+            $nivel = str_contains(strtolower($row->ciclo), 'auxiliar')
+                ? 'auxiliar_tecnico'
+                : 'tecnico';
+
+            $resultado[$id][$nivel][$sexo] += $row->total;
+        }
+
+        return response()->json(array_values($resultado));
+    }
 }

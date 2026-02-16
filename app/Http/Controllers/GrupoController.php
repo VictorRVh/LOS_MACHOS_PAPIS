@@ -259,19 +259,23 @@ class GrupoController extends Controller
     //ESPECIALIDADE DE UN PROGRAMA
 
     public function getEspecialidadesPorPrograma($idPrograma)
-    {
-        $especialidades = EspecialidadPrograma::with('especialidadMadre')
-            ->where('id_programa', $idPrograma)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'nombre_especialidad' => $item->especialidadMadre->nombre_especialidad
-                ];
-            });
+{
+    $especialidades = EspecialidadPrograma::where('id_programa', $idPrograma)
+        ->whereHas('especialidadMadre', function ($q) {
+            $q->where('is_deleted', 0);
+        })
+        ->with('especialidadMadre:id,nombre_especialidad')
+        ->get()
+        ->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'nombre_especialidad' => $item->especialidadMadre->nombre_especialidad
+            ];
+        });
 
-        return response()->json($especialidades);
-    }
+    return response()->json($especialidades);
+}
+
 
     // MODULOS POR ESPECIALIDAD
     public function getModulosPorEspecialidad($idEspecialidad)

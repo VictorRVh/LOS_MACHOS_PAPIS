@@ -12,6 +12,7 @@ use App\Models\Modulo;
 use App\Models\Periodo;
 use App\Models\ProgramaEstudio;
 use App\Models\User;
+use App\Models\Cetpro;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Traits\Helpers; // <-- AÑADIDO
@@ -756,6 +757,8 @@ class GrupoController extends Controller
 
     public function dataCertificado($idMatricula)
     {
+        $cetpro = Cetpro::first();
+
         // ===============================
         // DATOS PRINCIPALES
         // ===============================
@@ -885,6 +888,11 @@ class GrupoController extends Controller
 
             // 🔥 NUEVO
             'experiencia_formativa' => $notaExperiencia,
+            'cetpro' => [
+                'cetpro' => $cetpro->cetpro ?? null,
+                'tipo_gestion' => $cetpro->tipo_gestion ?? null,
+                'lugar' => $cetpro->lugar ?? null,
+            ],
         ]);
     }
 }

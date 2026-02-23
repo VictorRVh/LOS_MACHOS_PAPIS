@@ -18,7 +18,6 @@ import BaseButton from "../../components/ui/Button.vue"
 import useCertificado from "../../store/Grupo/useCertificadoStore.js"
 
 // IMPORTACIÓN DEL NUEVO CERTIFICADO MODULAR
-import { generateCertificate } from "../../pdf/CertificadoPDF.js";
 
 // IMPORTACIÓN DE CONSTANCIA
 import { generateConstanciaEstudiante } from "../../pdf/CosntanciaEstudiante.js";
@@ -28,6 +27,7 @@ import useCertificadoStore from '../../store/Grupo/useCertificadoStore.js';
 // Asumo que la función exportada se llama generateConstanciaEgresado, ajusta si es diferente en tu archivo JS
 import { generateConstanciaEgresado } from "../../pdf/ConstanciaEgresado.js"; 
 import { generateCertificadoModular } from '../../pdf/CertificadoModular.js';
+import { generateCertificadoEstudio } from '../../pdf/CertificadoEstudio.js';
 
 const props = defineProps({
   id: { type: [String, Number], required: true },
@@ -199,6 +199,25 @@ const emitirCertificado = () => {
   showCertificadoModal.value = false;
 };
 
+const emitirCertificadoEstudio = async (matriculaId) => {
+  try {
+    await dataAlumnoCertificado.loadCertificados(matriculaId);
+    const data = dataAlumnoCertificado.certificados;
+
+    if (!data) {
+      showToast("No se encontraron datos para el certificado de estudios", "warning");
+      return;
+    }
+
+    await generateCertificadoEstudio(data, null, {
+      periodo: matriculados.value?.periodo || "-",
+    });
+  } catch (error) {
+    console.error(error);
+    showToast("Error al generar el certificado de estudios", "error");
+  }
+};
+
 
 </script>
 
@@ -262,6 +281,16 @@ const emitirCertificado = () => {
                 </BaseButton> -->
 
                 <!-- BOTÓN CERTIFICADO MODULAR -->
+                <BaseButton title="Certificado Estudio" @click="emitirCertificadoEstudio(estudiante.id_matricula)"
+                  class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow">
+                  <template #icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                      stroke="currentColor" class="size-5">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                  </template>
+                </BaseButton>
                 <BaseButton title="Certificado Modular" @click="openCertificadoModal(estudiante.id_matricula)"
                   class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
                   <template #icon>

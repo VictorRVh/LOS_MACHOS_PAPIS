@@ -15,6 +15,9 @@ function formatearFechaActual(lugar = "PUNO") {
 export async function generateCertificadoEstudio(data, codigo, meta = {}) {
   try {
     const datosCetpro = data?.cetpro || {};
+   
+    console.log("esudio",data)
+    
     const doc = new jsPDF({ 
       orientation: "portrait", 
       unit: "mm", 
@@ -91,8 +94,8 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
       row.push(u?.nombre_unidad || "");
       row.push(u?.creditos || "");
       row.push(u?.nota || "");
-      row.push(meta?.anio || new Date().getFullYear());
-      row.push(meta?.periodo || "-");
+      row.push(data?.periodo_academico.split('-')[0]|| new Date().getFullYear());
+      row.push(data?.periodo_academico || "-");
       row.push("");
       return row;
     });

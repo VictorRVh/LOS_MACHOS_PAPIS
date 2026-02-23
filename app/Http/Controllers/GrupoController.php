@@ -770,6 +770,7 @@ class GrupoController extends Controller
             ->join('especialidad_madre as em', 'em.id', '=', 'ep.id_especialidad')
             ->join('programa_estudio as pe', 'pe.id', '=', 'g.id_programa')
             ->join('ciclo_academico as ca', 'ca.id', '=', 'pe.id_ciclo')
+            ->join('periodo as p', 'p.id', '=', 'g.id_periodo') // 👈 NUEVO
             ->where('m.id', $idMatricula)
             ->select(
                 'm.id as id_matricula',
@@ -787,7 +788,8 @@ class GrupoController extends Controller
                 'g.fecha_fin',
                 'g.id as id_grupo',
                 'e.id as id_estudiante',
-                'ca.nombre_ciclo as ciclo_academico'
+                'ca.nombre_ciclo as ciclo_academico',
+                'p.nombre_periodo as periodo_academico' // 👈 NUEVO
             )
             ->first();
 
@@ -878,6 +880,7 @@ class GrupoController extends Controller
             'ciclo_academico'     => $matricula->ciclo_academico,
             'unidad_competencia'  => $competencias,
             'modulo' => $matricula->unidad_competencia,
+            'periodo_academico' => $matricula->periodo_academico,
             'horas_totales'       => $totalHoras,
             // 🔥 AHORA SÍ ES CORRECTO
             'creditos_totales'    => $totalCreditos,

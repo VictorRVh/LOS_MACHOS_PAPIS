@@ -10,6 +10,7 @@ class Cetpro extends Model
 
     protected $fillable = [
         'cetpro',
+        'anio',
         'rd_autorizacion',
         'rd_conversion',
         'ugel',

@@ -12,7 +12,7 @@ class DatosCetproController extends Controller
     use Helpers;
 
     /**
-     * Obtener datos del CETPRO (único)
+     * Obtener datos del CETPRO (unico)
      */
     public function show()
     {
@@ -27,19 +27,20 @@ class DatosCetproController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'cetpro'           => 'required|string|max:255',
-            'rd_autorizacion'  => 'required|string|max:255',
-            'rd_conversion'    => 'nullable|string|max:255',
-            'ugel'             => 'required|string|max:255',
-            'dre'              => 'required|string|max:255',
-            'tipo_gestion'     => 'required|string|max:255',
-            'region'           => 'required|string|max:255',
-            'provincia'        => 'required|string|max:255',
-            'distrito'         => 'required|string|max:255',
-            'lugar'            => 'nullable|string|max:255',
-            'direccion'        => 'nullable|string|max:255',
-            'numero'           => 'nullable|string|max:50',
+        $validated = $request->validate([
+            'cetpro' => 'required|string|max:255',
+            'anio' => 'required|string|max:255',
+            'rd_autorizacion' => 'required|string|max:255',
+            'rd_conversion' => 'nullable|string|max:255',
+            'ugel' => 'required|string|max:255',
+            'dre' => 'required|string|max:255',
+            'tipo_gestion' => 'required|string|max:255',
+            'region' => 'required|string|max:255',
+            'provincia' => 'required|string|max:255',
+            'distrito' => 'required|string|max:255',
+            'lugar' => 'nullable|string|max:255',
+            'direccion' => 'nullable|string|max:255',
+            'numero' => 'nullable|string|max:50',
         ]);
 
         DB::beginTransaction();
@@ -48,20 +49,18 @@ class DatosCetproController extends Controller
             $cetpro = Cetpro::first();
 
             if ($cetpro) {
-                // 🔁 ACTUALIZAR
-                $cetpro->update($request->all());
+                $cetpro->update($validated);
 
                 $this->registrarActividad(
-                    "Actualizó los datos del CETPRO '{$cetpro->cetpro}'",
-                    "Actualizado"
+                    "Actualizo los datos del CETPRO '{$cetpro->cetpro}'",
+                    'Actualizado'
                 );
             } else {
-                // ➕ CREAR
-                $cetpro = Cetpro::create($request->all());
+                $cetpro = Cetpro::create($validated);
 
                 $this->registrarActividad(
-                    "Registró los datos del CETPRO '{$cetpro->cetpro}'",
-                    "Creado"
+                    "Registro los datos del CETPRO '{$cetpro->cetpro}'",
+                    'Creado'
                 );
             }
 
@@ -72,14 +71,14 @@ class DatosCetproController extends Controller
             DB::rollBack();
 
             throw new \Exception(
-                'Error al guardar datos del CETPRO: ' . $e->getMessage(),
+                'Error al guardar datos del CETPRO: '.$e->getMessage(),
                 13333
             );
         }
     }
 
     /**
-     * Eliminar CETPRO (borrado físico)
+     * Eliminar CETPRO (borrado fisico)
      */
     public function destroy()
     {
@@ -94,8 +93,8 @@ class DatosCetproController extends Controller
         $cetpro->delete();
 
         $this->registrarActividad(
-            "Eliminó los datos del CETPRO '{$nombre}'",
-            "Eliminado"
+            "Elimino los datos del CETPRO '{$nombre}'",
+            'Eliminado'
         );
 
         return response()->json([

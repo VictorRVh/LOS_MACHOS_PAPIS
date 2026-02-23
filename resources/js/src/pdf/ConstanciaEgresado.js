@@ -3,6 +3,7 @@ import useHttpRequest from "../composables/useHttpRequest";
 import useModalToast from "../composables/useModalToast";
 
 const { store: createDocumento } = useHttpRequest("/estudiante-documento");
+const { index: getCetproData } = useHttpRequest("/cetprodata");
 const { showToast } = useModalToast();
 
 function formatearFechaActual(lugar = "PUNO") {
@@ -98,7 +99,13 @@ export async function generateConstanciaEgresado(data, codigo = "") {
       if (!res.success) console.warn("Error BD");
     });
 
-    const datosCetpro = data?.cetpro || {};
+    let datosCetpro = data?.cetpro || {};
+    if (!datosCetpro?.anio || !datosCetpro?.cetpro || !datosCetpro?.lugar) {
+      const cetproAjustes = await getCetproData();
+      if (cetproAjustes) {
+        datosCetpro = { ...cetproAjustes, ...datosCetpro };
+      }
+    }
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
 
     const mL = 25;
@@ -107,7 +114,7 @@ export async function generateConstanciaEgresado(data, codigo = "") {
     const areaW = width - mL - mR;
 
     const nombreCetpro = (datosCetpro?.cetpro || "PUNO").toUpperCase();
-    const anioOficial = datosCetpro?.anio || "Año de la unidad, la paz y el desarrollo";
+    const anioOficial = datosCetpro?.anio || "........................................................";
     const lugarCetpro = datosCetpro?.lugar || "PUNO";
 
     const nombreCompuesto = [data?.apellido_paterno, data?.apellido_materno, data?.nombre]

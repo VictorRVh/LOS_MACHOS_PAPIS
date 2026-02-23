@@ -33,7 +33,7 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
     const moduloStr = (data?.modulo || "").toUpperCase();
     const unidades = Array.isArray(data?.unidades_didacticas) ? data.unidades_didacticas : [];
 
-    // --- ENCABEZADO Y LOGOS ---
+    // --- ENCABEZADO ---
     try { doc.addImage("/img/LogoMinisterio.png", "PNG", margin, 10, 49, 12, undefined, 'FAST'); } catch (e) {}
     try { doc.addImage("/img/CetproLOGOO.png", "PNG", (pageW / 2) - 10, 8, 18, 20, undefined, 'FAST'); } catch (e) {}
 
@@ -44,8 +44,7 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
     doc.text("FOTO", rightEdge - 12.5, 25, { align: "center" });
 
     let y = 48;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11);
     doc.text(`CENTRO DE EDUCACIÓN TÉCNICO-PRODUCTIVA (${tipoGestion})`, pageW / 2, y, { align: "center" });
     y += 6;
     doc.text(`"${nombreCetpro}"`, pageW / 2, y, { align: "center" });
@@ -53,7 +52,7 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
     doc.setFontSize(13);
     doc.text("CERTIFICADO DE ESTUDIOS", pageW / 2, y, { align: "center" });
 
-    // --- CUERPO ---
+    // --- TEXTO ---
     y += 12;
     doc.setFont("helvetica", "normal"); doc.setFontSize(11);
     doc.text("El CETPRO ", margin, y);
@@ -69,30 +68,21 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
     y += 7;
     doc.setFont("helvetica", "normal");
     doc.text("ha cursado las unidades didácticas, que se indican en el programa de estudios:", margin, y);
-
     y += 8;
     doc.setFont("helvetica", "bold");
     doc.text(especialidad, margin, y);
-
     y += 10;
     doc.setFont("helvetica", "normal");
     doc.text("Los resultados finales de las evaluaciones fueron las siguientes:", margin, y);
 
-    // --- TABLA DINÁMICA CON ROTACIÓN ---
+    // --- TABLA DINÁMICA ---
     const tableBody = unidades.map((u, index) => {
       const row = [];
       if (index === 0) {
         row.push({ 
           content: moduloStr, 
           rowSpan: unidades.length, 
-          styles: { 
-            halign: 'center', 
-            valign: 'middle', 
-            fontStyle: 'bold', 
-            fontSize: 8,
-            // Quitamos el padding lateral para que la rotación no se corte
-            cellPadding: 0
-          } 
+          styles: { halign: 'center', valign: 'middle' } 
         });
       }
       row.push(u?.nombre_unidad || "");
@@ -115,16 +105,16 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
         fontSize: 7,
         lineColor: [0, 0, 0],
         lineWidth: 0.15,
-        textColor: [0, 0, 0],
+        textColor: [0, 0, 0], // Asegura texto negro en toda la tabla
       },
       headStyles: {
         fillColor: [225, 225, 225],
+        textColor: [0, 0, 0], // TEXTO NEGRO PARA CABECERA
         fontStyle: "bold",
         halign: "center",
-        valign: "middle",
       },
       columnStyles: {
-        0: { cellWidth: 15 }, // Columna más estrecha para texto vertical
+        0: { cellWidth: 15 }, 
         1: { cellWidth: 57 },
         2: { cellWidth: 18, halign: "center" },
         3: { cellWidth: 18, halign: "center" },
@@ -132,30 +122,30 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
         5: { cellWidth: 25, halign: "center" },
         6: { cellWidth: 25 },
       },
-      // LÓGICA PARA ROTAR EL TEXTO 90 GRADOS
       didDrawCell: (data) => {
-        if (data.section === 'body' && data.column.index === 0 && data.cell.raw && data.cell.raw.rowSpan) {
-          const cell = data.cell;
-          const doc = data.doc;
-          const text = cell.text.join(' ');
-          
-          // Borrar el texto que autotable dibuja por defecto (para redibujarlo rotado)
-          doc.setFillColor(255, 255, 255);
-          doc.rect(cell.x + 0.2, cell.y + 0.2, cell.width - 0.4, cell.height - 0.4, 'F');
-          
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(8);
-          
-          // Calcular centro de la celda combinada
-          const centerX = cell.x + (cell.width / 2);
-          const centerY = cell.y + (cell.height / 2);
-          
-          // Rotar texto 90 grados
-          doc.text(text, centerX, centerY, {
-            angle: 90,
-            align: 'center',
-            baseline: 'middle'
-          });
+        // CORRECCIÓN DE POSICIÓN DEL MÓDULO
+        if (data.section === 'body' && data.column.index === 0) {
+          if (data.cell.raw && data.cell.raw.rowSpan) {
+            const cell = data.cell;
+            
+            // Limpiar la celda
+            doc.setFillColor(255, 255, 255);
+            doc.rect(cell.x + 0.1, cell.y + 0.1, cell.width - 0.2, cell.height - 0.2, 'F');
+            
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(7.5);
+            doc.setTextColor(0, 0, 0);
+            
+            // Centro exacto de la celda combinada
+            const centerX = cell.x + (cell.width / 2);
+            const centerY = cell.y + (cell.height / 2);
+            
+            doc.text(moduloStr, centerX, centerY, {
+              angle: 90,
+              align: 'center',
+              baseline: 'middle'
+            });
+          }
         }
       }
     });

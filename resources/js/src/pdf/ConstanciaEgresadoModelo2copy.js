@@ -58,7 +58,7 @@ export async function generateConstanciaEgresado(data) {
     // Usamos Times para que se vea como en tu referencia (más "oficial")
     doc.setFont("times", "bold"); 
     doc.setFontSize(22);
-    doc.text('"CETPRO ILAVE"', center, textCenterY + 8, { align: "center" });
+    doc.text('"CETPRO PUNO"', center, textCenterY + 8, { align: "center" });
 
     // C.3 Datos Técnicos (Resolución y Código)
     doc.setFont("helvetica", "bold"); // Volvemos a Helvetica para legibilidad técnica
@@ -169,7 +169,7 @@ export async function generateConstanciaEgresado(data) {
     // FECHA
     const hoy = new Date();
     const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-    const fechaTexto = `ILAVE, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`; // Fecha dinámica real
+    const fechaTexto = `PUNO, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`; // Fecha dinámica real
 
     cursorY += 35; // Espacio generoso antes de la fecha
     doc.setFont("helvetica", "bold");

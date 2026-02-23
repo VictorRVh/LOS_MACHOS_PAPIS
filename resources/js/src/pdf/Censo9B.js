@@ -12,7 +12,7 @@ export function generateCenso9B() {
   };
 
   const d = {
-    codMod: "0240069", codLoc: "441744", cetpro: "CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA ILAVE", dist: "ILAVE", loc: "ILAVE",
+    codMod: "0240069", codLoc: "441744", cetpro: "CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA PUNO", dist: "PUNO", loc: "PUNO",
     t101: [["TOTAL", "418", "875", "215", "480", "0", "0", "203", "395", "0", "0"], ["Aprobados", "395", "849", "200", "469", "0", "0", "195", "380", "0", "0"], ["Desaprobados", "1", "0", "1", "0", "0", "0", "0", "0", "0", "0"], ["Retirados", "22", "26", "14", "11", "0", "0", "8", "15", "0", "0"]],
     t102: [["TOTAL", "22", "26", "14", "11", "0", "0", "8", "15", "0", "0"]],
     t104: [["TOTAL", "395", "849", "200", "469", "0", "0", "195", "380", "0", "0"], ["Con Certificación", "170", "632", "97", "351", "0", "0", "73", "281", "0", "0"], ["Sin Certificación", "225", "217", "103", "118", "0", "0", "122", "99", "0", "0"]],
@@ -21,8 +21,8 @@ export function generateCenso9B() {
     t106: [["TOTAL", "377", "849", ...Array(26).fill("0"), "377", "849"], ["ASISTENCIA EN COCINA", "63", "122", ...Array(26).fill("0"), "63", "122"], ["MANUALIDADES", "0", "100", ...Array(26).fill("0"), "0", "100"], ["ELECTRICIDAD", "55", "2", ...Array(26).fill("0"), "55", "2"], ["ELECTRÓNICA", "52", "6", ...Array(26).fill("0"), "52", "6"], ["CONSTRUCCIONES METÁLICAS", "20", "0", ...Array(26).fill("0"), "20", "0"], ["MECÁNICA AUTOMOTRIZ", "45", "2", ...Array(26).fill("0"), "45", "2"], ["ASISTENCIA DE PANADERÍA", "35", "168", ...Array(26).fill("0"), "35", "168"], ["CONFECCIÓN TEXTIL", "25", "191", ...Array(26).fill("0"), "25", "191"], ["CARPINTERÍA", "54", "12", ...Array(26).fill("0"), "54", "12"], ["OTROS", "18", "4", ...Array(26).fill("0"), "18", "4"], ["PELUQUERÍA", "10", "177", ...Array(26).fill("0"), "10", "177"], ["TEJIDO A MÁQUINA", "0", "65", ...Array(26).fill("0"), "0", "65"]],
     t107: [["TOTAL", "0", "0", ...Array(28).fill("0")]],
     programas: [["01", "CTE0111458", "COSMETOLOGÍA", "400", "0", "1", "0", "0"], ["02", "CTE4131303", "LOGÍSTICA Y ALMACENES", "400", "0", "1", "1", "1"], ["03", "CTE6111399", "OPERACIÓN DE COMPUTADORAS", "400", "0", "1", "1", "1"], ["04", "CTE9X24014", "ESTILISMO", "528", "21", "0", "0", "0"]],
-    sedesAT: [["01", "AT01", "ILAVE CERCADO", "", "X", "", "210101", "ILAVE", "ILAVE", "ILAVE", "JIRON CONDE DE LEMUS 138"], ["02", "AT02", "SALCEDO", "", "X", "", "210101", "ILAVE", "ILAVE", "ILAVE", "S/N"], ["03", "AT03", "JALLUHUAYA", "", "X", "", "210101", "ILAVE", "ILAVE", "ILAVE", "S/N"]],
-    sedesTE: [["01", "TE01", "ILAVE CERCADO", "", "X", "", "210101", "ILAVE", "ILAVE", "ILAVE", "JIRON CONDE DE LEMUS 138"]],
+    sedesAT: [["01", "AT01", "PUNO CERCADO", "", "X", "", "210101", "PUNO", "PUNO", "PUNO", "JIRON CONDE DE LEMUS 138"], ["02", "AT02", "SALCEDO", "", "X", "", "210101", "PUNO", "PUNO", "PUNO", "S/N"], ["03", "AT03", "JALLUHUAYA", "", "X", "", "210101", "PUNO", "PUNO", "PUNO", "S/N"]],
+    sedesTE: [["01", "TE01", "PUNO CERCADO", "", "X", "", "210101", "PUNO", "PUNO", "PUNO", "JIRON CONDE DE LEMUS 138"]],
     matriculaEdad: [["30-34", "21", "34", "7", "21", "14", "13"], ["19", "11", "15", "7", "9", "4", "6"], ["50-54", "20", "40", "13", "28", "7", "12"], ["23", "10", "32", "7", "17", "3", "15"], ["TOTAL", "239", "488", "137", "300", "102", "188"]],
     personal: [["01", "CALDERON MUNOZ ALENA MONICA", "01258974", "01", "50 Mujer", "0100", "307", "01", "01", "01", "05", "02", "25", "25", "25", "06", "01", "01", "03", "40"], ["02", "TAPIA COAQUIRA JOSE", "01308555", "01", "56 Hombr", "0100", "", "01", "01", "01", "02", "03", "29", "01", "31", "31", "16", "08", "13", "", "01", "40"], ["03", "COA RIVAS IMELDA TERESA", "02144514", "01", "63 Mujer", "0100", "3342", "01", "01", "01", "02", "02", "", "02", "33", "33", "33", "04", "13", "", "03", "40"]]
   };
@@ -99,7 +99,7 @@ export function generateCenso9B() {
   autoTable(doc, { startY: p5Y + 12, head: [[ "N°", "Apellidos y Nombres", "DNI/CE", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313", "314", "315", "316", "317", "318", "319", "320" ]], body: d.personal, theme: 'grid', headStyles: { ...styles.head, fontSize: 5, padding: 0 }, bodyStyles: { ...styles.body, fontSize: 5, padding: 0.5 }, columnStyles: { 1: { cellWidth: 40, halign: 'left' } }, margin: { left: marginX, right: 15 } });
   let finalY5 = doc.internal.pageSize.height - 40; doc.setDrawColor(0); doc.line(marginX, finalY5, marginX + width, finalY5); doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.text("DATOS DEL DIRECTOR/RESPONSABLE DEL LLENADO DE LA CÉDULA", 105, finalY5 - 3, { align: "center" });
   doc.text("NOMBRES Y APELLIDOS", marginX, finalY5 + 5); doc.text("CARGO", marginX + 60, finalY5 + 5); doc.text("CORREO ELECTRÓNICO", marginX + 110, finalY5 + 5); doc.text("TELÉFONO", marginX + 160, finalY5 + 5);
-  doc.line(marginX, finalY5 + 7, marginX + width, finalY5 + 7); doc.setFont("helvetica", "normal"); doc.text("JOSE TAPIA COAQUIRA", marginX, finalY5 + 12); doc.text("COORDINADOR(A)", marginX + 60, finalY5 + 12); doc.text("josetapia@cetproILAVE.edu.pe", marginX + 110, finalY5 + 12); doc.text("961522899", marginX + 160, finalY5 + 12); doc.line(marginX, finalY5 + 15, marginX + width, finalY5 + 15);
+  doc.line(marginX, finalY5 + 7, marginX + width, finalY5 + 7); doc.setFont("helvetica", "normal"); doc.text("JOSE TAPIA COAQUIRA", marginX, finalY5 + 12); doc.text("COORDINADOR(A)", marginX + 60, finalY5 + 12); doc.text("josetapia@cetproPUNO.edu.pe", marginX + 110, finalY5 + 12); doc.text("961522899", marginX + 160, finalY5 + 12); doc.line(marginX, finalY5 + 15, marginX + width, finalY5 + 15);
 
   const pdfBlob = doc.output("blob");
   window.open(URL.createObjectURL(pdfBlob), "_blank");

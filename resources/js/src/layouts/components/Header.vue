@@ -83,7 +83,7 @@ const externalLinks = ref([
     {
         id: 'website',
         tooltip: 'Página Web Oficial',
-        href: 'https://cetproILAVE.edu.pe/',
+        href: 'https://cetproPUNO.edu.pe/',
         iconSrc: '/img/navegador.png',
         show: true
     },
@@ -144,7 +144,7 @@ const onLogout = async () => {
                     <Bars3Icon class="w-6 h-6" />
                 </button>
                 <h1 class="text-xl font-bold text-cetpro dark:text-gray-100 tracking-wide">
-                    CETPRO - ILAVE
+                    CETPRO - PUNO
                 </h1>
             </div>
             <div class="flex items-center gap-4">

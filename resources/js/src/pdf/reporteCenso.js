@@ -65,8 +65,8 @@ export async function exportarCensoEducativo() {
     const info = [
         ["1. CÓDIGO MODULAR:", "0240069"],
         ["2. CÓDIGO DE LOCAL EDUCATIVO:", "441744"],
-        ["3. NOMBRE DEL SERVICIO EDUCATIVO:", "CETPRO ILAVE"],
-        ["4. DISTRITO:", "ILAVE"],
+        ["3. NOMBRE DEL SERVICIO EDUCATIVO:", "CETPRO PUNO"],
+        ["4. DISTRITO:", "PUNO"],
     ];
 
     let rowIndex = 5;

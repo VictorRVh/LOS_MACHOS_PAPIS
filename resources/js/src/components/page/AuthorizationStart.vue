@@ -41,7 +41,7 @@ const isAuthorized = computed(() => {
 
             <!-- Subtítulo institucional -->
             <h2 class="text-xl md:text-2xl font-semibold text-cetpro dark:text-cetpro-dark mb-8">
-                CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA – ILAVE
+                CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA – PUNO
             </h2>
 
             <!-- Línea decorativa -->

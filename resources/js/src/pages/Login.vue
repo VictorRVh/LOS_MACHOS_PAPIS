@@ -98,7 +98,7 @@ const onPasswordChanged = async (newPassword) => {
             </div>
             <div class="relative z-10">
                 <p class="text-slate-300 max-w-sm opacity-0 animate-fade-in-up delay-300">
-                    Plataforma oficial del Centro de Educación Técnico-Productiva de ILAVE.
+                    Plataforma oficial del Centro de Educación Técnico-Productiva de PUNO.
                 </p>
             </div>
         </div>
@@ -177,7 +177,7 @@ const onPasswordChanged = async (newPassword) => {
                 </form>
 
                 <footer class="w-full text-center text-xs text-gray-400 pt-12 mt-auto opacity-0 animate-fade-in delay-300">
-                    © 2025 Todos los derechos reservados. CETPRO ILAVE.
+                    © 2025 Todos los derechos reservados. CETPRO PUNO.
                 </footer>
             </div>
         </div>

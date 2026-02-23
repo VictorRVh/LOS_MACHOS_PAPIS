@@ -37,7 +37,7 @@ onMounted(async () => {
         if (data.estado) {
             certificadoInfo.value = {
                 estudiante: data?.data?.estudiante, // Reemplazar con data.estudiante.nombre
-                emitidoPor: "Dirección Académica CETPRO ILAVE",   // Reemplazar con data.emisor
+                emitidoPor: "Dirección Académica CETPRO PUNO",   // Reemplazar con data.emisor
                 fechaEmision: data?.data?.fecha_emision,              // Reemplazar con data.fecha
                 documento: "Constancia de Estudios",
                 especialidad: data?.data?.especialidad,
@@ -69,7 +69,7 @@ onMounted(async () => {
                     <div class="relative z-10">
                         <header
                             class="flex items-center justify-between border-b bg-white/50 p-6 dark:border-gray-700 dark:bg-gray-800/50">
-                            <img src="/img/cetprologoHorizontal.png" alt="Logo CETPRO ILAVE" class="h-12 sm:h-16">
+                            <img src="/img/cetprologoHorizontal.png" alt="Logo CETPRO PUNO" class="h-12 sm:h-16">
                             <img src="/img/LogoMinisterio.png" alt="Logo Ministerio de Educación" class="h-12 sm:h-16">
                         </header>
 
@@ -184,7 +184,7 @@ onMounted(async () => {
             </Transition>
         </div>
         <div class="absolute bottom-4 left-0 w-full text-center text-xs text-gray-400 dark:text-gray-500">
-            © {{ currentYear }} CETPRO ILAVE. Plataforma Oficial de Verificación.
+            © {{ currentYear }} CETPRO PUNO. Plataforma Oficial de Verificación.
         </div>
     </div>
 </template>

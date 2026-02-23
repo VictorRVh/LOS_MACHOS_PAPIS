@@ -31,9 +31,9 @@ export function generatePdfMatricula(data) {
     body: [
       [
         { content: "Nombre del CETPRO", styles: sL },
-        { content: "CETPRO ILAVE", styles: sD },
+        { content: "CETPRO PUNO", styles: sD },
         { content: "DRE/GRE", styles: sL },
-        { content: "ILAVE", styles: sD },
+        { content: "PUNO", styles: sD },
       ],
       [
         { content: "Código modular", styles: sL },
@@ -43,19 +43,19 @@ export function generatePdfMatricula(data) {
       ],
       [
         { content: "Departamento", styles: sL },
-        { content: "ILAVE", styles: sD },
+        { content: "PUNO", styles: sD },
         { content: "Tipo de Gestión", styles: sL },
         { content: "Pública", styles: sD },
       ],
         [
         { content: "Provincia", styles: sL },
-        { content: "ILAVE", styles: sD },
+        { content: "PUNO", styles: sD },
         { content: "Periodo electivo:", styles: sL },
         { content: data?.ficha?.periodo || "—", styles: sD },
       ],
       [
         { content: "Distrito", styles: sL },
-        { content: "ILAVE", styles: sD },
+        { content: "PUNO", styles: sD },
         { content: "Periodo académico:", styles: sL },
         { content: data?.ficha?.periodo || "—", styles: sD },
       ],

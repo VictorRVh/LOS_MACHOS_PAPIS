@@ -50,7 +50,7 @@ const checkVisibility = (link) => {
             :class="layoutStore.isSidebarCollapsed ? 'w-25' : 'w-38'">
             <div class="h-20 flex items-center justify-between border-b border-cetpro-white/50 shrink-0 px-4 gap-2">
                 <RouterLink :to="{ name: 'start' }" v-if="!layoutStore.isSidebarCollapsed">
-                    <img src="/img/insignia.png" alt="CETPRO ILAVE" class="h-12 shrink-0">
+                    <img src="/img/insignia.png" alt="CETPRO PUNO" class="h-12 shrink-0">
                 </RouterLink>
                 <button @click="layoutStore.toggleSidebar"
                     class="pl-2 rounded-full text-cetpro-text/60 hover:bg-cetpro-light hover:text-white"
@@ -92,7 +92,7 @@ const checkVisibility = (link) => {
             :class="layoutStore.isSidebarOpenMobile ? 'translate-x-0' : '-translate-x-full'">
             <div class="h-20 flex items-center justify-between border-b border-cetpro-dark/50 px-4">
                 <RouterLink :to="{ name: 'start' }">
-                    <img src="/img/insignia.png" alt="CETPRO ILAVE" class="h-12">
+                    <img src="/img/insignia.png" alt="CETPRO PUNO" class="h-12">
                 </RouterLink>
                 <button @click="layoutStore.toggleSidebarMobile"
                     class="p-2 text-cetpro-text/80 rounded-full hover:bg-cetpro-light hover:text-white">

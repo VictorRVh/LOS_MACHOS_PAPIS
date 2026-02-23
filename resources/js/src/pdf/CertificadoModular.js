@@ -27,7 +27,7 @@ function obtenerFechaEmision() {
     "enero", "febrero", "marzo", "abril", "mayo", "junio",
     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
   ];
-  return `ILAVE, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+  return `PUNO, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
 }
 
 export async function generateCertificadoModular(data, codigo) {
@@ -123,7 +123,7 @@ export async function generateCertificadoModular(data, codigo) {
   doc.setFontSize(16);
   doc.text("CENTRO DE EDUCACIÓN TÉCNICO-PRODUCTIVA PÚBLICO", W / 2, textY, { align: "center" });
   doc.setFontSize(22);
-  doc.text('"CETPRO ILAVE"', W / 2, textY + 10, { align: "center" });
+  doc.text('"CETPRO PUNO"', W / 2, textY + 10, { align: "center" });
 
   let curY = 75;
   doc.setFontSize(30);
@@ -309,7 +309,7 @@ export async function generateCertificadoModular(data, codigo) {
   const contentY = finalY + headerHeight;
   doc.rect(mL, contentY, boxWidth, contentHeight);
   doc.setFont("times", "normal");
-  doc.text("• CENTRO DE EDUCACION TECNICO PRODUCTIVA ILAVE", mL + 5, contentY + 6);
+  doc.text("• CENTRO DE EDUCACION TECNICO PRODUCTIVA PUNO", mL + 5, contentY + 6);
 
   // 3. COD (FUERA DEL CUADRO, ABAJO A LA IZQUIERDA)
   const footerY = contentY + contentHeight + 5; // 5mm de separación

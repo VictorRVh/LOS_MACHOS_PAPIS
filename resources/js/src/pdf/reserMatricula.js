@@ -20,7 +20,7 @@ export function generatePdfReservaMatricula(data) {
     //        1) TABLA DE 2 COLUMNAS
     // ============================================
     const tabla2 = [
-        ["Nombre de la institución:", "CETPRO ILAVE"],
+        ["Nombre de la institución:", "CETPRO PUNO"],
 
     ];
 

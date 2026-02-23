@@ -1,234 +1,217 @@
-import jsPDF from "jspdf";
+﻿import jsPDF from "jspdf";
 import useHttpRequest from "../composables/useHttpRequest";
 import useModalToast from "../composables/useModalToast";
 
 const { store: createDocumento } = useHttpRequest("/estudiante-documento");
 const { showToast } = useModalToast();
 
-export async function generateConstanciaEgresado(data) {
-  // 1. Backend (Sin cambios)
+function formatearFechaActual(lugar = "PUNO") {
+  const meses = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+  ];
+  const hoy = new Date();
+  return `${lugar}, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+}
+
+function drawJustifiedRichLine(doc, words, x, y, maxWidth, justify = true) {
+  const lineWordsWidth = words.reduce((sum, w) => {
+    doc.setFont("helvetica", w.style);
+    return sum + doc.getTextWidth(w.text);
+  }, 0);
+
+  const gaps = Math.max(words.length - 1, 0);
+  doc.setFont("helvetica", "normal");
+  const baseSpace = doc.getTextWidth(" ");
+  const spaceWidth = justify && gaps > 0 ? (maxWidth - lineWordsWidth) / gaps : baseSpace;
+
+  let xCursor = x;
+  words.forEach((w, idx) => {
+    doc.setFont("helvetica", w.style);
+    doc.text(w.text, xCursor, y);
+    xCursor += doc.getTextWidth(w.text);
+    if (idx < words.length - 1) xCursor += spaceWidth;
+  });
+}
+
+function drawJustifiedRichText(doc, segments, x, yStart, maxWidth, lineHeight = 7) {
+  const words = [];
+  segments.forEach((seg) => {
+    const parts = String(seg.text || "").split(/\s+/).filter(Boolean);
+    parts.forEach((p) => words.push({ text: p, style: seg.style || "normal" }));
+  });
+
+  const lines = [];
+  let current = [];
+  const measureLine = (arr) => {
+    if (!arr.length) return 0;
+    let width = 0;
+    doc.setFont("helvetica", "normal");
+    const space = doc.getTextWidth(" ");
+    arr.forEach((w, i) => {
+      doc.setFont("helvetica", w.style);
+      width += doc.getTextWidth(w.text);
+      if (i < arr.length - 1) width += space;
+    });
+    return width;
+  };
+
+  words.forEach((w) => {
+    const tentative = [...current, w];
+    if (measureLine(tentative) <= maxWidth || current.length === 0) {
+      current = tentative;
+    } else {
+      lines.push(current);
+      current = [w];
+    }
+  });
+  if (current.length) lines.push(current);
+
+  let y = yStart;
+  lines.forEach((line, idx) => {
+    const isLast = idx === lines.length - 1;
+    drawJustifiedRichLine(doc, line, x, y, maxWidth, !isLast);
+    y += lineHeight;
+  });
+  return y;
+}
+
+export async function generateConstanciaEgresado(data, codigo = "") {
   try {
     const payload = {
       id_matricula: data.id_matricula,
       tipo_documento: 4,
       fecha_emision: new Date().toISOString().slice(0, 10),
+      codigo: codigo || null,
     };
-    createDocumento(payload).then((res) => { if(!res.success) console.warn("Error BD"); });
-  } catch (e) { console.error(e); }
+    createDocumento(payload).then((res) => {
+      if (!res.success) console.warn("Error BD");
+    });
 
-  // 2. Generación PDF
-  try {
-    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const datosCetpro = data?.cetpro || {};
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
 
-    // --- GEOMETRÍA EXACTA ---
-    const mL = 25; // Margen Izquierdo
-    const mR = 25; // Margen Derecho
+    const mL = 25;
+    const mR = 25;
     const width = 210;
-    const maxLineWidth = width - mL - mR;
-    
-    // Configuración de fuentes
-    const fontNormal = "helvetica";
-    const fontBold = "helvetica";
-    const fontSizeBody = 11;
-    const lineHeight = 6; // Altura entre líneas
+    const areaW = width - mL - mR;
 
-    // --- 1. CABECERA ALINEADA ---
-    
-    // A) Cuadro N° (Arriba a la izquierda)
-    // Coordenada Y base: 15
+    const nombreCetpro = (datosCetpro?.cetpro || "PUNO").toUpperCase();
+    const anioOficial = datosCetpro?.anio || "Año de la unidad, la paz y el desarrollo";
+    const lugarCetpro = datosCetpro?.lugar || "PUNO";
+
+    const nombreCompuesto = [data?.apellido_paterno, data?.apellido_materno, data?.nombre]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+
+    const nombreAlterno = [data?.apellidos, data?.nombres]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+
+    const nombre = (
+      data?.apellidos_nombres ||
+      data?.estudiante ||
+      nombreCompuesto ||
+      nombreAlterno ||
+      "...................................................."
+    ).toUpperCase();
+
+    const dni = data?.nro_documento || "....................";
+    const programa = (data?.especialidad || "....................................................").toUpperCase();
+    const cicloRaw = String(data?.ciclo || data?.ciclo_formativo || "AUXILIAR TÉCNICO");
+    const cicloNormalizado = cicloRaw.trim().toUpperCase();
+    const ciclo = cicloNormalizado === "TECNICO" || cicloNormalizado === "TÉCNICO"
+      ? "AUXILIAR TÉCNICO"
+      : cicloNormalizado;
+
     doc.setLineWidth(0.3);
-    doc.setDrawColor(0);
-    doc.rect(mL, 15, 45, 8); // Rectángulo
-    
-    doc.setFont(fontBold, "bold");
+    doc.rect(mL, 15, 45, 8);
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.text("N.° ........................", mL + 2, 20);
+    const codigoConstancia = codigo?.trim() || "........................";
+    doc.text(`N.° ${codigoConstancia}`, mL + 2, 20.5);
 
-    // B) Insignia CETPRO (Arriba a la derecha)
-    // Debe alinearse visualmente con el top del cuadro N° (Y=15)
-    // Ancho calculado para mantener proporción
-    const logoCetpro = "/img/CetproLOGOO.png";
     try {
-        // x = anchoTotal - margenDerecho - anchoImagen
-        doc.addImage(logoCetpro, "PNG", width - mR - 22, 14, 19, 22); 
+      doc.addImage("/img/CetproLOGOO.png", "PNG", width - mR - 22, 14, 22, 22, undefined, "FAST");
     } catch (e) {}
 
-    // C) Logo Ministerio (Debajo del N°)
-    // Y = 15 (rect) + 8 (alto rect) + 2 (espacio) = 25
-    const logoMin = "/img/LogoMinisterio.png";
     try {
-        // Ancho 60, Alto 15 (proporción rectangular)
-        doc.addImage(logoMin, "PNG", mL, 25, 48, 11);
+      doc.addImage("/img/LogoMinisterio.png", "PNG", mL, 26, 48, 11, undefined, "FAST");
     } catch (e) {}
 
-    // D) Línea de Año (Equilibrada)
-    // Y calculado para que esté debajo de los logos
-    const yAnio = 50;
-    doc.setFont(fontBold, "bold");
-    doc.setFontSize(10);
-    doc.text('"Año', mL, yAnio); // Inicio en margen izquierdo
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.text(`"${anioOficial}"`, width / 2, 52, { align: "center" });
 
-    // Cálculo de puntos suspensivos EXACTOS
-    doc.setFont(fontNormal, "normal");
-    const startTextWidth = doc.getStringUnitWidth('"Año ') * 10 / doc.internal.scaleFactor;
-    const endCharWidth = doc.getStringUnitWidth('"') * 10 / doc.internal.scaleFactor;
-    
-    // Dibujamos una línea de puntos real para controlar el tamaño del punto
-    // Desde donde termina "Año " hasta antes de las comillas finales
-    const startDots = mL + startTextWidth;
-    const endDots = width - mR - endCharWidth;
-    
-    // Texto de puntos manual para que sean pequeños y densos
-    doc.setFontSize(8); // Puntos pequeños
-    let dots = "";
-    while (doc.getStringUnitWidth(dots) * 8 / doc.internal.scaleFactor < (endDots - startDots)) {
-        dots += ".";
-    }
-    doc.text(dots, startDots, yAnio);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("CONSTANCIA DE EGRESADO", width / 2, 75, { align: "center" });
 
-    // Comilla de cierre alineada al margen derecho
-    doc.setFontSize(10);
-    doc.text('"', width - mR, yAnio, { align: "right" });
+    doc.setFontSize(11);
+    doc.text("LA DIRECCIÓN DEL CENTRO DE EDUCACIÓN TÉCNICO-PRODUCTIVA", width / 2, 88, { align: "center" });
 
+    doc.setFontSize(16);
+    doc.text(`"${nombreCetpro}"`, width / 2, 96, { align: "center" });
 
-    // --- 2. TÍTULOS ---
-    doc.setFont(fontBold, "bold");
-    doc.setFontSize(23); // Grande
-    doc.text("CONSTANCIA DE EGRESADO", width / 2, 72, { align: "center" });
-
-    doc.setFontSize(12);
-    doc.text("LA DIRECCIÓN DEL CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA", width / 2, 85, { align: "center" });
-    
-    doc.setFontSize(18);
-    doc.text("CETPRO PUNO", width / 2, 95, { align: "center" });
-
-    // --- 3. CUERPO JUSTIFICADO CON NEGRITAS ---
     let cursorY = 115;
-    
-    // Etiqueta
     doc.setFontSize(12);
-    doc.setFont(fontBold, "bold");
+    doc.setFont("helvetica", "bold");
     doc.text("HACE CONSTAR QUE:", mL, cursorY);
-    cursorY += 8;
 
-    // DEFINICIÓN DE CONTENIDO
-    const nombre = data?.estudiante?.toUpperCase() || "MARIA COLLANQUIE QUISPE";
-    const dni = data?.nro_documento || "71736658";
-    const programa = data?.especialidad?.toUpperCase() || "PELUQUERIA";
-    const ciclo = data?.ciclo?.toUpperCase() || "MÓDULO OCUPACIONAL";
+    cursorY += 10;
+    doc.setFontSize(11);
 
-    // Array de objetos de texto
-    const textData = [
-      { text: nombre, bold: true },
-      { text: " , identificado(a) con DNI N.° ", bold: false }, // Espacio al inicio importante
-      { text: dni, bold: true },
-      { text: " , ha aprobado satisfactoriamente la totalidad de las unidades didácticas y experiencias formativas en situaciones reales de trabajo, de acuerdo con el plan de estudio del programa de estudios de ", bold: false },
-      { text: programa, bold: true },
-      { text: " , correspondiente al ciclo formativo de ", bold: false },
-      { text: `${ciclo}.`, bold: true }
+    // Texto principal justificado (solo datos API en negrita)
+    const parrafo1 = [
+      { text: "Don (ña)", style: "normal" },
+      { text: nombre + ",", style: "bold" },
+      { text: "identificado (a) con DNI N.°", style: "normal" },
+      { text: String(dni) + ",", style: "bold" },
+      { text: "ha aprobado satisfactoriamente la totalidad de las unidades didácticas y experiencias formativas en situaciones reales de trabajo, de acuerdo con el plan de estudio del programa de estudio de", style: "normal" },
+      { text: programa + ",", style: "bold" },
     ];
+    cursorY = drawJustifiedRichText(doc, parrafo1, mL, cursorY, areaW, 7.2);
 
-    // --- ALGORITMO DE JUSTIFICACIÓN HÍBRIDO ---
-    // 1. Descomponer todo en palabras individuales con sus estilos
-    let allWords = [];
-    textData.forEach(chunk => {
-        const words = chunk.text.split(" ");
-        words.forEach(w => {
-            if(w.length > 0) allWords.push({ text: w, bold: chunk.bold });
-        });
-    });
+    const parrafo2 = [
+      { text: "correspondiente al ciclo formativo de", style: "normal" },
+      { text: ciclo + ".", style: "bold" },
+    ];
+    cursorY = drawJustifiedRichText(doc, parrafo2, mL, cursorY, areaW, 7.2);
 
-    let lineBuffer = [];
-    let currentLineWidth = 0;
-    const spaceWidth = doc.getStringUnitWidth(" ") * fontSizeBody / doc.internal.scaleFactor;
+    cursorY += 4;
+    const textoLegal =
+      "Se extiende la presente constancia conforme a lo precisado en el marco legal vigente establecido para los Centros de Educación Técnico Productiva.";
+    doc.setFont("helvetica", "normal");
+    doc.text(textoLegal, mL, cursorY, { align: "justify", maxWidth: areaW });
 
-    allWords.forEach((wordObj, index) => {
-        // Medir palabra (cambiando fuente temporalmente)
-        doc.setFont(wordObj.bold ? fontBold : fontNormal, wordObj.bold ? "bold" : "normal");
-        doc.setFontSize(fontSizeBody);
-        const wordWidth = doc.getStringUnitWidth(wordObj.text) * fontSizeBody / doc.internal.scaleFactor;
-
-        // Cabe en la línea?
-        if (currentLineWidth + wordWidth + spaceWidth <= maxLineWidth) {
-            lineBuffer.push({ ...wordObj, width: wordWidth });
-            currentLineWidth += wordWidth + spaceWidth;
-        } else {
-            // LÍNEA LLENA -> IMPRIMIR JUSTIFICADA
-            printJustifiedLine(doc, lineBuffer, mL, cursorY, maxLineWidth, width);
-            cursorY += lineHeight;
-            
-            // Iniciar nueva línea
-            lineBuffer = [{ ...wordObj, width: wordWidth }];
-            currentLineWidth = wordWidth + spaceWidth;
-        }
-    });
-
-    // Imprimir última línea (Izquierda, NO justificada)
-    if (lineBuffer.length > 0) {
-        let x = mL;
-        lineBuffer.forEach(w => {
-            doc.setFont(w.bold ? fontBold : fontNormal, w.bold ? "bold" : "normal");
-            doc.text(w.text, x, cursorY);
-            x += w.width + spaceWidth;
-        });
-        cursorY += lineHeight * 2; // Espacio tras el párrafo
-    }
-
-
-    // --- 4. TEXTO LEGAL ---
-    doc.setFont(fontBold, "bold"); // Según tu imagen, parece tener peso
+    cursorY += 30;
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    const legalText = "Se extiende la presente constancia conforme a lo precisado en el marco legal vigente establecido para los Centros de Educación Técnico Productiva.";
-    const splitLegal = doc.splitTextToSize(legalText, maxLineWidth);
-    doc.text(splitLegal, mL, cursorY); // Este puede ir normal a la izquierda
+    doc.text(`Lugar y fecha: ${formatearFechaActual(lugarCetpro)}`, width - mR, cursorY, { align: "right" });
 
+    const signY = cursorY + 35;
+    doc.setLineWidth(0.5);
+    doc.line(width / 2 - 40, signY, width / 2 + 40, signY);
 
-    // --- 5. FECHA (ALINEADA A LA DERECHA) ---
-    const hoy = new Date();
-    const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-    // Forzamos 2026 como en tu imagen o usamos dinámico
-    const anio = 2026; // hoy.getFullYear(); 
-    const fechaTexto = `PUNO, 3 de enero de ${anio}`; // Ojo: Hardcodeé el día para igualar tu imagen, cambia a dinámico si quieres.
+    doc.text("DIRECTOR(A)", width / 2, signY + 6, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text("(Firma, post firma y sello)", width / 2, signY + 11, { align: "center" });
 
-    cursorY += 40;
-    doc.setFont(fontBold, "bold");
-    doc.setFontSize(10);
-    doc.text(`Lugar y fecha: ${fechaTexto}`, width - mR, cursorY, { align: "right" });
-
-    // Abrir PDF
     window.open(URL.createObjectURL(doc.output("blob")), "_blank");
-
   } catch (error) {
-    console.error(error);
     showToast(`Error: ${error.message}`, "error");
   }
-}
-
-// --- FUNCIÓN DE IMPRESIÓN JUSTIFICADA ---
-function printJustifiedLine(doc, words, xStart, y, maxWidth, pageWidth) {
-    if (words.length === 0) return;
-    
-    // 1. Calcular ancho real del contenido (solo palabras)
-    const contentWidth = words.reduce((acc, w) => acc + w.width, 0);
-    
-    // 2. Calcular espacio disponible para repartir
-    const availableSpace = maxWidth - contentWidth;
-    
-    // 3. Calcular tamaño de cada espacio (gap)
-    // Si hay una sola palabra, se imprime a la izquierda
-    const gap = words.length > 1 ? availableSpace / (words.length - 1) : 0;
-
-    let currentX = xStart;
-
-    words.forEach((w, i) => {
-        doc.setFont("helvetica", w.bold ? "bold" : "normal");
-        doc.setFontSize(11);
-        doc.text(w.text, currentX, y);
-        
-        // Mover cursor: ancho de palabra + gap justificado
-        // No agregamos gap después de la última palabra
-        if (i < words.length - 1) {
-            currentX += w.width + gap;
-        }
-    });
 }

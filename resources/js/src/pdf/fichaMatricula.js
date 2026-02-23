@@ -1,5 +1,13 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import infoCetpro from "../store/useCetproStore"
+
+
+const dataCetpro = infoCetpro();
+
+if (dataCetpro?.cetpro.length <= 0) {
+  await dataCetpro.loadCetpro();
+}
 
 export function generatePdfMatricula(data) {
   const doc = new jsPDF({
@@ -31,31 +39,31 @@ export function generatePdfMatricula(data) {
     body: [
       [
         { content: "Nombre del CETPRO", styles: sL },
-        { content: "CETPRO PUNO", styles: sD },
+        { content: dataCetpro?.cetpro?.cetpro||"-", styles: sD },
         { content: "DRE/GRE", styles: sL },
-        { content: "PUNO", styles: sD },
+        { content: dataCetpro?.cetpro?.dre||"-", styles: sD },
       ],
       [
         { content: "Código modular", styles: sL },
-        { content: "469452", styles: sD },
+        { content: "240069", styles: sD },
         { content: "UGEL", styles: sL },
-        { content: "Puno", styles: sD },
+        { content: dataCetpro?.cetpro?.ugel||"-", styles: sD },
       ],
       [
         { content: "Departamento", styles: sL },
-        { content: "PUNO", styles: sD },
+        { content: dataCetpro?.cetpro?.region||"-", styles: sD },
         { content: "Tipo de Gestión", styles: sL },
-        { content: "Pública", styles: sD },
+        { content: dataCetpro?.cetpro?.tipo_gestion||"-", styles: sD },
       ],
         [
         { content: "Provincia", styles: sL },
-        { content: "PUNO", styles: sD },
+        { content: dataCetpro?.cetpro?.provincia||"-", styles: sD },
         { content: "Periodo electivo:", styles: sL },
-        { content: data?.ficha?.periodo || "—", styles: sD },
+        { content: data?.ficha?.periodo.split('-')[0] || "—", styles: sD },
       ],
       [
         { content: "Distrito", styles: sL },
-        { content: "PUNO", styles: sD },
+        { content: dataCetpro?.cetpro?.distrito||"-", styles: sD },
         { content: "Periodo académico:", styles: sL },
         { content: data?.ficha?.periodo || "—", styles: sD },
       ],
@@ -74,7 +82,7 @@ export function generatePdfMatricula(data) {
 
       [
         { content: "Ciclo:", styles: sL },
-        { content: "AUXILIAR TÉCNICO", styles: sD },
+        { content: data?.ficha?.ciclo_academico||"nombre ciclo", styles: sD },
         { content: "Número de documento de identidad del estudiante:", styles: sL },
         { content: data?.ficha?.nro_documento || "—", styles: sD },
       ],
@@ -99,10 +107,10 @@ export function generatePdfMatricula(data) {
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.text("UNIDADES DIDÁCTICAS / MÓDULOS", 148.5, doc.lastAutoTable.finalY + 12, { align: "center" });
+  doc.text("UNIDADES DIDÁCTICAS", 148.5, doc.lastAutoTable.finalY + 9, { align: "center" });
 
   autoTable(doc, {
-    startY: doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 20,
+    startY: doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 20,
     head: [[
       { content: "N°", styles: { halign: "center" } },
       { content: "UNIDAD DIDÁCTICA", styles: { halign: "center" } },
@@ -144,12 +152,12 @@ export function generatePdfMatricula(data) {
   doc.text(
     "EXPERIENCIAS FORMATIVAS EN SITUACIONES REALES DE TRABAJO",
     148.5,
-    doc.lastAutoTable.finalY + 12,
+    doc.lastAutoTable.finalY + 9,
     { align: "center" }
   );
 
   autoTable(doc, {
-    startY: doc.lastAutoTable.finalY + 20,
+    startY: doc.lastAutoTable.finalY + 15,
     head: [[
       { content: "EN EL CETPRO /CENTRO LABORAL", styles: { halign: "center" }, styles: { halign: "center" }  },
       { content: "CRÉDITOS", styles: { halign: "center" }, styles: { halign: "center" }  },
@@ -198,7 +206,7 @@ export function generatePdfMatricula(data) {
       margin: { left: 10, right: 10 },
     });
   */
-  const fY = doc.lastAutoTable.finalY + 25;
+  const fY = doc.lastAutoTable.finalY + 10;
   doc.setFontSize(8);
   doc.line(40, fY, 90, fY);
   doc.text("Director", 65, fY + 4, { align: "center" });

@@ -492,6 +492,8 @@ class MatriculaController extends Controller
         $ficha = DB::table('estudiante as e')
             ->join('matricula as m', 'e.id', '=', 'm.id_estudiante')
             ->join('grupo as g', 'm.id_grupo', '=', 'g.id')
+            ->join('programa_estudio as pe', 'g.id_programa', '=', 'pe.id') // 👈 N
+            ->join('ciclo_academico as ca', 'pe.id_ciclo', '=', 'ca.id')    // 👈 N
             ->join('especialidad_programa as ep', 'g.id_especialidad', '=', 'ep.id')
             ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
             ->join('modulos as mo', 'g.id_modulo', '=', 'mo.id')
@@ -512,6 +514,7 @@ class MatriculaController extends Controller
                 'mo.creditos',
                 'mo.horas',
                 'p.nombre_periodo as periodo',
+                'ca.nombre_ciclo as ciclo_academico', // 👈 AQUI LO AGREGAS
                 DB::raw("CONCAT(DATE_FORMAT(g.fecha_inicio, '%d/%m/%Y'), ' - ', DATE_FORMAT(g.fecha_fin, '%d/%m/%Y')) as periodo_clases")
             )
             ->first();
@@ -549,7 +552,7 @@ class MatriculaController extends Controller
 
         return response()->json([
             'ficha' => $ficha,
-            
+
             'capacidades_terminales' => $capacidades,
             'experiencia_formativa' => $experiencia
         ]);

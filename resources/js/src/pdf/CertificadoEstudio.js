@@ -33,7 +33,7 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
     const moduloStr = (data?.modulo || "").toUpperCase();
     const unidades = Array.isArray(data?.unidades_didacticas) ? data.unidades_didacticas : [];
 
-    // --- ENCABEZADO ---
+    // --- ENCABEZADO: LOGOS Y FOTO ---
     try { doc.addImage("/img/LogoMinisterio.png", "PNG", margin, 10, 49, 12, undefined, 'FAST'); } catch (e) {}
     try { doc.addImage("/img/CetproLOGOO.png", "PNG", (pageW / 2) - 10, 8, 18, 20, undefined, 'FAST'); } catch (e) {}
 
@@ -43,8 +43,10 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
     doc.setFontSize(8);
     doc.text("FOTO", rightEdge - 12.5, 25, { align: "center" });
 
+    // --- TÍTULOS ---
     let y = 48;
-    doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
     doc.text(`CENTRO DE EDUCACIÓN TÉCNICO-PRODUCTIVA (${tipoGestion})`, pageW / 2, y, { align: "center" });
     y += 6;
     doc.text(`"${nombreCetpro}"`, pageW / 2, y, { align: "center" });
@@ -52,9 +54,10 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
     doc.setFontSize(13);
     doc.text("CERTIFICADO DE ESTUDIOS", pageW / 2, y, { align: "center" });
 
-    // --- TEXTO ---
+    // --- CUERPO DEL TEXTO ---
     y += 12;
-    doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
     doc.text("El CETPRO ", margin, y);
     doc.setFont("helvetica", "bold");
     doc.text(nombreCetpro + ",", margin + doc.getTextWidth("El CETPRO "), y);
@@ -75,14 +78,14 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
     doc.setFont("helvetica", "normal");
     doc.text("Los resultados finales de las evaluaciones fueron las siguientes:", margin, y);
 
-    // --- TABLA DINÁMICA ---
+    // --- TABLA DINÁMICA (TEXTO HORIZONTAL NORMAL) ---
     const tableBody = unidades.map((u, index) => {
       const row = [];
       if (index === 0) {
         row.push({ 
           content: moduloStr, 
-          rowSpan: unidades.length, 
-          styles: { halign: 'center', valign: 'middle' } 
+          rowSpan: unidades.length,
+          styles: { halign: 'center', valign: 'middle', fontStyle: 'bold' }
         });
       }
       row.push(u?.nombre_unidad || "");
@@ -102,52 +105,27 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
       body: tableBody,
       styles: {
         font: "helvetica",
-        fontSize: 7,
+        fontSize: 7.5,
         lineColor: [0, 0, 0],
         lineWidth: 0.15,
-        textColor: [0, 0, 0], // Asegura texto negro en toda la tabla
+        textColor: [0, 0, 0],
       },
       headStyles: {
         fillColor: [225, 225, 225],
-        textColor: [0, 0, 0], // TEXTO NEGRO PARA CABECERA
+        textColor: [0, 0, 0],
         fontStyle: "bold",
         halign: "center",
+        valign: "middle",
       },
       columnStyles: {
-        0: { cellWidth: 15 }, 
-        1: { cellWidth: 57 },
+        0: { cellWidth: 25 }, 
+        1: { cellWidth: 47 },
         2: { cellWidth: 18, halign: "center" },
         3: { cellWidth: 18, halign: "center" },
         4: { cellWidth: 12, halign: "center" },
         5: { cellWidth: 25, halign: "center" },
         6: { cellWidth: 25 },
       },
-      didDrawCell: (data) => {
-        // CORRECCIÓN DE POSICIÓN DEL MÓDULO
-        if (data.section === 'body' && data.column.index === 0) {
-          if (data.cell.raw && data.cell.raw.rowSpan) {
-            const cell = data.cell;
-            
-            // Limpiar la celda
-            doc.setFillColor(255, 255, 255);
-            doc.rect(cell.x + 0.1, cell.y + 0.1, cell.width - 0.2, cell.height - 0.2, 'F');
-            
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(7.5);
-            doc.setTextColor(0, 0, 0);
-            
-            // Centro exacto de la celda combinada
-            const centerX = cell.x + (cell.width / 2);
-            const centerY = cell.y + (cell.height / 2);
-            
-            doc.text(moduloStr, centerX, centerY, {
-              angle: 90,
-              align: 'center',
-              baseline: 'middle'
-            });
-          }
-        }
-      }
     });
 
     // --- PIE DE PÁGINA ---

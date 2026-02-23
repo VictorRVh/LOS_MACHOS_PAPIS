@@ -9,6 +9,7 @@ use App\Models\MatriculaHistorial;
 use App\Models\Pago;
 use App\Models\ProgramaEstudio;
 use App\Traits\Helpers;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -500,6 +501,7 @@ class MatriculaController extends Controller
                 'e.id as id_estudiante',
                 DB::raw("CONCAT(e.apellido_paterno, ' ', e.apellido_materno, ', ', e.nombre) as estudiante"),
                 'e.nro_documento',
+                'e.grado_instruccion',
                 'e.sexo',
                 'e.fecha_nacimiento',
                 'm.id as id_matricula',
@@ -517,7 +519,8 @@ class MatriculaController extends Controller
         if (!$ficha) {
             return response()->json(['error' => 'No existe matrícula para este estudiante'], 404);
         }
-
+        $edad = Carbon::parse($ficha->fecha_nacimiento)->age;
+        $ficha->edad_estudiante = $edad;
         // Obtener capacidades terminales del grupo de esta matrícula
         $capacidades = DB::table('capacidad_terminal')
             ->where('id_grupo', $ficha->id_grupo)
@@ -525,6 +528,8 @@ class MatriculaController extends Controller
                 'id',
                 'numero_capacidad',
                 'nombre_capacidad',
+                DB::raw('(creditos_teoricos + creditos_practicos) as creditos'),
+                'horas', // 👈 si también manejas horas separadas
                 'fecha_inicio',
                 'fecha_fin',
                 'status'
@@ -532,9 +537,21 @@ class MatriculaController extends Controller
             ->orderBy('numero_capacidad')
             ->get();
 
+        $experiencia = DB::table('experiencia_formativa')
+            ->where('id_grupo', $ficha->id_grupo)
+            ->select(
+                'nombre_experiencia',
+                'creditos',
+                'horas',
+
+            )
+            ->first();
+
         return response()->json([
             'ficha' => $ficha,
-            'capacidades_terminales' => $capacidades
+            
+            'capacidades_terminales' => $capacidades,
+            'experiencia_formativa' => $experiencia
         ]);
     }
 

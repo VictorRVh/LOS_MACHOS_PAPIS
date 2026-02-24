@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Matricula;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -44,10 +45,19 @@ class NominaMatriculasExport
 
 
 
+
         $especialidad = $matriculas->first()?->grupo?->especialidad?->especialidadMadre?->nombre_especialidad ?? '';
         $modulo = $matriculas->first()?->grupo?->modulo?->descripcion ?? '';
+        $periodoFecha =  $matriculas->first()?->grupo?->fecha_inicio . ' - ' . $matriculas->first()?->grupo?->fecha_fin ?? '';
         $nivel_formativo = $matriculas->first()?->grupo?->programaEstudio?->ciclo?->nombre_ciclo ?? '';
-        $turno = $matriculas->first()?->grupo?->turno ?? '';
+        $turnoCodigo = $matriculas->first()?->grupo?->turno ?? '';
+
+        $turno = match ($turnoCodigo) {
+            'M' => 'MAÑANA',
+            'T' => 'TARDE',
+            'N' => 'NOCHE',
+            default => '',
+        };
         $periodo = $matriculas->first()?->grupo?->periodo?->nombre_periodo ?? '';
         $seccion = $matriculas->first()?->grupo?->seccion;
         $nroCapacidades = $matriculas->first()?->grupo?->modulo?->nro_capacidades ?? '';
@@ -64,8 +74,14 @@ class NominaMatriculasExport
         // Asignar valor
         $sheet->setCellValue('F10', $especialidad);
         $sheet->setCellValue('F11', $modulo);
+        $sheet->setCellValue('M11', $periodoFecha);
         $sheet->setCellValue('F12', $nivel_formativo);
+        $nivel_parse = str_ireplace('Ciclo ', '', $nivel_formativo);
+
+        $sheet->setCellValue('M12', $nivel_parse);
+        $sheet->setCellValue('M13', "Presencial");
         $sheet->setCellValue('F14', $turno);
+        $sheet->setCellValue('M9', explode('-', $periodo)[0]);
         $sheet->setCellValue('M10', $periodo);
         $sheet->setCellValue('M14', $seccion);
 
@@ -75,6 +91,42 @@ class NominaMatriculasExport
 
         // (Opcional) ponerlo en negrita
         $sheet->getStyle('G10')->getFont()->setBold(true);
+
+        /////////////////////////////////////////////////////
+        // datos de la intitucion 
+        /////////////////////////////////////////////////////
+        $institucion = DB::table('cetpros')->first();
+        $nombreInstitucion = $institucion->cetpro ?? '';
+        $dre = $institucion->dre ?? '';
+        $ugel = $institucion->ugel ?? '';
+        $codigoModular = $institucion->codigo_modular ?? '240069';
+        $codigoAutorizacion = $institucion->rd_autorizacion ?? 'R.D.00000';
+        $codigoConversion = $institucion->rd_conversion ?? 'R.C.00000';
+        $tipoGestion = $institucion->tipo_gestion ?? '';
+        $departamento = $institucion->region ?? '';
+        $provincia = $institucion->provincia ?? '';
+        $distrito = $institucion->distrito ?? '';
+        $direccion = $institucion->direccion ?? '';
+
+
+
+        $sheet->setCellValue('F4', $nombreInstitucion);
+        $sheet->setCellValue('M4', $dre);
+        $sheet->setCellValue('F5', $codigoModular);
+        $sheet->setCellValue('M5', $ugel);
+        $sheet->setCellValue('F6', $codigoAutorizacion);
+        $sheet->setCellValue('M6', $codigoConversion);
+
+        $sheet->setCellValue('F7', $departamento);
+        $sheet->setCellValue('M7', $provincia);
+
+        $sheet->setCellValue('F8', $distrito);
+        $sheet->setCellValue('M8', $tipoGestion);
+
+        $sheet->setCellValue('F9', $direccion);
+
+
+
 
         // 3. Llenar datos
         $filaInicio = 17;

@@ -340,4 +340,282 @@ class EstadisticaController extends Controller
 
         return response()->json(array_values($resultado));
     }
+
+    public function matriculaPorNivelEducativoCicloSexo(Request $request)
+    {
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin    = $request->input('fecha_fin');
+
+        $query = DB::table('matricula')
+            ->join('estudiante', 'matricula.id_estudiante', '=', 'estudiante.id')
+            ->join('grupo', 'matricula.id_grupo', '=', 'grupo.id')
+            ->join('programa_estudio', 'grupo.id_programa', '=', 'programa_estudio.id')
+            ->join('ciclo_academico', 'programa_estudio.id_ciclo', '=', 'ciclo_academico.id')
+            ->where('matricula.matriculado', 1);
+
+        if ($fechaInicio) {
+            $query->whereDate('matricula.created_at', '>=', $fechaInicio);
+        }
+
+        if ($fechaFin) {
+            $query->whereDate('matricula.created_at', '<=', $fechaFin);
+        }
+
+        $rows = $query->select(
+            DB::raw('LOWER(estudiante.grado_instruccion) as nivel'),
+            'ciclo_academico.nombre_ciclo as ciclo',
+            'estudiante.sexo',
+            DB::raw('COUNT(*) as total')
+        )
+            ->groupBy(
+                DB::raw('LOWER(estudiante.grado_instruccion)'),
+                'ciclo_academico.nombre_ciclo',
+                'estudiante.sexo'
+            )
+            ->get();
+
+        /* ------------------------------------------------------------
+       CATÁLOGO REAL (IGUAL A TU FRONT)
+    ------------------------------------------------------------ */
+
+        $niveles = [
+            'sin nivel'               => 'Sin Nivel',
+            'primaria incompleta'     => 'Primaria incompleta',
+            'primaria completa'       => 'Primaria completa',
+            'secundaria incompleta'   => 'Secundaria incompleta',
+            'secundaria completa'     => 'Secundaria completa',
+            'superior incompleta'     => 'Superior incompleta',
+            'superior completa'       => 'Superior completa',
+        ];
+
+        $resultado = [];
+
+        foreach ($niveles as $key => $label) {
+            $resultado[$key] = [
+                'nivel' => $label,
+
+                'total' => ['H' => 0, 'M' => 0],
+
+                'auxiliar_tecnico' => ['H' => 0, 'M' => 0],
+                'tecnico'          => ['H' => 0, 'M' => 0],
+            ];
+        }
+
+        /* ------------------------------------------------------------
+       PROCESAMIENTO
+    ------------------------------------------------------------ */
+
+        foreach ($rows as $row) {
+
+            if (!isset($resultado[$row->nivel])) {
+                continue;
+            }
+
+            // Sexo BD → Reporte
+            $sexo = strtoupper($row->sexo) === 'M' ? 'H' : 'M';
+
+            // Ciclo → nivel
+            $nivelCiclo = str_contains(strtolower($row->ciclo), 'auxiliar')
+                ? 'auxiliar_tecnico'
+                : 'tecnico';
+
+            // Total general
+            $resultado[$row->nivel]['total'][$sexo] += $row->total;
+
+            // Total por ciclo
+            $resultado[$row->nivel][$nivelCiclo][$sexo] += $row->total;
+        }
+
+        return response()->json(array_values($resultado));
+    }
+
+    public function seccionesPorCicloTurno(Request $request)
+    {
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin    = $request->input('fecha_fin');
+
+        $query = DB::table('grupo')
+            ->join('programa_estudio', 'grupo.id_programa', '=', 'programa_estudio.id')
+            ->join('ciclo_academico', 'programa_estudio.id_ciclo', '=', 'ciclo_academico.id')
+            ->where('grupo.status', 1)
+            ->where('programa_estudio.is_deleted', 0);
+
+        if ($fechaInicio) {
+            $query->whereDate('grupo.created_at', '>=', $fechaInicio);
+        }
+
+        if ($fechaFin) {
+            $query->whereDate('grupo.created_at', '<=', $fechaFin);
+        }
+
+        $rows = $query->select(
+            'ciclo_academico.nombre_ciclo as ciclo',
+            'grupo.turno',
+            DB::raw('COUNT(grupo.id) as total')
+        )
+            ->groupBy(
+                'ciclo_academico.nombre_ciclo',
+                'grupo.turno'
+            )
+            ->get();
+
+        /* ------------------------------------------------------------
+       ARMADO DE RESPUESTA
+    ------------------------------------------------------------ */
+
+        $resultado = [];
+
+        foreach ($rows as $row) {
+
+            if (!isset($resultado[$row->ciclo])) {
+                $resultado[$row->ciclo] = [
+                    'ciclo' => $row->ciclo,
+                    'total' => 0,
+                    'turnos' => []
+                ];
+            }
+
+            $turno = $row->turno ?? 'S/D'; // por si hay nulos
+
+            $resultado[$row->ciclo]['turnos'][$turno] =
+                ($resultado[$row->ciclo]['turnos'][$turno] ?? 0)
+                + $row->total;
+
+            $resultado[$row->ciclo]['total'] += $row->total;
+        }
+
+        return response()->json(array_values($resultado));
+    }
+
+    public function matriculaPorCicloSexoEdad(Request $request)
+    {
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin    = $request->input('fecha_fin');
+
+        $query = DB::table('matricula')
+            ->join('estudiante', 'matricula.id_estudiante', '=', 'estudiante.id')
+            ->join('grupo', 'matricula.id_grupo', '=', 'grupo.id')
+            ->join('programa_estudio', 'grupo.id_programa', '=', 'programa_estudio.id')
+            ->join('ciclo_academico', 'programa_estudio.id_ciclo', '=', 'ciclo_academico.id')
+            ->where('matricula.matriculado', 1);
+
+        if ($fechaInicio) {
+            $query->whereDate('matricula.created_at', '>=', $fechaInicio);
+        }
+
+        if ($fechaFin) {
+            $query->whereDate('matricula.created_at', '<=', $fechaFin);
+        }
+
+        $rows = $query->select(
+            DB::raw('TIMESTAMPDIFF(YEAR, estudiante.fecha_nacimiento, matricula.created_at) as edad'),
+            'estudiante.sexo',
+            'ciclo_academico.nombre_ciclo as ciclo',
+            DB::raw('COUNT(*) as total')
+        )
+            ->groupBy(
+                DB::raw('edad'),
+                'estudiante.sexo',
+                'ciclo_academico.nombre_ciclo'
+            )
+            ->get();
+
+        /* ------------------------------------------------------------
+       CATÁLOGO DE EDADES (FORMATO OFICIAL)
+    ------------------------------------------------------------ */
+
+        $edades = [
+            '12' => '12 AÑOS',
+            '13' => '13 AÑOS',
+            '14' => '14 AÑOS',
+            '15' => '15 AÑOS',
+            '16' => '16 AÑOS',
+            '17' => '17 AÑOS',
+            '18' => '18 AÑOS',
+            '19' => '19 AÑOS',
+            '20' => '20 AÑOS',
+            '21' => '21 AÑOS',
+            '22' => '22 AÑOS',
+            '23' => '23 AÑOS',
+            '24' => '24 AÑOS',
+            '25-29' => '25-29 AÑOS',
+            '30-34' => '30-34 AÑOS',
+            '35-39' => '35-39 AÑOS',
+            '40-44' => '40-44 AÑOS',
+            '45-49' => '45-49 AÑOS',
+            '50-54' => '50-54 AÑOS',
+            '55-59' => '55-59 AÑOS',
+            '60+'    => '60 y más AÑOS',
+        ];
+
+        $resultado = [];
+
+        // Inicialización
+        foreach ($edades as $key => $label) {
+            $resultado[$key] = [
+                'edad' => $label,
+                'total' => ['H' => 0, 'M' => 0],
+                'auxiliar_tecnico' => ['H' => 0, 'M' => 0],
+                'tecnico' => ['H' => 0, 'M' => 0],
+            ];
+        }
+
+        /* ------------------------------------------------------------
+       PROCESAMIENTO
+    ------------------------------------------------------------ */
+
+        foreach ($rows as $row) {
+
+            $edad = (int) $row->edad;
+
+            // Determinar rango
+            if ($edad >= 60) $rango = '60+';
+            elseif ($edad >= 55) $rango = '55-59';
+            elseif ($edad >= 50) $rango = '50-54';
+            elseif ($edad >= 45) $rango = '45-49';
+            elseif ($edad >= 40) $rango = '40-44';
+            elseif ($edad >= 35) $rango = '35-39';
+            elseif ($edad >= 30) $rango = '30-34';
+            elseif ($edad >= 25) $rango = '25-29';
+            else $rango = (string) $edad;
+
+            if (!isset($resultado[$rango])) continue;
+
+            // Sexo
+            $sexo = strtoupper($row->sexo) === 'M' ? 'H' : 'M';
+
+            // Ciclo
+            $nivelCiclo = str_contains(strtolower($row->ciclo), 'auxiliar')
+                ? 'auxiliar_tecnico'
+                : 'tecnico';
+
+            // Totales
+            $resultado[$rango]['total'][$sexo] += $row->total;
+            $resultado[$rango][$nivelCiclo][$sexo] += $row->total;
+        }
+
+        /* ------------------------------------------------------------
+       TOTAL GENERAL
+    ------------------------------------------------------------ */
+
+        $totalGeneral = [
+            'edad' => 'TOTAL GENERAL',
+            'total' => ['H' => 0, 'M' => 0],
+            'auxiliar_tecnico' => ['H' => 0, 'M' => 0],
+            'tecnico' => ['H' => 0, 'M' => 0],
+        ];
+
+        foreach ($resultado as $fila) {
+            foreach (['H', 'M'] as $s) {
+                $totalGeneral['total'][$s] += $fila['total'][$s];
+                $totalGeneral['auxiliar_tecnico'][$s] += $fila['auxiliar_tecnico'][$s];
+                $totalGeneral['tecnico'][$s] += $fila['tecnico'][$s];
+            }
+        }
+
+        return response()->json(array_merge(
+            [$totalGeneral],
+            array_values($resultado)
+        ));
+    }
 }

@@ -246,8 +246,12 @@ const exportarEspecialidadPDF = async (especialidad) => {
           tabindex="0"
         >
           <div>
-            <h3 class="text-sm font-semibold text-slate-800">{{ especialidad.nombre }}</h3>
-            <p class="text-sm text-slate-500">{{ especialidad.total_modulos }} módulos</p>
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+              {{ especialidad.nombre }}
+            </h3>
+            <p class="text-sm text-slate-500 dark:text-slate-300">
+              {{ especialidad.total_modulos }} módulos
+            </p>
           </div>
           <div class="flex items-center gap-1.5">
             <button
@@ -260,9 +264,9 @@ const exportarEspecialidadPDF = async (especialidad) => {
                 <path d="M15 2v5h5" stroke-width="2" />
                 <path d="M8 14h8M8 18h8M8 10h4" stroke-width="2" />
               </svg>
-              PDF
+              Exportar historial notas PDF
             </button>
-            <span class="chev" :class="especialidadAbierta === especialidad.id ? 'open' : ''">⌃</span>
+            <span class="chev-btn" :class="especialidadAbierta === especialidad.id ? 'open' : ''">⌃</span>
           </div>
         </div>
 
@@ -445,7 +449,7 @@ const exportarEspecialidadPDF = async (especialidad) => {
     </div>
 
     <div v-if="hasSearched && !loading && !estudiante && !error" class="panel text-center">
-      <p class="text-slate-500">No se encontró ningún estudiante con ese documento.</p>
+      <p class="text-slate-500 dark:text-slate-400">No se encontró ningún estudiante con ese documento.</p>
     </div>
   </div>
 
@@ -487,11 +491,23 @@ const exportarEspecialidadPDF = async (especialidad) => {
     linear-gradient(180deg, #f3f6fa 0%, #eef2f7 100%);
 }
 
+.dark .page-wrap {
+  background:
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 36%),
+    linear-gradient(180deg, #172133 0%, #1b2638 100%);
+}
+
 .panel {
-  @apply bg-white border border-slate-300 shadow-sm rounded-sm p-2.5;
+  @apply bg-white border border-slate-300 shadow-sm rounded-sm p-2.5 dark:bg-slate-900 dark:border-slate-700;
   box-shadow:
     0 1px 0 rgba(15, 23, 42, 0.03),
     inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.dark .panel {
+  background-color: #162033;
+  border-color: #30415a;
+  box-shadow: 0 1px 0 rgba(2, 6, 23, 0.45);
 }
 
 .section-head {
@@ -499,11 +515,11 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .section-title {
-  @apply text-slate-900 font-semibold tracking-tight mb-0.5 text-[15px];
+  @apply text-slate-900 font-semibold tracking-tight mb-0.5 text-[15px] dark:text-slate-100;
 }
 
 .section-subtitle {
-  @apply text-[12px] text-slate-500;
+  @apply text-[12px] text-slate-500 dark:text-slate-400;
 }
 
 .search-panel.compact {
@@ -519,7 +535,12 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .search-wrap {
-  @apply flex items-center border border-slate-300 rounded-sm overflow-hidden bg-white transition-colors;
+  @apply flex items-center border border-slate-300 rounded-sm overflow-hidden bg-white transition-colors dark:bg-slate-900 dark:border-slate-700;
+}
+
+.dark .search-wrap {
+  background-color: #0f1a2e;
+  border-color: #30415a;
 }
 
 .search-wrap:focus-within {
@@ -527,8 +548,21 @@ const exportarEspecialidadPDF = async (especialidad) => {
   box-shadow: 0 0 0 1px rgba(11, 95, 138, 0.1);
 }
 
+.dark .search-wrap:focus-within {
+  border-color: #2f8fc0;
+  box-shadow: 0 0 0 1px rgba(47, 143, 192, 0.22);
+}
+
 .search-input {
-  @apply flex-1 px-2.5 py-1 bg-transparent text-slate-800 focus:outline-none text-[13px];
+  @apply flex-1 px-2.5 py-1 bg-transparent text-slate-800 focus:outline-none text-[13px] dark:text-slate-100;
+}
+
+.search-input::placeholder {
+  color: rgb(148 163 184);
+}
+
+.dark .search-input::placeholder {
+  color: rgb(100 116 139);
 }
 
 .search-btn {
@@ -536,7 +570,7 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .error-box {
-  @apply border border-red-300 bg-red-50 text-red-700 px-4 py-3 rounded-md;
+  @apply border border-red-300 bg-red-50 text-red-700 px-4 py-3 rounded-md dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300;
 }
 
 .empty-state {
@@ -548,7 +582,7 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .empty-badge {
-  @apply text-[10px] uppercase tracking-wide px-2 py-0.5 rounded border border-slate-300 bg-slate-100 text-slate-600;
+  @apply text-[10px] uppercase tracking-wide px-2 py-0.5 rounded border border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300;
 }
 
 .empty-grid {
@@ -556,27 +590,41 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .empty-block {
-  @apply border border-slate-300 bg-white rounded-sm p-2;
+  @apply border border-slate-300 bg-white rounded-sm p-2 dark:border-slate-700 dark:bg-slate-900;
+}
+
+.dark .empty-block {
+  background-color: #0f1a2e;
+  border-color: #30415a;
 }
 
 .empty-title {
-  @apply text-[12px] font-semibold text-slate-800 mb-1;
+  @apply text-[12px] font-semibold text-slate-800 mb-1 dark:text-slate-200;
 }
 
 .empty-list {
-  @apply text-[12px] text-slate-600 space-y-0.5 pl-4 list-disc;
+  @apply text-[12px] text-slate-600 space-y-0.5 pl-4 list-disc dark:text-slate-300;
 }
 
 .info-table {
-  @apply grid grid-cols-1 md:grid-cols-3 border border-slate-300 rounded-sm bg-white overflow-hidden;
+  @apply grid grid-cols-1 md:grid-cols-3 border border-slate-300 rounded-sm bg-white overflow-hidden dark:border-slate-700 dark:bg-slate-900;
+}
+
+.dark .info-table {
+  background-color: #0f1a2e;
+  border-color: #30415a;
 }
 
 .info-item {
-  @apply flex flex-col gap-0.5 p-1.5 border-b border-slate-200 md:border-r;
+  @apply flex flex-col gap-0.5 p-1.5 border-b border-slate-200 md:border-r dark:border-slate-700;
 }
 
 .info-item:nth-child(-n + 3) {
-  @apply bg-slate-50;
+  @apply bg-slate-50 dark:bg-slate-800/40;
+}
+
+.dark .info-item:nth-child(-n + 3) {
+  background-color: #14223a;
 }
 
 .info-wide {
@@ -593,31 +641,44 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .label {
-  @apply text-[10px] uppercase tracking-wide text-slate-500 font-medium;
+  @apply text-[10px] uppercase tracking-wide text-slate-500 font-medium dark:text-slate-400;
 }
 
 .value {
-  @apply text-slate-900 font-medium text-[13px] leading-tight;
+  @apply text-slate-900 font-medium text-[13px] leading-tight dark:text-slate-100;
 }
 
 .value.main {
-  @apply text-slate-900 text-[14px] leading-tight;
+  @apply text-slate-900 text-[14px] leading-tight dark:text-slate-100;
 }
 
 .accordion-head {
-  @apply w-full flex justify-between items-center p-2.5 border-b border-slate-200 bg-white hover:bg-slate-50 transition text-left;
+  @apply w-full flex justify-between items-center p-2.5 border-b border-slate-200 bg-white hover:bg-slate-50 transition text-left dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800/60;
+}
+
+.dark .accordion-head {
+  background-color: #162033;
+  border-color: #30415a;
 }
 
 .chev {
-  @apply text-slate-500 text-base transition-transform duration-200;
+  @apply text-slate-500 text-base transition-transform duration-200 dark:text-slate-400;
 }
 
 .chev.open {
   transform: rotate(180deg);
 }
 
+.chev-btn {
+  @apply inline-flex items-center justify-center w-6 h-6 text-slate-700 bg-white border border-slate-300 rounded-sm transition-transform duration-200 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200;
+}
+
+.chev-btn.open {
+  transform: rotate(180deg);
+}
+
 .btn-pdf {
-  @apply inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold border border-slate-300 bg-white text-slate-700 rounded-sm;
+  @apply inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold border border-slate-300 bg-white text-slate-700 rounded-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200;
 }
 
 .btn-pdf svg {
@@ -626,20 +687,25 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .btn-pdf:hover {
-  @apply bg-slate-100;
+  @apply bg-slate-100 dark:bg-slate-800;
 }
 
 .period-chip {
-  @apply inline-block px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase bg-slate-800 text-white border border-slate-800 rounded;
+  @apply inline-block px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase bg-slate-800 text-white border border-slate-800 rounded dark:bg-slate-700 dark:border-slate-600;
 }
 
 .module-card {
-  @apply border border-slate-300 rounded-sm p-2 bg-slate-50;
+  @apply border border-slate-300 rounded-sm p-2 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/40;
   box-shadow: none;
 }
 
+.dark .module-card {
+  background-color: #111c30;
+  border-color: #30415a;
+}
+
 .module-top {
-  @apply flex items-center justify-between gap-2 pb-1 mb-1 border-b border-slate-300;
+  @apply flex items-center justify-between gap-2 pb-1 mb-1 border-b border-slate-300 dark:border-slate-700;
 }
 
 .module-top-right {
@@ -651,7 +717,7 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .toggle-btn {
-  @apply inline-flex items-center gap-1 px-2 py-0.5 text-[10px] border border-slate-300 bg-white text-slate-700 rounded-sm;
+  @apply inline-flex items-center gap-1 px-2 py-0.5 text-[10px] border border-slate-300 bg-white text-slate-700 rounded-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300;
 }
 
 .toggle-btn svg {
@@ -660,19 +726,24 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .toggle-btn.active {
-  @apply bg-slate-800 text-white border-slate-800;
+  @apply bg-slate-800 text-white border-slate-800 dark:bg-cetpro dark:border-cetpro;
 }
 
 .module-title {
-  @apply text-slate-900 font-semibold text-[13px];
+  @apply text-slate-900 font-semibold text-[13px] dark:text-slate-100;
 }
 
 .module-table {
-  @apply grid grid-cols-1 md:grid-cols-4 border border-slate-300 rounded-sm overflow-hidden bg-white;
+  @apply grid grid-cols-1 md:grid-cols-4 border border-slate-300 rounded-sm overflow-hidden bg-white dark:border-slate-700 dark:bg-slate-900;
+}
+
+.dark .module-table {
+  background-color: #0f1a2e;
+  border-color: #30415a;
 }
 
 .module-cell {
-  @apply p-1.5 border-b border-slate-200 md:border-r;
+  @apply p-1.5 border-b border-slate-200 md:border-r dark:border-slate-700;
 }
 
 .module-cell:nth-child(4n) {
@@ -684,11 +755,11 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .cell-label {
-  @apply block text-[9px] uppercase tracking-wide text-slate-500;
+  @apply block text-[9px] uppercase tracking-wide text-slate-500 dark:text-slate-400;
 }
 
 .cell-value {
-  @apply block text-[11px] font-semibold text-slate-800 leading-tight mt-0.5;
+  @apply block text-[11px] font-semibold text-slate-800 leading-tight mt-0.5 dark:text-slate-100;
 }
 
 .status-stack {
@@ -724,15 +795,20 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .detail-panel {
-  @apply mt-2 border border-slate-300 rounded-sm bg-white;
+  @apply mt-2 border border-slate-300 rounded-sm bg-white dark:border-slate-700 dark:bg-slate-900;
+}
+
+.dark .detail-panel {
+  background-color: #0f1a2e;
+  border-color: #30415a;
 }
 
 .detail-head {
-  @apply flex items-center justify-between gap-2 px-2 py-1 border-b border-slate-200 text-[11px] font-semibold text-slate-700;
+  @apply flex items-center justify-between gap-2 px-2 py-1 border-b border-slate-200 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-200;
 }
 
 .detail-badge {
-  @apply px-2 py-0.5 border border-slate-300 rounded-sm text-[10px] bg-slate-50;
+  @apply px-2 py-0.5 border border-slate-300 rounded-sm text-[10px] bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200;
 }
 
 .mini-table {
@@ -740,7 +816,7 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .mini-th {
-  @apply px-2 py-1 text-[10px] uppercase tracking-wide text-slate-500 border-b border-r border-slate-200 bg-slate-50;
+  @apply px-2 py-1 text-[10px] uppercase tracking-wide text-slate-500 border-b border-r border-slate-200 bg-slate-50 dark:text-slate-300 dark:border-slate-700 dark:bg-slate-800;
 }
 
 .mini-th:nth-child(3) {
@@ -748,7 +824,7 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .mini-td {
-  @apply px-2 py-1 text-[11px] text-slate-700 border-b border-r border-slate-200;
+  @apply px-2 py-1 text-[11px] text-slate-700 border-b border-r border-slate-200 dark:text-slate-200 dark:border-slate-700;
 }
 
 .mini-td:nth-child(3n) {
@@ -768,7 +844,7 @@ const exportarEspecialidadPDF = async (especialidad) => {
 }
 
 .asistencia-item {
-  @apply p-2 border-r border-slate-200;
+  @apply p-2 border-r border-slate-200 dark:border-slate-700;
 }
 
 .asistencia-item:last-child {

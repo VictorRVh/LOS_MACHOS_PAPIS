@@ -1,11 +1,19 @@
 <script setup>
 import { ref, computed } from 'vue';
 import useEstadistica101Store from '../../store/Estadisticas/Estadistica101Store';
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import useModalToast from '../../composables/useModalToast';
+import useExportEstadisticasExcel from '../../composables/estadisticas/useExportEstadisticasExcel';
+import ChartDonutModal from '../../components/estadisticas/ChartDonutModal.vue';
 
 const fechaInicio = ref('');
 const fechaFin = ref('');
 
 const estadisticaStore = useEstadistica101Store();
+const { showToast } = useModalToast();
+const { addInstitutionalHeader } = useExportEstadisticasExcel();
+const showChart = ref(false);
 
 const consultarDatos = () => {
   if (!fechaInicio.value || !fechaFin.value) return;
@@ -44,6 +52,120 @@ const data = computed(() => {
   };
 });
 
+const chartSeries = computed(() => ([
+  { label: 'Aprobados', value: Number(data.value.aprobados.total || 0), color: '#10b981' },
+  { label: 'Retirados', value: Number(data.value.retirados.total || 0), color: '#ef4444' },
+]));
+
+const abrirGrafico = () => {
+  if (!chartSeries.value.some((s) => s.value > 0)) {
+    showToast('Primero consulta datos para mostrar el gráfico.', 'warning');
+    return;
+  }
+  showChart.value = true;
+};
+
+const exportarExcel101 = async () => {
+  if (!fechaInicio.value || !fechaFin.value) {
+    showToast('Primero selecciona el rango de fechas.', 'warning');
+    return;
+  }
+
+  try {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Reporte 101', { views: [{ state: 'frozen', ySplit: 9 }] });
+
+    ws.columns = [
+      { width: 30 }, { width: 14 }, { width: 10 }, { width: 10 },
+      { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+    ];
+
+    const { startRow, applyThinBorder } = await addInstitutionalHeader(wb, ws, {
+      reportTitle: 'REPORTE 101 - APROBADOS Y RETIRADOS SEGÚN CICLO Y SEXO',
+      fechaInicio: fechaInicio.value,
+      fechaFin: fechaFin.value,
+      totalCols: 8,
+      logoCols: 2,
+    });
+
+    ws.mergeCells(`A${startRow}:A${startRow + 1}`);
+    ws.mergeCells(`B${startRow}:B${startRow + 1}`);
+    ws.mergeCells(`C${startRow}:D${startRow}`);
+    ws.mergeCells(`E${startRow}:F${startRow}`);
+    ws.mergeCells(`G${startRow}:H${startRow}`);
+
+    ws.getCell(`A${startRow}`).value = 'SITUACIÓN';
+    ws.getCell(`B${startRow}`).value = 'TOTAL GENERAL';
+    ws.getCell(`C${startRow}`).value = 'TOTAL';
+    ws.getCell(`E${startRow}`).value = 'AUXILIAR TÉCNICO';
+    ws.getCell(`G${startRow}`).value = 'TÉCNICO';
+
+    const topHeaders = [`A${startRow}`, `B${startRow}`, `C${startRow}`, `E${startRow}`, `G${startRow}`];
+    topHeaders.forEach((addr) => {
+      const c = ws.getCell(addr);
+      c.font = { bold: true, color: { argb: 'FFFFFFFF' }, italic: true };
+      c.alignment = { horizontal: 'center', vertical: 'middle' };
+      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
+      applyThinBorder(c);
+    });
+
+    ['C', 'D', 'E', 'F', 'G', 'H'].forEach((col, i) => {
+      const cell = ws.getCell(`${col}${startRow + 1}`);
+      cell.value = i % 2 === 0 ? 'H' : 'M';
+      cell.font = { bold: true, color: { argb: 'FF475569' } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+      applyThinBorder(cell);
+    });
+
+    const rows = [
+      [
+        'APROBADOS',
+        data.value.aprobados.total,
+        data.value.aprobados.auxiliar_tecnico.H + data.value.aprobados.tecnico.H,
+        data.value.aprobados.auxiliar_tecnico.M + data.value.aprobados.tecnico.M,
+        data.value.aprobados.auxiliar_tecnico.H,
+        data.value.aprobados.auxiliar_tecnico.M,
+        data.value.aprobados.tecnico.H,
+        data.value.aprobados.tecnico.M,
+      ],
+      [
+        'RETIRADOS',
+        data.value.retirados.total,
+        data.value.retirados.auxiliar_tecnico.H + data.value.retirados.tecnico.H,
+        data.value.retirados.auxiliar_tecnico.M + data.value.retirados.tecnico.M,
+        data.value.retirados.auxiliar_tecnico.H,
+        data.value.retirados.auxiliar_tecnico.M,
+        data.value.retirados.tecnico.H,
+        data.value.retirados.tecnico.M,
+      ],
+    ];
+
+    let r = startRow + 2;
+    rows.forEach((vals) => {
+      ws.addRow(vals);
+      for (let col = 1; col <= 8; col++) {
+        const c = ws.getCell(r, col);
+        c.font = { bold: col === 1 || col === 2, color: { argb: 'FF0F172A' } };
+        c.alignment = { horizontal: col === 1 ? 'left' : 'center', vertical: 'middle' };
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: r % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC' } };
+        applyThinBorder(c);
+      }
+      r++;
+    });
+
+    const buffer = await wb.xlsx.writeBuffer();
+    saveAs(new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }), `Reporte_101_${fechaInicio.value || 'sin-inicio'}_${fechaFin.value || 'sin-fin'}.xlsx`);
+
+    showToast('Excel 101 generado correctamente.', 'success');
+  } catch (error) {
+    console.error(error);
+    showToast('No se pudo exportar el reporte 101.', 'error');
+  }
+};
+
 </script>
 
 <template>
@@ -55,10 +177,16 @@ const data = computed(() => {
         101. APROBADOS Y RETIRADOS SEGÚN CICLO Y SEXO
       </h2>
 
-      <button
-        class="bg-[#10b981] text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-google-sm hover:bg-emerald-600 transition-all">
-        EXPORTAR EXCEL
-      </button>
+      <div class="flex items-center gap-2">
+        <button @click="abrirGrafico"
+          class="bg-[#0ea5e9] text-white px-4 py-2 rounded-lg font-bold shadow-google-sm hover:bg-sky-600 transition-all">
+          GRAFICO
+        </button>
+        <button @click="exportarExcel101"
+          class="bg-[#10b981] text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-google-sm hover:bg-emerald-600 transition-all">
+          EXPORTAR EXCEL
+        </button>
+      </div>
     </div>
 
     <!-- FILTROS -->
@@ -162,5 +290,13 @@ const data = computed(() => {
 
       </table>
     </div>
+
+    <ChartDonutModal
+      :show="showChart"
+      title="Gráfico 101 - Aprobados vs Retirados"
+      subtitle="Distribución total por situación académica"
+      :series="chartSeries"
+      @close="showChart = false"
+    />
   </div>
 </template>

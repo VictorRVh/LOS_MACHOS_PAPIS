@@ -133,31 +133,14 @@ function getRowsNotas(especialidad) {
 
   periodos.forEach((periodo) => {
     const modulos = Array.isArray(periodo?.modulos) ? periodo.modulos : [];
-    const modulosMap = new Map();
-
     modulos.forEach((item) => {
-      const modulo = `M${item?.modulo?.numero || "-"} - ${item?.modulo?.descripcion || "-"}`;
+      const seccion = item?.grupo?.seccion ? `Sec. ${item.grupo.seccion}` : "Sec. -";
+      const turno = item?.grupo?.turno ? `Turno ${item.grupo.turno}` : "Turno -";
+      const moduloBase = `M${item?.modulo?.numero || "-"} - ${item?.modulo?.descripcion || "-"}`;
+      const modulo = `${moduloBase} (${seccion} | ${turno})`;
       const estado = item?.matricula?.matriculado ? "Matriculado" : "Reserva";
-      const promedio = item?.promedio_notas ?? "-";
-      const key = `${periodo?.nombre || "-"}|${modulo}`;
       const unidades = Array.isArray(item?.notas_unidades) ? item.notas_unidades : [];
-
-      if (!modulosMap.has(key)) {
-        modulosMap.set(key, {
-          periodo: periodo?.nombre || "-",
-          modulo,
-          estado,
-          promedio,
-          unidadesMap: new Map(),
-        });
-      }
-
-      const bucket = modulosMap.get(key);
-      const promedioActual = parseNota(bucket.promedio);
-      const promedioNuevo = parseNota(promedio);
-      if ((promedioActual === null || promedioActual === 0) && promedioNuevo !== null) {
-        bucket.promedio = promedio;
-      }
+      const unidadesMap = new Map();
 
       unidades.forEach((u) => {
         const isExp = !!u?.es_experiencia_formativa || /experiencia/i.test(String(u?.nombre_unidad || ""));
@@ -167,10 +150,10 @@ function getRowsNotas(especialidad) {
           : `U${u?.numero_unidad || "-"} ${u?.nombre_unidad || ""}`.trim();
 
         const notaNueva = parseNota(u?.nota);
-        const existente = bucket.unidadesMap.get(unidadKey);
+        const existente = unidadesMap.get(unidadKey);
 
         if (!existente) {
-          bucket.unidadesMap.set(unidadKey, { unidadTexto, nota: u?.nota });
+          unidadesMap.set(unidadKey, { unidadTexto, nota: u?.nota });
           return;
         }
 
@@ -179,10 +162,7 @@ function getRowsNotas(especialidad) {
           existente.nota = u?.nota;
         }
       });
-    });
-
-    for (const moduloData of modulosMap.values()) {
-      const unidades = Array.from(moduloData.unidadesMap.entries())
+      const unidadesOrdenadas = Array.from(unidadesMap.entries())
         .sort((a, b) => {
           if (a[0] === "EF") return 1;
           if (b[0] === "EF") return -1;
@@ -190,37 +170,37 @@ function getRowsNotas(especialidad) {
         })
         .map(([, value]) => value);
 
-      const notasNumericas = unidades
+      const notasNumericas = unidadesOrdenadas
         .map((u) => parseNota(u?.nota))
         .filter((n) => n !== null);
       const promedioCalculado = notasNumericas.length
         ? notasNumericas.reduce((acc, n) => acc + n, 0) / notasNumericas.length
         : null;
-      const promedioFinal = formatPromedio(promedioCalculado ?? parseNota(moduloData.promedio));
+      const promedioFinal = formatPromedio(promedioCalculado);
 
-      if (!unidades.length) {
+      if (!unidadesOrdenadas.length) {
         rows.push([
-          moduloData.periodo,
-          moduloData.modulo,
+          periodo?.nombre || "-",
+          modulo,
           "-",
           "-",
           String(promedioFinal),
-          moduloData.estado,
+          estado,
         ]);
-        continue;
+        return;
       }
 
-      unidades.forEach((unidad, idx) => {
+      unidadesOrdenadas.forEach((unidad, idx) => {
         rows.push([
-          idx === 0 ? moduloData.periodo : "",
-          idx === 0 ? moduloData.modulo : "",
+          idx === 0 ? (periodo?.nombre || "-") : "",
+          idx === 0 ? modulo : "",
           unidad.unidadTexto,
           unidad.nota ?? "-",
           idx === 0 ? String(promedioFinal) : "",
-          idx === 0 ? moduloData.estado : "",
+          idx === 0 ? estado : "",
         ]);
       });
-    }
+    });
   });
 
   return rows;

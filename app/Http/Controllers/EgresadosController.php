@@ -12,14 +12,14 @@ class EgresadosController extends Controller
      */
     public function index()
     {
-        $egresados = Egresados::with(['estudiante', 'grupo'])->get();
+        $egresados = Egresados::with(['estudiante', 'especialidad'])->get();
         return response()->json($egresados);
     }
 
     // GET /api/egresados/{id}
     public function show($id)
     {
-        $egresado = Egresados::with(['estudiante', 'grupo'])->find($id);
+        $egresado = Egresados::with(['estudiante', 'especialidad'])->find($id);
 
         if (!$egresado) {
             return response()->json(['message' => 'Egresado no encontrado'], 404);
@@ -32,12 +32,25 @@ class EgresadosController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'turno'        => 'required|string|max:2',
+            'turno'        => 'nullable|string|max:2',
             'id_estudiante' => 'required|uuid|exists:estudiante,id',
-            'id_grupo'     => 'required|uuid|exists:grupo,id',
+            'id_especialidad'     => 'required|uuid|exists:especialidad_programa,id',
         ]);
 
-        $egresado = Egresados::create($request->all());
+        $existe = Egresados::where('id_estudiante', $request->id_estudiante)
+            ->where('id_especialidad', $request->id_especialidad)
+            ->exists();
+
+        if ($existe) {
+            return response()->json([
+                'message' => 'El estudiante ya es egresado en esta especialidad'
+            ], 409);
+        }
+
+        $egresado = Egresados::create([
+            'id_estudiante' => $request->id_estudiante,
+            'id_especialidad' => $request->id_especialidad,
+        ]);
 
         return response()->json([
             'message' => 'Egresado registrado correctamente',
@@ -57,7 +70,7 @@ class EgresadosController extends Controller
         $request->validate([
             'turno'        => 'sometimes|string|max:2',
             'id_estudiante' => 'sometimes|uuid|exists:estudiante,id',
-            'id_grupo'     => 'sometimes|uuid|exists:grupo,id',
+            'id_especialidad'     => 'sometimes|uuid|exists:especialidad_programa,id',
         ]);
 
         $egresado->update($request->all());

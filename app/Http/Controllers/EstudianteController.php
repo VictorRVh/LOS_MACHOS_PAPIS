@@ -9,6 +9,7 @@ use App\Models\Modulo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class EstudianteController extends Controller
 {
@@ -306,6 +307,8 @@ class EstudianteController extends Controller
                 'm.fecha_reserva',
                 'm.matriculado',
 
+                'ep.id as especialidad_programa',
+
                 // Grupo
                 'g.id as grupo_id',
                 'g.seccion',
@@ -348,6 +351,11 @@ class EstudianteController extends Controller
         // Construir estructura jerárquica
         $especialidades = [];
 
+        $especialidadesEgresadas = DB::table('egresados')
+            ->where('id_estudiante', $estudiante->id)
+            ->pluck('id_especialidad')
+            ->toArray();
+
         foreach ($informacionAcademica as $registro) {
 
             $espId = $registro->especialidad_id;
@@ -356,6 +364,8 @@ class EstudianteController extends Controller
             if (!isset($especialidades[$espId])) {
                 $especialidades[$espId] = [
                     'id' => $registro->especialidad_id,
+                    'especialidad_programa' => $registro->especialidad_programa,
+                    'es_egresado' => in_array($registro->especialidad_programa, $especialidadesEgresadas),
                     'nombre' => $registro->nombre_especialidad,
                     'programa' => [
                         'id' => $registro->programa_id,
@@ -451,51 +461,37 @@ class EstudianteController extends Controller
     {
         $request->validate([
             'especialidad' => 'required|uuid',
-            'periodo' => 'required|uuid',
+            'periodo'      => 'required|uuid',
         ]);
 
         $especialidadMadreId = $request->query('especialidad');
-        $periodoId = $request->query('periodo');
+        $periodoId           = $request->query('periodo');
 
-        // Obtener datos de la especialidad madre
         $especialidadMadre = DB::table('especialidad_madre')
             ->where('id', $especialidadMadreId)
             ->first(['id', 'nombre_especialidad']);
 
-        // Obtener datos del periodo
         $periodo = DB::table('periodo')
             ->where('id', $periodoId)
             ->first(['id', 'nombre_periodo']);
 
-        // 1. Obtener programas vinculados
+        // 1. Programas vinculados a la especialidad madre
         $especialidadesPrograma = DB::table('especialidad_programa')
             ->where('id_especialidad', $especialidadMadreId)
             ->pluck('id');
 
         if ($especialidadesPrograma->isEmpty()) {
-            return response()->json([
-                'especialidad' => $especialidadMadre,
-                'periodo' => $periodo,
-                'egresados' => []
-            ]);
+            return response()->json(['especialidad' => $especialidadMadre, 'periodo' => $periodo, 'egresados' => []]);
         }
 
-        // 2. Obtener grupos culminados
+        // 2. Grupos culminados (status = 2) del periodo
         $grupos = DB::table('grupo')
             ->whereIn('id_especialidad', $especialidadesPrograma)
             ->where('id_periodo', $periodoId)
             ->where('status', 2)
-            ->get();
+            ->get(['id', 'id_modulo', 'id_especialidad']);
 
-        if ($grupos->isEmpty()) {
-            return response()->json([
-                'especialidad' => $especialidadMadre,
-                'periodo' => $periodo,
-                'egresados' => []
-            ]);
-        }
-
-        // 3. Módulos requeridos
+        // 3. Módulos requeridos para esta especialidad
         $modulosRequeridos = DB::table('modulos')
             ->whereIn('id_especialidad', $especialidadesPrograma)
             ->pluck('id')
@@ -503,58 +499,188 @@ class EstudianteController extends Controller
 
         $totalModulos = count($modulosRequeridos);
 
-        // 4. Matriculados
-        $matriculas = DB::table('matricula')
-            ->whereIn('id_grupo', $grupos->pluck('id'))
-            ->get();
+        $egresados     = [];
+        $idsIncluidos  = [];
 
-        if ($matriculas->isEmpty()) {
-            return response()->json([
-                'especialidad' => $especialidadMadre,
-                'periodo' => $periodo,
-                'egresados' => []
-            ]);
-        }
+        // --- FUENTE 1: Cálculo automático (módulos completos + notas aprobadas) ---
+        if ($grupos->isNotEmpty()) {
 
-        $modulosCursados = [];
+            $grupoIds    = $grupos->pluck('id');
+            $grupoModulo = $grupos->pluck('id_modulo', 'id'); // [grupo_id => modulo_id]
 
-        foreach ($matriculas as $mat) {
-            $modulosCursados[$mat->id_estudiante][] = $mat->id_grupo;
-        }
+            // Capacidades terminales por grupo
+            $capacidadesPorGrupo = DB::table('capacidad_terminal')
+                ->whereIn('id_grupo', $grupoIds)
+                ->get(['id', 'id_grupo'])
+                ->groupBy('id_grupo');
 
-        $egresados = [];
+            // Matrículas
+            $matriculas = DB::table('matricula')
+                ->whereIn('id_grupo', $grupoIds)
+                ->get(['id_estudiante', 'id_grupo']);
 
-        // 5. Validar módulos completados
-        foreach ($modulosCursados as $estudianteId => $gruposDelEstudiante) {
+            if ($matriculas->isNotEmpty()) {
 
-            $modulosCompletados = DB::table('grupo')
-                ->whereIn('id', $gruposDelEstudiante)
-                ->pluck('id_modulo')
-                ->unique()
-                ->toArray();
-
-            if (count(array_intersect($modulosRequeridos, $modulosCompletados)) == $totalModulos) {
-
-                $estudiante = DB::table('estudiante')
-                    ->where('id', $estudianteId)
-                    ->first();
-
-                if ($estudiante) {
-                    $egresados[] = [
-                        'id' => $estudiante->id,
-                        'nombre' => $estudiante->nombre,
-                        'apellido_paterno' => $estudiante->apellido_paterno,
-                        'apellido_materno' => $estudiante->apellido_materno,
-                        'dni' => $estudiante->nro_documento ?? $estudiante->dni,
-                    ];
+                // Agrupar grupos por estudiante
+                $gruposPorEstudiante = [];
+                foreach ($matriculas as $mat) {
+                    $gruposPorEstudiante[$mat->id_estudiante][] = $mat->id_grupo;
                 }
+
+                // Cargar todas las notas en lote
+                $todasLasNotas = DB::table('nota_capacidad_terminal')
+                    ->whereIn('id_grupo', $grupoIds)
+                    ->get(['id_estudiante', 'id_grupo', 'id_capacidad', 'nota_capacidad']);
+
+                // Indexar: [estudiante_id][grupo_id][capacidad_id] => nota
+                $notasIndexadas = [];
+                foreach ($todasLasNotas as $nota) {
+                    $notasIndexadas[$nota->id_estudiante][$nota->id_grupo][$nota->id_capacidad] = $nota->nota_capacidad;
+                }
+
+                $notaMinima = 11; // Ajusta según tu reglamento
+
+                foreach ($gruposPorEstudiante as $estudianteId => $gruposDelEstudiante) {
+
+                    // A. Verificar que cubre todos los módulos requeridos
+                    $modulosCompletados = collect($gruposDelEstudiante)
+                        ->map(fn($gId) => $grupoModulo[$gId] ?? null)
+                        ->filter()
+                        ->unique()
+                        ->toArray();
+
+                    if (count(array_intersect($modulosRequeridos, $modulosCompletados)) !== $totalModulos) {
+                        continue;
+                    }
+
+                    // B. Verificar notas aprobatorias en todas las capacidades de cada grupo
+                    $aprobado = true;
+
+                    foreach ($gruposDelEstudiante as $grupoId) {
+
+                        $capacidadesDelGrupo = $capacidadesPorGrupo[$grupoId] ?? collect();
+
+                        if ($capacidadesDelGrupo->isEmpty()) {
+                            $aprobado = false;
+                            break;
+                        }
+
+                        foreach ($capacidadesDelGrupo as $capacidad) {
+                            $nota = $notasIndexadas[$estudianteId][$grupoId][$capacidad->id] ?? null;
+
+                            if ($nota === null || (float) $nota < $notaMinima) {
+                                $aprobado = false;
+                                break 2;
+                            }
+                        }
+                    }
+
+                    if (!$aprobado) {
+                        continue;
+                    }
+
+                    // C. Persistir en tabla egresados si aún no existe
+                    $yaEgresado = DB::table('egresados')
+                        ->where('id_estudiante', $estudianteId)
+                        ->whereIn('id_especialidad', $especialidadesPrograma)
+                        ->exists();
+
+                    if (!$yaEgresado) {
+                        $idEspecialidadPrograma = DB::table('grupo')
+                            ->whereIn('id', $gruposDelEstudiante)
+                            ->value('id_especialidad');
+
+                        DB::table('egresados')->insert([
+                            'id'              => \Str::uuid(),
+                            'id_estudiante'   => $estudianteId,
+                            'id_especialidad' => $idEspecialidadPrograma,
+                            'created_at'      => now(),
+                            'updated_at'      => now(),
+                        ]);
+                    }
+
+                    // D. Obtener datos del estudiante
+                    $estudiante = DB::table('estudiante')
+                        ->where('id', $estudianteId)
+                        ->first(['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'nro_documento']);
+
+                    if ($estudiante) {
+                        $idsIncluidos[] = $estudianteId;
+                        $egresados[]    = [
+                            'id'               => $estudiante->id,
+                            'nombre'           => $estudiante->nombre,
+                            'apellido_paterno' => $estudiante->apellido_paterno,
+                            'apellido_materno' => $estudiante->apellido_materno,
+                            'dni'              => $estudiante->nro_documento,
+                            'egreso_manual'    => false,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // --- FUENTE 2: Egresados registrados manualmente en tabla egresados ---
+        $egresadosTabla = DB::table('egresados as e')
+            ->join('especialidad_programa as ep', 'ep.id', '=', 'e.id_especialidad')
+            ->where('ep.id_especialidad', $especialidadMadreId)
+            ->pluck('e.id_estudiante')
+            ->toArray();
+
+        $pendientes = array_diff($egresadosTabla, $idsIncluidos);
+
+        if (!empty($pendientes)) {
+            $estudiantesExtra = DB::table('estudiante')
+                ->whereIn('id', $pendientes)
+                ->get(['id', 'nombre', 'apellido_paterno', 'apellido_materno', 'nro_documento']);
+
+            foreach ($estudiantesExtra as $estudiante) {
+                $egresados[] = [
+                    'id'               => $estudiante->id,
+                    'nombre'           => $estudiante->nombre,
+                    'apellido_paterno' => $estudiante->apellido_paterno,
+                    'apellido_materno' => $estudiante->apellido_materno,
+                    'dni'              => $estudiante->nro_documento,
+                    'egreso_manual'    => true,
+                ];
             }
         }
 
         return response()->json([
             'especialidad' => $especialidadMadre,
-            'periodo' => $periodo,
-            'egresados' => $egresados
+            'periodo'      => $periodo,
+            'egresados'    => $egresados,
         ]);
+    }
+
+    // -----------------------------------------------------------------------
+
+    public function registrarEgresoManual(Request $request)
+    {
+        $request->validate([
+            'id_estudiante'   => 'required|uuid',
+            'id_especialidad' => 'required|uuid', // id de especialidad_programa
+            'observacion'     => 'nullable|string|max:500',
+        ]);
+
+        $existe = DB::table('egresados')
+            ->where('id_estudiante', $request->id_estudiante)
+            ->where('id_especialidad', $request->id_especialidad)
+            ->exists();
+
+        if ($existe) {
+            return response()->json([
+                'message' => 'El estudiante ya figura como egresado de esta especialidad.'
+            ], 409);
+        }
+
+        DB::table('egresados')->insert([
+            'id'              => \Str::uuid(),
+            'id_estudiante'   => $request->id_estudiante,
+            'id_especialidad' => $request->id_especialidad,
+            'created_at'      => now(),
+            'updated_at'      => now(),
+        ]);
+
+        return response()->json(['message' => 'Egreso registrado correctamente.'], 201);
     }
 }

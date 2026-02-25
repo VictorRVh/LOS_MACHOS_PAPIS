@@ -51,8 +51,8 @@ class EspecialidadPrograma extends Model
         return $this->hasMany(Modulo::class, 'id_especialidad');
     }
 
-    public function grupo()
+    public function especialidad()
     {
-        return $this->hasMany(Grupo::class, 'id_especialidad');
+        return $this->hasMany(EspecialidadPrograma::class, 'id_especialidad');
     }
 }

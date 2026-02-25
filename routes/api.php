@@ -948,7 +948,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('egresados', [
         \App\Http\Controllers\EgresadosController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos');
 
     Route::patch('egresados/{id}', [
         \App\Http\Controllers\EgresadosController::class,

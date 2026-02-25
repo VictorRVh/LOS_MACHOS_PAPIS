@@ -13,16 +13,15 @@ return new class extends Migration
     {
         Schema::create('egresados', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->char('turno', 1);
             $table->uuid('id_estudiante');
-            $table->uuid('id_grupo');
+            $table->uuid('id_especialidad');
 
             $table->foreign('id_estudiante')
                   ->references('id')->on('estudiante')
                   ->onDelete('cascade');
 
-            $table->foreign('id_grupo')
-                  ->references('id')->on('grupo')
+            $table->foreign('id_especialidad')
+                  ->references('id')->on('especialidad_programa')
                   ->onDelete('cascade');
             $table->timestamps();
         });

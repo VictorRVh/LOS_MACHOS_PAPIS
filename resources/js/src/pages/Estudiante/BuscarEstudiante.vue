@@ -4,6 +4,7 @@ import { ref } from "vue";
 import useHttpRequest from "../../composables/useHttpRequest";
 
 const { store: buscar, saving } = useHttpRequest("/buscarEstudiante");
+const { store: egresado } = useHttpRequest("/egresados");
 
 const query = ref("");
 const loading = ref(false);
@@ -13,6 +14,10 @@ const hasSearched = ref(false);
 const error = ref("");
 
 const especialidadAbierta = ref(null)
+
+const showEgresadoModal = ref(false);
+const selectedEspecialidadId = ref(null);
+const selectedEstudianteId = ref(null);
 
 const buscarEstudiante = async () => {
     if (!query.value.trim()) return;
@@ -76,6 +81,35 @@ const esFinalizado = (fechaFin) => {
     const hoy = new Date();
     const fin = new Date(fechaFin);
     return hoy > fin;
+};
+
+const pasarEgresado = (especialidadId, estudianteId) => {
+
+    selectedEspecialidadId.value = especialidadId;
+    selectedEstudianteId.value = estudianteId;
+
+    showEgresadoModal.value = true;
+};
+
+const confirmarEgresado = async () => {
+    try {
+
+        const response = await egresado({
+            id_estudiante: selectedEstudianteId.value,
+            id_especialidad: selectedEspecialidadId.value,
+        });
+
+        console.log(response);
+
+        showEgresadoModal.value = false;
+
+        // opcional: limpiar
+        selectedEspecialidadId.value = null;
+        selectedEstudianteId.value = null;
+
+    } catch (error) {
+        console.error(error);
+    }
 };
 
 </script>
@@ -247,7 +281,17 @@ const esFinalizado = (fechaFin) => {
 
                                 </div>
                             </div>
-
+                            
+                            <div class="flex justify-end pt-4">
+                                <button :disabled="especialidad.es_egresado"
+                                    @click="!especialidad.es_egresado && pasarEgresado(especialidad.especialidad_programa, estudiante.id)"
+                                    :class="especialidad.es_egresado
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : 'bg-cetpro hover:bg-cetpro-dark'"
+                                    class="text-white font-semibold px-6 py-2 rounded-lg shadow-google-sm transition-all duration-200">
+                                    {{ especialidad.es_egresado ? 'YA ES EGRESADO' : 'PASAR A EGRESADO' }}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </transition>
@@ -260,6 +304,26 @@ const esFinalizado = (fechaFin) => {
             <p class="text-gray-500 dark:text-gray-400">
                 No se encontró ningún estudiante con ese documento.
             </p>
+        </div>
+    </div>
+
+    <div v-if="showEgresadoModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md p-6">
+            <h2 class="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">
+                ¿Desea pasar a este estudiante a Egresado?
+            </h2>
+
+            <!-- ACCIONES -->
+            <div class="flex justify-end gap-2">
+                <button @click="showEgresadoModal = false" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
+                    Cancelar
+                </button>
+
+                <button @click="confirmarEgresado"
+                    class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white">
+                    Sí
+                </button>
+            </div>
         </div>
     </div>
 </template>

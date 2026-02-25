@@ -19,7 +19,7 @@ class Egresados extends Model
         'id',
         'turno',
         'id_estudiante',
-        'id_grupo'
+        'id_especialidad'
     ];
 
     protected static function boot()
@@ -38,8 +38,8 @@ class Egresados extends Model
         return $this->belongsTo(Estudiante::class, 'id_estudiante');
     }
 
-    public function grupo()
+    public function especialidad()
     {
-        return $this->belongsTo(Grupo::class, 'id_grupo');
+        return $this->belongsTo(EspecialidadPrograma::class, 'id_especialidad');
     }
 }

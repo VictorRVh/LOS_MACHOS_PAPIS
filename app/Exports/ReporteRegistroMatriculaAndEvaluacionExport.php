@@ -40,6 +40,9 @@ class ReporteRegistroMatriculaAndEvaluacionExport
         // 3. Rellenar registro de evaluación (unidades didácticas)
         $this->rellenarEstudiantesYNotas($sheet);
 
+        // 🔥 AGREGA ESTA LÍNEA
+        $this->llenarUnidadesCompetencia($sheet);
+
         return $spreadsheet;
     }
 
@@ -277,7 +280,75 @@ class ReporteRegistroMatriculaAndEvaluacionExport
             $fila++;
         }
     }
+    private function llenarUnidadesCompetencia($sheet): void
+    {
+        $data = DB::table('capacidad_terminal as ct')
+            ->join('capacidades_competencias as cc', 'cc.id_capacidad_terminal', '=', 'ct.id')
+            ->join('competencias as c', 'cc.id_competencia', '=', 'c.id')
+            ->join('grupo as g', 'g.id', '=', 'ct.id_grupo')
+            ->where('g.id', $this->idGrupo)
 
+            ->orderBy('c.id') // 🔥 ordenar por competencia
+            ->orderBy('ct.numero_capacidad')
+
+            ->select(
+                'c.id as competencia_id',
+                'c.descripcion as competencia',
+                'ct.numero_capacidad',
+                'cc.descripcion as capacidad'
+            )
+            ->get();
+
+
+        $fila = 5;
+
+        $competenciaActual = null;
+        $filaInicioCompetencia = 5;
+
+        foreach ($data as $item) {
+
+            // 🔥 SI CAMBIA LA COMPETENCIA
+            if ($competenciaActual !== $item->competencia_id) {
+
+                // cerrar merge anterior
+                if ($competenciaActual !== null) {
+
+                    $sheet->mergeCells("W{$filaInicioCompetencia}:W" . ($fila - 1));
+                }
+
+                // nueva competencia
+                $competenciaActual = $item->competencia_id;
+                $filaInicioCompetencia = $fila;
+
+                // escribir competencia
+                $sheet->setCellValue(
+                    "W{$fila}",
+                    $item->competencia
+                );
+            }
+
+            // escribir capacidad
+            $sheet->setCellValue(
+                "X{$fila}",
+                "Cap {$item->numero_capacidad}: {$item->capacidad}"
+            );
+
+            $fila++;
+        }
+
+        // cerrar último merge
+        if ($competenciaActual !== null) {
+
+            $sheet->mergeCells("W{$filaInicioCompetencia}:W" . ($fila - 1));
+        }
+
+        // estilo vertical
+        $sheet->getStyle("W5:W" . ($fila - 1))
+            ->getAlignment()
+            ->setTextRotation(90)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+    }
     /**
      * Llena los datos de cada estudiante: número, documento, nombre y faltas
      */

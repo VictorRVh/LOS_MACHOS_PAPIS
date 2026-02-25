@@ -120,34 +120,94 @@ function getRowsNotas(especialidad) {
   const rows = [];
   const periodos = Array.isArray(especialidad?.periodos) ? especialidad.periodos : [];
 
+  const parseNota = (value) => {
+    if (value === null || value === undefined || value === "") return null;
+    const n = Number(value);
+    return Number.isNaN(n) ? null : n;
+  };
+
   periodos.forEach((periodo) => {
     const modulos = Array.isArray(periodo?.modulos) ? periodo.modulos : [];
+    const modulosMap = new Map();
+
     modulos.forEach((item) => {
       const modulo = `M${item?.modulo?.numero || "-"} - ${item?.modulo?.descripcion || "-"}`;
       const estado = item?.matricula?.matriculado ? "Matriculado" : "Reserva";
       const promedio = item?.promedio_notas ?? "-";
+      const key = `${periodo?.nombre || "-"}|${modulo}`;
       const unidades = Array.isArray(item?.notas_unidades) ? item.notas_unidades : [];
 
-      if (!unidades.length) {
-        rows.push([periodo?.nombre || "-", modulo, "-", "-", String(promedio), estado]);
-        return;
+      if (!modulosMap.has(key)) {
+        modulosMap.set(key, {
+          periodo: periodo?.nombre || "-",
+          modulo,
+          estado,
+          promedio,
+          unidadesMap: new Map(),
+        });
+      }
+
+      const bucket = modulosMap.get(key);
+      const promedioActual = parseNota(bucket.promedio);
+      const promedioNuevo = parseNota(promedio);
+      if (promedioActual === null && promedioNuevo !== null) {
+        bucket.promedio = promedio;
       }
 
       unidades.forEach((u) => {
-        const unidadTexto = u?.es_experiencia_formativa
+        const isExp = !!u?.es_experiencia_formativa || /experiencia/i.test(String(u?.nombre_unidad || ""));
+        const unidadKey = isExp ? "EF" : `U${u?.numero_unidad || "-"}`;
+        const unidadTexto = isExp
           ? "Experiencia formativa"
           : `U${u?.numero_unidad || "-"} ${u?.nombre_unidad || ""}`.trim();
 
-        rows.push([
-          periodo?.nombre || "-",
-          modulo,
-          unidadTexto,
-          u?.nota ?? "-",
-          String(promedio),
-          estado,
-        ]);
+        const notaNueva = parseNota(u?.nota);
+        const existente = bucket.unidadesMap.get(unidadKey);
+
+        if (!existente) {
+          bucket.unidadesMap.set(unidadKey, { unidadTexto, nota: u?.nota });
+          return;
+        }
+
+        const notaExistente = parseNota(existente.nota);
+        if ((notaExistente === null || notaExistente === 0) && notaNueva !== null && notaNueva !== 0) {
+          existente.nota = u?.nota;
+        }
       });
     });
+
+    for (const moduloData of modulosMap.values()) {
+      const unidades = Array.from(moduloData.unidadesMap.entries())
+        .sort((a, b) => {
+          if (a[0] === "EF") return 1;
+          if (b[0] === "EF") return -1;
+          return a[0].localeCompare(b[0], undefined, { numeric: true });
+        })
+        .map(([, value]) => value);
+
+      if (!unidades.length) {
+        rows.push([
+          moduloData.periodo,
+          moduloData.modulo,
+          "-",
+          "-",
+          String(moduloData.promedio),
+          moduloData.estado,
+        ]);
+        continue;
+      }
+
+      unidades.forEach((unidad, idx) => {
+        rows.push([
+          idx === 0 ? moduloData.periodo : "",
+          idx === 0 ? moduloData.modulo : "",
+          unidad.unidadTexto,
+          unidad.nota ?? "-",
+          idx === 0 ? String(moduloData.promedio) : "",
+          idx === 0 ? moduloData.estado : "",
+        ]);
+      });
+    }
   });
 
   return rows;

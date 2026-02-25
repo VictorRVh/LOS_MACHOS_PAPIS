@@ -140,12 +140,18 @@ class NotaCapacidadTerminalController extends Controller
         $notasExperiencia = DB::table('nota_experiencia_formativa')
             ->where('id_grupo', $idGrupo)
             ->where('status', 1)
+            ->whereNotNull('nota')
+            ->orderByDesc('updated_at')
+            ->orderByDesc('tipo_practicas')
             ->select(
                 'id_estudiante',
                 'nota'
             )
             ->get()
-            ->keyBy('id_estudiante');
+            ->groupBy('id_estudiante')
+            ->map(function ($items) {
+                return $items->first();
+            });
 
 
 

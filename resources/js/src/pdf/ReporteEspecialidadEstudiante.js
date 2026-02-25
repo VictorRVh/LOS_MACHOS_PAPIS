@@ -119,6 +119,27 @@ function drawFooter(doc, cetpro, pageW, pageH, margin, page, totalPages) {
 function getRowsNotas(especialidad) {
   const rows = [];
   const periodos = Array.isArray(especialidad?.periodos) ? especialidad.periodos : [];
+  const getEstadoPdf = (item = {}) => {
+    const matricula = item?.matricula || {};
+    const matriculadoEstadoApi = Number(matricula?.matriculado_estado);
+    const reservaEstadoApi = Number(matricula?.reserva_estado);
+
+    const matriculadoEstado = Number.isFinite(matriculadoEstadoApi)
+      ? matriculadoEstadoApi
+      : (matricula?.matriculado ? 1 : 0);
+
+    const reservaEstado = Number.isFinite(reservaEstadoApi)
+      ? reservaEstadoApi
+      : (matricula?.reserva ? 1 : 0);
+
+    if (matriculadoEstado === 2) return "Retirado";
+    if (matriculadoEstado === 3) return "Ret. justif.";
+    if (reservaEstado === 1) return "Reserva";
+    if (reservaEstado === 3) return "Res. usada";
+    if (matriculadoEstado === 1) return "Matriculado";
+
+    return "Pendiente";
+  };
 
   const parseNota = (value) => {
     if (value === null || value === undefined || value === "") return null;
@@ -138,7 +159,7 @@ function getRowsNotas(especialidad) {
       const turno = item?.grupo?.turno ? `Turno ${item.grupo.turno}` : "Turno -";
       const moduloBase = `M${item?.modulo?.numero || "-"} - ${item?.modulo?.descripcion || "-"}`;
       const modulo = `${moduloBase} (${seccion} | ${turno})`;
-      const estado = item?.matricula?.matriculado ? "Matriculado" : "Reserva";
+      const estado = getEstadoPdf(item);
       const unidades = Array.isArray(item?.notas_unidades) ? item.notas_unidades : [];
       const unidadesMap = new Map();
 

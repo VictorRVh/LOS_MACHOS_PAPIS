@@ -352,6 +352,7 @@ class EstudianteController extends Controller
 
         $capacidadesPorGrupo = collect();
         $notasPorGrupo = collect();
+        $notaExperienciaPorGrupo = collect();
         $asistenciaResumenPorGrupo = collect();
 
         if ($grupoIds->isNotEmpty()) {
@@ -370,6 +371,18 @@ class EstudianteController extends Controller
                 ->groupBy('id_grupo')
                 ->map(function ($items) {
                     return $items->keyBy('id_capacidad');
+                });
+
+            $notaExperienciaPorGrupo = DB::table('nota_experiencia_formativa')
+                ->where('id_estudiante', $estudiante->id)
+                ->whereIn('id_grupo', $grupoIds)
+                ->orderByDesc('tipo_practicas')
+                ->orderByDesc('created_at')
+                ->select('id_grupo', 'nota')
+                ->get()
+                ->groupBy('id_grupo')
+                ->map(function ($items) {
+                    return $items->first();
                 });
 
             $asistenciaResumenPorGrupo = DB::table('asistencia')
@@ -399,6 +412,12 @@ class EstudianteController extends Controller
         foreach ($informacionAcademica as $registro) {
             $capacidadesGrupo = $capacidadesPorGrupo->get($registro->grupo_id, collect());
             $notasGrupo = $notasPorGrupo->get($registro->grupo_id, collect());
+            $notaExperienciaRegistro = $notaExperienciaPorGrupo->get($registro->grupo_id);
+            $notaExperiencia = null;
+
+            if ($notaExperienciaRegistro && $notaExperienciaRegistro->nota !== null && is_numeric($notaExperienciaRegistro->nota)) {
+                $notaExperiencia = (float) $notaExperienciaRegistro->nota;
+            }
 
             $unidadesNotas = $capacidadesGrupo->map(function ($cap) use ($notasGrupo) {
                 $notaRegistro = $notasGrupo->get($cap->id);
@@ -412,10 +431,20 @@ class EstudianteController extends Controller
                 ];
             })->values();
 
+            if ($notaExperiencia !== null) {
+                $unidadesNotas->push([
+                    'id_capacidad' => null,
+                    'numero_unidad' => 'EF',
+                    'nombre_unidad' => 'Experiencia formativa',
+                    'nota' => $notaExperiencia,
+                    'es_experiencia_formativa' => true,
+                ]);
+            }
+
             $notasValidas = $unidadesNotas
                 ->pluck('nota')
                 ->filter(function ($n) {
-                    return $n !== null;
+                    return $n !== null && is_numeric($n);
                 });
 
             $promedioNotas = $notasValidas->count() > 0 ? round($notasValidas->avg(), 1) : null;
@@ -497,6 +526,7 @@ class EstudianteController extends Controller
 
                 'notas_unidades' => $unidadesNotas,
                 'promedio_notas' => $promedioNotas,
+                'nota_experiencia_formativa' => $notaExperiencia,
                 'asistencia_resumen' => [
                     'total_registros' => (int) $totalAsistencia,
                     'asistio' => (int) $asistio,

@@ -1,13 +1,16 @@
-<script setup>
+﻿<script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 import { UsersIcon, ArrowRightIcon } from '@heroicons/vue/24/outline';
 import useActividadesStore from '../store/ActividadesRecientes/UseActividadesRecientesStore';
 import PermissionBlock from '../components/page/AuthorizationStart.vue'
 import useGrupoStore from '../store/Grupo/useGrupoStore';
+import useHttpRequest from '../composables/useHttpRequest';
 
 // IMPORTAR GENERADOR CENSO
 import { generateCenso9B } from '../pdf/Censo9B.js';
+const { indexWithParams: getCensoData } = useHttpRequest('/censo9b-data');
+const { index: getCensoAnios } = useHttpRequest('/censo9b-anios');
 
 
 /* -------------------- TABS -------------------- */
@@ -17,6 +20,8 @@ const activeActivityTab = ref(null);
 /* -------------------- FECHAS -------------------- */
 const dateFrom = ref(new Date().toISOString().slice(0, 10));
 const dateTo = ref(new Date().toISOString().slice(0, 10));
+const censoAniosDisponibles = ref([]);
+const censoAnioSeleccionado = ref(null);
 
 /* -------------------- ACTIVIDADES -------------------- */
 const actividadesStore = useActividadesStore();
@@ -60,7 +65,7 @@ const setDateRange = (days) => {
 };
 
 const applyDateFilter = async () => {
-  isFiltering.value = true; // <- 🔥 activar bandera
+  isFiltering.value = true; // <- ðŸ”¥ activar bandera
   stopAutoUpdate();         // detener auto-update
 
   await actividadesStore.loadActividadesPorFechas(dateFrom.value, dateTo.value);
@@ -72,7 +77,7 @@ const applyDateFilter = async () => {
   }
 };
 
-/* -------------------- AUTO-ACTUALIZACIÓN -------------------- */
+/* -------------------- AUTO-ACTUALIZACIÃ“N -------------------- */
 let interval = null;
 let inactivityTimer = null;
 const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 min
@@ -99,7 +104,7 @@ const resetInactivityTimer = () => {
   }, INACTIVITY_LIMIT);
 
   if (!interval && document.visibilityState === 'visible' && !isFiltering.value) {
-    startAutoUpdate();  // solo si NO se está filtrando
+    startAutoUpdate();  // solo si NO se estÃ¡ filtrando
   }
 };
 
@@ -115,9 +120,30 @@ const handleVisibilityChange = () => {
 };
 
 /* -------------------- FUNCIONES CENSO -------------------- */
-const handleCensoClick = () => {
-    generateCenso9B();
-}
+const handleCensoClick = async () => {
+    const selectedYear =
+      Number(censoAnioSeleccionado.value) ||
+      Number((dateFrom.value || '').slice(0, 4)) ||
+      new Date().getFullYear();
+    const data = await getCensoData({
+      anio: selectedYear
+    });
+
+    generateCenso9B(data);
+};
+
+const loadCensoAnios = async () => {
+  const response = await getCensoAnios();
+  const anios = Array.isArray(response?.anios_disponibles) ? response.anios_disponibles : [];
+  censoAniosDisponibles.value = anios;
+
+  if (anios.length > 0) {
+    censoAnioSeleccionado.value = Number(anios[0]);
+    return;
+  }
+
+  censoAnioSeleccionado.value = Number(new Date().getFullYear());
+};
 
 /* -------------------- LIFECYCLE -------------------- */
 onMounted(async () => {
@@ -130,13 +156,14 @@ onMounted(async () => {
 
   await grupoStore.loadGruposCulminados();
   gruposCulminados.value = grupoStore.gruposCulminados;
+  await loadCensoAnios();
 
-  // activar primer rol automáticamente
+  // activar primer rol automÃ¡ticamente
   if (rolesTabs.value.length > 0) {
     activeActivityTab.value = rolesTabs.value[0];
   }
 
-  // iniciar lógica
+  // iniciar lÃ³gica
   startAutoUpdate();
   resetInactivityTimer();
 
@@ -190,6 +217,18 @@ onUnmounted(() => {
           </button>
 
           <!-- NUEVO BOTÓN CENSO -->
+          <div class="flex items-center gap-2 px-3 py-2 text-sm bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600">
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide">Año censo</span>
+            <select
+              v-model="censoAnioSeleccionado"
+              class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm text-gray-700 dark:text-gray-100 focus:ring-cetpro focus:border-cetpro"
+            >
+              <option v-for="anio in censoAniosDisponibles" :key="anio" :value="Number(anio)">
+                {{ anio }}
+              </option>
+            </select>
+          </div>
+
           <button @click="handleCensoClick"
             class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-slate-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors">
             <!-- Icono simulado (Documento) -->

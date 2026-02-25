@@ -1,7 +1,41 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export function generateCenso9B() {
+const mergeCensoData = (defaults, incoming) => {
+  if (!incoming || typeof incoming !== "object") return defaults;
+
+  const merged = { ...defaults, ...incoming };
+  const arrayKeys = [
+    "t101",
+    "t102",
+    "t104",
+    "t105_1",
+    "t105_2",
+    "t106",
+    "t107",
+    "programas",
+    "sedesAT",
+    "sedesTE",
+    "matriculaEdad",
+    "personal",
+  ];
+
+  for (const key of arrayKeys) {
+    if (!Array.isArray(merged[key])) {
+      merged[key] = defaults[key];
+    }
+  }
+
+  merged.codMod = merged.codMod || defaults.codMod;
+  merged.codLoc = merged.codLoc || defaults.codLoc;
+  merged.cetpro = merged.cetpro || defaults.cetpro;
+  merged.dist = merged.dist || defaults.dist;
+  merged.loc = merged.loc || defaults.loc;
+
+  return merged;
+};
+
+export function generateCenso9B(payload = null) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const logoCenso = "/img/CensoEducativoLogo.png"; 
 
@@ -11,7 +45,7 @@ export function generateCenso9B() {
     titleBox: { fillColor: [210, 210, 210], textColor: 0, fontStyle: "bold", fontSize: 7 }
   };
 
-  const d = {
+  const defaultData = {
     codMod: "0240069", codLoc: "441744", cetpro: "CENTRO DE EDUCACIÓN TÉCNICO PRODUCTIVA PUNO", dist: "PUNO", loc: "PUNO",
     t101: [["TOTAL", "418", "875", "215", "480", "0", "0", "203", "395", "0", "0"], ["Aprobados", "395", "849", "200", "469", "0", "0", "195", "380", "0", "0"], ["Desaprobados", "1", "0", "1", "0", "0", "0", "0", "0", "0", "0"], ["Retirados", "22", "26", "14", "11", "0", "0", "8", "15", "0", "0"]],
     t102: [["TOTAL", "22", "26", "14", "11", "0", "0", "8", "15", "0", "0"]],
@@ -27,15 +61,28 @@ export function generateCenso9B() {
     personal: [["01", "CALDERON MUNOZ ALENA MONICA", "01258974", "01", "50 Mujer", "0100", "307", "01", "01", "01", "05", "02", "25", "25", "25", "06", "01", "01", "03", "40"], ["02", "TAPIA COAQUIRA JOSE", "01308555", "01", "56 Hombr", "0100", "", "01", "01", "01", "02", "03", "29", "01", "31", "31", "16", "08", "13", "", "01", "40"], ["03", "COA RIVAS IMELDA TERESA", "02144514", "01", "63 Mujer", "0100", "3342", "01", "01", "01", "02", "02", "", "02", "33", "33", "33", "04", "13", "", "03", "40"]]
   };
 
+  const d = mergeCensoData(defaultData, payload);
+
+  const anioCenso = Number(d.anio_censo) || new Date().getFullYear();
+  const anioPrevio = anioCenso - 1;
+  const fechaEnvio = new Date().toLocaleString("es-PE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
   try { doc.addImage(logoCenso, "PNG", 15, 8, 25, 15); } catch (e) {}
-  doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text("2024", 105, 12, { align: "center" });
+  doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text(String(anioCenso), 105, 12, { align: "center" });
   doc.setFontSize(14); doc.text("CENSO EDUCATIVO", 105, 17, { align: "center" });
   doc.setFontSize(9); doc.text("RESULTADO DEL EJERCICIO EDUCATIVO", 105, 22, { align: "center" });
   doc.setFontSize(35); doc.setTextColor(40, 40, 40); doc.text("9B", 195, 18, { align: "right" }); doc.setTextColor(0);
   doc.setFillColor(230, 230, 230); doc.rect(145, 24, 50, 6, "F"); 
   doc.setFontSize(7); doc.setFont("helvetica", "italic"); doc.text("CONSTANCIA DE ENVIO Nº", 143, 28, { align: "right" });
   doc.setFont("helvetica", "bold"); doc.text("252895", 170, 28, { align: "center" });
-  doc.setFont("helvetica", "italic"); doc.text("FECHA DE ENVIO :", 143, 33, { align: "right" }); doc.setFont("helvetica", "normal"); doc.text("21/02/25 04:27 PM", 148, 33);
+  doc.setFont("helvetica", "italic"); doc.text("FECHA DE ENVIO :", 143, 33, { align: "right" }); doc.setFont("helvetica", "normal"); doc.text(fechaEnvio, 148, 33);
 
   const marginX = 15; const width = 180; const startY = 37; 
   doc.setFillColor(210, 210, 210); doc.setDrawColor(150); doc.setLineWidth(0.1); doc.rect(marginX, startY, width, 5, "FD");
@@ -65,22 +112,22 @@ export function generateCenso9B() {
   doc.setFont("helvetica", "bold"); doc.text("104. APROBADOS CON CERTIFICACIÓN Y SIN CERTIFICACIÓN POR CICLO Y SEXO", marginX, p2Y);
   autoTable(doc, { startY: p2Y + 2, head: [[{ content: "SITUACIÓN", rowSpan: 3, styles: styles.head }, { content: "TOTAL", colSpan: 2, rowSpan: 2, styles: styles.head }, { content: "SEMESTRE - I", colSpan: 4, styles: styles.head }, { content: "SEMESTRE - II", colSpan: 4, styles: styles.head }], [{ content: "Auxiliar\nTécnico", colSpan: 2, styles: styles.head }, { content: "Técnico", colSpan: 2, styles: styles.head }, { content: "Auxiliar\nTécnico", colSpan: 2, styles: styles.head }, { content: "Técnico", colSpan: 2, styles: styles.head }], [{ content: "H", styles: styles.head }, { content: "M", styles: styles.head }, { content: "H", styles: styles.head }, { content: "M", styles: styles.head }, { content: "H", styles: styles.head }, { content: "M", styles: styles.head }, { content: "H", styles: styles.head }, { content: "M", styles: styles.head }, { content: "H", styles: styles.head }, { content: "M", styles: styles.head }]], body: d.t104, theme: 'grid', headStyles: styles.head, bodyStyles: styles.body, columnStyles: { 0: { cellWidth: 35, halign: 'left' } }, margin: { left: marginX, right: 15 } });
 
-  p2Y = doc.lastAutoTable.finalY + 8; doc.setFontSize(7); doc.setFont("helvetica", "bold"); doc.text("105. MATRÍCULADOS, RETIRADOS, EGRESADOS Y TITULADOS EN 2024, POR SEMESTRE ACADÉMICO Y SEXO, SEGÚN", marginX, p2Y); doc.text("DENOMINACIÓN DE LA OPCIÓN OCUPACIONAL", marginX, p2Y + 4);
-  const head105 = [[{ content: "OPCIÓN OCUPACIONAL", rowSpan: 2, styles: styles.head }, { content: "MATRICULADOS", colSpan: 8, styles: styles.head }, { content: "RETIRADOS", colSpan: 8, styles: styles.head }], [{ content: "SEMESTRE 2023 - I", colSpan: 4, styles: styles.head }, { content: "SEMESTRE 2023 - II", colSpan: 4, styles: styles.head }, { content: "SEMESTRE 2023 - I", colSpan: 4, styles: styles.head }, { content: "SEMESTRE 2023 - II", colSpan: 4, styles: styles.head }], [{ content: "DENOMINACIÓN", styles: styles.head }, { content: "Auxiliar\nTécnico", colSpan: 2, styles: styles.head }, { content: "Técnico", colSpan: 2, styles: styles.head }, { content: "Auxiliar\nTécnico", colSpan: 2, styles: styles.head }, { content: "Técnico", colSpan: 2, styles: styles.head }, { content: "Auxiliar\nTécnico", colSpan: 2, styles: styles.head }, { content: "Técnico", colSpan: 2, styles: styles.head }, { content: "Auxiliar\nTécnico", colSpan: 2, styles: styles.head }, { content: "Técnico", colSpan: 2, styles: styles.head }], [{ content: "", styles: { cellPadding: 0, fontSize: 1 } }, "H", "M", "H", "M", "H", "M", "H", "M", "H", "M", "H", "M", "H", "M", "H", "M"]];
+  p2Y = doc.lastAutoTable.finalY + 8; doc.setFontSize(7); doc.setFont("helvetica", "bold"); doc.text(`105. MATRÍCULADOS, RETIRADOS, EGRESADOS Y TITULADOS EN ${anioCenso}, POR SEMESTRE ACADÉMICO Y SEXO, SEGÚN`, marginX, p2Y); doc.text("DENOMINACIÓN DE LA OPCIÓN OCUPACIONAL", marginX, p2Y + 4);
+  const head105 = [[{ content: "OPCIÓN OCUPACIONAL", rowSpan: 2, styles: styles.head }, { content: "MATRICULADOS", colSpan: 8, styles: styles.head }, { content: "RETIRADOS", colSpan: 8, styles: styles.head }], [{ content: `SEMESTRE ${anioCenso} - I`, colSpan: 4, styles: styles.head }, { content: `SEMESTRE ${anioCenso} - II`, colSpan: 4, styles: styles.head }, { content: `SEMESTRE ${anioCenso} - I`, colSpan: 4, styles: styles.head }, { content: `SEMESTRE ${anioCenso} - II`, colSpan: 4, styles: styles.head }], [{ content: "DENOMINACIÓN", styles: styles.head }, { content: "Auxiliar\nTécnico", colSpan: 2, styles: styles.head }, { content: "Técnico", colSpan: 2, styles: styles.head }, { content: "Auxiliar\nTécnico", colSpan: 2, styles: styles.head }, { content: "Técnico", colSpan: 2, styles: styles.head }, { content: "Auxiliar\nTécnico", colSpan: 2, styles: styles.head }, { content: "Técnico", colSpan: 2, styles: styles.head }, { content: "Auxiliar\nTécnico", colSpan: 2, styles: styles.head }, { content: "Técnico", colSpan: 2, styles: styles.head }], [{ content: "", styles: { cellPadding: 0, fontSize: 1 } }, "H", "M", "H", "M", "H", "M", "H", "M", "H", "M", "H", "M", "H", "M", "H", "M"]];
   autoTable(doc, { startY: p2Y + 6, head: head105, body: d.t105_1, theme: 'grid', headStyles: { ...styles.head, fontSize: 4.5 }, bodyStyles: { ...styles.body, fontSize: 4.5, cellPadding: 1 }, columnStyles: { 0: { cellWidth: 40, halign: 'left' } }, margin: { left: marginX, right: 15 } });
   
   p2Y = doc.lastAutoTable.finalY + 8; doc.text("105. Continuación ...", marginX, p2Y);
-  const head105Cont = [[{ content: "OPCIÓN OCUPACIONAL", rowSpan: 2, styles: styles.head }, { content: "EGRESADOS", colSpan: 8, styles: styles.head }, { content: "TITULADOS", colSpan: 8, styles: styles.head }], [{ content: "SEMESTRE 2023 - I", colSpan: 4, styles: styles.head }, { content: "SEMESTRE 2023 - II", colSpan: 4, styles: styles.head }, { content: "SEMESTRE 2023 - I", colSpan: 4, styles: styles.head }, { content: "SEMESTRE 2023 - II", colSpan: 4, styles: styles.head }], head105[2], head105[3]];
+  const head105Cont = [[{ content: "OPCIÓN OCUPACIONAL", rowSpan: 2, styles: styles.head }, { content: "EGRESADOS", colSpan: 8, styles: styles.head }, { content: "TITULADOS", colSpan: 8, styles: styles.head }], [{ content: `SEMESTRE ${anioCenso} - I`, colSpan: 4, styles: styles.head }, { content: `SEMESTRE ${anioCenso} - II`, colSpan: 4, styles: styles.head }, { content: `SEMESTRE ${anioCenso} - I`, colSpan: 4, styles: styles.head }, { content: `SEMESTRE ${anioCenso} - II`, colSpan: 4, styles: styles.head }], head105[2], head105[3]];
   autoTable(doc, { startY: p2Y + 2, head: head105Cont, body: d.t105_2, theme: 'grid', headStyles: { ...styles.head, fontSize: 4.5 }, bodyStyles: { ...styles.body, fontSize: 4.5, cellPadding: 1 }, columnStyles: { 0: { cellWidth: 40, halign: 'left' } }, margin: { left: marginX, right: 15 } });
 
   doc.addPage(); let p3Y = 15;
-  doc.setFontSize(7); doc.setFont("helvetica", "bold"); doc.text("106. EGRESADOS POR SEXO, SEGÚN TIPO DE DISCAPACIDAD U OTRA CONDICIÓN EN LOS SEMESTRES 2024-I", marginX, p3Y);
+  doc.setFontSize(7); doc.setFont("helvetica", "bold"); doc.text(`106. EGRESADOS POR SEXO, SEGÚN TIPO DE DISCAPACIDAD U OTRA CONDICIÓN EN LOS SEMESTRES ${anioCenso}-I`, marginX, p3Y);
   const headDisc = [[{ content: "CARRERAS Y/O\nPROGRAMAS DE\nESTUDIOS", rowSpan: 2, styles: styles.head }, { content: "TOTAL", colSpan: 2, rowSpan: 2, styles: styles.head }, { content: "Discapacidad Intelectual", colSpan: 6, styles: styles.head }, { content: "Discapacidad\nAuditiva", colSpan: 4, styles: styles.head }, { content: "Discapacidad\nVisual", colSpan: 4, styles: styles.head }, { content: "Disca-\nparcidad\nFísica o\nMotora", colSpan: 2, styles: styles.head }, { content: "Trans-\ntorno del\nEspectro\nAutista", colSpan: 2, styles: styles.head }, { content: "Sordo\nceguera", colSpan: 2, styles: styles.head }, { content: "Multi\ndiscapa\ncidad", colSpan: 2, styles: styles.head }, { content: "Otra\ndiscapa\ncidad u\notra\ncondición", colSpan: 2, styles: styles.head }, { content: "No tiene\ndiscapacidad u\notra condición", colSpan: 2, styles: styles.head }], [{ content: "Leve", colSpan: 2, styles: styles.head }, { content: "Moderada", colSpan: 2, styles: styles.head }, { content: "Severa", colSpan: 2, styles: styles.head }, { content: "Hipo-\nacusia", colSpan: 2, styles: styles.head }, { content: "Sordera", colSpan: 2, styles: styles.head }, { content: "Baja visión", colSpan: 2, styles: styles.head }, { content: "Ceguera", colSpan: 2, styles: styles.head }, { content: "", colSpan: 2, styles: styles.head }, { content: "", colSpan: 2, styles: styles.head }, { content: "", colSpan: 2, styles: styles.head }, { content: "", colSpan: 2, styles: styles.head }, { content: "", colSpan: 2, styles: styles.head }, { content: "", colSpan: 2, styles: styles.head }], ["DENOMINACIÓN", ...Array(28).fill("").map((_, i) => i % 2 === 0 ? "H" : "M")]];
   autoTable(doc, { startY: p3Y + 2, head: headDisc, body: d.t106, theme: 'grid', headStyles: { ...styles.head, fontSize: 4, cellPadding: 0.5 }, bodyStyles: { ...styles.body, fontSize: 4, cellPadding: 0.5 }, columnStyles: { 0: { cellWidth: 25, halign: 'left' } }, margin: { left: marginX, right: 5 } });
   
-  let y107 = doc.lastAutoTable.finalY + 8; doc.text("107. TITULADOS POR SEXO, SEGÚN TIPO DE DISCAPACIDAD U OTRA CONDICIÓN EN LOS SEMESTRES 2024-I", marginX, y107);
+  let y107 = doc.lastAutoTable.finalY + 8; doc.text(`107. TITULADOS POR SEXO, SEGÚN TIPO DE DISCAPACIDAD U OTRA CONDICIÓN EN LOS SEMESTRES ${anioCenso}-I`, marginX, y107);
   autoTable(doc, { startY: y107 + 2, head: headDisc, body: d.t107, theme: 'grid', headStyles: { ...styles.head, fontSize: 4, cellPadding: 0.5 }, bodyStyles: { ...styles.body, fontSize: 4, cellPadding: 0.5 }, columnStyles: { 0: { cellWidth: 25, halign: 'left' } }, margin: { left: marginX, right: 5 } });
-  let y108 = doc.lastAutoTable.finalY + 8; doc.text("108. ¿CUÁNTOS ESTUDIANTES QUE INGRESARON A ESTA INSTITUCIÓN EN EL CICLO/MÓDULO I DEL PERIODO 2024, SON", marginX, y108); doc.text("EGRESADOS DEL 5º AÑO DE EDUCACIÓN SECUNDARIA DEL PERÍODO 2023, PARA AUXILIAR TÉCNICO Y TÉCNICO?", marginX, y108 + 3); doc.line(marginX, y108 + 6, marginX + width, y108 + 6);
+  let y108 = doc.lastAutoTable.finalY + 8; doc.text(`108. ¿CUÁNTOS ESTUDIANTES QUE INGRESARON A ESTA INSTITUCIÓN EN EL CICLO/MÓDULO I DEL PERÍODO ${anioCenso}, SON`, marginX, y108); doc.text(`EGRESADOS DEL 5º AÑO DE EDUCACIÓN SECUNDARIA DEL PERÍODO ${anioPrevio}, PARA AUXILIAR TÉCNICO Y TÉCNICO?`, marginX, y108 + 3); doc.line(marginX, y108 + 6, marginX + width, y108 + 6);
 
   doc.addPage(); let p4Y = 15;
   doc.setFillColor(...styles.titleBox.fillColor); doc.rect(marginX, p4Y, width, 5, "FD"); doc.setFontSize(7); doc.text("OPCIONES OCUPACIONALES Y/O PROGRAMAS DE ESTUDIO", 105, p4Y + 3.5, { align: "center" });
@@ -91,7 +138,7 @@ export function generateCenso9B() {
   autoTable(doc, { startY: p4Y + 2, head: geoHeader, body: d.sedesAT, theme: 'grid', headStyles: styles.head, bodyStyles: styles.body, columnStyles: { 2: { halign: 'left', cellWidth: 35 }, 10: { halign: 'left', cellWidth: 35 } }, margin: { left: marginX, right: 15 }, didDrawCell: drawVerticalGeo });
   autoTable(doc, { startY: doc.lastAutoTable.finalY + 5, head: geoHeader, body: d.sedesTE, theme: 'grid', headStyles: styles.head, bodyStyles: styles.body, columnStyles: { 2: { halign: 'left', cellWidth: 35 }, 10: { halign: 'left', cellWidth: 35 } }, margin: { left: marginX, right: 15 }, didDrawCell: drawVerticalGeo });
   p4Y = doc.lastAutoTable.finalY + 10; doc.setFillColor(225); doc.rect(marginX, p4Y, width, 5, "FD"); doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.text("200. MATRÍCULA Y SECCIONES", 105, p4Y + 3.5, { align: "center" }); doc.setFontSize(7); doc.text("201. MATRÍCULA POR CICLOS Y SEXO, SEGÚN EDAD", marginX, p4Y + 9);
-  autoTable(doc, { startY: p4Y + 11, head: [[ { content: "Edad en años cumplidos al\n31-03-2023", rowSpan: 2, styles: styles.head }, { content: "TOTAL", colSpan: 2, styles: styles.head }, { content: "CICLO", colSpan: 4, styles: styles.head } ],[ "H", "M", { content: "Auxiliar", colSpan: 2 }, { content: "Técnico", colSpan: 2 } ]], body: d.matriculaEdad, theme: 'grid', headStyles: styles.head, bodyStyles: styles.body, margin: { left: marginX, right: 15 } });
+  autoTable(doc, { startY: p4Y + 11, head: [[ { content: `Edad en años cumplidos al\n31-03-${anioCenso}`, rowSpan: 2, styles: styles.head }, { content: "TOTAL", colSpan: 2, styles: styles.head }, { content: "CICLO", colSpan: 4, styles: styles.head } ],[ "H", "M", { content: "Auxiliar", colSpan: 2 }, { content: "Técnico", colSpan: 2 } ]], body: d.matriculaEdad, theme: 'grid', headStyles: styles.head, bodyStyles: styles.body, margin: { left: marginX, right: 15 } });
   let y208 = doc.lastAutoTable.finalY; doc.text("208. NÚMERO TOTAL DE SECCIONES POR CICLO, SEGÚN TURNO", marginX, y208 + 6);
   autoTable(doc, { startY: y208 + 8, head: [[ { content: "TURNO", rowSpan: 2 }, { content: "TOTAL\nSECCIONES", rowSpan: 2 }, { content: "CICLO", colSpan: 2 } ],["Auxiliar", "Técnico"]], body: [["Noche", "11", "7", "4"], ["Total", "31", "20", "11"], ["Tarde", "9", "6", "3"], ["Mañana", "11", "7", "4"]], theme: 'grid', headStyles: styles.head, bodyStyles: styles.body, tableWidth: 100, margin: { left: marginX } });
 

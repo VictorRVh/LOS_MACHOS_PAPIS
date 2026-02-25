@@ -1223,6 +1223,16 @@ Route::middleware('auth:sanctum')->group(function () {
         'generarExcelCenso',
     ])->middleware('permission:ver-ciclo-programa');
 
+    Route::get('/censo9b-data', [
+        \App\Http\Controllers\CensoController::class,
+        'data',
+    ])->middleware('permission:ver-ciclo-programa');
+
+    Route::get('/censo9b-anios', [
+        \App\Http\Controllers\CensoController::class,
+        'anios',
+    ])->middleware('permission:ver-ciclo-programa');
+
     Route::get('/reporte-acta-evaluacion/{idGrupo}', [
         \App\Http\Controllers\ReporteController::class,
         'actaEvaluacionExcel',

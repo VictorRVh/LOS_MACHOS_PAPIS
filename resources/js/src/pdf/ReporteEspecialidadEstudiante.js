@@ -134,10 +134,14 @@ function getRowsNotas(especialidad) {
       }
 
       unidades.forEach((u) => {
+        const unidadTexto = u?.es_experiencia_formativa
+          ? "Experiencia formativa"
+          : `U${u?.numero_unidad || "-"} ${u?.nombre_unidad || ""}`.trim();
+
         rows.push([
           periodo?.nombre || "-",
           modulo,
-          `U${u?.numero_unidad || "-"} ${u?.nombre_unidad || ""}`.trim(),
+          unidadTexto,
           u?.nota ?? "-",
           String(promedio),
           estado,

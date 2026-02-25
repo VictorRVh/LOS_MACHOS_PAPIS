@@ -356,9 +356,15 @@ const exportarEspecialidadPDF = async (especialidad) => {
                         v-for="unidad in item.notas_unidades || []"
                         :key="`${item.matricula_id}-${unidad.id_capacidad}`"
                       >
-                        <div class="mini-td">U{{ unidad.numero_unidad }}</div>
-                        <div class="mini-td">{{ unidad.nombre_unidad }}</div>
-                        <div class="mini-td font-semibold">{{ unidad.nota ?? "--" }}</div>
+                        <div class="mini-td" :class="{ 'exp-row': unidad.es_experiencia_formativa }">
+                          {{ unidad.es_experiencia_formativa ? "EF" : `U${unidad.numero_unidad}` }}
+                        </div>
+                        <div class="mini-td" :class="{ 'exp-row': unidad.es_experiencia_formativa }">
+                          {{ unidad.nombre_unidad }}
+                        </div>
+                        <div class="mini-td font-semibold" :class="{ 'exp-row': unidad.es_experiencia_formativa }">
+                          {{ unidad.nota ?? "--" }}
+                        </div>
                       </template>
                     </div>
                   </div>
@@ -690,6 +696,10 @@ const exportarEspecialidadPDF = async (especialidad) => {
 
 .mini-td:nth-child(3n) {
   @apply border-r-0;
+}
+
+.exp-row {
+  @apply font-semibold text-cetpro;
 }
 
 .mini-table > .mini-td:nth-last-child(-n + 3) {

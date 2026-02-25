@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 
@@ -58,7 +58,7 @@ const estudiantesNormalizados = computed(() => {
   });
 });
 
-// --- Tabla con búsqueda y paginación ---
+// --- Tabla con bÃºsqueda y paginaciÃ³n ---
 const {
   pagina,
   itemsPorPagina,
@@ -82,26 +82,25 @@ const getEstadoClass = (estado) =>
     ? "text-green-600 dark:text-green-400"
     : "text-red-600 dark:text-red-400";
 
-// --- 🔥 Función resumen: total, promedio, estado y clases ---
+// --- ðŸ”¥ FunciÃ³n resumen: total, promedio, estado y clases ---
 const getResumenNotas = (est) => {
-  const notas = est.capacidades.map(c => c.nota_capacidad);
+  const notas = (est.capacidades || []).map((c) => {
+    const value = c?.nota_capacidad;
+    return value !== null && value !== "" && !isNaN(value) ? Number(value) : 0;
+  });
 
-  const todasVacias = notas.every(n => n === null);
-
-  // --- Caso: SIN NOTA ---
-  if (todasVacias) {
+  if (!notas.length) {
     return {
-      total: "--",
-      promedio: "--",
-      estado: "sin nota",
-      promedioClass: "text-gray-400 ",
-      estadoClass: "text-gray-400",
+      total: "00",
+      promedio: "00",
+      estado: "DESAPROBADO",
+      promedioClass: "text-red-600 dark:text-red-500 font-bold",
+      estadoClass: "text-red-600 dark:text-red-400",
     };
   }
 
-  // --- Caso normal: hay notas ---
-  const total = notas.reduce((sum, n) => sum + Number(n ?? 0), 0);
-  const promedio = total / est.capacidades.length;
+  const total = notas.reduce((sum, n) => sum + n, 0);
+  const promedio = total / notas.length;
 
   const estado = promedio >= 11 ? "APROBADO" : "DESAPROBADO";
 
@@ -143,7 +142,7 @@ const getResumenNotas = (est) => {
         </h3>
 
 
-        <!-- Barra de búsqueda -->
+        <!-- Barra de bÃºsqueda -->
         <div class="flex justify-end">
           <SearchBar :totalResultados="estudiantesOrdenados.length" @search="filtrarEstudiantes" />
         </div>
@@ -162,7 +161,7 @@ const getResumenNotas = (est) => {
 
         <TBody>
           <Tr v-for="(est, index) in estudiantesPaginados" :key="est.id_estudiante ?? index">
-            <!-- N° -->
+            <!-- NÂ° -->
             <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
 
             <!-- Nombre -->
@@ -202,3 +201,4 @@ const getResumenNotas = (est) => {
   @apply text-gray-400 italic;
 }
 </style>
+

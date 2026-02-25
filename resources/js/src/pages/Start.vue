@@ -65,7 +65,7 @@ const setDateRange = (days) => {
 };
 
 const applyDateFilter = async () => {
-  isFiltering.value = true; // <- ðŸ”¥ activar bandera
+  isFiltering.value = true; // activar bandera
   stopAutoUpdate();         // detener auto-update
 
   await actividadesStore.loadActividadesPorFechas(dateFrom.value, dateTo.value);
@@ -77,7 +77,7 @@ const applyDateFilter = async () => {
   }
 };
 
-/* -------------------- AUTO-ACTUALIZACIÃ“N -------------------- */
+/* -------------------- AUTO-ACTUALIZACIÓN -------------------- */
 let interval = null;
 let inactivityTimer = null;
 const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 min
@@ -104,7 +104,7 @@ const resetInactivityTimer = () => {
   }, INACTIVITY_LIMIT);
 
   if (!interval && document.visibilityState === 'visible' && !isFiltering.value) {
-    startAutoUpdate();  // solo si NO se estÃ¡ filtrando
+    startAutoUpdate();  // solo si NO se está filtrando
   }
 };
 
@@ -158,12 +158,12 @@ onMounted(async () => {
   gruposCulminados.value = grupoStore.gruposCulminados;
   await loadCensoAnios();
 
-  // activar primer rol automÃ¡ticamente
+  // activar primer rol automáticamente
   if (rolesTabs.value.length > 0) {
     activeActivityTab.value = rolesTabs.value[0];
   }
 
-  // iniciar lÃ³gica
+  // iniciar lógica
   startAutoUpdate();
   resetInactivityTimer();
 

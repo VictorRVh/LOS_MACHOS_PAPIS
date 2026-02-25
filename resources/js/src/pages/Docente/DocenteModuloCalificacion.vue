@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 
@@ -91,7 +91,7 @@ const estudiantesNormalizados = computed(() => {
   });
 });
 
-// --- Tabla: búsqueda y paginación ---
+// --- Tabla: bÃºsqueda y paginaciÃ³n ---
 const {
   pagina,
   itemsPorPagina,
@@ -117,22 +117,20 @@ const getEstadoClass = (estado) =>
 
 // --- Resumen: total, promedio, estado ---
 const getResumenNotas = (est) => {
-  // 1. Notas válidas de capacidades
-  const notas = est.capacidades
-    .map(c => Number(c.nota_capacidad))
-    .filter(n => !isNaN(n));
+  // 1. Notas de capacidades (sin nota = 0)
+  const notas = (est.capacidades || []).map((c) => {
+    const value = c?.nota_capacidad;
+    return value !== null && value !== "" && !isNaN(value) ? Number(value) : 0;
+  });
 
-  // 2. Nota de experiencia (como una unidad más)
+  // 2. Nota de experiencia (sin nota = 0, cuenta como una unidad más)
   const notaExperiencia =
     est.nota_experiencia !== null &&
     est.nota_experiencia !== "" &&
     !isNaN(est.nota_experiencia)
       ? Number(est.nota_experiencia)
-      : null;
-
-  if (notaExperiencia !== null) {
-    notas.push(notaExperiencia); // 👈 cuenta igual que una UD
-  }
+      : 0;
+  notas.push(notaExperiencia);
 
   // 3. Promedio general
   const promedio = notas.length
@@ -148,10 +146,7 @@ const getResumenNotas = (est) => {
     : "00";
 
   return {
-    nota_experiencia:
-      notaExperiencia !== null
-        ? notaExperiencia.toString().padStart(2, "0")
-        : "--",
+    nota_experiencia: notaExperiencia.toString().padStart(2, "0"),
 
     total: notas
       .reduce((a, b) => a + b, 0)
@@ -192,7 +187,7 @@ const verNotasUnidad = async () => {
     return;
   }
 
-  // Mostrar fecha límite
+  // Mostrar fecha lÃ­mite
   const fechaLimite = capacidadTerminalStore.getFechaLimite();
   if (fechaLimite) {
     const fecha = new Date(fechaLimite);
@@ -210,7 +205,7 @@ const verNotasUnidad = async () => {
     capacidad: capacidadSeleccionada.value,
     idGroup: props.id,
     idType: "capacidad",
-    estadoCapacidad: estadoCapacidad.value, // ✅ Pasar estado al slider
+    estadoCapacidad: estadoCapacidad.value, // âœ… Pasar estado al slider
   });
 };
 
@@ -242,7 +237,7 @@ const getEstadoCapacidadClass = computed(() => {
       <!-- Cabecera -->
       <div class="flex justify-between items-center">
         <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300">
-          Registro y visualización de notas
+          Registro y visualizaciÃ³n de notas
         </h3>
       </div>
 
@@ -253,7 +248,7 @@ const getEstadoCapacidadClass = computed(() => {
             placeholder="Seleccione una Unidad Didactica"
             :class="['transition-all duration-200', getEstadoCapacidadClass]" />
 
-          <!-- ✅ NUEVO: Indicador de estado -->
+          <!-- âœ… NUEVO: Indicador de estado -->
           <div v-if="estadoCapacidad && capacidadSeleccionada" class="mt-1 text-xs flex items-center gap-2">
             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" :class="{
               'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': estadoCapacidad.status === 1,
@@ -263,7 +258,7 @@ const getEstadoCapacidadClass = computed(() => {
               {{ estadoCapacidad.status_texto }}
             </span>
             <span v-if="estadoCapacidad.puede_subir_notas" class="text-gray-600 dark:text-gray-400">
-              Fecha límite: {{ new Date(estadoCapacidad.fecha_limite_subida).toLocaleDateString('es-PE') }}
+              Fecha lÃ­mite: {{ new Date(estadoCapacidad.fecha_limite_subida).toLocaleDateString('es-PE') }}
             </span>
           </div>
         </div>
@@ -275,7 +270,7 @@ const getEstadoCapacidadClass = computed(() => {
         <SearchBar class="ml-auto" :totalResultados="estudiantesOrdenados.length" @search="filtrarEstudiantes" />
       </div>
 
-      <!-- ✅ NUEVO: Alert de estado -->
+      <!-- âœ… NUEVO: Alert de estado -->
       <div v-if="capacidadSeleccionada && estadoCapacidad && !estadoCapacidad.puede_subir_notas"
         class="p-4 rounded-lg border" :class="{
           'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200': estadoCapacidad.status === 0,
@@ -297,7 +292,7 @@ const getEstadoCapacidadClass = computed(() => {
           <Th>#</Th>
           <Th>Apellidos y Nombres</Th>
           <Th v-for="i in lengthUnit" :key="i">UD{{ i }}</Th>
-          <Th>EFSRT</Th>
+          <Th title="Experiencia formativa en situaciones reales de trabajo">EFSRT</Th>
           <Th>PUNTAJE</Th>
           <Th>PROMEDIO</Th>
           <Th>A-D-R</Th>
@@ -305,7 +300,7 @@ const getEstadoCapacidadClass = computed(() => {
 
         <TBody>
           <Tr v-for="(est, index) in estudiantesPaginados" :key="est.id_estudiante ?? index">
-            <!-- Si está retirado -->
+            <!-- Si estÃ¡ retirado -->
             <template v-if="est.matriculado === 2">
               <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
               <Td class="font-medium whitespace-nowrap">{{ est.apellidos_nombres }}</Td>
@@ -316,7 +311,7 @@ const getEstadoCapacidadClass = computed(() => {
               </Td>
             </template>
 
-            <!-- Si está activo -->
+            <!-- Si estÃ¡ activo -->
             <template v-else>
               <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
               <Td class="font-medium whitespace-nowrap">{{ est.apellidos_nombres }}</Td>
@@ -357,3 +352,4 @@ const getEstadoCapacidadClass = computed(() => {
   @apply text-gray-400 italic;
 }
 </style>
+

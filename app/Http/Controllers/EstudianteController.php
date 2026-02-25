@@ -413,10 +413,12 @@ class EstudianteController extends Controller
             $capacidadesGrupo = $capacidadesPorGrupo->get($registro->grupo_id, collect());
             $notasGrupo = $notasPorGrupo->get($registro->grupo_id, collect());
             $notaExperienciaRegistro = $notaExperienciaPorGrupo->get($registro->grupo_id);
-            $notaExperiencia = null;
+            $notaExperiencia = 0.0;
+            $experienciaRegistrada = false;
 
             if ($notaExperienciaRegistro && $notaExperienciaRegistro->nota !== null && is_numeric($notaExperienciaRegistro->nota)) {
                 $notaExperiencia = (float) $notaExperienciaRegistro->nota;
+                $experienciaRegistrada = true;
             }
 
             $unidadesNotas = $capacidadesGrupo->map(function ($cap) use ($notasGrupo) {
@@ -427,25 +429,20 @@ class EstudianteController extends Controller
                     'id_capacidad' => $cap->id,
                     'numero_unidad' => $cap->numero_capacidad,
                     'nombre_unidad' => $cap->nombre_capacidad,
-                    'nota' => $nota !== null ? (float) $nota : null,
+                    'nota' => $nota !== null && is_numeric($nota) ? (float) $nota : 0.0,
                 ];
             })->values();
 
-            if ($notaExperiencia !== null) {
-                $unidadesNotas->push([
-                    'id_capacidad' => null,
-                    'numero_unidad' => 'EF',
-                    'nombre_unidad' => 'Experiencia formativa',
-                    'nota' => $notaExperiencia,
-                    'es_experiencia_formativa' => true,
-                ]);
-            }
+            $unidadesNotas->push([
+                'id_capacidad' => null,
+                'numero_unidad' => 'EF',
+                'nombre_unidad' => 'Experiencia formativa',
+                'nota' => $notaExperiencia,
+                'es_experiencia_formativa' => true,
+                'registrada' => $experienciaRegistrada,
+            ]);
 
-            $notasValidas = $unidadesNotas
-                ->pluck('nota')
-                ->filter(function ($n) {
-                    return $n !== null && is_numeric($n);
-                });
+            $notasValidas = $unidadesNotas->pluck('nota');
 
             $promedioNotas = $notasValidas->count() > 0 ? round($notasValidas->avg(), 1) : null;
 

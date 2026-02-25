@@ -348,6 +348,46 @@ class EstudianteController extends Controller
             ->orderBy('mod.numero_modulo', 'asc')
             ->get();
 
+        $grupoIds = $informacionAcademica->pluck('grupo_id')->unique()->values();
+
+        $capacidadesPorGrupo = collect();
+        $notasPorGrupo = collect();
+        $asistenciaResumenPorGrupo = collect();
+
+        if ($grupoIds->isNotEmpty()) {
+            $capacidadesPorGrupo = DB::table('capacidad_terminal')
+                ->whereIn('id_grupo', $grupoIds)
+                ->select('id', 'id_grupo', 'numero_capacidad', 'nombre_capacidad')
+                ->orderByRaw('CAST(numero_capacidad AS UNSIGNED) ASC')
+                ->get()
+                ->groupBy('id_grupo');
+
+            $notasPorGrupo = DB::table('nota_capacidad_terminal')
+                ->where('id_estudiante', $estudiante->id)
+                ->whereIn('id_grupo', $grupoIds)
+                ->select('id_grupo', 'id_capacidad', 'nota_capacidad')
+                ->get()
+                ->groupBy('id_grupo')
+                ->map(function ($items) {
+                    return $items->keyBy('id_capacidad');
+                });
+
+            $asistenciaResumenPorGrupo = DB::table('asistencia')
+                ->where('id_estudiante', $estudiante->id)
+                ->whereIn('id_grupo', $grupoIds)
+                ->select(
+                    'id_grupo',
+                    DB::raw('COUNT(*) as total_registros'),
+                    DB::raw('SUM(CASE WHEN asistencia = 1 THEN 1 ELSE 0 END) as asistio'),
+                    DB::raw('SUM(CASE WHEN asistencia = 2 THEN 1 ELSE 0 END) as faltas'),
+                    DB::raw('SUM(CASE WHEN asistencia = 3 THEN 1 ELSE 0 END) as tardanzas'),
+                    DB::raw('SUM(CASE WHEN asistencia = 4 THEN 1 ELSE 0 END) as permisos')
+                )
+                ->groupBy('id_grupo')
+                ->get()
+                ->keyBy('id_grupo');
+        }
+
         // Construir estructura jerárquica
         $especialidades = [];
 
@@ -357,6 +397,38 @@ class EstudianteController extends Controller
             ->toArray();
 
         foreach ($informacionAcademica as $registro) {
+            $capacidadesGrupo = $capacidadesPorGrupo->get($registro->grupo_id, collect());
+            $notasGrupo = $notasPorGrupo->get($registro->grupo_id, collect());
+
+            $unidadesNotas = $capacidadesGrupo->map(function ($cap) use ($notasGrupo) {
+                $notaRegistro = $notasGrupo->get($cap->id);
+                $nota = $notaRegistro ? $notaRegistro->nota_capacidad : null;
+
+                return [
+                    'id_capacidad' => $cap->id,
+                    'numero_unidad' => $cap->numero_capacidad,
+                    'nombre_unidad' => $cap->nombre_capacidad,
+                    'nota' => $nota !== null ? (float) $nota : null,
+                ];
+            })->values();
+
+            $notasValidas = $unidadesNotas
+                ->pluck('nota')
+                ->filter(function ($n) {
+                    return $n !== null;
+                });
+
+            $promedioNotas = $notasValidas->count() > 0 ? round($notasValidas->avg(), 1) : null;
+
+            $asistenciaGrupo = $asistenciaResumenPorGrupo->get($registro->grupo_id);
+            $totalAsistencia = $asistenciaGrupo->total_registros ?? 0;
+            $asistio = $asistenciaGrupo->asistio ?? 0;
+            $tardanzas = $asistenciaGrupo->tardanzas ?? 0;
+            $faltas = $asistenciaGrupo->faltas ?? 0;
+            $permisos = $asistenciaGrupo->permisos ?? 0;
+            $porcentajeAsistencia = $totalAsistencia > 0
+                ? round((($asistio + $tardanzas) / $totalAsistencia) * 100, 1)
+                : null;
 
             $espId = $registro->especialidad_id;
 
@@ -421,6 +493,17 @@ class EstudianteController extends Controller
                     'reserva' => (bool)$registro->reserva,
                     'fecha_reserva' => $registro->fecha_reserva,
                     'matriculado' => (bool)$registro->matriculado
+                ],
+
+                'notas_unidades' => $unidadesNotas,
+                'promedio_notas' => $promedioNotas,
+                'asistencia_resumen' => [
+                    'total_registros' => (int) $totalAsistencia,
+                    'asistio' => (int) $asistio,
+                    'tardanzas' => (int) $tardanzas,
+                    'faltas' => (int) $faltas,
+                    'permisos' => (int) $permisos,
+                    'porcentaje_asistencia' => $porcentajeAsistencia,
                 ]
             ];
         }

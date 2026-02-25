@@ -457,6 +457,15 @@ class EstudianteController extends Controller
             $porcentajeAsistencia = $totalAsistencia > 0
                 ? round((($asistio + $tardanzas) / $totalAsistencia) * 100, 1)
                 : null;
+            $matriculadoEstado = is_numeric($registro->matriculado) ? (int) $registro->matriculado : 0;
+            $reservaEstado = is_numeric($registro->reserva) ? (int) $registro->reserva : 0;
+            $reservaTexto = null;
+
+            if ($reservaEstado === 1) {
+                $reservaTexto = 'Reserva activa';
+            } elseif ($reservaEstado === 3) {
+                $reservaTexto = 'Reserva utilizada';
+            }
 
             $espId = $registro->especialidad_id;
 
@@ -520,7 +529,11 @@ class EstudianteController extends Controller
                     'turno' => $registro->matricula_turno,
                     'reserva' => (bool)$registro->reserva,
                     'fecha_reserva' => $registro->fecha_reserva,
-                    'matriculado' => (bool)$registro->matriculado
+                    'matriculado' => (bool)$registro->matriculado,
+                    'reserva_estado' => $reservaEstado,
+                    'matriculado_estado' => $matriculadoEstado,
+                    'estado_texto' => Matricula::STATUS[$matriculadoEstado] ?? 'Desconocido',
+                    'reserva_texto' => $reservaTexto,
                 ],
 
                 'notas_unidades' => $unidadesNotas,

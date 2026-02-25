@@ -121,6 +121,29 @@ const setDetalleVista = (matriculaId, vista) => {
 
 const getDetalleVista = (matriculaId) => detalleVista.value[matriculaId] || "notas";
 
+const getEstadoMatricula = (matricula = {}) => {
+  const fromApi = Number(matricula?.matriculado_estado);
+  const fallbackBool = matricula?.matriculado ? 1 : 0;
+  const estado = Number.isFinite(fromApi) ? fromApi : fallbackBool;
+
+  if (estado === 1) return { label: "Matriculado", className: "badge-matriculado" };
+  if (estado === 2) return { label: "Retirado", className: "badge-retirado" };
+  if (estado === 3) return { label: "Retirado Justificado", className: "badge-retirado-justificado" };
+
+  return { label: "Pendiente", className: "badge-pendiente" };
+};
+
+const getEstadoReserva = (matricula = {}) => {
+  const fromApi = Number(matricula?.reserva_estado);
+  const fallbackBool = matricula?.reserva ? 1 : 0;
+  const estado = Number.isFinite(fromApi) ? fromApi : fallbackBool;
+
+  if (estado === 1) return { label: "Reserva activa", className: "badge-reserva" };
+  if (estado === 3) return { label: "Reserva utilizada", className: "badge-reserva-usada" };
+
+  return null;
+};
+
 const exportarEspecialidadPDF = async (especialidad) => {
   if (!estudiante.value || !especialidad) return;
   await generateReporteEspecialidadEstudiante(estudiante.value, especialidad);
@@ -332,10 +355,22 @@ const exportarEspecialidadPDF = async (especialidad) => {
                       >
                     </div>
                     <div class="module-cell">
-                      <span class="cell-label">Matrícula</span>
-                      <span class="cell-value" :class="item.matricula.matriculado ? 'text-emerald-700' : 'text-slate-700'">
-                        {{ item.matricula.matriculado ? "Matriculado" : "Reserva" }}
-                      </span>
+                      <span class="cell-label">Estado</span>
+                      <div class="status-stack">
+                        <span
+                          class="status-chip"
+                          :class="getEstadoMatricula(item.matricula).className"
+                        >
+                          {{ getEstadoMatricula(item.matricula).label }}
+                        </span>
+                        <span
+                          v-if="getEstadoReserva(item.matricula)"
+                          class="status-chip"
+                          :class="getEstadoReserva(item.matricula).className"
+                        >
+                          {{ getEstadoReserva(item.matricula).label }}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -664,6 +699,38 @@ const exportarEspecialidadPDF = async (especialidad) => {
 
 .cell-value {
   @apply block text-[11px] font-semibold text-slate-800 leading-tight mt-0.5;
+}
+
+.status-stack {
+  @apply flex flex-wrap items-center gap-1 mt-0.5;
+}
+
+.status-chip {
+  @apply inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold rounded-sm border uppercase tracking-wide;
+}
+
+.badge-matriculado {
+  @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+}
+
+.badge-retirado {
+  @apply bg-red-50 text-red-700 border-red-200;
+}
+
+.badge-retirado-justificado {
+  @apply bg-amber-50 text-amber-700 border-amber-200;
+}
+
+.badge-pendiente {
+  @apply bg-slate-100 text-slate-700 border-slate-300;
+}
+
+.badge-reserva {
+  @apply bg-cyan-50 text-cyan-700 border-cyan-200;
+}
+
+.badge-reserva-usada {
+  @apply bg-indigo-50 text-indigo-700 border-indigo-200;
 }
 
 .detail-panel {

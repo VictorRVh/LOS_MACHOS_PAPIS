@@ -326,7 +326,7 @@ const exportarEspecialidadPDF = async (especialidad) => {
                       <span class="cell-value">{{ item.modulo.horas }}</span>
                     </div>
                     <div class="module-cell">
-                      <span class="cell-label">Capacidades</span>
+                      <span class="cell-label">Unidades didácticas</span>
                       <span class="cell-value">{{ item.modulo.nro_capacidades }}</span>
                     </div>
                     <div class="module-cell">
@@ -336,16 +336,6 @@ const exportarEspecialidadPDF = async (especialidad) => {
                     <div class="module-cell">
                       <span class="cell-label">Turno</span>
                       <span class="cell-value">{{ item.grupo.turno || item.matricula.turno || "N/A" }}</span>
-                    </div>
-                    <div class="module-cell">
-                      <span class="cell-label">Horario</span>
-                      <span class="cell-value">{{
-                        item.grupo.horario
-                          ? item.grupo.horario
-                          : item.grupo.hora_inicio && item.grupo.hora_fin
-                            ? `${item.grupo.hora_inicio} - ${item.grupo.hora_fin}`
-                            : "N/A"
-                      }}</span>
                     </div>
                     <div class="module-cell">
                       <span class="cell-label">Fechas</span>
@@ -689,7 +679,7 @@ const exportarEspecialidadPDF = async (especialidad) => {
   @apply md:border-r-0;
 }
 
-.module-cell:nth-last-child(-n + 4) {
+.module-cell:nth-last-child(-n + 3) {
   @apply border-b-0;
 }
 

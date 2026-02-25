@@ -125,6 +125,11 @@ function getRowsNotas(especialidad) {
     const n = Number(value);
     return Number.isNaN(n) ? null : n;
   };
+  const formatPromedio = (value) => {
+    if (value === null || value === undefined || Number.isNaN(value)) return "-";
+    const fixed = Number(value).toFixed(1);
+    return fixed.endsWith(".0") ? fixed.slice(0, -2) : fixed;
+  };
 
   periodos.forEach((periodo) => {
     const modulos = Array.isArray(periodo?.modulos) ? periodo.modulos : [];
@@ -150,7 +155,7 @@ function getRowsNotas(especialidad) {
       const bucket = modulosMap.get(key);
       const promedioActual = parseNota(bucket.promedio);
       const promedioNuevo = parseNota(promedio);
-      if (promedioActual === null && promedioNuevo !== null) {
+      if ((promedioActual === null || promedioActual === 0) && promedioNuevo !== null) {
         bucket.promedio = promedio;
       }
 
@@ -185,13 +190,21 @@ function getRowsNotas(especialidad) {
         })
         .map(([, value]) => value);
 
+      const notasNumericas = unidades
+        .map((u) => parseNota(u?.nota))
+        .filter((n) => n !== null);
+      const promedioCalculado = notasNumericas.length
+        ? notasNumericas.reduce((acc, n) => acc + n, 0) / notasNumericas.length
+        : null;
+      const promedioFinal = formatPromedio(promedioCalculado ?? parseNota(moduloData.promedio));
+
       if (!unidades.length) {
         rows.push([
           moduloData.periodo,
           moduloData.modulo,
           "-",
           "-",
-          String(moduloData.promedio),
+          String(promedioFinal),
           moduloData.estado,
         ]);
         continue;
@@ -203,7 +216,7 @@ function getRowsNotas(especialidad) {
           idx === 0 ? moduloData.modulo : "",
           unidad.unidadTexto,
           unidad.nota ?? "-",
-          idx === 0 ? String(moduloData.promedio) : "",
+          idx === 0 ? String(promedioFinal) : "",
           idx === 0 ? moduloData.estado : "",
         ]);
       });

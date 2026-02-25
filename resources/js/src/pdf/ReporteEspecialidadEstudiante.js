@@ -213,6 +213,56 @@ function getRowsNotas(especialidad) {
   return rows;
 }
 
+function buildNotasBodyMerged(rows) {
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return [["-", "-", "-", "-", "-", "-"]];
+  }
+
+  const body = [];
+  let i = 0;
+
+  while (i < rows.length) {
+    const row = rows[i] || [];
+    const isBlockStart = row[0] !== "" && row[1] !== "";
+    if (!isBlockStart) {
+      body.push(row);
+      i += 1;
+      continue;
+    }
+
+    let blockLen = 1;
+    for (let j = i + 1; j < rows.length; j += 1) {
+      const next = rows[j] || [];
+      if (next[0] !== "" || next[1] !== "") break;
+      blockLen += 1;
+    }
+
+    if (blockLen === 1) {
+      body.push(row);
+      i += 1;
+      continue;
+    }
+
+    body.push([
+      { content: row[0], rowSpan: blockLen, styles: { valign: "middle" } },
+      { content: row[1], rowSpan: blockLen, styles: { valign: "middle" } },
+      row[2],
+      row[3],
+      { content: row[4], rowSpan: blockLen, styles: { valign: "middle", halign: "center" } },
+      { content: row[5], rowSpan: blockLen, styles: { valign: "middle", halign: "center" } },
+    ]);
+
+    for (let k = i + 1; k < i + blockLen; k += 1) {
+      const continuation = rows[k] || [];
+      body.push([continuation[2], continuation[3]]);
+    }
+
+    i += blockLen;
+  }
+
+  return body;
+}
+
 function getRowsAsistencia(especialidad) {
   const rows = [];
   const periodos = Array.isArray(especialidad?.periodos) ? especialidad.periodos : [];
@@ -300,7 +350,7 @@ export async function generateReporteEspecialidadEstudiante(estudiante, especial
     startY: yNotas + 2,
     margin: { left: margin, right: margin, top: 40, bottom: 18 },
     head: [["Periodo", "Módulo", "Unidad didáctica", "Nota", "Prom.", "Estado"]],
-    body: notas.length ? notas : [["-", "-", "-", "-", "-", "-"]],
+    body: buildNotasBodyMerged(notas),
     theme: "grid",
     headStyles: {
       fillColor: colorAccent,

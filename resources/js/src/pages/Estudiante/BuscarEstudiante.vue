@@ -1,6 +1,7 @@
 ﻿<script setup>
 import { ref } from "vue";
 import useHttpRequest from "../../composables/useHttpRequest";
+import { generateReporteEspecialidadEstudiante } from "../../pdf/ReporteEspecialidadEstudiante";
 
 const { store: buscar } = useHttpRequest("/buscarEstudiante");
 const { store: egresado } = useHttpRequest("/egresados");
@@ -119,6 +120,11 @@ const setDetalleVista = (matriculaId, vista) => {
 };
 
 const getDetalleVista = (matriculaId) => detalleVista.value[matriculaId] || "notas";
+
+const exportarEspecialidadPDF = async (especialidad) => {
+  if (!estudiante.value || !especialidad) return;
+  await generateReporteEspecialidadEstudiante(estudiante.value, especialidad);
+};
 </script>
 
 <template>
@@ -208,13 +214,34 @@ const getDetalleVista = (matriculaId) => detalleVista.value[matriculaId] || "not
         :key="especialidad.id"
         class="panel p-0 overflow-hidden"
       >
-        <button @click="toggleEspecialidad(especialidad.id)" class="accordion-head">
+        <div
+          @click="toggleEspecialidad(especialidad.id)"
+          @keydown.enter.prevent="toggleEspecialidad(especialidad.id)"
+          @keydown.space.prevent="toggleEspecialidad(especialidad.id)"
+          class="accordion-head"
+          role="button"
+          tabindex="0"
+        >
           <div>
             <h3 class="text-sm font-semibold text-slate-800">{{ especialidad.nombre }}</h3>
             <p class="text-sm text-slate-500">{{ especialidad.total_modulos }} módulos</p>
           </div>
-          <span class="chev" :class="especialidadAbierta === especialidad.id ? 'open' : ''">⌃</span>
-        </button>
+          <div class="flex items-center gap-1.5">
+            <button
+              class="btn-pdf"
+              @click.stop="exportarEspecialidadPDF(especialidad)"
+              title="Descargar reporte PDF de especialidad"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M6 2h9l5 5v15H6z" stroke-width="2" />
+                <path d="M15 2v5h5" stroke-width="2" />
+                <path d="M8 14h8M8 18h8M8 10h4" stroke-width="2" />
+              </svg>
+              PDF
+            </button>
+            <span class="chev" :class="especialidadAbierta === especialidad.id ? 'open' : ''">⌃</span>
+          </div>
+        </div>
 
         <transition name="fade">
           <div
@@ -556,6 +583,19 @@ const getDetalleVista = (matriculaId) => detalleVista.value[matriculaId] || "not
 
 .chev.open {
   transform: rotate(180deg);
+}
+
+.btn-pdf {
+  @apply inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold border border-slate-300 bg-white text-slate-700 rounded-sm;
+}
+
+.btn-pdf svg {
+  width: 12px;
+  height: 12px;
+}
+
+.btn-pdf:hover {
+  @apply bg-slate-100;
 }
 
 .period-chip {

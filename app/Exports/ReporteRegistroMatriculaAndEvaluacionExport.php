@@ -285,67 +285,136 @@ class ReporteRegistroMatriculaAndEvaluacionExport
         $data = DB::table('capacidad_terminal as ct')
             ->join('capacidades_competencias as cc', 'cc.id_capacidad_terminal', '=', 'ct.id')
             ->join('competencias as c', 'cc.id_competencia', '=', 'c.id')
-            ->join('grupo as g', 'g.id', '=', 'ct.id_grupo')
-            ->where('g.id', $this->idGrupo)
+            ->where('ct.id_grupo', $this->idGrupo)
 
-            ->orderBy('c.id') // 🔥 ordenar por competencia
-            ->orderBy('ct.numero_capacidad')
+           // ->orderBy('c.id') // primero competencia
 
-            ->select(
+            ->orderByRaw('CAST(ct.numero_capacidad AS UNSIGNED) ASC')
+
+           // ->orderBy('cc.id', 'asc') // orden capacidades dentro de unidad
+
+            ->select([
                 'c.id as competencia_id',
                 'c.descripcion as competencia',
-                'ct.numero_capacidad',
+
+                'ct.id as unidad_id',
+                'ct.nombre_capacidad as unidad',
+
+                'ct.numero_capacidad', // recomendable incluirlo
+
                 'cc.descripcion as capacidad'
-            )
+            ])
             ->get();
 
+        /*
+        =====================================
+        CONTAR FILAS POR COMPETENCIA Y UNIDAD
+        =====================================
+        */
 
-        $fila = 5;
-
-        $competenciaActual = null;
-        $filaInicioCompetencia = 5;
+        $conteoCompetencia = [];
+        $conteoUnidad = [];
 
         foreach ($data as $item) {
+            $conteoCompetencia[$item->competencia_id] =
+                ($conteoCompetencia[$item->competencia_id] ?? 0) + 1;
 
-            // 🔥 SI CAMBIA LA COMPETENCIA
-            if ($competenciaActual !== $item->competencia_id) {
+            $conteoUnidad[$item->unidad_id] =
+                ($conteoUnidad[$item->unidad_id] ?? 0) + 1;
+        }
 
-                // cerrar merge anterior
-                if ($competenciaActual !== null) {
+        /*
+        =====================================
+        ESCRIBIR EN EXCEL
+        =====================================
+        */
 
-                    $sheet->mergeCells("W{$filaInicioCompetencia}:W" . ($fila - 1));
+        $fila = 6;
+
+        $competenciasEscritas = [];
+        $unidadesEscritas = [];
+
+        foreach ($data as $item) {
+            /*
+            =========================
+            COMPETENCIA (col W)
+            =========================
+            */
+
+            if (!isset($competenciasEscritas[$item->competencia_id])) {
+                $alto = $conteoCompetencia[$item->competencia_id];
+
+                $sheet->setCellValue("W{$fila}", $item->competencia);
+
+                // SOLO merge si tiene más de 1 fila
+                if ($alto > 1) {
+                    $sheet->mergeCells("W{$fila}:W" . ($fila + $alto - 1));
                 }
 
-                // nueva competencia
-                $competenciaActual = $item->competencia_id;
-                $filaInicioCompetencia = $fila;
-
-                // escribir competencia
-                $sheet->setCellValue(
-                    "W{$fila}",
-                    $item->competencia
-                );
+                $competenciasEscritas[$item->competencia_id] = true;
             }
 
-            // escribir capacidad
-            $sheet->setCellValue(
-                "X{$fila}",
-                "Cap {$item->numero_capacidad}: {$item->capacidad}"
-            );
+            /*
+            =========================
+            UNIDAD DIDACTICA (AB:AD)
+            =========================
+            */
+            if (!isset($unidadesEscritas[$item->unidad_id])) {
+
+                $alto = $conteoUnidad[$item->unidad_id];
+
+                // escribir unidad
+                $sheet->setCellValue("AB{$fila}", $item->unidad);
+
+                // SIEMPRE unir horizontal AB:AD
+                $sheet->mergeCells("AB{$fila}:AD{$fila}");
+
+                // SI tiene más de una capacidad, unir vertical también
+                if ($alto > 1) {
+
+                    // primero deshacer horizontal para evitar conflicto
+                    $sheet->unmergeCells("AB{$fila}:AD{$fila}");
+
+                    // unir todo el bloque correctamente
+                    $sheet->mergeCells("AB{$fila}:AD" . ($fila + $alto - 1));
+                }
+
+                $unidadesEscritas[$item->unidad_id] = true;
+            }
+
+            /*
+            =========================
+            CAPACIDAD (X:AA)
+            =========================
+            */
+
+            $sheet->setCellValue("X{$fila}", $item->capacidad);
+
+            $sheet->mergeCells("X{$fila}:AA{$fila}");
 
             $fila++;
         }
 
-        // cerrar último merge
-        if ($competenciaActual !== null) {
+        /*
+            =========================
+            ESTILOS
+            =========================
+            */
 
-            $sheet->mergeCells("W{$filaInicioCompetencia}:W" . ($fila - 1));
-        }
+        $ultimaFila = $fila - 1;
 
-        // estilo vertical
-        $sheet->getStyle("W5:W" . ($fila - 1))
+        $sheet->getStyle("W6:W{$ultimaFila}")
             ->getAlignment()
             ->setTextRotation(90)
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $sheet->getStyle("X6:AA{$ultimaFila}")
+            ->getAlignment()
+            ->setVertical(Alignment::VERTICAL_CENTER);
+
+        $sheet->getStyle("AB6:AD{$ultimaFila}")
+            ->getAlignment()
             ->setHorizontal(Alignment::HORIZONTAL_CENTER)
             ->setVertical(Alignment::VERTICAL_CENTER);
     }

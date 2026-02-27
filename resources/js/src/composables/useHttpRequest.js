@@ -196,7 +196,7 @@ const useHttpRequest = (path = '') => {
                 showToast(
                     `${error.response.data?.message}${error.response.data?.permissions?.length
                         ? `\r\nPermisos requeridos: ${error.response.data?.permissions.join(
-                            ' or ',
+                            ' o ',
                         )}`
                         : ''
                     }`,

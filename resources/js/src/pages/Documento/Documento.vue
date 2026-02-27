@@ -278,7 +278,7 @@ const publicarPersonalizado = async (prog, gruposSeleccionados) => {
 
 
 <template>
-  <AuthorizationFallback :permissions="['todo-documento-programado', 'ver-documento-programado']">
+  <AuthorizationFallback :permissions="['todo-acceso-documento-programado', 'ver-documento-programado']">
     <div class="p-4 md:p-6 space-y-6">
       <!-- Overlay de carga -->
       <Transition name="fade">

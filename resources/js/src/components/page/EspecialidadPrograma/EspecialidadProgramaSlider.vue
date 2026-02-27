@@ -47,7 +47,7 @@ const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
-    if (!props.role?.id) return ["todo-acceso-ciclo-programa", "crear-ciclo-programa"];
+    if (!props.especialidadPrograma?.id) return ["todo-acceso-ciclo-programa", "crear-ciclo-programa"];
     else return ["todo-acceso-ciclo-programa", "editar-ciclo-programa"];
 });
 

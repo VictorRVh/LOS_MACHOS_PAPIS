@@ -35,12 +35,12 @@ export const useBreadcrumbStore = defineStore('breadcrumb', () => {
     }
 
     // 🔁 Reordenar para mantener jerarquía padre → hijo → nieto
-    // itemsText.value.sort((a, b) => {
-    //   const order = ['programa', 'especialidadPrograma', 'modulo'];
-    //   const indexA = order.indexOf(a.parent || a.id);
-    //   const indexB = order.indexOf(b.parent || b.id);
-    //   return indexA - indexB;
-    // });
+    itemsText.value.sort((a, b) => {
+      const order = ['programa', 'especialidadPrograma', 'modulo'];
+      const indexA = order.indexOf(a.parent || a.id);
+      const indexB = order.indexOf(b.parent || b.id);
+      return indexA - indexB;
+    });
   }
 
   function findTextById(id) {

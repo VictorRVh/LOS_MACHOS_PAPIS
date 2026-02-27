@@ -22,7 +22,7 @@ const navLinks = [
     { name: 'Programa de Estudios', routeName: 'especialidad', icon: AcademicCapIcon, permissions: ["todo-acceso-programas-de-estudio", "icono-programas-de-estudio"] },
     { name: 'Comisión', routeName: 'comision', icon: UserGroupIcon, permissions: ["todo-acceso-comisiones", "icono-comisiones"] },
     { name: 'Ciclo Académico', routeName: 'programa', icon: RectangleStackIcon, permissions: ["todo-acceso-ciclo-academico", "icono-ciclo-academico"] },
-    { name: 'Doc. Curricular', routeName: 'documentos', icon: DocumentDuplicateIcon, permissions: ["todo-documento-programado", "icono-periodos"] },
+    { name: 'Doc. Curricular', routeName: 'documentos', icon: DocumentDuplicateIcon, permissions: ['todo-acceso-documento-programado', "icono-documento-programado"] },
     { name: 'Matricula', routeName: 'matricula.index', icon: IdentificationIcon, permissions: ["todo-acceso-matriculas", "icono-matriculas"] },
     { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-grupos", "icono-grupos"] },
     { name: 'Mis Módulos', routeName: 'moduloAsignado', icon: AcademicCapIcon, permissions: ["ver-mis-modulos", "ver-estudiantes-asignados"] },
@@ -30,7 +30,7 @@ const navLinks = [
     { name: 'Egresados', routeName: 'egresados', icon: AcademicCapIcon, permissions: ["ver-grupos"] },
     { name: 'Ingresos', routeName: 'ingresos', icon: CurrencyDollarIcon, permissions: ["ver-grupos"] },
     { name: 'Ajustes', routeName: 'cetpro.index', icon: Cog8ToothIcon, permissions: ["ver-informacion-cetpro"] },
-    { name: 'Estadísticas', routeName: 'estadistica', icon: UnderlineIcon, permissions: [] },
+    { name: 'Estadísticas', routeName: 'estadistica', icon: UnderlineIcon, permissions: ["todo-acceso-estadisticas", "icono-estadisticas"] },
 
 ];
 

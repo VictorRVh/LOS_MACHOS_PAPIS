@@ -56,7 +56,7 @@ const useValidation = () => {
 
     const requiredIfExists = (value, { createError, path }) => {
         if (value === undefined) return true;
-        if (!value) return createError({ message: `${path} is required` });
+        if (!value) return createError({ message: `${path} esto es requerido` });
         return true;
     };
 

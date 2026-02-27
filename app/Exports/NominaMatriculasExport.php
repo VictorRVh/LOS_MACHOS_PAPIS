@@ -2,186 +2,250 @@
 
 namespace App\Exports;
 
-use App\Models\Grupo;
 use App\Models\Matricula;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
-class ReporteConsolidadoNotasExport
+class NominaMatriculasExport
 {
-    protected string $idGrupo;
+    protected $idGrupo;
 
-    public function __construct(string $idGrupo)
+    public function __construct($idGrupo)
     {
         $this->idGrupo = $idGrupo;
     }
 
     public function build(): Spreadsheet
     {
-        $spreadsheet = IOFactory::load(
-            storage_path('app/templates/consolidado-notas-ultimo.xlsx')
-        );
+        // 1. Cargar plantilla
+        $spreadsheet = IOFactory::load(storage_path('app/templates/nomina_matricula_tres.xlsx'));
+        $sheet = $spreadsheet->getActiveSheet();
 
-        $grupo = Grupo::with([
-            'especialidad.especialidadMadre',
-            'modulo',
-            'periodo',
-            'programaEstudio.ciclo'
-        ])->findOrFail($this->idGrupo);
+        // 2. Obtener datos
+        // $matriculas = Matricula::where('id_grupo', $this->idGrupo)
+        //     ->with('estudiante')
+        //     ->get();
 
-        $this->llenarDatosGenerales($spreadsheet, $grupo);
-        $this->llenarNombreModulo($spreadsheet, $grupo);
-        $this->llenarEstudiantes($spreadsheet, $grupo);
-
-        return $spreadsheet;
-    }
-
-    private function llenarDatosGenerales(
-        Spreadsheet $spreadsheet,
-        Grupo $grupo
-    ): void {
-
-        $sheet = $spreadsheet->getSheetByName('CONSOLIDADO');
-
-        if (!$sheet) {
-            throw new \Exception('La hoja CONSOLIDADO no existe');
-        }
-
-        $nombreEspecialidad =
-            $grupo->especialidad?->especialidadMadre?->nombre_especialidad ?? '';
-
-        $sheet->setCellValue(
-            'S4',
-            'PROGRAMA DE ESTUDIOS: ' . $nombreEspecialidad
-        );
-
-        $nombreCiclo =
-            $grupo->programaEstudio?->ciclo?->nombre_ciclo ?? '';
-
-        $sheet->setCellValue(
-            'S7',
-            'NIVEL FORMATIVO: ' . $nombreCiclo
-        );
-    }
-
-    private function llenarNombreModulo(
-        Spreadsheet $spreadsheet,
-        Grupo $grupo
-    ): void {
-
-        $sheet = $spreadsheet->getSheetByName('CONSOLIDADO');
-
-        if (!$sheet) {
-            throw new \Exception('La hoja CONSOLIDADO no existe');
-        }
-
-        $sheet->setCellValue(
-            'K5',
-            $grupo->modulo?->descripcion ?? ''
-        );
-    }
-
-    private function llenarEstudiantes(
-        Spreadsheet $spreadsheet,
-        Grupo $grupo
-    ): void {
-
-        $sheet = $spreadsheet->getSheetByName('CONSOLIDADO');
-
-        $filaInicio = 12;
-        $filaFirmas = 32;
-
-        /////////////////////////////////////////////////////
-        // OBTENER MATRICULAS (FALTABA ESTO)
-        /////////////////////////////////////////////////////
-
-        $matriculas = Matricula::with('estudiante')
-            ->where('id_grupo', $grupo->id)
-            ->where('reserva', 0)
+        $matriculas = Matricula::where('id_grupo', $this->idGrupo)
+            ->where('matricula.reserva', 0)
+            ->with([
+                'estudiante',
+                'pago',
+                'grupo.modulo'
+            ])
             ->join('estudiante as e', 'matricula.id_estudiante', '=', 'e.id')
-            ->orderBy('e.apellido_paterno')
-            ->orderBy('e.apellido_materno')
-            ->orderBy('e.nombre')
+            ->orderBy('e.apellido_paterno', 'asc')
+            ->orderBy('e.apellido_materno', 'asc')
+            ->orderBy('e.nombre', 'asc')
             ->select('matricula.*')
             ->get();
 
-        $totalEstudiantes = $matriculas->count();
+
+
+
+        $especialidad = $matriculas->first()?->grupo?->especialidad?->especialidadMadre?->nombre_especialidad ?? '';
+        $modulo = $matriculas->first()?->grupo?->modulo?->descripcion ?? '';
+        $periodoFecha =  $matriculas->first()?->grupo?->fecha_inicio . ' - ' . $matriculas->first()?->grupo?->fecha_fin ?? '';
+        $nivel_formativo = $matriculas->first()?->grupo?->programaEstudio?->ciclo?->nombre_ciclo ?? '';
+        $turnoCodigo = $matriculas->first()?->grupo?->turno ?? '';
+
+        $turno = match ($turnoCodigo) {
+            'M' => 'MAÑANA',
+            'T' => 'TARDE',
+            'N' => 'NOCHE',
+            default => '',
+        };
+        $periodo = $matriculas->first()?->grupo?->periodo?->nombre_periodo ?? '';
+        $seccion = $matriculas->first()?->grupo?->seccion;
+        $nroCapacidades = $matriculas->first()?->grupo?->modulo?->nro_capacidades ?? '';
+        $nroCreditos    = $matriculas->first()?->grupo?->modulo?->creditos ?? '';
+
+        // Unir celdas de G10 a Q10
+        $sheet->mergeCells('F10:I10');
+        $sheet->mergeCells('F11:I11');
+        $sheet->mergeCells('F12:I12');
+        $sheet->mergeCells('F14:I14');
+        $sheet->mergeCells('M10:O10');
+        $sheet->mergeCells('M14:O14');
+
+        // Asignar valor
+        $sheet->setCellValue('F10', $especialidad);
+        $sheet->setCellValue('F11', $modulo);
+        $sheet->setCellValue('M11', $periodoFecha);
+        $sheet->setCellValue('F12', $nivel_formativo);
+        $nivel_parse = str_ireplace('Ciclo ', '', $nivel_formativo);
+
+        $sheet->setCellValue('M12', $nivel_parse);
+        $sheet->setCellValue('M13', "Presencial");
+        $sheet->setCellValue('F14', $turno);
+        $sheet->setCellValue('M9', explode('-', $periodo)[0]);
+        $sheet->setCellValue('M10', $periodo);
+        $sheet->setCellValue('M14', $seccion);
+
+        // Centrar el texto
+        $sheet->getStyle('G10')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('G10')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+        // (Opcional) ponerlo en negrita
+        $sheet->getStyle('G10')->getFont()->setBold(true);
 
         /////////////////////////////////////////////////////
-        // CALCULAR CAPACIDAD DE PLANTILLA
+        // datos de la intitucion 
         /////////////////////////////////////////////////////
+        $institucion = DB::table('cetpros')->first();
+        $nombreInstitucion = $institucion->cetpro ?? '';
+        $dre = $institucion->dre ?? '';
+        $ugel = $institucion->ugel ?? '';
+        $codigoModular = $institucion->codigo_modular ?? '240069';
+        $codigoAutorizacion = $institucion->rd_autorizacion ?? 'R.D.00000';
+        $codigoConversion = $institucion->rd_conversion ?? 'R.C.00000';
+        $tipoGestion = $institucion->tipo_gestion ?? '';
+        $departamento = $institucion->region ?? '';
+        $provincia = $institucion->provincia ?? '';
+        $distrito = $institucion->distrito ?? '';
+        $direccion = $institucion->direccion ?? '';
 
-        $capacidadPlantilla = $filaFirmas - $filaInicio;
 
-        /////////////////////////////////////////////////////
-        // INSERTAR FILAS SI ES NECESARIO
-        /////////////////////////////////////////////////////
 
-        if ($totalEstudiantes > $capacidadPlantilla) {
+        $sheet->setCellValue('F4', $nombreInstitucion);
+        $sheet->setCellValue('M4', $dre);
+        $sheet->setCellValue('F5', $codigoModular);
+        $sheet->setCellValue('M5', $ugel);
+        $sheet->setCellValue('F6', $codigoAutorizacion);
+        $sheet->setCellValue('M6', $codigoConversion);
 
-            $filasAInsertar = $totalEstudiantes - $capacidadPlantilla;
+        $sheet->setCellValue('F7', $departamento);
+        $sheet->setCellValue('M7', $provincia);
 
-            $sheet->insertNewRowBefore($filaFirmas, $filasAInsertar);
+        $sheet->setCellValue('F8', $distrito);
+        $sheet->setCellValue('M8', $tipoGestion);
 
+        $sheet->setCellValue('F9', $direccion);
+
+
+
+
+        // 3. Llenar datos
+        $filaInicio = 17;
+        $totalMatriculas = $matriculas->count();
+        $filasPlantilla = 30;
+
+        if ($totalMatriculas > $filasPlantilla) {
+
+            $filasAInsertar = $totalMatriculas - $filasPlantilla;
             $filaModelo = $filaInicio;
 
-            $mergedCells = $sheet->getMergeCells();
+            // Obtener celdas combinadas de la fila modelo
+            $mergedCells = [];
+            foreach ($sheet->getMergeCells() as $merge) {
+                if (str_contains($merge, (string)$filaModelo)) {
+                    $mergedCells[] = $merge;
+                }
+            }
+
+            // Insertar filas nuevas
+            $sheet->insertNewRowBefore($filaInicio + $filasPlantilla, $filasAInsertar);
+
+            $columnas = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
 
             for ($i = 0; $i < $filasAInsertar; $i++) {
 
-                $filaDestino = $filaFirmas + $i;
+                $filaDestino = $filaInicio + $filasPlantilla + $i;
 
-                foreach (range('A', 'Z') as $col) {
+                foreach ($columnas as $col) {
 
+                    $celdaModelo = "{$col}{$filaModelo}";
+                    $celdaDestino = "{$col}{$filaDestino}";
+
+                    // Copiar estilo completo
                     $sheet->duplicateStyle(
-                        $sheet->getStyle("{$col}{$filaModelo}"),
-                        "{$col}{$filaDestino}"
+                        $sheet->getStyle($celdaModelo),
+                        $celdaDestino
                     );
+
+                    // Ajustar bordes a THIN
+                    $sheet->getStyle($celdaDestino)
+                        ->getBorders()
+                        ->getAllBorders()
+                        ->setBorderStyle(Border::BORDER_THIN);
                 }
 
+                $border = $sheet->getStyle("B{$filaDestino}:O{$filaDestino}")->getBorders();
+                // $border->getTop()->setBorderStyle(Border::BORDER_MEDIUM);
+                // $border->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
+                $border->getLeft()->setBorderStyle(Border::BORDER_MEDIUM);
+                $border->getRight()->setBorderStyle(Border::BORDER_MEDIUM);
+
+                // Copiar altura de fila
                 $altura = $sheet->getRowDimension($filaModelo)->getRowHeight();
-
-                if ($altura) {
-                    $sheet->getRowDimension($filaDestino)
-                        ->setRowHeight($altura);
+                if ($altura !== null) {
+                    $sheet->getRowDimension($filaDestino)->setRowHeight($altura);
                 }
 
+                // Aplicar celdas combinadas
                 foreach ($mergedCells as $merge) {
 
-                    if (preg_match('/([A-Z]+)(\d+):([A-Z]+)(\d+)/', $merge, $m)) {
+                    preg_match('/([A-Z]+)(\d+):([A-Z]+)(\d+)/', $merge, $m);
 
-                        if ((int)$m[2] == $filaModelo) {
+                    if ($m) {
+                        $colIni = $m[1];
+                        $colFin = $m[3];
 
-                            $sheet->mergeCells(
-                                "{$m[1]}{$filaDestino}:{$m[3]}{$filaDestino}"
-                            );
-                        }
+                        $nuevoRango = "{$colIni}{$filaDestino}:{$colFin}{$filaDestino}";
+                        $sheet->mergeCells($nuevoRango);
                     }
                 }
             }
         }
 
-        /////////////////////////////////////////////////////
-        // LLENAR ESTUDIANTES
-        /////////////////////////////////////////////////////
-
+        // 4. Llenar datos de estudiantes
+        $fila = $filaInicio;
         foreach ($matriculas as $index => $matricula) {
-
-            $fila = $filaInicio + $index;
 
             $est = $matricula->estudiante;
 
-            $sheet->setCellValue(
-                "B{$fila}",
-                $est->nro_documento ?? ''
-            );
+            $sheet->setCellValue("B{$fila}", str_pad($index + 1, 2, '0', STR_PAD_LEFT));
+            $sheet->setCellValue("C{$fila}", $est->nro_documento);
+            $sheet->setCellValue("F{$fila}", "{$est->apellido_paterno} {$est->apellido_materno}, {$est->nombre}");
+            // $sheet->setCellValue("K{$fila}", $est->sexo);
 
-            $sheet->setCellValue(
-                "C{$fila}",
-                "{$est->apellido_paterno} {$est->apellido_materno}, {$est->nombre}"
-            );
+            $sexoExcel = match (strtoupper($est->sexo)) {
+                'M' => 'H',
+                'F' => 'M',
+                default => $est->sexo ?? '—',
+            };
+
+            $sheet->setCellValue("K{$fila}", $sexoExcel);
+
+            $sheet->setCellValue("L{$fila}", $est->fecha_nacimiento ?? '');
+            $condicion = $matricula->pago?->condicion ?? null;
+            $condicionTexto = $condicion
+                ? trim(explode('|', $condicion)[1] ?? $condicion)
+                : '—';
+
+            $sheet->setCellValue("M{$fila}", $condicionTexto);
+
+            $sheet->setCellValue("N{$fila}", $nroCapacidades);
+
+            $sheet->setCellValue("O{$fila}", $nroCreditos);
+
+            $fila++;
         }
+
+        // 5. Limpiar filas sobrantes
+        if ($totalMatriculas < $filasPlantilla) {
+            for ($i = $filaInicio + $totalMatriculas; $i < $filaInicio + $filasPlantilla; $i++) {
+                $sheet->setCellValue("B{$i}", '');
+                $sheet->setCellValue("C{$i}", '');
+                $sheet->setCellValue("F{$i}", '');
+                $sheet->setCellValue("K{$i}", '');
+                $sheet->setCellValue("L{$i}", '');
+            }
+        }
+
+        return $spreadsheet;
     }
 }

@@ -106,7 +106,8 @@ class CapacidadCompetenciaController extends Controller
         $capacidad = CapacidadCompetencia::findOrFail($id);
 
         $data = $request->validate([
-            'sigla' => ['nullable', 'string', 'max:20'],
+            'id_capacidad_terminal' => ['required', 'string'],
+            'id_competencia' => ['required', 'string'],
             'descripcion' => ['required', 'string'],
         ]);
 
@@ -128,6 +129,6 @@ class CapacidadCompetenciaController extends Controller
 
         return response()->json([
             'message' => 'Capacidad eliminada correctamente'
-        ],204);
+        ], 204);
     }
 }

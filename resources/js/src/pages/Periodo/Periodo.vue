@@ -50,13 +50,13 @@ const onDelete = (periodo) => {
 
 
 
-const descargarDocumento = async (idPeriodo) => {
+const descargarDocumento = async (idPeriodo,nombre) => {
   try {
     const response = await axios.get(`reportes/matriculaInstitucional/${idPeriodo}`, { responseType: "blob" });
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "reportenuwco.xlsx");
+    link.setAttribute("download", `Historial ${nombre} Matrícula Institucional.xlsx`);
     document.body.appendChild(link);
     link.click();
   } catch (error) {
@@ -64,7 +64,7 @@ const descargarDocumento = async (idPeriodo) => {
   }
 };
 
-const descargarReporteCertificado = async (idPeriodo) => {
+const descargarReporteCertificado = async (idPeriodo,nombre) => {
   try {
     const response = await axios.get(
       `reportes/certificadosPorPeriodo/${idPeriodo}`,
@@ -75,7 +75,7 @@ const descargarReporteCertificado = async (idPeriodo) => {
     const link = document.createElement("a");
 
     link.href = url;
-    link.setAttribute("download", "reporte-certificados.xlsx");
+    link.setAttribute("download", `Historial ${nombre} Certificados Emitidos.xlsx`);
     document.body.appendChild(link);
     link.click();
 
@@ -126,7 +126,7 @@ const descargarReporteCertificado = async (idPeriodo) => {
                   <EditButton @click="showSlider(true, periodo)" />
                   <DeleteButton @click="onDelete(periodo)" />
 
-                  <BaseButton title="MATRÍCULA  INSTITUCIONAL" @click="descargarDocumento(periodo.id)"
+                  <BaseButton title="MATRÍCULA  INSTITUCIONAL" @click="descargarDocumento(periodo.id,periodo?.nombre_periodo)"
                     class="px-1 h-[35px] bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
                     <template #icon>
 

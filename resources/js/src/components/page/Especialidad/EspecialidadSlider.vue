@@ -47,7 +47,7 @@ const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
-  if (!props.role?.id) return ["todo-acceso-programas-de-estudio", "crear-programas-de-estudio"];
+  if (!props.especialidad?.id) return ["todo-acceso-programas-de-estudio", "crear-programas-de-estudio"];
   else return ["todo-acceso-programas-de-estudio", "editar-programas-de-estudio"];
 });
 

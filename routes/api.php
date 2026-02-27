@@ -1251,6 +1251,36 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\DatosCetproController::class,
         'store',
     ])->middleware('permission:editar-informacion-cetpro');
+
+    Route::get('estadistica101', [
+        \App\Http\Controllers\EstadisticaController::class,
+        'estadistica101Data',
+    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
+
+    Route::get('estadistica104', [
+        \App\Http\Controllers\EstadisticaController::class,
+        'matriculadosRetiradosPorCarrera',
+    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
+
+    Route::get('estadistica202', [
+        \App\Http\Controllers\EstadisticaController::class,
+        'matriculadosPorCicloYSexo',
+    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
+
+    Route::get('estadistica203', [
+        \App\Http\Controllers\EstadisticaController::class,
+        'matriculaPorNivelEducativoCicloSexo',
+    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
+
+    Route::get('estadistica205', [
+        \App\Http\Controllers\EstadisticaController::class,
+        'seccionesPorCicloTurno',
+    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
+
+    Route::get('estadistica201', [
+        \App\Http\Controllers\EstadisticaController::class,
+        'matriculaPorCicloSexoEdad',
+    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
 });
 
 Route::get('reportes/nomina/grupo/{idGrupo}', [
@@ -1269,35 +1299,7 @@ Route::get('reportes/certificadosPorPeriodo/{idPeriodo}', [
 ]);
 
 // ESTADISTICAS 
-Route::get('estadistica101', [
-    \App\Http\Controllers\EstadisticaController::class,
-    'estadistica101Data',
-]);
 
-Route::get('estadistica104', [
-    \App\Http\Controllers\EstadisticaController::class,
-    'matriculadosRetiradosPorCarrera',
-]);
-
-Route::get('estadistica202', [
-    \App\Http\Controllers\EstadisticaController::class,
-    'matriculadosPorCicloYSexo',
-]);
-
-Route::get('estadistica203', [
-    \App\Http\Controllers\EstadisticaController::class,
-    'matriculaPorNivelEducativoCicloSexo',
-]);
-
-Route::get('estadistica205', [
-    \App\Http\Controllers\EstadisticaController::class,
-    'seccionesPorCicloTurno',
-]);
-
-Route::get('estadistica201', [
-    \App\Http\Controllers\EstadisticaController::class,
-    'matriculaPorCicloSexoEdad',
-]);
 
 Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
     Route::get('/files/{fileId}', [GoogleDriveController::class, 'listFilesNew']);

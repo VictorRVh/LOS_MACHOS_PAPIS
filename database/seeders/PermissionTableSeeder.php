@@ -14,9 +14,8 @@ class PermissionTableSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'ver-actividades',
-            'ver-informacion-cetpro',
-            'editar-informacion-cetpro',
+
+
 
 
             'todo-acceso-usuarios',
@@ -142,6 +141,19 @@ class PermissionTableSeeder extends Seeder
             'eliminar-programacion-documentos-subidos',
             'icono-programacion-documentos-subidos',
 
+            // Datos cetpro
+            'ver-actividades',
+            'ver-informacion-cetpro',
+            'editar-informacion-cetpro',
+
+            // ESTADISTICAS
+
+            'todo-acceso-estadisticas',
+            'ver-estadisticas',
+            // 'crear-documento-estadisticas',
+            // 'editar-documento-estadisticas',
+            // 'eliminar-documento-estadisticas',
+            'icono-estadisticas',
 
             ///////////////////////////////////////
             ///////////////////////////////////////

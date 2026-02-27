@@ -66,77 +66,87 @@ const verMatriculados = (grupo) => {
   router.push({ name: 'matricula.grupos.alumnos', params: { id: grupo.id } });
 };
 
-const descargarNomina = async (idGrupo) => {
+
+const obtenerNombrePeriodo = () => {
+  const periodoObj = periodoStore.periodos.find(
+    p => p.id === selectedPeriodo.value
+  );
+  return periodoObj?.nombre_periodo ?? "Periodo";
+};
+
+const descargarArchivo = (blob, nombreArchivo) => {
+  const url = window.URL.createObjectURL(new Blob([blob]));
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.setAttribute("download", nombreArchivo);
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  window.URL.revokeObjectURL(url);
+};
+
+const descargarNomina = async (idGrupo, grupo, esp) => {
   try {
-    const response = await axios.get(`/reportes/nomina/grupo/${idGrupo}`, { responseType: "blob" });
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "nomina.xlsx");
-    document.body.appendChild(link);
-    link.click();
+    const response = await axios.get(
+      `/reportes/nomina/grupo/${idGrupo}`,
+      { responseType: "blob" }
+    );
+
+    const nombrePeriodo = obtenerNombrePeriodo();
+
+    const nombreArchivo =
+      `Nomina ${esp} ${nombrePeriodo} Modulo: ${grupo?.modulo} Sección: ${grupo?.seccion}____.xlsx`;
+
+    descargarArchivo(response.data, nombreArchivo);
+
   } catch (error) {
-    console.error("Error descargando reporte:", error);
+    console.error("Error descargando nómina:", error);
+    showToast("Error al descargar nómina", "error");
   }
 };
 
-const descargarActa = async (idAdmin) => {
+const descargarActa = async (idGrupo) => {
   try {
-    // const idAdmin = '2946189c-883f-40f6-91e6-bee16fba575d';
-
     const response = await axios.get(
-      `/reporte-acta-evaluacion/${idAdmin}`,
-      { responseType: 'blob' }
+      `/reporte-acta-evaluacion/${idGrupo}`,
+      { responseType: "blob" }
     );
 
-    const url = window.URL.createObjectURL(
-      new Blob([response.data])
-    );
+    const grupo = gruposData.value.find(g => g.id === idGrupo);
+    const nombrePeriodo = obtenerNombrePeriodo();
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Acta_Evaluacion_${new Date()
-      .toISOString()
-      .slice(0, 10)}.xlsx`;
+    const nombreArchivo =
+      `Acta ${grupo?.especialidad} ${nombrePeriodo} Modulo: ${grupo?.modulo} Sección: ${grupo?.seccion}____.xlsx`;
 
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    descargarArchivo(response.data, nombreArchivo);
 
   } catch (error) {
-    console.error('Error:', error);
-    showToast("Ocurrió un error al generar el reporte.", "error");
+    console.error("Error:", error);
+    showToast("Error al descargar acta", "error");
   }
 };
 
-const descargarConsolidado = async (idAdmin) => {
+const descargarConsolidado = async (idGrupo) => {
   try {
-    // const idAdmin = '2946189c-883f-40f6-91e6-bee16fba575d';
-
     const response = await axios.get(
-      `/reporte-consolidado/${idAdmin}`,
-      { responseType: 'blob' }
+      `/reporte-consolidado/${idGrupo}`,
+      { responseType: "blob" }
     );
 
-    const url = window.URL.createObjectURL(
-      new Blob([response.data])
-    );
+    const grupo = gruposData.value.find(g => g.id === idGrupo);
+    const nombrePeriodo = obtenerNombrePeriodo();
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Consolidado_${new Date()
-      .toISOString()
-      .slice(0, 10)}.xlsx`;
+    const nombreArchivo =
+      `Consolidado ${grupo?.especialidad} ${nombrePeriodo} Modulo: ${grupo?.modulo} Sección: ${grupo?.seccion}____.xlsx`;
 
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    descargarArchivo(response.data, nombreArchivo);
 
   } catch (error) {
-    console.error('Error:', error);
-    showToast("Ocurrió un error al generar el reporte.", "error");
+    console.error("Error:", error);
+    showToast("Error al descargar consolidado", "error");
   }
 };
 
@@ -243,8 +253,9 @@ const gruposAgrupados = computed(() => {
                   {{ grupo.cantidad_estudiantes }}</td>
                 <td class="text-center border-b border-gray-300 dark:border-gray-700 py-3">
                   <MenuTable :actions="{ view: true, download: true, report: true, reportConsol: true }"
-                    :labels="{ view: 'Ver Alumnos', download: 'Descargar Nomina', report: 'Descargar Acta', reportConsol: 'Descargar Consolidado' }" @view="verMatriculados(grupo)"
-                    @download="descargarNomina(grupo.id)" @report="descargarActa(grupo.id)" @report-consol="descargarConsolidado(grupo.id)"/>
+                    :labels="{ view: 'Ver Alumnos', download: 'Descargar Nomina', report: 'Descargar Acta', reportConsol: 'Descargar Consolidado' }"
+                    @view="verMatriculados(grupo)" @download="descargarNomina(grupo.id, grupo, especialidad)"
+                    @report="descargarActa(grupo.id)" @report-consol="descargarConsolidado(grupo.id)" />
                 </td>
               </tr>
             </template>

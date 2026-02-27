@@ -25,13 +25,43 @@ class RegistroMatriculaInstitucionalExport
 
         $sheet = $spreadsheet->getActiveSheet();
 
+
         // 2️⃣ Datos estáticos de institución
-        $institucion = [
-            'region'         => 'PUNO',
-            'ugel'           => 'PUNO',
-            'codigo_modular' => '0000000',
-            'nombre'         => 'CETPRO PUNO',
-        ];
+
+        /////////////////////////////////////////////////////
+        // datos de la intitucion 
+        /////////////////////////////////////////////////////
+        $institucion = DB::table('cetpros')->first();
+        $nombreInstitucion = $institucion->cetpro ?? '';
+        $dre = $institucion->dre ?? '';
+        $ugel = $institucion->ugel ?? '';
+        $codigoModular = $institucion->codigo_modular ?? '240069';
+        $codigoAutorizacion = $institucion->rd_autorizacion ?? 'R.D.00000';
+        $codigoConversion = $institucion->rd_conversion ?? 'R.C.00000';
+        $tipoGestion = $institucion->tipo_gestion ?? '';
+        $departamento = $institucion->region ?? '';
+        $provincia = $institucion->provincia ?? '';
+        $distrito = $institucion->distrito ?? '';
+        $direccion = $institucion->direccion ?? '';
+
+
+
+        // $sheet->setCellValue('F4', $nombreInstitucion);
+        // $sheet->setCellValue('M4', $dre);
+        // $sheet->setCellValue('F5', $codigoModular);
+        // $sheet->setCellValue('M5', $ugel);
+        // $sheet->setCellValue('F6', $codigoAutorizacion);
+        // $sheet->setCellValue('M6', $codigoConversion);
+
+        // $sheet->setCellValue('F7', $departamento);
+        // $sheet->setCellValue('M7', $provincia);
+
+        // $sheet->setCellValue('F8', $distrito);
+        // $sheet->setCellValue('M8', $tipoGestion);
+
+        // $sheet->setCellValue('F9', $direccion);
+
+
 
 
         // 3️⃣ Consulta
@@ -80,13 +110,13 @@ class RegistroMatriculaInstitucionalExport
 
         foreach ($registros as $r) {
             $sheet->fromArray([
-                $institucion['region'],
-                $institucion['ugel'],
-                $institucion['codigo_modular'],
-                $institucion['nombre'],
+                $departamento,
+                $ugel,
+                $codigoModular,
+                $nombreInstitucion,
                 $r->nombre_especialidad,
                 $r->nombre_ciclo,
-                $r->numero_rd,
+                $codigoAutorizacion,
                 $r->modulo,
                 $r->tipo_documento,
                 $r->nro_documento,

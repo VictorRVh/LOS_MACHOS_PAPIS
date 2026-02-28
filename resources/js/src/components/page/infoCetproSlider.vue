@@ -40,6 +40,7 @@ const title = computed(() => "Datos del CETPRO");
 
 const initialFormData = () => ({
   cetpro: "",
+  director: "",
   anio: "Año de la Esperanza y el Fortalecimiento de la Democracia",
   rd_autorizacion: "",
   rd_conversion: "",
@@ -78,6 +79,7 @@ watch(
 
 const schema = yup.object({
   cetpro: yup.string().required("El CETPRO es obligatorio"),
+  director: yup.string().nullable(),
   anio: yup.string().required("El campo Año es obligatorio"),
   rd_autorizacion: yup.string().required("La R.D. de autorización es obligatoria"),
   rd_conversion: yup.string().nullable(),
@@ -131,6 +133,12 @@ const onSubmit = async () => {
               label="CETPRO"
               :error="formErrors.cetpro"
               required
+              :uppercase="true"
+            />
+            <FormInput
+              v-model="formData.director"
+              label="Director(a)"
+              :error="formErrors.director"
               :uppercase="true"
             />
             <FormInput

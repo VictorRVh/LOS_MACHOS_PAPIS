@@ -29,6 +29,7 @@ class DatosCetproController extends Controller
     {
         $validated = $request->validate([
             'cetpro' => 'required|string|max:255',
+            'director' => 'nullable|string|max:255',
             'anio' => 'required|string|max:255',
             'rd_autorizacion' => 'required|string|max:255',
             'rd_conversion' => 'nullable|string|max:255',

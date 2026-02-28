@@ -16,6 +16,7 @@ import {
   HomeIcon,
   HashtagIcon,
   ClipboardDocumentCheckIcon,
+  UserCircleIcon,
 } from "@heroicons/vue/24/outline";
 
 const cetproStore = useCetproStore();
@@ -31,6 +32,7 @@ const hasCetpro = computed(() => !!cetpro.value?.id);
 
 const detailItems = computed(() => [
   { label: "CETPRO", value: cetpro.value?.cetpro, icon: BuildingOffice2Icon },
+  { label: "Director(a)", value: cetpro.value?.director, icon: UserCircleIcon },
   { label: "Tipo de Gestión", value: cetpro.value?.tipo_gestion, icon: ClipboardDocumentCheckIcon },
   { label: "Año", value: cetpro.value?.anio, icon: CalendarDaysIcon },
   { label: "R.D. Autorización", value: cetpro.value?.rd_autorizacion, icon: IdentificationIcon },

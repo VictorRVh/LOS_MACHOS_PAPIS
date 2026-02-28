@@ -893,8 +893,17 @@ class GrupoController extends Controller
             'experiencia_formativa' => $notaExperiencia,
             'cetpro' => [
                 'cetpro' => $cetpro->cetpro ?? null,
+                'director' => $cetpro->director ?? null,
                 'tipo_gestion' => $cetpro->tipo_gestion ?? null,
                 'lugar' => $cetpro->lugar ?? null,
+                'ugel' => $cetpro->ugel ?? null,
+                'dre' => $cetpro->dre ?? null,
+                'rd_autorizacion' => $cetpro->rd_autorizacion ?? null,
+                'rd_conversion' => $cetpro->rd_conversion ?? null,
+                'direccion' => $cetpro->direccion ?? null,
+                'region' => $cetpro->region ?? null,
+                'provincia' => $cetpro->provincia ?? null,
+                'distrito' => $cetpro->distrito ?? null,
             ],
         ]);
     }

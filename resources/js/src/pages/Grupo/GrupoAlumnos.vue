@@ -219,6 +219,7 @@ const emitirCertificadoEstudio = async (matriculaId) => {
 };
 
 
+
 </script>
 
 <template>
@@ -291,6 +292,7 @@ const emitirCertificadoEstudio = async (matriculaId) => {
                     </svg>
                   </template>
                 </BaseButton>
+
                 <BaseButton title="Certificado Modular" @click="openCertificadoModal(estudiante.id_matricula)"
                   class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
                   <template #icon>
@@ -367,3 +369,4 @@ const emitirCertificadoEstudio = async (matriculaId) => {
 
   </AuthorizationFallback>
 </template>
+

@@ -19,15 +19,13 @@ const formData = computed({
 });
 
 const condiciones = [
-    { label: 'G | Gratuito', value: 'G' },
-    { label: 'P | Pagante', value: 'P' },
-    { label: 'B | Beca', value: 'B' },
-    { label: 'S | Semibeca', value: 'S' }
+    { label: 'G | Gratuito', value: 'Gratuito' },
+    { label: 'P | Pagante', value: 'Pagante' },
+    { label: 'B | Beca', value: 'Beca' },
+    { label: 'S | Semibeca', value: 'Semibeca' }
 ]
 
-const onChangeCondicion = (option) => {
-    formData.value.condicion = option?.value ?? null
-}
+
 
 </script>
 
@@ -41,9 +39,8 @@ const onChangeCondicion = (option) => {
         <div class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormLabelError label="Condición">
-                    <vSelect :model-value="formData.condicion" :options="condiciones" label="label" :clearable="false"
-                        @update:modelValue="onChangeCondicion" />
-
+                    <vSelect v-model="formData.condicion" :options="condiciones" label="label"
+                        :reduce="option => option.value" :clearable="false" />
                 </FormLabelError>
                 <FormInput v-model="formData.nro_recibo" label="N° Recibo / Voucher" />
                 <FormInput v-model="formData.aporte" label="Aporte S/." type="number" step="0.01" />
@@ -72,7 +69,7 @@ const onChangeCondicion = (option) => {
                     <li>
                         <span class="font-semibold text-gray-700 dark:text-gray-300">Detalles de grupo: </span>
                         <span class="text-gray-600 dark:text-gray-400"> {{ props.nameGrupo || 'No seleccionado'
-                        }}</span>
+                            }}</span>
                     </li>
                 </ul>
             </div>

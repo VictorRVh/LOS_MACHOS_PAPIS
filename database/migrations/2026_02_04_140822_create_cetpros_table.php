@@ -15,13 +15,14 @@ return new class extends Migration
             $table->id();
 
             $table->string('cetpro');
+              $table->string('anio');
             $table->string('rd_autorizacion');
             $table->string('rd_conversion')->nullable();
 
             $table->string('ugel');
             $table->string('dre');
             $table->string('tipo_gestion');
-
+          
             $table->string('region');
             $table->string('provincia');
             $table->string('distrito');

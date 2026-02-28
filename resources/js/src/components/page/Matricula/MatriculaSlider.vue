@@ -62,7 +62,7 @@ const formData = reactive({
     celular_referencia: '',
     parentesco_referencia: '',
     lengua_materna: '',
-    condicion: 'G | Gratuito',
+    condicion: 'Gratuito',
     nro_recibo: '',
     aporte: '',
     anio_egreso: ''

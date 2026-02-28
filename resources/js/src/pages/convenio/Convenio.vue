@@ -66,7 +66,7 @@ const onDelete = (convenio) => {
           <THead>
             <Th>Id</Th>
             <Th>Modalidad</Th>
-            <Th>Acciones</Th>
+            <Th class="text-center">Acciones</Th>
           </THead>
 
           <TBody>

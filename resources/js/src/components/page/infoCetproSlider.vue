@@ -33,7 +33,7 @@ const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => [
   "todo-acceso-cetpro",
-  "editar-informacion-cetpro",
+  "editar-información-cetpro",
 ]);
 
 const title = computed(() => "Datos del CETPRO");

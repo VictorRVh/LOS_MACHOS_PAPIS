@@ -227,7 +227,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('buscar-documento', [
         \App\Http\Controllers\EstudianteController::class,
         'buscar',
-    ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
+    ])->middleware('permission:todo-acceso-matrículas|ver-matrículas');
 
     Route::post('buscarEstudiante', [
         \App\Http\Controllers\EstudianteController::class,
@@ -256,7 +256,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('ciclo_academico', [
         \App\Http\Controllers\CicloAcademicoController::class,
         'index',
-    ])->middleware('permission:todo-acceso-ciclo-academico|ver-ciclo-academico');
+    ])->middleware('permission:todo-acceso-ciclo-académico|ver-ciclo-académico');
 
     Route::post('ciclo_academico', [
         \App\Http\Controllers\CicloAcademicoController::class,
@@ -336,38 +336,38 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('lista_programacion/{id_admin}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'subidasPorProgramacion',
-    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
+    ])->middleware('permission:todo-acceso-programación-documentos-subidos|ver-programación-documentos-subidos');
 
     Route::get('entrega_docente_estado/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'verificarEstado',
-    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-programación-documentos-subidos|ver-programación-documentos-subidos|ver-mis-módulos');
 
     Route::post('entrega_docente_subir', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'subirArchivo',
-    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-programación-documentos-subidos|ver-programación-documentos-subidos|ver-mis-módulos');
 
     Route::post('entrega_docente_sincronizar', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'sincronizarEstado',
-    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|ver-programacion-documentos-subidos');
+    ])->middleware('permission:todo-acceso-programación-documentos-subidos|ver-programación-documentos-subidos');
 
     Route::patch('entrega_docente/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'update',
-    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|editar-programacion-documentos-subidos');
+    ])->middleware('permission:todo-acceso-programación-documentos-subidos|editar-programación-documentos-subidos');
 
     Route::delete('entrega_docente/{id}', [
         \App\Http\Controllers\EntregaDocenteController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-programacion-documentos-subidos|eliminar-programacion-documentos-subidos');
+    ])->middleware('permission:todo-acceso-programación-documentos-subidos|eliminar-programación-documentos-subidos');
 
 
     Route::get('programacion_grupo/{id_grupo}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
         'programacionesPorGrupo',
-    ])->middleware('permission:todo-acceso-programas-de-estudio|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-programas-de-estudio|ver-mis-módulos');
 
     // RUTA PARA ESPECIALIDAD_MADRE
     Route::get('especialidad_madre', [
@@ -404,28 +404,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('programa_estudio', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'index',
-    ])->middleware('permission:todo-acceso-ciclo-academico|ver-ciclo-academico');
+    ])->middleware('permission:todo-acceso-ciclo-académico|ver-ciclo-académico');
 
     Route::get('programa_estudio_status', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'index_filter_status',
-    ])->middleware('permission:todo-acceso-ciclo-academico|ver-ciclo-academico');
+    ])->middleware('permission:todo-acceso-ciclo-académico|ver-ciclo-académico');
 
 
     Route::post('programa_estudio', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'store',
-    ])->middleware('permission:todo-acceso-ciclo-academico|crear-ciclo-academico');
+    ])->middleware('permission:todo-acceso-ciclo-académico|crear-ciclo-académico');
 
     Route::patch('programa_estudio/{id}', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'update',
-    ])->middleware('permission:todo-acceso-ciclo-academico|editar-ciclo-academico');
+    ])->middleware('permission:todo-acceso-ciclo-académico|editar-ciclo-académico');
 
     Route::delete('programa_estudio/{id}', [
         \App\Http\Controllers\ProgramaEstudioController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-ciclo-academico|eliminar-ciclo-academico');
+    ])->middleware('permission:todo-acceso-ciclo-académico|eliminar-ciclo-académico');
 
 
     // RUTA PARA ESPECIALIDAD_PROGRAMA
@@ -531,27 +531,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('modulo', [
         \App\Http\Controllers\ModuloController::class,
         'index',
-    ])->middleware('permission:todo-acceso-modulos|ver-modulos');
+    ])->middleware('permission:todo-acceso-módulos|ver-módulos');
 
     Route::get('modulo/{id}', [
         \App\Http\Controllers\ModuloController::class,
         'show',
-    ])->middleware('permission:todo-acceso-modulos|ver-modulos');
+    ])->middleware('permission:todo-acceso-módulos|ver-módulos');
 
     Route::post('modulo', [
         \App\Http\Controllers\ModuloController::class,
         'store',
-    ])->middleware('permission:todo-acceso-modulos|crear-modulos');
+    ])->middleware('permission:todo-acceso-módulos|crear-módulos');
 
     Route::patch('modulo/{id}', [
         \App\Http\Controllers\ModuloController::class,
         'update',
-    ])->middleware('permission:todo-acceso-modulos|editar-modulos');
+    ])->middleware('permission:todo-acceso-módulos|editar-módulos');
 
     Route::delete('modulo/{id}', [
         \App\Http\Controllers\ModuloController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-modulos|eliminar-modulos');
+    ])->middleware('permission:todo-acceso-módulos|eliminar-módulos');
 
 
     Route::get('certificado/{idMatricula}', [
@@ -584,7 +584,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('especialidadByPrograma/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'getEspecialidadesPorPrograma',
-    ])->middleware('permission:todo-acceso-ciclo-programa|ver-ciclo-academico');
+    ])->middleware('permission:todo-acceso-ciclo-programa|ver-ciclo-académico');
 
     Route::get('moduloByEspecialidad/{id}', [
         \App\Http\Controllers\GrupoController::class,
@@ -630,13 +630,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('gruposMatricula', [
         \App\Http\Controllers\GrupoController::class,
         'getGruposPorCicloYPeriodo',
-    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
+    ])->middleware('permission:todo-acceso-matrículas|ver-matrículas');
 
     // Lista de grupos disponibles para cambio de grupo
     Route::get('gruposDisponibles', [
         \App\Http\Controllers\GrupoController::class,
         'gruposDisponibles',
-    ])->middleware('permission:todo-acceso-grupos|ver-grupos');
+    ])->middleware('permission:todo-acceso-matrículas|trasladar-estudiante-matrículas');
 
     Route::get('gruposRecientes', [
         \App\Http\Controllers\GrupoController::class,
@@ -652,119 +652,119 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('capacidad_terminal', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'index',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-docente|ver-unidad-didáctica-docente');
     Route::get('capacidad_terminal/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'indexGrupo',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-docente|ver-unidad-didáctica-docente');
 
     Route::get('unidades_didacticas/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'indexUnidadDidactica',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-docente|ver-unidad-didáctica-docente');
 
     Route::get('nro_capacidades/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'nroCapacidades',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-docente|ver-unidad-didáctica-docente');
 
     Route::get('lista_calificaciones/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'getMatriculadosPorGrupoParaNotas',
-    ])->middleware('permission:ver-grupos|todo-acceso-capacidad-terminal-docente|ver-capacidad-terminal-docente');
+    ])->middleware('permission:ver-grupos|todo-acceso-unidad-didáctica-docente|ver-unidad-didáctica-docente');
 
     Route::post('capacidad_terminal', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'store',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|crear-capacidad-terminal-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-docente|crear-unidad-didáctica-docente');
 
     Route::patch('capacidad_terminal_reactivar/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'reactivarNota',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|editar-capacidad-terminal-docente|ver-grupos');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-docente|editar-unidad-didáctica-docente|ver-grupos');
 
     Route::post('capacidad_terminal_aplazar/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'aplazarCapacidadTerminal',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|editar-capacidad-terminal-docente|ver-grupos');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-docente|editar-unidad-didáctica-docente|ver-grupos');
 
     Route::patch('capacidad_terminal/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'update',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|editar-capacidad-terminal-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-docente|editar-unidad-didáctica-docente');
 
     Route::delete('capacidad_terminal/{id}', [
         \App\Http\Controllers\CapacidadTerminalController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-docente|eliminar-capacidad-terminal-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-docente|eliminar-unidad-didáctica-docente');
 
     // RUTA PARA NOTA DE CAPACIDAD TERMINAL
     Route::get('nota_capacidad_terminal', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'index',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|ver-capacidad-terminal-notas-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-notas-docente|ver-unidad-didáctica-notas-docente');
 
     Route::get('nota_capacidad_terminal/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'index_grupo_alumnos',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|ver-capacidad-terminal-notas-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-notas-docente|ver-unidad-didáctica-notas-docente');
 
     Route::get('lista_alumnos_notas/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'listaAlumnosNotas',
-    ])->middleware('permission:ver-grupos|todo-acceso-capacidad-terminal-notas-docente|ver-capacidad-terminal-notas-docente');
+    ])->middleware('permission:ver-grupos|todo-acceso-unidad-didáctica-notas-docente|ver-unidad-didáctica-notas-docente');
 
     Route::get('nota_capacidad_terminal_restringido/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'index_grupo_capacidad_terminal',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|ver-capacidad-terminal-notas-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-notas-docente|ver-unidad-didáctica-notas-docente');
 
     Route::get('nota_capacidad_terminal_info/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'obtenerInfoCapacidad',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|ver-capacidad-terminal-notas-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-notas-docente|ver-unidad-didáctica-notas-docente');
 
     Route::post('nota_capacidad_terminal', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'store',
-    ])->middleware('permission:ver-grupos|todo-acceso-capacidad-terminal-notas-docente|crear-capacidad-terminal-notas-docente');
+    ])->middleware('permission:ver-grupos|todo-acceso-unidad-didáctica-notas-docente|crear-unidad-didáctica-notas-docente');
 
     Route::patch('nota_capacidad_terminal/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'update',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|editar-capacidad-terminal-notas-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-notas-docente|editar-unidad-didáctica-notas-docente');
 
     Route::delete('nota_capacidad_terminal/{id}', [
         \App\Http\Controllers\NotaCapacidadTerminalController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-capacidad-terminal-notas-docente|eliminar-capacidad-terminal-notas-docente');
+    ])->middleware('permission:todo-acceso-unidad-didáctica-notas-docente|eliminar-unidad-didáctica-notas-docente');
 
 
     // RUTA PARA EXPERIENCIA FORMATIVA
     Route::get('experiencia_formativa', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-módulos');
 
     Route::get('experiencia_formativa_index/{id_grupo}', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'indexExperienciaFormativa',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-módulos');
 
     Route::get('experiencia_formativa_folderDrive/{id_grupo}', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'indexExperienciaFormativaFolderDrive',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-módulos');
 
     Route::post('experiencia_formativa', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos|ver-mis-módulos');
 
     Route::patch('experiencia_formativa/{id}', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|editar-permisos|ver-mis-módulos');
 
     Route::delete('experiencia_formativa/{id}', [
         \App\Http\Controllers\ExperienciaFormativaController::class,
@@ -781,7 +781,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('competencias_index/{idModulo}', [
         \App\Http\Controllers\CompetenciaController::class,
         'getCompetenciasPorModulo',
-    ])->middleware('permission:todo-acceso-competencias |ver-competencias|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-competencias |ver-competencias|ver-mis-módulos');
 
     Route::post('competencias', [
         \App\Http\Controllers\CompetenciaController::class,
@@ -796,33 +796,33 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('competencias/{id}', [
         \App\Http\Controllers\CompetenciaController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-mis-módulos');
 
     // RUTA PARA CAPACIDADES TERMINALES-COMPETENCIA
     Route::get('capacidad_competencia', [
         \App\Http\Controllers\CapacidadCompetenciaController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-módulos');
 
     Route::get('capacidad_competencia_index/{idGrupo}', [
         \App\Http\Controllers\CapacidadCompetenciaController::class,
         'getCapacidadesPorCompetencia',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-módulos');
 
     Route::post('capacidad_competencia', [
         \App\Http\Controllers\CapacidadCompetenciaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos|ver-mis-módulos');
 
     Route::patch('capacidad_competencia/{id}', [
         \App\Http\Controllers\CapacidadCompetenciaController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-módulos');
 
     Route::delete('capacidad_competencia/{id}', [
         \App\Http\Controllers\CapacidadCompetenciaController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-modulos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-módulos|ver-mis-módulos');
 
 
     // RUTA PARA NOTA DE EXPERIENCIA FORMATIVA
@@ -834,7 +834,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('nota_experiencia_formativa', [
         \App\Http\Controllers\NotaExperienciaFormativaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-mis-módulos');
 
     Route::patch('nota_experiencia_formativa/{id}', [
         \App\Http\Controllers\NotaExperienciaFormativaController::class,
@@ -885,27 +885,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('asistencia', [
         \App\Http\Controllers\AsistenciaController::class,
         'index',
-    ])->middleware('permission:ver-mis-modulos|todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:ver-mis-módulos|todo-acceso-permisos|ver-permisos');
 
     Route::get('sesiones_entrega/{idEntrega}', [
         \App\Http\Controllers\AsistenciaController::class,
         'obtenerSesionPorEntrega',
-    ])->middleware('permission:ver-mis-modulos|todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:ver-mis-módulos|todo-acceso-permisos|ver-permisos');
 
     Route::get('sesiones_asistencia/{idEntrega}', [
         \App\Http\Controllers\AsistenciaController::class,
         'obtenerAsistenciaEstudiantes',
-    ])->middleware('permission:ver-mis-modulos|todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:ver-mis-módulos|todo-acceso-permisos|ver-permisos');
 
     Route::post('asistencia', [
         \App\Http\Controllers\AsistenciaController::class,
         'store',
-    ])->middleware('permission:ver-grupos|ver-mis-modulos|todo-acceso-mis-modulos');
+    ])->middleware('permission:ver-grupos|ver-mis-módulos|todo-acceso-mis-módulos');
 
     Route::get('asistencia/{idGrupo}', [
         \App\Http\Controllers\AsistenciaController::class,
         'listAsistenciaEstudiantes',
-    ])->middleware('permission:ver-grupos|ver-mis-modulos|todo-acceso-mis-modulos');
+    ])->middleware('permission:ver-grupos|ver-mis-módulos|todo-acceso-mis-módulos');
 
     Route::patch('asistencia/{id}', [
         \App\Http\Controllers\AsistenciaController::class,
@@ -937,7 +937,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('entregas_realizadas/{fileId}', [
         \App\Http\Controllers\EntregasRealizadasController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-mis-módulos');
 
     //RUTA PARA EGRESADOS
     Route::get('egresados', [
@@ -1102,33 +1102,33 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('matricula', [
         \App\Http\Controllers\MatriculaController::class,
         'index',
-    ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
+    ])->middleware('permission:todo-acceso-matrículas|ver-matrículas');
 
     Route::get('matriculaUpdate/{id}', [
         \App\Http\Controllers\MatriculaController::class,
         'matriculaAlumnoData',
-    ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
+    ])->middleware('permission:todo-acceso-matrículas|editar-matrículas');
 
     Route::post('matricula', [
         \App\Http\Controllers\MatriculaController::class,
         'store',
-    ])->middleware('permission:todo-acceso-matriculas|crear-matriculas');
+    ])->middleware('permission:todo-acceso-matrículas|crear-matrículas');
 
     Route::patch('matricula/{id}', [
         \App\Http\Controllers\MatriculaController::class,
         'update',
-    ])->middleware('permission:todo-acceso-matriculas|editar-matriculas');
+    ])->middleware('permission:todo-acceso-matrículas|editar-matrículas');
 
     Route::delete('matricula/{id}', [
         \App\Http\Controllers\MatriculaController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-matriculas|eliminar-matriculas');
+    ])->middleware('permission:todo-acceso-matrículas|eliminar-matrículas');
 
 
     Route::get('ingresos/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'IngresosByGrupo',
-    ])->middleware('permission:todo-acceso-matriculas|ver-matriculas');
+    ])->middleware('permission:todo-acceso-matrículas|ver-matrículas');
 
 
     //matricula Reserva
@@ -1136,51 +1136,51 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('reservaMatricula/{id}', [
         \App\Http\Controllers\MatriculaController::class,
         'reservar',
-    ])->middleware('permission:ver-matriculas');
+    ])->middleware('permission:todo-acceso-matrículas|reservar-estudiante-matrículas');
 
     Route::delete('reserva/{id}', [
         \App\Http\Controllers\MatriculaController::class,
         'usarReservar',
-    ])->middleware('permission:ver-matriculas|editar-matriculas');
+    ])->middleware('permission:todo-acceso-matrículas|reservar-estudiante-matrículas');
 
     Route::get('listaReserva/{tipo}', [
         \App\Http\Controllers\MatriculaController::class,
         'matriculadosConReserva',
-    ])->middleware('permission:ver-matriculas');
+    ])->middleware('permission:ver-matrículas');
     // Alumnos matriculados (en modulo matricula)
     Route::get('matricula/{grupoId}', [
         \App\Http\Controllers\MatriculaController::class,
         'getMatriculadosPorGrupo',
-    ])->middleware('permission:ver-matriculas');
+    ])->middleware('permission:ver-matrículas');
 
     Route::get('fichaMatricula/{estudianteId}', [
         \App\Http\Controllers\MatriculaController::class,
         'getFichaMatricula',
-    ])->middleware('permission:ver-matriculas');
+    ])->middleware('permission:ver-matrículas');
 
 
     Route::get('matriculados/{grupoId}', [
         \App\Http\Controllers\MatriculaController::class,
         'getMatriculadosPorGrupoExtendido',
-    ])->middleware('permission:ver-matriculas|ver-mis-modulos');
+    ])->middleware('permission:ver-matrículas|ver-mis-módulos');
 
 
     // Cambio de matricula
     Route::patch('cambiarMatricula', [
         \App\Http\Controllers\MatriculaController::class,
         'cambiarGrupo',
-    ])->middleware('permission:todo-acceso-matriculas');
+    ])->middleware('permission:todo-acceso-matrículas');
 
 
     Route::patch('cambiarMatricula/{idMatricula}', [
         \App\Http\Controllers\MatriculaController::class,
         'cambiarGrupo',
-    ])->middleware('permission:todo-acceso-matriculas');
+    ])->middleware('permission:todo-acceso-matrículas');
 
     Route::patch('retirarEstudiante', [
         \App\Http\Controllers\MatriculaController::class,
         'retirarAlumno',
-    ])->middleware('permission:todo-acceso-matriculas|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-matrículas|ver-mis-módulos');
 
 
     // programa por ciclo
@@ -1193,7 +1193,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('grupoByEspecialidad/{idEspecialidad}', [
         \App\Http\Controllers\MatriculaController::class,
         'getGruposPorEspecialidad',
-    ])->middleware('permission:permission:todo-acceso-matriculas|ver-matriculas');
+    ])->middleware('permission:permission:todo-acceso-matrículas|ver-matrículas');
 
     Route::get('grupoByPeriodo/{idPeriodo}', [
         \App\Http\Controllers\EntregaDocenteAdminController::class,
@@ -1204,13 +1204,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('modulosAsignados', [
         \App\Http\Controllers\DocenteController::class,
         'getModulosAsignados',
-    ])->middleware('permission:ver-mis-modulos|ver-estudiantes-asignados');
+    ])->middleware('permission:ver-mis-módulos|ver-estudiantes-asignados');
 
     // PARA LA INFO DEL GRUPO
     Route::get('infoGrupo/{id}', [
         \App\Http\Controllers\GrupoController::class,
         'infoGrupo',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-modulos');
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos|ver-mis-módulos');
 
     // RUTA PARA REPORTE DE CUMPLIMIENTO
     Route::get('/reporte-entregas-docentes', [
@@ -1242,46 +1242,46 @@ Route::middleware('auth:sanctum')->group(function () {
         'consolidadoExcel',
     ])->middleware('permission:ver-ciclo-programa');
 
-    Route::get('cetprodata', [
-        \App\Http\Controllers\DatosCetproController::class,
-        'show',
-    ])->middleware('permission:ver-informacion-cetpro');
 
     Route::post('cetprodata', [
         \App\Http\Controllers\DatosCetproController::class,
         'store',
-    ])->middleware('permission:editar-informacion-cetpro');
+    ])->middleware('permission:editar-información-cetpro');
 
     Route::get('estadistica101', [
         \App\Http\Controllers\EstadisticaController::class,
         'estadistica101Data',
-    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
+    ])->middleware('permission:ver-estadísticas|todo-acceso-estadísticas');
 
     Route::get('estadistica104', [
         \App\Http\Controllers\EstadisticaController::class,
         'matriculadosRetiradosPorCarrera',
-    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
+    ])->middleware('permission:ver-estadísticas|todo-acceso-estadísticas');
 
     Route::get('estadistica202', [
         \App\Http\Controllers\EstadisticaController::class,
         'matriculadosPorCicloYSexo',
-    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
+    ])->middleware('permission:ver-estadísticas|todo-acceso-estadísticas');
 
     Route::get('estadistica203', [
         \App\Http\Controllers\EstadisticaController::class,
         'matriculaPorNivelEducativoCicloSexo',
-    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
+    ])->middleware('permission:ver-estadísticas|todo-acceso-estadísticas');
 
     Route::get('estadistica205', [
         \App\Http\Controllers\EstadisticaController::class,
         'seccionesPorCicloTurno',
-    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
+    ])->middleware('permission:ver-estadísticas|todo-acceso-estadísticas');
 
     Route::get('estadistica201', [
         \App\Http\Controllers\EstadisticaController::class,
         'matriculaPorCicloSexoEdad',
-    ])->middleware('permission:ver-estadisticas|todo-acceso-estadisticas');
+    ])->middleware('permission:ver-estadísticas|todo-acceso-estadísticas');
 });
+    Route::get('cetprodata', [
+        \App\Http\Controllers\DatosCetproController::class,
+        'show',
+    ]);
 
 Route::get('reportes/nomina/grupo/{idGrupo}', [
     \App\Http\Controllers\ReporteController::class,

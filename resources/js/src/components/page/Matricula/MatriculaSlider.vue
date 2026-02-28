@@ -4,11 +4,12 @@ import { useRouter } from 'vue-router';
 import useHttpRequest from '../../../composables/useHttpRequest';
 import useModalToast from '../../../composables/useModalToast';
 import useProgramaStore from '../../../store/Programa/useProgramaStatusStore';
-
+import AuthorizationFallback from "../AuthorizationFallback.vue";
 import Step1 from './Steps/Step1.vue';
 import Step2 from './Steps/Step2.vue';
 import Step3 from './Steps/Step3.vue';
 import Button from '../../ui/Button.vue';
+
 import * as yup from "yup";
 
 const router = useRouter();
@@ -107,7 +108,7 @@ const stepSchemas = {
             .string()
             .required('Celular es requerido')
             .matches(/^\d{9}$/, 'El celular debe tener 9 números'),
-              celular_referencia: yup
+        celular_referencia: yup
             .string()
             .notRequired()
             .matches(/^\d{9}$/, 'El celular debe tener 9 números'),
@@ -166,46 +167,50 @@ const onSubmit = async () => {
 </script>
 
 <template>
-    <div class="p-2 bg-white dark:bg-gray-900/50 font-inter">
+    <AuthorizationFallback :permissions="['todo-acceso-matrículas', 'crear-matrículas']">
+        <div class="p-2 bg-white dark:bg-gray-900/50 font-inter">
 
-        <div v-if="isLoading"
-            class="flex justify-center items-center min-h-[500px] bg-white dark:bg-gray-800 rounded-lg shadow-xl">
-            <p class="text-gray-500 dark:text-gray-400 text-lg">Cargando datos del formulario...</p>
-        </div>
-
-        <div v-else>
-            <ol class="flex items-center space-x-2 text-sm font-medium text-gray-500 dark:text-gray-400 sm:text-base">
-                <li class="flex items-center">
-                    <span :class="currentStep >= 1 ? 'text-blue-600 dark:text-blue-500' : ''">1. Datos Académicos</span>
-                    <span v-if="currentStep < 3" class="mx-2">»</span>
-                </li>
-                <li class="flex items-center">
-                    <span :class="currentStep >= 2 ? 'text-blue-600 dark:text-blue-500' : ''">2. Datos del
-                        Estudiante</span>
-                    <span v-if="currentStep < 3" class="mx-2">»</span>
-                </li>
-                <li class="flex items-center">
-                    <span :class="currentStep >= 3 ? 'text-blue-600 dark:text-blue-500' : ''">3. Pago y
-                        Confirmación</span>
-                </li>
-            </ol>
-
-
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-h-[350px]">
-                <Step1 v-show="currentStep === 1" v-model="formData" :programas="programaStore.programa.programas"
-                    :nameGrupo="nameGrupo" @cambiarVariable="nameGrupo = $event" :errors="stepErrors[1]" />
-                <Step2 v-show="currentStep === 2" v-model="formData" :errors="stepErrors[2]" />
-                <Step3 v-show="currentStep === 3" v-model="formData" :nameGrupo="nameGrupo" />
+            <div v-if="isLoading"
+                class="flex justify-center items-center min-h-[500px] bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+                <p class="text-gray-500 dark:text-gray-400 text-lg">Cargando datos del formulario...</p>
             </div>
 
-            <div class="flex justify-between mt-2">
-                <Button v-if="currentStep > 1" variant="outline" @click="prevStep" title="Anterior" />
-                <div>
-                    <Button v-if="currentStep < 3" @click="nextStep" title="Siguiente" />
-                    <Button v-if="currentStep === 3" @click="onSubmit" :loading="saving"
-                        title="Confirmar y Matricular" />
+            <div v-else>
+                <ol
+                    class="flex items-center space-x-2 text-sm font-medium text-gray-500 dark:text-gray-400 sm:text-base">
+                    <li class="flex items-center">
+                        <span :class="currentStep >= 1 ? 'text-blue-600 dark:text-blue-500' : ''">1. Datos
+                            Académicos</span>
+                        <span v-if="currentStep < 3" class="mx-2">»</span>
+                    </li>
+                    <li class="flex items-center">
+                        <span :class="currentStep >= 2 ? 'text-blue-600 dark:text-blue-500' : ''">2. Datos del
+                            Estudiante</span>
+                        <span v-if="currentStep < 3" class="mx-2">»</span>
+                    </li>
+                    <li class="flex items-center">
+                        <span :class="currentStep >= 3 ? 'text-blue-600 dark:text-blue-500' : ''">3. Pago y
+                            Confirmación</span>
+                    </li>
+                </ol>
+
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 min-h-[350px]">
+                    <Step1 v-show="currentStep === 1" v-model="formData" :programas="programaStore.programa.programas"
+                        :nameGrupo="nameGrupo" @cambiarVariable="nameGrupo = $event" :errors="stepErrors[1]" />
+                    <Step2 v-show="currentStep === 2" v-model="formData" :errors="stepErrors[2]" />
+                    <Step3 v-show="currentStep === 3" v-model="formData" :nameGrupo="nameGrupo" />
+                </div>
+
+                <div class="flex justify-between mt-2">
+                    <Button v-if="currentStep > 1" variant="outline" @click="prevStep" title="Anterior" />
+                    <div>
+                        <Button v-if="currentStep < 3" @click="nextStep" title="Siguiente" />
+                        <Button v-if="currentStep === 3" @click="onSubmit" :loading="saving"
+                            title="Confirmar y Matricular" />
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </AuthorizationFallback>
 </template>

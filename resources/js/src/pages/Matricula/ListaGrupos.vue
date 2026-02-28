@@ -190,7 +190,7 @@ const gruposAgrupados = computed(() => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-permisos', 'ver-permisos']">
+  <AuthorizationFallback :permissions="['todo-acceso-matrículas', 'ver-matrículas']">
     <div class=""> <!-- FILTROS -->
       <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-300">
         <!-- FILTROS EN UNA SOLA FILA MEJOR DISTRIBUIDOS -->

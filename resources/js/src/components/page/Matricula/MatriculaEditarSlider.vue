@@ -4,7 +4,7 @@ import { useRouter, useRoute } from 'vue-router';
 import useHttpRequest from '../../../composables/useHttpRequest';
 import useModalToast from '../../../composables/useModalToast';
 import useMatriculaUpStore from '../../../store/Matricula/useMatriculaUpdateStore';
-
+import AuthorizationFallback from "../AuthorizationFallback.vue";
 import Step2 from './Steps/Step2.vue';
 import Step3 from './Steps/Step3.vue';
 import Button from '../../ui/Button.vue';
@@ -241,6 +241,7 @@ onMounted(() => {
 </script>
 
 <template>
+      <AuthorizationFallback :permissions="['todo-acceso-matrículas', 'editar-matrículas']">
     <div class="p-2 bg-white dark:bg-gray-900/50 font-inter">
         <h4 class="text-xl font-bold text-gray-800 dark:text-gray-200">
             Editar Datos del Estudiante
@@ -281,4 +282,5 @@ onMounted(() => {
 
         </div>
     </div>
+    </AuthorizationFallback>
 </template>

@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 
 import useHttpRequest from '../composables/useHttpRequest';
 
-const useCetproStore = defineStore('cetpro-informacion', () => {
+const useCetproStore = defineStore('cetpro-información', () => {
     const {
         index: getCetpro,
         loading: cetproLoading,

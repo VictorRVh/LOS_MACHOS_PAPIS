@@ -31,8 +31,8 @@ const { store: createPrograma, update: updatePrograma, saving, updating } = useH
 
 const requiredPermissions = computed(() =>
   props.programa?.id
-    ? ["todo-acceso-ciclo-academico", "editar-ciclo-academico"]
-    : ["todo-acceso-ciclo-academico", "crear-ciclo-academico"]
+    ? ["todo-acceso-ciclo-académico", "editar-ciclo-académico"]
+    : ["todo-acceso-ciclo-académico", "crear-ciclo-académico"]
 );
 
 const title = computed(() =>

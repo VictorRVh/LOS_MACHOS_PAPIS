@@ -146,7 +146,7 @@ const estadoTexto = computed(() => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-capacidad-terminal-docente', 'ver-capacidad-terminal-docente']">
+  <AuthorizationFallback :permissions="['todo-acceso-unidad-didáctica-docente', 'ver-unidad-didáctica-docente']">
 
     <div v-if="sesionStore?.sesion.id"
       class="col-span-full bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-2 px-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">

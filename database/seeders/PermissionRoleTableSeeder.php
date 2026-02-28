@@ -15,7 +15,7 @@ class PermissionRoleTableSeeder extends Seeder
     {
         $permissionRole = [];
 
-        for ($i = 1; $i <= 99; $i++) {
+        for ($i = 1; $i <= 101; $i++) {
             $permissionRole[] = [
                 'role_id' => 1,
                 'permission_id' => $i,
@@ -38,15 +38,15 @@ class PermissionRoleTableSeeder extends Seeder
         $docentePermissions = [
             'ver-perfil-docente',
             'editar-perfil-docente',
-            'ver-mis-modulos',
+            'ver-mis-módulos',
             'ver-estudiantes-asignados',
 
             //Permisos para capacida terminal
-            'todo-acceso-capacidad-terminal-docente',
-            'ver-capacidad-terminal-docente',
-            'crear-capacidad-terminal-docente',
-            'editar-capacidad-terminal-docente',
-            'eliminar-capacidad-terminal-docente',
+            'todo-acceso-unidad-didáctica-docente',
+            'ver-unidad-didáctica-docente',
+            'crear-unidad-didáctica-docente',
+            'editar-unidad-didáctica-docente',
+            'eliminar-unidad-didáctica-docente',
 
             'todo-acceso-sesiones-docente',
             'ver-sesiones-docente',
@@ -54,11 +54,11 @@ class PermissionRoleTableSeeder extends Seeder
             'editar-sesiones-docente',
             'eliminar-sesiones-docente',
 
-            'todo-acceso-capacidad-terminal-notas-docente',
-            'ver-capacidad-terminal-notas-docente',
-            'crear-capacidad-terminal-notas-docente',
-            'editar-capacidad-terminal-notas-docente',
-            'eliminar-capacidad-terminal-notas-docente',
+            'todo-acceso-unidad-didáctica-notas-docente',
+            'ver-unidad-didáctica-notas-docente',
+            'crear-unidad-didáctica-notas-docente',
+            'editar-unidad-didáctica-notas-docente',
+            'eliminar-unidad-didáctica-notas-docente',
 
             'todo-acceso-alumnos-docente',
             'ver-alumnos-docente',
@@ -67,7 +67,7 @@ class PermissionRoleTableSeeder extends Seeder
             // 'eliminar-alumnos-docente',
 
             // comsiones ...  
-            'ver-comision-docente',
+            'ver-comisión-docente',
 
             //Competencias 
             'todo-acceso-capacidades-docente',

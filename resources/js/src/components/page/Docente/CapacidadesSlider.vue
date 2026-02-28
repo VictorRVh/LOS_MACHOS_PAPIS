@@ -79,8 +79,8 @@ const isEditing = computed(() => !!props.capacidad?.id);
 ========================= */
 const requiredPermissions = computed(() =>
     isEditing.value
-        ? ["todo-acceso-capacidad-terminal-docente", "editar-capacidad-terminal-docente"]
-        : ["todo-acceso-capacidad-terminal-docente", "crear-capacidad-terminal-docente"]
+        ? ["todo-acceso-unidad-didáctica-docente", "editar-unidad-didáctica-docente"]
+        : ["todo-acceso-unidad-didáctica-docente", "crear-unidad-didáctica-docente"]
 );
 
 /* =========================

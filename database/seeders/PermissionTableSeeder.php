@@ -14,10 +14,6 @@ class PermissionTableSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-
-
-
-
             'todo-acceso-usuarios',
             'ver-usuarios',
             'crear-usuarios',
@@ -86,12 +82,12 @@ class PermissionTableSeeder extends Seeder
 
             /////////////////////////////////////////////PROGRAMA DE ESTUDIOS//////////////////////////////////////////
             // PERMISOS DE MODULOS
-            'todo-acceso-modulos',
-            'ver-modulos',
-            'crear-modulos',
-            'editar-modulos',
-            'eliminar-modulos',
-            'icono-modulos',
+            'todo-acceso-módulos',
+            'ver-módulos',
+            'crear-módulos',
+            'editar-módulos',
+            'eliminar-módulos',
+            'icono-módulos',
 
             // PERMISOS DE PROGRAMA ESPECIALIDAD
             'todo-acceso-ciclo-programa',
@@ -104,12 +100,12 @@ class PermissionTableSeeder extends Seeder
             //
 
             // PERMISOS DE PROGRAMAS
-            'todo-acceso-ciclo-academico',
-            'ver-ciclo-academico',
-            'crear-ciclo-academico',
-            'editar-ciclo-academico',
-            'eliminar-ciclo-academico',
-            'icono-ciclo-academico',
+            'todo-acceso-ciclo-académico',
+            'ver-ciclo-académico',
+            'crear-ciclo-académico',
+            'editar-ciclo-académico',
+            'eliminar-ciclo-académico',
+            'icono-ciclo-académico',
 
             'todo-acceso-grupos',
             'ver-grupos',
@@ -118,12 +114,14 @@ class PermissionTableSeeder extends Seeder
             'eliminar-grupos',
             'icono-grupos',
 
-            'todo-acceso-matriculas',
-            'ver-matriculas',
-            'crear-matriculas',
-            'editar-matriculas',
-            'eliminar-matriculas',
-            'icono-matriculas',
+            'todo-acceso-matrículas',
+            'ver-matrículas',
+            'crear-matrículas',
+            'editar-matrículas',
+            'eliminar-matrículas',
+            'trasladar-estudiante-matrículas',
+            'reservar-estudiante-matrículas',
+            'icono-matrículas',
 
             // PERMISOS DE DE PROGRAMACION ADMIN 
             'todo-acceso-documento-programado',
@@ -134,26 +132,26 @@ class PermissionTableSeeder extends Seeder
             'icono-documento-programado',
 
             // PERMISOS DE DE PROGRAMACION PARA DOCENTES
-            'todo-acceso-programacion-documentos-subidos',
-            'ver-programacion-documentos-subidos',
-            'crear-programacion-documentos-subidos',
-            'editar-programacion-documentos-subidos',
-            'eliminar-programacion-documentos-subidos',
-            'icono-programacion-documentos-subidos',
+            'todo-acceso-programación-documentos-subidos',
+            'ver-programación-documentos-subidos',
+            'crear-programación-documentos-subidos',
+            'editar-programación-documentos-subidos',
+            'eliminar-programación-documentos-subidos',
+            'icono-programación-documentos-subidos',
 
             // Datos cetpro
             'ver-actividades',
-            'ver-informacion-cetpro',
-            'editar-informacion-cetpro',
+            'ver-información-cetpro',
+            'editar-información-cetpro',
 
             // ESTADISTICAS
 
-            'todo-acceso-estadisticas',
-            'ver-estadisticas',
-            // 'crear-documento-estadisticas',
-            // 'editar-documento-estadisticas',
-            // 'eliminar-documento-estadisticas',
-            'icono-estadisticas',
+            'todo-acceso-estadísticas',
+            'ver-estadísticas',
+            // 'crear-documento-estadísticas',
+            // 'editar-documento-estadísticas',
+            // 'eliminar-documento-estadísticas',
+            'icono-estadísticas',
 
             ///////////////////////////////////////
             ///////////////////////////////////////
@@ -163,8 +161,8 @@ class PermissionTableSeeder extends Seeder
             // PERMISOSPARA ELADMIN..PARA QUE PUEDA VISUALIZAR LOS DATOS DEL DOCENTE
             // (CALENDARIZACION,CAPACIDADDES TERMINALES, NOTAS, ASISTENCIA)
             'ver-sesiones-docente',
-            'ver-capacidad-terminal-docente',
-            'ver-capacidad-terminal-notas-docente',
+            'ver-unidad-didáctica-docente',
+            'ver-unidad-didáctica-notas-docente',
 
             ///////////////////////////////////////
             ///////////////////////////////////////
@@ -173,17 +171,17 @@ class PermissionTableSeeder extends Seeder
 
 
             // PERMISOS DE DE PROGRAMACION PARA DOCENTES
-            'todo-acceso-capacidad-terminal-docente',
-            /// 'ver-capacidad-terminal-docente',
-            'crear-capacidad-terminal-docente',
-            'editar-capacidad-terminal-docente',
-            'eliminar-capacidad-terminal-docente',
+            'todo-acceso-unidad-didáctica-docente',
+            /// 'ver-unidad-didáctica-docente',
+            'crear-unidad-didáctica-docente',
+            'editar-unidad-didáctica-docente',
+            'eliminar-unidad-didáctica-docente',
 
-            'todo-acceso-capacidad-terminal-notas-docente',
-            //'ver-capacidad-terminal-notas-docente',
-            'crear-capacidad-terminal-notas-docente',
-            'editar-capacidad-terminal-notas-docente',
-            'eliminar-capacidad-terminal-notas-docente',
+            'todo-acceso-unidad-didáctica-notas-docente',
+            //'ver-unidad-didáctica-notas-docente',
+            'crear-unidad-didáctica-notas-docente',
+            'editar-unidad-didáctica-notas-docente',
+            'eliminar-unidad-didáctica-notas-docente',
 
             'todo-acceso-alumnos-docente',
             'ver-alumnos-docente',
@@ -198,12 +196,12 @@ class PermissionTableSeeder extends Seeder
             'eliminar-sesiones-docente',
 
             // ver comsiones 
-            'ver-comision-docente',
+            'ver-comisión-docente',
 
 
             'ver-perfil-docente',
             'editar-perfil-docente',
-            'ver-mis-modulos',
+            'ver-mis-módulos',
             'ver-estudiantes-asignados',
 
             //Competencias

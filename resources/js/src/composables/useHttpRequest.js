@@ -27,7 +27,7 @@ const useHttpRequest = (path = '') => {
             return [];
         } catch (error) {
             loading.value = false;
-            return handleError(error, [], callback, false);
+            return handleError(error, [], callback, true);
         }
     };
 
@@ -151,7 +151,7 @@ const useHttpRequest = (path = '') => {
             return [];
         } catch (error) {
             loading.value = false;
-            return handleError(error, [], callback, false);
+            return handleError(error, [], callback, true);
         }
     };
 

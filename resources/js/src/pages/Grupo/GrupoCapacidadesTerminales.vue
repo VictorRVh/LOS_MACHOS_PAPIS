@@ -84,7 +84,7 @@ const reactivarNota = async (capacidad) => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-capacidad-terminal-docente', 'ver-capacidad-terminal-docente']">
+  <AuthorizationFallback :permissions="['todo-acceso-unidad-didáctica-docente', 'ver-unidad-didáctica-docente']">
     <div class="flex flex-col lg:flex-row px-6 gap-6">
       <!-- 🧾 INFORMACIÓN -->
       <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">

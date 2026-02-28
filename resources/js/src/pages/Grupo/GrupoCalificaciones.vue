@@ -131,8 +131,8 @@ const getResumenNotas = (est) => {
 
 <template>
   <AuthorizationFallback :permissions="[
-    'todo-acceso-capacidad-terminal-notas-docente',
-    'ver-capacidad-terminal-notas-docente',
+    'todo-acceso-unidad-didáctica-notas-docente',
+    'ver-unidad-didáctica-notas-docente',
   ]">
     <div class="space-y-4">
       <!-- Cabecera -->

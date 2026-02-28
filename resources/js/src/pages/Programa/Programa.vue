@@ -85,7 +85,7 @@ const updateTooltipPos = (event) => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-ciclo-academico', 'ver-ciclo-academico']">
+  <AuthorizationFallback :permissions="['todo-acceso-ciclo-académico', 'ver-ciclo-académico']">
     <div class="p-4 md:p-6 space-y-6">
       <header>
         <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Ciclo académico</h1>

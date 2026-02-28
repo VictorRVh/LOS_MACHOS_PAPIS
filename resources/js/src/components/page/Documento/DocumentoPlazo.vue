@@ -75,8 +75,8 @@ const schema = computed(() =>
 );
 
 const requiredPermissions = computed(() => [
-    "todo-acceso-programacion-documentos-subidos",
-    "editar-programacion-documentos-subidos",
+    "todo-acceso-programación-documentos-subidos",
+    "editar-programación-documentos-subidos",
 ]);
 
 const diasOptions = [

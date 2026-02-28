@@ -238,7 +238,7 @@ const onNotaInput = (event, idx) => {
 </script>
 
 <template>
-    <AuthorizationFallback :permissions="['ver-mis-modulos']">
+    <AuthorizationFallback :permissions="['ver-mis-módulos']">
         <div class="w-full space-y-4">
 
             <div class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">

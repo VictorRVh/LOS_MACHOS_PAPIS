@@ -74,7 +74,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <AuthorizationFallback :permissions="['ver-mis-modulos']">
+    <AuthorizationFallback :permissions="['ver-mis-módulos']">
         <div class="w-full space-y-6 py-6 px-4 sm:px-6">
             <header>
                 <h2 class="text-gray-900 dark:text-gray-50 font-bold text-3xl">Mis Módulos</h2>

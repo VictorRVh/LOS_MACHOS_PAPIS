@@ -1,5 +1,5 @@
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-estadisticas', 'ver-estadisticas']">
+  <AuthorizationFallback :permissions="['todo-acceso-estadísticas', 'ver-estadísticas']">
     <div class="p-6 bg-gray-100 min-h-screen">
 
       <!-- CONTENEDOR ANIMADO -->

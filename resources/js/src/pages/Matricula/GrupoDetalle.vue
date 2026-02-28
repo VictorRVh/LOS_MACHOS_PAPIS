@@ -231,7 +231,7 @@ const EliminarMatricula = (idMatricula, nombre) => {
 
 </script>
 <template>
-    <AuthorizationFallback :permissions="['todo-acceso-grupo', 'ver-grupos']">
+    <AuthorizationFallback :permissions="['todo-acceso-matrículas', 'ver-matrículas']">
         <div class="w-full px-3" v-if="matriculados">
             <div>
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

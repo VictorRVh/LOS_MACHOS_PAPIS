@@ -230,8 +230,8 @@ const getEstadoCapacidadClass = computed(() => {
 
 <template>
   <AuthorizationFallback :permissions="[
-    'todo-acceso-capacidad-terminal-notas-docente',
-    'ver-capacidad-terminal-notas-docente',
+    'todo-acceso-unidad-didáctica-notas-docente',
+    'ver-unidad-didáctica-notas-docente',
   ]">
     <div v-if="!slider" class="space-y-4">
       <!-- Cabecera -->

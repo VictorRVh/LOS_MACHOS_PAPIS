@@ -50,7 +50,7 @@ const detailItems = computed(() => [
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['ver-informacion-cetpro']">
+  <AuthorizationFallback :permissions="['ver-información-cetpro']">
     <div class="p-4 sm:p-6">
       <div
         class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"

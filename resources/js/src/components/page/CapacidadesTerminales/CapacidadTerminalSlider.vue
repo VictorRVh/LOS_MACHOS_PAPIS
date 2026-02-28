@@ -44,8 +44,8 @@ const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
     if (!props.capacidad?.id)
-        return ["todo-acceso-capacidad-terminal-docente", "crear-capacidad-terminal-docente"];
-    return ["todo-acceso-capacidad-terminal-docente", "editar-capacidad-terminal-docente"];
+        return ["todo-acceso-unidad-didáctica-docente", "crear-unidad-didáctica-docente"];
+    return ["todo-acceso-unidad-didáctica-docente", "editar-unidad-didáctica-docente"];
 });
 
 const capacidades = ref([]);

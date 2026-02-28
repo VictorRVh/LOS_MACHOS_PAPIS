@@ -262,7 +262,7 @@ export default [
             permissions: [
                 'ver-perfil-docente',
                 'editar-perfil-docente',
-                'ver-mis-modulos',
+                'ver-mis-módulos',
                 'ver-estudiantes-asignados',
             ],
             breadcrumb: [{ text: 'Modulos Asignados', to: { name: 'moduloAsignado' } }],

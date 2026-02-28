@@ -204,7 +204,7 @@ const fechaLimiteFormateada = computed(() => {
 
 <template>
   <AuthorizationFallback
-    :permissions="['todo-acceso-capacidad-terminal-notas-docente', 'editar-capacidad-terminal-notas-docente']">
+    :permissions="['todo-acceso-unidad-didáctica-notas-docente', 'editar-unidad-didáctica-notas-docente']">
     <div v-if="show" class="w-full space-y-4 py-6">
       <!-- Header -->
       <header class="flex justify-between items-start">

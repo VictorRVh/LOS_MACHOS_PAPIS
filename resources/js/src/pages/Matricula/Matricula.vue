@@ -1,6 +1,8 @@
 <script setup>
 import { UserPlusIcon, UserGroupIcon, ClipboardDocumentCheckIcon } from '@heroicons/vue/24/outline';
 import { useRoute, useRouter } from 'vue-router';
+import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+
 
 const route = useRoute();
 const router = useRouter();
@@ -17,31 +19,35 @@ const isActive = (to) => route.name === to.name;
 </script>
 
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col">
+  <AuthorizationFallback :permissions="['todo-acceso-matrículas', 'ver-matrículas']">
 
-    <header class="px-8 pt-2">
-      <h1 class="text-xl font-bold">Módulo de Matrículas</h1>
-    </header>
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col">
 
-    <nav class="px-6 border-b border-gray-200 dark:border-gray-700">
-      <div class="flex space-x-4 overflow-x-auto custom-scrollbar-nav">
+      <header class="px-8 pt-2">
+        <h1 class="text-xl font-bold">Módulo de Matrículas</h1>
+      </header>
 
-        <button v-for="link in navLinks" :key="link.text" @click="router.push(link.to)"
-          class="flex items-center gap-2 py-2 px-1 text-sm font-medium border-b-2" :class="isActive(link.to)
-            ? 'text-cetpro border-cetpro font-semibold'
-            : 'border-transparent text-gray-500 hover:text-cetpro hover:border-cetpro/50'">
-          <component :is="link.icon" class="h-5 w-5" />
-          <span>{{ link.text }}</span>
-        </button>
+      <nav class="px-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex space-x-4 overflow-x-auto custom-scrollbar-nav">
 
+          <button v-for="link in navLinks" :key="link.text" @click="router.push(link.to)"
+            class="flex items-center gap-2 py-2 px-1 text-sm font-medium border-b-2" :class="isActive(link.to)
+              ? 'text-cetpro border-cetpro font-semibold'
+              : 'border-transparent text-gray-500 hover:text-cetpro hover:border-cetpro/50'">
+            <component :is="link.icon" class="h-5 w-5" />
+            <span>{{ link.text }}</span>
+          </button>
+
+        </div>
+      </nav>
+
+      <div class="p-4 flex-grow">
+        <router-view />
       </div>
-    </nav>
 
-    <div class="p-4 flex-grow">
-      <router-view />
     </div>
-
-  </div>
+  </AuthorizationFallback>
 </template>
 
 

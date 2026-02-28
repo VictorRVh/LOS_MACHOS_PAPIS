@@ -118,7 +118,7 @@ const closeCompetencias = () => {
 </script>
 
 <template>
-  <AuthorizationFallback :permissions="['todo-acceso-modulos', 'ver-modulos']">
+  <AuthorizationFallback :permissions="['todo-acceso-módulos', 'ver-módulos']">
 
     <div class="flex  px-6 py-6">
       <div class="w-1/2">

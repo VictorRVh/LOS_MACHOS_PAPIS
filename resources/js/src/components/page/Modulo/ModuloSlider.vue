@@ -42,8 +42,8 @@ const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => [
-    "todo-acceso-modulos",
-    props.modulo?.id ? "editar-modulos" : "crear-modulos"
+    "todo-acceso-módulos",
+    props.modulo?.id ? "editar-módulos" : "crear-módulos"
 ]);
 
 /* =========================

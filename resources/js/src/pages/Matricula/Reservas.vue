@@ -8,7 +8,7 @@ import Th from "../../components/table/Th.vue";
 import Td from "../../components/table/Td.vue";
 import SearchBar from "../../components/head_table/headSearch.vue";
 import MenuTable from "../../components/table/MenuTable.vue";
-
+import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 import useMatriculaStore from "../../store/Matricula/useMatriculaStore";
 import useTableData from "../../composables/tabla/useTableData";
 import useHttpRequest from "../../composables/useHttpRequest";
@@ -129,64 +129,67 @@ const UtilizarReserva = (reserva) => {
 };
 </script>
 <template>
-  <div class="w-full space-y-4 px-3">
 
-    <!-- NUEVO: Botones + buscador -->
-    <div class="flex-between my-5 items-center gap-4">
+  <AuthorizationFallback :permissions="['todo-acceso-matrículas', 'ver-matrículas-reserva']">
+    <div class="w-full space-y-4 px-3">
 
-      <!-- BOTONES DE FILTRO -->
-      <div class="flex gap-3">
-        <BaseButton :loading="loading" :disabled="loading" :title="botonTexto" loadingTitle="Cargando..."
-          :class="botonClase" @click="botonAccion()" />
+      <!-- NUEVO: Botones + buscador -->
+      <div class="flex-between my-5 items-center gap-4">
+
+        <!-- BOTONES DE FILTRO -->
+        <div class="flex gap-3">
+          <BaseButton :loading="loading" :disabled="loading" :title="botonTexto" loadingTitle="Cargando..."
+            :class="botonClase" @click="botonAccion()" />
+
+        </div>
+
+        <SearchBar :totalResultados="ordenados.length" :campoOrden="'apellidos_nombres'" @search="filtrar" />
+
 
       </div>
 
-      <SearchBar :totalResultados="ordenados.length" :campoOrden="'apellidos_nombres'" @search="filtrar" />
+      <!-- TABLA -->
+      <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
+        <THead>
+          <Th>N°</Th>
+          <Th>Estudiante</Th>
+          <Th>DNI</Th>
+          <Th>Especialidad - Módulo</Th>
+          <Th>Turno</Th>
+          <Th>Sección</Th>
+          <Th>Fch. Reserva</Th>
+          <Th class="text-center">Acciones</Th>
+        </THead>
 
+        <TBody :filas="ordenados.length">
+          <Tr v-for="(reserva, index) in paginados" :key="reserva.id_matricula">
+            <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
+            <Td>{{ reserva.apellidos_nombres }}</Td>
+            <Td>{{ reserva.nro_documento }}</Td>
+            <Td>{{ reserva.especialidad }} - {{ reserva.modulo }}</Td>
+            <Td>{{ reserva.turno }}</Td>
+            <Td>{{ reserva.seccion }}</Td>
+            <Td>{{ reserva.fecha_reserva ?? "---" }}</Td>
 
+            <Td class="text-center text-gray-600 dark:text-gray-200">
+              <MenuTable
+                :actions="{ view: false, edit: false, delete: false, download: true, custom1: reserva.reserva != 3 }"
+                :labels="{
+                  custom1: 'Utilizar reserva',
+                  download: 'Descargar reserva',
+                }" @download="descargarReserva(reserva)" @custom1="UtilizarReserva(reserva)" />
+            </Td>
+          </Tr>
+
+          <Tr v-if="ordenados.length === 0 && !loading">
+            <Td colspan="8" class="text-center py-4">No se encontraron resultados.</Td>
+          </Tr>
+
+          <Tr v-if="loading">
+            <Td colspan="8" class="text-center py-4">Cargando reservas...</Td>
+          </Tr>
+        </TBody>
+      </Table>
     </div>
-
-    <!-- TABLA -->
-    <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
-      <THead>
-        <Th>N°</Th>
-        <Th>Estudiante</Th>
-        <Th>DNI</Th>
-        <Th>Especialidad - Módulo</Th>
-        <Th>Turno</Th>
-        <Th>Sección</Th>
-        <Th>Fch. Reserva</Th>
-        <Th class="text-center">Acciones</Th>
-      </THead>
-
-      <TBody :filas="ordenados.length">
-        <Tr v-for="(reserva, index) in paginados" :key="reserva.id_matricula">
-          <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
-          <Td>{{ reserva.apellidos_nombres }}</Td>
-          <Td>{{ reserva.nro_documento }}</Td>
-          <Td>{{ reserva.especialidad }} - {{ reserva.modulo }}</Td>
-          <Td>{{ reserva.turno }}</Td>
-          <Td>{{ reserva.seccion }}</Td>
-          <Td>{{ reserva.fecha_reserva ?? "---" }}</Td>
-
-          <Td class="text-center text-gray-600 dark:text-gray-200">
-            <MenuTable
-              :actions="{ view: false, edit: false, delete: false, download: true, custom1: reserva.reserva != 3 }"
-              :labels="{
-                custom1: 'Utilizar reserva',
-                download: 'Descargar reserva',
-              }" @download="descargarReserva(reserva)" @custom1="UtilizarReserva(reserva)" />
-          </Td>
-        </Tr>
-
-        <Tr v-if="ordenados.length === 0 && !loading">
-          <Td colspan="8" class="text-center py-4">No se encontraron resultados.</Td>
-        </Tr>
-
-        <Tr v-if="loading">
-          <Td colspan="8" class="text-center py-4">Cargando reservas...</Td>
-        </Tr>
-      </TBody>
-    </Table>
-  </div>
+  </AuthorizationFallback>
 </template>

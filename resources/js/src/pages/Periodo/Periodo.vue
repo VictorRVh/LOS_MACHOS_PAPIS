@@ -139,7 +139,7 @@ const descargarReporteCertificado = async (idPeriodo,nombre) => {
                     </template>
                   </BaseButton>
 
-                  <BaseButton title="CERTIFICADOS" @click="descargarReporteCertificado(periodo.id)"
+                  <BaseButton title="CERTIFICADOS" @click="descargarReporteCertificado(periodo.id, periodo?.nombre_periodo)"
                     class="px-1 h-[35px] bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
                     <template #icon>
 

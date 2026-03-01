@@ -15,7 +15,8 @@ import AuthorizationFallback from '../../components/page/AuthorizationFallback.v
 import useGrupoStore from '../../store/Grupo/useGrupoStore';
 import useCicloStore from '../../store/Ciclo/useCicloStore';
 import useTableData from "../../composables/tabla/useTableData";
-import usePeriodosStore from '../../store/Periodo/usePeriodoStore';
+//import usePeriodosStore from '../../store/Periodo/usePeriodoStore';
+import usePeriodosStore from '../../store/Periodo/usePeriodoStatusStore';
 import useModalToast from "../../composables/useModalToast";
 
 

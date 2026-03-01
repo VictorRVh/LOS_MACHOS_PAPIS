@@ -944,6 +944,12 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\EgresadosController::class,
         'index',
     ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    
+    Route::get('egresados/{idEstudiante}', [
+        \App\Http\Controllers\EgresadosController::class,
+        'datosEstudianteEgresado',
+    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+
 
     Route::post('egresados', [
         \App\Http\Controllers\EgresadosController::class,
@@ -1278,10 +1284,10 @@ Route::middleware('auth:sanctum')->group(function () {
         'matriculaPorCicloSexoEdad',
     ])->middleware('permission:ver-estadísticas|todo-acceso-estadísticas');
 });
-    Route::get('cetprodata', [
-        \App\Http\Controllers\DatosCetproController::class,
-        'show',
-    ]);
+Route::get('cetprodata', [
+    \App\Http\Controllers\DatosCetproController::class,
+    'show',
+]);
 
 Route::get('reportes/nomina/grupo/{idGrupo}', [
     \App\Http\Controllers\ReporteController::class,

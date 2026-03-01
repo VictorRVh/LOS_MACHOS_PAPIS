@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
 
             $table->string('cetpro');
+            
+            $table->string('director');
               $table->string('anio');
             $table->string('rd_autorizacion');
             $table->string('rd_conversion')->nullable();

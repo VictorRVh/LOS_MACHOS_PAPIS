@@ -21,7 +21,7 @@ const formData = computed({
 const condiciones = [
     { label: 'G | Gratuito', value: 'Gratuito' },
     { label: 'P | Pagante', value: 'Pagante' },
-    { label: 'B | Beca', value: 'Beca' },
+    { label: 'B | Becado', value: 'Becado' },
     { label: 'S | Semibeca', value: 'Semibeca' }
 ]
 

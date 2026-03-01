@@ -18,7 +18,7 @@ return new class extends Migration
 
             // Relaciones
             $table->uuid('id_estudiante');
-            $table->uuid('id_grupo');
+            // $table->uuid('id_grupo');
             $table->uuid('id_especialidad');
 
             // Foreign keys
@@ -27,10 +27,10 @@ return new class extends Migration
                 ->on('estudiante')
                 ->onDelete('cascade');
 
-            $table->foreign('id_grupo')
-                ->references('id')
-                ->on('grupo')
-                ->onDelete('cascade');
+            // $table->foreign('id_grupo')
+            //     ->references('id')
+            //     ->on('grupo')
+            //     ->onDelete('cascade');
 
             $table->foreign('id_especialidad')
                 ->references('id')
@@ -39,7 +39,7 @@ return new class extends Migration
 
             // Indexes (opcional pero recomendado)
             $table->index('id_estudiante');
-            $table->index('id_grupo');
+            // $table->index('id_grupo');
             $table->index('id_especialidad');
 
             $table->timestamps();

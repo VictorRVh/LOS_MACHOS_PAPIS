@@ -52,6 +52,7 @@ const estudiantesPlanos = computed(() =>
     estudiantes.value.map((e, index) => ({
         index: index + 1,
         id: e.id,
+        id_egresado: e.id_egresado,
         dni: e.dni ?? "",
         apellidos: `${e.apellido_paterno ?? ""} ${e.apellido_materno ?? ""}`.trim(),
         nombres: e.nombre ?? "",
@@ -91,15 +92,8 @@ const emitirConstancia = () => {
     const row = estudianteSeleccionado.value;
     if (!row) return;
 
-    const data = {
-        id_matricula: row.id,
-        estudiante: `${row.apellidos} ${row.nombres}`,
-        nro_documento: row.dni,
-        especialidad: especialidad.value?.nombre_especialidad,
-        ciclo: especialidad.value?.ciclo,
-    };
 
-    generateConstanciaEgresado(data, codigoConstancia.value.trim());
+    generateConstanciaEgresado(row?.id_egresado, codigoConstancia.value.trim());
     showConstanciaModal.value = false;
 };
 

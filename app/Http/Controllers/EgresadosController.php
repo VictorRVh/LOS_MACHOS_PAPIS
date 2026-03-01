@@ -18,64 +18,96 @@ class EgresadosController extends Controller
         return response()->json($egresados);
     }
 
-    public function datosEstudianteEgresado(Request $request)
+
+    public function datosEstudianteEgresado($id_egresado)
     {
-        $request->validate([
-            'id_egresado' => 'required|uuid|exists:egresados,id'
-        ]);
+        try {
 
-        // Obtener datos del egresado con relaciones
-        $egresado = DB::table('egresados as eg')
-            ->join('estudiante as e', 'e.id', '=', 'eg.id_estudiante')
-            ->join('grupo as g', 'g.id', '=', 'eg.id_grupo')
-            ->join('especialidad as esp', 'esp.id', '=', 'eg.id_especialidad')
-            ->join('programa as p', 'p.id', '=', 'esp.id_programa')
-            ->select(
-                'eg.id as id_egresado',
-                DB::raw("CONCAT(e.apellido_paterno,' ',e.apellido_materno,' ',e.nombre) as apellidos_nombres"),
-                'e.nro_documento',
-                'esp.nombre as especialidad',
-                'g.nombre as grupo',
-                'p.nombre as programa'
-            )
-            ->where('eg.id', $request->id_egresado)
-            ->first();
+            $egresado = DB::table('egresados as eg')
 
-        // CORREGIDO: usar $egresado, no $matricula
-        if (!$egresado) {
+                ->join('estudiante as e', 'eg.id_estudiante', '=', 'e.id')
+
+                ->join('especialidad_programa as ep', 'eg.id_especialidad', '=', 'ep.id')
+
+                ->join('especialidad_madre as em', 'ep.id_especialidad', '=', 'em.id')
+
+                ->join('ciclo_academico as ca', 'em.id_ciclo', '=', 'ca.id')
+
+                ->select(
+
+                    'eg.id as id_egresado',
+
+                    DB::raw("
+                    CONCAT(
+                        e.apellido_paterno,' ',
+                        e.apellido_materno,' ',
+                        e.nombre
+                    ) as apellidos_nombres
+                "),
+
+                    'e.nro_documento',
+
+                    'em.nombre_especialidad as especialidad',
+
+                    'ca.nombre_ciclo as ciclo'
+
+                )
+
+                ->where('eg.id', $id_egresado)
+
+                ->first();
+
+
+            if (!$egresado) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Egresado no encontrado'
+                ], 404);
+            }
+
+
+            // CETPRO
+            $cetpro = DB::table('cetpros')->first();
+
+
+            // DIRECTOR
+            $director = User::role('directora')
+                ->select(DB::raw("CONCAT(nombre,' ',apellido) as nombre_completo"))
+                ->first();
+
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+
+                    'id_egresado' => $egresado->id_egresado,
+
+                    'apellidos_nombres' => $egresado->apellidos_nombres,
+
+                    'nro_documento' => $egresado->nro_documento,
+
+                    'especialidad' => $egresado->especialidad,
+
+                    'ciclo' => $egresado->ciclo,
+
+                    'cetpro' => [
+                        'cetpro' => $cetpro->nombre ?? '',
+                        'lugar' => $cetpro->lugar ?? '',
+                        'director' => $director->nombre_completo ?? '',
+                        'rd_autorizacion' => $cetpro->rd_autorizacion ?? '',
+                        'rd_conversion' => $cetpro->rd_conversion ?? '',
+                        'anio' => date('Y')
+                    ]
+
+                ]
+            ]);
+        } catch (\Exception $e) {
+
             return response()->json([
                 'success' => false,
-                'message' => 'Egresado no encontrado'
-            ], 404);
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        // Obtener datos CETPRO
-        $cetpro = DB::table('cetpros')->first();
-
-        // Obtener DIRECTOR
-        $director = User::role('directora')
-            ->select(DB::raw("CONCAT(nombre,' ',apellido) as nombre_completo"))
-            ->first();
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'apellidos_nombres' => $egresado->apellidos_nombres,
-                'dni' => $egresado->nro_documento,
-                'especialidad' => $egresado->especialidad,
-                'grupo' => $egresado->grupo,
-                'programa' => $egresado->programa,
-
-                'cetpro' => [
-                    'cetpro' => $cetpro->nombre ?? '',
-                    'tipo_gestion' => $cetpro->tipo_gestion ?? '',
-                    'lugar' => $cetpro->lugar ?? '',
-                    'director' => $director->nombre_completo ?? '',
-                    'rd_autorizacion' => $cetpro->rd_autorizacion ?? '',
-                    'rd_conversion' => $cetpro->rd_conversion ?? '',
-                ]
-            ]
-        ]);
     }
 
     // GET /api/egresados/{id}

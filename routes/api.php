@@ -937,35 +937,60 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('entregas_realizadas/{fileId}', [
         \App\Http\Controllers\EntregasRealizadasController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos|ver-mis-módulos');
+    ])->middleware('permission:todo-acceso-permisos|ver-mis-módulos');
 
     //RUTA PARA EGRESADOS
     Route::get('egresados', [
         \App\Http\Controllers\EgresadosController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-acceso-egresados|ver-egresados');
     
     Route::get('egresados/{idEstudiante}', [
         \App\Http\Controllers\EgresadosController::class,
         'datosEstudianteEgresado',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
-
+    ])->middleware('permission:todo-acceso-egresados|ver-egresados');
 
     Route::post('egresados', [
         \App\Http\Controllers\EgresadosController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos|ver-grupos');
+    ])->middleware('permission:todo-acceso-egresados|crear-egresados|ver-grupos');
 
     Route::patch('egresados/{id}', [
         \App\Http\Controllers\EgresadosController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
+    ])->middleware('permission:todo-acceso-egresados|editar-egresados');
 
     Route::delete('egresados/{id}', [
         \App\Http\Controllers\EgresadosController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-acceso-egresados|eliminar-egresados');
 
+// RUTAS PARA DOCUMENTOS DE EGRESADOS
+
+Route::get('egresado-documento', [
+    \App\Http\Controllers\EgresadoDocumentoController::class,
+    'index',
+])->middleware('permission:todo-acceso-egresados|ver-egresados');
+
+Route::get('egresado-documento/{id}', [
+    \App\Http\Controllers\EgresadoDocumentoController::class,
+    'show',
+])->middleware('permission:todo-acceso-egresados|ver-egresados');
+
+Route::post('egresado-documento', [
+    \App\Http\Controllers\EgresadoDocumentoController::class,
+    'store',
+])->middleware('permission:todo-acceso-egresados|crear-egresados');
+
+Route::patch('egresado-documento/{id}', [
+    \App\Http\Controllers\EgresadoDocumentoController::class,
+    'update',
+])->middleware('permission:todo-acceso-egresados|editar-egresados');
+
+// Route::delete('egresado-documento/{id}', [
+//     \App\Http\Controllers\EgresadoDocumentoController::class,
+//     'destroy',
+// ])->middleware('permission:todo-acceso-egresados|eliminar-egresado-documento');
 
     // RUTA PARA PERSONAL ADMINISTRATIVO
     Route::get('personal_administrativo', [

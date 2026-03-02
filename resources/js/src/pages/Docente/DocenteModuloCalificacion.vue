@@ -237,7 +237,7 @@ const getEstadoCapacidadClass = computed(() => {
       <!-- Cabecera -->
       <div class="flex justify-between items-center">
         <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300">
-          Registro y visualizaciÃ³n de notas
+          Registro y visualización de notas
         </h3>
       </div>
 

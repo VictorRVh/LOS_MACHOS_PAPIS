@@ -1,17 +1,19 @@
 ﻿<script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 import { UsersIcon, ArrowRightIcon } from '@heroicons/vue/24/outline';
 import useActividadesStore from '../store/ActividadesRecientes/UseActividadesRecientesStore';
 import PermissionBlock from '../components/page/AuthorizationStart.vue'
 import useGrupoStore from '../store/Grupo/useGrupoStore';
+import useUserStore from '../store/useUserStore.js'
 import useHttpRequest from '../composables/useHttpRequest';
-
 // IMPORTAR GENERADOR CENSO
 import { generateCenso9B } from '../pdf/Censo9B.js';
+import useNotificacionesStore from '../store/Notificaciones/UseNotificacionesStore.js';
+
+
 const { indexWithParams: getCensoData } = useHttpRequest('/censo9b-data');
 const { index: getCensoAnios } = useHttpRequest('/censo9b-anios');
-
 
 /* -------------------- TABS -------------------- */
 const activeGroupsTab = ref('recientes');
@@ -26,7 +28,16 @@ const censoAnioSeleccionado = ref(null);
 /* -------------------- ACTIVIDADES -------------------- */
 const actividadesStore = useActividadesStore();
 const grupoStore = useGrupoStore();
+const userStore = useUserStore();
+const notificacionesStore = useNotificacionesStore();
+
+const authUser = computed(() => userStore.user);
+
 const allActivities = ref([]);
+
+const canVerActividades = computed(() =>
+  userStore.canVerActividadesRecientes  // computed reactivo directo
+)
 
 /* -------------------- ROLES -------------------- */
 const rolesTabs = computed(() => {
@@ -83,14 +94,21 @@ let inactivityTimer = null;
 const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 min
 
 const startAutoUpdate = () => {
-  if (interval) return;
+  if (!canVerActividades.value) return
+  if (interval) return
+
   interval = setInterval(async () => {
-    if (document.visibilityState === 'visible') {
-      await actividadesStore.loadActividadesRecientes();
-      allActivities.value = actividadesStore.actividadesRecientes;
+    if (!canVerActividades.value) {
+      stopAutoUpdate()
+      return
     }
-  }, 10000);
-};
+
+    if (document.visibilityState === 'visible') {
+      await actividadesStore.loadActividadesRecientes()
+      allActivities.value = actividadesStore.actividadesRecientes
+    }
+  }, 10000)
+}
 
 const stopAutoUpdate = () => {
   clearInterval(interval);
@@ -98,15 +116,51 @@ const stopAutoUpdate = () => {
 };
 
 const resetInactivityTimer = () => {
-  clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(() => {
-    stopAutoUpdate(); // parar por inactividad
-  }, INACTIVITY_LIMIT);
+  clearTimeout(inactivityTimer)
 
-  if (!interval && document.visibilityState === 'visible' && !isFiltering.value) {
-    startAutoUpdate();  // solo si NO se está filtrando
+  inactivityTimer = setTimeout(() => {
+    stopAutoUpdate()
+  }, INACTIVITY_LIMIT)
+
+  if (
+    !interval &&
+    document.visibilityState === 'visible' &&
+    !isFiltering.value &&
+    canVerActividades.value
+  ) {
+    startAutoUpdate()
   }
-};
+}
+
+watch(
+  canVerActividades,
+  async (allowed) => {
+    if (!allowed) {
+      stopAutoUpdate()
+      return
+    }
+
+    await notificacionesStore.loadNotificaciones()
+    await actividadesStore.loadActividadesRecientes()
+    allActivities.value = actividadesStore.actividadesRecientes
+
+    await grupoStore.loadGruposRecientes()
+    gruposRecientes.value = grupoStore.gruposRecientes
+
+    await grupoStore.loadGruposCulminados()
+    gruposCulminados.value = grupoStore.gruposCulminados
+
+    await loadCensoAnios()
+
+     if (rolesTabs.value.length > 0) {
+      activeActivityTab.value = rolesTabs.value[0]
+    }
+
+    startAutoUpdate()
+    resetInactivityTimer()
+  },
+  { immediate: true }
+)
 
 /* -------------------- HANDLER VISIBILITY -------------------- */
 const handleVisibilityChange = () => {
@@ -121,15 +175,15 @@ const handleVisibilityChange = () => {
 
 /* -------------------- FUNCIONES CENSO -------------------- */
 const handleCensoClick = async () => {
-    const selectedYear =
-      Number(censoAnioSeleccionado.value) ||
-      Number((dateFrom.value || '').slice(0, 4)) ||
-      new Date().getFullYear();
-    const data = await getCensoData({
-      anio: selectedYear
-    });
+  const selectedYear =
+    Number(censoAnioSeleccionado.value) ||
+    Number((dateFrom.value || '').slice(0, 4)) ||
+    new Date().getFullYear();
+  const data = await getCensoData({
+    anio: selectedYear
+  });
 
-    generateCenso9B(data);
+  generateCenso9B(data);
 };
 
 const loadCensoAnios = async () => {
@@ -148,26 +202,22 @@ const loadCensoAnios = async () => {
 /* -------------------- LIFECYCLE -------------------- */
 onMounted(async () => {
 
-  await actividadesStore.loadActividadesRecientes();
-  allActivities.value = actividadesStore.actividadesRecientes;
+  // if (can('ver-actividades-recientes')) {
 
-  await grupoStore.loadGruposRecientes();
-  gruposRecientes.value = grupoStore.gruposRecientes;
+  //   await notificacionesStore.loadNotificaciones();
 
-  await grupoStore.loadGruposCulminados();
-  gruposCulminados.value = grupoStore.gruposCulminados;
-  await loadCensoAnios();
+  //   await actividadesStore.loadActividadesRecientes();
+  //   allActivities.value = actividadesStore.actividadesRecientes;
 
-  // activar primer rol automáticamente
-  if (rolesTabs.value.length > 0) {
-    activeActivityTab.value = rolesTabs.value[0];
-  }
+  //   await grupoStore.loadGruposRecientes();
+  //   gruposRecientes.value = grupoStore.gruposRecientes;
 
-  // iniciar lógica
-  startAutoUpdate();
-  resetInactivityTimer();
+  //   await grupoStore.loadGruposCulminados();
+  //   gruposCulminados.value = grupoStore.gruposCulminados;
 
-  // listeners
+  //   await loadCensoAnios();
+  // }
+
   window.addEventListener('mousemove', resetInactivityTimer);
   window.addEventListener('keydown', resetInactivityTimer);
   document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -182,8 +232,6 @@ onUnmounted(() => {
   document.removeEventListener('visibilitychange', handleVisibilityChange);
 });
 </script>
-
-
 
 <template>
   <PermissionBlock :permissions="['ver-actividades']">
@@ -208,7 +256,7 @@ onUnmounted(() => {
             <img src="/img/ciclo.png" class="h-6 w-6" alt="Nuevo Ciclo">
             <span>NUEVO CICLO</span>
           </button>
-          
+
           <!-- BOTÓN BUSCAR ESTUDIANTE -->
           <button @click="$router.push({ name: 'buscar.estudiante' })"
             class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-slate-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors">
@@ -217,12 +265,12 @@ onUnmounted(() => {
           </button>
 
           <!-- NUEVO BOTÓN CENSO -->
-          <div class="flex items-center gap-2 px-3 py-2 text-sm bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600">
-            <span class="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide">Año censo</span>
-            <select
-              v-model="censoAnioSeleccionado"
-              class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm text-gray-700 dark:text-gray-100 focus:ring-cetpro focus:border-cetpro"
-            >
+          <div
+            class="flex items-center gap-2 px-3 py-2 text-sm bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600">
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide">Año
+              censo</span>
+            <select v-model="censoAnioSeleccionado"
+              class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm text-gray-700 dark:text-gray-100 focus:ring-cetpro focus:border-cetpro">
               <option v-for="anio in censoAniosDisponibles" :key="anio" :value="Number(anio)">
                 {{ anio }}
               </option>
@@ -232,8 +280,10 @@ onUnmounted(() => {
           <button @click="handleCensoClick"
             class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-slate-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors">
             <!-- Icono simulado (Documento) -->
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-purple-600">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor" class="w-6 h-6 text-purple-600">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
             </svg>
             <span>CENSO</span>
           </button>

@@ -1084,27 +1084,27 @@ Route::patch('egresado-documento/{id}', [
     Route::get('actividades_recientes', [
         \App\Http\Controllers\ActividadesRecientesController::class,
         'index',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-actividades-recientes|ver-actividades-recientes');
 
     Route::get('actividades_recientes_fecha', [
         \App\Http\Controllers\ActividadesRecientesController::class,
         'indexByDate',
-    ])->middleware('permission:todo-acceso-permisos|ver-permisos');
+    ])->middleware('permission:todo-actividades-recientes|ver-actividades-recientes');
 
     Route::post('actividades_recientes', [
         \App\Http\Controllers\ActividadesRecientesController::class,
         'store',
-    ])->middleware('permission:todo-acceso-permisos|crear-permisos');
+    ])->middleware('permission:todo-actividades-recientes|crear-actividades-recientes');
 
     Route::patch('actividades_recientes/{id}', [
         \App\Http\Controllers\ActividadesRecientesController::class,
         'update',
-    ])->middleware('permission:todo-acceso-permisos|editar-permisos');
+    ])->middleware('permission:todo-actividades-recientes|editar-actividades-recientes');
 
     Route::delete('actividades_recientes/{id}', [
         \App\Http\Controllers\ActividadesRecientesController::class,
         'destroy',
-    ])->middleware('permission:todo-acceso-permisos|eliminar-permisos');
+    ])->middleware('permission:todo-actividades-recientes|eliminar-actividades-recientes');
 
     // RUTA COMISION USUARIO
 

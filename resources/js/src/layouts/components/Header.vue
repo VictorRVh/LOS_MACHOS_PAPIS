@@ -19,10 +19,12 @@ import {
 } from '@heroicons/vue/24/outline';
 import useNotificacionesStore from '../../store/Notificaciones/UseNotificacionesStore';
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
-
-
 import { useRouter } from 'vue-router';
+import usePermission from '../../composables/usePermission';
+
 const router = useRouter();
+
+const { can } = usePermission()
 
 const handleGoBack = async () => {
     const items = breadcrumb.itemsText;
@@ -66,10 +68,10 @@ const userMenuContainer = ref(null);
 const createMenuContainer = ref(null);
 const notificationsContainer = ref(null);
 
-onMounted(async () => {
-    await notificacionesStore.loadNotificaciones();
-    //await notificacionesStore.loadNotificacionesPendientes();
-});
+// onMounted(async () => {
+//     await notificacionesStore.loadNotificaciones();
+//     //await notificacionesStore.loadNotificacionesPendientes();
+// });
 
 const RolUser = computed(() => userStore.user?.roles?.[0]?.name?.toUpperCase() || 'USUARIO');
 const userInitial = computed(() => userStore.user?.name?.[0]?.toUpperCase() || '?');
@@ -158,7 +160,7 @@ const onLogout = async () => {
                         <MoonIcon v-else class="h-6 w-6" />
                     </button>
 
-                    <div ref="notificationsContainer" class="relative">
+                    <div ref="notificationsContainer" class="relative" v-if="can('ver-actividades-recientes')">
                         <button @click="isNotificationsOpen = !isNotificationsOpen"
                             class="relative p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <BellIcon class="h-6 w-6" />

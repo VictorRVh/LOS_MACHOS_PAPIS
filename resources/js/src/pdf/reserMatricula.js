@@ -12,7 +12,7 @@ export function generatePdfReservaMatricula(data) {
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
     const margin = 20;
-    const primaryColor = [0, 46, 93]; // Azul Ejecutivo
+    const primaryColor = [0, 0, 0]; // Azul Ejecutivo
     const secondaryColor = [60, 60, 60];
 
     const cetpro = data?.cetpro || {};
@@ -135,8 +135,8 @@ export function generatePdfReservaMatricula(data) {
         body: [
             ["PROGRAMA:", data.especialidad || "-", "MÓDULO:", data.modulo || "-"],
             ["SECCIÓN:", data.seccion || "-", "TURNO:", data.turno || "-"],
-            ["CRÉDITOS:", data.creditos || "—", "FECHA LÍMITE:", invertirFechaSimple(data.fecha_reserva)],
-            ["FECHA EMISIÓN:", new Date(data.created_at).toLocaleDateString('es-PE'), "ESTADO:", "RESERVADO"]
+            ["CRÉDITOS:", data.creditos || "—", "FECHA DE MATRÍCULA:", invertirFechaSimple(data.fecha_reserva)],
+            ["FECHA DE EMISIÓN:", new Date(data.created_at).toLocaleDateString('es-PE'), "ESTADO:", "RESERVADO"]
         ]
     });
 

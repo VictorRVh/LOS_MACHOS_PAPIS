@@ -36,7 +36,7 @@ class EgresadoDocumento extends Model
 
     public function egresado()
     {
-        return $this->belongsTo(Egresado::class, 'id_egresado');
+        return $this->belongsTo(Egresados::class, 'id_egresado');
     }
 
     public function autor()

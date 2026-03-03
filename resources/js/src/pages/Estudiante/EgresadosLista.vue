@@ -14,15 +14,19 @@ import useModalToast from "../../composables/useModalToast";
 
 import useTableData from "../../composables/tabla/useTableData";
 import useEstudianteStore from "../../store/Estudiante/UseEstudianteStore";
-import useCertificado from "../../store/Grupo/useCertificadoStore.js";
+import useDocumento from "../../store/Estudiante/UseDocumentoEgresadoStore.js";
 
 import { generateConstanciaEgresado } from "../../pdf/ConstanciaEgresado";
 import { generateTituloCetpro } from "../../pdf/TituloCetpro.js";
 
+import useHttpRequest from "../../composables/useHttpRequest.js";
+
+
 const route = useRoute();
 const estudianteStore = useEstudianteStore();
-const dataAlumnoCertificado = useCertificado();
+const egresadoDocumento = useDocumento();
 const { showToast } = useModalToast();
+const { store: createDocumento } = useHttpRequest("/egresado-documento");
 
 const idEspecialidad = route.params.id;
 const idPeriodo = route.params.periodoId;
@@ -30,9 +34,24 @@ const idPeriodo = route.params.periodoId;
 const estudiantes = ref([]);
 const especialidad = ref(null);
 const isLoading = ref(false);
-const showConstanciaModal = ref(false);
-const codigoConstancia = ref("");
+
+
+
+/* ============================
+   MODAL DOCUMENTO GENERAL
+============================ */
+const showDocumentoModal = ref(false);
+const tipoDocumento = ref(null); // 1 constancia | 2 titulo
 const estudianteSeleccionado = ref(null);
+
+const codigoInstitucional = ref("");
+const codigoUgel = ref("");
+const esDuplicado = ref(false);
+
+
+
+
+
 
 onMounted(async () => {
     isLoading.value = true;
@@ -46,7 +65,7 @@ onMounted(async () => {
 });
 
 /* ============================
-   DATOS PLANOS PARA LA TABLA
+   DATOS PLANOS
 ============================ */
 const estudiantesPlanos = computed(() =>
     estudiantes.value.map((e, index) => ({
@@ -61,7 +80,7 @@ const estudiantesPlanos = computed(() =>
 );
 
 /* ============================
-   TABLA (FILTRO / PAGINACIÓN)
+   TABLA
 ============================ */
 const {
     pagina,
@@ -74,48 +93,113 @@ const {
     searchFields: ["dni", "nombres", "apellidos", "correo"],
 });
 
-/* ============================
-   ACCIONES
-============================ */
-const handlePrintConstancia = (row) => {
-    estudianteSeleccionado.value = row;
-    codigoConstancia.value = "";
-    showConstanciaModal.value = true;
-};
 
-const emitirConstancia = () => {
-    if (!codigoConstancia.value.trim()) {
-        showToast("Ingresa el código de la constancia", "warning");
-        return;
+const handlePrintConstancia = async (row) => {
+    estudianteSeleccionado.value = row;
+    tipoDocumento.value = 1;
+
+    codigoInstitucional.value = "";
+    codigoUgel.value = "";
+    esDuplicado.value = false;
+
+    const res = await egresadoDocumento.loadEgresadoDocumento(
+        row.id_egresado,
+        1
+    );
+
+    if (res?.existe) {
+        esDuplicado.value = true;
+        codigoInstitucional.value = res.data.codigo_institucion ?? "";
+
+        showToast(
+            `Ya existe constancia con código: ${codigoInstitucional.value}`,
+            "warning"
+        );
     }
 
+    showDocumentoModal.value = true;
+};
+
+const handlePrintTitulo = async (row) => {
+    estudianteSeleccionado.value = row;
+    tipoDocumento.value = 2;
+
+    codigoInstitucional.value = "";
+    codigoUgel.value = "";
+    esDuplicado.value = false;
+
+    const res = await egresadoDocumento.loadEgresadoDocumento(
+        row.id_egresado,
+        2
+    );
+
+    if (res?.existe) {
+        esDuplicado.value = true;
+        codigoInstitucional.value = res.data.codigo_institucion ?? "";
+        codigoUgel.value = res.data.codigo_ugel ?? "";
+
+        showToast(
+            `Ya existe título con código: ${codigoInstitucional.value}`,
+            "warning"
+        );
+    }
+
+    showDocumentoModal.value = true;
+};
+
+const emitirDocumento = async () => {
     const row = estudianteSeleccionado.value;
     if (!row) return;
 
+    if (!codigoInstitucional.value.trim()) {
+        showToast("Ingresa el código institucional", "warning");
+        return;
+    }
 
-    generateConstanciaEgresado(row?.id_egresado, codigoConstancia.value.trim());
-    showConstanciaModal.value = false;
-};
+    if (tipoDocumento.value === 2 && !codigoUgel.value.trim()) {
+        showToast("Ingresa el código UGEL", "warning");
+        return;
+    }
 
-const emitirTitulo = async (row) => {
     try {
-        await dataAlumnoCertificado.loadCertificados(row.id);
-        const data = dataAlumnoCertificado.certificados;
+        const response = await createDocumento({
+            id_egresado: row.id_egresado,
+            tipo_documento: tipoDocumento.value,
+            codigo_institucion: codigoInstitucional.value.trim(),
+            codigo_ugel: tipoDocumento.value === 2
+                ? codigoUgel.value.trim()
+                : null
+        });
 
-        if (!data) {
-            showToast("No se encontraron datos para el título", "warning");
-            return;
+        if (tipoDocumento.value === 1) {
+            await generateConstanciaEgresado(
+                row.id_egresado,
+                response.data.codigo_institucion
+            );
+        } else {
+            await generateTituloCetpro(
+                row.id_egresado,
+                response.data.codigo_institucion,
+                response.data.codigo_ugel,
+            );
         }
 
-        await generateTituloCetpro(data);
+        showToast(
+            esDuplicado.value
+                ? "Documento generado como DUPLICADO"
+                : "Documento generado correctamente",
+            esDuplicado.value ? "warning" : "success"
+        );
+
+        showDocumentoModal.value = false;
+
     } catch (error) {
         console.error(error);
-        showToast("Error al generar el título", "error");
+        showToast("Error al generar documento", "error");
     }
 };
 
 </script>
-
 <template>
     <div class="p-4 md:p-6 space-y-4">
 
@@ -127,7 +211,7 @@ const emitirTitulo = async (row) => {
 
             <div class="flex justify-between items-center p-3">
                 <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                    Lista de Estudiantes 
+                    Lista de Estudiantes
                 </h3>
 
                 <SearchBar v-if="!isLoading && estudiantesPlanos.length" :totalResultados="estudiantesOrdenados.length"
@@ -174,7 +258,7 @@ const emitirTitulo = async (row) => {
                                     </template>
                                 </BaseButton>
 
-                                <BaseButton title="Título" @click="emitirTitulo(est)"
+                                <BaseButton title="Título" @click="handlePrintTitulo(est)"
                                     class="bg-slate-700 hover:bg-slate-800 text-white">
                                     <template #icon>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -199,31 +283,53 @@ const emitirTitulo = async (row) => {
         </div>
     </div>
 
-    <!-- MODAL CÓDIGO CONSTANCIA -->
-    <div v-if="showConstanciaModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div v-if="showDocumentoModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md p-6">
-            <h2 class="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                Emitir Constancia de Egresado
+
+            <h2 class="text-lg font-semibold mb-4">
+                {{ tipoDocumento === 1
+                    ? 'Emitir Constancia de Egresado'
+                    : 'Emitir Título'
+                }}
             </h2>
 
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">
-                    Código de constancia
-                </label>
-                <input v-model="codigoConstancia" type="text" placeholder="Ej: CE-2026-001"
-                    class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" />
+            <!-- AVISO DUPLICADO -->
+            <div v-if="esDuplicado" class="mb-3 p-3 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
+                Este documento ya fue emitido.<br>
+                Se marcará como <b>DUPLICADO</b>.
+            </div>
+
+            <div class="space-y-4 mb-4">
+
+                <!-- Código Institucional -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">
+                        Código Institucional
+                    </label>
+                    <input v-model="codigoInstitucional" type="text" class="w-full px-3 py-2 border rounded-lg" />
+                </div>
+
+                <!-- Código UGEL (SOLO TÍTULO) -->
+                <div v-if="tipoDocumento === 2">
+                    <label class="block text-sm font-medium mb-1">
+                        Código UGEL
+                    </label>
+                    <input v-model="codigoUgel" type="text" class="w-full px-3 py-2 border rounded-lg" />
+                </div>
+
             </div>
 
             <div class="flex justify-end gap-2">
-                <button @click="showConstanciaModal = false"
-                    class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
+                <button @click="showDocumentoModal = false" class="px-4 py-2 rounded-lg bg-gray-200">
                     Cancelar
                 </button>
-                <button @click="emitirConstancia"
-                    class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
-                    Emitir
+
+                <button @click="emitirDocumento" class="px-4 py-2 rounded-lg bg-blue-600 text-white">
+                    {{ esDuplicado ? 'Emitir DUPLICADO' : 'Emitir' }}
                 </button>
             </div>
+
         </div>
     </div>
 </template>

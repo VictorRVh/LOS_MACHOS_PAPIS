@@ -71,10 +71,16 @@ class EgresadosController extends Controller
 
 
             // DIRECTOR
-            $director = User::role('directora')
-                ->select(DB::raw("CONCAT(nombre,' ',apellido) as nombre_completo"))
-                ->first();
+            // $director = DB::table('users as u')
+            //     ->join('model_has_roles as mr', 'u.id', '=', 'mr.model_id')
+            //     ->join('roles as r', 'mr.role_id', '=', 'r.id')
+            //     ->where('r.name', 'directora')
+            //     ->select(DB::raw("CONCAT(u.nombre,' ',u.apellido) as nombre_completo"))
+            //     ->first();
 
+            $cicloCompleto = $egresado->ciclo;
+
+            $resto = implode(' ', array_slice(explode(' ', $cicloCompleto), 1));
 
             return response()->json([
                 'success' => true,
@@ -88,15 +94,16 @@ class EgresadosController extends Controller
 
                     'especialidad' => $egresado->especialidad,
 
-                    'ciclo' => $egresado->ciclo,
+                    'ciclo' => $resto,
 
                     'cetpro' => [
-                        'cetpro' => $cetpro->nombre ?? '',
-                        'lugar' => $cetpro->lugar ?? '',
-                        'director' => $director->nombre_completo ?? '',
-                        'rd_autorizacion' => $cetpro->rd_autorizacion ?? '',
+                        'cetpro' => $cetpro->cetpro ?? '',
+                        'lugar' => $cetpro->distrito ?? '',
+                        'director' => $cetpro->director?? '',
+                        'rd_autorizacion' =>  $cetpro->rd_autorizacion ?? '',
                         'rd_conversion' => $cetpro->rd_conversion ?? '',
-                        'anio' => date('Y')
+                        'tipo_gestion' => $cetpro->tipo_gestion ?? '',
+                        'anio' =>  $cetpro->anio
                     ]
 
                 ]

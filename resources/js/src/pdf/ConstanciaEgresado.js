@@ -2,7 +2,6 @@
 import useHttpRequest from "../composables/useHttpRequest";
 import useModalToast from "../composables/useModalToast";
 
-const { store: createDocumento } = useHttpRequest("/egresado-documento");
 const { show: getDataEstudiante } = useHttpRequest("/egresados");
 const { showToast } = useModalToast();
 
@@ -90,18 +89,8 @@ function drawJustifiedRichText(doc, segments, x, yStart, maxWidth, lineHeight = 
 export async function generateConstanciaEgresado(id_egresado, codigo = "") {
   try {
 
-    // 1. GUARDAR DOCUMENTO EN BD
-    const payload = {
-      id_egresado: id_egresado,
-      tipo_documento: 1, // CONSTANCIA
-      codigo_institucion: codigo || null,
-    };
-
-    const resDocumento = await createDocumento(payload);
-
-    const codigoConstancia =
-      resDocumento?.data?.codigo_institucion ||
-      codigo ||
+ 
+    const codigoConstancia =codigo ||
       "........................";
 
 
@@ -124,22 +113,18 @@ export async function generateConstanciaEgresado(id_egresado, codigo = "") {
     const programa = (datos?.especialidad || "").toUpperCase();
 
     // CICLO desde programa
-    const cicloRaw = datos?.programa || "AUXILIAR TÉCNICO";
+    const cicloRaw = datos?.ciclo || "AUXILIAR -- ";
 
     const cicloNormalizado = cicloRaw.trim().toUpperCase();
 
-    const ciclo =
-      cicloNormalizado === "TECNICO" ||
-        cicloNormalizado === "TÉCNICO"
-        ? "AUXILIAR TÉCNICO"
-        : cicloNormalizado;
+    const ciclo = cicloNormalizado ;
 
 
     const nombreCetpro =
-      (datos?.cetpro?.cetpro || "PUNO").toUpperCase();
+      (datos?.cetpro?.cetpro || "----").toUpperCase();
 
     const lugarCetpro =
-      datos?.cetpro?.lugar || "PUNO";
+      datos?.cetpro?.lugar || "---";
 
     const anioOficial =
       datos?.cetpro?.anio || new Date().getFullYear();
@@ -171,7 +156,7 @@ export async function generateConstanciaEgresado(id_egresado, codigo = "") {
 
     // LOGOS
     try {
-      doc.addImage("/img/CetproLOGOO.png", "PNG", width - mR - 22, 14, 22, 22);
+      doc.addImage("/img/CetproLOGOO.png", "PNG", width - mR - 22, 14, 18,22);
     } catch { }
 
     try {
@@ -188,15 +173,15 @@ export async function generateConstanciaEgresado(id_egresado, codigo = "") {
 
     // TITULO
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
+    doc.setFontSize(14);
 
-    doc.text("CONSTANCIA DE EGRESADO", width / 2, 75, {
+    doc.text("CONSTANCIA DE EGRESADO", width / 2, 70, {
       align: "center",
     });
 
 
     // SUBTITULO
-    doc.setFontSize(11);
+    doc.setFontSize(12);
 
     doc.text(
       "LA DIRECCIÓN DEL CENTRO DE EDUCACIÓN TÉCNICO-PRODUCTIVA",
@@ -206,7 +191,7 @@ export async function generateConstanciaEgresado(id_egresado, codigo = "") {
     );
 
 
-    doc.setFontSize(16);
+    doc.setFontSize(12);
 
     doc.text(`"${nombreCetpro}"`, width / 2, 96, {
       align: "center",
@@ -223,17 +208,17 @@ export async function generateConstanciaEgresado(id_egresado, codigo = "") {
 
     cursorY += 10;
 
-    doc.setFontSize(11);
+    doc.setFontSize(12);
 
 
     const parrafo1 = [
-      { text: "Don (ña)", style: "normal" },
+      { text: "", style: "normal" },
       { text: nombre + ",", style: "bold" },
       { text: "identificado (a) con DNI N.°", style: "normal" },
       { text: dni + ",", style: "bold" },
       {
         text:
-          "ha aprobado satisfactoriamente la totalidad de las unidades didácticas y experiencias formativas en situaciones reales de trabajo, de acuerdo con el plan de estudio del programa de estudio de",
+          "ha aprobado la totalidad de las unidades didácticas y experiencias formativas en situaciones reales de trabajo, de acuerdo con el plan de estudio del programa de estudio de ",
         style: "normal",
       },
       { text: programa + ",", style: "bold" },
@@ -278,8 +263,8 @@ export async function generateConstanciaEgresado(id_egresado, codigo = "") {
 
     cursorY += 30;
 
-    doc.setFont("helvetica", "bold");
-
+    doc.setFont("helvetica");
+  doc.setFontSize(11);
     doc.text(
       `Lugar y fecha: ${formatearFechaActual(lugarCetpro)}`,
       width - mR,

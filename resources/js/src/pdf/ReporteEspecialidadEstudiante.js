@@ -316,7 +316,7 @@ export async function generateReporteEspecialidadEstudiante(estudiante, especial
   const nombreEspecialidad = String(especialidad?.nombre || "-").toUpperCase();
   const nombreEstudiante = getNombreCompleto(estudiante).toUpperCase();
   const dni = estudiante?.nro_documento || "-";
-  const fechaEmision = `${String(cetpro?.lugar || "PUNO").toUpperCase()}, ${fechaLargaEs()}`;
+  const fechaEmision = `${String(cetpro?.distrito || "PUNO").toUpperCase()}, ${fechaLargaEs()}`;
   const gestion = String(cetpro?.tipo_gestion || "-").toUpperCase();
   const ugel = String(cetpro?.ugel || "-").toUpperCase();
   const dre = String(cetpro?.dre || "-").toUpperCase();

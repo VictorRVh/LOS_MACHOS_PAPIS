@@ -560,6 +560,8 @@ class MatriculaController extends Controller
 
     public function getMatriculadosPorGrupoExtendido($idGrupo)
     {
+        $rol = strtoupper(auth()->user()->rol); // convertir a MAYÚSCULA
+
         // Datos del grupo
         $infoGrupo = DB::table('grupo')
             ->join('especialidad_programa', 'grupo.id_especialidad', '=', 'especialidad_programa.id')
@@ -579,8 +581,7 @@ class MatriculaController extends Controller
             )
             ->first();
 
-        // Estudiantes
-        $estudiantes = DB::table('matricula')
+        $query = DB::table('matricula')
             ->join('estudiante', 'matricula.id_estudiante', '=', 'estudiante.id')
             ->leftJoin('pagos', 'matricula.id_pago', '=', 'pagos.id')
             ->where('matricula.id_grupo', $idGrupo)
@@ -590,30 +591,31 @@ class MatriculaController extends Controller
             })
             ->select(
                 'matricula.id as id_matricula',
-
-                // 🔥 SEPARADO: nombres y apellidos
                 'estudiante.nombre as nombre',
                 DB::raw("CONCAT(estudiante.apellido_paterno, ' ', estudiante.apellido_materno) as apellidos"),
-
                 'estudiante.tipo_documento',
                 'estudiante.nro_documento',
                 'estudiante.sexo',
                 DB::raw("TIMESTAMPDIFF(YEAR, estudiante.fecha_nacimiento, CURDATE()) as edad"),
                 'matricula.turno as condicion',
-
                 'estudiante.fecha_nacimiento',
                 'estudiante.lugar_nacimiento as lugar',
                 'estudiante.estado_civil',
                 'estudiante.grado_instruccion',
+                'estudiante.celular_personal',
+                'estudiante.correo_electronico'
+            );
 
-                // 🔥 nombres corregidos tal como tu Excel pide
-                'estudiante.celular_personal as celular_personal',
-                'estudiante.correo_electronico',
-
-                'pagos.nro_recibo as nro_recibo',
+        // 🔥 Solo agregar datos de pago si NO es DOCENTE
+        if ($rol !== 'DOCENTE') {
+            $query->addSelect(
+                'pagos.nro_recibo',
                 'pagos.aporte',
                 'pagos.condicion'
-            )
+            );
+        }
+
+        $estudiantes = $query
             ->orderBy('estudiante.apellido_paterno', 'asc')
             ->get();
 
@@ -622,8 +624,8 @@ class MatriculaController extends Controller
             'id_grupo'      => $infoGrupo->id ?? null,
             'id_periodo'    => $infoGrupo->id_periodo ?? null,
             'modulo'        => $infoGrupo->modulo ?? null,
-            'seccion'        => $infoGrupo->seccion ?? null,
-            'turno'        => $infoGrupo->turno ?? null,
+            'seccion'       => $infoGrupo->seccion ?? null,
+            'turno'         => $infoGrupo->turno ?? null,
             'duracion'      => $infoGrupo->duracion ?? null,
             'fecha_inicio'  => $infoGrupo->fecha_inicio ?? null,
             'fecha_fin'     => $infoGrupo->fecha_fin ?? null,

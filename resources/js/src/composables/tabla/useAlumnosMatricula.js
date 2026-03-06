@@ -74,7 +74,11 @@ export default function useExportAlumnos() {
         // ======================================================
         // 3) CABECERA DE LA TABLA (incluye datos de pago)
         // ======================================================
-        worksheet.getRow(rowIndex).values = [
+        const tienePagos = lista?.estudiantes?.some(
+            a => a.nro_recibo || a.aporte || a.condicion
+        );
+
+        const headers = [
             "N°",
             "Nombre",
             "Tipo Doc",
@@ -82,11 +86,18 @@ export default function useExportAlumnos() {
             "Sexo",
             "Celular",
             "Email",
-            "Fecha Nac.",
-            "Condición de Pago",
-            "N° Recibo",
-            "Aporte",
+            "Fecha Nac."
         ];
+
+        if (tienePagos) {
+            headers.push(
+                "Condición de Pago",
+                "N° Recibo",
+                "Aporte"
+            );
+        }
+
+        worksheet.getRow(rowIndex).values = headers;
 
         worksheet.getRow(rowIndex).eachCell((cell) => {
             cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
@@ -105,22 +116,30 @@ export default function useExportAlumnos() {
         // ======================================================
         // 4) AGREGAR ALUMNOS (CON columnas de pago)
         // ======================================================
+
         lista?.matriculados?.forEach((item, index) => {
-            worksheet.addRow([
+
+            const row = [
                 index + 1,
-                `${item.nombre} ${item.apellidos}`,
+                `${item.nombre}`,
                 item.tipo_documento,
                 item.nro_documento,
                 item.sexo,
                 item.celular_personal,
                 item.correo_electronico,
-                item.fecha_nacimiento,
+                item.fecha_nacimiento
+            ];
 
-                // 🟩 DATOS DEL PAGO (SIN estado_pago)
-                item.condicion,
-                item.nro_recibo,
-                item.aporte
-            ]);
+            if (tienePagos) {
+                row.push(
+                    item.condicion ?? "",
+                    item.nro_recibo ?? "",
+                    item.aporte ?? ""
+                );
+            }
+
+            worksheet.addRow(row);
+
         });
 
         // ======================================================
@@ -134,11 +153,16 @@ export default function useExportAlumnos() {
             { width: 10 },
             { width: 15 },
             { width: 32 },
-            { width: 15 },
-            { width: 20 },
-            { width: 15 },
-            { width: 12 }
+            { width: 15 }
         ];
+
+        if (tienePagos) {
+            worksheet.columns.push(
+                { width: 20 },
+                { width: 15 },
+                { width: 12 }
+            );
+        }
 
         // ======================================================
         // 6) GENERAR ARCHIVO

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import useHttpRequest from '../../composables/useHttpRequest';
+import { generateReporteEspecialidadEstudiante } from '../../pdf/ReporteEspecialidadEstudiante';
 
 const { store: consultar, saving } = useHttpRequest('/consulta-notas-publica');
 
@@ -17,6 +18,8 @@ const consultaRealizada = ref(false);
 const nombreEstudiante = computed(
   () => resultado.value?.estudiante?.nombre_completo || ''
 );
+
+const exportandoPdf = ref(false);
 
 const consultarNotas = async () => {
   consultaRealizada.value = true;
@@ -68,6 +71,19 @@ const notaClass = (nota) => {
   if (nota === null || nota === undefined) return 'bg-slate-100 text-slate-500';
   if (nota >= 13) return 'bg-cetpro/10 text-cetpro';
   return 'bg-slate-200 text-slate-700';
+};
+
+const exportarEspecialidadPDF = async (especialidad) => {
+  if (!resultado.value?.estudiante || !especialidad || exportandoPdf.value) return;
+
+  try {
+    exportandoPdf.value = true;
+    await generateReporteEspecialidadEstudiante(resultado.value.estudiante, especialidad, {
+      cetproPath: "/cetprodata-publica",
+    });
+  } finally {
+    exportandoPdf.value = false;
+  }
 };
 </script>
 
@@ -202,7 +218,16 @@ const notaClass = (nota) => {
                     </p>
                     <h3 class="text-2xl font-semibold tracking-tight text-slate-900">{{ especialidad.nombre }}</h3>
                   </div>
-                  <p class="text-sm text-slate-600">{{ especialidad.total_modulos }} módulo(s)</p>
+                  <div class="flex items-center gap-3">
+                    <p class="text-sm text-slate-600">{{ especialidad.total_modulos }} módulo(s)</p>
+                    <button
+                      type="button"
+                      class="border border-cetpro bg-white px-4 py-2 text-sm font-medium text-cetpro transition hover:bg-cetpro hover:text-white"
+                      @click="exportarEspecialidadPDF(especialidad)"
+                    >
+                      {{ exportandoPdf ? 'Generando PDF...' : 'Descargar PDF' }}
+                    </button>
+                  </div>
                 </div>
               </div>
 

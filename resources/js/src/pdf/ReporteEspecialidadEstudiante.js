@@ -1,26 +1,30 @@
 ﻿import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import useHttpRequest from "../composables/useHttpRequest";
+import axios from "axios";
 
-const { index: getCetproData } = useHttpRequest("/cetprodata");
+const cetproCache = new Map();
+const cetproPromises = new Map();
 
-let cetproCache = null;
-let cetproPromise = null;
+async function getCetproCached(path = "/cetprodata") {
+  if (cetproCache.has(path)) return cetproCache.get(path);
 
-async function getCetproCached() {
-  if (cetproCache) return cetproCache;
-  if (!cetproPromise) {
-    cetproPromise = getCetproData()
-      .then((res) => {
-        cetproCache = res || {};
-        return cetproCache;
+  if (!cetproPromises.has(path)) {
+    const request = axios
+      .get(path)
+      .then((response) => {
+        const data = response?.data || {};
+        cetproCache.set(path, data);
+        return data;
       })
       .catch(() => ({}))
       .finally(() => {
-        cetproPromise = null;
+        cetproPromises.delete(path);
       });
+
+    cetproPromises.set(path, request);
   }
-  return cetproPromise;
+
+  return cetproPromises.get(path);
 }
 
 function fechaLargaEs(fecha = new Date()) {
@@ -300,10 +304,11 @@ function getRowsAsistencia(especialidad) {
   return rows;
 }
 
-export async function generateReporteEspecialidadEstudiante(estudiante, especialidad) {
+export async function generateReporteEspecialidadEstudiante(estudiante, especialidad, options = {}) {
   const previewWindow = window.open("", "_blank");
 
-  const cetpro = (await getCetproCached()) || {};
+  const cetproPath = options?.cetproPath || "/cetprodata";
+  const cetpro = (await getCetproCached(cetproPath)) || {};
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();

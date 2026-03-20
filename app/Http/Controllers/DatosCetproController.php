@@ -11,6 +11,40 @@ class DatosCetproController extends Controller
 {
     use Helpers;
 
+    private function buildCetproPublicoPayload(?Cetpro $cetpro): array
+    {
+        $defaults = [
+            'cetpro' => 'PUNO',
+            'director' => '',
+            'anio' => (string) now()->year,
+            'rd_autorizacion' => '-',
+            'rd_conversion' => '-',
+            'ugel' => 'PUNO',
+            'dre' => 'PUNO',
+            'tipo_gestion' => 'PÚBLICO',
+            'region' => 'PUNO',
+            'provincia' => 'PUNO',
+            'distrito' => 'PUNO',
+            'lugar' => 'PUNO',
+            'direccion' => '-',
+            'numero' => '',
+        ];
+
+        if (!$cetpro) {
+            return $defaults;
+        }
+
+        $data = $cetpro->only(array_keys($defaults));
+
+        foreach ($defaults as $key => $value) {
+            if ($data[$key] === null || $data[$key] === '') {
+                $data[$key] = $value;
+            }
+        }
+
+        return $data;
+    }
+
     /**
      * Obtener datos del CETPRO (unico)
      */
@@ -19,6 +53,13 @@ class DatosCetproController extends Controller
         $cetpro = Cetpro::first();
 
         return response()->json($cetpro);
+    }
+
+    public function showPublico()
+    {
+        $cetpro = Cetpro::first();
+
+        return response()->json($this->buildCetproPublicoPayload($cetpro));
     }
 
     /**

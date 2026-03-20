@@ -24,6 +24,10 @@ Route::post('consulta-notas-publica', [
     \App\Http\Controllers\ConsultaNotasPublicaController::class,
     'consultar',
 ]);
+Route::get('cetprodata-publica', [
+    \App\Http\Controllers\DatosCetproController::class,
+    'showPublico',
+]);
 
 // Route::middleware('auth:sanctum')->group(function () {
 //     Route::get('logout', [\App\Http\Controllers\AuthController::class, 'logout']);

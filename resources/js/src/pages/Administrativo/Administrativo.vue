@@ -121,10 +121,10 @@ const {
               </span>
             </Td>
             <Td>
-              {{ user?.administrativo?.turno }}
+              {{ user?.administrativo?.local }}
             </Td>
             <Td>
-              {{ user?.administrativo?.local }}
+              {{ user?.administrativo?.turno }}
             </Td>
 
             <Td class="flex items-center justify-center gap-1">

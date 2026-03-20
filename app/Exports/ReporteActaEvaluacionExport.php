@@ -424,8 +424,7 @@ class ReporteActaEvaluacionExport
         if (!$pago) {
             return '';
         }
-
-        return $pago->condicion;
+        return $pago->condicion[0];
     }
 
     private function escribirDocumentoPorDigitos(

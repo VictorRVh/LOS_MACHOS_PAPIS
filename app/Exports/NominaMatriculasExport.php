@@ -223,7 +223,7 @@ class NominaMatriculasExport
             $sheet->setCellValue("L{$fila}", $est->fecha_nacimiento ?? '');
             $condicion = $matricula->pago?->condicion ?? null;
             $condicionTexto = $condicion
-                ? trim(explode('|', $condicion)[1] ?? $condicion)
+                ? mb_substr(trim($condicion), 0, 1, 'UTF-8')
                 : '—';
 
             $sheet->setCellValue("M{$fila}", $condicionTexto);

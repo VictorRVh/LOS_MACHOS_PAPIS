@@ -7,7 +7,6 @@ import useModalToast from "../../composables/useModalToast";
 const { showToast } = useModalToast();
 
 export default function useExportAlumnos() {
-
     const exportarAlumnos = async (lista) => {
 
         const workbook = new ExcelJS.Workbook();

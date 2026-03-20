@@ -7,6 +7,15 @@ import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 export default [
     { path: '/', name: 'login', component: () => import('../pages/Login.vue'), meta: { layout: 'full', permissions: [], }, },
     {
+        path: '/consulta-notas',
+        name: 'consulta.notas.publica',
+        component: () => import('../pages/web/ConsultaNotas.vue'),
+        meta: {
+            layout: 'full',
+            public: true,
+        }
+    },
+    {
         path: '/verificarCertificado/:codigo',
         name: 'verificarCertificado',
         props: true,

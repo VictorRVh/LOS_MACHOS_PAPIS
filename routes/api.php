@@ -20,6 +20,10 @@ Route::post('auth/reset_password', [
     \App\Http\Controllers\AuthController::class,
     'cambiarPasswordPrimeraVez',
 ]);
+Route::post('consulta-notas-publica', [
+    \App\Http\Controllers\ConsultaNotasPublicaController::class,
+    'consultar',
+]);
 
 // Route::middleware('auth:sanctum')->group(function () {
 //     Route::get('logout', [\App\Http\Controllers\AuthController::class, 'logout']);

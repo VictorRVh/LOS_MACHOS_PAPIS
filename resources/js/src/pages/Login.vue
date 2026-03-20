@@ -96,10 +96,35 @@ const onPasswordChanged = async (newPassword) => {
                     Académica
                 </h1>
             </div>
-            <div class="relative z-10">
-                <p class="text-slate-300 max-w-sm opacity-0 animate-fade-in-up delay-300">
+            <div class="relative z-10 w-full opacity-0 animate-fade-in-up delay-300">
+                <p class="max-w-sm text-slate-300 leading-8">
                     Plataforma oficial del Centro de Educación Técnico-Productiva de PUNO.
                 </p>
+
+                <div class="mx-auto mt-8 w-full border border-[#d7c7a1] bg-[#f4ead2] px-6 py-5 shadow-[0_18px_40px_rgba(6,26,38,0.18)]">
+                    <div class="flex items-center justify-between gap-8">
+                        <div class="min-w-0 flex-1 pr-2">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#8a6a2f]">
+                                Acceso para estudiantes
+                            </p>
+                            <p class="mt-2 text-[24px] font-bold leading-tight text-slate-900">
+                                Consulta publica de notas
+                            </p>
+                            <p class="mt-2 max-w-[420px] text-sm leading-6 text-slate-700">
+                                Revisa calificaciones registradas desde una vista externa, separada del acceso academico institucional.
+                            </p>
+                        </div>
+
+                        <div class="flex shrink-0 items-center justify-end">
+                            <router-link
+                                :to="{ name: 'consulta.notas.publica' }"
+                                class="inline-flex items-center justify-center border border-slate-900 bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#12384f]"
+                            >
+                                Ir a consulta de notas
+                            </router-link>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -175,6 +200,25 @@ const onPasswordChanged = async (newPassword) => {
                         :loading="loggingIn" 
                     />
                 </form>
+
+                <div class="mt-8 border border-slate-200 bg-slate-50 px-5 py-5 opacity-0 animate-fade-in delay-300 lg:hidden">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8a6a2f]">
+                        Acceso para estudiantes
+                    </p>
+                    <p class="mt-3 text-xl font-bold leading-tight text-slate-900">
+                        Consulta publica de notas
+                    </p>
+                    <p class="mt-3 text-sm leading-7 text-slate-600">
+                        Revisa calificaciones registradas desde una vista externa, separada del acceso academico institucional.
+                    </p>
+                    <div class="mt-4 h-px w-full bg-[#c9b27d]"></div>
+                    <router-link
+                        :to="{ name: 'consulta.notas.publica' }"
+                        class="mt-5 inline-flex w-full items-center justify-center border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#12384f]"
+                    >
+                        Ir a consulta de notas
+                    </router-link>
+                </div>
 
                 <footer class="w-full text-center text-xs text-gray-400 pt-12 mt-auto opacity-0 animate-fade-in delay-300">
                     © 2025 Todos los derechos reservados. CETPRO PUNO.

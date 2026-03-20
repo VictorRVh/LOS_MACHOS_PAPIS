@@ -8,10 +8,10 @@ const asyncLoading = ref(false);
 </script>
 
 <template>
-    <main class="h-full w-full relative">
+    <main class="min-h-screen w-full relative">
         <PageLoader :loading="asyncLoading" />
 
-        <div class="container mx-auto max-w-full px-4 lg:px-0 h-full">
+        <div class="container mx-auto max-w-full px-4 lg:px-0">
 
             <RouterView v-slot="{ Component }">
                 <template v-if="Component">

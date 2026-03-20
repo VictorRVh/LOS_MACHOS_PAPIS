@@ -7,7 +7,7 @@ useTheme();
 </script>
 
 <template>
-    <LayoutRenderer class="overflow-hidden" />
+    <LayoutRenderer class="overflow-x-hidden" />
     <!-- confirm modal -->
     <ConfirmModal />
 </template>

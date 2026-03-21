@@ -1,11 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import {
-  AcademicCapIcon,
-  CreditCardIcon,
-  IdentificationIcon,
-} from "@heroicons/vue/24/outline";
+import { AcademicCapIcon, CreditCardIcon, IdentificationIcon } from "@heroicons/vue/24/outline";
 import useHttpRequest from "../../../composables/useHttpRequest";
 import useModalToast from "../../../composables/useModalToast";
 import useProgramaStore from "../../../store/Programa/useProgramaStatusStore";
@@ -25,28 +21,15 @@ const isLoading = ref(true);
 const currentStep = ref(1);
 const nameGrupo = ref("");
 
-const stepMeta = [
-  {
-    number: 1,
-    title: "Datos academicos",
-    description: "Programa, especialidad y grupo",
-    icon: AcademicCapIcon,
-  },
-  {
-    number: 2,
-    title: "Datos del estudiante",
-    description: "Identidad, contacto y perfil",
-    icon: IdentificationIcon,
-  },
-  {
-    number: 3,
-    title: "Pago y confirmacion",
-    description: "Condicion, aporte y revision final",
-    icon: CreditCardIcon,
-  },
+const steps = [
+  { number: 1, title: "Datos academicos", description: "Programa, especialidad y grupo", icon: AcademicCapIcon },
+  { number: 2, title: "Datos del estudiante", description: "Identificacion, contacto y perfil", icon: IdentificationIcon },
+  { number: 3, title: "Pago y confirmacion", description: "Revision final del registro", icon: CreditCardIcon },
 ];
 
-const currentStepMeta = computed(() => stepMeta.find((step) => step.number === currentStep.value));
+const currentStepMeta = computed(() => steps.find((step) => step.number === currentStep.value));
+const completedSteps = computed(() => steps.filter((step) => step.number < currentStep.value).length);
+const progressPercent = computed(() => ((currentStep.value - 1) / (steps.length - 1)) * 100);
 
 const formData = reactive({
   id_programa: null,
@@ -94,11 +77,7 @@ const formData = reactive({
   anio_egreso: "",
 });
 
-const stepErrors = reactive({
-  1: {},
-  2: {},
-  3: {},
-});
+const stepErrors = reactive({ 1: {}, 2: {}, 3: {} });
 
 onMounted(async () => {
   try {
@@ -128,10 +107,7 @@ const stepSchemas = {
       .required("Fecha de nacimiento es requerida")
       .max(new Date(new Date().setFullYear(new Date().getFullYear() - 12)), "El estudiante debe ser mayor de 12 anos")
       .min(new Date(new Date().setFullYear(new Date().getFullYear() - 100)), "La edad no puede ser mayor a 100 anos"),
-    celular_personal: yup
-      .string()
-      .required("Celular es requerido")
-      .matches(/^\d{9}$/, "El celular debe tener 9 numeros"),
+    celular_personal: yup.string().required("Celular es requerido").matches(/^\d{9}$/, "El celular debe tener 9 numeros"),
     celular_referencia: yup.string().notRequired().matches(/^\d{9}$/, "El celular debe tener 9 numeros"),
     correo_electronico: yup.string().email("Debe ser un correo valido").notRequired(),
     direccion_residencia: yup.string().required("La direccion es requerida"),
@@ -198,52 +174,67 @@ const onSubmit = async () => {
         <p class="text-sm font-medium">Cargando datos del formulario...</p>
       </div>
 
-      <div v-else class="space-y-3">
-        <section class="border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-700 dark:bg-slate-800/70">
-          <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-                Proceso de registro
+      <div v-else class="space-y-2">
+        <section class="border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                Proceso de matricula
               </p>
-              <h2 class="mt-1 text-[1.05rem] font-semibold text-slate-900 dark:text-slate-100">
-                Matricular estudiante
-              </h2>
-              <p class="mt-1 text-[13px] text-slate-500 dark:text-slate-400">
-                Complete la informacion academica, personal y de pago para registrar la matricula.
-              </p>
+              <div class="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <h2 class="text-[0.95rem] font-semibold text-slate-900 dark:text-slate-100">
+                  Registro guiado del estudiante
+                </h2>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                  Paso {{ currentStep }} de {{ steps.length }} · {{ completedSteps }} completado(s)
+                </p>
+              </div>
             </div>
 
-            <div class="grid gap-2 sm:grid-cols-3">
-              <div
-                v-for="step in stepMeta"
-                :key="step.number"
-                class="min-w-[200px] border px-3 py-2 transition-colors"
-                :class="
-                  currentStep === step.number
-                    ? 'border-cetpro bg-white text-cetpro dark:border-cetpro-light dark:bg-slate-900 dark:text-cetpro-light'
-                    : currentStep > step.number
-                      ? 'border-cetpro/30 bg-cetpro/5 text-slate-700 dark:border-cetpro-light/30 dark:bg-cetpro-light/10 dark:text-slate-200'
-                      : 'border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400'
-                "
-              >
-                <div class="flex items-start gap-2.5">
-                  <div
-                    class="flex h-8 w-8 shrink-0 items-center justify-center border"
-                    :class="
-                      currentStep >= step.number
-                        ? 'border-cetpro/20 bg-cetpro/10 dark:border-cetpro-light/20 dark:bg-cetpro-light/10'
-                        : 'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800'
-                    "
+            <div class="flex min-w-[110px] items-center justify-end gap-2">
+              <p class="text-[14px] font-semibold text-cetpro dark:text-cetpro-light">{{ Math.round(progressPercent) }}%</p>
+              <div class="h-1.5 w-16 bg-slate-200 dark:bg-slate-700">
+                <div class="h-full bg-cetpro transition-all duration-300 dark:bg-cetpro-light" :style="{ width: `${progressPercent}%` }"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-2 grid gap-1 md:grid-cols-3">
+            <div
+              v-for="step in steps"
+              :key="step.number"
+              class="border px-2 py-1 transition-colors duration-200"
+              :class="
+                currentStep === step.number
+                  ? 'border-cetpro bg-white dark:border-cetpro-light dark:bg-slate-900'
+                  : currentStep > step.number
+                    ? 'border-cetpro/30 bg-cetpro/5 dark:border-cetpro-light/30 dark:bg-cetpro-light/10'
+                    : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'
+              "
+            >
+              <div class="flex items-center gap-2">
+                <div
+                  class="flex h-6 w-6 shrink-0 items-center justify-center border text-[11px] font-semibold"
+                  :class="
+                    currentStep === step.number
+                      ? 'border-cetpro bg-cetpro text-white dark:border-cetpro-light dark:bg-cetpro-light dark:text-slate-900'
+                      : currentStep > step.number
+                        ? 'border-cetpro/20 bg-cetpro/10 text-cetpro dark:border-cetpro-light/20 dark:bg-cetpro-light/10 dark:text-cetpro-light'
+                        : 'border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                  "
+                >
+                  <component v-if="currentStep !== step.number" :is="step.icon" class="h-3 w-3" />
+                  <span v-else>{{ step.number }}</span>
+                </div>
+                <div class="min-w-0">
+                  <p
+                    class="text-[9px] font-semibold uppercase tracking-[0.18em]"
+                    :class="currentStep === step.number ? 'text-cetpro dark:text-cetpro-light' : 'text-slate-500 dark:text-slate-400'"
                   >
-                    <component :is="step.icon" class="h-4 w-4" />
-                  </div>
-                  <div class="min-w-0">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.22em]">Paso {{ step.number }}</p>
-                    <p class="mt-1 text-[13px] font-semibold leading-tight">{{ step.title }}</p>
-                    <p class="mt-0.5 text-[11px] leading-4 text-slate-500 dark:text-slate-400">
-                      {{ step.description }}
-                    </p>
-                  </div>
+                    {{ currentStep > step.number ? "Completado" : currentStep === step.number ? "Paso actual" : "Pendiente" }}
+                  </p>
+                  <p class="text-[12px] font-semibold leading-tight text-slate-900 dark:text-slate-100">{{ step.title }}</p>
+                  <p class="text-[10px] leading-4 text-slate-500 dark:text-slate-400">{{ step.description }}</p>
                 </div>
               </div>
             </div>
@@ -251,17 +242,11 @@ const onSubmit = async () => {
         </section>
 
         <section class="border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-          <div class="border-b border-slate-200 px-3 py-2.5 dark:border-slate-700">
-            <div class="flex items-center gap-2">
+          <div class="border-b border-slate-200 px-3 py-2 dark:border-slate-700">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Paso {{ currentStep }}</p>
+            <div class="mt-0.5 flex items-center gap-2">
               <component :is="currentStepMeta.icon" class="h-4 w-4 text-cetpro dark:text-cetpro-light" />
-              <div>
-                <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                  Paso {{ currentStep }}
-                </p>
-                <p class="text-[14px] font-semibold text-slate-900 dark:text-slate-100">
-                  {{ currentStepMeta.title }}
-                </p>
-              </div>
+              <h3 class="text-[14px] font-semibold text-slate-900 dark:text-slate-100">{{ currentStepMeta.title }}</h3>
             </div>
           </div>
 
@@ -279,11 +264,11 @@ const onSubmit = async () => {
           </div>
         </section>
 
-        <section class="flex items-center justify-between border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800/60">
-          <p class="text-[12px] text-slate-500 dark:text-slate-400">
-            Revise cada paso antes de continuar para evitar observaciones posteriores.
+        <section class="sticky bottom-0 z-10 flex flex-col gap-2 border border-slate-200 bg-slate-50/95 px-3 py-2 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/90 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-[10px] leading-5 text-slate-500 dark:text-slate-400">
+            Revise cada paso antes de continuar.
           </p>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center justify-end gap-2">
             <Button v-if="currentStep > 1" variant="outline" @click="prevStep" title="Anterior" />
             <Button v-if="currentStep < 3" @click="nextStep" title="Siguiente" />
             <Button v-if="currentStep === 3" @click="onSubmit" :loading="saving" title="Confirmar y matricular" />

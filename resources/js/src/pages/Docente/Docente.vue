@@ -12,6 +12,7 @@ import Td from "../../components/table/Td.vue";
 import MenuTable from "../../components/table/MenuTable.vue";
 
 import CreateButton from "../../components/ui/CreateButton.vue";
+import TableBadge from "../../components/ui/TableBadge.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 import DocenteSlider from "../../components/page/Docente/DocenteSlider.vue";
 import DocenteInfoModal from "../../components/page/Docente/infoDocenteSlider.vue";
@@ -98,7 +99,7 @@ orderDirection.value = "asc";
           <div class="flex flex-col gap-1 lg:flex-row lg:items-start lg:justify-between">
             <div class="min-w-0">
               <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-                Gestión institucional
+                Gestion institucional
               </p>
               <h2 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">Docentes</h2>
             </div>
@@ -189,9 +190,9 @@ orderDirection.value = "asc";
             <Th>Apellidos</Th>
             <Th>Dni</Th>
             <Th>Correo</Th>
-            <Th>Fecha de creación</Th>
+            <Th>Fecha de creacion</Th>
             <Th>Estado</Th>
-            <Th class="text-center">Acción</Th>
+            <Th class="text-center">Accion</Th>
           </THead>
 
           <TBody>
@@ -207,17 +208,11 @@ orderDirection.value = "asc";
               <Td>{{ docente.email }}</Td>
               <Td>{{ docente.created_at.slice(0, 10) }}</Td>
               <Td>
-                <span
-                  :class="
-                    docente.status === 1
-                      ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
-                      : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
-                  "
-                  class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold"
-                >
-                  <span v-if="docente.status === 1">Activo ✓</span>
-                  <span v-else>Inactivo X</span>
-                </span>
+                <TableBadge
+                  :label="docente.status === 1 ? 'Activo' : 'Inactivo'"
+                  :variant="docente.status === 1 ? 'success' : 'danger'"
+                  :dot="true"
+                />
               </Td>
               <Td class="text-center text-gray-600 dark:text-gray-200">
                 <MenuTable

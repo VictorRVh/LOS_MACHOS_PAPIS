@@ -8,6 +8,7 @@ import TBody from "../../components/table/TBody.vue";
 import Tr from "../../components/table/Tr.vue";
 import Th from "../../components/table/Th.vue";
 import Td from "../../components/table/Td.vue";
+import TableBadge from "../../components/ui/TableBadge.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
 import BaseButton from "../../components/ui/Button.vue";
@@ -46,7 +47,7 @@ const descargarDocumento = async (idPeriodo, nombre) => {
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `Historial ${nombre} Matrícula Institucional.xlsx`);
+    link.setAttribute("download", `Historial ${nombre} Matricula Institucional.xlsx`);
     document.body.appendChild(link);
     link.click();
   } catch (error) {
@@ -96,7 +97,7 @@ const periodosConReportes = computed(() =>
         <div class="flex flex-col gap-1.5">
           <div class="flex flex-col gap-1">
             <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Gestión institucional
+              Gestion institucional
             </p>
             <h2 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">Periodos</h2>
           </div>
@@ -134,7 +135,7 @@ const periodosConReportes = computed(() =>
               </p>
               <div class="mt-1 flex items-end justify-between gap-3">
                 <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ periodosInactivos }}</p>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">Históricos</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Historicos</span>
               </div>
             </div>
 
@@ -159,7 +160,7 @@ const periodosConReportes = computed(() =>
         >
           <div class="mb-3">
             <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Configuración
+              Configuracion
             </p>
             <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Agregar periodo</h3>
           </div>
@@ -192,17 +193,11 @@ const periodosConReportes = computed(() =>
                 <Td>{{ index + 1 }}</Td>
                 <Td>{{ periodo?.nombre_periodo }}</Td>
                 <Td>
-                  <span
-                    :class="
-                      periodo.status === 1
-                        ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
-                        : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
-                    "
-                    class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold"
-                  >
-                    <span v-if="periodo.status === 1">Activo ✓</span>
-                    <span v-else>Inactivo X</span>
-                  </span>
+                  <TableBadge
+                    :label="periodo.status === 1 ? 'Activo' : 'Inactivo'"
+                    :variant="periodo.status === 1 ? 'success' : 'danger'"
+                    :dot="true"
+                  />
                 </Td>
                 <Td class="align-middle">
                   <div class="flex items-center justify-center gap-1">
@@ -210,7 +205,7 @@ const periodosConReportes = computed(() =>
                     <DeleteButton @click="onDelete(periodo)" />
 
                     <BaseButton
-                      title="MATRÍCULA INSTITUCIONAL"
+                      title="MATRICULA INSTITUCIONAL"
                       @click="descargarDocumento(periodo.id, periodo?.nombre_periodo)"
                       class="h-[35px] rounded-lg bg-green-600 px-1 text-white shadow hover:bg-green-700"
                     >

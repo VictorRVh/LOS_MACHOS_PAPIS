@@ -1,6 +1,5 @@
 <script setup>
 import { computed } from "vue";
-import FormInput from "../../../ui/FormInput.vue";
 import FormLabelError from "../../../ui/FormLabelError.vue";
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
@@ -27,20 +26,13 @@ const handleProgramaChange = (programaId) => {
   formData.value.id_grupo = null;
   resetGrupoData();
   especialidadStore.especialidadPrograma = [];
-
-  if (programaId) {
-    especialidadStore.loadEspecialidadPrograma(programaId);
-  }
+  if (programaId) especialidadStore.loadEspecialidadPrograma(programaId);
 };
 
 const handleEspecialidadChange = (especialidadId) => {
   formData.value.id_grupo = null;
   especialidadStore.gruposDisponibles = [];
-
-  if (especialidadId) {
-    especialidadStore.loadGrupoEspecialidad(especialidadId);
-  }
-
+  if (especialidadId) especialidadStore.loadGrupoEspecialidad(especialidadId);
   resetGrupoData();
 };
 
@@ -67,86 +59,102 @@ const resetGrupoData = () => {
   formData.value.seccion = "";
   emit("cambiarVariable", "");
 };
+
+const readonlyItems = computed(() => [
+  { label: "Convenio", value: formData.value.convenio },
+  { label: "Duracion", value: formData.value.duracion },
+  { label: "Horas", value: formData.value.horas },
+  { label: "Turno", value: formData.value.turno },
+  { label: "Seccion", value: formData.value.seccion },
+]);
 </script>
 
 <template>
-  <div class="space-y-3">
-    <section class="border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-700 dark:bg-slate-800/60">
-      <div class="flex flex-col gap-1">
+  <div class="space-y-2">
+    <section class="grid gap-2 xl:grid-cols-[minmax(0,1.55fr)_minmax(250px,0.72fr)]">
+      <div class="border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-700 dark:bg-slate-800/60">
         <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-          Configuracion academica
+          Seleccion guiada
         </p>
-        <h3 class="text-[15px] font-semibold text-slate-900 dark:text-slate-100">
-          Seleccione programa, especialidad y grupo
-        </h3>
-      </div>
-
-      <div class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-3">
-        <FormLabelError label="Programa de estudio *" :error="errors.id_programa">
-          <v-select
-            v-model="formData.id_programa"
-            :options="programas"
-            label="nameCiclo"
-            :reduce="(p) => p.id"
-            placeholder="Seleccione programa"
-            @update:modelValue="handleProgramaChange"
-          />
-        </FormLabelError>
-
-        <FormLabelError label="Especialidad *" :error="errors.id_especialidad">
-          <v-select
-            v-model="formData.id_especialidad"
-            :options="especialidadStore.especialidadPrograma"
-            :disabled="!formData.id_programa"
-            label="nombre_especialidad"
-            :reduce="(e) => e.id"
-            placeholder="Seleccione especialidad"
-            :loading="especialidadStore.especialidadByCicloLoading"
-            @update:modelValue="handleEspecialidadChange"
-          />
-        </FormLabelError>
-
-        <FormLabelError label="Grupo *" :error="errors.id_grupo">
-          <v-select
-            v-model="formData.id_grupo"
-            :options="especialidadStore.gruposDisponibles"
-            :disabled="!formData.id_especialidad"
-            label="nombre_grupo"
-            :reduce="(g) => g.id"
-            placeholder="Seleccione grupo"
-            :loading="especialidadStore.grupoByEspecialidadLoading"
-            @update:modelValue="handleGrupoChange"
-          />
-        </FormLabelError>
-      </div>
-    </section>
-
-    <section class="border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
-      <div class="flex flex-col gap-1">
-        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-          Resumen del grupo
+        <h4 class="mt-0.5 text-[14px] font-semibold text-slate-900 dark:text-slate-100">
+          Secuencia academica del registro
+        </h4>
+        <p class="mt-0.5 text-[12px] leading-5 text-slate-500 dark:text-slate-400">
+          Seleccione programa, especialidad y grupo.
         </p>
-        <h3 class="text-[15px] font-semibold text-slate-900 dark:text-slate-100">
-          Datos operativos de la seccion seleccionada
-        </h3>
+
+        <div class="mt-3 grid gap-3 lg:grid-cols-3">
+          <div class="space-y-1.5">
+            <FormLabelError label="Programa de estudio *" :error="errors.id_programa">
+              <v-select
+                v-model="formData.id_programa"
+                :options="programas"
+                label="nameCiclo"
+                :reduce="(p) => p.id"
+                placeholder="Seleccione programa"
+                @update:modelValue="handleProgramaChange"
+              />
+            </FormLabelError>
+          </div>
+
+          <div class="space-y-1.5">
+            <FormLabelError label="Especialidad *" :error="errors.id_especialidad">
+              <v-select
+                v-model="formData.id_especialidad"
+                :options="especialidadStore.especialidadPrograma"
+                :disabled="!formData.id_programa"
+                label="nombre_especialidad"
+                :reduce="(e) => e.id"
+                placeholder="Seleccione especialidad"
+                :loading="especialidadStore.especialidadByCicloLoading"
+                @update:modelValue="handleEspecialidadChange"
+              />
+            </FormLabelError>
+          </div>
+
+          <div class="space-y-1.5">
+            <FormLabelError label="Grupo *" :error="errors.id_grupo">
+              <v-select
+                v-model="formData.id_grupo"
+                :options="especialidadStore.gruposDisponibles"
+                :disabled="!formData.id_especialidad"
+                label="nombre_grupo"
+                :reduce="(g) => g.id"
+                placeholder="Seleccione grupo"
+                :loading="especialidadStore.grupoByEspecialidadLoading"
+                @update:modelValue="handleGrupoChange"
+              />
+            </FormLabelError>
+          </div>
+        </div>
       </div>
 
-      <div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <FormInput v-model="formData.convenio" label="Convenio" disabled />
-        <FormInput v-model="formData.duracion" label="Duracion" disabled />
-        <FormInput v-model="formData.horas" label="Horas" disabled />
-        <FormInput v-model="formData.turno" label="Turno" disabled />
-        <FormInput v-model="formData.seccion" label="Seccion" disabled />
-      </div>
-
-      <div class="mt-3 border border-dashed border-slate-300 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800/70">
+      <aside class="border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
         <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
           Grupo seleccionado
         </p>
-        <p class="mt-1 text-[13px] font-medium text-slate-800 dark:text-slate-100">
-          {{ nameGrupo || "Aun no se ha seleccionado un grupo." }}
+        <h4 class="mt-0.5 text-[14px] font-semibold text-slate-900 dark:text-slate-100">
+          {{ nameGrupo || "Aun no se ha definido un grupo" }}
+        </h4>
+        <p class="mt-0.5 text-[12px] leading-5 text-slate-500 dark:text-slate-400">
+          Datos de referencia del grupo.
         </p>
-      </div>
+
+        <dl class="mt-2 space-y-1">
+          <div
+            v-for="item in readonlyItems"
+            :key="item.label"
+            class="flex items-start justify-between gap-3 border-b border-slate-200 py-1.5 last:border-b-0 dark:border-slate-700"
+          >
+            <dt class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+              {{ item.label }}
+            </dt>
+            <dd class="text-right text-[12px] font-medium text-slate-800 dark:text-slate-100">
+              {{ item.value || "No definido" }}
+            </dd>
+          </div>
+        </dl>
+      </aside>
     </section>
   </div>
 </template>

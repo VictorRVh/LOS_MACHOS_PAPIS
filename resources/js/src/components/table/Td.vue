@@ -1,5 +1,5 @@
 <template>
-  <td class="px-6 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+  <td class="whitespace-nowrap px-4 py-1 align-middle text-[12px] text-slate-700 dark:text-slate-200">
     <slot></slot>
   </td>
 </template>

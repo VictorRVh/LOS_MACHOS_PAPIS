@@ -24,7 +24,7 @@ const defaultLabels = {
   download: "Descargar Nomina",
   report: "Descargar Acta",
   reportConsol: "Descargar Consolidad",
-  custom1: "Acción personalizada",
+  custom1: "Accion personalizada",
   deactivate: "Desactivar",
 };
 
@@ -49,7 +49,6 @@ const menuRef = ref(null);
 const buttonRef = ref(null);
 const menuStyles = ref({});
 
-// ⭐⭐⭐ AQUÍ ESTÁ LA SOLUCIÓN ⭐⭐⭐
 const toggleMenu = async () => {
   isOpen.value = !isOpen.value;
   if (!isOpen.value) return;
@@ -60,22 +59,19 @@ const toggleMenu = async () => {
   const menu = menuRef.value;
 
   const buttonRect = button.getBoundingClientRect();
-  const tableRect = button.closest("td, th").getBoundingClientRect(); // ⭐ RELATIVO A LA CELDA
+  const tableRect = button.closest("td, th").getBoundingClientRect();
 
   const menuHeight = menu.offsetHeight;
   const spaceBelow = window.innerHeight - buttonRect.bottom;
 
   let top;
   if (spaceBelow < menuHeight) {
-    // arriba
     top = buttonRect.top - tableRect.top - menuHeight - 5;
   } else {
-    // abajo
     top = buttonRect.bottom - tableRect.top - 28;
   }
 
-  const left =
-    buttonRect.left - tableRect.left - 195 + 20; // pegado al borde derecho
+  const left = buttonRect.left - tableRect.left - 195 + 20;
 
   menuStyles.value = {
     position: "absolute",
@@ -107,63 +103,83 @@ onBeforeUnmount(() =>
 </script>
 
 <template>
-  <!-- ⭐ la celda PONE relative aquí ⭐ -->
   <div class="relative inline-block text-left">
-    <button ref="buttonRef" @click="toggleMenu"
-      class="text-xl text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-      <EllipsisVerticalIcon class="h-5 w-5" />
+    <button
+      ref="buttonRef"
+      @click="toggleMenu"
+      class="inline-flex h-7 w-7 items-center justify-center text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cetpro/30 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white">
+      <EllipsisVerticalIcon class="h-4.5 w-4.5" />
     </button>
 
-    <div v-if="isOpen" ref="menuRef" :style="menuStyles"
-      class="absolute w-[190px] bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-gray-300 dark:ring-gray-700 py-1 text-sm">
-      <button v-if="actions.view" @click="emitAndClose('view')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
-        <EyeIcon class="w-4 h-4" /> {{ mergedLabels.view }} {{ entityLabel }}
+    <div
+      v-if="isOpen"
+      ref="menuRef"
+      :style="menuStyles"
+      class="absolute w-[190px] rounded-md border border-slate-200 bg-white py-1 text-sm shadow-sm ring-1 ring-slate-200 dark:border-slate-700 dark:bg-gray-800 dark:ring-slate-700">
+      <button
+        v-if="actions.view"
+        @click="emitAndClose('view')"
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        <EyeIcon class="h-4 w-4" /> {{ mergedLabels.view }} {{ entityLabel }}
       </button>
 
-      <button v-if="actions.edit" @click="emitAndClose('edit')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
-        <PencilSquareIcon class="w-4 h-4" /> {{ mergedLabels.edit }}
+      <button
+        v-if="actions.edit"
+        @click="emitAndClose('edit')"
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        <PencilSquareIcon class="h-4 w-4" /> {{ mergedLabels.edit }}
         {{ entityLabel }}
       </button>
 
-      <button v-if="actions.custom1" @click="emitAndClose('custom1')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
-        <CalendarDaysIcon class="w-4 h-4" /> {{ mergedLabels.custom1 }}
+      <button
+        v-if="actions.custom1"
+        @click="emitAndClose('custom1')"
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        <CalendarDaysIcon class="h-4 w-4" /> {{ mergedLabels.custom1 }}
       </button>
 
-      <hr v-if="actions.view || actions.edit || actions.custom1" class="my-1 mx-2 border-gray-300" />
+      <hr
+        v-if="actions.view || actions.edit || actions.custom1"
+        class="mx-2 my-1 border-slate-200 dark:border-slate-700" />
 
-      <button v-if="actions.deactivate" @click="emitAndClose('deactivate')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
-        <ExclamationTriangleIcon class="w-4 h-4" /> {{ mergedLabels.deactivate }}
+      <button
+        v-if="actions.deactivate"
+        @click="emitAndClose('deactivate')"
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        <ExclamationTriangleIcon class="h-4 w-4" /> {{ mergedLabels.deactivate }}
         {{ entityLabel }}
       </button>
 
-      <button v-if="actions.delete" @click="emitAndClose('delete')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
-        <TrashIcon class="w-4 h-4" /> {{ mergedLabels.delete }} {{ entityLabel }}
+      <button
+        v-if="actions.delete"
+        @click="emitAndClose('delete')"
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        <TrashIcon class="h-4 w-4" /> {{ mergedLabels.delete }} {{ entityLabel }}
       </button>
 
-      <button v-if="actions.report" @click="emitAndClose('report')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
-        <ArrowDownTrayIcon class="w-4 h-4" />
+      <button
+        v-if="actions.report"
+        @click="emitAndClose('report')"
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        <ArrowDownTrayIcon class="h-4 w-4" />
         {{ mergedLabels.report }} {{ entityLabel }}
       </button>
 
-      <button v-if="actions.download" @click="emitAndClose('download')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
-        <ArrowDownTrayIcon class="w-4 h-4" />
+      <button
+        v-if="actions.download"
+        @click="emitAndClose('download')"
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        <ArrowDownTrayIcon class="h-4 w-4" />
         {{ mergedLabels.download }} {{ entityLabel }}
       </button>
 
-      <button v-if="actions.reportConsol" @click="emitAndClose('reportConsol')"
-        class="flex items-center gap-3 w-full px-4 py-1 hover:bg-gray-100 dark:hover:bg-gray-700">
-        <ArrowDownTrayIcon class="w-4 h-4" />
+      <button
+        v-if="actions.reportConsol"
+        @click="emitAndClose('reportConsol')"
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        <ArrowDownTrayIcon class="h-4 w-4" />
         {{ mergedLabels.reportConsol }} {{ entityLabel }}
       </button>
-
-
     </div>
   </div>
 </template>

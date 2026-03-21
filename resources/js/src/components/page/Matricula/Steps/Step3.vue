@@ -25,24 +25,56 @@ const condiciones = [
   { label: "B | Becado", value: "Becado" },
   { label: "S | Semibeca", value: "Semibeca" },
 ];
+
+const resumenItems = computed(() => [
+  {
+    label: "Estudiante",
+    value: `${formData.value.nombre || ""} ${formData.value.apellido_paterno || ""} ${formData.value.apellido_materno || ""}`.trim(),
+  },
+  {
+    label: "Documento",
+    value: `${formData.value.tipo_documento || ""} - ${formData.value.nro_documento || "No registrado"}`,
+  },
+  {
+    label: "Grupo",
+    value: props.nameGrupo || "No seleccionado",
+  },
+  {
+    label: "Condicion",
+    value: formData.value.condicion || "No definida",
+  },
+  {
+    label: "Recibo",
+    value: formData.value.nro_recibo || "No registrado",
+  },
+  {
+    label: "Aporte",
+    value: formData.value.aporte ? `S/. ${formData.value.aporte}` : "No registrado",
+  },
+]);
 </script>
 
 <template>
-  <div class="space-y-3">
-    <section class="border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-700 dark:bg-slate-800/60">
-      <div class="flex items-center gap-2">
-        <CreditCardIcon class="h-5 w-5 text-cetpro dark:text-cetpro-light" />
-        <div>
+  <div class="space-y-4">
+    <section class="border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-700 dark:bg-slate-800/60">
+      <div class="flex items-start gap-2.5">
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center border border-cetpro/20 bg-cetpro/10 text-cetpro dark:border-cetpro-light/20 dark:bg-cetpro-light/10 dark:text-cetpro-light">
+          <CreditCardIcon class="h-4 w-4" />
+        </div>
+        <div class="min-w-0">
           <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-            Registro economico
+            Cierre del proceso
           </p>
-          <h3 class="text-[15px] font-semibold text-slate-900 dark:text-slate-100">
-            Datos de pago y condicion de matricula
-          </h3>
+          <h4 class="mt-1 text-[15px] font-semibold text-slate-900 dark:text-slate-100">
+            Pago y confirmacion de la matricula
+          </h4>
+          <p class="mt-1 text-[13px] leading-5 text-slate-500 dark:text-slate-400">
+            Registre la condicion economica del estudiante y revise el resumen final antes de confirmar.
+          </p>
         </div>
       </div>
 
-      <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+      <div class="mt-4 grid gap-3 md:grid-cols-3">
         <FormLabelError label="Condicion">
           <v-select v-model="formData.condicion" :options="condiciones" label="label" :reduce="(option) => option.value" :clearable="false" />
         </FormLabelError>
@@ -51,52 +83,35 @@ const condiciones = [
       </div>
     </section>
 
-    <section
-      v-if="!edit"
-      class="border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900"
-    >
+    <section v-if="!edit" class="border border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-900">
       <div class="flex items-start gap-2.5">
         <div class="flex h-8 w-8 shrink-0 items-center justify-center border border-cetpro/20 bg-cetpro/10 text-cetpro dark:border-cetpro-light/20 dark:bg-cetpro-light/10 dark:text-cetpro-light">
           <InformationCircleIcon class="h-4 w-4" />
         </div>
         <div class="min-w-0">
           <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-            Resumen previo
+            Revision final
           </p>
-          <h3 class="mt-1 text-[15px] font-semibold text-slate-900 dark:text-slate-100">
-            Verificacion final antes de registrar
-          </h3>
-          <p class="mt-1 text-[13px] text-slate-500 dark:text-slate-400">
-            Revise los datos principales del estudiante y del grupo antes de confirmar la matricula.
+          <h4 class="mt-1 text-[15px] font-semibold text-slate-900 dark:text-slate-100">
+            Resumen operativo del registro
+          </h4>
+          <p class="mt-1 text-[13px] leading-5 text-slate-500 dark:text-slate-400">
+            Confirme que los datos principales del estudiante, grupo y pago sean correctos antes de registrar la matricula.
           </p>
         </div>
       </div>
 
-      <div class="mt-3 grid gap-3 md:grid-cols-3">
-        <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-slate-50 px-3 py-2 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-800/70">
+      <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div
+          v-for="item in resumenItems"
+          :key="item.label"
+          class="border border-slate-200 border-l-[3px] border-l-cetpro bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-800/70"
+        >
           <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-            Estudiante
+            {{ item.label }}
           </p>
           <p class="mt-1 text-[13px] font-medium text-slate-800 dark:text-slate-100">
-            {{ formData.nombre }} {{ formData.apellido_paterno }} {{ formData.apellido_materno }}
-          </p>
-        </div>
-
-        <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-slate-50 px-3 py-2 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-800/70">
-          <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-            Documento
-          </p>
-          <p class="mt-1 text-[13px] font-medium text-slate-800 dark:text-slate-100">
-            {{ formData.tipo_documento }} - {{ formData.nro_documento || "No registrado" }}
-          </p>
-        </div>
-
-        <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-slate-50 px-3 py-2 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-800/70">
-          <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-            Grupo
-          </p>
-          <p class="mt-1 text-[13px] font-medium text-slate-800 dark:text-slate-100">
-            {{ props.nameGrupo || "No seleccionado" }}
+            {{ item.value || "No registrado" }}
           </p>
         </div>
       </div>

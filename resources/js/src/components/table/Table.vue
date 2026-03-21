@@ -15,9 +15,10 @@ defineEmits(['changePage']);
 
 <template>
   <div class="w-full">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div
+      class="overflow-hidden rounded-sm border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-gray-800">
       <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
+        <table class="min-w-full text-left text-sm text-slate-700 dark:text-slate-200">
           <slot></slot>
         </table>
       </div>
@@ -25,26 +26,26 @@ defineEmits(['changePage']);
 
     <div
       v-if="paginacion && totalPages > 1"
-      class="flex items-center justify-between mt-4 px-2"
+      class="mt-3 flex items-center justify-between px-1"
     >
-      <span class="text-sm text-gray-700 dark:text-gray-300">
-        Página {{ currentPage }} de {{ totalPages }}
+      <span class="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+        Pagina {{ currentPage }} de {{ totalPages }}
       </span>
 
-      <div class="inline-flex items-center -space-x-px">
+      <div class="inline-flex items-center gap-1">
         <button
           @click="$emit('changePage', currentPage - 1)"
           :disabled="currentPage === 1"
-          class="px-3 py-2 leading-tight text-gray-500 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-slate-300 bg-white text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-gray-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
         >
           <span class="sr-only">Anterior</span>
           <ChevronLeftIcon class="h-4 w-4" />
         </button>
-        
+
         <button
           @click="$emit('changePage', currentPage + 1)"
           :disabled="currentPage === totalPages"
-          class="px-3 py-2 leading-tight text-gray-500 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-slate-300 bg-white text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-gray-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
         >
           <span class="sr-only">Siguiente</span>
           <ChevronRightIcon class="h-4 w-4" />

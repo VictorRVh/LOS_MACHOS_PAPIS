@@ -8,6 +8,7 @@ import TBody from "../../components/table/TBody.vue";
 import Tr from "../../components/table/Tr.vue";
 import Th from "../../components/table/Th.vue";
 import Td from "../../components/table/Td.vue";
+import TableBadge from "../../components/ui/TableBadge.vue";
 import CreateButton from "../../components/ui/CreateButton.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
@@ -187,9 +188,7 @@ orderDirection.value = "asc";
               <Td>{{ user.apellido_paterno }} {{ user.apellido_materno }}</Td>
               <Td>{{ user.dni }}</Td>
               <Td>
-                <span class="rounded-full bg-gray-800 px-2 py-1 text-white dark:bg-gray-600">
-                  {{ user?.roles[0] }}
-                </span>
+                <TableBadge :label="user?.roles[0]" variant="neutral" />
               </Td>
               <Td>{{ user?.administrativo?.local }}</Td>
               <Td>{{ user?.administrativo?.turno }}</Td>

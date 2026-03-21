@@ -13,7 +13,10 @@ class RoleController extends Controller
     use Error, Helpers;
     public function index(Request $request)
     {
-        $roles = Role::with('permissions')->get();
+        $roles = Role::with('permissions')
+            ->where('id', '!=', 1)
+            ->get();
+
         return response()->json($roles);
     }
 

@@ -57,20 +57,30 @@ trait Helpers
 
 
     // insertar actividades .. leo csmr ni me lo toques 
-    public function registrarActividad($descripcion,$action)
+    public function registrarActividad($descripcion, $action)
     {
         $user = auth()->user();
-
-        // Tomamos el primer rol del usuario (si tiene)
         $rol = $user->roles()->first();
+
+        // No registrar actividad si el usuario tiene el rol 'superdirectora'
+        if ($rol && $rol->id === 1) {
+            return;
+        }
+
+        // TAMBIEN PUEDE SER POR ROL
+        // $rolesExcluidos = ['superdirectora'];
+
+        // if ($rol && in_array($rol->name, $rolesExcluidos)) {
+        //     return;
+        // }
+
         $idRole = $rol ? $rol->id : null;
 
         ActividadesRecientes::create([
-            'id_role'    => $idRole,       // puede ser null
+            'id_role'    => $idRole,
             'id_usuario' => $user->id,
             'descripcion' => $descripcion,
-            'accion' => $action,
-            // no necesitamos 'fecha', usamos created_at
+            'accion'     => $action,
         ]);
     }
 

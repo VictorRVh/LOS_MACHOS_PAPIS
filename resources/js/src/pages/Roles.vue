@@ -97,8 +97,8 @@ const groupedPermissions = computed(() => {
             </THead>
 
             <TBody>
-              <Tr v-for="role in roleStore.roles" :key="role.id">
-                <Td>{{ role?.id }}</Td>
+              <Tr v-for="(role, index) in roleStore.roles" :key="role.id">
+                <Td>{{ index + 1 }}</Td>
                 <Td>{{ role?.name }}</Td>
                 <Td class="w-48 whitespace-nowrap">
                   <div :class="[

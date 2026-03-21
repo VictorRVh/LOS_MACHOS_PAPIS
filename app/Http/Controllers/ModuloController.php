@@ -37,10 +37,10 @@ class ModuloController extends Controller
             'nro_capacidades'  => 'required|integer|min:0',
 
             // competencias (opcional)
-            'competencias'                 => 'nullable|array',
+            'competencias'                   => 'nullable|array',
             'competencias.*.tipo'            => 'required|string',
-            'competencias.*.nombre'            => 'required|string',
-            'competencias.*.descripcion'   => 'required|string|max:225',
+            'competencias.*.nombre'          => 'required|string',
+            'competencias.*.descripcion'     => 'required|string|max:225',
         ]);
 
         DB::beginTransaction();
@@ -61,21 +61,28 @@ class ModuloController extends Controller
             );
 
             /* =====================
-           2️⃣ CREAR COMPETENCIAS
+           2️⃣ CREAR COMPETENCIAS + LOG
         ====================== */
             if ($request->filled('competencias')) {
                 foreach ($request->competencias as $competencia) {
-                    Competencia::create([
+
+                    $nueva = Competencia::create([
                         'id_modulo'   => $modulo->id,
-                        'tipo'        => $competencia['tipo'], // tipo de competencia
-                        'nombre'        => $competencia['nombre'], // tipo de competencia
+                        'tipo'        => $competencia['tipo'],
+                        'nombre'      => $competencia['nombre'],
                         'descripcion' => $competencia['descripcion'],
                     ]);
+
+                    // 🔥 LOG INDIVIDUAL
+                    $this->registrarActividad(
+                        "Agregó la competencia '{$nueva->nombre}' al módulo '{$modulo->numero_modulo}'",
+                        "Creado"
+                    );
                 }
             }
 
             /* =====================
-           3️⃣ LOG ACTIVIDAD
+           3️⃣ LOG MÓDULO
         ====================== */
             $this->registrarActividad(
                 "Creó el módulo N° '{$modulo->numero_modulo}' para la especialidad '{$modulo->especialidadPrograma->especialidadMadre->nombre_especialidad}'",
@@ -87,6 +94,7 @@ class ModuloController extends Controller
             return response()->json($modulo->load('competencias'), 201);
         } catch (\Throwable $e) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Error al crear el módulo',
                 'error' => $e->getMessage()
@@ -195,20 +203,20 @@ class ModuloController extends Controller
                 'id_especialidad' => 'sometimes|exists:especialidad_programa,id',
                 'nro_capacidades' => 'sometimes|integer|min:0',
 
-                'competencias'               => 'sometimes|array',
-                'competencias.*.tipo'          => 'required|string', // tipo
-                'competencias.*.nombre'          => 'required|string', // tipo
-                'competencias.*.descripcion' => 'required|string|max:225',
+                'competencias'                 => 'sometimes|array',
+                'competencias.*.tipo'          => 'required|string',
+                'competencias.*.nombre'        => 'required|string',
+                'competencias.*.descripcion'   => 'required|string|max:225',
             ]);
 
             // =========================
             // ALIAS PARA ACTIVIDAD
             // =========================
             $alias = [
-                'numero_modulo' => 'Número del módulo',
-                'descripcion'   => 'Descripción',
-                'creditos'      => 'Créditos',
-                'horas'         => 'Horas',
+                'numero_modulo'   => 'Número del módulo',
+                'descripcion'     => 'Descripción',
+                'creditos'        => 'Créditos',
+                'horas'           => 'Horas',
                 'nro_capacidades' => 'N° de capacidades',
             ];
 
@@ -220,26 +228,45 @@ class ModuloController extends Controller
             $modulo->update($request->except('competencias'));
 
             // =========================
+            // 🔍 VERIFICAR SI TENÍA COMPETENCIAS
+            // =========================
+            $teniaCompetencias = Competencia::where('id_modulo', $modulo->id)->exists();
+
+            // =========================
             // 🔥 ELIMINAR COMPETENCIAS
             // =========================
             Competencia::where('id_modulo', $modulo->id)->delete();
 
+            if ($teniaCompetencias) {
+                $this->registrarActividad(
+                    "Eliminó todas las competencias del módulo '{$modulo->numero_modulo}'",
+                    "Eliminado"
+                );
+            }
+
             // =========================
-            // 🔥 CREAR NUEVAS
+            // ➕ CREAR NUEVAS COMPETENCIAS
             // =========================
             if ($request->filled('competencias')) {
                 foreach ($request->competencias as $competencia) {
-                    Competencia::create([
+
+                    $nueva = Competencia::create([
                         'id_modulo'   => $modulo->id,
-                        'tipo'        => $competencia['tipo'], // 👈 tipo
-                        'nombre'        => $competencia['nombre'], // 👈 tipo
+                        'tipo'        => $competencia['tipo'],
+                        'nombre'      => $competencia['nombre'],
                         'descripcion' => $competencia['descripcion'],
                     ]);
+
+                    // 🔥 REGISTRO INDIVIDUAL
+                    $this->registrarActividad(
+                        "Agregó la competencia '{$nueva->nombre}' al módulo '{$modulo->numero_modulo}'",
+                        "Creado"
+                    );
                 }
             }
 
             // =========================
-            // DETECTAR CAMBIOS
+            // DETECTAR CAMBIOS DEL MÓDULO
             // =========================
             $cambios = [];
 
@@ -254,16 +281,19 @@ class ModuloController extends Controller
                 : "campos modificados: " . implode(", ", $cambios);
 
             // =========================
-            // ACTIVIDAD
+            // 📝 ACTIVIDAD DEL MÓDULO
             // =========================
-            $this->registrarActividad(
-                "Actualizó el módulo '{$modulo->numero_modulo}' de la especialidad '{$modulo->especialidadPrograma->especialidadMadre->nombre_especialidad}' ({$descripcionCambios})",
-                "Actualizado"
-            );
+            if (!empty($cambios)) {
+                $this->registrarActividad(
+                    "Actualizó el módulo '{$modulo->numero_modulo}' de la especialidad '{$modulo->especialidadPrograma->especialidadMadre->nombre_especialidad}' ({$descripcionCambios})",
+                    "Actualizado"
+                );
+            }
         });
 
         return response()->json($modulo->load('competencias'));
     }
+
     // Eliminar un módulo
     public function destroy($id)
     {

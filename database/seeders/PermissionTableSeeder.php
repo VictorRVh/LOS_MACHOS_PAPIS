@@ -212,11 +212,11 @@ class PermissionTableSeeder extends Seeder
             'eliminar-capacidades-docente',
             
             //PARA VER LAS ACTIVIDADES RECIENTES
-            'todo-actividadaes-recientes',
-            'ver-actividadaes-recientes',
-            'crear-actividadaes-recientes',
-            'editar-actividadaes-recientes',
-            'eliminar-actividadaes-recientes'
+            'todo-actividades-recientes',
+            'ver-actividades-recientes',
+            'crear-actividades-recientes',
+            'editar-actividades-recientes',
+            'eliminar-actividades-recientes'
 
         ];
 

@@ -1,9 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
-import useHttpRequest from '../../composables/useHttpRequest';
 import { generateReporteEspecialidadEstudiante } from '../../pdf/ReporteEspecialidadEstudiante';
-
-const { store: consultar, saving } = useHttpRequest('/consulta-notas-publica');
+const saving = ref(false);
 
 const form = ref({
   nro_documento: '',
@@ -40,19 +38,33 @@ const consultarNotas = async () => {
   }
 
   try {
-    const response = await consultar({
-      nro_documento: form.value.nro_documento.trim(),
-      fecha_nacimiento: form.value.fecha_nacimiento,
+    saving.value = true;
+
+    const httpResponse = await fetch('/api/consulta-notas-publica', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nro_documento: form.value.nro_documento.trim(),
+        fecha_nacimiento: form.value.fecha_nacimiento,
+      }),
     });
+
+    const rawResponse = await httpResponse.text();
+    const response = rawResponse ? JSON.parse(rawResponse) : {};
 
     if (response?.success) {
       resultado.value = response.data;
       return;
     }
 
-    error.value = response?.message || 'No se encontraron notas.';
+    error.value = response?.message || (!httpResponse.ok ? 'La consulta pública no respondió correctamente.' : 'No se encontraron notas.');
   } catch (err) {
-    error.value = err.response?.data?.message || 'No se pudo completar la consulta.';
+    error.value = 'No se pudo completar la consulta.';
+  } finally {
+    saving.value = false;
   }
 };
 

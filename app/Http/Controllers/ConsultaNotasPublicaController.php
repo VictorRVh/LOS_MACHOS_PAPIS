@@ -3,11 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Estudiante;
+use App\Models\Matricula;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ConsultaNotasPublicaController extends Controller
 {
+    private function redondearNotaFinal(?float $promedio): ?int
+    {
+        if ($promedio === null) {
+            return null;
+        }
+
+        return (int) round($promedio, 0, PHP_ROUND_HALF_UP);
+    }
+
     public function consultar(Request $request)
     {
         $validated = $request->validate([
@@ -37,6 +47,9 @@ class ConsultaNotasPublicaController extends Controller
             ->where('m.id_estudiante', $estudiante->id)
             ->select(
                 'm.id as matricula_id',
+                'm.turno as matricula_turno',
+                'm.reserva',
+                'm.fecha_reserva',
                 'm.matriculado',
                 'g.id as grupo_id',
                 'g.seccion',
@@ -67,6 +80,7 @@ class ConsultaNotasPublicaController extends Controller
         $capacidadesPorGrupo = collect();
         $notasPorGrupo = collect();
         $notaExperienciaPorGrupo = collect();
+        $asistenciaResumenPorGrupo = collect();
 
         if ($grupoIds->isNotEmpty()) {
             $capacidadesPorGrupo = DB::table('capacidad_terminal')
@@ -95,6 +109,21 @@ class ConsultaNotasPublicaController extends Controller
                 ->get()
                 ->groupBy('id_grupo')
                 ->map(fn($items) => $items->first());
+
+            $asistenciaResumenPorGrupo = DB::table('asistencia')
+                ->where('id_estudiante', $estudiante->id)
+                ->whereIn('id_grupo', $grupoIds)
+                ->select(
+                    'id_grupo',
+                    DB::raw('COUNT(*) as total_registros'),
+                    DB::raw('SUM(CASE WHEN asistencia = 1 THEN 1 ELSE 0 END) as asistio'),
+                    DB::raw('SUM(CASE WHEN asistencia = 2 THEN 1 ELSE 0 END) as faltas'),
+                    DB::raw('SUM(CASE WHEN asistencia = 3 THEN 1 ELSE 0 END) as tardanzas'),
+                    DB::raw('SUM(CASE WHEN asistencia = 4 THEN 1 ELSE 0 END) as permisos')
+                )
+                ->groupBy('id_grupo')
+                ->get()
+                ->keyBy('id_grupo');
         }
 
         $especialidades = [];
@@ -119,7 +148,7 @@ class ConsultaNotasPublicaController extends Controller
                     'id_capacidad' => $cap->id,
                     'numero_unidad' => $cap->numero_capacidad,
                     'nombre_unidad' => $cap->nombre_capacidad,
-                    'nota' => $nota !== null && is_numeric($nota) ? (float) $nota : null,
+                    'nota' => $nota !== null && is_numeric($nota) ? (float) $nota : 0.0,
                 ];
             })->values();
 
@@ -127,15 +156,33 @@ class ConsultaNotasPublicaController extends Controller
                 'id_capacidad' => null,
                 'numero_unidad' => 'EF',
                 'nombre_unidad' => 'Experiencia formativa',
-                'nota' => $experienciaRegistrada ? $notaExperiencia : null,
+                'nota' => $notaExperiencia,
                 'es_experiencia_formativa' => true,
+                'registrada' => $experienciaRegistrada,
             ]);
 
-            $notasValidas = $unidadesNotas
-                ->pluck('nota')
-                ->filter(fn($nota) => $nota !== null && is_numeric($nota));
+            $notasValidas = $unidadesNotas->pluck('nota');
+            $promedioBase = $notasValidas->count() > 0 ? (float) $notasValidas->avg() : null;
+            $promedioNotas = $this->redondearNotaFinal($promedioBase);
 
-            $promedioNotas = $notasValidas->count() > 0 ? round($notasValidas->avg(), 1) : null;
+            $asistenciaGrupo = $asistenciaResumenPorGrupo->get($registro->grupo_id);
+            $totalAsistencia = $asistenciaGrupo->total_registros ?? 0;
+            $asistio = $asistenciaGrupo->asistio ?? 0;
+            $tardanzas = $asistenciaGrupo->tardanzas ?? 0;
+            $faltas = $asistenciaGrupo->faltas ?? 0;
+            $permisos = $asistenciaGrupo->permisos ?? 0;
+            $porcentajeAsistencia = $totalAsistencia > 0
+                ? round((($asistio + $tardanzas) / $totalAsistencia) * 100, 1)
+                : null;
+            $matriculadoEstado = is_numeric($registro->matriculado) ? (int) $registro->matriculado : 0;
+            $reservaEstado = is_numeric($registro->reserva) ? (int) $registro->reserva : 0;
+            $reservaTexto = null;
+
+            if ($reservaEstado === 1) {
+                $reservaTexto = 'Reserva activa';
+            } elseif ($reservaEstado === 3) {
+                $reservaTexto = 'Reserva utilizada';
+            }
 
             $espId = $registro->especialidad_id;
 
@@ -181,8 +228,27 @@ class ConsultaNotasPublicaController extends Controller
                     'status' => $registro->grupo_status,
                 ],
                 'estado' => (int) $registro->matriculado,
+                'matricula' => [
+                    'turno' => $registro->matricula_turno,
+                    'reserva' => (bool) $registro->reserva,
+                    'fecha_reserva' => $registro->fecha_reserva,
+                    'matriculado' => (bool) $registro->matriculado,
+                    'reserva_estado' => $reservaEstado,
+                    'matriculado_estado' => $matriculadoEstado,
+                    'estado_texto' => Matricula::STATUS[$matriculadoEstado] ?? 'Desconocido',
+                    'reserva_texto' => $reservaTexto,
+                ],
                 'notas_unidades' => $unidadesNotas,
                 'promedio_notas' => $promedioNotas,
+                'nota_experiencia_formativa' => $notaExperiencia,
+                'asistencia_resumen' => [
+                    'total_registros' => (int) $totalAsistencia,
+                    'asistio' => (int) $asistio,
+                    'tardanzas' => (int) $tardanzas,
+                    'faltas' => (int) $faltas,
+                    'permisos' => (int) $permisos,
+                    'porcentaje_asistencia' => $porcentajeAsistencia,
+                ],
             ];
         }
 

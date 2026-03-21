@@ -198,10 +198,12 @@ function getRowsNotas(especialidad) {
       const notasNumericas = unidadesOrdenadas
         .map((u) => parseNota(u?.nota))
         .filter((n) => n !== null);
-      const promedioCalculado = notasNumericas.length
-        ? notasNumericas.reduce((acc, n) => acc + n, 0) / notasNumericas.length
-        : null;
-      const promedioFinal = formatPromedio(promedioCalculado);
+      const promedioCalculado = item?.promedio_notas ?? (
+        notasNumericas.length
+          ? notasNumericas.reduce((acc, n) => acc + n, 0) / notasNumericas.length
+          : null
+      );
+      const promedioFinal = formatPromedio(redondearNotaFinal(promedioCalculado));
 
       if (!unidadesOrdenadas.length) {
         rows.push([
@@ -279,6 +281,11 @@ function buildNotasBodyMerged(rows) {
   }
 
   return body;
+}
+
+function redondearNotaFinal(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return null;
+  return Math.round(Number(value));
 }
 
 function getRowsAsistencia(especialidad) {

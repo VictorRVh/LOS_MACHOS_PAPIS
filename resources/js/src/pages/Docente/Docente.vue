@@ -14,6 +14,7 @@ import MenuTable from "../../components/table/MenuTable.vue";
 import CreateButton from "../../components/ui/CreateButton.vue";
 import TableBadge from "../../components/ui/TableBadge.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+import StatsOverviewSection from "../../components/page/StatsOverviewSection.vue";
 import DocenteSlider from "../../components/page/Docente/DocenteSlider.vue";
 import DocenteInfoModal from "../../components/page/Docente/infoDocenteSlider.vue";
 
@@ -92,24 +93,14 @@ orderDirection.value = "asc";
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-docentes', 'ver-docentes']">
     <div class="w-full space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
-      <section
-        class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
-      >
-        <div class="flex flex-col gap-1.5">
-          <div class="flex flex-col gap-1 lg:flex-row lg:items-start lg:justify-between">
-            <div class="min-w-0">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-                Gestion institucional
-              </p>
-              <h2 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">Docentes</h2>
-            </div>
-
-            <div class="shrink-0">
-              <CreateButton @click="showSlider(true)" />
-            </div>
+      <StatsOverviewSection eyebrow="Gestion institucional" title="Docentes">
+        <template #actions>
+          <div class="shrink-0">
+            <CreateButton @click="showSlider(true)" />
           </div>
+        </template>
 
-          <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
+        <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
             <div
               class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
             >
@@ -160,18 +151,14 @@ orderDirection.value = "asc";
               </div>
             </div>
           </div>
-        </div>
-      </section>
+      </StatsOverviewSection>
 
       <section
         class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
       >
         <div class="mb-2.5 flex flex-col gap-2.5 lg:flex-row lg:items-end lg:justify-between">
           <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Registro operativo
-            </p>
-            <div class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de docentes</div>
+            <div class="text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de docentes</div>
           </div>
 
           <div class="w-full lg:w-auto">

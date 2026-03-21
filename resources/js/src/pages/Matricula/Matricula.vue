@@ -22,15 +22,11 @@ const isActive = (to) => route.name === to.name;
         <div class="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
           <div class="min-w-0">
             <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Gestion institucional
             </p>
             <div class="mt-1 flex flex-col gap-1 xl:flex-row xl:items-center xl:gap-3">
               <h1 class="text-[1rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">
                 Modulo de matriculas
               </h1>
-              <p class="text-[12px] text-slate-500 dark:text-slate-400">
-                Registro, grupos y reservas.
-              </p>
             </div>
           </div>
 

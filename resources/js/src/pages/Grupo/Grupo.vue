@@ -10,6 +10,7 @@ import Th from "../../components/table/Th.vue";
 import MenuTable from "../../components/table/MenuTable.vue";
 import CreateButton from "../../components/ui/CreateButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+import StatsOverviewSection from "../../components/page/StatsOverviewSection.vue";
 import GrupoSlider from "../../components/page/Grupo/GrupoSlider.vue";
 import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 import useSlider from "../../composables/useSlider";
@@ -161,17 +162,10 @@ const totalEstudiantes = computed(() =>
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-grupos', 'ver-grupos']">
     <div class="space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
-      <section
-        class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
-      >
-        <div class="flex flex-col gap-1.5">
-          <div class="flex flex-col gap-1 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Gestión institucional</p>
-              <h1 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">Grupos</h1>
-            </div>
-            <CreateButton @click="showSlider(true)" text="Agregar Nuevo" />
-          </div>
+      <StatsOverviewSection eyebrow="Gestion institucional" title="Grupos">
+        <template #actions>
+          <CreateButton @click="showSlider(true)" text="Agregar Nuevo" />
+        </template>
 
           <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
             <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
@@ -203,8 +197,7 @@ const totalEstudiantes = computed(() =>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+      </StatsOverviewSection>
 
       <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
         <div class="mb-3">
@@ -236,7 +229,6 @@ const totalEstudiantes = computed(() =>
       <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
         <div class="mb-3 flex justify-between gap-3">
           <div>
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Registro operativo</p>
             <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de grupos</h3>
           </div>
           <SearchBar v-if="!isLoading && gruposPlanos.length > 0" :totalResultados="gruposOrdenados.length" :campoOrden="'modulo'" @search="filtrarGrupos" />

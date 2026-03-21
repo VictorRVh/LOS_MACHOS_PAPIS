@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/vue/24/outline";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+import StatsOverviewSection from "../../components/page/StatsOverviewSection.vue";
 import ProgramaSlider from "../../components/page/Programa/ProgramaSlider.vue";
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
@@ -48,7 +49,7 @@ const handleProgramaGuardado = (programaGuardado) => {
 const onDelete = async (programa) => {
   if (deleting.value) return;
 
-  showConfirmModal(`¿Seguro que quieres eliminar "${programa?.nameCiclo} - ${programa?.año}"?`, async (confirmed) => {
+  showConfirmModal(`¿Seguro que quieres eliminar "${programa?.nameCiclo} - ${programa?.["año"]}"?`, async (confirmed) => {
     if (!confirmed) return;
     try {
       const isDeleted = await deletePrograma(programa.id);
@@ -95,19 +96,7 @@ const updateTooltipPos = (event) => {
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-ciclo-académico', 'ver-ciclo-académico']">
     <div class="space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
-      <section
-        class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
-      >
-        <div class="flex flex-col gap-1.5">
-          <div class="flex flex-col gap-1">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Gestión institucional
-            </p>
-            <h1 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">
-              Programas de estudio
-            </h1>
-          </div>
-
+      <StatsOverviewSection eyebrow="Gestion institucional" title="Programas de estudio">
           <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
             <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
               <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
@@ -149,18 +138,10 @@ const updateTooltipPos = (event) => {
               </div>
             </div>
           </div>
-        </div>
-      </section>
+      </StatsOverviewSection>
 
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:col-span-1">
-          <div class="mb-3">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Configuración
-            </p>
-            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Agregar programa</h3>
-          </div>
-
           <ProgramaSlider
             :show="true"
             :programa="sliderData"
@@ -171,13 +152,6 @@ const updateTooltipPos = (event) => {
         </section>
 
         <section class="space-y-4 border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:col-span-2">
-          <div>
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Registro operativo
-            </p>
-            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de programas</h3>
-          </div>
-
           <div class="flex items-center space-x-2 rounded-lg bg-white p-2 shadow-sm dark:bg-gray-800">
             <button
               @click="filtroCiclo = 'Ciclo Técnico'"
@@ -223,7 +197,7 @@ const updateTooltipPos = (event) => {
                   </div>
                   <div class="flex flex-col">
                     <span class="text-xs text-gray-500 dark:text-gray-400">Periodo</span>
-                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ programa.año }}</p>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ programa["año"] }}</p>
                   </div>
                   <div class="flex flex-col">
                     <span class="text-xs text-gray-500 dark:text-gray-400">Resolución</span>

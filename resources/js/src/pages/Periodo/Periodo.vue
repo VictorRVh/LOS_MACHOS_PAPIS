@@ -1,6 +1,6 @@
 <script setup>
 import axios from "axios";
-import { computed, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { ArrowDownTrayIcon, ChevronDownIcon, TableCellsIcon } from "@heroicons/vue/24/outline";
 
 import Table from "../../components/table/Table.vue";
@@ -13,6 +13,7 @@ import TableBadge from "../../components/ui/TableBadge.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+import StatsOverviewSection from "../../components/page/StatsOverviewSection.vue";
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
@@ -86,24 +87,86 @@ const periodosInactivos = computed(() =>
 const periodosConReportes = computed(() =>
   periodosStore.periodos.filter((periodo) => periodo?.id).length
 );
-const reportsOpen = ref(false);
+const openDownloadMenuId = ref(null);
+const openDownloadMenuStyles = ref({});
+const downloadButtonRefs = ref({});
+const downloadMenuRef = ref(null);
+
+const setDownloadButtonRef = (periodoId, el) => {
+  if (el) {
+    downloadButtonRefs.value[periodoId] = el;
+    return;
+  }
+
+  delete downloadButtonRefs.value[periodoId];
+};
+
+const closeDownloadMenu = () => {
+  openDownloadMenuId.value = null;
+};
+
+const updateDownloadMenuPosition = (periodoId) => {
+  const button = downloadButtonRefs.value[periodoId];
+  if (!button) return;
+
+  const rect = button.getBoundingClientRect();
+  openDownloadMenuStyles.value = {
+    position: "fixed",
+    top: `${rect.bottom + 6}px`,
+    left: `${Math.max(12, rect.right - 240)}px`,
+    zIndex: 9999,
+  };
+};
+
+const toggleDownloadMenu = async (periodoId) => {
+  if (openDownloadMenuId.value === periodoId) {
+    closeDownloadMenu();
+    return;
+  }
+
+  openDownloadMenuId.value = periodoId;
+  await nextTick();
+  updateDownloadMenuPosition(periodoId);
+};
+
+const handleClickOutside = (event) => {
+  const activeId = openDownloadMenuId.value;
+  if (!activeId) return;
+
+  const button = downloadButtonRefs.value[activeId];
+  if (
+    downloadMenuRef.value &&
+    !downloadMenuRef.value.contains(event.target) &&
+    button &&
+    !button.contains(event.target)
+  ) {
+    closeDownloadMenu();
+  }
+};
+
+const handleViewportChange = () => {
+  if (!openDownloadMenuId.value) return;
+  updateDownloadMenuPosition(openDownloadMenuId.value);
+};
+
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+  window.addEventListener("resize", handleViewportChange);
+  window.addEventListener("scroll", handleViewportChange, true);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+  window.removeEventListener("resize", handleViewportChange);
+  window.removeEventListener("scroll", handleViewportChange, true);
+});
 </script>
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-periodos', 'ver-periodos']">
     <div class="space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
-      <section
-        class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
-      >
-        <div class="flex flex-col gap-1.5">
-          <div class="flex flex-col gap-1">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Gestion institucional
-            </p>
-            <h2 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">Periodos</h2>
-          </div>
-
-          <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
+      <StatsOverviewSection eyebrow="Gestion institucional" title="Periodos">
+        <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
             <div
               class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
             >
@@ -152,17 +215,13 @@ const reportsOpen = ref(false);
               </div>
             </div>
           </div>
-        </div>
-      </section>
+      </StatsOverviewSection>
 
       <div class="flex flex-col gap-4 lg:flex-row">
         <section
           class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-1/3"
         >
           <div class="mb-3">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Configuracion
-            </p>
             <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Agregar periodo</h3>
           </div>
 
@@ -174,86 +233,13 @@ const reportsOpen = ref(false);
         <section
           class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-2/3"
         >
-          <div class="mb-3 flex items-start justify-between gap-3">
+          <div class="mb-3">
             <div>
-              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-                Registro operativo
-              </p>
               <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de periodos</h3>
             </div>
-
-            <button
-              type="button"
-              @click="reportsOpen = !reportsOpen"
-              class="inline-flex h-8 shrink-0 items-center gap-2 rounded-[3px] border border-slate-200 bg-white px-2.5 text-slate-600 transition-colors hover:border-cetpro/20 hover:bg-cetpro/10 hover:text-cetpro focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cetpro/20 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-cetpro-light/25 dark:hover:bg-cetpro-light/10 dark:hover:text-cetpro-light dark:focus-visible:ring-offset-slate-900"
-              :title="reportsOpen ? 'Ocultar reportes' : 'Mostrar reportes'"
-              :aria-expanded="reportsOpen"
-              aria-label="Alternar reportes"
-            >
-              <ArrowDownTrayIcon class="h-4 w-4 shrink-0" />
-              <span class="text-[12px] font-medium leading-none">
-                {{ reportsOpen ? "Ocultar descargas" : "Mostrar descargas" }}
-              </span>
-              <ChevronDownIcon class="h-4 w-4 transition-transform duration-200" :class="reportsOpen ? 'rotate-180' : ''" />
-            </button>
           </div>
 
-          <div
-            v-if="reportsOpen"
-            class="mb-4 space-y-2 border border-slate-200 bg-slate-50/70 p-2.5 dark:border-slate-700 dark:bg-slate-800/50"
-          >
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                  Reportes
-                </p>
-                <p class="mt-0.5 text-sm text-slate-700 dark:text-slate-200">
-                  Descargas operativas por periodo
-                </p>
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <div
-                v-for="periodo in periodosStore.periodos"
-                :key="`reportes-${periodo.id}`"
-                class="flex flex-col gap-2 border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900 md:flex-row md:items-center md:justify-between"
-              >
-                <div class="min-w-0">
-                  <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                    Periodo
-                  </p>
-                  <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-100">
-                    {{ periodo?.nombre_periodo }}
-                  </p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    @click="descargarDocumento(periodo.id, periodo?.nombre_periodo)"
-                    class="inline-flex h-9 items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-3 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
-                  >
-                    <TableCellsIcon class="h-4 w-4 shrink-0" />
-                    <span>Matricula institucional</span>
-                    <ArrowDownTrayIcon class="h-4 w-4 shrink-0 opacity-70" />
-                  </button>
-
-                  <button
-                    type="button"
-                    @click="descargarReporteCertificado(periodo.id, periodo?.nombre_periodo)"
-                    class="inline-flex h-9 items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-3 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
-                  >
-                    <TableCellsIcon class="h-4 w-4 shrink-0" />
-                    <span>Certificados</span>
-                    <ArrowDownTrayIcon class="h-4 w-4 shrink-0 opacity-70" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <Table>
+          <Table class="periodos-table">
             <THead>
               <Th>Id</Th>
               <Th>Periodo</Th>
@@ -276,6 +262,18 @@ const reportsOpen = ref(false);
                   <div class="flex items-center justify-center gap-1">
                     <EditButton @click="showSlider(true, periodo)" />
                     <DeleteButton @click="onDelete(periodo)" />
+                    <button
+                      :ref="(el) => setDownloadButtonRef(periodo.id, el)"
+                      type="button"
+                      @click="toggleDownloadMenu(periodo.id)"
+                      class="inline-flex h-8 items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 text-xsm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+                      :aria-expanded="openDownloadMenuId === periodo.id"
+                      title="Descargas"
+                    >
+                      <ArrowDownTrayIcon class="h-4 w-4 shrink-0" />
+                      <span>Descargas</span>
+                      <ChevronDownIcon class="h-4 w-4 shrink-0 transition-transform duration-200" :class="openDownloadMenuId === periodo.id ? 'rotate-180' : ''" />
+                    </button>
                   </div>
                 </Td>
               </Tr>
@@ -284,5 +282,34 @@ const reportsOpen = ref(false);
         </section>
       </div>
     </div>
+
+    <Teleport to="body">
+      <div
+        v-if="openDownloadMenuId"
+        ref="downloadMenuRef"
+        :style="openDownloadMenuStyles"
+        class="min-w-[240px] rounded-[3px] border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+      >
+        <button
+          type="button"
+          @click="descargarDocumento(openDownloadMenuId, periodosStore.periodos.find((p) => p.id === openDownloadMenuId)?.nombre_periodo); closeDownloadMenu()"
+          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
+        >
+          <TableCellsIcon class="h-4 w-4 shrink-0" />
+          <span class="flex-1">Matricula institucional</span>
+          <ArrowDownTrayIcon class="h-4 w-4 shrink-0 opacity-70" />
+        </button>
+
+        <button
+          type="button"
+          @click="descargarReporteCertificado(openDownloadMenuId, periodosStore.periodos.find((p) => p.id === openDownloadMenuId)?.nombre_periodo); closeDownloadMenu()"
+          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
+        >
+          <TableCellsIcon class="h-4 w-4 shrink-0" />
+          <span class="flex-1">Certificados</span>
+          <ArrowDownTrayIcon class="h-4 w-4 shrink-0 opacity-70" />
+        </button>
+      </div>
+    </Teleport>
   </AuthorizationFallback>
 </template>

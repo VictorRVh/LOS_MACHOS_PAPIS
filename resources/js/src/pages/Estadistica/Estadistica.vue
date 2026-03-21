@@ -8,9 +8,6 @@
           >
             <div class="flex flex-col gap-1.5">
               <div class="flex flex-col gap-1">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-                  Gestión institucional
-                </p>
                 <h1 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">
                   Estadísticas institucionales
                 </h1>

@@ -12,6 +12,7 @@ import MenuTable from "../../components/table/MenuTable.vue";
 import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
 import DocumentoSlider from "../../components/page/Documento/DocumentoSlider.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+import StatsOverviewSection from "../../components/page/StatsOverviewSection.vue";
 
 import usePeriodoStatusStore from "../../store/Periodo/usePeriodoStatusStore";
 import useModalToast from "../../composables/useModalToast";
@@ -221,18 +222,12 @@ const periodoActualLabel = computed(() => {
         </div>
       </Transition>
 
-      <section class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
-        <div class="flex flex-col gap-2">
-          <div class="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Gestión institucional</p>
-              <h1 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">Programación de entregas</h1>
-            </div>
-
-            <div class="w-full lg:w-64">
+      <StatsOverviewSection eyebrow="Gestion institucional" title="Programacion de entregas">
+        <template #actions>
+          <div class="w-full lg:w-64">
               <BaseSelectGrupo v-model="selectedPeriodo" :options="periodoStore?.periodos" label="nombre_periodo" value-prop="id" placeholder="Seleccione un periodo" />
-            </div>
           </div>
+        </template>
 
           <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
             <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
@@ -264,13 +259,11 @@ const periodoActualLabel = computed(() => {
               </div>
             </div>
           </div>
-        </div>
-      </section>
+      </StatsOverviewSection>
 
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:col-span-1">
           <div class="mb-3">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Configuración</p>
             <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Nueva programación</h3>
           </div>
 
@@ -285,7 +278,6 @@ const periodoActualLabel = computed(() => {
 
         <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:col-span-2">
           <div class="mb-3">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Registro operativo</p>
             <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de entregas</h3>
           </div>
 

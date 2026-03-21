@@ -13,6 +13,7 @@ import CreateButton from "../../components/ui/CreateButton.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+import StatsOverviewSection from "../../components/page/StatsOverviewSection.vue";
 import UserSlider from "../../components/page/Administrativo/AdministrativoSlider.vue";
 
 import useAdministraticoStore from "../../store/Administrativo/useAdministrativoStore";
@@ -77,18 +78,12 @@ orderDirection.value = "asc";
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-administrativos', 'ver-administrativos']">
     <div class="w-full space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
-      <section
-        class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
-      >
-        <div class="flex flex-col gap-1.5">
-          <div class="flex flex-col gap-1">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Gestión institucional
-            </p>
-            <h2 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">
-              Administrativos
-            </h2>
+      <StatsOverviewSection eyebrow="Gestion institucional" title="Administrativos">
+        <template #actions>
+          <div class="shrink-0">
+            <CreateButton @click="showSlider(true)" />
           </div>
+        </template>
 
           <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
             <div
@@ -143,21 +138,16 @@ orderDirection.value = "asc";
               </div>
             </div>
           </div>
-        </div>
-      </section>
+      </StatsOverviewSection>
 
       <section
         class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
       >
         <div class="mb-2.5 flex flex-col gap-2.5 lg:flex-row lg:items-end lg:justify-between">
           <div class="min-w-0">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Registro operativo
-            </p>
-            <div class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de administrativos</div>
+            <div class="text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de administrativos</div>
           </div>
-
-          <div class="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end lg:w-auto">
+          <div class="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end lg:w-auto lg:ml-auto">
             <div class="w-full lg:w-auto">
               <SearchBar
                 :totalResultados="usuariosOrdenados.length"
@@ -165,7 +155,6 @@ orderDirection.value = "asc";
                 @search="filtrarUsuarios"
               />
             </div>
-            <CreateButton @click="showSlider(true)" />
           </div>
         </div>
 

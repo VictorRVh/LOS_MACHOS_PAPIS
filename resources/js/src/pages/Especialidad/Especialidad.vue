@@ -9,6 +9,7 @@ import Td from "../../components/table/Td.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+import StatsOverviewSection from "../../components/page/StatsOverviewSection.vue";
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
@@ -58,19 +59,7 @@ const ciclosConEspecialidades = computed(() => {
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-programas-de-estudio', 'ver-programas-de-estudio']">
     <div class="space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
-      <section
-        class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
-      >
-        <div class="flex flex-col gap-1.5">
-          <div class="flex flex-col gap-1">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Gestión institucional
-            </p>
-            <h2 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">
-              Programas de estudio
-            </h2>
-          </div>
-
+      <StatsOverviewSection eyebrow="Gestion institucional" title="Programas de estudio">
           <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
             <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
               <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
@@ -112,29 +101,14 @@ const ciclosConEspecialidades = computed(() => {
               </div>
             </div>
           </div>
-        </div>
-      </section>
+      </StatsOverviewSection>
 
       <div class="flex flex-col gap-4 lg:flex-row">
         <section class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-1/3">
-          <div class="mb-3">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Configuración
-            </p>
-            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Agregar nuevo programa de estudio</h3>
-          </div>
-
           <EspecialidadSlider :show="slider" :especialidad="sliderData" :ciclo="cicloStore.ciclo" @hide="hideSlider" />
         </section>
 
         <section class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-2/3">
-          <div class="mb-3">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Registro operativo
-            </p>
-            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de programas de estudio</h3>
-          </div>
-
           <Table>
             <THead>
               <Th>Id</Th>

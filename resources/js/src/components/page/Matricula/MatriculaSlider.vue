@@ -176,7 +176,7 @@ const onSubmit = async () => {
 
       <div v-else class="space-y-2">
         <section class="border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
-          <div class="flex items-center justify-between gap-3">
+          <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
             <div class="min-w-0">
               <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
                 Proceso de matricula
@@ -199,11 +199,11 @@ const onSubmit = async () => {
             </div>
           </div>
 
-          <div class="mt-2 grid gap-1 md:grid-cols-3">
+          <div class="mt-2 flex flex-col gap-1.5 lg:flex-row lg:items-stretch">
             <div
               v-for="step in steps"
               :key="step.number"
-              class="border px-2 py-1 transition-colors duration-200"
+              class="flex-1 border px-2.5 py-1.5 transition-colors duration-200"
               :class="
                 currentStep === step.number
                   ? 'border-cetpro bg-white dark:border-cetpro-light dark:bg-slate-900'
@@ -212,9 +212,9 @@ const onSubmit = async () => {
                     : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'
               "
             >
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2.5">
                 <div
-                  class="flex h-6 w-6 shrink-0 items-center justify-center border text-[11px] font-semibold"
+                  class="flex h-7 w-7 shrink-0 items-center justify-center border text-[11px] font-semibold"
                   :class="
                     currentStep === step.number
                       ? 'border-cetpro bg-cetpro text-white dark:border-cetpro-light dark:bg-cetpro-light dark:text-slate-900'
@@ -223,18 +223,17 @@ const onSubmit = async () => {
                         : 'border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400'
                   "
                 >
-                  <component v-if="currentStep !== step.number" :is="step.icon" class="h-3 w-3" />
+                  <component v-if="currentStep !== step.number" :is="step.icon" class="h-3.5 w-3.5" />
                   <span v-else>{{ step.number }}</span>
                 </div>
                 <div class="min-w-0">
                   <p
-                    class="text-[9px] font-semibold uppercase tracking-[0.18em]"
+                    class="text-[9px] font-semibold uppercase tracking-[0.16em]"
                     :class="currentStep === step.number ? 'text-cetpro dark:text-cetpro-light' : 'text-slate-500 dark:text-slate-400'"
                   >
                     {{ currentStep > step.number ? "Completado" : currentStep === step.number ? "Paso actual" : "Pendiente" }}
                   </p>
                   <p class="text-[12px] font-semibold leading-tight text-slate-900 dark:text-slate-100">{{ step.title }}</p>
-                  <p class="text-[10px] leading-4 text-slate-500 dark:text-slate-400">{{ step.description }}</p>
                 </div>
               </div>
             </div>

@@ -158,3 +158,115 @@ const readonlyItems = computed(() => [
     </section>
   </div>
 </template>
+
+<style scoped>
+:deep(.vs__dropdown-toggle) {
+  @apply h-9 min-h-9 rounded-[3px] border border-slate-300 bg-white px-3 py-0 text-sm text-slate-800 shadow-none transition-colors duration-150;
+}
+
+:deep(.vs--open .vs__dropdown-toggle),
+:deep(.vs--focused .vs__dropdown-toggle) {
+  @apply border-cetpro ring-2 ring-cetpro/15;
+}
+
+:deep(.vs__selected-options) {
+  @apply min-h-0 flex-nowrap items-center gap-1 py-0;
+}
+
+:deep(.vs__selected) {
+  @apply m-0 leading-5 text-sm text-slate-800;
+}
+
+:deep(.vs__search) {
+  @apply m-0 leading-5 bg-transparent text-slate-800;
+}
+
+:deep(.vs__search::placeholder) {
+  @apply text-sm leading-5 text-slate-400;
+}
+
+:deep(.vs__actions) {
+  @apply items-center pr-0.5;
+}
+
+:deep(.vs__open-indicator) {
+  @apply text-slate-500 transition-transform duration-150;
+}
+
+:deep(.vs--open .vs__open-indicator) {
+  transform: rotate(180deg);
+}
+
+:deep(.vs__clear) {
+  @apply text-slate-400 transition-colors duration-150;
+}
+
+:deep(.vs__dropdown-menu) {
+  @apply mt-1 rounded-sm border border-slate-200 bg-white py-1 text-sm text-slate-800 shadow-sm;
+}
+
+:deep(.vs__dropdown-option) {
+  @apply px-3 py-2 text-sm text-slate-700;
+}
+
+:deep(.vs__dropdown-option--highlight) {
+  @apply bg-cetpro/10 text-cetpro;
+}
+
+:deep(.vs__dropdown-option--selected) {
+  @apply bg-cetpro/10 font-medium text-cetpro;
+}
+
+:deep(.vs--disabled .vs__dropdown-toggle) {
+  @apply cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400;
+}
+
+:deep(.dark .vs__dropdown-toggle) {
+  @apply border-slate-600 bg-slate-800 text-slate-100;
+}
+
+:deep(.dark .vs--open .vs__dropdown-toggle),
+:deep(.dark .vs--focused .vs__dropdown-toggle) {
+  @apply border-cetpro-light ring-cetpro-light/20;
+}
+
+:deep(.dark .vs__selected) {
+  @apply text-slate-100;
+}
+
+:deep(.dark .vs__search) {
+  @apply bg-transparent text-slate-100;
+}
+
+:deep(.dark .vs__search::placeholder) {
+  @apply text-slate-400;
+}
+
+:deep(.dark .vs__open-indicator) {
+  @apply text-slate-400;
+}
+
+:deep(.dark .vs__clear) {
+  @apply text-slate-500;
+}
+
+:deep(.dark .vs__dropdown-menu) {
+  @apply border-slate-700 bg-slate-900 text-slate-100;
+}
+
+:deep(.dark .vs__dropdown-option) {
+  @apply text-slate-200;
+}
+
+:deep(.dark .vs__dropdown-option--highlight) {
+  @apply bg-cetpro-light/10 text-cetpro-light;
+}
+
+:deep(.dark .vs__dropdown-option--selected) {
+  @apply bg-cetpro-light/10 text-cetpro-light;
+}
+
+:deep(.dark .vs--disabled .vs__dropdown-toggle) {
+  @apply border-slate-700 bg-slate-900 text-slate-500;
+}
+</style>

@@ -186,7 +186,7 @@ async function onSubmit() {
         return; // 🚫 NO ENVÍA NADA
     }
 
-    if (!formData.value.tipo_practicas || !formData.value.documento) {
+    if (!formData.value.tipo_practicas) {
         showToast("Debe seleccionar la modalidad y adjuntar el documento.", "warning");
         return;
     }
@@ -200,7 +200,9 @@ async function onSubmit() {
         form.append("id_estudiante", selectedAlumno.value.id_estudiante);
         form.append("id_grupo", props.id);
         form.append("tipo_practicas", formData.value.tipo_practicas);
-        form.append("file", formData.value.documento);
+        if (formData.value.documento) {
+            form.append("file", formData.value.documento);
+        }
         form.append("nota", formData.value.nota);
         // form.append("observacion", observacion.value || "");
         form.append("parentFolderId", idPracticasDrive.value);
@@ -258,11 +260,8 @@ const onNotaInput = (event, idx) => {
                         <!-- Si SÍ hay experiencia => botón EDITAR -->
                         <Button v-else title="Editar Experiencia" color="secondary" :loading="isSavingExp"
                             :disabled="isSavingExp" @click="guardarExperiencia" />
-
                     </div>
                 </div>
-
-
             </div>
 
 
@@ -353,7 +352,7 @@ const onNotaInput = (event, idx) => {
                         ]" @input="onNotaInput" required />
                     </div>
 
-                    <FormInputFile v-model="formData.documento" label="Documento (Informe o Evidencia) *" />
+                    <FormInputFile v-model="formData.documento" label="Documento (Informe o Evidencia)" />
                     <!-- <label for="observacion"
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observación
                         General</label>

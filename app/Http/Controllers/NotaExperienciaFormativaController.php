@@ -29,14 +29,13 @@ class NotaExperienciaFormativaController extends Controller
         return response()->json($nota);
     }
 
-    // POST /api/nota_experiencia_formativa
     public function store(Request $request)
     {
         $request->validate([
             'id_experiencia'  => 'required|uuid|exists:experiencia_formativa,id',
             'tipo_practicas'  => 'required|integer|in:1,2,3',
-            'file'            => 'required|file',
-            'nota' => 'required|numeric|min:0|max:20',
+            'file'            => 'nullable|file', // ✅ CAMBIO AQUÍ
+            'nota'            => 'required|numeric|min:0|max:20',
             'parentFolderId'  => 'required|string',
             'id_estudiante'   => 'required|uuid|exists:estudiante,id',
             'id_grupo'        => 'required|uuid|exists:grupo,id',
@@ -44,49 +43,48 @@ class NotaExperienciaFormativaController extends Controller
         ]);
 
         try {
-            // 1️⃣ Subir archivo a Google Drive usando el request original
-            $driveController = new GoogleDriveController();
+            $fileData = null;
 
-            // Pasar el request original que ya contiene el archivo
-            $response = $driveController->uploadFile($request);
+            // ✅ SOLO sube si hay archivo
+            if ($request->hasFile('file')) {
+                $driveController = new GoogleDriveController();
+                $response = $driveController->uploadFile($request);
 
-            if ($response->status() !== 201) {
-                return response()->json(['error' => 'No se pudo subir el archivo al Drive.'], 500);
+                if ($response->status() !== 201) {
+                    return response()->json([
+                        'error' => 'No se pudo subir el archivo al Drive.'
+                    ], 500);
+                }
+
+                $fileData = $response->getData();
             }
 
-            $fileData = $response->getData();
-
-            // 2️⃣ Guardar el registro en la tabla nota_experiencia_formativa
+            // ✅ Guardar con o sin archivo
             $nota = NotaExperienciaFormativa::create([
                 'id_experiencia' => $request->id_experiencia,
                 'tipo_practicas' => $request->tipo_practicas,
-                'documento'      => $fileData->id,
-                'nota'      => $request->nota,
+                'documento'      => $fileData->id ?? null,
+                'nota'           => $request->nota,
                 'id_estudiante'  => $request->id_estudiante,
                 'id_grupo'       => $request->id_grupo,
                 'observacion'    => $request->input('observacion', ''),
                 'status'         => 1,
             ]);
 
-            // $carpeta = CarpetasPracticasDrive::create([
-            //     'id_nota_experiencia' => $nota->id,
-            //     'id_estudiante'       => $request->id_estudiante,
-            //     'drive_file_id'       => $fileData->id,
-            // ]);
-
             return response()->json([
-                'message' => 'Nota registrada y archivo subido con éxito.',
+                'message' => 'Nota registrada correctamente.',
                 'data' => $nota,
-                'drive_file' => [
+                'drive_file' => $fileData ? [
                     'id' => $fileData->id,
                     'name' => $fileData->name ?? 'Archivo',
-                ],
+                ] : null,
             ], 201);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al guardar la nota: ' . $e->getMessage()], 500);
+            return response()->json([
+                'error' => 'Error al guardar la nota: ' . $e->getMessage()
+            ], 500);
         }
     }
-
     // PATCH /api/nota_experiencia_formativa/{id}
     public function update(Request $request, $id)
     {

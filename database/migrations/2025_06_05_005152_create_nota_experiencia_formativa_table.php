@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('id_experiencia');
             $table->tinyInteger('tipo_practicas');
             $table->string('nota')->nullable();
-            $table->string('documento');
+            $table->string('documento')->nullable();
             $table->string('observacion');
             $table->uuid('id_estudiante');
             $table->uuid('id_grupo');

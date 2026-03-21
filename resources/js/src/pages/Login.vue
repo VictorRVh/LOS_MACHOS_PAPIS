@@ -75,9 +75,9 @@ const onPasswordChanged = async (newPassword) => {
 </script>
 
 <template>
-    <section class="min-h-screen bg-slate-100 font-inter text-slate-800 lg:h-screen lg:overflow-hidden">
-        <div class="flex min-h-screen w-full flex-col px-0 py-0 sm:px-0 sm:py-0 lg:h-screen">
-            <div class="grid min-h-screen grid-cols-1 overflow-hidden bg-white shadow-sm lg:h-screen lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_minmax(460px,0.84fr)] xl:grid-cols-[minmax(0,1fr)_minmax(520px,0.86fr)]">
+    <section class="h-screen overflow-y-auto overscroll-y-contain bg-slate-100 font-inter text-slate-800 lg:overflow-hidden">
+        <div class="flex min-h-full w-full flex-col px-0 py-0 sm:px-0 sm:py-0 lg:h-screen">
+            <div class="grid min-h-full grid-cols-1 bg-white shadow-sm lg:h-screen lg:min-h-0 lg:overflow-hidden lg:grid-cols-[minmax(0,1fr)_minmax(460px,0.84fr)] xl:grid-cols-[minmax(0,1fr)_minmax(520px,0.86fr)]">
         <aside class="login-brand relative hidden lg:flex items-center overflow-hidden border-r border-slate-200">
             <div class="absolute inset-0 z-0">
                 <div class="absolute inset-0 bg-[linear-gradient(180deg,_rgba(255,255,255,0.03),_rgba(255,255,255,0.01))]"></div>

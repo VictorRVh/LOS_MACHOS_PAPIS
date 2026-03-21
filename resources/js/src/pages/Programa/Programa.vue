@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import { storeToRefs } from "pinia";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/vue/24/outline";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 import ProgramaSlider from "../../components/page/Programa/ProgramaSlider.vue";
@@ -22,37 +21,46 @@ const { slider, sliderData, showSlider, hideSlider } = useSlider("role-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deletePrograma, deleting } = useHttpRequest("/programa_estudio");
 
-const filtroCiclo = ref('Ciclo Técnico');
+const filtroCiclo = ref("Ciclo Técnico");
 
-const programasFiltrados = computed(() => {
-  if (!programaStore.programas.programas) return [];
-  return programaStore.programas.programas.filter(p => p.nameCiclo === filtroCiclo.value);
-});
+const programas = computed(() => programaStore.programas?.programas || []);
+const programasFiltrados = computed(() =>
+  programas.value.filter((programa) => programa.nameCiclo === filtroCiclo.value)
+);
+
+const totalProgramas = computed(() => programas.value.length);
+const programasTecnicos = computed(() =>
+  programas.value.filter((programa) => programa.nameCiclo === "Ciclo Técnico").length
+);
+const programasAuxiliares = computed(() =>
+  programas.value.filter((programa) => programa.nameCiclo === "Ciclo Auxiliar Técnico").length
+);
+const programasEnCurso = computed(() =>
+  programas.value.filter((programa) => Boolean(programa.status)).length
+);
 
 const handleProgramaGuardado = (programaGuardado) => {
-  const nombreCiclo = cicloStore.ciclo.find(c => c.id === programaGuardado.id_ciclo)?.nombre_ciclo || '';
-  if (nombreCiclo) {
-    filtroCiclo.value = nombreCiclo;
-  }
+  const nombreCiclo =
+    cicloStore.ciclo.find((ciclo) => ciclo.id === programaGuardado.id_ciclo)?.nombre_ciclo || "";
+  if (nombreCiclo) filtroCiclo.value = nombreCiclo;
 };
 
 const onDelete = async (programa) => {
   if (deleting.value) return;
+
   showConfirmModal(`¿Seguro que quieres eliminar "${programa?.nameCiclo} - ${programa?.año}"?`, async (confirmed) => {
     if (!confirmed) return;
     try {
       const isDeleted = await deletePrograma(programa.id);
       if (isDeleted) {
-        showToast(`Ciclo académico eliminado exitosamente.`);
-        programaStore.loadProgramas()
+        showToast("Programa de estudio eliminado exitosamente.");
+        programaStore.loadProgramas();
       }
     } catch (error) {
-      showToast('Error al eliminar el Ciclo académico.', 'error');
+      showToast("Error al eliminar el programa de estudio.", "error");
     }
   });
 };
-
-
 
 const seeMore = (programa) => {
   router.push({
@@ -63,7 +71,7 @@ const seeMore = (programa) => {
 
 const tooltip = ref({
   visible: false,
-  text: 'Asignar programas',
+  text: "Asignar programas",
   x: 0,
   y: 0,
 });
@@ -86,88 +94,191 @@ const updateTooltipPos = (event) => {
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-ciclo-académico', 'ver-ciclo-académico']">
-    <div class="p-4 md:p-6 space-y-6">
-      <header>
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Ciclo académico</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">Administra los Ciclo académicos de ciclo técnico y auxiliar.
-        </p>
-      </header>
+    <div class="space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
+      <section
+        class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
+      >
+        <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-1">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+              Gestión institucional
+            </p>
+            <h1 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">
+              Programas de estudio
+            </h1>
+          </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-1 ">
+          <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Total programas
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalProgramas }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Registrados</span>
+              </div>
+            </div>
 
-          <ProgramaSlider :show="true" :programa="sliderData" :ciclo="cicloStore.ciclo" @hide="hideSlider"
-            @programa-guardado="handleProgramaGuardado" />
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Ciclo técnico
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ programasTecnicos }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Técnico</span>
+              </div>
+            </div>
+
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Ciclo auxiliar
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ programasAuxiliares }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Auxiliar</span>
+              </div>
+            </div>
+
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                En curso
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ programasEnCurso }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Vigentes</span>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div class="lg:col-span-2 space-y-4">
-          <div class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
-            <button @click="filtroCiclo = 'Ciclo Técnico'"
-              :class="['w-full py-2 px-4 rounded-md text-sm font-semibold transition-colors',
-                filtroCiclo === 'Ciclo Técnico' ? 'bg-cetpro text-white shadow' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700']">
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:col-span-1">
+          <div class="mb-3">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+              Configuración
+            </p>
+            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Agregar programa</h3>
+          </div>
+
+          <ProgramaSlider
+            :show="true"
+            :programa="sliderData"
+            :ciclo="cicloStore.ciclo"
+            @hide="hideSlider"
+            @programa-guardado="handleProgramaGuardado"
+          />
+        </section>
+
+        <section class="space-y-4 border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:col-span-2">
+          <div>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+              Registro operativo
+            </p>
+            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de programas</h3>
+          </div>
+
+          <div class="flex items-center space-x-2 rounded-lg bg-white p-2 shadow-sm dark:bg-gray-800">
+            <button
+              @click="filtroCiclo = 'Ciclo Técnico'"
+              :class="[
+                'w-full rounded-md px-4 py-2 text-sm font-semibold transition-colors',
+                filtroCiclo === 'Ciclo Técnico'
+                  ? 'bg-cetpro text-white shadow'
+                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
+              ]"
+            >
               Ciclo Técnico
             </button>
-            <button @click="filtroCiclo = 'Ciclo Auxiliar Técnico'"
-              :class="['w-full py-2 px-4 rounded-md text-sm font-semibold transition-colors',
-                filtroCiclo === 'Ciclo Auxiliar Técnico' ? 'bg-cetpro text-white shadow' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700']">
+            <button
+              @click="filtroCiclo = 'Ciclo Auxiliar Técnico'"
+              :class="[
+                'w-full rounded-md px-4 py-2 text-sm font-semibold transition-colors',
+                filtroCiclo === 'Ciclo Auxiliar Técnico'
+                  ? 'bg-cetpro text-white shadow'
+                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
+              ]"
+            >
               Ciclo Auxiliar Técnico
             </button>
           </div>
 
           <div class="space-y-3" @mousemove="updateTooltipPos">
-            <div v-for="programa in programasFiltrados" :key="programa.id"
-              class="bg-white dark:bg-gray-800 rounded-lg shadow-md border-l-4 flex"
-              :class="[programa.status ? 'border-green-500' : 'border-red-500']">
-              <div @click="seeMore(programa)" @mouseover="showTooltip" @mouseleave="hideTooltip"
-                class="flex-grow p-3 cursor-pointer rounded-l-md transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 items-center h-full">
+            <div
+              v-for="programa in programasFiltrados"
+              :key="programa.id"
+              class="flex rounded-lg border-l-4 bg-white shadow-md dark:bg-gray-800"
+              :class="[programa.status ? 'border-green-500' : 'border-red-500']"
+            >
+              <div
+                class="flex-grow cursor-pointer rounded-l-md p-3 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                @click="seeMore(programa)"
+                @mouseover="showTooltip"
+                @mouseleave="hideTooltip"
+              >
+                <div class="grid h-full grid-cols-2 items-center gap-3 md:grid-cols-4">
                   <div class="flex flex-col">
                     <span class="text-xs text-gray-500 dark:text-gray-400">Programa</span>
-                    <p class="font-semibold text-sm text-gray-800 dark:text-gray-200">{{ programa.nameCiclo }}</p>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ programa.nameCiclo }}</p>
                   </div>
                   <div class="flex flex-col">
                     <span class="text-xs text-gray-500 dark:text-gray-400">Periodo</span>
-                    <p class="font-semibold text-sm text-gray-800 dark:text-gray-200">{{ programa.año }}</p>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ programa.año }}</p>
                   </div>
                   <div class="flex flex-col">
                     <span class="text-xs text-gray-500 dark:text-gray-400">Resolución</span>
-                    <p class="font-semibold text-sm text-gray-800 dark:text-gray-200">RD {{ programa.numero_rd }}</p>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">RD {{ programa.numero_rd }}</p>
                   </div>
                   <div class="flex flex-col">
                     <span class="text-xs text-gray-500 dark:text-gray-400">Estado</span>
-                    <span class="text-xs font-bold py-1 px-2 rounded-full w-fit"
-                      :class="[programa.status ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300']">
-                      {{ programa.status ? 'En Curso' : 'Finalizado' }}
+                    <span
+                      class="w-fit rounded-full px-2 py-1 text-xs font-bold"
+                      :class="[
+                        programa.status
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                          : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+                      ]"
+                    >
+                      {{ programa.status ? "En Curso" : "Finalizado" }}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div
-                class="flex-shrink-0 flex flex-col items-center justify-center space-y-2 px-3 py-2 border-l border-gray-200 dark:border-gray-700">
-                <button @click="showSlider(true, programa)" title="Editar"
-                  class="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors duration-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+              <div class="flex flex-shrink-0 flex-col items-center justify-center space-y-2 border-l border-gray-200 px-3 py-2 dark:border-gray-700">
+                <button
+                  @click="showSlider(true, programa)"
+                  title="Editar"
+                  class="rounded-full p-2 text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+                >
                   <PencilSquareIcon class="h-5 w-5" />
                 </button>
-                <button @click="onDelete(programa)" title="Eliminar"
-                  class="p-2 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors duration-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                <button
+                  @click="onDelete(programa)"
+                  title="Eliminar"
+                  class="rounded-full p-2 text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-red-600 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-red-400"
+                >
                   <TrashIcon class="h-5 w-5" />
                 </button>
               </div>
             </div>
 
-            <div v-if="!programasFiltrados.length && !deleting"
-              class="text-center py-10 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <div
+              v-if="!programasFiltrados.length && !deleting"
+              class="rounded-lg bg-white py-10 text-center shadow-md dark:bg-gray-800"
+            >
               <p class="text-gray-500 dark:text-gray-400">No hay programas para mostrar en esta categoría.</p>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
 
-    <div v-if="tooltip.visible"
-      class="fixed z-50 px-3 py-1.5 bg-cetpro-dark text-white text-xs font-semibold rounded-md shadow-lg pointer-events-none transition-opacity duration-200"
-      :style="{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }">
+    <div
+      v-if="tooltip.visible"
+      class="pointer-events-none fixed z-50 rounded-md bg-cetpro-dark px-3 py-1.5 text-xs font-semibold text-white shadow-lg transition-opacity duration-200"
+      :style="{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }"
+    >
       {{ tooltip.text }}
     </div>
   </AuthorizationFallback>

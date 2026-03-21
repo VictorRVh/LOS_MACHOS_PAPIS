@@ -1,10 +1,8 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-
-import SearchBar from "../../components/head_table/headSearch.vue";
-
+import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 
+import SearchBar from "../../components/head_table/headSearch.vue";
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
 import TBody from "../../components/table/TBody.vue";
@@ -14,37 +12,28 @@ import Td from "../../components/table/Td.vue";
 import MenuTable from "../../components/table/MenuTable.vue";
 
 import CreateButton from "../../components/ui/CreateButton.vue";
-import EditButton from "../../components/ui/EditButton.vue";
-import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
-import DocenteSlider from '../../components/page/Docente/DocenteSlider.vue'
+import DocenteSlider from "../../components/page/Docente/DocenteSlider.vue";
+import DocenteInfoModal from "../../components/page/Docente/infoDocenteSlider.vue";
 
 import useDocenteStore from "../../store/Docente/useDocenteStore";
-
 import useSlider from "../../composables/useSlider";
-
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
 import useTableData from "../../composables/tabla/useTableData";
-import ChangePasswordModal from "../../components/page/ChangePasswordModal.vue";
-import DocenteInfoModal from "../../components/page/Docente/infoDocenteSlider.vue";
 
 const docenteStore = useDocenteStore();
 
-if (!docenteStore.docentes?.length) await docenteStore.loadDocentes();
+if (!docenteStore.docentes?.length) {
+  await docenteStore.loadDocentes();
+}
 
 const { slider, sliderData, showSlider, hideSlider } = useSlider("docente-crud");
 const { showConfirmModal, showToast } = useModalToast();
 const { destroy: deleteDocente, deleting } = useHttpRequest("/docente");
 
-const showModal = ref(false);
 const { docenteData } = storeToRefs(docenteStore);
-
 const showDocenteModal = ref(false);
-
-
-const { requiereCambioPassword } = storeToRefs(docenteStore);
-
 
 const onDelete = (docente) => {
   if (deleting.value) return;
@@ -58,7 +47,6 @@ const onDelete = (docente) => {
       docenteStore.loadDocentes();
     } else {
       showToast(`"${docente?.name}" no se pudo eliminar...`, "warning");
-
     }
   });
 };
@@ -67,7 +55,7 @@ const verDocente = async (docente) => {
   await docenteStore.getDatosDocente(docente.id);
 
   if (docenteStore.docenteData) {
-    showDocenteModal.value = true; // abrir modal automáticamente
+    showDocenteModal.value = true;
   } else {
     showToast(`"${docente?.name}" No encontramos datos del docente`, "warning");
   }
@@ -75,90 +63,178 @@ const verDocente = async (docente) => {
 
 const emitCloseModal = () => (showDocenteModal.value = false);
 
-/// FILTAR USUARIOS
-// const usuarios = ref(docenteStore.docentes)
 const usuarios = computed(() => docenteStore.docentes);
-
-
+const totalDocentes = computed(() => usuarios.value.length);
+const docentesActivos = computed(() =>
+  usuarios.value.filter((docente) => Number(docente.status) === 1).length
+);
+const docentesInactivos = computed(() =>
+  usuarios.value.filter((docente) => Number(docente.status) !== 1).length
+);
 
 const {
-  query,
-  orderBy,
   orderDirection,
   pagina,
   itemsPorPagina,
   paginados: usuariosPaginados,
   totalPaginas,
   ordenados: usuariosOrdenados,
-  filtrar: filtrarUsuarios
+  filtrar: filtrarUsuarios,
 } = useTableData(usuarios, {
   defaultOrderBy: "created_at",
-  searchFields: ["name", "apellido_paterno", "dni"]
+  searchFields: ["name", "apellido_paterno", "dni"],
 });
 
 orderDirection.value = "asc";
-
 </script>
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-docentes', 'ver-docentes']">
-    <div class="w-full space-y-2 py-2 px-3">
-      <div class="m-2">
-        <div class="flex-between">
-          <h2 class="text-cetpro dark:text-cetpro-light font-bold text-2xl">Docentes</h2>
-          <CreateButton @click="showSlider(true)" />
+    <div class="w-full space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
+      <section
+        class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
+      >
+        <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-1 lg:flex-row lg:items-start lg:justify-between">
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+                Gestión institucional
+              </p>
+              <h2 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">Docentes</h2>
+            </div>
+
+            <div class="shrink-0">
+              <CreateButton @click="showSlider(true)" />
+            </div>
+          </div>
+
+          <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Total docentes
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalDocentes }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Registrados</span>
+              </div>
+            </div>
+
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Activos
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ docentesActivos }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Habilitados</span>
+              </div>
+            </div>
+
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Inactivos
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ docentesInactivos }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Por revisar</span>
+              </div>
+            </div>
+
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Resultados visibles
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">
+                  {{ usuariosOrdenados.length }}
+                </p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Filtro actual</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
+      >
+        <div class="mb-2.5 flex flex-col gap-2.5 lg:flex-row lg:items-end lg:justify-between">
+          <div class="min-w-0">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+              Registro operativo
+            </p>
+            <div class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de docentes</div>
+          </div>
+
+          <div class="w-full lg:w-auto">
+            <SearchBar
+              :totalResultados="usuariosOrdenados.length"
+              :campoOrden="'apellido_paterno'"
+              @search="filtrarUsuarios"
+            />
+          </div>
         </div>
 
-        <div class="flex-between flex-row-reverse my-5">
-          <SearchBar :totalResultados="usuariosOrdenados.length" :campoOrden="'apellido_paterno'"
-            @search="filtrarUsuarios" />
+        <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
+          <THead>
+            <Th>N°</Th>
+            <Th>Nombres</Th>
+            <Th>Apellidos</Th>
+            <Th>Dni</Th>
+            <Th>Correo</Th>
+            <Th>Fecha de creación</Th>
+            <Th>Estado</Th>
+            <Th class="text-center">Acción</Th>
+          </THead>
 
-          <div class="font-inter text-md w-full">Lista de docentes</div>
-        </div>
-      </div>
-      <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
-        <THead>
-          <Th>N°</Th>
-          <Th>Nombres</Th>
-          <Th>Apellidos</Th>
-          <Th>Dni</Th>
-          <Th>Correo</Th>
-          <Th>Fecha de Creación</Th>
-          <Th>Estado</Th>
-          <Th class="text-center">Acción</Th>
-        </THead>
-
-        <TBody>
-          <Tr v-for="(docente, index) in usuariosPaginados" :key="docente.id">
-            <Td><span class="text-gray-800 dark:text-gray-300">{{
-              (pagina - 1) * itemsPorPagina + index + 1
-                }}</span></Td>
-            <Td>{{ docente.name }}</Td>
-            <Td>{{ docente.apellido_paterno }} {{ docente.apellido_materno }}</Td>
-            <Td>{{ docente.dni }}</Td>
-            <Td>{{ docente.email }}</Td>
-
-            <Td>{{ docente.created_at.slice(0, 10) }}</Td>
-            <Td>
-              <span :class="docente.status === 1
-                ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
-                : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
-                " class="px-2 py-1 text-xs rounded-md font-semibold inline-flex items-center gap-1">
-                <span v-if="docente.status === 1"> Activo ✓ </span>
-                <span v-else="docente.status === 0"> Inactivo X </span>
-              </span>
-            </Td>
-            <Td class="text-center text-gray-600 dark:text-gray-200">
-              <MenuTable :actions="{ view: true, edit: true, delete: true, download: false }" entity-label="Docente"
-                @view="verDocente(docente)" @edit="showSlider(true, docente)" @delete="onDelete(docente)" />
-            </Td>
-          </Tr>
-        </TBody>
-      </Table>
+          <TBody>
+            <Tr v-for="(docente, index) in usuariosPaginados" :key="docente.id">
+              <Td>
+                <span class="text-gray-800 dark:text-gray-300">
+                  {{ (pagina - 1) * itemsPorPagina + index + 1 }}
+                </span>
+              </Td>
+              <Td>{{ docente.name }}</Td>
+              <Td>{{ docente.apellido_paterno }} {{ docente.apellido_materno }}</Td>
+              <Td>{{ docente.dni }}</Td>
+              <Td>{{ docente.email }}</Td>
+              <Td>{{ docente.created_at.slice(0, 10) }}</Td>
+              <Td>
+                <span
+                  :class="
+                    docente.status === 1
+                      ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900'
+                      : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900'
+                  "
+                  class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold"
+                >
+                  <span v-if="docente.status === 1">Activo ✓</span>
+                  <span v-else>Inactivo X</span>
+                </span>
+              </Td>
+              <Td class="text-center text-gray-600 dark:text-gray-200">
+                <MenuTable
+                  :actions="{ view: true, edit: true, delete: true, download: false }"
+                  entity-label="Docente"
+                  @view="verDocente(docente)"
+                  @edit="showSlider(true, docente)"
+                  @delete="onDelete(docente)"
+                />
+              </Td>
+            </Tr>
+          </TBody>
+        </Table>
+      </section>
     </div>
 
     <DocenteSlider :show="slider" :docente="sliderData ?? null" @hide="hideSlider" />
     <DocenteInfoModal :show="showDocenteModal" :data="docenteData" @close="emitCloseModal" />
   </AuthorizationFallback>
-  <!--<ChangePasswordModal v-if="showModal" @success="onPasswordChanged" />-->
 </template>

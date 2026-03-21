@@ -72,20 +72,113 @@ const groupedPermissions = computed(() => {
     {}
   );
 });
+
+const totalRoles = computed(() => roleStore.roles.length);
+const totalPermisosAsignados = computed(() =>
+  roleStore.roles.reduce((total, role) => total + role.permissions.length, 0)
+);
+const rolesMultipermiso = computed(() =>
+  roleStore.roles.filter((role) => role.permissions.length > 1).length
+);
+const promedioPermisos = computed(() => {
+  if (!roleStore.roles.length) return 0;
+  return Math.round(totalPermisosAsignados.value / roleStore.roles.length);
+});
 </script>
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-roles', 'ver-roles']">
-    <div class="flex justify-between items-center p-4">
-      <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Roles</h2>
+    <div class="space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800 sm:px-3">
+      <section
+        class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
+      >
+        <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-1">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+              Gestión institucional
+            </p>
+            <h2 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">Roles</h2>
+          </div>
+
+          <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Total roles
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalRoles }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Registrados</span>
+              </div>
+            </div>
+
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Permisos asignados
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">
+                  {{ totalPermisosAsignados }}
+                </p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Acumulados</span>
+              </div>
+            </div>
+
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Roles con detalle
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">
+                  {{ rolesMultipermiso }}
+                </p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Ver más</span>
+              </div>
+            </div>
+
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Promedio permisos
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">
+                  {{ promedioPermisos }}
+                </p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Por rol</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
-    <div class="flex flex-col lg:flex-row px-4 sm:px-6 gap-6 pb-24 lg:pb-0">
-      <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
 
-        <RoleSlider :show="slider" :role="sliderData" @hide="hideSlider" />
-      </div>
+    <div class="flex flex-col gap-4 px-3 pb-24 sm:px-3 lg:flex-row lg:pb-0">
+      <section class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-1/3">
+        <div class="mb-3">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+            Configuración
+          </p>
+          <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Agregar nuevo rol</h3>
+        </div>
+        <div class="bg-white dark:bg-gray-800">
+          <RoleSlider :show="slider" :role="sliderData" @hide="hideSlider" />
+        </div>
+      </section>
 
-      <div class="w-full lg:w-2/3">
+      <section class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-2/3">
+        <div class="mb-3">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+            Registro operativo
+          </p>
+          <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de roles</h3>
+        </div>
 
         <div class="max-h-[70vh] overflow-y-auto">
           <Table class="min-w-full">
@@ -128,8 +221,7 @@ const groupedPermissions = computed(() => {
             </TBody>
           </Table>
         </div>
-
-      </div>
+      </section>
 
       <ModalRoles v-if="showModal" @close="showModal = false" size="5xl">
         <template #title>

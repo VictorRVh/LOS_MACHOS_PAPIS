@@ -408,7 +408,7 @@ export default [
         meta: {
             layout: 'dashboard',
             permissions: [],
-            breadcrumb: [{ text: 'Todas las Notificaciones', to: { name: 'notificaciones.index' } }]
+            breadcrumb: [{ text: 'Ajustes', to: { name: 'cetpro.index' } }]
         }
     },
 

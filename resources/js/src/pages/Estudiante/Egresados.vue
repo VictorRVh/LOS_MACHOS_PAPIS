@@ -1,82 +1,49 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
-
-import { useBreadcrumbStore } from "@/store/useBreadcrumbStore";
+import { useRouter } from "vue-router";
 import SearchBar from "../../components/head_table/headSearch.vue";
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
 import TBody from "../../components/table/TBody.vue";
-import Tr from "../../components/table/Tr.vue";
 import Th from "../../components/table/Th.vue";
-import Td from "../../components/table/Td.vue";
 import MenuTable from "../../components/table/MenuTable.vue";
-import CreateButton from "../../components/ui/CreateButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
-
 import BaseSelectGrupo from "../../components/ui/BaseSelectGrupo.vue";
-
-import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
-import useHttpRequest from "../../composables/useHttpRequest";
 import useTableData from "../../composables/tabla/useTableData";
 import useEspecialidadStore from "../../store/Especialidad/useEspecialidadStore";
-import useEstudianteStore from "../../store/Estudiante/UseEstudianteStore";
 import usePeriodosStore from "../../store/Periodo/usePeriodoStatusStore";
-import { exportarCensoEducativo } from "../../pdf/reporteCenso";
 import axios from "axios";
 
 const especialidadStore = useEspecialidadStore();
-const estudianteStore = useEstudianteStore();
 const periodoStore = usePeriodosStore();
-
 const router = useRouter();
-
-const { showConfirmModal, showToast } = useModalToast();
+const { showToast } = useModalToast();
 
 const anios = ref([]);
 const periodos = ref([]);
 const anioSeleccionado = ref(null);
 const periodoSeleccionado = ref(null);
 const especialidades = ref([]);
-
-const especialidadSeleccionada = ref('');
-const egresados = ref([]);
-
-const pagina = ref(1);
-
-const openEspecialidades = ref(new Set());
 const isLoading = ref(false);
 
 onMounted(async () => {
-
   await periodoStore.loadPeriodosAnios();
   anios.value = periodoStore.periodosAnios;
-
 });
 
-const descargarReporte = async () => {
-  await exportarCensoEducativo();
-};
-
 const onAnioChange = async () => {
-  // 1. Limpiar valor seleccionado
   periodoSeleccionado.value = null;
-
-  // 2. Limpiar lista de periodos
   periodos.value = [];
 
   if (anioSeleccionado.value) {
     await periodoStore.loadPeriodosAniosFiltrado(anioSeleccionado.value.anio);
-
-    // 3. Asignar nuevos periodos
     periodos.value = periodoStore.periodosAniosFiltrado;
   } else {
     periodoStore.periodosAniosFiltrado = [];
   }
 };
 
-// ---- Filtrar por selección
 const filtrarPorSeleccion = async () => {
   if (!anioSeleccionado.value || !periodoSeleccionado.value) {
     showToast("Debes seleccionar todos los filtros para buscar.", "warning");
@@ -84,85 +51,48 @@ const filtrarPorSeleccion = async () => {
   }
 
   isLoading.value = true;
-
   await especialidadStore.loadEspecialidadesPorPeriodo(periodoSeleccionado.value);
-
   especialidades.value = especialidadStore.especialidadesFiltradas || [];
-
-  console.log('dejidje', periodoSeleccionado.value)
-
-  // abrir todas las especialidades luego del filtro
-  openEspecialidades.value = new Set(especialidadesPlanas.value.map(e => e.nombre_especialidad));
-
-  pagina.value = 1;
   isLoading.value = false;
 };
 
-// ---- Mapeo plano de especialidades
-const especialidadesPlanas = computed(() => {
-  return especialidades.value.map((e) => ({
-    id: e.id_especialidad,
-    nombre_especialidad: e.nombre_especialidad,
-    // cantidad_egresados: e.cantidad_egresados ?? 0,
-    // codigo: e.codigo ?? "",
-    // descripcion: e.descripcion ?? "",
-  }));
-});
-
-// ---- Agrupación por especialidad
-const especialidadesAgrupadas = computed(() => {
-  const agrupados = {};
-
-  especialidadesPaginadas.value.forEach((esp) => {
-    if (!agrupados[esp.nombre_especialidad]) agrupados[esp.nombre_especialidad] = [];
-    agrupados[esp.nombre_especialidad].push(esp);
-  });
-
-  return Object.entries(agrupados);
-});
-
-const verEgresados = (esp) => {
+const verEgresados = (especialidad) => {
   router.push({
     name: "egresadosLista",
     params: {
-      id: esp.id_especialidad,
-      periodoId: periodoSeleccionado.value
-    }
+      id: especialidad.id_especialidad,
+      periodoId: periodoSeleccionado.value,
+    },
   });
 };
 
 const generarReporte = async () => {
   try {
-    const response = await axios.get('/reporte-censo', {
-      responseType: 'blob',
+    const response = await axios.get("/reporte-censo", {
+      responseType: "blob",
     });
 
-    // 🔹 Detectar si el backend devolvió error JSON
-    const contentType = response.headers['content-type'];
-    if (contentType.includes('application/json')) {
+    const contentType = response.headers["content-type"];
+    if (contentType.includes("application/json")) {
       const text = await response.data.text();
       const error = JSON.parse(text);
-      showToast(error.error || 'Error al generar el reporte', 'error');
+      showToast(error.error || "Error al generar el reporte", "error");
       return;
     }
 
-    // 🔹 Obtener nombre del archivo desde headers
-    let filename = 'censo_educativo.xlsx';
-    const disposition = response.headers['content-disposition'];
+    let filename = "censo_educativo.xlsx";
+    const disposition = response.headers["content-disposition"];
 
-    if (disposition && disposition.includes('filename=')) {
-      filename = disposition
-        .split('filename=')[1]
-        .replace(/"/g, '');
+    if (disposition && disposition.includes("filename=")) {
+      filename = disposition.split("filename=")[1].replace(/"/g, "");
     }
 
-    // 🔹 Descargar archivo
     const blob = new Blob([response.data], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
 
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
 
@@ -170,164 +100,139 @@ const generarReporte = async () => {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-
   } catch (error) {
-    console.error('Error:', error);
-    showToast('Ocurrió un error al generar el reporte.', 'error');
-  }
-};
-
-const generarReporteActa = async () => {
-  try {
-    const idAdmin = '2946189c-883f-40f6-91e6-bee16fba575d';
-
-    const response = await axios.get(
-      `/reporte-acta-evaluacion/${idAdmin}`,
-      { responseType: 'blob' }
-    );
-
-    const url = window.URL.createObjectURL(
-      new Blob([response.data])
-    );
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Reporte_Entregas_${new Date()
-      .toISOString()
-      .slice(0, 10)}.xlsx`;
-
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-
-  } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
     showToast("Ocurrió un error al generar el reporte.", "error");
   }
 };
 
-// ---- Configuración de tabla
 const {
-  query,
-  orderBy,
-  orderDirection,
-  pagina: paginaTabla,
-  itemsPorPagina,
-  paginados: especialidadesPaginadas,
-  totalPaginas,
   ordenados: especialidadesOrdenadas,
   filtrar: filtrarEspecialidades,
-} = useTableData(especialidadesPlanas, {
-  defaultOrderBy: "nombre_especialidad",
-  searchFields: ["nombre_especialidad"],
-});
+} = useTableData(
+  computed(() =>
+    especialidades.value.map((especialidad) => ({
+      id_especialidad: especialidad.id_especialidad,
+      nombre_especialidad: especialidad.nombre_especialidad,
+    }))
+  ),
+  {
+    defaultOrderBy: "nombre_especialidad",
+    searchFields: ["nombre_especialidad"],
+  }
+);
 
-
+const totalEspecialidades = computed(() => especialidades.value.length);
+const totalAnios = computed(() => anios.value.length);
+const totalPeriodos = computed(() => periodos.value.length);
 </script>
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-grupos', 'ver-grupos']">
-    <div class="p-4 md:p-6 space-y-4">
-      <h1 class="text-3xl font-bold mb-4">Egresados</h1>
-
-      <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <div class="grid grid-cols-1 md:grid-cols-7 gap-4 items-end"> <!-- Ciclo -->
-          <div class="md:col-span-2"> <label
-              class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Año</label>
-            <BaseSelectGrupo v-model="anioSeleccionado" :options="anios" label="anio" placeholder="Seleccione un año"
-              @change="onAnioChange" />
-          </div>
-          <div class="md:col-span-2"> <label
-              class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Periodo</label>
-            <BaseSelectGrupo v-model="periodoSeleccionado" :options="periodos" label="nombre_periodo"
-              placeholder="Seleccione un periodo" :disabled="!anioSeleccionado"
-              :loading="periodoStore.periodosAniosFiltradoLoading" />
+    <div class="space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
+      <section class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
+        <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-1">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Gestión institucional</p>
+            <h1 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">Egresados</h1>
           </div>
 
-          <div class="md:col-span-1 flex items-end"> <button @click="filtrarPorSeleccion"
-              class="w-full bg-cetpro hover:bg-cetpro-dark text-white font-semibold py-2 px-4 rounded-md transition-colors duration-300 h-10 flex items-center justify-center">
-              Filtrar </button> </div>
+          <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Especialidades</p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalEspecialidades }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Filtradas</span>
+              </div>
+            </div>
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Años disponibles</p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalAnios }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Histórico</span>
+              </div>
+            </div>
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Periodos</p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalPeriodos }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Del año</span>
+              </div>
+            </div>
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Vista actual</p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ especialidadesOrdenadas.length }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Resultado</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div> <!-- TABLA -->
+      </section>
 
-      <div
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-auto border border-gray-200 dark:border-gray-700 mt-4">
-
-        <!-- ENCABEZADO Tabla -->
-        <div class="flex justify-between items-center p-2 pb-0">
-          <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300">
-            Lista de Especialidades
-          </h3>
-
-          <!-- Buscador opcional -->
-          <SearchBar v-if="!isLoading && especialidades.length > 0" :totalResultados="especialidades.length"
-            :campoOrden="'nombre_especialidad'" @search="filtrarEspecialidades" />
-        </div>
-
-        <!-- Loading -->
-        <div v-if="isLoading" class="p-4 space-y-2">
-          <div v-for="i in 5" :key="i" class="h-12 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-        </div>
-
-        <!-- TABLA -->
-        <Table v-else-if="especialidades.length > 0" :paginacion="false" class="w-full border-collapse mt-2">
-
-          <THead>
-            <Th class="border-b border-gray-300 dark:border-gray-600 w-[40px] text-center">N°</Th>
-            <Th class="border-b border-gray-300 dark:border-gray-600 min-w-[250px]">Especialidad</Th>
-            <Th class="border-b border-gray-300 dark:border-gray-600 w-[100px] text-center">Acciones</Th>
-          </THead>
-
-          <TBody>
-
-            <!-- FILAS DE LA TABLA -->
-            <tr v-for="(esp, index) in especialidades" :key="esp.id"
-              class="border-b border-gray-300 dark:border-gray-700">
-
-              <td class="text-center py-3">{{ index + 1 }}</td>
-
-              <td class="py-3 font-semibold">
-                {{ esp.nombre_especialidad }}
-              </td>
-
-              <td class="text-center py-3">
-                <MenuTable :actions="{ view: true }" @view="verEgresados(esp)" entity-label="egresados" />
-              </td>
-
-            </tr>
-
-          </TBody>
-        </Table>
-
-        <!-- SIN RESULTADOS -->
-        <div v-else class="text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
-          </svg>
-          <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
-            No se encontraron especialidades
-          </h3>
-          <p class="mt-1 text-sm text-gray-500">Intenta con otro periodo.</p>
+      <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
+        <div class="mb-3">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Filtros operativos</p>
+          <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Consulta de egresados</h3>
         </div>
 
-        <!-- <div class="mt-4 md:mt-0 flex items-center gap-3">
-          <Button class="bg-cetpro hover:bg-cetpro-dark text-white px-4 py-2 rounded-lg text-sm shadow"
-            @click="generarReporte">
-            Generar reporte
-          </Button>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-7 md:items-end">
+          <div class="md:col-span-2">
+            <label class="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">Año</label>
+            <BaseSelectGrupo v-model="anioSeleccionado" :options="anios" label="anio" placeholder="Seleccione un año" @change="onAnioChange" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">Periodo</label>
+            <BaseSelectGrupo v-model="periodoSeleccionado" :options="periodos" label="nombre_periodo" placeholder="Seleccione un periodo" :disabled="!anioSeleccionado" :loading="periodoStore.periodosAniosFiltradoLoading" />
+          </div>
+          <div class="md:col-span-1 flex items-end">
+            <button @click="filtrarPorSeleccion" class="flex h-10 w-full items-center justify-center bg-cetpro px-4 py-2 font-semibold text-white transition-colors duration-300 hover:bg-cetpro-dark">
+              Filtrar
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
+        <div class="mb-3 flex justify-between gap-3">
+          <div>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Registro operativo</p>
+            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de especialidades</h3>
+          </div>
+          <SearchBar v-if="!isLoading && especialidades.length > 0" :totalResultados="especialidades.length" :campoOrden="'nombre_especialidad'" @search="filtrarEspecialidades" />
         </div>
 
-        <div class="mt-4 md:mt-0 flex items-center gap-3">
-          <Button class="bg-cetpro hover:bg-cetpro-dark text-white px-4 py-2 rounded-lg text-sm shadow"
-            @click="generarReporteActa()">
-            Generar reporte
-          </Button>
-        </div> -->
+        <div class="overflow-auto border border-gray-200 dark:border-gray-700">
+          <div v-if="isLoading" class="space-y-2 p-4">
+            <div v-for="i in 5" :key="i" class="h-12 animate-pulse bg-gray-200 dark:bg-gray-700"></div>
+          </div>
 
-      </div>
+          <Table v-else-if="especialidades.length > 0" :paginacion="false" class="mt-2 w-full border-collapse">
+            <THead>
+              <Th class="w-[40px] border-b border-gray-300 text-center dark:border-gray-600">N°</Th>
+              <Th class="min-w-[250px] border-b border-gray-300 dark:border-gray-600">Especialidad</Th>
+              <Th class="w-[100px] border-b border-gray-300 text-center dark:border-gray-600">Acciones</Th>
+            </THead>
+            <TBody>
+              <tr v-for="(esp, index) in especialidades" :key="esp.id" class="border-b border-gray-300 dark:border-gray-700">
+                <td class="py-3 text-center">{{ index + 1 }}</td>
+                <td class="py-3 font-semibold">{{ esp.nombre_especialidad }}</td>
+                <td class="py-3 text-center">
+                  <MenuTable :actions="{ view: true }" @view="verEgresados(esp)" entity-label="egresados" />
+                </td>
+              </tr>
+            </TBody>
+          </Table>
 
+          <div v-else class="py-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
+            </svg>
+            <h3 class="mt-2 text-lg font-semibold text-gray-800 dark:text-gray-200">No se encontraron especialidades</h3>
+            <p class="mt-1 text-sm text-gray-500">Intenta con otro periodo.</p>
+          </div>
+        </div>
+      </section>
     </div>
   </AuthorizationFallback>
 </template>

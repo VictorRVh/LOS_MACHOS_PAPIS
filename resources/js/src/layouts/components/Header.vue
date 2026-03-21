@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref, computed, watch, onUnmounted, onMounted } from 'vue';
+import { inject, ref, computed, watch, onUnmounted } from 'vue';
 import userMenu from './UserMenu.vue';
 import useAppRouter from '../../composables/useAppRouter';
 import useUserStore from '../../store/useUserStore';
@@ -12,9 +12,6 @@ import {
     BellIcon,
     SunIcon,
     MoonIcon,
-    UserPlusIcon,
-    KeyIcon,
-    AcademicCapIcon,
     Bars3Icon
 } from '@heroicons/vue/24/outline';
 import useNotificacionesStore from '../../store/Notificaciones/UseNotificacionesStore';
@@ -23,35 +20,28 @@ import { useRouter } from 'vue-router';
 import usePermission from '../../composables/usePermission';
 
 const router = useRouter();
+const { can } = usePermission();
 
-const { can } = usePermission()
+const breadcrumb = useBreadcrumbStore();
 
 const handleGoBack = async () => {
     const items = breadcrumb.itemsText;
     if (!items.length) return;
 
-    // Tomamos el penúltimo item para retroceder
     const lastIndex = items.length - 2;
-    if (lastIndex < 0) return; // nada que retroceder
+    if (lastIndex < 0) return;
 
     const lastItem = items[lastIndex];
     if (lastItem?.to) {
-        await router.push(lastItem.to); // navegamos
+        await router.push(lastItem.to);
     }
 
-    // Recortamos el breadcrumb actual
     breadcrumb.goBack(lastIndex);
 };
-
-
-
-const breadcrumb = useBreadcrumbStore();
-
 
 const showBackButton = computed(() => {
     return breadcrumb.itemsText.length > 1;
 });
-
 
 const { isDarkMode, updateDarkMode } = inject('theme');
 const { pushToRoute } = useAppRouter();
@@ -62,16 +52,9 @@ const { index: logout } = useHttpRequest('/logout');
 const notificacionesStore = useNotificacionesStore();
 
 const isUserMenuOpen = ref(false);
-const isCreateMenuOpen = ref(false);
 const isNotificationsOpen = ref(false);
 const userMenuContainer = ref(null);
-const createMenuContainer = ref(null);
 const notificationsContainer = ref(null);
-
-// onMounted(async () => {
-//     await notificacionesStore.loadNotificaciones();
-//     //await notificacionesStore.loadNotificacionesPendientes();
-// });
 
 const RolUser = computed(() => userStore.user?.roles?.[0]?.name?.toUpperCase() || 'USUARIO');
 const userInitial = computed(() => userStore.user?.name?.[0]?.toUpperCase() || '?');
@@ -81,37 +64,17 @@ const userFullName = computed(() => {
     return [name, apellido_paterno, apellido_materno].filter(Boolean).join(' ');
 });
 
-const externalLinks = ref([
-    {
-        id: 'website',
-        tooltip: 'Página Web Oficial',
-        href: 'https://cetproPUNO.edu.pe/',
-        iconSrc: '/img/navegador.png',
-        show: true
-    },
-    {
-        id: 'facebook',
-        tooltip: 'Visítanos en Facebook',
-        href: '#',
-        iconSrc: '/img/facebook.png',
-        show: true
-    }
-]);
-
 const handleClickOutside = (event) => {
     if (userMenuContainer.value && !userMenuContainer.value.contains(event.target)) {
         isUserMenuOpen.value = false;
-    }
-    if (createMenuContainer.value && !createMenuContainer.value.contains(event.target)) {
-        isCreateMenuOpen.value = false;
     }
     if (notificationsContainer.value && !notificationsContainer.value.contains(event.target)) {
         isNotificationsOpen.value = false;
     }
 };
 
-watch([isUserMenuOpen, isCreateMenuOpen, isNotificationsOpen], ([userOpen, createOpen, notifOpen]) => {
-    if (userOpen || createOpen || notifOpen) {
+watch([isUserMenuOpen, isNotificationsOpen], ([userOpen, notifOpen]) => {
+    if (userOpen || notifOpen) {
         document.addEventListener('mousedown', handleClickOutside);
     } else {
         document.removeEventListener('mousedown', handleClickOutside);
@@ -122,11 +85,6 @@ onUnmounted(() => {
     document.removeEventListener('mousedown', handleClickOutside);
 });
 
-const navigateToAction = (action) => {
-    pushToRoute(action.route);
-    isCreateMenuOpen.value = false;
-};
-
 const onLogout = async () => {
     const isLoggedOut = await logout();
     if (isLoggedOut) {
@@ -134,60 +92,65 @@ const onLogout = async () => {
         await pushToRoute({ name: 'login' });
     }
 };
-
 </script>
 
 <template>
-    <div class="bg-white dark:bg-gray-800 border-b-2 border-cetpro transition-colors duration-300">
-        <div class="flex h-16 items-center justify-between px-4 sm:px-6">
-            <div class="flex items-center gap-4">
+    <header class="border-b border-slate-200 bg-white transition-colors duration-300 dark:border-gray-700 dark:bg-gray-800">
+        <div class="flex min-h-[68px] items-center justify-between gap-4 px-4 sm:px-6">
+            <div class="flex min-w-0 items-center gap-3">
                 <button @click.prevent="layoutStore.toggleSidebarMobile"
-                    class="p-2 text-gray-500 rounded-full lg:hidden hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <Bars3Icon class="w-6 h-6" />
+                    class="rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 lg:hidden">
+                    <Bars3Icon class="h-5 w-5" />
                 </button>
-                <h1 class="text-xl font-bold text-cetpro dark:text-gray-100 tracking-wide">
-                    CETPRO - PUNO
-                </h1>
+
+                <button v-if="showBackButton" @click="handleGoBack"
+                    class="inline-flex items-center gap-1 rounded-md bg-cetpro px-3 py-2 text-sm font-medium text-white transition hover:bg-cetpro-light dark:bg-cetpro-dark dark:hover:bg-cetpro-light">
+                    <ArrowLeftIcon class="h-4 w-4 shrink-0" />
+                    <span>Atrás</span>
+                </button>
+
+                <div class="min-w-0 overflow-hidden">
+                    <Breadcrumbs />
+                </div>
             </div>
-            <div class="flex items-center gap-4">
-                <span class="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full hidden lg:block">
+
+            <div class="flex items-center gap-3">
+                <span class="hidden rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-orange-600 lg:inline-flex">
                     {{ RolUser }}
                 </span>
-                <div class="hidden lg:flex items-center gap-1">
+
+                <div class="hidden items-center gap-1 lg:flex">
                     <button @click="updateDarkMode(!isDarkMode)"
-                        class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        <SunIcon v-if="isDarkMode" class="h-6 w-6" />
-                        <MoonIcon v-else class="h-6 w-6" />
+                        class="rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700">
+                        <SunIcon v-if="isDarkMode" class="h-5 w-5" />
+                        <MoonIcon v-else class="h-5 w-5" />
                     </button>
 
                     <div ref="notificationsContainer" class="relative" v-if="can('ver-actividades-recientes')">
                         <button @click="isNotificationsOpen = !isNotificationsOpen"
-                            class="relative p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                            <BellIcon class="h-6 w-6" />
+                            class="relative rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700">
+                            <BellIcon class="h-5 w-5" />
                             <div v-if="notificacionesStore.notificacionesPendientes">
-                                <span class=" absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-                                    <span
-                                        class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                                <span class="absolute right-1.5 top-1.5 flex h-2.5 w-2.5">
+                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+                                    <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                                 </span>
                             </div>
                         </button>
                         <Notificacion :show="isNotificationsOpen" @close="isNotificationsOpen = false" />
                     </div>
-
-                    <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2"></div>
                 </div>
+
                 <div ref="userMenuContainer" class="relative">
                     <button @click="isUserMenuOpen = !isUserMenuOpen"
-                        class="flex items-center gap-3 rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        class="flex items-center gap-3 rounded-lg p-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700">
                         <span class="hidden lg:block text-sm font-medium text-gray-700 dark:text-gray-200">
                             {{ userFullName }}
                         </span>
                         <div class="block h-10 w-10 shrink-0 overflow-hidden rounded-full">
                             <img v-if="userStore.user?.avatar_url" :src="userStore.user.avatar_url" alt="Avatar"
                                 class="h-full w-full object-cover">
-                            <div v-else
-                                class="h-full w-full rounded-full bg-cetpro flex items-center justify-center text-white font-bold text-xl">
+                            <div v-else class="flex h-full w-full items-center justify-center rounded-full bg-cetpro text-xl font-bold text-white">
                                 <span>{{ userInitial }}</span>
                             </div>
                         </div>
@@ -205,61 +168,5 @@ const onLogout = async () => {
                 </div>
             </div>
         </div>
-
-        <div
-            class="flex h-14 items-center justify-between gap-2 px-2 sm:px-2 border-t border-gray-200 dark:border-gray-700">
-            <div class="flex min-w-0 items-center gap-3">
-                <button v-if="showBackButton" @click="handleGoBack"
-                    class="flex items-center gap-1 p-1 px-4 rounded-md bg-cetpro hover:bg-cetpro-light dark:bg-cetpro-dark dark:hover:bg-cetpro-light text-white transition-colors">
-                    <ArrowLeftIcon class="h-6 w-6 shrink-0" />
-                    <span class="text-sm font-medium">Atrás</span>
-                </button>
-
-                <div class="min-w-0 truncate">
-                    <Breadcrumbs />
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <div ref="createMenuContainer" class="relative group">
-                    <button @click="isCreateMenuOpen = !isCreateMenuOpen"
-                        class="flex items-center p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-                        <img src="/img/mas.png" class="h-6 w-6" alt="Crear Nuevo" />
-                    </button>
-                    <div
-                        class="absolute bottom-full mb-2 hidden group-hover:block w-max bg-gray-800 text-white text-xs rounded py-1 px-2">
-                        Crear Nuevo
-                    </div>
-                    <Transition enter-active-class="transition ease-out duration-100"
-                        enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
-                        leave-active-class="transition ease-in duration-75"
-                        leave-from-class="transform opacity-100 scale-100"
-                        leave-to-class="transform opacity-0 scale-95">
-                        <div v-if="isCreateMenuOpen"
-                            class="absolute right-0 top-full mt-2 w-56 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                            <div class="py-1">
-                                <a v-for="action in quickCreateActions" :key="action.label"
-                                    @click="navigateToAction(action)"
-                                    class="cursor-pointer flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <component :is="action.icon" class="h-5 w-5" />
-                                    <span>{{ action.label }}</span>
-                                </a>
-                            </div>
-                        </div>
-                    </Transition>
-                </div>
-                <div class="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
-                <template v-for="link in externalLinks" :key="link.id">
-                    <a v-if="link.show" :href="link.href" target="_blank" rel="noopener noreferrer"
-                        class="relative group p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-                        <img :src="link.iconSrc" class="h-6 w-6" :alt="link.tooltip" />
-                        <div
-                            class="absolute bottom-full mb-2 hidden group-hover:block w-max bg-gray-800 text-white text-xs rounded py-1 px-2">
-                            {{ link.tooltip }}
-                        </div>
-                    </a>
-                </template>
-            </div>
-        </div>
-    </div>
+    </header>
 </template>

@@ -4,9 +4,8 @@ import usePermissions from '@/composables/usePermissions';
 import {
     UsersIcon, ShieldCheckIcon, KeyIcon, AcademicCapIcon, PresentationChartLineIcon,
     CalendarDaysIcon, NewspaperIcon, UserGroupIcon, RectangleStackIcon, IdentificationIcon, TagIcon, XMarkIcon, DocumentDuplicateIcon,
-    ClipboardDocumentListIcon, CurrencyDollarIcon, Cog8ToothIcon
+    ClipboardDocumentListIcon, CurrencyDollarIcon, Cog8ToothIcon, ChartPieIcon
 } from '@heroicons/vue/24/outline';
-import { UnderlineIcon } from '@heroicons/vue/24/solid';
 
 const { hasPermission } = usePermissions();
 const layoutStore = useLayoutStore();
@@ -30,7 +29,7 @@ const navLinks = [
     { name: 'Egresados', routeName: 'egresados', icon: AcademicCapIcon, permissions: ["ver-grupos"] },
     { name: 'Ingresos', routeName: 'ingresos', icon: CurrencyDollarIcon, permissions: ["ver-grupos"] },
     { name: 'Ajustes', routeName: 'cetpro.index', icon: Cog8ToothIcon, permissions: ["ver-información-cetpro"] },
-    { name: 'Estadísticas', routeName: 'estadistica', icon: UnderlineIcon, permissions: ["todo-acceso-estadísticas", "icono-estadísticas"] },
+    { name: 'Estadísticas', routeName: 'estadistica', icon: ChartPieIcon, permissions: ["todo-acceso-estadísticas", "icono-estadísticas"] },
 
 ];
 

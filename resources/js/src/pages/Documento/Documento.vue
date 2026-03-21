@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 
 import Table from "../../components/table/Table.vue";
@@ -25,54 +25,43 @@ const documentoProgramado = useProgramacionAdmintore();
 
 const { showToast, showConfirmModal } = useModalToast();
 const { destroy, loading } = useHttpRequest("/entrega_docente_admin");
+const { update: updateDocente, updating } = useHttpRequest("crear_grupos");
+const { update: storeGrupoPersonalizado, updating: updtingPersonalizado } = useHttpRequest("crear_grupos_personalizado");
 
-const { update: updateDocente, updating } = useHttpRequest('crear_grupos');
-const { update: storeGrupoPersonalizado, updating: updtingPersonalizado} = useHttpRequest('crear_grupos_personalizado');
-// 🔹 Estados
 const selectedPeriodo = ref(null);
 const programaciones = ref([]);
 const programacionParaEditar = ref(null);
-
 const gruposPorPeriodo = ref([]);
 const modalPublicarAbierto = ref(false);
 const modalPublicarData = ref(null);
 
-
-// 🔹 Función para traer programaciones por periodo
 const fetchProgramaciones = async (periodoId) => {
   await documentoProgramado.loadgetProgramacionAdminByPerido(periodoId);
   programaciones.value = documentoProgramado.programacionAdmin?.programaciones || [];
 };
 
-// 🔹 Cargar periodos al iniciar
 onMounted(async () => {
   try {
     if (!periodoStore.periodos.length) {
       await periodoStore.loadPeriodos();
     }
 
-    // Tomamos el último periodo disponible
     const ultimoPeriodo = periodoStore.periodos.at(-1);
     if (ultimoPeriodo) {
       selectedPeriodo.value = ultimoPeriodo.id;
-      //await fetchProgramaciones(selectedPeriodo.value);
     }
   } catch (error) {
     console.error("Error al cargar periodos o programaciones:", error);
   }
 });
 
-// 🔹 Cuando cambia el select
 watch(selectedPeriodo, async (nuevoPeriodo, anterior) => {
   if (!nuevoPeriodo || nuevoPeriodo === anterior) return;
   await fetchProgramaciones(nuevoPeriodo);
 });
 
-// 🔹 Estado visual de cada programación según su status numérico
-// 🔹 Estado visual de cada programación según su status numérico o texto
 const getProgramacionStatus = (doc) => {
-  // Algunos backends devuelven status = 0 o status_texto = 'Pendiente'
-  const status = Number(doc.status); // aseguramos que sea número
+  const status = Number(doc.status);
   const texto = doc.status_texto?.toLowerCase() || "";
 
   if (status === 0 || texto.includes("pendiente")) {
@@ -116,13 +105,12 @@ const getProgramacionStatus = (doc) => {
   }
 };
 
-// 🔹 Acciones
 const verDetalleEntrega = (programacion) => {
   router.push({ name: "programacion.detalle", params: { id: programacion.id } });
 };
 
-const editProgramacion = (prog) => {
-  programacionParaEditar.value = prog;
+const editProgramacion = (programacion) => {
+  programacionParaEditar.value = programacion;
 };
 
 const resetEditingState = () => {
@@ -134,100 +122,42 @@ const handleFormSubmitted = async () => {
   resetEditingState();
 };
 
-const onDelete = (prog) => {
+const onDelete = (programacion) => {
+  showConfirmModal(null, async (confirmed) => {
+    if (!confirmed) return;
 
-  showConfirmModal(
-    null,
-    async (confirmed) => {
-      if (!confirmed) return;
-
-      try {
-        const response = await destroy(prog.id);
-        console.log("entrada: ", response)
-        if (!response) {
-          return showToast("No se puede eliminar la programacion porque ya fue programada para los grupos.", "error");
-        }
-
-        showToast("Programación eliminada.", "success");
-        await fetchProgramaciones(selectedPeriodo.value);
-
-        if (programacionParaEditar.value?.id === prog.id) resetEditingState();
-      } catch (error) {
-        showToast("Error al eliminar.", "error");
+    try {
+      const response = await destroy(programacion.id);
+      if (!response) {
+        return showToast("No se puede eliminar la programación porque ya fue programada para los grupos.", "error");
       }
+
+      showToast("Programación eliminada.", "success");
+      await fetchProgramaciones(selectedPeriodo.value);
+
+      if (programacionParaEditar.value?.id === programacion.id) resetEditingState();
+    } catch (error) {
+      showToast("Error al eliminar.", "error");
     }
-  );
+  });
 };
 
-const createSubGrupos = (prog) => {
-  showConfirmModal(
-    {
-      title: "Confirmar publicación",
-      message: "¿Deseas publicar esta programación para todos los grupos?",
-      actionButton: {
-        class: "bg-emerald-600 hover:bg-emerald-700",
-        text: "Sí, publicar",
-      },
-      returnButton: {
-        class: "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600",
-        text: "Cancelar",
-      },
-    },
-    async (confirmed) => {
-      if (!confirmed) return;
-
-      try {
-        const response = await updateDocente(prog.id);
-
-        if (!response) {
-          showToast(
-            "No se puede publicar la programación porque ya fue asignada a los grupos.",
-            "warning"
-          );
-          return;
-        }
-
-        showToast("Programación publicada correctamente.", "success");
-        await fetchProgramaciones(selectedPeriodo.value);
-
-        if (programacionParaEditar.value?.id === prog.id) {
-          resetEditingState();
-        }
-      } catch (error) {
-        console.error(error);
-        const msg =
-          error.response?.data?.message ||
-          "Ocurrió un error al intentar publicar la programación.";
-        showToast(msg, "error");
-      }
-    }
-  );
-};
-
-const abrirModalPublicar = async (prog) => {
+const abrirModalPublicar = async (programacion) => {
   try {
-    // Cargar grupos por período
     await documentoProgramado.loadGruposByPeriodo(selectedPeriodo.value);
-    gruposPorPeriodo.value = documentoProgramado.gruposByPeriodo
-
-    // Guardar la programación seleccionada
-    modalPublicarData.value = prog;
-
-    // Abrir modal
+    gruposPorPeriodo.value = documentoProgramado.gruposByPeriodo;
+    modalPublicarData.value = programacion;
     modalPublicarAbierto.value = true;
-
   } catch (error) {
     console.error("Error al abrir modal:", error);
     showToast("No se pudieron cargar los grupos.", "error");
   }
 };
 
-
-const publicarMasivo = async (prog) => {
+const publicarMasivo = async (programacion) => {
   try {
     updating.value = true;
-
-    const response = await updateDocente(prog.id);
+    const response = await updateDocente(programacion.id);
 
     if (!response) {
       return showToast("No se puede publicar masivamente.", "warning");
@@ -236,7 +166,6 @@ const publicarMasivo = async (prog) => {
     showToast("Publicación para todos los grupos realizada correctamente", "success");
     modalPublicarAbierto.value = false;
     await fetchProgramaciones(selectedPeriodo.value);
-
   } catch (error) {
     console.error(error);
     showToast("Error en la publicación para todos los grupos.", "error");
@@ -245,12 +174,12 @@ const publicarMasivo = async (prog) => {
   }
 };
 
-const publicarPersonalizado = async (prog, gruposSeleccionados) => {
+const publicarPersonalizado = async (programacion, gruposSeleccionados) => {
   try {
     updtingPersonalizado.value = true;
 
-    const response = await storeGrupoPersonalizado(prog.id, {
-      grupos: gruposSeleccionados
+    const response = await storeGrupoPersonalizado(programacion.id, {
+      grupos: gruposSeleccionados,
     });
 
     if (!response) {
@@ -258,126 +187,173 @@ const publicarPersonalizado = async (prog, gruposSeleccionados) => {
     }
 
     showToast("Publicación personalizada realizada correctamente.", "success");
-
     modalPublicarAbierto.value = false;
     await fetchProgramaciones(selectedPeriodo.value);
-
   } catch (error) {
     console.error(error);
-    showToast(
-      error.response?.data?.message || "Ocurrió un error al publicar.",
-      "error"
-    );
+    showToast(error.response?.data?.message || "Ocurrió un error al publicar.", "error");
   } finally {
     updtingPersonalizado.value = false;
   }
 };
 
-
+const totalProgramaciones = computed(() => programaciones.value.length);
+const totalPublicadas = computed(() => programaciones.value.filter((programacion) => Boolean(programacion.mostrar)).length);
+const totalPendientes = computed(() => programaciones.value.filter((programacion) => getProgramacionStatus(programacion).text === "Pendiente").length);
+const periodoActualLabel = computed(() => {
+  const periodo = periodoStore.periodos.find((item) => item.id === selectedPeriodo.value);
+  return periodo?.nombre_periodo || "Sin periodo";
+});
 </script>
-
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-documento-programado', 'ver-documento-programado']">
-    <div class="p-4 md:p-6 space-y-6">
-      <!-- Overlay de carga -->
+    <div class="space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
       <Transition name="fade">
-        <div v-if="updating || updtingPersonalizado"
-          class="fixed inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center z-50">
+        <div v-if="updating || updtingPersonalizado" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm">
           <div class="flex flex-col items-center space-y-4">
-            <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-              viewBox="0 0 24 24">
+            <svg class="h-10 w-10 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
             </svg>
-            <p class="text-white font-semibold text-lg">Publicando programación...</p>
+            <p class="text-lg font-semibold text-white">Publicando programación...</p>
           </div>
         </div>
       </Transition>
 
-      <header class="flex justify-between items-start">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200">
-            Programación de Entregas
-          </h1>
-          <p class="text-gray-500 dark:text-gray-400 mt-1">
-            Crea y gestiona los plazos de entrega de documentos para los docentes.
-          </p>
-        </div>
-        <div class="w-64">
-          <BaseSelectGrupo v-model="selectedPeriodo" :options="periodoStore?.periodos" label="nombre_periodo"
-            value-prop="id" placeholder="Seleccione un Periodo" />
+      <section class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
+        <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Gestión institucional</p>
+              <h1 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">Programación de entregas</h1>
+            </div>
 
-        </div>
-      </header>
+            <div class="w-full lg:w-64">
+              <BaseSelectGrupo v-model="selectedPeriodo" :options="periodoStore?.periodos" label="nombre_periodo" value-prop="id" placeholder="Seleccione un periodo" />
+            </div>
+          </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-1">
-          <DocumentoSlider :programacion-to-edit="programacionParaEditar" :periodos="periodoStore?.periodos"
-            :selected-periodo-id="selectedPeriodo" @form-submitted="handleFormSubmitted"
-            @cancel-edit="resetEditingState" />
+          <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Programaciones</p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalProgramaciones }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Registradas</span>
+              </div>
+            </div>
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Publicadas</p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalPublicadas }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Visibles</span>
+              </div>
+            </div>
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Pendientes</p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalPendientes }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Por publicar</span>
+              </div>
+            </div>
+            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Periodo actual</p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ periodoActualLabel }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Activo</span>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div class="lg:col-span-2">
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:col-span-1">
+          <div class="mb-3">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Configuración</p>
+            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Nueva programación</h3>
+          </div>
+
+          <DocumentoSlider
+            :programacion-to-edit="programacionParaEditar"
+            :periodos="periodoStore?.periodos"
+            :selected-periodo-id="selectedPeriodo"
+            @form-submitted="handleFormSubmitted"
+            @cancel-edit="resetEditingState"
+          />
+        </section>
+
+        <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:col-span-2">
+          <div class="mb-3">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Registro operativo</p>
+            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de entregas</h3>
+          </div>
+
           <Table>
             <THead>
               <Th>Título / Descripción</Th>
-              <Th>Plazo de Entrega</Th>
+              <Th>Plazo de entrega</Th>
               <Th>Estado</Th>
               <Th>Publicación</Th>
               <Th class="text-center">Acciones</Th>
             </THead>
             <TBody :filas="programaciones.length">
               <Tr v-if="loading">
-                <Td colspan="5" class="text-center py-10">Cargando...</Td>
+                <Td colspan="5" class="py-10 text-center">Cargando...</Td>
               </Tr>
               <Tr v-else-if="!selectedPeriodo">
-                <Td colspan="5" class="text-center py-12">Seleccione un periodo para empezar.</Td>
+                <Td colspan="5" class="py-12 text-center">Seleccione un periodo para empezar.</Td>
               </Tr>
               <Tr v-else-if="!programaciones.length">
-                <Td colspan="5" class="text-center py-12">No hay programaciones para este periodo.</Td>
+                <Td colspan="5" class="py-12 text-center">No hay programaciones para este periodo.</Td>
               </Tr>
               <Tr v-else v-for="prog in programaciones" :key="prog.id">
                 <Td>
-                  <p
-                    class="font-semibold text-gray-800 dark:text-gray-200 hover:text-cetpro dark:hover:text-cetpro-light">
+                  <p class="font-semibold text-gray-800 hover:text-cetpro dark:text-gray-200 dark:hover:text-cetpro-light">
                     {{ prog.nombre_entrega }}
                   </p>
                 </Td>
                 <Td class="font-mono text-xs">{{ prog.fecha_inicio }} - {{ prog.fecha_fin }}</Td>
                 <Td>
-                  <span :class="getProgramacionStatus(prog).class" class="px-2 py-1 text-xs rounded-full font-semibold">
+                  <span :class="getProgramacionStatus(prog).class" class="rounded-full px-2 py-1 text-xs font-semibold">
                     {{ getProgramacionStatus(prog).text }}
                   </span>
-
                 </Td>
                 <Td>
-                  <span v-if="prog.mostrar"
-                    class="px-2 py-1 text-xs rounded-full font-semibold text-green-700 bg-green-100 dark:bg-green-900/50 dark:text-green-300">Publicado</span>
-                  <span v-else
-                    class="px-2 py-1 text-xs rounded-full font-semibold text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300">Borrador</span>
+                  <span v-if="prog.mostrar" class="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                    Publicado
+                  </span>
+                  <span v-else class="rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                    Borrador
+                  </span>
                 </Td>
                 <Td class="text-center">
-                  <MenuTable :actions="{
-                    view: prog.mostrar !== 0,
-                    edit: true,
-                    custom1: prog.mostrar === 0,
-                    delete: true
-                  }" :labels="{ custom1: 'Publicar' }" entity-label="entrega" @view="verDetalleEntrega(prog)"
-                    @edit="editProgramacion(prog)" @delete="onDelete(prog)" @custom1="() => abrirModalPublicar(prog)" />
+                  <MenuTable
+                    :actions="{ view: prog.mostrar !== 0, edit: true, custom1: prog.mostrar === 0, delete: true }"
+                    :labels="{ custom1: 'Publicar' }"
+                    entity-label="entrega"
+                    @view="verDetalleEntrega(prog)"
+                    @edit="editProgramacion(prog)"
+                    @delete="onDelete(prog)"
+                    @custom1="() => abrirModalPublicar(prog)"
+                  />
                 </Td>
-
               </Tr>
             </TBody>
           </Table>
-        </div>
+        </section>
       </div>
-
-
     </div>
-    <PublicarEntregaModal v-if="modalPublicarAbierto" :programacion="modalPublicarData" :periodo-id="selectedPeriodo"
-      :grupos="gruposPorPeriodo" @close="modalPublicarAbierto = false" @masivo="publicarMasivo(modalPublicarData)"
-      @personalizado="publicarPersonalizado(modalPublicarData, $event)" />
+
+    <PublicarEntregaModal
+      v-if="modalPublicarAbierto"
+      :programacion="modalPublicarData"
+      :periodo-id="selectedPeriodo"
+      :grupos="gruposPorPeriodo"
+      @close="modalPublicarAbierto = false"
+      @masivo="publicarMasivo(modalPublicarData)"
+      @personalizado="publicarPersonalizado(modalPublicarData, $event)"
+    />
   </AuthorizationFallback>
 </template>
 

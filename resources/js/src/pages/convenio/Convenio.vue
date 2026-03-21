@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from "vue";
+
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
 import TBody from "../../components/table/TBody.vue";
@@ -8,20 +10,19 @@ import Td from "../../components/table/Td.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
+import ConvenioSlider from "../../components/page/ConvenioSlider.vue";
 
 import useUserStore from "../../store/useUserStore";
 import useRoleStore from "../../store/useRoleStore";
 import usePermissionStore from "../../store/usePermissionStore";
+import useConveniosStore from "../../store/Convenio/useConvenioStore";
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
 import useHttpRequest from "../../composables/useHttpRequest";
-import ConvenioSlider from "../../components/page/ConvenioSlider.vue";
-import useConveniosStore from "../../store/Convenio/useConvenioStore";
 
 const userStore = useUserStore();
 const roleStore = useRoleStore();
 const permissionStore = usePermissionStore();
-
 const conveniosStore = useConveniosStore();
 
 if (!permissionStore.permissions.length) await permissionStore.loadPermissions();
@@ -46,44 +47,133 @@ const onDelete = (convenio) => {
   });
 };
 
+const totalModalidades = computed(() => conveniosStore.convenios.length);
+const modalidadesLargas = computed(() =>
+  conveniosStore.convenios.filter((convenio) => (convenio?.nombre_institucion || "").length > 20).length
+);
+const promedioCaracteres = computed(() => {
+  if (!conveniosStore.convenios.length) return 0;
+  const total = conveniosStore.convenios.reduce(
+    (acc, convenio) => acc + (convenio?.nombre_institucion || "").length,
+    0
+  );
+  return Math.round(total / conveniosStore.convenios.length);
+});
 </script>
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-modalidades', 'ver-modalidades']">
-    <div class="flex justify-between items-center p-4">
-      <h2 class="text-cetpro ml-2 dark:text-cetpro-light font-bold text-2xl">Modalidad</h2>
-    </div>
+    <div class="space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
+      <section
+        class="border border-slate-200 bg-white px-3 py-2 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900"
+      >
+        <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-1">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+              Gestión institucional
+            </p>
+            <h2 class="text-[1.2rem] font-semibold tracking-tight text-cetpro dark:text-cetpro-light">Modalidades</h2>
+          </div>
 
-    <div class="flex flex-col lg:flex-row px-6 gap-6">
+          <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Total modalidades
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalModalidades }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Registradas</span>
+              </div>
+            </div>
 
-      <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-        
-        <ConvenioSlider :show="slider" :convenio="sliderData" @hide="hideSlider" />
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Nombres extensos
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ modalidadesLargas }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Revisión</span>
+              </div>
+            </div>
+
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Promedio de texto
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ promedioCaracteres }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Caracteres</span>
+              </div>
+            </div>
+
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                Vista actual
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalModalidades }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Sin filtro</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="flex flex-col gap-4 lg:flex-row">
+        <section
+          class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-1/3"
+        >
+          <div class="mb-3">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+              Configuración
+            </p>
+            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Agregar modalidad</h3>
+          </div>
+          <div class="bg-white dark:bg-gray-800">
+            <ConvenioSlider :show="slider" :convenio="sliderData" @hide="hideSlider" />
+          </div>
+        </section>
+
+        <section
+          class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-2/3"
+        >
+          <div class="mb-3">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+              Registro operativo
+            </p>
+            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de modalidades</h3>
+          </div>
+
+          <Table>
+            <THead>
+              <Th>Id</Th>
+              <Th>Modalidad</Th>
+              <Th class="text-center">Acciones</Th>
+            </THead>
+
+            <TBody>
+              <Tr v-for="(convenio, index) in conveniosStore.convenios" :key="convenio.id">
+                <Td>{{ index + 1 }}</Td>
+                <Td>{{ convenio?.nombre_institucion }}</Td>
+                <Td class="align-middle">
+                  <div class="flex items-center justify-center gap-1">
+                    <EditButton @click="showSlider(true, convenio)" />
+                    <DeleteButton @click="onDelete(convenio)" />
+                  </div>
+                </Td>
+              </Tr>
+            </TBody>
+          </Table>
+        </section>
       </div>
-      
-      <div class="w-full lg:w-2/3">
-        <Table>
-          <THead>
-            <Th>Id</Th>
-            <Th>Modalidad</Th>
-            <Th class="text-center">Acciones</Th>
-          </THead>
-
-          <TBody>
-            <Tr v-for="(convenio, index) in conveniosStore.convenios" :key="convenio.id">
-              <Td>{{ index + 1 }}</Td>
-              <Td>{{ convenio?.nombre_institucion }}</Td> 
-              <Td class="align-middle">
-                <div class="flex items-center justify-center gap-1">
-                  <EditButton @click="showSlider(true, convenio)" />
-                  <DeleteButton @click="onDelete(convenio)" />
-                </div>
-              </Td>
-            </Tr>
-          </TBody>
-        </Table>
-      </div>
-
     </div>
   </AuthorizationFallback>
 </template>

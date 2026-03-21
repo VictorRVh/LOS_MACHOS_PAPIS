@@ -236,50 +236,50 @@ onUnmounted(() => {
 <template>
   <PermissionBlock :permissions="['ver-actividades']">
 
-    <div class="space-y-3 bg-slate-100 p-2.5 font-sans sm:p-3 lg:p-3">
+    <div class="space-y-3 bg-slate-100 p-2.5 font-sans transition-colors duration-300 dark:bg-slate-800 sm:p-3 lg:p-3">
 
-      <section class="border border-slate-200 bg-white p-3 shadow-sm">
+      <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
         <div class="flex flex-col gap-2.5">
           <div class="space-y-1.5">
             <div>
-              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Accesos rápidos</p>
-              <h1 class="mt-1 text-[1.3rem] font-semibold tracking-tight text-slate-900">Panel principal</h1>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Accesos rápidos</p>
+              <h1 class="mt-1 text-[1.3rem] font-semibold tracking-tight text-slate-900 dark:text-slate-100">Panel principal</h1>
             </div>
 
             <div class="flex flex-wrap gap-2">
           <button
             @click="$router.push({ name: 'matricula.index' })"
-            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100">
+            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700">
             <img src="/img/matricula.png" class="h-5 w-5" alt="Matrículas">
             <span>MATRICULAS</span>
           </button>
           <button
             @click="$router.push({ name: 'grupo' })"
-            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100">
+            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700">
             <img src="/img/grupo.png" class="h-5 w-5" alt="Grupos">
             <span>GRUPOS</span>
           </button>
           <button
             @click="$router.push({ name: 'programa' })"
-            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100">
+            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700">
             <img src="/img/ciclo.png" class="h-5 w-5" alt="Nuevo Ciclo">
             <span>NUEVO CICLO</span>
           </button>
 
           <!-- BOTÓN BUSCAR ESTUDIANTE -->
           <button @click="$router.push({ name: 'buscar.estudiante' })"
-            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100">
+            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700">
             <img src="/img/busqueda-estudiante.png" class="h-5 w-5" alt="Buscar Estudiante">
             <span>BUSCAR ESTUDIANTE</span>
           </button>
 
           <!-- NUEVO BOTÓN CENSO -->
           <div
-            class="inline-flex items-center gap-2 border border-slate-200 bg-white px-3 py-1.5 text-sm">
-            <span class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Año
+            class="inline-flex items-center gap-2 border border-slate-200 bg-white px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900">
+            <span class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Año
               censo</span>
             <select v-model="censoAnioSeleccionado"
-              class="border border-slate-300 bg-white px-2 py-1 text-[13px] text-slate-700 focus:border-cetpro focus:ring-cetpro">
+              class="border border-slate-300 bg-white px-2 py-1 text-[13px] text-slate-700 focus:border-cetpro focus:ring-cetpro dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:[color-scheme:dark]">
               <option v-for="anio in censoAniosDisponibles" :key="anio" :value="Number(anio)">
                 {{ anio }}
               </option>
@@ -287,7 +287,7 @@ onUnmounted(() => {
           </div>
 
           <button @click="handleCensoClick"
-            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100">
+            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700">
             <!-- Icono simulado (Documento) -->
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
               stroke="currentColor" class="h-5 w-5 text-purple-600">
@@ -302,31 +302,31 @@ onUnmounted(() => {
         </div>
       </section>
 
-      <section class="border border-slate-200 bg-white p-3 shadow-sm">
-        <div class="mb-2.5 border-b border-slate-200 pb-2.5">
+      <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
+        <div class="mb-2.5 border-b border-slate-200 pb-2.5 dark:border-slate-700">
           <div class="flex flex-col gap-2.5 xl:flex-row xl:items-end xl:justify-between">
             <div class="min-w-0">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Actividad reciente</p>
-              <h2 class="mt-1 text-[1.2rem] font-semibold tracking-tight text-slate-900">Seguimiento por rol</h2>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Actividad reciente</p>
+              <h2 class="mt-1 text-[1.2rem] font-semibold tracking-tight text-slate-900 dark:text-slate-100">Seguimiento por rol</h2>
             </div>
 
             <div class="flex w-full flex-wrap items-end gap-2 xl:w-auto xl:justify-end">
                 <button @click="setDateRange(0)"
-                  class="border border-slate-200 bg-white px-3 py-1.5 text-[13px] font-medium text-slate-700 transition hover:bg-slate-100">Hoy</button>
+                  class="border border-slate-200 bg-white px-3 py-1.5 text-[13px] font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">Hoy</button>
                 <button @click="setDateRange(7)"
-                  class="border border-slate-200 bg-white px-3 py-1.5 text-[13px] font-medium text-slate-700 transition hover:bg-slate-100">Últimos
+                  class="border border-slate-200 bg-white px-3 py-1.5 text-[13px] font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">Últimos
                   7 días</button>
                 <div class="relative min-w-[160px] flex-1 xl:flex-none">
                   <label for="dateFrom"
-                    class="absolute -top-2 left-2 bg-white px-1 text-[11px] font-medium text-slate-500">Desde</label>
+                    class="absolute -top-2 left-2 bg-white px-1 text-[11px] font-medium text-slate-500 dark:bg-slate-900 dark:text-slate-400">Desde</label>
                   <input id="dateFrom" type="date" v-model="dateFrom"
-                    class="w-full border border-slate-300 bg-white px-3 py-1.5 text-[13px] text-slate-700 focus:border-cetpro focus:ring-cetpro">
+                    class="w-full border border-slate-300 bg-white px-3 py-1.5 text-[13px] text-slate-700 focus:border-cetpro focus:ring-cetpro dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:[color-scheme:dark]">
                 </div>
                 <div class="relative min-w-[160px] flex-1 xl:flex-none">
                   <label for="dateTo"
-                    class="absolute -top-2 left-2 bg-white px-1 text-[11px] font-medium text-slate-500">Hasta</label>
+                    class="absolute -top-2 left-2 bg-white px-1 text-[11px] font-medium text-slate-500 dark:bg-slate-900 dark:text-slate-400">Hasta</label>
                   <input id="dateTo" type="date" v-model="dateTo"
-                    class="w-full border border-slate-300 bg-white px-3 py-1.5 text-[13px] text-slate-700 focus:border-cetpro focus:ring-cetpro">
+                    class="w-full border border-slate-300 bg-white px-3 py-1.5 text-[13px] text-slate-700 focus:border-cetpro focus:ring-cetpro dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:[color-scheme:dark]">
                 </div>
                 <button @click="applyDateFilter"
                   class="border border-cetpro bg-cetpro px-4 py-1.5 text-[13px] font-semibold text-white transition hover:bg-cetpro-dark">Buscar</button>
@@ -334,103 +334,103 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <div class="mb-2.5 flex flex-wrap gap-2 border-b border-slate-200 pb-2.5">
+        <div class="mb-2.5 flex flex-wrap gap-2 border-b border-slate-200 pb-2.5 dark:border-slate-700">
           <div v-for="rol in rolesTabs" :key="rol" @click="activeActivityTab = rol" class="cursor-pointer border px-3 py-1.5 text-[13px] font-semibold transition"
-            :class="activeActivityTab === rol ? 'border-cetpro/25 bg-cetpro/[0.08] text-cetpro' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'">
+            :class="activeActivityTab === rol ? 'border-cetpro/25 bg-cetpro/[0.08] text-cetpro dark:border-cetpro/30 dark:bg-cetpro/15 dark:text-sky-300' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-slate-100'">
             {{ rol }}
           </div>
         </div>
 
         <!-- Contenedor con scroll -->
         <div class="max-h-52 overflow-y-auto pr-1">
-          <div v-if="currentActivities.length === 0" class="border border-dashed border-slate-200 bg-slate-50 py-8 text-center text-slate-500">
+          <div v-if="currentActivities.length === 0" class="border border-dashed border-slate-200 bg-slate-50 py-8 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
             No hay actividad reciente para este rol en el rango de fechas seleccionado.
           </div>
           <div v-else v-for="(actividad, index) in currentActivities" :key="index" class="flex gap-3 px-1 py-1">
             <div class="flex flex-col items-center">
-              <div class="rounded-full bg-slate-100 p-2">
+              <div class="rounded-full bg-slate-100 p-2 dark:bg-slate-800">
                 <img src="/img/transmision.png" class="h-5 w-5" alt="Actividad">
               </div>
-              <div v-if="index < currentActivities.length - 1" class="w-px flex-grow bg-slate-200">
+              <div v-if="index < currentActivities.length - 1" class="w-px flex-grow bg-slate-200 dark:bg-slate-700">
               </div>
             </div>
-            <div class="flex flex-grow items-start justify-between border-b border-slate-100 pb-4">
+            <div class="flex flex-grow items-start justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
               <div>
-                <p class="text-[13px] font-semibold text-slate-700">
+                <p class="text-[13px] font-semibold text-slate-700 dark:text-slate-200">
                   {{ actividad.actor }} - <span class="font-bold" :class="actividad.accionColor || 'text-green-500'">{{
                     actividad.accion }}</span>
                 </p>
-                <p class="text-[13px] text-slate-500">{{ actividad.detalle }}</p>
+                <p class="text-[13px] text-slate-500 dark:text-slate-400">{{ actividad.detalle }}</p>
               </div>
-              <p class="ml-4 shrink-0 text-xs text-slate-400">{{ actividad.tiempo }}</p>
+              <p class="ml-4 shrink-0 text-xs text-slate-400 dark:text-slate-500">{{ actividad.tiempo }}</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="border border-slate-200 bg-white p-3 shadow-sm">
-        <div class="mb-2.5 flex flex-col gap-3 border-b border-slate-200 pb-2.5 sm:flex-row sm:items-end sm:justify-between">
+      <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
+        <div class="mb-2.5 flex flex-col gap-3 border-b border-slate-200 pb-2.5 dark:border-slate-700 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Grupos</p>
-            <h2 class="mt-1 text-[1.2rem] font-semibold tracking-tight text-slate-900">Estado de grupos</h2>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Grupos</p>
+            <h2 class="mt-1 text-[1.2rem] font-semibold tracking-tight text-slate-900 dark:text-slate-100">Estado de grupos</h2>
           </div>
 
           <div class="flex flex-wrap gap-2">
           <button @click="activeGroupsTab = 'recientes'"
-            :class="['inline-flex items-center gap-2 border px-3 py-1.5 text-[13px] font-semibold transition-colors', activeGroupsTab === 'recientes' ? 'border-cetpro/25 bg-cetpro/[0.08] text-cetpro' : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700']">
+            :class="['inline-flex items-center gap-2 border px-3 py-1.5 text-[13px] font-semibold transition-colors', activeGroupsTab === 'recientes' ? 'border-cetpro/25 bg-cetpro/[0.08] text-cetpro dark:border-cetpro/30 dark:bg-cetpro/15 dark:text-sky-300' : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-100']">
             <UsersIcon class="h-5 w-5" />
             <span>Grupos Recientes</span>
           </button>
           <button @click="activeGroupsTab = 'culminados'"
-            :class="['inline-flex items-center gap-2 border px-3 py-1.5 text-[13px] font-semibold transition-colors', activeGroupsTab === 'culminados' ? 'border-cetpro/25 bg-cetpro/[0.08] text-cetpro' : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700']">
+            :class="['inline-flex items-center gap-2 border px-3 py-1.5 text-[13px] font-semibold transition-colors', activeGroupsTab === 'culminados' ? 'border-cetpro/25 bg-cetpro/[0.08] text-cetpro dark:border-cetpro/30 dark:bg-cetpro/15 dark:text-sky-300' : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-100']">
             <UsersIcon class="h-5 w-5" />
             <span>Grupos Culminados</span>
           </button>
           </div>
         </div>
-        <div class="overflow-x-auto border border-slate-200">
-          <table class="min-w-full divide-y divide-slate-200">
-            <thead class="bg-slate-50">
+        <div class="overflow-x-auto border border-slate-200 dark:border-slate-700">
+          <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+            <thead class="bg-slate-50 dark:bg-slate-800">
               <tr>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Especialidad</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Nro de Módulo</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Modulo</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Seccion</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Turno</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Nro Matriculados</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Opciones</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200 bg-white">
+            <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-700 dark:bg-slate-900">
               <tr v-for="(grupo, index) in currentGrupos" :key="index"
-                class="transition hover:bg-slate-50">
+                class="transition hover:bg-slate-50 dark:hover:bg-slate-800/80">
 
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">{{
                   grupo.nombre_especialidad }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{ grupo.numero_modulo
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">{{ grupo.numero_modulo
                 }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{ grupo.nombre_modulo
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">{{ grupo.nombre_modulo
                 }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{ grupo.seccion }}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">{{ grupo.seccion }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{ grupo.turno }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">{{ grupo.turno }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"
-                  :class="grupo.nro_matriculados > 0 ? 'text-green-600' : 'text-slate-900'">{{
+                  :class="grupo.nro_matriculados > 0 ? 'text-green-600' : 'text-slate-900 dark:text-slate-100'">{{
                     grupo.nro_matriculados }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <router-link v-if="grupo.nominaRoute" :to="grupo.nominaRoute"

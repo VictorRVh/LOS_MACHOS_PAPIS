@@ -107,7 +107,7 @@ onBeforeUnmount(() =>
     <button
       ref="buttonRef"
       @click="toggleMenu"
-      class="inline-flex h-7 w-7 items-center justify-center text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cetpro/30 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white">
+      class="inline-flex h-8 w-8 items-center justify-center rounded-sm border border-transparent text-slate-500 transition-colors hover:border-cetpro/15 hover:bg-cetpro/10 hover:text-cetpro focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cetpro/20 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-cetpro-light/10 dark:hover:text-cetpro-light dark:focus-visible:ring-offset-slate-900">
       <EllipsisVerticalIcon class="h-4.5 w-4.5" />
     </button>
 
@@ -115,18 +115,18 @@ onBeforeUnmount(() =>
       v-if="isOpen"
       ref="menuRef"
       :style="menuStyles"
-      class="absolute w-[190px] rounded-md border border-slate-200 bg-white py-1 text-sm shadow-sm ring-1 ring-slate-200 dark:border-slate-700 dark:bg-gray-800 dark:ring-slate-700">
+      class="absolute w-[190px] rounded-md border border-slate-200 bg-white py-1 text-sm shadow-sm ring-1 ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:ring-slate-700">
       <button
         v-if="actions.view"
         @click="emitAndClose('view')"
-        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 transition-colors hover:bg-cetpro/10 hover:text-cetpro dark:text-slate-200 dark:hover:bg-cetpro-light/10 dark:hover:text-cetpro-light">
         <EyeIcon class="h-4 w-4" /> {{ mergedLabels.view }} {{ entityLabel }}
       </button>
 
       <button
         v-if="actions.edit"
         @click="emitAndClose('edit')"
-        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 transition-colors hover:bg-cetpro/10 hover:text-cetpro dark:text-slate-200 dark:hover:bg-cetpro-light/10 dark:hover:text-cetpro-light">
         <PencilSquareIcon class="h-4 w-4" /> {{ mergedLabels.edit }}
         {{ entityLabel }}
       </button>
@@ -134,7 +134,7 @@ onBeforeUnmount(() =>
       <button
         v-if="actions.custom1"
         @click="emitAndClose('custom1')"
-        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 transition-colors hover:bg-cetpro/10 hover:text-cetpro dark:text-slate-200 dark:hover:bg-cetpro-light/10 dark:hover:text-cetpro-light">
         <CalendarDaysIcon class="h-4 w-4" /> {{ mergedLabels.custom1 }}
       </button>
 
@@ -145,7 +145,7 @@ onBeforeUnmount(() =>
       <button
         v-if="actions.deactivate"
         @click="emitAndClose('deactivate')"
-        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 transition-colors hover:bg-cetpro/10 hover:text-cetpro dark:text-slate-200 dark:hover:bg-cetpro-light/10 dark:hover:text-cetpro-light">
         <ExclamationTriangleIcon class="h-4 w-4" /> {{ mergedLabels.deactivate }}
         {{ entityLabel }}
       </button>
@@ -153,14 +153,14 @@ onBeforeUnmount(() =>
       <button
         v-if="actions.delete"
         @click="emitAndClose('delete')"
-        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-red-700 transition-colors hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/35">
         <TrashIcon class="h-4 w-4" /> {{ mergedLabels.delete }} {{ entityLabel }}
       </button>
 
       <button
         v-if="actions.report"
         @click="emitAndClose('report')"
-        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 transition-colors hover:bg-cetpro/10 hover:text-cetpro dark:text-slate-200 dark:hover:bg-cetpro-light/10 dark:hover:text-cetpro-light">
         <ArrowDownTrayIcon class="h-4 w-4" />
         {{ mergedLabels.report }} {{ entityLabel }}
       </button>
@@ -168,7 +168,7 @@ onBeforeUnmount(() =>
       <button
         v-if="actions.download"
         @click="emitAndClose('download')"
-        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 transition-colors hover:bg-cetpro/10 hover:text-cetpro dark:text-slate-200 dark:hover:bg-cetpro-light/10 dark:hover:text-cetpro-light">
         <ArrowDownTrayIcon class="h-4 w-4" />
         {{ mergedLabels.download }} {{ entityLabel }}
       </button>
@@ -176,7 +176,7 @@ onBeforeUnmount(() =>
       <button
         v-if="actions.reportConsol"
         @click="emitAndClose('reportConsol')"
-        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700">
+        class="flex w-full items-center gap-3 px-3 py-2 text-left text-slate-700 transition-colors hover:bg-cetpro/10 hover:text-cetpro dark:text-slate-200 dark:hover:bg-cetpro-light/10 dark:hover:text-cetpro-light">
         <ArrowDownTrayIcon class="h-4 w-4" />
         {{ mergedLabels.reportConsol }} {{ entityLabel }}
       </button>

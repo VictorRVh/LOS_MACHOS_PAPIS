@@ -1,4 +1,6 @@
 <script setup>
+import { computed } from "vue";
+
 const props = defineProps({
     loading: {
         type: Boolean,
@@ -10,49 +12,103 @@ const props = defineProps({
     },
     title: {
         type: String,
-        default: 'Enviar',
+        default: "Enviar",
     },
     loadingTitle: {
         type: String,
-        default: '',
+        default: "",
     },
     disabledClass: {
         type: String,
-        default: 'cursor-not-allowed',
+        default: "cursor-not-allowed",
     },
     loaderClass: {
         type: String,
-        default: '',
+        default: "",
     },
     slotted: {
         type: Boolean,
         default: false,
     },
+    variant: {
+        type: String,
+        default: "primary",
+    },
+    color: {
+        type: String,
+        default: "",
+    },
+    size: {
+        type: String,
+        default: "md",
+    },
 });
+
+const normalizedVariant = computed(() => {
+    if (props.color) return props.color;
+    if (props.variant === "outline") return "secondary";
+    return props.variant;
+});
+
+const variantClasses = computed(() => {
+    const variants = {
+        primary:
+            "border border-cetpro bg-cetpro text-white hover:bg-cetpro-dark active:bg-cetpro-dark focus-visible:ring-cetpro/30 dark:border-cetpro-light dark:bg-cetpro dark:hover:bg-cetpro-light dark:active:bg-cetpro-light",
+        secondary:
+            "border border-cetpro/20 bg-cetpro/10 text-cetpro hover:border-cetpro/30 hover:bg-cetpro/15 active:bg-cetpro/20 focus-visible:ring-cetpro/20 dark:border-cetpro-light/25 dark:bg-cetpro-light/10 dark:text-cetpro-light dark:hover:bg-cetpro-light/15 dark:active:bg-cetpro-light/20",
+        ghost:
+            "border border-transparent bg-transparent text-cetpro hover:bg-cetpro/10 active:bg-cetpro/15 focus-visible:ring-cetpro/20 dark:text-cetpro-light dark:hover:bg-cetpro-light/10 dark:active:bg-cetpro-light/15",
+        tertiary:
+            "border border-transparent bg-transparent text-cetpro hover:bg-cetpro/10 active:bg-cetpro/15 focus-visible:ring-cetpro/20 dark:text-cetpro-light dark:hover:bg-cetpro-light/10 dark:active:bg-cetpro-light/15",
+        danger:
+            "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 active:bg-red-100 focus-visible:ring-red-200 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/45 dark:active:bg-red-950/55",
+        destructive:
+            "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 active:bg-red-100 focus-visible:ring-red-200 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/45 dark:active:bg-red-950/55",
+        table:
+            "border border-cetpro/15 bg-white text-cetpro hover:border-cetpro/25 hover:bg-cetpro/10 active:bg-cetpro/15 focus-visible:ring-cetpro/20 dark:border-slate-700 dark:bg-slate-900 dark:text-cetpro-light dark:hover:bg-cetpro-light/10 dark:active:bg-cetpro-light/15",
+        "table-action":
+            "border border-cetpro/15 bg-white text-cetpro hover:border-cetpro/25 hover:bg-cetpro/10 active:bg-cetpro/15 focus-visible:ring-cetpro/20 dark:border-slate-700 dark:bg-slate-900 dark:text-cetpro-light dark:hover:bg-cetpro-light/10 dark:active:bg-cetpro-light/15",
+        icon:
+            "border border-cetpro/15 bg-white text-cetpro hover:border-cetpro/25 hover:bg-cetpro/10 active:bg-cetpro/15 focus-visible:ring-cetpro/20 dark:border-slate-700 dark:bg-slate-900 dark:text-cetpro-light dark:hover:bg-cetpro-light/10 dark:active:bg-cetpro-light/15",
+    };
+
+    return variants[normalizedVariant.value] || variants.primary;
+});
+
+const sizeClasses = computed(() => {
+    const sizes = {
+        sm: "min-h-8 px-3 py-1.5 text-xsm gap-1.5",
+        md: "min-h-10 px-4 py-2 text-sm gap-2",
+        lg: "min-h-11 px-5 py-2.5 text-sm gap-2",
+        table: "min-h-8 px-2.5 py-1.5 text-xsm gap-1.5",
+        icon: "h-8 w-8 p-0",
+    };
+
+    if (normalizedVariant.value === "icon") return sizes.icon;
+    if (normalizedVariant.value === "table" || normalizedVariant.value === "table-action") return sizes.table;
+    return sizes[props.size] || sizes.md;
+});
+
+const isDisabled = computed(() => props.disabled || props.loading);
 </script>
 
 <template>
     <button
         type="button"
-        class="text-white bg-cetpro active:bg-cetpro-light hover:bg-cetpro-light font-medium rounded text-sm px-5 py-2.5 text-center flex-center gap-2"
-        :class="[disabled ? disabledClass : '']"
-        :disabled="disabled"
+        class="inline-flex items-center justify-center rounded-sm font-medium text-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-white disabled:pointer-events-none dark:focus-visible:ring-offset-slate-900"
+        :class="[variantClasses, sizeClasses, isDisabled ? `opacity-60 ${disabledClass}` : '']"
+        :disabled="isDisabled"
     >
-        <!-- SLOT COMPLETO -->
         <slot v-if="slotted"></slot>
 
-        <!-- CONTENIDO NORMAL -->
-        <div v-else class="flex items-center gap-2">
-
-            <!-- ICONO DINÁMICO -->
+        <div v-else class="inline-flex items-center justify-center gap-2">
             <slot name="icon" v-if="!loading"></slot>
 
-            <!-- LOADER -->
             <svg
                 v-if="loading"
                 aria-hidden="true"
                 role="status"
-                class="inline w-4 h-4 mr-1 animate-spin"
+                class="inline h-4 w-4 animate-spin"
                 :class="[loaderClass]"
                 viewBox="0 0 100 101"
                 fill="none"
@@ -67,7 +123,6 @@ const props = defineProps({
                 />
             </svg>
 
-            <!-- TEXTO -->
             {{
                 loading
                     ? (loadingTitle ? loadingTitle : "Procesando...")

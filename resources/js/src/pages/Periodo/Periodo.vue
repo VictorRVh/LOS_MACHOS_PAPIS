@@ -1,6 +1,7 @@
 <script setup>
 import axios from "axios";
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import { ArrowDownTrayIcon, ChevronDownIcon, TableCellsIcon } from "@heroicons/vue/24/outline";
 
 import Table from "../../components/table/Table.vue";
 import THead from "../../components/table/THead.vue";
@@ -11,7 +12,6 @@ import Td from "../../components/table/Td.vue";
 import TableBadge from "../../components/ui/TableBadge.vue";
 import EditButton from "../../components/ui/EditButton.vue";
 import DeleteButton from "../../components/ui/DeleteButton.vue";
-import BaseButton from "../../components/ui/Button.vue";
 import AuthorizationFallback from "../../components/page/AuthorizationFallback.vue";
 import useSlider from "../../composables/useSlider";
 import useModalToast from "../../composables/useModalToast";
@@ -86,6 +86,7 @@ const periodosInactivos = computed(() =>
 const periodosConReportes = computed(() =>
   periodosStore.periodos.filter((periodo) => periodo?.id).length
 );
+const reportsOpen = ref(false);
 </script>
 
 <template>
@@ -173,11 +174,83 @@ const periodosConReportes = computed(() =>
         <section
           class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-2/3"
         >
-          <div class="mb-3">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-              Registro operativo
-            </p>
-            <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de periodos</h3>
+          <div class="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+                Registro operativo
+              </p>
+              <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de periodos</h3>
+            </div>
+
+            <button
+              type="button"
+              @click="reportsOpen = !reportsOpen"
+              class="inline-flex h-8 shrink-0 items-center gap-2 rounded-[3px] border border-slate-200 bg-white px-2.5 text-slate-600 transition-colors hover:border-cetpro/20 hover:bg-cetpro/10 hover:text-cetpro focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cetpro/20 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-cetpro-light/25 dark:hover:bg-cetpro-light/10 dark:hover:text-cetpro-light dark:focus-visible:ring-offset-slate-900"
+              :title="reportsOpen ? 'Ocultar reportes' : 'Mostrar reportes'"
+              :aria-expanded="reportsOpen"
+              aria-label="Alternar reportes"
+            >
+              <ArrowDownTrayIcon class="h-4 w-4 shrink-0" />
+              <span class="text-[12px] font-medium leading-none">
+                {{ reportsOpen ? "Ocultar descargas" : "Mostrar descargas" }}
+              </span>
+              <ChevronDownIcon class="h-4 w-4 transition-transform duration-200" :class="reportsOpen ? 'rotate-180' : ''" />
+            </button>
+          </div>
+
+          <div
+            v-if="reportsOpen"
+            class="mb-4 space-y-2 border border-slate-200 bg-slate-50/70 p-2.5 dark:border-slate-700 dark:bg-slate-800/50"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                  Reportes
+                </p>
+                <p class="mt-0.5 text-sm text-slate-700 dark:text-slate-200">
+                  Descargas operativas por periodo
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div
+                v-for="periodo in periodosStore.periodos"
+                :key="`reportes-${periodo.id}`"
+                class="flex flex-col gap-2 border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900 md:flex-row md:items-center md:justify-between"
+              >
+                <div class="min-w-0">
+                  <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                    Periodo
+                  </p>
+                  <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-100">
+                    {{ periodo?.nombre_periodo }}
+                  </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    @click="descargarDocumento(periodo.id, periodo?.nombre_periodo)"
+                    class="inline-flex h-9 items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-3 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+                  >
+                    <TableCellsIcon class="h-4 w-4 shrink-0" />
+                    <span>Matricula institucional</span>
+                    <ArrowDownTrayIcon class="h-4 w-4 shrink-0 opacity-70" />
+                  </button>
+
+                  <button
+                    type="button"
+                    @click="descargarReporteCertificado(periodo.id, periodo?.nombre_periodo)"
+                    class="inline-flex h-9 items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-3 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+                  >
+                    <TableCellsIcon class="h-4 w-4 shrink-0" />
+                    <span>Certificados</span>
+                    <ArrowDownTrayIcon class="h-4 w-4 shrink-0 opacity-70" />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <Table>
@@ -203,30 +276,6 @@ const periodosConReportes = computed(() =>
                   <div class="flex items-center justify-center gap-1">
                     <EditButton @click="showSlider(true, periodo)" />
                     <DeleteButton @click="onDelete(periodo)" />
-
-                    <BaseButton
-                      title="MATRICULA INSTITUCIONAL"
-                      @click="descargarDocumento(periodo.id, periodo?.nombre_periodo)"
-                      class="h-[35px] rounded-lg bg-green-600 px-1 text-white shadow hover:bg-green-700"
-                    >
-                      <template #icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-                        </svg>
-                      </template>
-                    </BaseButton>
-
-                    <BaseButton
-                      title="CERTIFICADOS"
-                      @click="descargarReporteCertificado(periodo.id, periodo?.nombre_periodo)"
-                      class="h-[35px] rounded-lg bg-green-600 px-1 text-white shadow hover:bg-green-700"
-                    >
-                      <template #icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-                        </svg>
-                      </template>
-                    </BaseButton>
                   </div>
                 </Td>
               </Tr>

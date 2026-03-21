@@ -100,7 +100,7 @@ const exportarEspecialidadPDF = async (especialidad) => {
 </script>
 
 <template>
-  <section class="min-h-screen bg-slate-100 text-slate-800">
+  <section class="h-screen overflow-y-auto bg-slate-100 text-slate-800">
     <div class="mx-auto max-w-[1320px] px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
       <header class="border border-slate-200 bg-white px-5 py-4 shadow-sm">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

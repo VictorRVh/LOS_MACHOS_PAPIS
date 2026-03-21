@@ -236,41 +236,50 @@ onUnmounted(() => {
 <template>
   <PermissionBlock :permissions="['ver-actividades']">
 
-    <div class="p-4 sm:p-6 lg:p-8 space-y-2 font-sans bg-gray-50 dark:bg-slate-900">
+    <div class="space-y-3 bg-slate-100 p-2.5 font-sans sm:p-3 lg:p-3">
 
-      <div
-        class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-md flex flex-wrap items-center justify-between gap-4">
-        <div class="flex items-center gap-2 flex-wrap">
+      <section class="border border-slate-200 bg-white p-3 shadow-sm">
+        <div class="flex flex-col gap-2.5">
+          <div class="space-y-1.5">
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Accesos rápidos</p>
+              <h1 class="mt-1 text-[1.3rem] font-semibold tracking-tight text-slate-900">Panel principal</h1>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
           <button
-            class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-slate-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors">
-            <img src="/img/matricula.png" class="h-6 w-6" alt="Matrículas">
+            @click="$router.push({ name: 'matricula.index' })"
+            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100">
+            <img src="/img/matricula.png" class="h-5 w-5" alt="Matrículas">
             <span>MATRICULAS</span>
           </button>
           <button
-            class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-slate-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors">
-            <img src="/img/grupo.png" class="h-6 w-6" alt="Grupos">
+            @click="$router.push({ name: 'grupo' })"
+            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100">
+            <img src="/img/grupo.png" class="h-5 w-5" alt="Grupos">
             <span>GRUPOS</span>
           </button>
           <button
-            class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-cetpro dark:text-cetpro-light bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
-            <img src="/img/ciclo.png" class="h-6 w-6" alt="Nuevo Ciclo">
+            @click="$router.push({ name: 'programa' })"
+            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100">
+            <img src="/img/ciclo.png" class="h-5 w-5" alt="Nuevo Ciclo">
             <span>NUEVO CICLO</span>
           </button>
 
           <!-- BOTÓN BUSCAR ESTUDIANTE -->
           <button @click="$router.push({ name: 'buscar.estudiante' })"
-            class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-slate-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors">
-            <img src="/img/busqueda-estudiante.png" class="h-6 w-6" alt="Buscar Estudiante">
+            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100">
+            <img src="/img/busqueda-estudiante.png" class="h-5 w-5" alt="Buscar Estudiante">
             <span>BUSCAR ESTUDIANTE</span>
           </button>
 
           <!-- NUEVO BOTÓN CENSO -->
           <div
-            class="flex items-center gap-2 px-3 py-2 text-sm bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600">
-            <span class="text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wide">Año
+            class="inline-flex items-center gap-2 border border-slate-200 bg-white px-3 py-1.5 text-sm">
+            <span class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Año
               censo</span>
             <select v-model="censoAnioSeleccionado"
-              class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm text-gray-700 dark:text-gray-100 focus:ring-cetpro focus:border-cetpro">
+              class="border border-slate-300 bg-white px-2 py-1 text-[13px] text-slate-700 focus:border-cetpro focus:ring-cetpro">
               <option v-for="anio in censoAniosDisponibles" :key="anio" :value="Number(anio)">
                 {{ anio }}
               </option>
@@ -278,144 +287,154 @@ onUnmounted(() => {
           </div>
 
           <button @click="handleCensoClick"
-            class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-slate-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors">
+            class="inline-flex items-center gap-2.5 border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100">
             <!-- Icono simulado (Documento) -->
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-              stroke="currentColor" class="w-6 h-6 text-purple-600">
+              stroke="currentColor" class="h-5 w-5 text-purple-600">
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
             </svg>
             <span>CENSO</span>
           </button>
-
+            </div>
         </div>
 
-        <div class="flex flex-wrap items-center justify-end gap-2">
-          <span class="text-sm font-semibold text-gray-600 dark:text-gray-300 mr-2">Filtrar Actividad:</span>
-          <button @click="setDateRange(0)"
-            class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-slate-700 rounded-md hover:bg-gray-200 dark:hover:bg-slate-600">Hoy</button>
-          <button @click="setDateRange(7)"
-            class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-slate-700 rounded-md hover:bg-gray-200 dark:hover:bg-slate-600">Últimos
-            7 días</button>
-          <div class="relative">
-            <label for="dateFrom"
-              class="absolute -top-2 left-2 text-xs text-gray-500 bg-white dark:bg-slate-800 px-1">Desde</label>
-            <input id="dateFrom" type="date" v-model="dateFrom"
-              class="pl-2 pr-2 py-1.5 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-md text-sm focus:ring-cetpro focus:border-cetpro">
-          </div>
-          <div class="relative">
-            <label for="dateTo"
-              class="absolute -top-2 left-2 text-xs text-gray-500 bg-white dark:bg-slate-800 px-1">Hasta</label>
-            <input id="dateTo" type="date" v-model="dateTo"
-              class="pl-2 pr-2 py-1.5 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-md text-sm focus:ring-cetpro focus:border-cetpro">
-          </div>
-          <button @click="applyDateFilter"
-            class="px-4 py-2 bg-cetpro text-white font-semibold rounded-lg text-sm hover:bg-opacity-90 transition-colors">Buscar</button>
         </div>
-      </div>
+      </section>
 
-      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-2">
-        <!-- Tabs tipo submenu con pointer -->
-        <div class="flex gap-2 border-b border-gray-200 dark:border-slate-700 mb-4">
-          <div v-for="rol in rolesTabs" :key="rol" @click="activeActivityTab = rol" class="relative px-4 py-2 text-sm font-semibold cursor-pointer rounded-md transition
-         text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            :class="activeActivityTab === rol && 'text-cetpro'">
+      <section class="border border-slate-200 bg-white p-3 shadow-sm">
+        <div class="mb-2.5 border-b border-slate-200 pb-2.5">
+          <div class="flex flex-col gap-2.5 xl:flex-row xl:items-end xl:justify-between">
+            <div class="min-w-0">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Actividad reciente</p>
+              <h2 class="mt-1 text-[1.2rem] font-semibold tracking-tight text-slate-900">Seguimiento por rol</h2>
+            </div>
+
+            <div class="flex w-full flex-wrap items-end gap-2 xl:w-auto xl:justify-end">
+                <button @click="setDateRange(0)"
+                  class="border border-slate-200 bg-white px-3 py-1.5 text-[13px] font-medium text-slate-700 transition hover:bg-slate-100">Hoy</button>
+                <button @click="setDateRange(7)"
+                  class="border border-slate-200 bg-white px-3 py-1.5 text-[13px] font-medium text-slate-700 transition hover:bg-slate-100">Últimos
+                  7 días</button>
+                <div class="relative min-w-[160px] flex-1 xl:flex-none">
+                  <label for="dateFrom"
+                    class="absolute -top-2 left-2 bg-white px-1 text-[11px] font-medium text-slate-500">Desde</label>
+                  <input id="dateFrom" type="date" v-model="dateFrom"
+                    class="w-full border border-slate-300 bg-white px-3 py-1.5 text-[13px] text-slate-700 focus:border-cetpro focus:ring-cetpro">
+                </div>
+                <div class="relative min-w-[160px] flex-1 xl:flex-none">
+                  <label for="dateTo"
+                    class="absolute -top-2 left-2 bg-white px-1 text-[11px] font-medium text-slate-500">Hasta</label>
+                  <input id="dateTo" type="date" v-model="dateTo"
+                    class="w-full border border-slate-300 bg-white px-3 py-1.5 text-[13px] text-slate-700 focus:border-cetpro focus:ring-cetpro">
+                </div>
+                <button @click="applyDateFilter"
+                  class="border border-cetpro bg-cetpro px-4 py-1.5 text-[13px] font-semibold text-white transition hover:bg-cetpro-dark">Buscar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-2.5 flex flex-wrap gap-2 border-b border-slate-200 pb-2.5">
+          <div v-for="rol in rolesTabs" :key="rol" @click="activeActivityTab = rol" class="cursor-pointer border px-3 py-1.5 text-[13px] font-semibold transition"
+            :class="activeActivityTab === rol ? 'border-cetpro/25 bg-cetpro/[0.08] text-cetpro' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'">
             {{ rol }}
-
-            <!-- Pointer / triángulo -->
-            <div v-if="activeActivityTab === rol" class="absolute left-1/2 -bottom-2 h-0 w-0 -translate-x-1/2
-           border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent
-           border-t-cetpro"></div>
           </div>
         </div>
 
         <!-- Contenedor con scroll -->
-        <div class="max-h-40 overflow-y-auto">
-          <div v-if="currentActivities.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div class="max-h-52 overflow-y-auto pr-1">
+          <div v-if="currentActivities.length === 0" class="border border-dashed border-slate-200 bg-slate-50 py-8 text-center text-slate-500">
             No hay actividad reciente para este rol en el rango de fechas seleccionado.
           </div>
-          <div v-else v-for="(actividad, index) in currentActivities" :key="index" class="flex gap-2">
+          <div v-else v-for="(actividad, index) in currentActivities" :key="index" class="flex gap-3 px-1 py-1">
             <div class="flex flex-col items-center">
-              <div class="bg-gray-100 dark:bg-slate-700 rounded-full p-2">
+              <div class="rounded-full bg-slate-100 p-2">
                 <img src="/img/transmision.png" class="h-5 w-5" alt="Actividad">
               </div>
-              <div v-if="index < currentActivities.length - 1" class="w-px flex-grow bg-gray-300 dark:bg-slate-600">
+              <div v-if="index < currentActivities.length - 1" class="w-px flex-grow bg-slate-200">
               </div>
             </div>
-            <div class="flex-grow pb-4 flex justify-between items-start">
+            <div class="flex flex-grow items-start justify-between border-b border-slate-100 pb-4">
               <div>
-                <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                <p class="text-[13px] font-semibold text-slate-700">
                   {{ actividad.actor }} - <span class="font-bold" :class="actividad.accionColor || 'text-green-500'">{{
                     actividad.accion }}</span>
                 </p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ actividad.detalle }}</p>
+                <p class="text-[13px] text-slate-500">{{ actividad.detalle }}</p>
               </div>
-              <p class="text-xs text-gray-400 dark:text-gray-500 shrink-0 ml-4">{{ actividad.tiempo }}</p>
+              <p class="ml-4 shrink-0 text-xs text-slate-400">{{ actividad.tiempo }}</p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-6">
-        <div class="flex border-b border-gray-200 dark:border-slate-700 mb-4">
+      <section class="border border-slate-200 bg-white p-3 shadow-sm">
+        <div class="mb-2.5 flex flex-col gap-3 border-b border-slate-200 pb-2.5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Grupos</p>
+            <h2 class="mt-1 text-[1.2rem] font-semibold tracking-tight text-slate-900">Estado de grupos</h2>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
           <button @click="activeGroupsTab = 'recientes'"
-            :class="['flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors', activeGroupsTab === 'recientes' ? 'border-b-2 border-cetpro text-cetpro' : 'text-gray-500 hover:text-gray-700']">
+            :class="['inline-flex items-center gap-2 border px-3 py-1.5 text-[13px] font-semibold transition-colors', activeGroupsTab === 'recientes' ? 'border-cetpro/25 bg-cetpro/[0.08] text-cetpro' : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700']">
             <UsersIcon class="h-5 w-5" />
             <span>Grupos Recientes</span>
           </button>
           <button @click="activeGroupsTab = 'culminados'"
-            :class="['flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors', activeGroupsTab === 'culminados' ? 'border-b-2 border-cetpro text-cetpro' : 'text-gray-500 hover:text-gray-700']">
+            :class="['inline-flex items-center gap-2 border px-3 py-1.5 text-[13px] font-semibold transition-colors', activeGroupsTab === 'culminados' ? 'border-cetpro/25 bg-cetpro/[0.08] text-cetpro' : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700']">
             <UsersIcon class="h-5 w-5" />
             <span>Grupos Culminados</span>
           </button>
+          </div>
         </div>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
-            <thead class="bg-gray-50 dark:bg-slate-700/50">
+        <div class="overflow-x-auto border border-slate-200">
+          <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
               <tr>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
                   Especialidad</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
                   Nro de Módulo</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
                   Modulo</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
                   Seccion</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
                   Turno</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
                   Nro Matriculados</th>
                 <th scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  class="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
                   Opciones</th>
               </tr>
             </thead>
-            <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
+            <tbody class="divide-y divide-slate-200 bg-white">
               <tr v-for="(grupo, index) in currentGrupos" :key="index"
-                class="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                class="transition hover:bg-slate-50">
 
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{
                   grupo.nombre_especialidad }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ grupo.numero_modulo
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{ grupo.numero_modulo
                 }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ grupo.nombre_modulo
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{ grupo.nombre_modulo
                 }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ grupo.seccion }}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{ grupo.seccion }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ grupo.turno }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{ grupo.turno }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"
-                  :class="grupo.nro_matriculados > 0 ? 'text-green-600' : 'text-gray-900 dark:text-gray-200'">{{
+                  :class="grupo.nro_matriculados > 0 ? 'text-green-600' : 'text-slate-900'">{{
                     grupo.nro_matriculados }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <router-link v-if="grupo.nominaRoute" :to="grupo.nominaRoute"
-                    class="flex items-center justify-center gap-1 text-white bg-cetpro hover:bg-opacity-90 rounded-md px-3 py-1.5">
+                    class="inline-flex items-center justify-center gap-1 border border-cetpro bg-cetpro px-3 py-2 text-white transition hover:bg-cetpro-dark">
                     <span>Nomina</span>
                     <ArrowRightIcon class="h-4 w-4" />
                   </router-link>
@@ -424,7 +443,7 @@ onUnmounted(() => {
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </div>
   </PermissionBlock>
 </template>

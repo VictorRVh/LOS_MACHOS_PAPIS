@@ -91,7 +91,9 @@ const onPasswordChanged = async (newPassword) => {
 
             <div class="relative z-10 mx-auto flex w-full max-w-[42rem] flex-col gap-8">
                 <div class="flex max-w-[30rem] flex-col gap-5">
-                    <img src="/img/insignia.png" alt="Insignia CETPRO Puno" class="h-12 w-12 opacity-0 animate-fade-in-up" />
+                    <div class="flex h-20 w-20 items-center justify-center border border-white/65 bg-white/80 p-2 backdrop-blur-sm shadow-[0_10px_24px_rgba(15,23,42,0.10)] opacity-0 animate-fade-in-up">
+                        <img src="/img/cetproLOGOO.png" alt="Logo CETPRO Puno" class="h-full w-full object-contain" />
+                    </div>
 
                     <div class="space-y-5">
                         <div class="space-y-2 opacity-0 animate-fade-in-up delay-100">
@@ -142,7 +144,9 @@ const onPasswordChanged = async (newPassword) => {
             <div class="relative z-10 w-full max-w-[36rem] xl:max-w-[40rem]">
                 <div class="mb-3 border border-slate-200 bg-white px-3 py-3 shadow-sm opacity-0 animate-fade-in-up lg:hidden">
                     <div class="flex items-center gap-4">
-                        <img src="/img/insignia.png" alt="Insignia CETPRO Puno" class="h-14 w-14 shrink-0" />
+                        <div class="flex h-14 w-14 shrink-0 items-center justify-center border border-slate-200 bg-white p-1.5">
+                            <img src="/img/cetproLOGOO.png" alt="Logo CETPRO Puno" class="h-full w-full object-contain" />
+                        </div>
                         <div>
                             <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">CETPRO Puno</p>
                             <h1 class="mt-1 text-[1.75rem] font-semibold leading-none text-slate-900">Gestión Académica</h1>
@@ -153,7 +157,7 @@ const onPasswordChanged = async (newPassword) => {
                     </p>
                 </div>
 
-                <div class="border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-5 xl:p-6">
+                <div class="border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:min-h-[430px] lg:p-5 xl:min-h-[450px] xl:p-6">
                     <div class="mb-4 opacity-0 animate-fade-in delay-100">
                         <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-cetpro/80">Acceso institucional</p>
                         <h2 class="mt-1 text-[1.7rem] font-semibold tracking-tight text-slate-900 xl:text-[2.15rem]">Iniciar sesión</h2>
@@ -219,7 +223,7 @@ const onPasswordChanged = async (newPassword) => {
                             <p v-if="formErrors.password" class="text-xs text-red-600">{{ formErrors.password }}</p>
                         </div>
 
-                        <div class="flex items-center justify-between gap-3 pt-0.5">
+                        <div class="flex items-center justify-between gap-4 pt-1.5">
                             <label for="remember-me" class="inline-flex cursor-pointer items-center gap-2 text-[13px] text-slate-600">
                                 <input id="remember-me" v-model="rememberMe" type="checkbox" class="h-3.5 w-3.5 rounded-none border-slate-300 text-cetpro focus:ring-cetpro-light">
                                 <span>Recuérdame</span>
@@ -232,7 +236,7 @@ const onPasswordChanged = async (newPassword) => {
                         <Button
                             title="Ingresar"
                             type="submit"
-                            class="!mt-0.5 !w-full !rounded-none !py-2.5 !text-[15px] !font-semibold !border !border-cetpro bg-cetpro hover:bg-cetpro-dark text-white transition-colors duration-200"
+                            class="!mt-2 !w-full !rounded-none !py-2.5 !text-[15px] !font-semibold !border !border-cetpro bg-cetpro hover:bg-cetpro-dark text-white transition-colors duration-200"
                             loading-title="Ingresando..."
                             :loading="loggingIn"
                         />
@@ -279,10 +283,10 @@ const onPasswordChanged = async (newPassword) => {
 }
 
 .balance-title {
-    font-size: clamp(2.4rem, 3.5vw, 4rem);
+    font-size: clamp(2rem, 3vw, 3.45rem);
     font-weight: 800;
-    line-height: 0.92;
-    letter-spacing: -0.05em;
+    line-height: 1;
+    letter-spacing: -0.035em;
     text-transform: uppercase;
     text-wrap: balance;
 }
@@ -347,7 +351,7 @@ const onPasswordChanged = async (newPassword) => {
 
 @media (min-width: 1024px) and (max-width: 1365px) {
     .balance-title {
-        font-size: clamp(2.2rem, 3.2vw, 3.6rem);
+        font-size: clamp(1.9rem, 2.7vw, 3rem);
     }
 }
 

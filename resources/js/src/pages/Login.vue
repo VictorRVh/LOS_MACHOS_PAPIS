@@ -22,6 +22,7 @@ const formErrors = ref({});
 const showModal = ref(false);
 const lastUser = ref(null);
 const rememberMe = ref(false);
+const currentYear = new Date().getFullYear();
 
 const isPasswordVisible = ref(false);
 const passwordInputType = computed(() => isPasswordVisible.value ? 'text' : 'password');
@@ -74,51 +75,58 @@ const onPasswordChanged = async (newPassword) => {
 </script>
 
 <template>
-    <section class="min-h-screen grid grid-cols-1 lg:grid-cols-2 font-inter bg-slate-50">
-        
-        <div class="hidden lg:flex flex-col justify-between p-16 xl:p-24 relative overflow-hidden bg-cetpro-dark">
+    <section class="min-h-screen bg-slate-100 font-inter text-slate-800 lg:h-screen lg:overflow-hidden">
+        <div class="flex min-h-screen w-full flex-col px-0 py-0 sm:px-0 sm:py-0 lg:h-screen">
+            <div class="grid min-h-screen grid-cols-1 overflow-hidden bg-white shadow-sm lg:h-screen lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_minmax(460px,0.84fr)] xl:grid-cols-[minmax(0,1fr)_minmax(520px,0.86fr)]">
+        <aside class="login-brand relative hidden lg:flex items-center overflow-hidden border-r border-slate-200">
             <div class="absolute inset-0 z-0">
-                <img src="/img/computacion-en-la-nube.png" alt="Marca de Agua" class="absolute inset-0 w-full h-full object-contain object-center opacity-5 transform scale-125" />
-                <div class="node" style="top: 10%; left: 20%;"></div>
-                <div class="node" style="top: 25%; left: 70%; width: 6px; height: 6px;"></div>
-                <div class="node" style="top: 50%; left: 50%; width: 3px; height: 3px;"></div>
-                <div class="node" style="top: 70%; left: 15%;"></div>
-                <div class="node" style="top: 85%; left: 80%; width: 6px; height: 6px;"></div>
+                <div class="absolute inset-0 bg-[linear-gradient(180deg,_rgba(255,255,255,0.03),_rgba(255,255,255,0.01))]"></div>
+                <img src="/img/computacion-en-la-nube.png" alt="" class="login-watermark absolute inset-0 h-full w-full object-contain object-center opacity-[0.08] scale-[1.08]" />
+                <div class="node" style="top: 10%; left: 12%;"></div>
+                <div class="node" style="top: 18%; left: 78%; width: 6px; height: 6px;"></div>
+                <div class="node" style="top: 47%; left: 60%; width: 3px; height: 3px;"></div>
+                <div class="node" style="top: 72%; left: 18%;"></div>
+                <div class="node" style="top: 84%; left: 82%; width: 6px; height: 6px;"></div>
             </div>
 
-            <div class="relative z-10">
-                <img src="/img/insignia.png" alt="Insignia" class="w-20 h-20 mb-12 opacity-0 animate-fade-in-up" />
-                
-                <h1 class="text-7xl xl:text-8xl font-black text-white uppercase tracking-tighter leading-none opacity-0 animate-fade-in-up delay-100">
-                    Gestión
-                </h1>
-                <h1 class="text-7xl xl:text-8xl font-black text-white uppercase tracking-tighter leading-none opacity-0 animate-fade-in-up delay-200">
-                    Académica
-                </h1>
-            </div>
-            <div class="relative z-10 w-full opacity-0 animate-fade-in-up delay-300">
-                <p class="max-w-sm text-slate-300 leading-8">
-                    Plataforma oficial del Centro de Educación Técnico-Productiva de PUNO.
-                </p>
+            <div class="relative z-10 mx-auto flex w-full max-w-[42rem] flex-col gap-8">
+                <div class="flex max-w-[30rem] flex-col gap-5">
+                    <img src="/img/insignia.png" alt="Insignia CETPRO Puno" class="h-12 w-12 opacity-0 animate-fade-in-up" />
 
-                <div class="mx-auto mt-8 w-full border border-[#d7c7a1] bg-[#f4ead2] px-6 py-5 shadow-[0_18px_40px_rgba(6,26,38,0.18)]">
-                    <div class="flex items-center justify-between gap-8">
-                        <div class="min-w-0 flex-1 pr-2">
-                            <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#8a6a2f]">
-                                Acceso para estudiantes
+                    <div class="space-y-5">
+                        <div class="space-y-2 opacity-0 animate-fade-in-up delay-100">
+                            <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-100/80">
+                                CETPRO Puno
                             </p>
-                            <p class="mt-2 text-[24px] font-bold leading-tight text-slate-900">
-                                Consulta publica de notas
-                            </p>
-                            <p class="mt-2 max-w-[420px] text-sm leading-6 text-slate-700">
-                                Revisa calificaciones registradas desde una vista externa, separada del acceso academico institucional.
-                            </p>
+                            <h1 class="balance-title max-w-[10ch] text-white">
+                                Gestión Académica
+                            </h1>
                         </div>
 
-                        <div class="flex shrink-0 items-center justify-end">
+                        <p class="max-w-[24rem] text-[13px] leading-6 text-slate-200 opacity-0 animate-fade-in-up delay-200">
+                            Plataforma oficial del Centro de Educación Técnico-Productiva de Puno, organizada para un acceso claro, rápido y consistente.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="relative z-10 w-full max-w-[38rem] opacity-0 animate-fade-in-up delay-300">
+                    <div class="border border-white/30 bg-white/5 p-4">
+                        <div class="flex items-end justify-between gap-4">
+                            <div class="min-w-0 flex-1 space-y-3">
+                                <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#f4d89f]">
+                                    Acceso para estudiantes
+                                </p>
+                                <p class="max-w-[14ch] text-[1.45rem] font-semibold leading-tight text-white">
+                                    Consulta pública de notas
+                                </p>
+                                <p class="max-w-[24rem] text-[12px] leading-5 text-slate-200/92">
+                                    Revisa calificaciones registradas desde una vista externa, separada del acceso académico institucional.
+                                </p>
+                            </div>
+
                             <router-link
                                 :to="{ name: 'consulta.notas.publica' }"
-                                class="inline-flex items-center justify-center border border-slate-900 bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#12384f]"
+                                class="inline-flex shrink-0 items-center justify-center border border-slate-950 bg-slate-950 px-3 py-2 text-[13px] font-semibold text-white transition hover:bg-[#12384f] focus:outline-none focus:ring-2 focus:ring-white/30"
                             >
                                 Ir a consulta de notas
                             </router-link>
@@ -126,103 +134,136 @@ const onPasswordChanged = async (newPassword) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </aside>
 
-        <div class="flex items-center justify-center p-6 sm:p-12 bg-white">
-            <div class="w-full max-w-sm">
-                <div class="mb-10 opacity-0 animate-fade-in delay-100">
-                    <h2 class="text-3xl font-bold text-gray-800">Iniciar Sesión</h2>
-                    <p class="text-gray-500 mt-1">Bienvenido de nuevo.</p>
-                </div>
-                
-                <form @submit.prevent="onSignIn" class="space-y-6 opacity-0 animate-fade-in delay-200">
-                    <div class="relative">
-                        <span class="absolute hidden lg:flex inset-y-0 -left-12 items-center">
-                            <svg class="h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
-                        </span>
+        <main class="relative flex min-h-full items-center justify-center bg-white px-2 py-2 sm:px-3 sm:py-3 lg:px-5 xl:px-6">
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,_#edf3f8_0%,_#ffffff_20%)] lg:hidden"></div>
+
+            <div class="relative z-10 w-full max-w-[36rem] xl:max-w-[40rem]">
+                <div class="mb-3 border border-slate-200 bg-white px-3 py-3 shadow-sm opacity-0 animate-fade-in-up lg:hidden">
+                    <div class="flex items-center gap-4">
+                        <img src="/img/insignia.png" alt="Insignia CETPRO Puno" class="h-14 w-14 shrink-0" />
                         <div>
-                             <label for="usuario" class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
-                            <input
-                                id="usuario"
-                                v-model="formData.usuario"
-                                type="text"
-                                placeholder="Nombre de usuario"
-                                :class="[
-                                    'w-full rounded-md bg-gray-100 border-gray-300 sm:text-sm block p-3 focus:ring-1 focus:ring-cetpro focus:border-cetpro outline-none transition',
-                                    { 'border-red-500 ring-red-500': formErrors.usuario }
-                                ]"
-                            />
-                            <p v-if="formErrors.usuario" class="mt-1 text-xs text-red-600">{{ formErrors.usuario }}</p>
+                            <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">CETPRO Puno</p>
+                            <h1 class="mt-1 text-[1.75rem] font-semibold leading-none text-slate-900">Gestión Académica</h1>
                         </div>
                     </div>
-                   
-                    <div class="relative">
-                        <span class="absolute hidden lg:flex inset-y-0 -left-12 items-center">
-                             <svg class="h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
-                        </span>
-                        <div>
-                             <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                            <div class="relative w-full">
+                    <p class="mt-4 max-w-xl text-[13px] leading-5 text-slate-600">
+                        Acceso institucional con una interfaz simple, legible y adaptada a distintas resoluciones.
+                    </p>
+                </div>
+
+                <div class="border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-5 xl:p-6">
+                    <div class="mb-4 opacity-0 animate-fade-in delay-100">
+                        <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-cetpro/80">Acceso institucional</p>
+                        <h2 class="mt-1 text-[1.7rem] font-semibold tracking-tight text-slate-900 xl:text-[2.15rem]">Iniciar sesión</h2>
+                        <p class="mt-1 max-w-md text-[13px] leading-6 text-slate-600">
+                            Ingresa con tu usuario y contraseña para continuar en la plataforma.
+                        </p>
+                    </div>
+
+                    <form @submit.prevent="onSignIn" class="space-y-3.5 opacity-0 animate-fade-in delay-200">
+                        <div class="space-y-1.5">
+                            <label for="usuario" class="block text-[13px] font-medium text-slate-700">Usuario</label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                                </span>
+                                <input
+                                    id="usuario"
+                                    v-model="formData.usuario"
+                                    type="text"
+                                    autocomplete="username"
+                                    placeholder="Nombre de usuario"
+                                    :class="[
+                                        'w-full rounded-none border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-3 text-[14px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:bg-white focus:ring-1 focus:ring-slate-200',
+                                        { 'border-red-500 focus:border-red-500 focus:ring-red-500/10': formErrors.usuario }
+                                    ]"
+                                />
+                            </div>
+                            <p v-if="formErrors.usuario" class="text-xs text-red-600">{{ formErrors.usuario }}</p>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label for="password" class="block text-[13px] font-medium text-slate-700">Contraseña</label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
+                                </span>
                                 <input
                                     id="password"
                                     v-model="formData.password"
                                     :type="passwordInputType"
+                                    autocomplete="current-password"
                                     placeholder="••••••••"
                                     :class="[
-                                        'w-full rounded-md bg-gray-100 border-gray-300 sm:text-sm block p-3 pr-10 focus:ring-1 focus:ring-cetpro focus:border-cetpro outline-none transition',
-                                        { 'border-red-500 ring-red-500': formErrors.password }
+                                        'w-full rounded-none border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-10 text-[14px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:bg-white focus:ring-1 focus:ring-slate-200',
+                                        { 'border-red-500 focus:border-red-500 focus:ring-red-500/10': formErrors.password }
                                     ]"
                                 />
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                    <button type="button" @click="togglePasswordVisibility" class="hover:text-gray-600 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" 
-                                            :class="['h-6 w-6', isPasswordVisible ? 'text-cetpro' : 'text-gray-400']">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-4">
+                                    <button
+                                        type="button"
+                                        @click="togglePasswordVisibility"
+                                        class="p-1 text-slate-400 transition hover:text-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-200"
+                                        :aria-label="isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                            :class="['h-4 w-4', isPasswordVisible ? 'text-cetpro' : 'text-slate-400']">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                         </svg>
                                     </button>
                                 </div>
-                                <p v-if="formErrors.password" class="mt-1 text-xs text-red-600">{{ formErrors.password }}</p>
                             </div>
+                            <p v-if="formErrors.password" class="text-xs text-red-600">{{ formErrors.password }}</p>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3 pt-0.5">
+                            <label for="remember-me" class="inline-flex cursor-pointer items-center gap-2 text-[13px] text-slate-600">
+                                <input id="remember-me" v-model="rememberMe" type="checkbox" class="h-3.5 w-3.5 rounded-none border-slate-300 text-cetpro focus:ring-cetpro-light">
+                                <span>Recuérdame</span>
+                            </label>
+                            <span class="hidden text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400 sm:inline">
+                                Acceso seguro
+                            </span>
+                        </div>
+
+                        <Button
+                            title="Ingresar"
+                            type="submit"
+                            class="!mt-0.5 !w-full !rounded-none !py-2.5 !text-[15px] !font-semibold !border !border-cetpro bg-cetpro hover:bg-cetpro-dark text-white transition-colors duration-200"
+                            loading-title="Ingresando..."
+                            :loading="loggingIn"
+                        />
+                    </form>
+
+                    <div class="mt-4 border-t border-slate-200 pt-3 opacity-0 animate-fade-in delay-300 lg:hidden">
+                        <div class="border border-slate-200 bg-white px-3 py-3">
+                            <p class="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
+                                Acceso para estudiantes
+                            </p>
+                            <p class="mt-2 text-xl font-semibold leading-tight text-slate-900">
+                                Consulta pública de notas
+                            </p>
+                            <p class="mt-2 text-[13px] leading-6 text-slate-600">
+                                Revisa calificaciones registradas desde una vista externa, separada del acceso académico institucional.
+                            </p>
+                            <router-link
+                                :to="{ name: 'consulta.notas.publica' }"
+                                class="mt-4 inline-flex w-full items-center justify-center border border-slate-300 bg-white px-4 py-2.5 text-[13px] font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-slate-200"
+                            >
+                                Ir a consulta de notas
+                            </router-link>
                         </div>
                     </div>
-
-                    <div class="flex items-center">
-                        <input id="remember-me" v-model="rememberMe" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-cetpro focus:ring-cetpro-light">
-                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">Recuérdame</label>
-                    </div>
-                    
-                    <Button 
-                        title="Ingresar" 
-                        type="submit"
-                        class="!w-full !py-3 !text-base !font-semibold bg-cetpro hover:bg-cetpro-dark text-white shadow-lg shadow-cyan-500/30 transition-shadow duration-300" 
-                        loading-title="Ingresando..."
-                        :loading="loggingIn" 
-                    />
-                </form>
-
-                <div class="mt-8 border border-slate-200 bg-slate-50 px-5 py-5 opacity-0 animate-fade-in delay-300 lg:hidden">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8a6a2f]">
-                        Acceso para estudiantes
-                    </p>
-                    <p class="mt-3 text-xl font-bold leading-tight text-slate-900">
-                        Consulta publica de notas
-                    </p>
-                    <p class="mt-3 text-sm leading-7 text-slate-600">
-                        Revisa calificaciones registradas desde una vista externa, separada del acceso academico institucional.
-                    </p>
-                    <div class="mt-4 h-px w-full bg-[#c9b27d]"></div>
-                    <router-link
-                        :to="{ name: 'consulta.notas.publica' }"
-                        class="mt-5 inline-flex w-full items-center justify-center border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#12384f]"
-                    >
-                        Ir a consulta de notas
-                    </router-link>
                 </div>
 
-                <footer class="w-full text-center text-xs text-gray-400 pt-12 mt-auto opacity-0 animate-fade-in delay-300">
-                    © 2025 Todos los derechos reservados. CETPRO PUNO.
+                <footer class="relative z-10 w-full px-1 pt-2 text-center text-[11px] text-slate-400 opacity-0 animate-fade-in delay-300">
+                    © {{ currentYear }} Todos los derechos reservados. CETPRO PUNO.
                 </footer>
+            </div>
+        </main>
             </div>
         </div>
 
@@ -231,37 +272,91 @@ const onPasswordChanged = async (newPassword) => {
 </template>
 
 <style scoped>
-.node {
-    @apply absolute w-4 h-4 bg-cetpro-light/10 rounded-full;
-    animation: float 4s ease-in-out infinite;
+.login-brand {
+    padding: clamp(1rem, 1.2vw, 1.35rem);
+    background:
+        linear-gradient(180deg, #0b6f99 0%, #0c6085 100%);
 }
+
+.balance-title {
+    font-size: clamp(2.4rem, 3.5vw, 4rem);
+    font-weight: 800;
+    line-height: 0.92;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+    text-wrap: balance;
+}
+
+.node {
+    @apply absolute w-4 h-4 rounded-full;
+    background: rgba(186, 230, 253, 0.18);
+    box-shadow: 0 0 0 4px rgba(186, 230, 253, 0.04);
+    animation: float 6s ease-in-out infinite;
+}
+
+.login-watermark {
+    animation: drift 18s ease-in-out infinite;
+}
+
 @keyframes float {
     0% { transform: translateY(0px); }
     50% { transform: translateY(-20px); }
     100% { transform: translateY(0px); }
 }
-.node:nth-child(2) { animation-duration: 4s; animation-delay: 1s; }
-.node:nth-child(3) { animation-duration: 5s; }
-.node:nth-child(4) { animation-duration: 6s; animation-delay: 2s; }
-.node:nth-child(5) { animation-duration: 4.5s; }
+
+.node:nth-child(2) { animation-duration: 7s; animation-delay: 1s; }
+.node:nth-child(3) { animation-duration: 8s; }
+.node:nth-child(4) { animation-duration: 9s; animation-delay: 2s; }
+.node:nth-child(5) { animation-duration: 7.5s; }
+
+@keyframes drift {
+    0% { transform: scale(1.08) translate3d(0, 0, 0); }
+    50% { transform: scale(1.1) translate3d(10px, -8px, 0); }
+    100% { transform: scale(1.08) translate3d(0, 0, 0); }
+}
 
 @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
 @keyframes fade-in-up {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
 .animate-fade-in {
     animation: fade-in 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     animation-fill-mode: both;
 }
+
 .animate-fade-in-up {
     animation: fade-in-up 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     animation-fill-mode: both;
 }
+
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
+
+@media (max-width: 1023px) {
+    .login-brand {
+        padding: 0;
+    }
+}
+
+@media (min-width: 1024px) and (max-width: 1365px) {
+    .balance-title {
+        font-size: clamp(2.2rem, 3.2vw, 3.6rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .login-watermark,
+    .node,
+    .animate-fade-in,
+    .animate-fade-in-up {
+        animation: none !important;
+    }
+}
 </style>

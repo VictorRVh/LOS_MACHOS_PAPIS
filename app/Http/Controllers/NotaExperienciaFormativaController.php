@@ -25,7 +25,6 @@ class NotaExperienciaFormativaController extends Controller
         if (!$nota) {
             return response()->json(['message' => 'Nota no encontrada'], 404);
         }
-
         return response()->json($nota);
     }
 

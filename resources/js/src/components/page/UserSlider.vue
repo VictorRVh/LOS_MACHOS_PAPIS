@@ -59,6 +59,19 @@ const initialFormData = () => ({
 
 const formData = ref(initialFormData());
 const formErrors = ref({});
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
+
+const passwordType = computed(() => showPassword.value ? 'text' : 'password');
+const confirmPasswordType = computed(() => showConfirmPassword.value ? 'text' : 'password');
+
+const togglePassword = () => {
+    showPassword.value = !showPassword.value;
+};
+
+const toggleConfirmPassword = () => {
+    showConfirmPassword.value = !showConfirmPassword.value;
+};
 
 watch(() => props.show, () => {
     if (props.show) {
@@ -181,10 +194,63 @@ const onSubmit = async () => {
                     <FormInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento" type="date"
                         :error="formErrors?.fecha_nacimiento" required />
                     <template v-if="!user?.id">
-                        <FormInput v-model="formData.password" label="Contraseña" type="password"
-                            :error="formErrors?.password" required />
-                        <FormInput v-model="formData.confirm_password" type="password" label="Confirmar Contraseña"
-                            required />
+                        <div class="relative">
+                            <label class="block text-sm font-medium mb-1">Contraseña</label>
+
+                            <div class="relative">
+                                <input v-model="formData.password" :type="passwordType" class="w-full rounded-md 
+           bg-gray-100 text-gray-900 border-gray-300
+           dark:bg-gray-800 dark:text-white dark:border-gray-600
+           p-3 pr-10" placeholder="••••••••" />
+
+                                <button type="button" @click="togglePassword"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-3">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor"
+                                        :class="['h-5 w-5', showPassword ? 'text-cetpro' : 'text-gray-400']">
+
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <p v-if="formErrors.password" class="text-xs text-red-500">
+                                {{ formErrors.password }}
+                            </p>
+                        </div>
+                        <div class="relative">
+                            <label class="block text-sm font-medium mb-1">Confirmar Contraseña</label>
+
+                            <div class="relative">
+                                <input v-model="formData.confirm_password" :type="confirmPasswordType"
+                                    class="w-full rounded-md 
+                                    bg-gray-100 text-gray-900 border-gray-300
+                                    dark:bg-gray-800 dark:text-white dark:border-gray-600
+                                    p-3 pr-10" placeholder="••••••••" />
+
+                                <button type="button" @click="toggleConfirmPassword"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-3">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor"
+                                        :class="['h-5 w-5', showConfirmPassword ? 'text-cetpro' : 'text-gray-400']">
+
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <p v-if="formErrors.confirm_password" class="text-xs text-red-500">
+                                {{ formErrors.confirm_password }}
+                            </p>
+                        </div>
                     </template>
                 </div>
 
@@ -200,15 +266,15 @@ const onSubmit = async () => {
                 <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
                     <SelectedChips :items="formData.roles" @remove="onRoleRemove" />
                 </div>
-<div class="flex gap-2 mt-1">
-    <Button :title="user?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
-        :loading-title="user?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full h-10" 
-        :loading="saving || updating" @click="onSubmit" :disabled="saving || updating" />
-    
-    <!-- Botón Cancelar: ancho flexible solo si se está editando -->
-    <Button title="Cancelar" variant="outline" @click="emit('hide');"
-        class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer !mt-6 h-10" />
-</div>
+                <div class="flex gap-2 mt-1">
+                    <Button :title="user?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
+                        :loading-title="user?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full h-10"
+                        :loading="saving || updating" @click="onSubmit" :disabled="saving || updating" />
+
+                    <!-- Botón Cancelar: ancho flexible solo si se está editando -->
+                    <Button title="Cancelar" variant="outline" @click="emit('hide');"
+                        class="bg-red-500 active:bg-red-500 dark:bg-cc-10 active:dark:bg-cc-10 text-white dark:text-red-200 hover:bg-red-600 dark:hover:bg-cc-12 cursor-pointer !mt-6 h-10" />
+                </div>
 
             </div>
         </AuthorizationFallback>

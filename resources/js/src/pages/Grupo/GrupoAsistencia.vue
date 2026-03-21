@@ -17,7 +17,7 @@ import TBody from '@/components/table/TBody.vue';
 import Tr from '@/components/table/Tr.vue';
 import Th from '@/components/table/Th.vue';
 import Td from '@/components/table/Td.vue';
-
+import BaseButton from '@/components/ui/Button.vue';
 import TomarAsistencia from '../../components/page/SesionesDocente/TomarAsistenciaSlider.vue';
 import MenuTable from "../../components/table/MenuTable.vue";
 import useExportExcel from "../../composables/sesiones/useExportExcel"
@@ -51,9 +51,16 @@ watch(
   async (nuevoId) => {
     if (!nuevoId) return;
 
-    allEvents.value = []
-    calendarKey.value++
+    // 1. LIMPIAR ANTES DE CARGAR
+    programacionSesion.sesiones = [];
+    sesionStore.sesion = null;
 
+    allEvents.value = [];
+    selectionEvents.value = [];
+    datesForSlider.value = [];
+    calendarKey.value++; // Rerender inmediato sin los eventos anteriores
+
+    // 2. CARGAR NUEVA DATA
     await sesionStore.loadSesion({
       id_grupo: nuevoId,
       tipo_entrega: 2,
@@ -350,7 +357,7 @@ const onSliderHide = () => {
       </Table>
     </div>
 
-    <TomarAsistencia :show="asist" :grupo-id="id"  @hide="ocultarSliderAsistencia"
+    <TomarAsistencia :show="asist" :grupo-id="id" :llamar-asistencia="true"  @hide="ocultarSliderAsistencia"
       @save="clearSelection" />
 
     <SesionSlider :show="slider" :blockToEdit="sliderData ?? null" :idGrupo="id" :sesion="sesionStore?.sesion"

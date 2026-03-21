@@ -24,7 +24,7 @@
 
             <!-- Input -->
             <input v-model="form.password" :type="showPass ? 'text' : 'password'" class="block w-full border-gray-300 rounded-lg pl-10 pr-10 py-2 
-                     focus:ring-2 focus:ring-cyan-500 transition" placeholder="Mínimo 6 caracteres" required />
+                     focus:ring-2 focus:ring-cyan-500 transition" placeholder="Mínimo 8 caracteres" required />
 
             <!-- Icono mostrar/ocultar -->
             <button type="button" @click="showPass = !showPass"
@@ -110,8 +110,8 @@ const closeModal = () => {
 const onSubmit = async () => {
   error.value = '';
 
-  if (form.value.password.length < 6) {
-    error.value = 'La contraseña debe tener al menos 6 caracteres.';
+  if (form.value.password.length < 8) {
+    error.value = 'La contraseña debe tener al menos 8 caracteres.';
     return;
   }
 

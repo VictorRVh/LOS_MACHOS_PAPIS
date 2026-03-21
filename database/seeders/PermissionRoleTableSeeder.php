@@ -12,6 +12,9 @@ class PermissionRoleTableSeeder extends Seeder
     {
         $permissionRole = [];
 
+        // =========================
+        // SOLO DOCENTE
+        // =========================
         $docentePermissions = [
             'ver-perfil-docente',
             'editar-perfil-docente',
@@ -43,17 +46,34 @@ class PermissionRoleTableSeeder extends Seeder
             'eliminar-capacidades-docente',
         ];
 
-        $docentePermissionIds = DB::table('permissions')
-            ->whereIn('name', $docentePermissions)
-            ->pluck('id')
-            ->toArray();
+        // =========================
+        // COMPARTIDOS
+        // =========================
+        $sharedPermissions = [
+            'editar-perfil',
+            'editar-password',
+        ];
 
-        // Con esta webada filtramos los permisos del admin 
-        $adminPermissionIds = DB::table('permissions')
-            ->whereNotIn('id', $docentePermissionIds)
+        // =========================
+        // IDS
+        // =========================
+        $docenteIds = DB::table('permissions')
+            ->whereIn('name', $docentePermissions)
             ->pluck('id');
 
-        foreach ($adminPermissionIds as $pid) {
+        $sharedIds = DB::table('permissions')
+            ->whereIn('name', $sharedPermissions)
+            ->pluck('id');
+
+        // ADMIN = todo menos docente y shared
+        $adminIds = DB::table('permissions')
+            ->whereNotIn('name', array_merge($docentePermissions, $sharedPermissions))
+            ->pluck('id');
+
+        // =========================
+        // ADMIN (1,2,4)
+        // =========================
+        foreach ($adminIds as $pid) {
             foreach ([1, 2, 4] as $roleId) {
                 $permissionRole[] = [
                     'role_id'       => $roleId,
@@ -63,8 +83,10 @@ class PermissionRoleTableSeeder extends Seeder
             }
         }
 
-        // Rol docente: solo permisos de docente
-        foreach ($docentePermissionIds as $pid) {
+        // =========================
+        // DOCENTE (6)
+        // =========================
+        foreach ($docenteIds as $pid) {
             $permissionRole[] = [
                 'role_id'       => 6,
                 'permission_id' => $pid,
@@ -72,6 +94,20 @@ class PermissionRoleTableSeeder extends Seeder
             ];
         }
 
-        DB::table('permission_role')->insert($permissionRole);
+        // =========================
+        // SHARED (ADMIN + DOCENTE)
+        // =========================
+        foreach ($sharedIds as $pid) {
+            foreach ([1, 2, 4, 6] as $roleId) {
+                $permissionRole[] = [
+                    'role_id'       => $roleId,
+                    'permission_id' => $pid,
+                    'created_at'    => now(),
+                ];
+            }
+        }
+
+        // Evita errores si corres el seeder varias veces
+        DB::table('permission_role')->insertOrIgnore($permissionRole);
     }
 }

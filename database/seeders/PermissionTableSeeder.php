@@ -216,7 +216,10 @@ class PermissionTableSeeder extends Seeder
             'ver-actividades-recientes',
             'crear-actividades-recientes',
             'editar-actividades-recientes',
-            'eliminar-actividades-recientes'
+            'eliminar-actividades-recientes',
+
+            'editar-perfil',
+            'editar-password'
 
         ];
 

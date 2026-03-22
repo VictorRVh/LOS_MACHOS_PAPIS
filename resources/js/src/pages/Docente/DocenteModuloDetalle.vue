@@ -3,6 +3,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import useGrupoStore from '../../store/Grupo/useGrupoStore';
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
+import ModuleHeader from '../../components/page/ModuleHeader.vue';
+import ModuleNavigation from '../../components/page/ModuleNavigation.vue';
 
 const route = useRoute();
 const grupoStore = useGrupoStore();
@@ -22,6 +24,16 @@ const tituloPrincipal = computed(() => {
 const subTitulo = computed(() => {
   if (!infoGrupo.value) return 'Cargando detalles...';
   return `Modulo ${infoGrupo.value.modulo} · Seccion ${infoGrupo.value.seccion} · Turno ${infoGrupo.value.turno}`;
+});
+
+const metadataItems = computed(() => {
+  if (!infoGrupo.value) return [];
+
+  return [
+    { label: 'Modulo', value: infoGrupo.value.modulo },
+    { label: 'Seccion', value: infoGrupo.value.seccion },
+    { label: 'Turno', value: infoGrupo.value.turno },
+  ];
 });
 
 onMounted(async () => {
@@ -71,28 +83,8 @@ const navLinks = computed(() => {
     </div>
 
     <template v-else>
-      <header class="flex flex-col gap-3 px-6 pt-5 lg:flex-row lg:items-start lg:justify-between">
-        <div class="min-w-0">
-          <h2 class="truncate text-2xl font-bold text-gray-800 dark:text-gray-200">{{ tituloPrincipal }}</h2>
-          <p class="text-md text-gray-500 dark:text-gray-400">{{ subTitulo }}</p>
-        </div>
-
-        <div id="docente-header-actions" class="flex flex-wrap items-center justify-start gap-2 lg:justify-end"></div>
-      </header>
-
-      <nav class="mt-4 border-b border-gray-200 px-6 dark:border-gray-700">
-        <div class="custom-scrollbar-nav flex overflow-x-auto space-x-4 sm:space-x-6">
-          <router-link
-            v-for="link in navLinks"
-            :key="link.text"
-            :to="link.to"
-            class="whitespace-nowrap border-b-2 border-transparent px-1 py-3 text-sm font-medium text-gray-500 transition-colors duration-200 hover:border-cetpro/50 hover:text-cetpro-dark dark:text-gray-400 dark:hover:text-cetpro-light"
-            active-class="!text-cetpro !dark:text-cetpro-light !border-cetpro font-semibold"
-          >
-            {{ link.text }}
-          </router-link>
-        </div>
-      </nav>
+      <ModuleHeader :title="tituloPrincipal" :metadata="metadataItems" actions-target-id="docente-header-actions" />
+      <ModuleNavigation :links="navLinks" />
 
       <div class="flex-grow p-6">
         <router-view />
@@ -100,22 +92,3 @@ const navLinks = computed(() => {
     </template>
   </div>
 </template>
-
-<style scoped>
-.custom-scrollbar-nav::-webkit-scrollbar {
-  height: 4px;
-}
-
-.custom-scrollbar-nav::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar-nav::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
-  border-radius: 20px;
-}
-
-.dark .custom-scrollbar-nav::-webkit-scrollbar-thumb {
-  background-color: #4b5563;
-}
-</style>

@@ -8,6 +8,8 @@ import esLocale from '@fullcalendar/core/locales/es'
 const props = defineProps({
   events: { type: Array, default: () => [] },
   selectable: { type: Boolean, default: true },
+  height: { type: [Number, String], default: 500 },
+  embedded: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['date-click', 'event-click', 'selection-change'])
@@ -18,7 +20,7 @@ const calendarOptions = ref({
   plugins: [dayGridPlugin, interactionPlugin],
   initialView: 'dayGridMonth',
   locale: esLocale,
-  height: 500,
+  height: props.height,
   stickyHeaderDates: true, // ✅ hace que “lun, mar, mié…” queden fijos
   expandRows: true,
   headerToolbar: {
@@ -74,7 +76,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="calendar-container">
+  <div class="calendar-container" :class="{ 'calendar-container--embedded': embedded }">
     <FullCalendar :options="calendarOptions" />
   </div>
 </template>
@@ -85,6 +87,22 @@ onMounted(() => {
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   padding: 0.5rem;
+}
+
+.calendar-container--embedded {
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+
+.calendar-container--embedded :deep(.fc-theme-standard .fc-scrollgrid) {
+  border: 0;
+}
+
+.calendar-container--embedded :deep(.fc-theme-standard td),
+.calendar-container--embedded :deep(.fc-theme-standard th) {
+  border-bottom-width: 0;
 }
 
 /* Colores de sábado y domingo */

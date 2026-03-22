@@ -18,7 +18,7 @@ import useDocumento from "../../store/Estudiante/UseDocumentoEgresadoStore.js";
 
 import { generateConstanciaEgresado } from "../../pdf/ConstanciaEgresado";
 import { generateTituloCetpro } from "../../pdf/TituloCetpro.js";
-
+import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 import useHttpRequest from "../../composables/useHttpRequest.js";
 
 
@@ -35,7 +35,7 @@ const estudiantes = ref([]);
 const especialidad = ref(null);
 const isLoading = ref(false);
 
-
+const breadcrumb = useBreadcrumbStore();
 
 /* ============================
    MODAL DOCUMENTO GENERAL
@@ -57,11 +57,17 @@ onMounted(async () => {
     isLoading.value = true;
 
     await estudianteStore.loadEstudiantesEgresados(idEspecialidad, idPeriodo);
-
     especialidad.value = estudianteStore.estudiantesEgresados?.especialidad ?? null;
     estudiantes.value = estudianteStore.estudiantesEgresados?.egresados ?? [];
 
     isLoading.value = false;
+
+    breadcrumb.setTextItemAuto(
+        `Egresados`,
+        idEspecialidad,
+        "egresados",
+        { name: 'egresadosLista', params: { id: idEspecialidad, periodoId: idPeriodo } }
+    );
 });
 
 /* ============================

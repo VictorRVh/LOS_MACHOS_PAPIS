@@ -43,9 +43,27 @@ export default [
 
     { path: '/comisionDocente', name: 'comsion.docente', component: () => import('../pages/Docente-menu/DocenteComsion.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Comisiones', to: { name: 'comsion.docente' } }] }, },
     { path: '/buscar-estudiante', name: 'buscar.estudiante', component: () => import('../pages/Estudiante/BuscarEstudiante.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Buscar estudiante', to: { name: 'buscar.estudiante' } }] }, },
-    { path: '/egresados', name: 'egresados', component: () => import('../pages/Estudiante/Egresados.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Egresados', to: { name: 'egresados' } }] }, },
-    { path: '/egresados/:id/:periodoId', name: 'egresadosLista', component: () => import('../pages/Estudiante/EgresadosLista.vue'), meta: { layout: 'dashboard', permissions: ['ver-comsion-docente'], breadcrumb: [{ text: 'Lista de Egresados', to: { name: 'egresadosLista' } }] }, },
-
+    {
+        path: '/egresados',
+        name: 'egresados',
+        component: () => import('../pages/Estudiante/Egresados.vue'),
+        meta: {
+            layout: 'dashboard',
+            permissions: ['ver-comsion-docente'],
+            breadcrumb: [{ text: 'Egresados', to: { name: 'egresados' } }]
+        },
+        children: [
+            {
+                path: ':id/:periodoId',
+                name: 'egresadosLista',
+                component: () => import('../pages/Estudiante/EgresadosLista.vue'),
+                props: true,
+                meta: {
+                    breadcrumb: [{ text: 'Lista de Egresados' }]
+                }
+            }
+        ]
+    },
     {
         path: '/programa',
         name: 'programa',
@@ -412,7 +430,7 @@ export default [
         }
     },
 
-   {
+    {
         path: '/estadistica',
         name: 'estadistica',
         component: () => import('../pages/Estadistica/Estadistica.vue'),

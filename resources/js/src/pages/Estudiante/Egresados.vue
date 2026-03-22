@@ -166,8 +166,7 @@ const totalPeriodos = computed(() => periodos.value.length);
 
       <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
         <div class="mb-3">
-          <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Filtros operativos</p>
-          <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Consulta de egresados</h3>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Filtros de egresados</p>
         </div>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-7 md:items-end">
@@ -206,7 +205,7 @@ const totalPeriodos = computed(() => periodos.value.length);
               <Th class="min-w-[250px] border-b border-gray-300 dark:border-gray-600">Especialidad</Th>
               <Th class="w-[100px] border-b border-gray-300 text-center dark:border-gray-600">Acciones</Th>
             </THead>
-            <TBody>
+            <TBody :filas="especialidades.length">
               <tr v-for="(esp, index) in especialidades" :key="esp.id" class="border-b border-gray-300 dark:border-gray-700">
                 <td class="py-3 text-center">{{ index + 1 }}</td>
                 <td class="py-3 font-semibold">{{ esp.nombre_especialidad }}</td>

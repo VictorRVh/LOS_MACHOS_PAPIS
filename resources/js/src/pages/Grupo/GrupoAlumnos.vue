@@ -281,38 +281,6 @@ const handleViewportChange = () => {
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-grupos']">
     <div class="w-full space-y-4 px-3 py-2" v-if="matriculados">
-      <div class="mb-4 ml-2 flex flex-wrap justify-end gap-3">
-        <button
-          type="button"
-          @click="descargarNomina(props.id)"
-          class="inline-flex min-h-[36px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-3 py-1.5 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
-        >
-          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
-          <span class="text-[13px] font-medium">Descargar nomina</span>
-          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
-        </button>
-
-        <button
-          type="button"
-          @click="exportar()"
-          class="inline-flex min-h-[36px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-3 py-1.5 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
-        >
-          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
-          <span class="text-[13px] font-medium">Exportar Alumnos</span>
-          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
-        </button>
-
-        <button
-          type="button"
-          @click="exportarMatriculaEvaluaciones(props.id)"
-          class="inline-flex min-h-[36px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-3 py-1.5 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
-        >
-          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
-          <span class="text-[13px] font-medium">Registro de matrículas y evaluaciones</span>
-          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
-        </button>
-      </div>
-
       <Table>
         <THead>
           <Th>N°</Th>
@@ -369,6 +337,40 @@ const handleViewportChange = () => {
     </div>
 
     <div v-else class="p-8 text-center">Cargando información del grupo...</div>
+
+    <Teleport to="#grupo-header-actions">
+      <div v-if="matriculados" class="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          @click="descargarNomina(props.id)"
+          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+        >
+          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
+          <span class="text-[12px] font-medium">Nomina</span>
+          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
+        </button>
+
+        <button
+          type="button"
+          @click="exportar()"
+          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+        >
+          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
+          <span class="text-[12px] font-medium">Alumnos</span>
+          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
+        </button>
+
+        <button
+          type="button"
+          @click="exportarMatriculaEvaluaciones(props.id)"
+          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+        >
+          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
+          <span class="text-[12px] font-medium">Matriculas y evaluaciones</span>
+          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
+        </button>
+      </div>
+    </Teleport>
 
     <Teleport to="body">
       <div

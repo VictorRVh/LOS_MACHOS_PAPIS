@@ -29,7 +29,7 @@ const tituloPrincipal = computed(() => {
 
 const subTitulo = computed(() => {
   if (!infoGrupo.value) return 'Cargando detalles...';
-  return `Modulo ${infoGrupo.value.modulo} · Seccion ${infoGrupo.value.seccion}`;
+  return `Modulo ${infoGrupo.value.modulo} · Seccion ${infoGrupo.value.seccion} · Turno ${infoGrupo.value.turno}`;
 });
 
 onMounted(async () => {
@@ -62,9 +62,13 @@ onMounted(async () => {
     </div>
 
     <template v-else>
-      <header class="px-6 pt-5">
-        <h2 class="truncate text-2xl font-bold text-gray-800 dark:text-gray-200">{{ tituloPrincipal }}</h2>
-        <p class="text-md text-gray-500 dark:text-gray-400">{{ subTitulo }}</p>
+      <header class="flex flex-col gap-3 px-6 pt-5 lg:flex-row lg:items-start lg:justify-between">
+        <div class="min-w-0">
+          <h2 class="truncate text-2xl font-bold text-gray-800 dark:text-gray-200">{{ tituloPrincipal }}</h2>
+          <p class="text-md text-gray-500 dark:text-gray-400">{{ subTitulo }}</p>
+        </div>
+
+        <div id="grupo-header-actions" class="flex flex-wrap items-center justify-start gap-2 lg:justify-end"></div>
       </header>
 
       <nav class="mt-4 border-b border-gray-200 px-6 dark:border-gray-700">

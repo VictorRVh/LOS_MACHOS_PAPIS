@@ -63,10 +63,11 @@ onMounted(async () => {
     isLoading.value = false;
 
     breadcrumb.setTextItemAuto(
-        `Egresados`,
-        idEspecialidad,
+        null,
+        null,
         "egresados",
         { name: 'egresadosLista', params: { id: idEspecialidad, periodoId: idPeriodo } }
+        
     );
 });
 

@@ -51,18 +51,20 @@ export default [
             layout: 'dashboard',
             permissions: ['ver-comsion-docente'],
             breadcrumb: [{ text: 'Egresados', to: { name: 'egresados' } }]
-        },
-        children: [
-            {
-                path: ':id/:periodoId',
-                name: 'egresadosLista',
-                component: () => import('../pages/Estudiante/EgresadosLista.vue'),
-                props: true,
-                meta: {
-                    breadcrumb: [{ text: 'Lista de Egresados' }]
-                }
-            }
-        ]
+        }
+    },
+    {
+        path: '/egresados/:id/:periodoId',
+        name: 'egresadosLista',
+        component: () => import('../pages/Estudiante/EgresadosLista.vue'),
+        props: true,
+        meta: {
+            layout: 'dashboard',
+            parent: 'egresados',
+            breadcrumb: [
+                { text: 'Lista de Egresados', to: { name: 'egresados' } }
+            ]
+        }
     },
     {
         path: '/programa',

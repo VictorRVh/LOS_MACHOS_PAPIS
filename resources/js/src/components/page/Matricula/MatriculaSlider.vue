@@ -234,10 +234,6 @@ const onSubmit = async () => {
         <section class="border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
           <div class="border-b border-slate-200 px-3 py-2 dark:border-slate-700">
             <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Paso {{ currentStep }}</p>
-            <div class="mt-0.5 flex items-center gap-2">
-              <component :is="currentStepMeta.icon" class="h-4 w-4 text-cetpro dark:text-cetpro-light" />
-              <h3 class="text-[14px] font-semibold text-slate-900 dark:text-slate-100">{{ currentStepMeta.title }}</h3>
-            </div>
           </div>
 
           <div class="p-3">

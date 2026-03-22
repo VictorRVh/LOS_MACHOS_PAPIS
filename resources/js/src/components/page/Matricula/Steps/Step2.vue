@@ -1,11 +1,10 @@
 <script setup>
 import { computed, ref, watch } from "vue";
-import { MagnifyingGlassIcon, UserCircleIcon } from "@heroicons/vue/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
 import FormInput from "../../../ui/FormInput.vue";
 import FormLabelError from "../../../ui/FormLabelError.vue";
-import vSelect from "vue-select";
-import "vue-select/dist/vue-select.css";
 import BaseSelect from "../../../ui/BaseSelect.vue";
+import BaseSelectGrupo from "../../../ui/BaseSelectGrupo.vue";
 import ubigeo from "../../../../utils/ubigeo";
 import useModalToast from "../../../../composables/useModalToast";
 import useHttpRequest from "../../../../composables/useHttpRequest";
@@ -149,7 +148,7 @@ watch(
 </script>
 
 <template>
-  <div class="relative space-y-4">
+  <div class="relative space-y-3">
     <transition name="fade">
       <div
         v-if="saving"
@@ -163,21 +162,8 @@ watch(
       </div>
     </transition>
 
-    <section class="border border-slate-200 bg-slate-50 px-4 py-4 dark:border-slate-700 dark:bg-slate-800/60">
-      <div class="flex items-start gap-2.5">
-        <div class="flex h-8 w-8 shrink-0 items-center justify-center border border-cetpro/20 bg-cetpro/10 text-cetpro dark:border-cetpro-light/20 dark:bg-cetpro-light/10 dark:text-cetpro-light">
-          <UserCircleIcon class="h-4 w-4" />
-        </div>
-        <div class="min-w-0">
-          <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Identificacion</p>
-          <h4 class="mt-1 text-[15px] font-semibold text-slate-900 dark:text-slate-100">Datos personales del estudiante</h4>
-          <p class="mt-1 text-[13px] leading-5 text-slate-500 dark:text-slate-400">
-            Registre la informacion principal del estudiante y valide el documento cuando corresponda.
-          </p>
-        </div>
-      </div>
-
-      <div class="mt-4 grid gap-3 xl:grid-cols-[1.1fr_1fr_1fr_1fr]">
+    <section class="border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-700 dark:bg-slate-800/60">
+      <div class="grid gap-2.5 xl:grid-cols-[1.1fr_1fr_1fr_1fr]">
         <div class="xl:col-span-2">
           <label class="mb-1 block text-[12px] font-medium text-slate-700 dark:text-slate-200">Documento *</label>
           <div class="grid gap-2 sm:grid-cols-[160px_minmax(0,1fr)_42px]">
@@ -199,10 +185,10 @@ watch(
         <FormInput v-model="formData.apellido_materno" label="Apellido materno *" :error="errors.apellido_materno" />
       </div>
 
-      <div class="mt-3 grid gap-3 md:grid-cols-4">
+      <div class="mt-2.5 grid gap-2.5 md:grid-cols-4">
         <FormInput v-model="formData.nombre" label="Nombres *" :error="errors.nombre" />
         <FormLabelError label="Sexo *" :error="errors.sexo">
-          <v-select v-model="formData.sexo" :options="opcionesSexo" label="name" :reduce="(opcion) => opcion.value" placeholder="Seleccione sexo" :clearable="false" />
+          <BaseSelectGrupo v-model="formData.sexo" :options="opcionesSexo" label="name" value-prop="value" placeholder="Seleccione sexo" :clearable="false" />
         </FormLabelError>
         <FormLabelError label="Fecha de nacimiento *" :error="errors.fecha_nacimiento">
           <FormInput v-model="formData.fecha_nacimiento" type="date" label="" />
@@ -211,21 +197,16 @@ watch(
       </div>
     </section>
 
-    <section class="border border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-900">
-      <div class="flex flex-col gap-1">
-        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Ubicacion y contacto</p>
-        <h4 class="text-[15px] font-semibold text-slate-900 dark:text-slate-100">Datos de residencia y comunicacion</h4>
-      </div>
-
-      <div class="mt-4 grid gap-3 md:grid-cols-3">
+    <section class="border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
+      <div class="grid gap-2.5 md:grid-cols-3">
         <FormLabelError label="Departamento de nacimiento" :error="errors.departamento_nacimiento">
-          <v-select v-model="formData.departamento_nacimiento" :options="departamentos" placeholder="Buscar departamento..." />
+          <BaseSelectGrupo v-model="formData.departamento_nacimiento" :options="departamentos" placeholder="Buscar departamento..." />
         </FormLabelError>
         <FormLabelError label="Provincia de nacimiento" :error="errors.provincia_nacimiento">
-          <v-select v-model="formData.provincia_nacimiento" :options="provincias" placeholder="Buscar provincia..." :disabled="!formData.departamento_nacimiento" />
+          <BaseSelectGrupo v-model="formData.provincia_nacimiento" :options="provincias" placeholder="Buscar provincia..." :disabled="!formData.departamento_nacimiento" />
         </FormLabelError>
         <FormLabelError label="Distrito de nacimiento" :error="errors.distrito_nacimiento">
-          <v-select v-model="formData.distrito_nacimiento" :options="distritos" placeholder="Buscar distrito..." :disabled="!formData.provincia_nacimiento" />
+          <BaseSelectGrupo v-model="formData.distrito_nacimiento" :options="distritos" placeholder="Buscar distrito..." :disabled="!formData.provincia_nacimiento" />
         </FormLabelError>
         <FormInput v-if="mostrarOtroDistrito" v-model="formData.lugar_nacimiento" label="Especifique otro lugar" />
         <FormInput v-model="formData.direccion_residencia" label="Direccion de residencia *" :error="errors.direccion_residencia" class="md:col-span-2" />
@@ -236,47 +217,42 @@ watch(
       </div>
     </section>
 
-    <section class="border border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-900">
-      <div class="flex flex-col gap-1">
-        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Perfil complementario</p>
-        <h4 class="text-[15px] font-semibold text-slate-900 dark:text-slate-100">Informacion adicional para seguimiento</h4>
-      </div>
-
-      <div class="mt-4 grid gap-3 md:grid-cols-3">
+    <section class="border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
+      <div class="grid gap-2.5 md:grid-cols-3">
         <FormLabelError label="Estado civil *" :error="errors.estado_civil">
-          <v-select v-model="formData.estado_civil" :options="opcionesEstadoCivil" placeholder="Seleccione estado" />
+          <BaseSelectGrupo v-model="formData.estado_civil" :options="opcionesEstadoCivil" placeholder="Seleccione estado" />
         </FormLabelError>
         <FormLabelError label="Grado de instruccion" :error="errors.grado_instruccion">
-          <v-select v-model="formData.grado_instruccion" :options="opcionesGradoInstruccion" placeholder="Seleccione grado" />
+          <BaseSelectGrupo v-model="formData.grado_instruccion" :options="opcionesGradoInstruccion" placeholder="Seleccione grado" />
         </FormLabelError>
         <FormInput v-model="formData.anio_egreso" label="Ano de egreso" />
         <FormLabelError label="Lengua materna" :error="errors.lengua_materna">
-          <v-select v-model="formData.lengua_materna" :options="opcionesLenguaMaterna" placeholder="Seleccione lengua" />
+          <BaseSelectGrupo v-model="formData.lengua_materna" :options="opcionesLenguaMaterna" placeholder="Seleccione lengua" />
         </FormLabelError>
         <FormLabelError label="Trabaja actualmente" :error="errors.trabaja">
-          <v-select v-model="formData.trabaja" :options="opcionesSiNo" placeholder="Seleccione opcion" />
+          <BaseSelectGrupo v-model="formData.trabaja" :options="opcionesSiNo" placeholder="Seleccione opcion" />
         </FormLabelError>
         <FormInput v-if="formData.trabaja === 'Si'" v-model="formData.detalle_trabajo" label="Ocupacion o centro laboral" />
         <FormLabelError label="Carga familiar" :error="errors.carga_familiar">
-          <v-select v-model="formData.carga_familiar" :options="opcionesSiNo" placeholder="Seleccione opcion" />
+          <BaseSelectGrupo v-model="formData.carga_familiar" :options="opcionesSiNo" placeholder="Seleccione opcion" />
         </FormLabelError>
         <FormInput v-if="formData.carga_familiar === 'Si'" v-model="formData.detalle_carga_familiar" label="Numero de personas a cargo" />
         <FormLabelError label="Internet en casa" :error="errors.internet_casa">
-          <v-select v-model="formData.internet_casa" :options="opcionesSiNo" placeholder="Seleccione opcion" />
+          <BaseSelectGrupo v-model="formData.internet_casa" :options="opcionesSiNo" placeholder="Seleccione opcion" />
         </FormLabelError>
         <FormInput v-if="formData.internet_casa === 'Si'" v-model="formData.tipo_internet" label="Tipo de conexion" />
         <FormLabelError label="Operador celular" :error="errors.tipo_operador">
-          <v-select v-model="formData.tipo_operador" :options="opcionesOperadores" placeholder="Seleccione operador" />
+          <BaseSelectGrupo v-model="formData.tipo_operador" :options="opcionesOperadores" placeholder="Seleccione operador" />
         </FormLabelError>
         <FormInput v-if="formData.tipo_operador === 'OTRO'" v-model="formData.otro_operador" label="Especifique operador" />
         <FormLabelError label="Equipos disponibles" :error="errors.equipos_virtuales">
-          <v-select v-model="formData.equipos_virtuales" :options="opcionesEquiposVirtuales" placeholder="Seleccione equipos" multiple :close-on-select="false" />
+          <BaseSelectGrupo v-model="formData.equipos_virtuales" :options="opcionesEquiposVirtuales" placeholder="Seleccione equipos" multiple :close-on-select="false" />
         </FormLabelError>
         <FormLabelError label="Tiene discapacidad" :error="errors.discapacidad">
-          <v-select v-model="formData.discapacidad" :options="opcionesSiNo" placeholder="Seleccione opcion" />
+          <BaseSelectGrupo v-model="formData.discapacidad" :options="opcionesSiNo" placeholder="Seleccione opcion" />
         </FormLabelError>
         <FormLabelError v-if="formData.discapacidad === 'Si'" label="Tipo de discapacidad" :error="errors.tipo_discapacidad">
-          <v-select v-model="formData.tipo_discapacidad" :options="opcionesDiscapacidad" placeholder="Seleccione discapacidad" />
+          <BaseSelectGrupo v-model="formData.tipo_discapacidad" :options="opcionesDiscapacidad" placeholder="Seleccione discapacidad" />
         </FormLabelError>
       </div>
     </section>

@@ -3,8 +3,7 @@ import { computed } from "vue";
 import { CreditCardIcon, InformationCircleIcon } from "@heroicons/vue/24/outline";
 import FormInput from "../../../ui/FormInput.vue";
 import FormLabelError from "../../../ui/FormLabelError.vue";
-import vSelect from "vue-select";
-import "vue-select/dist/vue-select.css";
+import BaseSelectGrupo from "../../../ui/BaseSelectGrupo.vue";
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
@@ -76,7 +75,7 @@ const resumenItems = computed(() => [
 
       <div class="mt-4 grid gap-3 md:grid-cols-3">
         <FormLabelError label="Condicion">
-          <v-select v-model="formData.condicion" :options="condiciones" label="label" :reduce="(option) => option.value" :clearable="false" />
+          <BaseSelectGrupo v-model="formData.condicion" :options="condiciones" label="label" value-prop="value" :clearable="false" />
         </FormLabelError>
         <FormInput v-model="formData.nro_recibo" label="Nro. recibo / voucher" />
         <FormInput v-model="formData.aporte" label="Aporte S/." type="number" step="0.01" />

@@ -3,14 +3,18 @@ import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
 
 const props = defineProps({
-  modelValue: [String, Number, Object, null],
+  modelValue: [String, Number, Array, Object, null],
   options: { type: Array, default: () => [] },
   label: { type: String, default: 'name' },
-  placeholder: { type: String, default: 'Seleccione una opción' },
+  valueProp: { type: String, default: 'id' },
+  placeholder: { type: String, default: 'Seleccione una opcion' },
   disabled: { type: Boolean, default: false },
   scrollable: { type: Boolean, default: true },
   maxHeight: { type: [String, Number], default: 180 },
   loading: { type: Boolean, default: false },
+  clearable: { type: Boolean, default: true },
+  multiple: { type: Boolean, default: false },
+  closeOnSelect: { type: Boolean, default: true },
 });
 
 const emit = defineEmits(['update:modelValue', 'change']);
@@ -19,20 +23,31 @@ const updateValue = (val) => {
   emit('update:modelValue', val);
   emit('change', val);
 };
+
+const reduceValue = (option) => {
+  if (option && typeof option === 'object' && props.valueProp in option) {
+    return option[props.valueProp];
+  }
+
+  return option;
+};
 </script>
 
 <template>
   <v-select
     :options="options || []"
     :label="label"
-    :reduce="option => option?.id ?? option"
+    :reduce="reduceValue"
     :modelValue="modelValue"
     @update:modelValue="updateValue"
     :placeholder="placeholder"
     :disabled="disabled"
     :loading="loading"
+    :clearable="clearable"
+    :multiple="multiple"
+    :close-on-select="closeOnSelect"
     class="base-v-select w-full"
-    :menu-style="scrollable ? { 'max-height': maxHeight + 'px', 'overflow-y': 'auto' } : {}"
+    :menu-style="scrollable ? { 'max-height': `${maxHeight}px`, 'overflow-y': 'auto' } : {}"
   >
     <template #no-options>
       No hay opciones disponibles
@@ -47,7 +62,7 @@ const updateValue = (val) => {
 <style scoped>
 :deep(.base-v-select) {
   --vs-border-width: 0;
-  --vs-border-radius: 4px;
+  --vs-border-radius: 3px;
   --vs-dropdown-z-index: 100;
   --vs-controls-color: #64748b;
   --vs-selected-color: #0f172a;
@@ -79,7 +94,7 @@ const updateValue = (val) => {
 }
 
 :deep(.base-v-select .vs__search) {
-  @apply m-0 leading-5;
+  @apply m-0 leading-5 bg-transparent text-slate-800;
 }
 
 :deep(.base-v-select .vs__search::placeholder) {
@@ -136,11 +151,11 @@ const updateValue = (val) => {
 
 :deep(.dark .base-v-select) {
   --vs-controls-color: #94a3b8;
-  --vs-selected-color: #e2e8f0;
+  --vs-selected-color: #f8fafc;
   --vs-search-input-color: #f8fafc;
   --vs-search-input-placeholder-color: #94a3b8;
   --vs-dropdown-bg: #0f172a;
-  --vs-dropdown-color: #e2e8f0;
+  --vs-dropdown-color: #f8fafc;
 }
 
 :deep(.dark .base-v-select .vs__dropdown-toggle) {
@@ -156,8 +171,15 @@ const updateValue = (val) => {
   @apply border-cetpro-light ring-cetpro-light/20;
 }
 
-:deep(.dark .base-v-select .vs__selected) {
-  @apply text-slate-100;
+:deep(.dark .base-v-select .vs__selected),
+:deep(.dark .base-v-select .vs__selected *),
+:deep(.dark .base-v-select .vs__selected-options),
+:deep(.dark .base-v-select .vs__selected-options *),
+:deep(.dark .base-v-select .vs__search),
+:deep(.dark .base-v-select .vs__search::placeholder),
+:deep(.dark .base-v-select input),
+:deep(.dark .base-v-select textarea) {
+  color: #f8fafc !important;
 }
 
 :deep(.dark .base-v-select .vs__search::placeholder) {
@@ -176,20 +198,29 @@ const updateValue = (val) => {
   @apply text-slate-400;
 }
 
+:deep(.dark .base-v-select .vs__dropdown-menu),
+:deep(.dark .base-v-select .vs__dropdown-menu *),
+:deep(.dark .base-v-select .vs__no-options) {
+  color: #f8fafc !important;
+}
+
 :deep(.dark .base-v-select .vs__dropdown-menu) {
   @apply border-slate-700 bg-slate-900 text-slate-100;
 }
 
 :deep(.dark .base-v-select .vs__dropdown-option) {
-  @apply text-slate-200;
+  color: #f8fafc !important;
+  background-color: transparent !important;
 }
 
 :deep(.dark .base-v-select .vs__dropdown-option--highlight) {
-  @apply bg-cetpro-light/10 text-cetpro-light;
+  color: #f8fafc !important;
+  @apply bg-slate-700 text-slate-50;
 }
 
 :deep(.dark .base-v-select .vs__dropdown-option--selected) {
-  @apply bg-cetpro-light/10 text-cetpro-light;
+  color: #f8fafc !important;
+  @apply bg-slate-700/80 text-slate-50;
 }
 
 :deep(.dark .base-v-select.vs--disabled .vs__dropdown-toggle) {

@@ -125,8 +125,6 @@ const SeeMore = (especialidadPrograma) => {
             <Tr
               v-for="(especialidadPrograma, index) in especialidadProgramaStore?.especialidadProgramaFiltrado?.especialidad_programas"
               :key="especialidadPrograma.id"
-              
-               class=" bg-white dark:bg-gray-800 rounded-lg shadow-md  border-l-4 transition-all duration-200 hover:shadow-lg hover:bg-gray-200 dark:hover:bg-gray-700/50"
             >
               <Td>{{ index + 1 }}</Td>
               <Td>{{ especialidadPrograma?.especialidad_madre?.nombre_especialidad }}</Td>

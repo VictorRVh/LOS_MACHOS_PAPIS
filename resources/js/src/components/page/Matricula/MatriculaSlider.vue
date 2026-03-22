@@ -178,9 +178,6 @@ const onSubmit = async () => {
         <section class="border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
           <div class="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
             <div class="min-w-0">
-              <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                Proceso de matricula
-              </p>
               <div class="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <h2 class="text-[0.95rem] font-semibold text-slate-900 dark:text-slate-100">
                   Registro guiado del estudiante
@@ -227,12 +224,6 @@ const onSubmit = async () => {
                   <span v-else>{{ step.number }}</span>
                 </div>
                 <div class="min-w-0">
-                  <p
-                    class="text-[9px] font-semibold uppercase tracking-[0.16em]"
-                    :class="currentStep === step.number ? 'text-cetpro dark:text-cetpro-light' : 'text-slate-500 dark:text-slate-400'"
-                  >
-                    {{ currentStep > step.number ? "Completado" : currentStep === step.number ? "Paso actual" : "Pendiente" }}
-                  </p>
                   <p class="text-[12px] font-semibold leading-tight text-slate-900 dark:text-slate-100">{{ step.title }}</p>
                 </div>
               </div>

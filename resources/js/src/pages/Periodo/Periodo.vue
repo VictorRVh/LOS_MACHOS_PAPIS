@@ -268,10 +268,10 @@ onBeforeUnmount(() => {
                       @click="toggleDownloadMenu(periodo.id)"
                       class="inline-flex h-8 items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 text-xsm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
                       :aria-expanded="openDownloadMenuId === periodo.id"
-                      title="Descargas"
+                      title="Documentos"
                     >
                       <ArrowDownTrayIcon class="h-4 w-4 shrink-0" />
-                      <span>Descargas</span>
+                      <span>Documentos</span>
                       <ChevronDownIcon class="h-4 w-4 shrink-0 transition-transform duration-200" :class="openDownloadMenuId === periodo.id ? 'rotate-180' : ''" />
                     </button>
                   </div>

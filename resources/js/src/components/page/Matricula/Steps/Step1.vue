@@ -67,23 +67,20 @@ const readonlyItems = computed(() => [
   { label: "Turno", value: formData.value.turno },
   { label: "Seccion", value: formData.value.seccion },
 ]);
+
+const formatGroupName = (value) =>
+  (value || "")
+    .split("|")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(" · ");
 </script>
 
 <template>
   <div class="space-y-2">
     <section class="grid gap-2 xl:grid-cols-[minmax(0,1.55fr)_minmax(250px,0.72fr)]">
       <div class="border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-700 dark:bg-slate-800/60">
-        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-          Seleccion guiada
-        </p>
-        <h4 class="mt-0.5 text-[14px] font-semibold text-slate-900 dark:text-slate-100">
-          Secuencia academica del registro
-        </h4>
-        <p class="mt-0.5 text-[12px] leading-5 text-slate-500 dark:text-slate-400">
-          Seleccione programa, especialidad y grupo.
-        </p>
-
-        <div class="mt-3 grid gap-3 lg:grid-cols-3">
+        <div class="grid gap-3 lg:grid-cols-2">
           <div class="space-y-1.5">
             <FormLabelError label="Programa de estudio *" :error="errors.id_programa">
               <v-select
@@ -112,7 +109,7 @@ const readonlyItems = computed(() => [
             </FormLabelError>
           </div>
 
-          <div class="space-y-1.5">
+          <div class="space-y-1.5 lg:col-span-2">
             <FormLabelError label="Grupo *" :error="errors.id_grupo">
               <v-select
                 v-model="formData.id_grupo"
@@ -130,17 +127,11 @@ const readonlyItems = computed(() => [
       </div>
 
       <aside class="border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
-        <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-          Grupo seleccionado
-        </p>
-        <h4 class="mt-0.5 text-[14px] font-semibold text-slate-900 dark:text-slate-100">
-          {{ nameGrupo || "Aun no se ha definido un grupo" }}
+        <h4 class="text-[14px] font-semibold text-slate-900 dark:text-slate-100">
+          {{ formatGroupName(nameGrupo) || "Aun no se ha definido un grupo" }}
         </h4>
-        <p class="mt-0.5 text-[12px] leading-5 text-slate-500 dark:text-slate-400">
-          Datos de referencia del grupo.
-        </p>
 
-        <dl class="mt-2 space-y-1">
+        <dl class="mt-3 space-y-1">
           <div
             v-for="item in readonlyItems"
             :key="item.label"

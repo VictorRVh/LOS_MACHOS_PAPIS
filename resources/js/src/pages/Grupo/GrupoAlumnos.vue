@@ -1,5 +1,6 @@
 <script setup>
-import { onMounted, computed, ref } from 'vue';
+import { onMounted, onBeforeUnmount, computed, nextTick, ref } from 'vue';
+import { ArrowDownTrayIcon, ChevronDownIcon, DocumentTextIcon, TableCellsIcon } from "@heroicons/vue/24/outline";
 import Table from '../../components/table/Table.vue';
 import THead from '../../components/table/THead.vue';
 import TBody from '../../components/table/TBody.vue';
@@ -13,19 +14,11 @@ import axios from 'axios';
 import Slider from '../../components/ui/Slider.vue';
 import useModalToast from '../../composables/useModalToast';
 import useExportAlumnos from '../../composables/tabla/useAlumnosMatricula.js';
-import BaseButton from "../../components/ui/Button.vue"
 
-import useCertificado from "../../store/Grupo/useCertificadoStore.js"
-
-// IMPORTACIÓN DEL NUEVO CERTIFICADO MODULAR
-
-// IMPORTACIÓN DE CONSTANCIA
+import useCertificado from "../../store/Grupo/useCertificadoStore.js";
 import { generateConstanciaEstudiante } from "../../pdf/CosntanciaEstudiante.js";
 import useCertificadoStore from '../../store/Grupo/useCertificadoStore.js';
-
-// IMPORTACIÓN DE CONSTANCIA DE EGRESADO (NUEVO)
-// Asumo que la función exportada se llama generateConstanciaEgresado, ajusta si es diferente en tu archivo JS
-import { generateConstanciaEgresado } from "../../pdf/ConstanciaEgresado.js"; 
+import { generateConstanciaEgresado } from "../../pdf/ConstanciaEgresado.js";
 import { generateCertificadoModular } from '../../pdf/CertificadoModular.js';
 import { generateCertificadoEstudio } from '../../pdf/CertificadoEstudio.js';
 
@@ -46,6 +39,10 @@ const showCertificadoModal = ref(false);
 const codigoCertificado = ref('');
 const selectedMatriculaId = ref(null);
 const esDuplicado = ref(false);
+const openDocumentsMenuId = ref(null);
+const openDocumentsMenuStyles = ref({});
+const documentsButtonRefs = ref({});
+const documentsMenuRef = ref(null);
 
 const matriculados = computed(() => matriculaStore.matriculadosPorGrupoExtendido);
 
@@ -53,6 +50,16 @@ onMounted(async () => {
   loading.value = true;
   await matriculaStore.fetchMatriculadosPorGrupoExtendido(props.id);
   loading.value = false;
+
+  document.addEventListener("click", handleClickOutside);
+  window.addEventListener("resize", handleViewportChange);
+  window.addEventListener("scroll", handleViewportChange, true);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+  window.removeEventListener("resize", handleViewportChange);
+  window.removeEventListener("scroll", handleViewportChange, true);
 });
 
 const todosSeleccionados = computed({
@@ -64,8 +71,7 @@ const todosSeleccionados = computed({
   },
   set(valor) {
     if (valor) {
-      estudiantesSeleccionados.value =
-        matriculados.value.estudiantes.map(e => e.id_matricula);
+      estudiantesSeleccionados.value = matriculados.value.estudiantes.map((e) => e.id_matricula);
     } else {
       estudiantesSeleccionados.value = [];
     }
@@ -75,6 +81,10 @@ const todosSeleccionados = computed({
 const showModal = ref(false);
 const nuevoGrupoId = ref("");
 const saving = ref(false);
+
+const cambiarGrupo = async () => {
+  showModal.value = false;
+};
 
 const descargarNomina = async (idGrupo) => {
   try {
@@ -100,7 +110,7 @@ const exportar = () => {
     seccion: matriculados.value.seccion,
     turno: matriculados.value.turno,
     docente: matriculados.value.docente ?? "No asignado",
-    matriculados: matriculados.value.estudiantes.map(e => ({
+    matriculados: matriculados.value.estudiantes.map((e) => ({
       ...e,
       nombre: `${e.nombre} ${e.apellidos}`
     }))
@@ -108,7 +118,6 @@ const exportar = () => {
   exportarAlumnos(data);
 };
 
-// FUNCIÓN PARA GENERAR LA CONSTANCIA DE ESTUDIANTE
 const imprimirConstancia = (estudiante) => {
   const dataParaConstancia = {
     estudiante: ` ${estudiante.nombre} ${estudiante.apellidos}`,
@@ -121,9 +130,7 @@ const imprimirConstancia = (estudiante) => {
   generateConstanciaEstudiante(dataParaConstancia);
 };
 
-// FUNCIÓN PARA GENERAR LA CONSTANCIA DE EGRESADO (NUEVO)
 const imprimirConstanciaEgresado = (estudiante) => {
-  // Preparamos los datos combinando info del estudiante y del grupo (matriculados)
   const dataParaEgresado = {
     estudiante: `${estudiante.nombre} ${estudiante.apellidos}`,
     nro_documento: estudiante.nro_documento,
@@ -131,16 +138,14 @@ const imprimirConstanciaEgresado = (estudiante) => {
     modulo: matriculados.value.modulo,
     fecha_inicio: matriculados.value.fecha_inicio,
     fecha_fin: matriculados.value.fecha_fin,
-    horas: matriculados.value.horas, // Si tienes las horas en el grupo
-    creditos: matriculados.value.creditos, // Si tienes créditos
+    horas: matriculados.value.horas,
+    creditos: matriculados.value.creditos,
     periodo: matriculados.value.periodo || "2025"
   };
-  
-  // Llamamos a la función importada
+
   generateConstanciaEgresado(dataParaEgresado);
 };
 
-// FUNCIÓN PARA GENERAR EL CERTIFICADO MODULAR
 const generateSelectedCertificates = async (idMatricula, codigo) => {
   try {
     await dataAlumnoCertificado.loadCertificados(idMatricula);
@@ -184,13 +189,10 @@ const openCertificadoModal = async (matriculaId) => {
   });
 
   esDuplicado.value = response.existe;
-
   showCertificadoModal.value = true;
 };
 
 const emitirCertificado = () => {
-  // if (!codigoCertificado.value) return;
-
   generateSelectedCertificates(
     selectedMatriculaId.value,
     codigoCertificado.value
@@ -218,18 +220,97 @@ const emitirCertificadoEstudio = async (matriculaId) => {
   }
 };
 
+const setDocumentsButtonRef = (matriculaId, el) => {
+  if (el) {
+    documentsButtonRefs.value[matriculaId] = el;
+    return;
+  }
 
+  delete documentsButtonRefs.value[matriculaId];
+};
 
+const closeDocumentsMenu = () => {
+  openDocumentsMenuId.value = null;
+};
+
+const updateDocumentsMenuPosition = (matriculaId) => {
+  const button = documentsButtonRefs.value[matriculaId];
+  if (!button) return;
+
+  const rect = button.getBoundingClientRect();
+  openDocumentsMenuStyles.value = {
+    position: "fixed",
+    top: `${rect.bottom + 6}px`,
+    left: `${Math.max(12, rect.right - 250)}px`,
+    zIndex: 9999,
+  };
+};
+
+const toggleDocumentsMenu = async (matriculaId) => {
+  if (openDocumentsMenuId.value === matriculaId) {
+    closeDocumentsMenu();
+    return;
+  }
+
+  openDocumentsMenuId.value = matriculaId;
+  await nextTick();
+  updateDocumentsMenuPosition(matriculaId);
+};
+
+const handleClickOutside = (event) => {
+  const activeId = openDocumentsMenuId.value;
+  if (!activeId) return;
+
+  const button = documentsButtonRefs.value[activeId];
+  if (
+    documentsMenuRef.value &&
+    !documentsMenuRef.value.contains(event.target) &&
+    button &&
+    !button.contains(event.target)
+  ) {
+    closeDocumentsMenu();
+  }
+};
+
+const handleViewportChange = () => {
+  if (!openDocumentsMenuId.value) return;
+  updateDocumentsMenuPosition(openDocumentsMenuId.value);
+};
 </script>
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-grupos']">
-    <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
-      <div class="flex justify-end mb-4 gap-6 ml-2">
-        <Button title="Descargar nomina" @click="descargarNomina(props.id)" variant="secondary" />
-        <Button title="Exportar Alumnos" @click="exportar()" variant="secondary" />
-        <Button title="Exporta registro de matrículas y evaluaciones" @click="exportarMatriculaEvaluaciones(props.id)"
-          variant="secondary" />
+    <div class="w-full space-y-4 px-3 py-2" v-if="matriculados">
+      <div class="mb-4 ml-2 flex flex-wrap justify-end gap-3">
+        <button
+          type="button"
+          @click="descargarNomina(props.id)"
+          class="inline-flex min-h-[36px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-3 py-1.5 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+        >
+          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
+          <span class="text-[13px] font-medium">Descargar nomina</span>
+          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
+        </button>
+
+        <button
+          type="button"
+          @click="exportar()"
+          class="inline-flex min-h-[36px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-3 py-1.5 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+        >
+          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
+          <span class="text-[13px] font-medium">Exportar Alumnos</span>
+          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
+        </button>
+
+        <button
+          type="button"
+          @click="exportarMatriculaEvaluaciones(props.id)"
+          class="inline-flex min-h-[36px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-3 py-1.5 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+        >
+          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
+          <span class="text-[13px] font-medium">Registro de matrículas y evaluaciones</span>
+          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
+        </button>
       </div>
 
       <Table>
@@ -245,8 +326,11 @@ const emitirCertificadoEstudio = async (matriculaId) => {
         </THead>
 
         <TBody>
-          <Tr v-for="(estudiante, index) in matriculados.estudiantes" :key="estudiante.nro_documento"
-            class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+          <Tr
+            v-for="(estudiante, index) in matriculados.estudiantes"
+            :key="estudiante.nro_documento"
+            class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+          >
             <Td>{{ index + 1 }}</Td>
             <Td>{{ estudiante.nro_documento }}</Td>
             <Td>{{ estudiante.nombre }} {{ estudiante.apellidos }}</Td>
@@ -256,117 +340,119 @@ const emitirCertificadoEstudio = async (matriculaId) => {
             <Td>{{ estudiante.correo_electronico ?? '-' }}</Td>
 
             <Td>
-              <div class="flex gap-2 justify-center">
-                
-                <!-- BOTÓN CONSTANCIA ESTUDIANTE -->
-                <BaseButton title="Constancia Est." @click="imprimirConstancia(estudiante)"
-                  class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow">
-                  <template #icon>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                      stroke="currentColor" class="size-5">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                    </svg>
-                  </template>
-                </BaseButton>
-
-                <!-- NUEVO BOTÓN: CONSTANCIA DE EGRESADO -->
-                <!-- <BaseButton title="Constancia Egresado" @click="imprimirConstanciaEgresado(estudiante)"
-                  class="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow">
-                  <template #icon>
-                   
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.905 59.905 0 0 1 12 3.493a59.902 59.902 0 0 1 10.499 5.516 50.548 50.548 0 0 0-2.658.813m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
-                    </svg>
-                  </template>
-                </BaseButton> -->
-
-                <!-- BOTÓN CERTIFICADO MODULAR -->
-                <BaseButton title="Certificado Estudio" @click="emitirCertificadoEstudio(estudiante.id_matricula)"
-                  class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow">
-                  <template #icon>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                      stroke="currentColor" class="size-5">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                    </svg>
-                  </template>
-                </BaseButton>
-
-                <BaseButton title="Certificado Modular" @click="openCertificadoModal(estudiante.id_matricula)"
-                  class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
-                  <template #icon>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                      stroke="currentColor" class="size-5">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                    </svg>
-                  </template>
-                </BaseButton>
+              <div class="flex justify-center">
+                <button
+                  :ref="(el) => setDocumentsButtonRef(estudiante.id_matricula, el)"
+                  type="button"
+                  @click="toggleDocumentsMenu(estudiante.id_matricula)"
+                  class="inline-flex h-8 items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 text-xsm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+                  :aria-expanded="openDocumentsMenuId === estudiante.id_matricula"
+                  title="Documentos"
+                >
+                  <ArrowDownTrayIcon class="h-4 w-4 shrink-0" />
+                  <span>Documentos</span>
+                  <ChevronDownIcon class="h-4 w-4 shrink-0 transition-transform duration-200" :class="openDocumentsMenuId === estudiante.id_matricula ? 'rotate-180' : ''" />
+                </button>
               </div>
             </Td>
           </Tr>
 
           <Tr v-if="matriculados.estudiantes?.length === 0 && !loading">
-            <Td colspan="16" class="text-center py-4">No hay estudiantes matriculados en este grupo.</Td>
+            <Td colspan="16" class="py-4 text-center">No hay estudiantes matriculados en este grupo.</Td>
           </Tr>
 
           <Tr v-if="loading">
-            <Td colspan="16" class="text-center py-4">Cargando estudiantes...</Td>
+            <Td colspan="16" class="py-4 text-center">Cargando estudiantes...</Td>
           </Tr>
         </TBody>
       </Table>
     </div>
 
-    <div v-else class="text-center p-8">Cargando información del grupo...</div>
+    <div v-else class="p-8 text-center">Cargando información del grupo...</div>
+
+    <Teleport to="body">
+      <div
+        v-if="openDocumentsMenuId"
+        ref="documentsMenuRef"
+        :style="openDocumentsMenuStyles"
+        class="min-w-[250px] rounded-[3px] border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+      >
+        <button
+          type="button"
+          @click="imprimirConstancia(matriculados.estudiantes.find((estudiante) => estudiante.id_matricula === openDocumentsMenuId)); closeDocumentsMenu()"
+          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
+        >
+          <DocumentTextIcon class="h-4 w-4 shrink-0" />
+          <span class="flex-1">Constancia Est.</span>
+          <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-rose-600 dark:text-rose-300">PDF</span>
+        </button>
+
+        <button
+          type="button"
+          @click="emitirCertificadoEstudio(openDocumentsMenuId); closeDocumentsMenu()"
+          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
+        >
+          <DocumentTextIcon class="h-4 w-4 shrink-0" />
+          <span class="flex-1">Certificado Estudio</span>
+          <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-rose-600 dark:text-rose-300">PDF</span>
+        </button>
+
+        <button
+          type="button"
+          @click="openCertificadoModal(openDocumentsMenuId); closeDocumentsMenu()"
+          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
+        >
+          <DocumentTextIcon class="h-4 w-4 shrink-0" />
+          <span class="flex-1">Certificado Modular</span>
+          <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-rose-600 dark:text-rose-300">PDF</span>
+        </button>
+      </div>
+    </Teleport>
 
     <Slider :show="showModal" title="Cambiar Grupo" @hide="showModal = false">
-      <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+      <hr class="mb-4 border-t-2 border-cetpro dark:border-cetpro-light" />
       <div class="mt-4 space-y-3">
-        <p class="text-gray-600 dark:text-gray-300">Estás a punto de mover <strong>{{ estudiantesSeleccionados.length
-        }}</strong> estudiantes.</p>
-        <div class="flex justify-end gap-2 mt-6">
+        <p class="text-gray-600 dark:text-gray-300">Estás a punto de mover <strong>{{ estudiantesSeleccionados.length }}</strong> estudiantes.</p>
+        <div class="mt-6 flex justify-end gap-2">
           <Button title="Cancelar" variant="secondary" @click="showModal = false" />
-          <Button title="Confirmar" variant="primary" :disabled="!nuevoGrupoId || saving" :loading="saving"
-            @click="cambiarGrupo" />
+          <Button title="Confirmar" variant="primary" :disabled="!nuevoGrupoId || saving" :loading="saving" @click="cambiarGrupo" />
         </div>
       </div>
     </Slider>
 
-    <!-- MODAL CERTIFICADO -->
     <div v-if="showCertificadoModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg w-full max-w-md p-6">
-        <h2 class="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">
+      <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-lg dark:bg-gray-800">
+        <h2 class="mb-2 text-lg font-semibold text-gray-800 dark:text-gray-100">
           Emitir Certificado Modular
         </h2>
 
-        <!-- AVISO DUPLICADO -->
-        <div v-if="esDuplicado" class="mb-4 p-3 rounded-lg bg-yellow-100 text-yellow-800 text-sm">
+        <div v-if="esDuplicado" class="mb-4 rounded-lg bg-yellow-100 p-3 text-sm text-yellow-800">
           Este certificado ya fue emitido.
           Se marcará como <b>DUPLICADO</b>.
         </div>
 
         <div v-if="!esDuplicado" class="mb-4">
-          <label class="block text-sm font-medium mb-1">
+          <label class="mb-1 block text-sm font-medium">
             Código del certificado
           </label>
-          <input v-model="codigoCertificado" type="text" placeholder="Ej: CM-2026-001"
-            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500" />
+          <input
+            v-model="codigoCertificado"
+            type="text"
+            placeholder="Ej: CM-2026-001"
+            class="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500"
+          />
         </div>
 
-        <!-- ACCIONES -->
         <div class="flex justify-end gap-2">
-          <button @click="showCertificadoModal = false" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
+          <button @click="showCertificadoModal = false" class="rounded-lg bg-gray-200 px-4 py-2 hover:bg-gray-300">
             Cancelar
           </button>
 
-          <button @click="emitirCertificado" class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white">
+          <button @click="emitirCertificado" class="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700">
             {{ esDuplicado ? 'Emitir duplicado' : 'Emitir' }}
           </button>
         </div>
       </div>
     </div>
-
   </AuthorizationFallback>
 </template>
-

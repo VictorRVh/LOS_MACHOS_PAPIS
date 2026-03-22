@@ -199,10 +199,10 @@ class PermissionTableSeeder extends Seeder
             'ver-comisión-docente',
 
 
-            'ver-perfil-docente',
-            'editar-perfil-docente',
-            'ver-mis-módulos',
-            'ver-estudiantes-asignados',
+            // 'ver-perfil-docente',
+            // 'editar-perfil-docente',
+            // 'ver-mis-módulos',
+            // 'ver-estudiantes-asignados',
 
             //Competencias
             'todo-acceso-capacidades-docente',
@@ -210,7 +210,7 @@ class PermissionTableSeeder extends Seeder
             'crear-capacidades-docente',
             'editar-capacidades-docente',
             'eliminar-capacidades-docente',
-            
+
             //PARA VER LAS ACTIVIDADES RECIENTES
             'todo-actividades-recientes',
             'ver-actividades-recientes',
@@ -230,6 +230,10 @@ class PermissionTableSeeder extends Seeder
             ];
         }, $permissions);
 
-        DB::table('permissions')->insert($permissions);
+        DB::table('permissions')->upsert(
+            $permissions,
+            ['name'],
+            ['created_at']
+        );
     }
 }

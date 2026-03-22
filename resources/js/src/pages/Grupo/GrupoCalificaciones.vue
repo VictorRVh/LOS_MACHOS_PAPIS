@@ -161,33 +161,43 @@ const getResumenNotas = (est) => {
 
         <TBody>
           <Tr v-for="(est, index) in estudiantesPaginados" :key="est.id_estudiante ?? index">
-            <!-- NÂ° -->
+            <!-- N° -->
             <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
 
             <!-- Nombre -->
-            <Td class=" whitespace-nowrap">
+            <Td class="whitespace-nowrap">
               {{ est.apellidos_nombres }}
             </Td>
 
-            <!-- Notas por CT -->
-            <Td v-for="(cap, i) in est.capacidades" :key="i" class="text-center"
-              :class="getNotaClass(cap.nota_capacidad)">
-              {{ cap.nota_capacidad ?? "--" }}
-            </Td>
+            <!-- SI ESTÁ RETIRADO -->
+            <template v-if="est.matriculado === 2">
+              <Td :colspan="lengthUnit + 3" class="text-center text-red-600 font-semibold">
+                RETIRADO POR INASISTENCIA
+              </Td>
+            </template>
 
-            <!-- Resumen -->
-            <template v-if="getResumenNotas(est)">
-              <Td class="text-center font-semibold">
-                {{ getResumenNotas(est).total }}
+            <!-- SI NO ESTÁ RETIRADO -->
+            <template v-else>
+              <!-- Notas por CT -->
+              <Td v-for="(cap, i) in est.capacidades" :key="i" class="text-center"
+                :class="getNotaClass(cap.nota_capacidad)">
+                {{ cap.nota_capacidad ?? "--" }}
               </Td>
 
-              <Td class="text-center font-semibold" :class="getResumenNotas(est).promedioClass">
-                {{ getResumenNotas(est).promedio }}
-              </Td>
+              <!-- Resumen -->
+              <template v-if="getResumenNotas(est)">
+                <Td class="text-center font-semibold">
+                  {{ getResumenNotas(est).total }}
+                </Td>
 
-              <Td class="text-center" :class="getResumenNotas(est).estadoClass">
-                {{ getResumenNotas(est).estado }}
-              </Td>
+                <Td class="text-center font-semibold" :class="getResumenNotas(est).promedioClass">
+                  {{ getResumenNotas(est).promedio }}
+                </Td>
+
+                <Td class="text-center" :class="getResumenNotas(est).estadoClass">
+                  {{ getResumenNotas(est).estado }}
+                </Td>
+              </template>
             </template>
           </Tr>
         </TBody>
@@ -201,4 +211,3 @@ const getResumenNotas = (est) => {
   @apply text-gray-400 italic;
 }
 </style>
-

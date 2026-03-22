@@ -167,58 +167,53 @@ const totalEstudiantes = computed(() =>
           <CreateButton @click="showSlider(true)" text="Agregar Nuevo" />
         </template>
 
-          <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
-            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
-              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Total grupos</p>
-              <div class="mt-1 flex items-end justify-between gap-3">
-                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalGrupos }}</p>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">Filtrados</span>
-              </div>
-            </div>
-            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
-              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Especialidades</p>
-              <div class="mt-1 flex items-end justify-between gap-3">
-                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalEspecialidades }}</p>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">Activas</span>
-              </div>
-            </div>
-            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
-              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Con docente</p>
-              <div class="mt-1 flex items-end justify-between gap-3">
-                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ gruposConDocente }}</p>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">Asignados</span>
-              </div>
-            </div>
-            <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
-              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Estudiantes</p>
-              <div class="mt-1 flex items-end justify-between gap-3">
-                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalEstudiantes }}</p>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">Acumulados</span>
-              </div>
+        <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
+          <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Total grupos</p>
+            <div class="mt-1 flex items-end justify-between gap-3">
+              <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalGrupos }}</p>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">Filtrados</span>
             </div>
           </div>
+          <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Especialidades</p>
+            <div class="mt-1 flex items-end justify-between gap-3">
+              <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalEspecialidades }}</p>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">Activas</span>
+            </div>
+          </div>
+          <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Con docente</p>
+            <div class="mt-1 flex items-end justify-between gap-3">
+              <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ gruposConDocente }}</p>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">Asignados</span>
+            </div>
+          </div>
+          <div class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Estudiantes</p>
+            <div class="mt-1 flex items-end justify-between gap-3">
+              <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalEstudiantes }}</p>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">Acumulados</span>
+            </div>
+          </div>
+        </div>
       </StatsOverviewSection>
 
       <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
-        <div class="mb-3">
-          <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Filtros operativos</p>
-          <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Búsqueda de grupos</h3>
-        </div>
-
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-7 md:items-end">
-          <div class="md:col-span-2">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_180px] md:items-end">
+          <div>
             <label class="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">Ciclo</label>
             <BaseSelectGrupo v-model="selectedCiclo" :options="cicloStore.ciclo" label="nombre_ciclo" placeholder="Seleccione un ciclo" @change="onCicloChange" />
           </div>
-          <div class="md:col-span-2">
+          <div>
             <label class="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">Año</label>
             <BaseSelectGrupo v-model="selectedAnio" :options="grupoStore?.anios" label="label" placeholder="Seleccione un año" @change="onAnioChange" :disabled="!selectedCiclo" :loading="grupoStore.aniosByCicloLoading" />
           </div>
-          <div class="md:col-span-2">
+          <div>
             <label class="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">Periodo</label>
             <BaseSelectGrupo v-model="selectedPeriodo" :options="grupoStore.periodoAnio" label="nombre_periodo" placeholder="Seleccione un periodo" :disabled="!selectedAnio" :loading="grupoStore.periodoByAnioLoading" />
           </div>
-          <div class="md:col-span-1 flex items-end">
+          <div class="flex items-end">
             <button @click="filtrarPorSeleccion" class="flex h-10 w-full items-center justify-center bg-cetpro px-4 py-2 font-semibold text-white transition-colors duration-300 hover:bg-cetpro-dark">
               Filtrar
             </button>
@@ -242,7 +237,7 @@ const totalEstudiantes = computed(() =>
           <Table v-else-if="gruposPaginados.length > 0" :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event" class="mt-2 w-full border-collapse">
             <THead>
               <Th class="w-[40px] border-b border-gray-300 text-center dark:border-gray-600">N°</Th>
-              <Th class="min-w-[250px] border-b border-gray-300 dark:border-gray-600">Módulo</Th>
+              <Th class="min-w-[250px] border-b border-gray-300 dark:border-gray-600">Modulo</Th>
               <Th class="w-[80px] border-b border-gray-300 text-center dark:border-gray-600">Sección</Th>
               <Th class="w-[80px] border-b border-gray-300 text-center dark:border-gray-600">Turno</Th>
               <Th class="min-w-[180px] border-b border-gray-300 dark:border-gray-600">Convenio</Th>
@@ -253,7 +248,7 @@ const totalEstudiantes = computed(() =>
             <TBody>
               <template v-for="([nombreEspecialidad, modulos]) in gruposAgrupados" :key="nombreEspecialidad">
                 <tr @click="toggleEspecialidad(nombreEspecialidad)" class="cursor-pointer bg-cetpro hover:bg-cetpro-dark/80 dark:bg-cetpro-dark">
-                  <td colspan="8" class="border-b border-gray-300 px-4 py-2 text-sm font-bold uppercase tracking-wider text-cetpro-text dark:border-gray-700">
+                  <td colspan="8" class="px-4 py-2 text-sm font-bold uppercase tracking-wider text-cetpro-text">
                     <div class="flex items-center justify-between">
                       <span>{{ nombreEspecialidad }}</span>
                       <ChevronDownIcon :class="['h-6 w-6 transition-transform duration-300', { 'rotate-180': openEspecialidades.has(nombreEspecialidad) }]" />
@@ -296,11 +291,13 @@ const totalEstudiantes = computed(() =>
 .list-leave-active {
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
+
 .list-enter-from,
 .list-leave-to {
   opacity: 0;
   transform: translateY(-20px);
 }
+
 .list-leave-active {
   position: absolute;
 }

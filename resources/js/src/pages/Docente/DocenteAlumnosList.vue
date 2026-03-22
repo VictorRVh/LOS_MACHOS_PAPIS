@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, computed, ref, watch } from 'vue';
+import { ArrowDownTrayIcon, TableCellsIcon } from "@heroicons/vue/24/outline";
 import Table from '../../components/table/Table.vue';
 import THead from '../../components/table/THead.vue';
 import TBody from '../../components/table/TBody.vue';
@@ -13,7 +14,7 @@ import useMatriculaStore from '../../store/Matricula/useMatriculaStore';
 import axios from 'axios';
 import Slider from '../../components/ui/Slider.vue';
 import useModalToast from '../../composables/useModalToast';
-import useExportAlumnos from '../../composables/tabla/useAlumnosMatricula.js';  // Importa el composable
+import useExportAlumnos from '../../composables/tabla/useAlumnosMatricula.js';
 
 const props = defineProps({
   id: { type: [String, Number], required: true },
@@ -21,25 +22,19 @@ const props = defineProps({
 
 const { showConfirmModal, showToast } = useModalToast();
 const matriculaStore = useMatriculaStore();
-
-const { exportarAlumnos } = useExportAlumnos();  // Obtén la función
+const { exportarAlumnos } = useExportAlumnos();
 
 const loading = ref(true);
 const estudiantesSeleccionados = ref([]);
 
-// ✅ computed correcto
 const matriculados = computed(() => matriculaStore.matriculadosPorGrupoExtendido);
 
-// 🔥 Cargar los matriculados correctamente
 onMounted(async () => {
   loading.value = true;
   await matriculaStore.fetchMatriculadosPorGrupoExtendido(props.id);
   loading.value = false;
 });
 
-/* ------------------------------------------
-   ✔ Seleccionar todos
------------------------------------------- */
 const todosSeleccionados = computed({
   get() {
     return (
@@ -49,24 +44,19 @@ const todosSeleccionados = computed({
   },
   set(valor) {
     if (valor) {
-      estudiantesSeleccionados.value =
-        matriculados.value.estudiantes.map(e => e.id_matricula);
+      estudiantesSeleccionados.value = matriculados.value.estudiantes.map(e => e.id_matricula);
     } else {
       estudiantesSeleccionados.value = [];
     }
   }
 });
 
-// Modal
 const showModal = ref(false);
 const nuevoGrupoId = ref("");
 const saving = ref(false);
 
 const cambiarGrupo = async () => {
-  // tu lógica...
 };
-
-// Método para exportar alumnos
 
 const descargarNomina = async (idGrupo) => {
   try {
@@ -93,16 +83,14 @@ const exportar = () => {
     seccion: matriculados.value.seccion,
     turno: matriculados.value.turno,
     docente: matriculados.value.docente ?? "No asignado",
-
     matriculados: matriculados.value.estudiantes.map(e => ({
       ...e,
-      nombre: `${e.nombre} ${e.apellidos}` // 👈 aquí envías el nombre como "nom"
+      nombre: `${e.nombre} ${e.apellidos}`
     }))
   };
 
   exportarAlumnos(data);
 };
-
 
 const exportarMatriculaEvaluaciones = async (idGrupo) => {
   try {
@@ -120,62 +108,31 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
     console.error("Error descargando reporte:", error);
   }
 };
-
-
 </script>
-
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-alumnos-docente', 'ver-alumnos-docente']">
-    <div class="w-full space-y-4 py-2 px-3" v-if="matriculados">
-
-
-      <div class="flex justify-end mb-4  gap-6 ml-2">
-        <Button title="Descargar nomina" @click="descargarNomina(props.id)" variant="secondary" />
-        <Button title="Alumnos" @click="exportar()" variant="secondary" />
-        <Button title="Exporta registro de matrículas y evaluaciones" @click="exportarMatriculaEvaluaciones(props.id)"
-          variant="secondary" />
-
-      </div>
-
+    <div class="w-full space-y-4 px-3 py-2" v-if="matriculados">
       <Table>
         <THead>
-          <!-- <Th class="w-10 text-center">
-            <input type="checkbox" v-model="todosSeleccionados"
-              class="rounded border-gray-300 text-cetpro focus:ring-cetpro-light" />
-          </Th> -->
           <Th>N°</Th>
           <Th>DNI</Th>
           <Th>Apellidos y Nombres</Th>
           <Th>Sexo</Th>
-
           <Th>Fecha de Nacimiento</Th>
           <Th>Teléfono</Th>
           <Th>Correo Electrónico</Th>
-
         </THead>
 
         <TBody>
-          <Tr v-for="(estudiante, index) in matriculados.estudiantes" :key="estudiante.nro_documento"
-            class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-            <!-- 
-            <Td class="text-center">
-              <input type="checkbox"
-                :value="estudiante.id_matricula"
-                v-model="estudiantesSeleccionados"
-                class="rounded border-gray-300 text-cetpro focus:ring-cetpro-light" />
-            </Td> -->
-
+          <Tr v-for="(estudiante, index) in matriculados.estudiantes" :key="estudiante.nro_documento" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
             <Td>{{ index + 1 }}</Td>
             <Td>{{ estudiante.nro_documento }}</Td>
-            <Td> {{ estudiante.apellidos }} {{ estudiante.nombre }} </Td>
+            <Td>{{ estudiante.apellidos }} {{ estudiante.nombre }}</Td>
             <Td>{{ estudiante.sexo }}</Td>
-
             <Td>{{ estudiante.fecha_nacimiento }}</Td>
             <Td>{{ estudiante.celular_personal ?? '-' }}</Td>
             <Td>{{ estudiante.correo_electronico ?? '-' }}</Td>
-
-
           </Tr>
 
           <Tr v-if="matriculados.estudiantes?.length === 0 && !loading">
@@ -193,7 +150,40 @@ const exportarMatriculaEvaluaciones = async (idGrupo) => {
 
     <div v-else class="text-center p-8">Cargando información del grupo...</div>
 
-    <!-- MODAL -->
+    <Teleport to="#docente-header-actions">
+      <div v-if="matriculados" class="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          @click="descargarNomina(props.id)"
+          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+        >
+          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
+          <span class="text-[12px] font-medium">Nomina</span>
+          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
+        </button>
+
+        <button
+          type="button"
+          @click="exportar()"
+          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+        >
+          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
+          <span class="text-[12px] font-medium">Alumnos</span>
+          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
+        </button>
+
+        <button
+          type="button"
+          @click="exportarMatriculaEvaluaciones(props.id)"
+          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
+        >
+          <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
+          <span class="text-[12px] font-medium">Matriculas y evaluaciones</span>
+          <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
+        </button>
+      </div>
+    </Teleport>
+
     <Slider :show="showModal" title="Cambiar Grupo" @hide="showModal = false">
       <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
       <div class="mt-4 space-y-3">

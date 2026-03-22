@@ -165,11 +165,6 @@ const totalPeriodos = computed(() => periodos.value.length);
       </StatsOverviewSection>
 
       <section class="border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900">
-        <div class="mb-3">
-          <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Filtros operativos</p>
-          <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Consulta de egresados</h3>
-        </div>
-
         <div class="grid grid-cols-1 gap-4 md:grid-cols-7 md:items-end">
           <div class="md:col-span-2">
             <label class="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">Año</label>

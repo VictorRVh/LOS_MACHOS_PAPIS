@@ -117,43 +117,38 @@ const getEstadoClass = (estado) =>
 
 // --- Resumen: total, promedio, estado ---
 const getResumenNotas = (est) => {
-  // 1. Notas de capacidades (sin nota = 0)
+  // Notas de capacidades
   const notas = (est.capacidades || []).map((c) => {
     const value = c?.nota_capacidad;
     return value !== null && value !== "" && !isNaN(value) ? Number(value) : 0;
   });
 
-  // 2. Nota de experiencia (sin nota = 0, cuenta como una unidad más)
+  // ✅ AGREGAR EXPERIENCIA (EFSRT / PRÁCTICAS)
   const notaExperiencia =
     est.nota_experiencia !== null &&
-    est.nota_experiencia !== "" &&
-    !isNaN(est.nota_experiencia)
+      est.nota_experiencia !== "" &&
+      !isNaN(est.nota_experiencia)
       ? Number(est.nota_experiencia)
       : 0;
+
   notas.push(notaExperiencia);
 
-  // 3. Promedio general
-  const promedio = notas.length
-    ? notas.reduce((a, b) => a + b, 0) / notas.length
-    : 0;
+  // Promedio
+  const total = notas.reduce((sum, n) => sum + n, 0);
+  const promedio = notas.length ? total / notas.length : 0;
 
-  // 4. Estado
   const estado = promedio >= 11 ? "APROBADO" : "DESAPROBADO";
 
-  // 5. Formato
-  const promedioTexto = promedio
-    ? promedio.toFixed(1).replace(/\.0$/, "")
-    : "00";
-
   return {
+    // ✅ IMPORTANTE: ahora sí existe
     nota_experiencia: notaExperiencia.toString().padStart(2, "0"),
 
-    total: notas
-      .reduce((a, b) => a + b, 0)
-      .toString()
-      .padStart(2, "0"),
+    total: total.toString().padStart(2, "0"),
 
-    promedio: promedioTexto,
+    promedio:
+      Number.isInteger(promedio)
+        ? promedio.toString().padStart(2, "0")
+        : promedio.toFixed(1),
 
     estado,
 
@@ -162,7 +157,10 @@ const getResumenNotas = (est) => {
         ? "text-red-600 dark:text-red-500 font-bold"
         : "text-green-600 dark:text-green-400 font-bold",
 
-    estadoClass: getEstadoClass(estado),
+    estadoClass:
+      estado === "APROBADO"
+        ? "text-green-600 dark:text-green-400"
+        : "text-red-600 dark:text-red-400",
   };
 };
 
@@ -322,7 +320,7 @@ const getEstadoCapacidadClass = computed(() => {
                 {{ cap.nota_capacidad ?? "--" }}
               </Td>
 
-              <Td class="text-center font-semibold">{{ getResumenNotas(est).nota_experiencia }}</Td>
+              <Td class="text-center font-semibold">  {{ getResumenNotas(est).nota_experiencia }}</Td>
               <!-- Totales -->
               <template v-if="getResumenNotas(est)">
                 <Td class="text-center font-semibold">{{ getResumenNotas(est).total }}</Td>
@@ -352,4 +350,3 @@ const getEstadoCapacidadClass = computed(() => {
   @apply text-gray-400 italic;
 }
 </style>
-

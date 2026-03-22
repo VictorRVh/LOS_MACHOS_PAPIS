@@ -62,7 +62,7 @@ export default [
             layout: 'dashboard',
             parent: 'egresados',
             breadcrumb: [
-                { text: 'Lista de Egresados', to: { name: 'egresados' } }
+                { text: 'Lista de Egresados', to: { name: 'egresadosLista' } }
             ]
         }
     },

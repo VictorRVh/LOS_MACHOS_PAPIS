@@ -84,49 +84,52 @@ const getEstadoClass = (estado) =>
 
 // --- ðŸ”¥ FunciÃ³n resumen: total, promedio, estado y clases ---
 const getResumenNotas = (est) => {
+  // Notas de capacidades
   const notas = (est.capacidades || []).map((c) => {
     const value = c?.nota_capacidad;
     return value !== null && value !== "" && !isNaN(value) ? Number(value) : 0;
   });
 
-  if (!notas.length) {
-    return {
-      total: "00",
-      promedio: "00",
-      estado: "DESAPROBADO",
-      promedioClass: "text-red-600 dark:text-red-500 font-bold",
-      estadoClass: "text-red-600 dark:text-red-400",
-    };
-  }
+  // ✅ AGREGAR EXPERIENCIA (EFSRT / PRÁCTICAS)
+  const notaExperiencia =
+    est.nota_experiencia !== null &&
+    est.nota_experiencia !== "" &&
+    !isNaN(est.nota_experiencia)
+      ? Number(est.nota_experiencia)
+      : 0;
 
+  notas.push(notaExperiencia);
+
+  // Promedio
   const total = notas.reduce((sum, n) => sum + n, 0);
-  const promedio = total / notas.length;
+  const promedio = notas.length ? total / notas.length : 0;
 
   const estado = promedio >= 11 ? "APROBADO" : "DESAPROBADO";
 
-  const promedioTexto =
-    Number.isInteger(promedio)
-      ? promedio.toString().padStart(2, "0")
-      : promedio.toFixed(1);
-
   return {
+    // ✅ IMPORTANTE: ahora sí existe
+    nota_experiencia: notaExperiencia.toString().padStart(2, "0"),
+
     total: total.toString().padStart(2, "0"),
-    promedio: promedioTexto,
+
+    promedio:
+      Number.isInteger(promedio)
+        ? promedio.toString().padStart(2, "0")
+        : promedio.toFixed(1),
+
     estado,
+
     promedioClass:
       promedio < 11
         ? "text-red-600 dark:text-red-500 font-bold"
         : "text-green-600 dark:text-green-400 font-bold",
+
     estadoClass:
       estado === "APROBADO"
         ? "text-green-600 dark:text-green-400"
         : "text-red-600 dark:text-red-400",
   };
 };
-
-
-
-
 </script>
 
 <template>
@@ -154,6 +157,7 @@ const getResumenNotas = (est) => {
           <Th>#</Th>
           <Th>Apellidos y Nombres</Th>
           <Th v-for="i in lengthUnit" :key="i" class="text-center">CT{{ i }}</Th>
+          <Th class="text-center" title="Experiencia formativa en situaciones reales de trabajo">EFSRT</Th>
           <Th class="text-center">PUNTAJE</Th>
           <Th class="text-center">PROMEDIO</Th>
           <Th class="text-center">A-D-R</Th>
@@ -183,7 +187,7 @@ const getResumenNotas = (est) => {
                 :class="getNotaClass(cap.nota_capacidad)">
                 {{ cap.nota_capacidad ?? "--" }}
               </Td>
-
+              <Td class="text-center font-semibold">{{ getResumenNotas(est).nota_experiencia }}</Td>
               <!-- Resumen -->
               <template v-if="getResumenNotas(est)">
                 <Td class="text-center font-semibold">

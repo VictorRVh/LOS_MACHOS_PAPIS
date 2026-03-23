@@ -103,12 +103,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('users-update-password/{id}', [
         \App\Http\Controllers\UserController::class,
         'updatePassword',
-    ])->middleware('permission:editar-password');
+    ]);
 
     Route::patch('users-update/{id}', [
         \App\Http\Controllers\UserController::class,
         'updateProfile',
-    ])->middleware('permission:editar-perfil');
+    ]);
+
+    Route::post('users-update/{id}', [
+        \App\Http\Controllers\UserController::class,
+        'updateProfile',
+    ]);
 
     /**
      * ------------------------------------------------------------------------

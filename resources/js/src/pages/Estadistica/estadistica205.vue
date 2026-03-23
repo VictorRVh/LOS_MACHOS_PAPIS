@@ -1,14 +1,18 @@
 ﻿<script setup>
 import { ref, computed } from 'vue';
+import flatPickr from 'vue-flatpickr-component';
 import useEstadistica205Store from '../../store/Estadisticas/Estadistica205Store';
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import useModalToast from '../../composables/useModalToast';
 import useExportEstadisticasExcel from '../../composables/estadisticas/useExportEstadisticasExcel';
 import ChartDonutModal from '../../components/estadisticas/ChartDonutModal.vue';
+import { createDatePickerConfig } from '../../utils/datePickerConfig';
 
 const fechaInicio = ref('');
 const fechaFin = ref('');
+
+const datePickerConfig = createDatePickerConfig();
 
 const estadisticaStore = useEstadistica205Store();
 const { showToast } = useModalToast();
@@ -164,81 +168,10 @@ const exportarExcel205 = async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="flex items-center justify-between gap-4 mb-8">
-      <div class="flex items-center gap-4">
-        <div class="h-12 w-2 bg-cetpro-dark rounded-full shadow-google"></div>
-        <h2 class="text-2xl font-black text-gray-800 uppercase tracking-tighter italic">205. NÚMERO TOTAL DE SECCIONES,
-          POR CICLO SEGÚN TURNO</h2>
-      </div>
-      <div class="flex items-center gap-2">
-        <button @click="abrirGrafico"
-          class="bg-[#0ea5e9] text-white px-4 py-2 rounded-lg font-bold shadow-google-sm hover:bg-sky-600 transition-all whitespace-nowrap">
-          GRAFICO
-        </button>
-        <button @click="exportarExcel205"
-          class="bg-[#10b981] text-white px-4 py-2 rounded-lg font-bold shadow-google-sm hover:bg-emerald-600 transition-all whitespace-nowrap">
-          EXPORTAR EXCEL
-        </button>
-      </div>
-    </div>
-
-    <div
-      class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-xl mb-6 shadow-google-sm border border-gray-100">
-      <div>
-        <label class="text-[10px] font-black uppercase">Fecha Inicio</label>
-        <input type="date" v-model="fechaInicio" class="w-full shadow-google-sm rounded-lg p-2" />
-      </div>
-
-      <div>
-        <label class="text-[10px] font-black uppercase">Fecha Fin</label>
-        <input type="date" v-model="fechaFin" class="w-full shadow-google-sm rounded-lg p-2" />
-      </div>
-      <div class="flex items-end pb-0.5">
-        <button @click="consultarDatos"
-          class="bg-cetpro w-full text-white font-bold py-2 rounded-lg hover:bg-cetpro-dark shadow-google-sm transition-all">
-          CONSULTAR DATOS
-        </button>
-      </div>
-    </div>
-
-    <div class="max-w-4xl mx-auto overflow-hidden rounded-2xl shadow-google border border-gray-100 bg-white">
-      <table class="w-full text-sm text-center">
-        <thead>
-          <tr class="bg-gray-900 text-white font-bold uppercase italic">
-            <th class="p-5 border-r border-gray-800">Turno de Trabajo</th>
-            <th class="p-5 border-r border-gray-800 bg-gray-800">Total Secciones</th>
-            <th class="p-5 border-r border-gray-800 bg-cetpro">Ciclo Auxiliar Tecnico</th>
-            <th class="p-5 bg-cetpro-dark">Ciclo Tecnico</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y text-lg font-black text-gray-700">
-          <tr v-for="turno in ['Mañana', 'Tarde', 'Noche']" :key="turno" class="hover:bg-gray-50 group">
-            <td class="p-6 text-left border-r uppercase bg-gray-50/50 group-hover:text-cetpro transition-colors italic">
-              {{ turno }}
-            </td>
-
-            <td class="p-6 border-r text-2xl font-black">{{ tablaProcesada[turno].total }}</td>
-            <td class="p-6 border-r text-cetpro font-black">{{ tablaProcesada[turno].basico }}</td>
-            <td class="p-6 text-cetpro-dark font-black">{{ tablaProcesada[turno].medio }}</td>
-          </tr>
-
-          <tr class="bg-gray-800 text-white">
-            <td class="p-6 text-left border-r font-black uppercase tracking-widest italic">Total General</td>
-            <td class="p-6 border-r text-2xl">{{ totalGeneral.total }}</td>
-            <td class="p-6 border-r">{{ totalGeneral.basico }}</td>
-            <td class="p-6">{{ totalGeneral.medio }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <ChartDonutModal
-      :show="showChart"
-      title="Gráfico 205 - Secciones por Turno"
-      subtitle="Distribución total de secciones por turno"
-      :series="chartSeries"
-      @close="showChart = false"
-    />
-  </div>
+  <div class="space-y-2 p-3"><div class="flex flex-col gap-1.5 xl:flex-row xl:items-start xl:justify-between"><div class="space-y-0.5"><p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Reporte 205</p><h2 class="text-[1.25rem] font-semibold tracking-[0.01em] text-slate-900">205. NÚMERO TOTAL DE SECCIONES, POR CICLO SEGÚN TURNO</h2></div><div class="flex flex-wrap items-center gap-1.5"><button @click="abrirGrafico" class="inline-flex h-8 items-center justify-center rounded-md border border-cetpro/20 bg-cetpro/10 px-3 text-[11px] font-semibold text-cetpro transition-colors hover:bg-cetpro/15 whitespace-nowrap">GRAFICO</button><button @click="exportarExcel205" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-emerald-200 bg-white px-3 text-[11px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 0 1 1 1v6.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3A1 1 0 0 1 7.707 8.293L9 9.586V3a1 1 0 0 1 1-1Zm-6 11a1 1 0 1 0 0 2h12a1 1 0 1 0 0-2H4Z" clip-rule="evenodd" /></svg>Exportar Excel</button></div></div><div class="grid grid-cols-1 gap-1.5 border border-slate-200 bg-white p-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]"><div><label class="mb-0.5 block text-[9px] font-semibold tracking-[0.1em] text-slate-700">FECHA INICIO</label><flat-pickr v-model="fechaInicio" :config="datePickerConfig" class="h-8 w-full rounded-md border border-slate-300 px-2.5 text-[11px] text-slate-800 outline-none transition-colors hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15" /></div><div><label class="mb-0.5 block text-[9px] font-semibold tracking-[0.1em] text-slate-700">FECHA FIN</label><flat-pickr v-model="fechaFin" :config="datePickerConfig" class="h-8 w-full rounded-md border border-slate-300 px-2.5 text-[11px] text-slate-800 outline-none transition-colors hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15" /></div><div class="flex items-end"><button @click="consultarDatos" class="inline-flex h-8 w-full items-center justify-center rounded-md bg-cetpro px-3 text-[11px] font-semibold text-white transition-colors hover:bg-cetpro-dark">Consultar datos</button></div></div><div class="max-w-4xl overflow-hidden border border-slate-200 bg-white"><table class="w-full text-[11px] text-center"><thead><tr class="bg-slate-800 text-white font-semibold uppercase"><th class="px-2.5 py-1.5 border-r border-slate-600">Turno de Trabajo</th><th class="px-2.5 py-1.5 border-r border-slate-600 bg-slate-700">Total Secciones</th><th class="px-2.5 py-1.5 border-r border-slate-600 bg-cetpro">Ciclo Auxiliar Tecnico</th><th class="px-2.5 py-1.5 bg-cetpro-dark">Ciclo Tecnico</th></tr></thead><tbody class="divide-y divide-slate-200 text-[13px] font-semibold text-slate-700"><tr v-for="turno in ['Mañana', 'Tarde', 'Noche']" :key="turno" class="hover:bg-slate-50/70"><td class="px-2.5 py-1.5 text-left border-r border-slate-200 uppercase bg-slate-50/50">{{ turno }}</td><td class="px-2.5 py-1.5 border-r border-slate-200 text-[18px] font-bold">{{ tablaProcesada[turno].total }}</td><td class="px-2.5 py-1.5 border-r border-slate-200 text-cetpro font-bold">{{ tablaProcesada[turno].basico }}</td><td class="px-2.5 py-1.5 text-cetpro-dark font-bold">{{ tablaProcesada[turno].medio }}</td></tr><tr class="bg-cetpro/5 text-cetpro"><td class="px-2.5 py-1.5 text-left border-r border-slate-200 font-bold uppercase">Total General</td><td class="px-2.5 py-1.5 border-r border-slate-200 text-[18px] font-bold">{{ totalGeneral.total }}</td><td class="px-2.5 py-1.5 border-r border-slate-200 font-bold">{{ totalGeneral.basico }}</td><td class="px-2.5 py-1.5 font-bold">{{ totalGeneral.medio }}</td></tr></tbody></table></div><ChartDonutModal :show="showChart" title="Gráfico 205 - Secciones por Turno" subtitle="Distribución total de secciones por turno" :series="chartSeries" @close="showChart = false" /></div>
 </template>
+
+
+
+
+

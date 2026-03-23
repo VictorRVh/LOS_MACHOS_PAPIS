@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import Slider from '../../ui/Slider.vue';
 import FormInput from '../../ui/FormInput.vue';
+import DatePickerInput from '../../ui/DatePickerInput.vue';
 import FormLabelError from '../../ui/FormLabelError.vue';
 import Button from '../../ui/Button.vue';
 import AuthorizationFallback from '../AuthorizationFallback.vue';
@@ -313,13 +314,13 @@ const onSubmit = async () => {
           </FormLabelError>
 
 
-          <FormInput v-model="formData.fecha_inicio" label="Fecha Inicio" type="date"
+          <DatePickerInput v-model="formData.fecha_inicio" label="Fecha Inicio"
             :error="formErrors?.fecha_inicio" />
-          <FormInput v-model="formData.fecha_fin" label="Fecha Fin" type="date" :error="formErrors?.fecha_fin" />
+          <DatePickerInput v-model="formData.fecha_fin" label="Fecha Fin" :error="formErrors?.fecha_fin" />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormInput v-model="formData.fecha_entrega_acta" label="Entrega Acta" type="date"
+          <DatePickerInput v-model="formData.fecha_entrega_acta" label="Entrega Acta"
             :error="formErrors?.fecha_entrega_acta" />
           <FormLabelError label="Sección" :error="formErrors?.seccion" required>
 

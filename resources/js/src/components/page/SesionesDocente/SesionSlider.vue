@@ -181,9 +181,12 @@ const closeAndReset = () => {
 
     <!-- DESCRIPCIÓN -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción (opcional)</label>
-      <textarea v-model="form.descripcion" rows="4"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+      <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Descripción (opcional)</label>
+      <textarea
+        v-model="form.descripcion"
+        rows="4"
+        class="mt-1 block w-full rounded-[3px] border border-slate-300 bg-white px-3 py-2 text-sm leading-5 text-slate-800 outline-none transition-colors duration-150 placeholder:text-slate-400 hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400 dark:hover:border-cetpro-light/55 dark:focus:border-cetpro-light dark:focus:ring-cetpro-light/20"
+      ></textarea>
       <FormLabelError v-if="formErrors?.descripcion" :error="formErrors.descripcion" />
     </div>
 

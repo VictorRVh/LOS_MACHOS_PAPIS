@@ -1,14 +1,18 @@
 ﻿<script setup>
 import { ref, computed } from 'vue';
+import flatPickr from 'vue-flatpickr-component';
 import useEstadistica203Store from '../../store/Estadisticas/Estadistica203Store';
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import useModalToast from '../../composables/useModalToast';
 import useExportEstadisticasExcel from '../../composables/estadisticas/useExportEstadisticasExcel';
 import ChartDonutModal from '../../components/estadisticas/ChartDonutModal.vue';
+import { createDatePickerConfig } from '../../utils/datePickerConfig';
 
 const fechaInicio = ref('');
 const fechaFin = ref('');
+
+const datePickerConfig = createDatePickerConfig();
 
 const estadisticaStore = useEstadistica203Store();
 const { showToast } = useModalToast();
@@ -128,81 +132,9 @@ const exportarExcel203 = async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="flex justify-between items-center gap-3 mb-6">
-      <div class="bg-cetpro p-4 rounded-t-xl shadow-google-sm flex-1">
-        <h2 class="text-white font-black uppercase text-center tracking-widest">203. MATRÍCULA POR CICLO Y SEXO, SEGÚN
-          NIVEL EDUCATIVO</h2>
-      </div>
-      <div class="flex items-center gap-2">
-        <button @click="abrirGrafico"
-          class="bg-[#0ea5e9] text-white px-4 py-2 rounded-lg font-bold shadow-google-sm hover:bg-sky-600 transition-all whitespace-nowrap">
-          GRAFICO
-        </button>
-        <button @click="exportarExcel203"
-          class="bg-[#10b981] text-white px-4 py-2 rounded-lg font-bold shadow-google-sm hover:bg-emerald-600 transition-all whitespace-nowrap">
-          EXPORTAR EXCEL
-        </button>
-      </div>
-    </div>
-
-    <div
-      class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-xl mb-6 shadow-google-sm border border-gray-100">
-      <div>
-        <label class="text-[10px] font-black uppercase">Fecha Inicio</label>
-        <input type="date" v-model="fechaInicio" class="w-full shadow-google-sm rounded-lg p-2" />
-      </div>
-
-      <div>
-        <label class="text-[10px] font-black uppercase">Fecha Fin</label>
-        <input type="date" v-model="fechaFin" class="w-full shadow-google-sm rounded-lg p-2" />
-      </div>
-      <div class="flex items-end pb-0.5">
-        <button @click="consultarDatos"
-          class="bg-cetpro w-full text-white font-bold py-2 rounded-lg hover:bg-cetpro-dark shadow-google-sm transition-all">
-          CONSULTAR DATOS
-        </button>
-      </div>
-    </div>
-
-    <div class="overflow-x-auto shadow-google border border-gray-200 rounded-b-xl">
-      <table class="w-full text-sm text-center bg-white">
-        <thead>
-          <tr class="bg-gray-100 text-gray-800 uppercase font-black border-b">
-            <th rowspan="2" class="p-4 border-r text-left">Nivel Educativo de los Participantes</th>
-            <th colspan="2" class="p-2 border-b border-r">Total</th>
-            <th colspan="2" class="p-2 border-b border-r bg-gray-200/50">Básico</th>
-            <th colspan="2" class="p-2 border-b bg-gray-200/50">Medio</th>
-          </tr>
-          <tr class="bg-gray-50 text-gray-500 border-b">
-            <th class="p-2 border-r">H</th>
-            <th class="p-2 border-r">M</th>
-            <th class="p-2 border-r">H</th>
-            <th class="p-2 border-r">M</th>
-            <th class="p-2 border-r">H</th>
-            <th class="p-2">M</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y font-bold">
-          <tr v-for="item in data" :key="item.nivel" class="hover:bg-cetpro/5">
-            <td class="p-4 text-left border-r font-black text-gray-700">{{ item.nivel.toUpperCase() }}</td>
-            <td class="p-4 border-r">{{ item.total.H }}</td>
-            <td class="p-4 border-r">{{ item.total.M }}</td>
-            <td class="p-4 border-r">{{ item.auxiliar_tecnico.H }}</td>
-            <td class="p-4 border-r">{{ item.auxiliar_tecnico.M }}</td>
-            <td class="p-4 border-r">{{ item.tecnico.H }}</td>
-            <td class="p-4">{{ item.tecnico.M }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <ChartDonutModal
-      :show="showChart"
-      title="Gráfico 203 - Nivel Educativo"
-      subtitle="Distribución de matrícula total por nivel educativo"
-      :series="chartSeries"
-      @close="showChart = false"
-    />
-  </div>
+  <div class="space-y-2 p-3"><div class="flex flex-col gap-1.5 xl:flex-row xl:items-start xl:justify-between"><div class="space-y-0.5"><p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Reporte 203</p><h2 class="text-[1.25rem] font-semibold tracking-[0.01em] text-slate-900">203. MATRÍCULA POR CICLO Y SEXO, SEGÚN NIVEL EDUCATIVO</h2></div><div class="flex flex-wrap items-center gap-1.5"><button @click="abrirGrafico" class="inline-flex h-8 items-center justify-center rounded-md border border-cetpro/20 bg-cetpro/10 px-3 text-[11px] font-semibold text-cetpro transition-colors hover:bg-cetpro/15 whitespace-nowrap">GRAFICO</button><button @click="exportarExcel203" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-emerald-200 bg-white px-3 text-[11px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 0 1 1 1v6.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3A1 1 0 0 1 7.707 8.293L9 9.586V3a1 1 0 0 1 1-1Zm-6 11a1 1 0 1 0 0 2h12a1 1 0 1 0 0-2H4Z" clip-rule="evenodd" /></svg>Exportar Excel</button></div></div><div class="grid grid-cols-1 gap-1.5 border border-slate-200 bg-white p-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]"><div><label class="mb-0.5 block text-[9px] font-semibold tracking-[0.1em] text-slate-700">FECHA INICIO</label><flat-pickr v-model="fechaInicio" :config="datePickerConfig" class="h-8 w-full rounded-md border border-slate-300 px-2.5 text-[11px] text-slate-800 outline-none transition-colors hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15" /></div><div><label class="mb-0.5 block text-[9px] font-semibold tracking-[0.1em] text-slate-700">FECHA FIN</label><flat-pickr v-model="fechaFin" :config="datePickerConfig" class="h-8 w-full rounded-md border border-slate-300 px-2.5 text-[11px] text-slate-800 outline-none transition-colors hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15" /></div><div class="flex items-end"><button @click="consultarDatos" class="inline-flex h-8 w-full items-center justify-center rounded-md bg-cetpro px-3 text-[11px] font-semibold text-white transition-colors hover:bg-cetpro-dark">Consultar datos</button></div></div><div class="overflow-x-auto border border-slate-200 bg-white"><table class="w-full text-[11px] text-center"><thead><tr class="bg-slate-800 text-white uppercase font-semibold border-b border-slate-600"><th rowspan="2" class="px-2 py-1 border-r border-slate-600 text-left">Nivel Educativo de los Participantes</th><th colspan="2" class="px-2 py-1 border-b border-r border-slate-600 bg-slate-700">Total</th><th colspan="2" class="px-2 py-1 border-b border-r border-slate-600 bg-cetpro">Básico</th><th colspan="2" class="px-2 py-1 border-b bg-cetpro-dark">Medio</th></tr><tr class="bg-slate-50 text-slate-500 border-b border-slate-200 font-semibold"><th class="px-2 py-1 border-r border-slate-200">H</th><th class="px-2 py-1 border-r border-slate-200">M</th><th class="px-2 py-1 border-r border-slate-200">H</th><th class="px-2 py-1 border-r border-slate-200">M</th><th class="px-2 py-1 border-r border-slate-200">H</th><th class="px-2 py-1">M</th></tr></thead><tbody class="divide-y divide-slate-200 font-medium text-slate-700"><tr v-for="item in data" :key="item.nivel" class="hover:bg-slate-50/70"><td class="px-2 py-1 text-left border-r border-slate-200 font-semibold text-slate-900">{{ item.nivel.toUpperCase() }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.total.H }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.total.M }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.auxiliar_tecnico.H }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.auxiliar_tecnico.M }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.tecnico.H }}</td><td class="px-2 py-1">{{ item.tecnico.M }}</td></tr></tbody></table></div><ChartDonutModal :show="showChart" title="Gráfico 203 - Nivel Educativo" subtitle="Distribución de matrícula total por nivel educativo" :series="chartSeries" @close="showChart = false" /></div>
 </template>
+
+
+
+

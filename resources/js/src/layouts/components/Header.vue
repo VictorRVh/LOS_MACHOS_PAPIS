@@ -162,7 +162,7 @@ const onLogout = async () => {
                         leave-to-class="transform opacity-0 scale-95">
                         <userMenu v-if="isUserMenuOpen" class="absolute right-0 mt-2 z-50"
                             :nombre="userStore.user?.name" :apellido="userStore.user?.apellido_paterno"
-                            :email="userStore.user?.email" :is-dark-mode="isDarkMode" @logout="onLogout"
+                            :email="userStore.user?.email" :avatar-url="userStore.user?.avatar_url" :is-dark-mode="isDarkMode" @logout="onLogout"
                             @toggle-theme="updateDarkMode(!isDarkMode)" @close-menu="isUserMenuOpen = false" />
                     </Transition>
                 </div>

@@ -1,14 +1,18 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue';
+import flatPickr from 'vue-flatpickr-component';
 import useEstadistica101Store from '../../store/Estadisticas/Estadistica101Store';
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import useModalToast from '../../composables/useModalToast';
 import useExportEstadisticasExcel from '../../composables/estadisticas/useExportEstadisticasExcel';
 import ChartDonutModal from '../../components/estadisticas/ChartDonutModal.vue';
+import { createDatePickerConfig } from '../../utils/datePickerConfig';
 
 const fechaInicio = ref('');
 const fechaFin = ref('');
+
+const datePickerConfig = createDatePickerConfig();
 
 const estadisticaStore = useEstadistica101Store();
 const { showToast } = useModalToast();
@@ -59,7 +63,7 @@ const chartSeries = computed(() => ([
 
 const abrirGrafico = () => {
   if (!chartSeries.value.some((s) => s.value > 0)) {
-    showToast('Primero consulta datos para mostrar el gráfico.', 'warning');
+    showToast('Primero consulta datos para mostrar el grÃ¡fico.', 'warning');
     return;
   }
   showChart.value = true;
@@ -81,7 +85,7 @@ const exportarExcel101 = async () => {
     ];
 
     const { startRow, applyThinBorder } = await addInstitutionalHeader(wb, ws, {
-      reportTitle: 'REPORTE 101 - APROBADOS Y RETIRADOS SEGÚN CICLO Y SEXO',
+      reportTitle: 'REPORTE 101 - APROBADOS Y RETIRADOS SEGÃšN CICLO Y SEXO',
       fechaInicio: fechaInicio.value,
       fechaFin: fechaFin.value,
       totalCols: 8,
@@ -94,11 +98,11 @@ const exportarExcel101 = async () => {
     ws.mergeCells(`E${startRow}:F${startRow}`);
     ws.mergeCells(`G${startRow}:H${startRow}`);
 
-    ws.getCell(`A${startRow}`).value = 'SITUACIÓN';
+    ws.getCell(`A${startRow}`).value = 'SITUACIÃ“N';
     ws.getCell(`B${startRow}`).value = 'TOTAL GENERAL';
     ws.getCell(`C${startRow}`).value = 'TOTAL';
-    ws.getCell(`E${startRow}`).value = 'AUXILIAR TÉCNICO';
-    ws.getCell(`G${startRow}`).value = 'TÉCNICO';
+    ws.getCell(`E${startRow}`).value = 'AUXILIAR TÃ‰CNICO';
+    ws.getCell(`G${startRow}`).value = 'TÃ‰CNICO';
 
     const topHeaders = [`A${startRow}`, `B${startRow}`, `C${startRow}`, `E${startRow}`, `G${startRow}`];
     topHeaders.forEach((addr) => {
@@ -169,134 +173,35 @@ const exportarExcel101 = async () => {
 </script>
 
 <template>
-  <div class="p-6">
-
-    <!-- TÍTULO Y EXCEL -->
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-extrabold text-gray-800">
-        101. APROBADOS Y RETIRADOS SEGÚN CICLO Y SEXO
-      </h2>
-
-      <div class="flex items-center gap-2">
-        <button @click="abrirGrafico"
-          class="bg-[#0ea5e9] text-white px-4 py-2 rounded-lg font-bold shadow-google-sm hover:bg-sky-600 transition-all">
-          GRAFICO
-        </button>
-        <button @click="exportarExcel101"
-          class="bg-[#10b981] text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-google-sm hover:bg-emerald-600 transition-all">
-          EXPORTAR EXCEL
-        </button>
+  <div class="space-y-2 p-3">
+    <div class="flex flex-col gap-1.5 xl:flex-row xl:items-start xl:justify-between">
+      <div class="space-y-0.5">
+        <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Reporte 101</p>
+        <h2 class="text-[1.25rem] font-semibold tracking-[0.01em] text-slate-900">101. APROBADOS Y RETIRADOS SEGÚN CICLO Y SEXO</h2>
+      </div>
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button @click="abrirGrafico" class="inline-flex h-8 items-center justify-center rounded-md border border-cetpro/20 bg-cetpro/10 px-3 text-[11px] font-semibold text-cetpro transition-colors hover:bg-cetpro/15">GRAFICO</button>
+        <button @click="exportarExcel101" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-emerald-200 bg-white px-3 text-[11px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-50"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 0 1 1 1v6.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3A1 1 0 0 1 7.707 8.293L9 9.586V3a1 1 0 0 1 1-1Zm-6 11a1 1 0 1 0 0 2h12a1 1 0 1 0 0-2H4Z" clip-rule="evenodd" /></svg>Exportar Excel</button>
       </div>
     </div>
-
-    <!-- FILTROS -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl mb-6 border">
-      <div>
-        <label class="text-[10px] font-black uppercase">Fecha Inicio</label>
-        <input type="date" v-model="fechaInicio" class="w-full shadow-google-sm rounded-lg p-2" />
-      </div>
-
-      <div>
-        <label class="text-[10px] font-black uppercase">Fecha Fin</label>
-        <input type="date" v-model="fechaFin" class="w-full shadow-google-sm rounded-lg p-2" />
-      </div>
-
-      <div class="flex items-end">
-        <button @click="consultarDatos"
-          class="bg-cetpro w-full text-white font-bold py-2 rounded-lg hover:bg-cetpro-dark shadow-google-sm transition-all">
-          CONSULTAR DATOS
-        </button>
-      </div>
+    <div class="grid grid-cols-1 gap-1.5 border border-slate-200 bg-white p-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]">
+      <div><label class="mb-0.5 block text-[9px] font-semibold tracking-[0.1em] text-slate-700">FECHA INICIO</label><flat-pickr v-model="fechaInicio" :config="datePickerConfig" class="h-8 w-full rounded-md border border-slate-300 px-2.5 text-[11px] text-slate-800 outline-none transition-colors hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15" /></div>
+      <div><label class="mb-0.5 block text-[9px] font-semibold tracking-[0.1em] text-slate-700">FECHA FIN</label><flat-pickr v-model="fechaFin" :config="datePickerConfig" class="h-8 w-full rounded-md border border-slate-300 px-2.5 text-[11px] text-slate-800 outline-none transition-colors hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15" /></div>
+      <div class="flex items-end"><button @click="consultarDatos" class="inline-flex h-8 w-full items-center justify-center rounded-md bg-cetpro px-3 text-[11px] font-semibold text-white transition-colors hover:bg-cetpro-dark">Consultar datos</button></div>
     </div>
-
-    <!-- TABLA -->
-    <div class="overflow-x-auto rounded-xl border border-gray-200">
-      <table class="w-full text-sm">
+    <div class="overflow-x-auto border border-slate-200 bg-white">
+      <table class="w-full text-[11px]">
         <thead>
-          <tr class="bg-gray-800 text-white text-center">
-            <th class="p-4 border-r">SITUACIÓN</th>
-            <th class="p-4 border-r">TOTAL GENERAL</th>
-            <th colspan="2" class="p-4 border-r bg-gray-700">TOTAL</th>
-            <th colspan="2" class="p-4 border-r bg-cetpro">AUXILIAR TECNICO</th>
-            <th colspan="2" class="p-4 bg-cetpro-dark">TECNICO</th>
-          </tr>
-          <tr class="bg-gray-100 text-gray-600">
-            <th></th>
-            <th></th>
-            <th>H</th>
-            <th>M</th>
-            <th>H</th>
-            <th>M</th>
-            <th>H</th>
-            <th>M</th>
-          </tr>
+          <tr class="bg-slate-800 text-center text-white"><th class="border-r border-slate-600 px-2 py-1">SITUACIÓN</th><th class="border-r border-slate-600 px-2 py-1">TOTAL GENERAL</th><th colspan="2" class="border-r border-slate-600 bg-slate-700 px-2 py-1">TOTAL</th><th colspan="2" class="border-r border-slate-600 bg-cetpro px-2 py-1">AUXILIAR TECNICO</th><th colspan="2" class="bg-cetpro-dark px-2 py-1">TECNICO</th></tr>
+          <tr class="bg-slate-50 text-[12px] font-semibold text-slate-500"><th class="px-2 py-1"></th><th class="px-2 py-1"></th><th class="px-2 py-1">H</th><th class="px-2 py-1">M</th><th class="px-2 py-1">H</th><th class="px-2 py-1">M</th><th class="px-2 py-1">H</th><th class="px-2 py-1">M</th></tr>
         </thead>
-
-        <tbody class="text-center font-medium">
-
-          <!-- APROBADOS -->
-          <tr>
-            <td class="font-bold text-left">APROBADOS</td>
-
-            <!-- TOTAL GENERAL -->
-            <td class="font-black text-cetpro">
-              {{ data.aprobados.total }}
-            </td>
-
-            <!-- TOTAL (H/M) -->
-            <td>
-              {{ data.aprobados.auxiliar_tecnico.H + data.aprobados.tecnico.H }}
-            </td>
-            <td>
-              {{ data.aprobados.auxiliar_tecnico.M + data.aprobados.tecnico.M }}
-            </td>
-
-            <!-- BÁSICO -->
-            <td>{{ data.aprobados.auxiliar_tecnico.H }}</td>
-            <td>{{ data.aprobados.auxiliar_tecnico.M }}</td>
-
-            <!-- MEDIO -->
-            <td>{{ data.aprobados.tecnico.H }}</td>
-            <td>{{ data.aprobados.tecnico.M }}</td>
-          </tr>
-
-          <!-- RETIRADOS -->
-          <tr>
-            <td class="font-bold text-left">RETIRADOS</td>
-
-            <!-- TOTAL GENERAL -->
-            <td class="font-black text-cetpro">
-              {{ data.retirados.total }}
-            </td>
-
-            <!-- TOTAL (H/M) -->
-            <td>
-              {{ data.retirados.auxiliar_tecnico.H + data.retirados.tecnico.H }}
-            </td>
-            <td>
-              {{ data.retirados.auxiliar_tecnico.M + data.retirados.tecnico.M }}
-            </td>
-
-            <!-- BÁSICO -->
-            <td>{{ data.retirados.auxiliar_tecnico.H }}</td>
-            <td>{{ data.retirados.auxiliar_tecnico.M }}</td>
-
-            <!-- MEDIO -->
-            <td>{{ data.retirados.tecnico.H }}</td>
-            <td>{{ data.retirados.tecnico.M }}</td>
-          </tr>
-
-        </tbody>
-
+        <tbody class="text-center font-medium text-slate-700"><tr class="border-t border-slate-200"><td class="px-2 py-1 text-left font-semibold text-slate-900">APROBADOS</td><td class="px-2 py-1 font-bold text-cetpro">{{ data.aprobados.total }}</td><td class="px-2 py-1">{{ data.aprobados.auxiliar_tecnico.H + data.aprobados.tecnico.H }}</td><td class="px-2 py-1">{{ data.aprobados.auxiliar_tecnico.M + data.aprobados.tecnico.M }}</td><td class="px-2 py-1">{{ data.aprobados.auxiliar_tecnico.H }}</td><td class="px-2 py-1">{{ data.aprobados.auxiliar_tecnico.M }}</td><td class="px-2 py-1">{{ data.aprobados.tecnico.H }}</td><td class="px-2 py-1">{{ data.aprobados.tecnico.M }}</td></tr><tr class="border-t border-slate-200 bg-slate-50/40"><td class="px-2 py-1 text-left font-semibold text-slate-900">RETIRADOS</td><td class="px-2 py-1 font-bold text-cetpro">{{ data.retirados.total }}</td><td class="px-2 py-1">{{ data.retirados.auxiliar_tecnico.H + data.retirados.tecnico.H }}</td><td class="px-2 py-1">{{ data.retirados.auxiliar_tecnico.M + data.retirados.tecnico.M }}</td><td class="px-2 py-1">{{ data.retirados.auxiliar_tecnico.H }}</td><td class="px-2 py-1">{{ data.retirados.auxiliar_tecnico.M }}</td><td class="px-2 py-1">{{ data.retirados.tecnico.H }}</td><td class="px-2 py-1">{{ data.retirados.tecnico.M }}</td></tr></tbody>
       </table>
     </div>
-
-    <ChartDonutModal
-      :show="showChart"
-      title="Gráfico 101 - Aprobados vs Retirados"
-      subtitle="Distribución total por situación académica"
-      :series="chartSeries"
-      @close="showChart = false"
-    />
+    <ChartDonutModal :show="showChart" title="Gráfico 101 - Aprobados vs Retirados" subtitle="Distribución total por situación académica" :series="chartSeries" @close="showChart = false" />
   </div>
 </template>
+
+
+
+

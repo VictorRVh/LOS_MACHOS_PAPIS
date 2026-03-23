@@ -9,6 +9,7 @@ import {
     FormInput,
     CheckBox,
 } from "@/components/ui";
+import DatePickerInput from "../../ui/DatePickerInput.vue";
 
 const props = defineProps({
     show: { type: Boolean, default: false },
@@ -131,9 +132,9 @@ const onSubmit = async () => {
                 :error="formErrors?.nombre_experiencia" />
 
             <div class="flex gap-2">
-                <FormInput type="date" v-model="formData.fecha_inicio" label="Fecha de inicio *"
+                <DatePickerInput v-model="formData.fecha_inicio" label="Fecha de inicio *"
                     :error="formErrors?.fecha_inicio" />
-                <FormInput type="date" v-model="formData.fecha_fin" label="Fecha de fin *"
+                <DatePickerInput v-model="formData.fecha_fin" label="Fecha de fin *"
                     :error="formErrors?.fecha_fin" />
             </div>
 

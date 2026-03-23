@@ -13,6 +13,7 @@ const props = defineProps({
   nombre: String,
   apellido: String,
   email: String,
+  avatarUrl: String,
   isDarkMode: Boolean
 });
 
@@ -59,8 +60,11 @@ onUnmounted(() => {
   >
     <div class="py-1">
       <div class="flex items-center gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-cetpro text-white text-xl font-bold">
-          {{ getInitials(nombre, apellido) }}
+        <div class="h-12 w-12 overflow-hidden rounded-full">
+          <img v-if="avatarUrl" :src="avatarUrl" alt="Avatar" class="h-full w-full object-cover">
+          <div v-else class="flex h-full w-full items-center justify-center rounded-full bg-cetpro text-xl font-bold text-white">
+            {{ getInitials(nombre, apellido) }}
+          </div>
         </div>
         <div>
           <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">

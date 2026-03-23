@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { ArrowDownTrayIcon, ChevronDownIcon, ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
 import useCalendarEvents from '@/composables/sesiones/useCalendarEvents'
 import useSesionStore from "../../store/Sesion/useSesionStore"
 import useProgramacionStore from "../../store/Sesion/useProgramacionDocenteStore"
@@ -21,7 +22,6 @@ import BaseButton from '@/components/ui/Button.vue';
 import TomarAsistencia from '../../components/page/SesionesDocente/TomarAsistenciaSlider.vue';
 import MenuTable from "../../components/table/MenuTable.vue";
 import useExportExcel from "../../composables/sesiones/useExportExcel"
-
 
 const props = defineProps({
   id: {
@@ -51,16 +51,14 @@ watch(
   async (nuevoId) => {
     if (!nuevoId) return;
 
-    // 1. LIMPIAR ANTES DE CARGAR
     programacionSesion.sesiones = [];
     sesionStore.sesion = null;
 
     allEvents.value = [];
     selectionEvents.value = [];
     datesForSlider.value = [];
-    calendarKey.value++; // Rerender inmediato sin los eventos anteriores
+    calendarKey.value++;
 
-    // 2. CARGAR NUEVA DATA
     await sesionStore.loadSesion({
       id_grupo: nuevoId,
       tipo_entrega: 2,
@@ -73,8 +71,6 @@ watch(
   { immediate: true }
 );
 
-// const isFinalizado = computed(() => sesionStore?.sesion?.estado === 4)
-
 const Asistencia = () => {
   if (sesionStore?.sesion?.id) {
     asist.value = true;
@@ -83,10 +79,10 @@ const Asistencia = () => {
     showToast("Selecciona una Unidad Didactica primero.", "warning");
   }
 };
+
 const ocultarSliderAsistencia = () => {
   asist.value = false;
 };
-
 
 watch(
   () => programacionSesion.sesiones,
@@ -198,7 +194,6 @@ const handleDateClick = ({ dateStr, date }) => {
 const clearSelection = () => {
   selectionEvents.value = [];
   datesForSlider.value = [];
-  selectedDates.value = [];
   calendarKey.value++
 
   const calendar = document.querySelector('.fc');
@@ -208,11 +203,6 @@ const clearSelection = () => {
 };
 
 const openSessionForm = () => {
-  // if (isFinalizado.value) {
-  //   showToast("La programación está FINALIZADA. No puedes crear nuevas sesiones.", "warning");
-  //   return;
-  // }
-
   if (!hasSelection.value) return;
 
   datesForSlider.value = [...selectedDates.value];
@@ -221,12 +211,6 @@ const openSessionForm = () => {
 };
 
 const confirmDelete = (bloque) => {
-
-  // if (isFinalizado.value) {
-  //   showToast("No puedes eliminar sesiones porque la programación está FINALIZADA.", "warning");
-  //   return;
-  // }
-
   if (deleting.value) return;
 
   showConfirmModal(
@@ -248,11 +232,6 @@ const verSesion = (bloque) => { }
 const isEditing = ref(false)
 
 const handleEdit = (bloque) => {
-  // if (isFinalizado.value) {
-  //   showToast("Esta unidad didáctica está FINALIZADA. No se puede editar sesiones.", "warning");
-  //   return;
-  // }
-
   clearSelection()
   isEditing.value = true
 
@@ -266,6 +245,7 @@ const handleEdit = (bloque) => {
   datesForSlider.value = [...fechas]
   sliderData.value = bloque
 }
+
 const cancelEdit = () => {
   isEditing.value = false
   clearSelection()
@@ -297,95 +277,103 @@ const toggleCapacidad = (id) => {
     openCapacidades.value.add(id)
   }
 }
+
 const onSliderHide = () => {
   hideSlider();
   sliderData.value = null;
   isEditing.value = false
   clearSelection()
 };
-
-
-
-//console.log("dATOS SESION: ", sesionStore?.sesion)
 </script>
 
 <template>
   <div v-if="sesionStore?.sesion?.id"
-    class="col-span-full bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-2 px-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-    <div>
-      <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200">
-        Programación de Sesiones
-      </h3>
-      <p class="text-sm text-gray-700 dark:text-gray-300">
-        Del
-        <strong>
-          {{
-            new Date(sesionStore?.sesion?.fecha_inicio).toLocaleDateString(
-              'es-PE',
-              { day: '2-digit', month: 'long', year: 'numeric' }
-            )
-          }}
-        </strong>
-        al
-        <strong>
-          {{
-            new Date(sesionStore?.sesion?.fecha_fin).toLocaleDateString(
-              'es-PE',
-              { day: '2-digit', month: 'long', year: 'numeric' }
-            )
-          }}
-        </strong>
-      </p>
+    class="col-span-full border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-800">
+    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div class="min-w-0">
+        <h3 class="text-sm font-semibold tracking-wide text-slate-900 dark:text-slate-100">
+          Programación de sesiones
+        </h3>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+          <strong>
+            {{
+              new Date(sesionStore?.sesion?.fecha_inicio).toLocaleDateString(
+                'es-PE',
+                { day: '2-digit', month: 'long', year: 'numeric' }
+              )
+            }}
+          </strong>
+          <span class="px-1 text-slate-400 dark:text-slate-500">-</span>
+          <strong>
+            {{
+              new Date(sesionStore?.sesion?.fecha_fin).toLocaleDateString(
+                'es-PE',
+                { day: '2-digit', month: 'long', year: 'numeric' }
+              )
+            }}
+          </strong>
+        </p>
+      </div>
+
+      <div class="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end md:w-auto">
+        <div class="inline-flex h-6 items-center gap-1.5 self-start rounded-sm border px-2 text-xs font-medium sm:self-auto" :class="{
+          'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-700/50 dark:bg-amber-500/10 dark:text-amber-200': sesionStore?.sesion?.estado === 0,
+          'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-700/50 dark:bg-emerald-500/10 dark:text-emerald-200': sesionStore?.sesion?.estado === 1,
+          'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-700/60 dark:text-slate-200': sesionStore?.sesion?.estado === 2,
+          'border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-700/50 dark:bg-sky-500/10 dark:text-sky-200': sesionStore?.sesion?.estado === 3,
+          'border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-500 dark:bg-slate-700/50 dark:text-slate-200': sesionStore?.sesion?.estado === 4,
+        }">
+          <span class="h-2 w-2 rounded-full" :class="{
+            'bg-amber-500': sesionStore?.sesion?.estado === 0,
+            'bg-emerald-500': sesionStore?.sesion?.estado === 1,
+            'bg-slate-400': sesionStore?.sesion?.estado === 2 || sesionStore?.sesion?.estado === 4,
+            'bg-sky-500': sesionStore?.sesion?.estado === 3,
+          }"></span>
+          <span>{{ estadoTexto }}</span>
+        </div>
+
+        <button type="button" @click="Asistencia"
+          class="inline-flex h-8 items-center justify-center gap-2 rounded-sm border border-emerald-200 bg-white px-3 text-sm font-semibold text-emerald-700 transition-colors duration-150 hover:border-emerald-300 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 dark:border-emerald-700/60 dark:bg-slate-800 dark:text-emerald-300 dark:hover:bg-emerald-500/10 dark:focus-visible:ring-emerald-700/40">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+            class="size-4">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+          </svg>
+          <span>Asistencia</span>
+        </button>
+      </div>
     </div>
-
-    <div class="px-3 py-1 rounded-full text-sm font-bold" :class="{
-      'bg-yellow-100 text-yellow-800': sesionStore?.sesion?.estado === 0,
-      'bg-green-100 text-green-800': sesionStore?.sesion?.estado === 1,
-      'bg-gray-200 text-gray-800': sesionStore?.sesion?.estado === 2,
-    }">
-      Estado: {{ estadoTexto }}
-    </div>
-
-    <BaseButton title="Asistencia" @click="Asistencia"
-      class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow">
-      <template #icon>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-          class="size-6">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
-        </svg>
-
-      </template>
-    </BaseButton>
-
   </div>
 
   <div v-else
-    class="col-span-full bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-xl p-3 flex flex-col">
-
-    <h3 class="text-lg font-semibold text-red-800 dark:text-red-200">
-      No existe una programación para crear sesiones.
-    </h3>
-
-    <p class="text-sm text-red-700 dark:text-red-300 mt-1">
-      Debe existir la programación de sesiones. Solicítala a coordinación.
-    </p>
+    class="col-span-full border border-amber-200 border-l-[3px] border-l-amber-500 bg-white px-4 py-3 dark:border-amber-700/60 dark:bg-slate-800">
+    <div class="flex items-start gap-3">
+      <ExclamationTriangleIcon class="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-300" />
+      <div class="min-w-0">
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          No existe una programación para crear sesiones.
+        </h3>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+          Debe existir la programación de sesiones. Solicítala a coordinación.
+        </p>
+      </div>
+    </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-5 gap-2">
-    <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow calendar-container">
-      <div class="sticky top-0 z-10 bg-white dark:bg-gray-800 p-2 border-b border-gray-200 dark:border-gray-700">
-        <div class="md:flex justify-between items-center">
+  <div class="grid grid-cols-1 gap-2 lg:grid-cols-5">
+    <div class="calendar-container overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800 lg:col-span-3">
+      <div class="border-b border-gray-200 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-800">
+        <div class="items-center justify-between md:flex">
           <div>
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">
-              Programador de Sesiones
+            <h2 class="text-base font-bold text-gray-800 dark:text-gray-200">
+              Calendario de sesiones
             </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              Haga clic en los días para seleccionar.
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              Seleccione los días para programar.
             </p>
           </div>
 
-          <div class="mt-4 md:mt-0 flex gap-2 justify-end">
+          <div class="mt-3 flex justify-end gap-2 md:mt-0">
             <template v-if="isEditing">
               <BaseButton title="Cancelar" variant="secondary" @click="cancelEdit" />
               <BaseButton :title="`Actualizar ${selectedDates.length} sesiones`" variant="primary"
@@ -398,31 +386,25 @@ const onSliderHide = () => {
                 @click="openSessionForm" />
             </template>
           </div>
-
         </div>
       </div>
 
       <div class="calendar-scroll">
-        <BaseCalendar :key="calendarKey" :events="[...allEvents, ...selectionEvents]" :holidays="holidays"
+        <BaseCalendar :key="calendarKey" :events="[...allEvents, ...selectionEvents]" :holidays="holidays" height="auto" embedded
           @date-click="handleDateClick" @event-click="handleEventClick" :idEntrega="sesionStore?.sesion?.id" />
       </div>
     </div>
 
-    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-      <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200">
-          Sesiones Programadas
+    <div class="rounded-lg bg-white p-3 shadow dark:bg-gray-800 lg:col-span-2">
+      <div class="mb-3 flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
+        <h3 class="text-base font-bold text-gray-800 dark:text-gray-200">
+          Sesiones programadas
         </h3>
-        <BaseButton title="Exportar" @click="exportarCalendarioExcel(sesionStore, programacionSesion)">
-          <template #icon>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-          </template>
-        </BaseButton>
-
+        <button type="button" @click="exportarCalendarioExcel(sesionStore, programacionSesion)"
+          class="inline-flex h-8 items-center justify-center gap-2 rounded-sm border border-emerald-200 bg-white px-3 text-sm font-semibold text-emerald-700 transition-colors duration-150 hover:border-emerald-300 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 dark:border-emerald-700/60 dark:bg-slate-800 dark:text-emerald-300 dark:hover:bg-emerald-500/10 dark:focus-visible:ring-emerald-700/40">
+          <ArrowDownTrayIcon class="h-4 w-4" />
+          <span>Exportar</span>
+        </button>
       </div>
 
       <Table>
@@ -435,10 +417,8 @@ const onSliderHide = () => {
 
         <TBody>
           <template v-for="capacidad in programacionSesion?.sesiones" :key="capacidad.id">
-
-            <tr @click="toggleCapacidad(capacidad.id)" class="bg-cetpro dark:bg-cetpro-dark hover:bg-cetpro-dark dark:hover:bg-cetpro cursor-pointer
-               transition-colors duration-200 border-b border-white dark:border-cetpro">
-              <td colspan="8" class="px-4 py-3 font-bold uppercase tracking-wider text-sm">
+            <tr @click="toggleCapacidad(capacidad.id)" class="cursor-pointer border-b border-white bg-cetpro transition-colors duration-200 hover:bg-cetpro-dark dark:border-cetpro dark:bg-cetpro-dark dark:hover:bg-cetpro">
+              <td colspan="8" class="px-4 py-3 text-sm font-bold uppercase tracking-wider">
                 <div class="flex items-center justify-between text-cetpro-text">
                   <span>Sesiones {{ capacidad.nombre_capacidad }}</span>
 
@@ -453,35 +433,32 @@ const onSliderHide = () => {
             <tr v-if="openCapacidades.has(capacidad.id)" class="bg-white dark:bg-gray-800">
               <td colspan="8" class="p-0">
                 <TransitionGroup name="list" tag="table" class="w-full">
+                  <Tr v-for="(sesion, index) in capacidad.sesiones" :key="sesion.id" class="border-t-0">
+                    <Td class="w-12 text-center">{{ index + 1 }}</Td>
 
-            <Tr v-for="(sesion, index) in capacidad.sesiones" :key="sesion.id" class="border-t-0">
-              <Td class="text-center w-12">{{ index + 1 }}</Td>
+                    <Td>
+                      <div class="flex items-center gap-2 font-medium">
+                        <span class="h-3 w-3 rounded-full" :style="{ backgroundColor: '#22c55e' }"></span>
+                        {{ sesion.nombre_sesion }}
+                      </div>
 
-              <Td>
-                <div class="flex items-center gap-2 font-medium">
-                  <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: '#22c55e' }"></span>
-                  {{ sesion.nombre_sesion }}
-                </div>
+                      <div class="ml-5 mt-1 text-xs opacity-60">
+                        {{ sesion.fecha_inicio }} - {{ sesion.fecha_fin }}
+                      </div>
+                    </Td>
 
-                <div class="text-xs opacity-60 mt-1 ml-5">
-                  {{ sesion.fecha_inicio }} - {{ sesion.fecha_fin }}
-                </div>
-              </Td>
+                    <Td class="text-xs text-gray-500">
+                      {{ sesion.calendario_admin.length }} días
+                    </Td>
 
-              <Td class="text-xs text-gray-500">
-                {{ sesion.calendario_admin.length }} días
-              </Td>
-
-              <Td class="text-center text-gray-600 dark:text-gray-200">
-                <MenuTable :actions="{ view: false, edit: true, delete: true }" @view="verSesion(sesion)"
-                  @edit="handleEdit(sesion)" @delete="confirmDelete(sesion)" entity-label="sesión" />
-              </Td>
-            </Tr>
-
-            </TransitionGroup>
-            </td>
+                    <Td class="text-center text-gray-600 dark:text-gray-200">
+                      <MenuTable :actions="{ view: false, edit: true, delete: true }" @view="verSesion(sesion)"
+                        @edit="handleEdit(sesion)" @delete="confirmDelete(sesion)" entity-label="sesión" />
+                    </Td>
+                  </Tr>
+                </TransitionGroup>
+              </td>
             </tr>
-
           </template>
         </TBody>
       </Table>
@@ -494,23 +471,61 @@ const onSliderHide = () => {
       @hide="onSliderHide" :fechas-seleccionadas="datesForSlider" />
   </div>
 </template>
+
 <style scoped>
-.calendar-container {
-  /* ajusta según necesidad */
-  max-height: 450px;
-
-}
-
 .calendar-container {
   display: flex;
   flex-direction: column;
-  height: 450px;
-  /* puedes ajustar según el espacio total */
+  overflow: hidden;
 }
 
-/* Encabezado fijo */
-.sticky {
-  position: sticky;
-  top: 0;
+:deep(.fc) {
+  font-size: 0.72rem;
+}
+
+:deep(.fc .fc-toolbar.fc-header-toolbar) {
+  margin-bottom: 0.25rem;
+}
+
+:deep(.fc .fc-toolbar-title) {
+  font-size: 0.82rem;
+}
+
+:deep(.fc .fc-button) {
+  padding: 0.12rem 0.3rem;
+  font-size: 0.68rem;
+}
+
+:deep(.fc .fc-col-header-cell-cushion) {
+  padding: 0.12rem 0;
+  font-size: 0.64rem;
+}
+
+:deep(.fc .fc-daygrid-day-frame) {
+  min-height: 0.88rem;
+}
+
+:deep(.fc .fc-daygrid-day-top) {
+  padding: 0.02rem 0.12rem 0;
+}
+
+:deep(.fc .fc-scrollgrid-section-header > *) {
+  min-height: 1rem;
+}
+
+:deep(.fc .fc-view-harness),
+:deep(.fc .fc-view-harness-active) {
+  height: auto !important;
+}
+
+:deep(.fc .fc-scroller),
+:deep(.fc .fc-scroller-liquid-absolute) {
+  overflow: hidden !important;
+}
+
+:deep(.fc .fc-scrollgrid),
+:deep(.fc .fc-scrollgrid-section-body table),
+:deep(.fc .fc-scrollgrid-section-body tbody) {
+  height: auto !important;
 }
 </style>

@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import Slider from '../ui/Slider.vue';
 import FormInput from '../ui/FormInput.vue';
+import DatePickerInput from '../ui/DatePickerInput.vue';
 import FormLabelError from '../ui/FormLabelError.vue';
 import VSelect from 'vue-select';
 import Button from '../ui/Button.vue';
@@ -191,7 +192,7 @@ const onSubmit = async () => {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento" type="date"
+                    <DatePickerInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento"
                         :error="formErrors?.fecha_nacimiento" required />
                     <template v-if="!user?.id">
                         <div class="relative">

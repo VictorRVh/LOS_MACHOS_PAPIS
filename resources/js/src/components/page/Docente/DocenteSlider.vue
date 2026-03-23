@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import Slider from '../../ui/Slider.vue';
 import FormInput from '../../ui/FormInput.vue';
+import DatePickerInput from '../../ui/DatePickerInput.vue';
 import FormLabelError from '../../ui/FormLabelError.vue';
 import VSelect from 'vue-select';
 import Button from '../../ui/Button.vue';
@@ -197,7 +198,7 @@ const onSubmit = async () => {
                     <FormInput v-model="formData.condicion" label="Condición" :error="formErrors?.condicion" required />
                     <FormInput v-model="formData.escala_magisterial" label="Escala Magisterial"
                         :error="formErrors?.escala_magisterial" autocomplete="off" required />
-                    <FormInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento" type="date"
+                    <DatePickerInput v-model="formData.fecha_nacimiento" label="Fecha de Nacimiento"
                         :error="formErrors?.fecha_nacimiento" required />
                 </div>
 

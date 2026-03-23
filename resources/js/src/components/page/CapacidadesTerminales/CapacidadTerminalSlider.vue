@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import FormInput from "../../ui/FormInput.vue";
+import DatePickerInput from "../../ui/DatePickerInput.vue";
 import Button from "../../ui/Button.vue";
 import AuthorizationFallback from "../../../components/page/AuthorizationFallback.vue";
 import useValidation from "../../../composables/useValidation";
@@ -30,6 +31,10 @@ const props = defineProps({
         type: [Object, null],
         default: () => null,
     },
+    notice: {
+        type: String,
+        default: () => "",
+    },
 });
 
 const emit = defineEmits(["hide"]);
@@ -43,12 +48,14 @@ const { runYupValidation } = useValidation();
 const { showToast } = useModalToast();
 
 const requiredPermissions = computed(() => {
-    if (!props.capacidad?.id)
+    if (!props.capacidad?.id) {
         return ["todo-acceso-unidad-didáctica-docente", "crear-unidad-didáctica-docente"];
+    }
     return ["todo-acceso-unidad-didáctica-docente", "editar-unidad-didáctica-docente"];
 });
 
 const capacidades = ref([]);
+const noticeDismissed = ref(false);
 
 const initialFormData = () => ({
     numero_capacidad: "",
@@ -62,6 +69,7 @@ const initialFormData = () => ({
 const formData = ref(initialFormData());
 const formErrors = ref({});
 const isEditing = computed(() => !!props.capacidad?.id);
+const visibleNotice = computed(() => !noticeDismissed.value && props.notice);
 
 const onCancelEdit = () => {
     formData.value = initialFormData();
@@ -69,11 +77,17 @@ const onCancelEdit = () => {
     emit("hide");
 };
 
-// cuando se recibe una capacidad para editar
+watch(
+    () => props.notice,
+    () => {
+        noticeDismissed.value = false;
+    },
+    { immediate: true }
+);
+
 watch(
     [() => props.capacidad, () => props.capacidades],
     ([newCapacidad, newCapacidades]) => {
-
         if (props.show && newCapacidad?.id) {
             formData.value = { ...initialFormData(), ...newCapacidad };
             formErrors.value = {};
@@ -93,31 +107,28 @@ watch(
     { immediate: true }
 );
 
-// Lista de módulos ya creados (simulada)
-const capacidadesCreadas = ref([])
+const capacidadesCreadas = ref([]);
 
-// Opciones filtradas: excluye las ya creadas
 const filteredCapacidades = computed(() => {
     return capacidades.value.filter(
         cap => !capacidadesCreadas.value.includes(cap.id)
-    )
-})
+    );
+});
 
 yup.setLocale({
     mixed: {
-        required: 'Este campo es obligatorio.',
+        required: "Este campo es obligatorio.",
     },
     string: {
-        email: 'Debe ser un correo válido.',
+        email: "Debe ser un correo válido.",
     },
     date: {
-        min: 'La fecha no puede ser anterior a ${min}',
-        max: 'La fecha no puede ser posterior a ${max}',
-        typeError: 'Debe ser una fecha válida',
+        min: "La fecha no puede ser anterior a ${min}",
+        max: "La fecha no puede ser posterior a ${max}",
+        typeError: "Debe ser una fecha válida",
     },
 });
 
-// Validación con Yup
 const schema = yup.object().shape({
     numero_capacidad: yup
         .string()
@@ -145,7 +156,6 @@ const schema = yup.object().shape({
         .positive("Las horas deben ser mayores a 0.")
         .integer("Las horas deben ser un número entero.")
         .required("Las horas son obligatorias."),
-
     fecha_inicio: yup.date().required("La fecha de inicio es requerida.").typeError("Debe ingresar una fecha válida"),
     fecha_fin: yup.date()
         .required("La fecha de fin es requerida.")
@@ -166,7 +176,6 @@ const onSubmit = async () => {
 
     formErrors.value = {};
 
-
     const now = new Date();
     const horaActual = now.toTimeString().slice(0, 8);
     const horaFin = "23:59:59";
@@ -184,9 +193,7 @@ const onSubmit = async () => {
         : await createCapacidad(data);
 
     if (response?.id) {
-
         capacidadesCreadas.value.push(data.numero_capacidad);
-
         formData.value = initialFormData();
         formErrors.value = {};
         showToast(
@@ -201,58 +208,111 @@ const onSubmit = async () => {
 
 <template>
     <AuthorizationFallback :permissions="requiredPermissions">
-        <h2 class="text-lg font-semibold text-cetpro dark:text-cetpro-light mb-2">
-            {{ capacidad?.id ? "Editar Unidad Didáctica" : "Agregar Unidad Didáctica" }}
-        </h2>
-        <hr class="border-t-2 border-cetpro dark:border-cetpro-light mb-4" />
+        <div class="mb-2 flex flex-col gap-2">
+            <div class="flex items-start justify-between gap-3">
+                <h2 class="text-lg font-semibold text-cetpro dark:text-cetpro-light">
+                    {{ capacidad?.id ? "Editar Unidad Didáctica" : "Agregar Unidad Didáctica" }}
+                </h2>
+
+                <div
+                    v-if="visibleNotice"
+                    class="flex max-w-[350px] items-start gap-2 border border-red-700 bg-red-700 px-3 py-1 text-[11px] leading-4 text-white"
+                >
+                    <span class="min-w-0 flex-1">{{ visibleNotice }}</span>
+                    <button
+                        type="button"
+                        class="shrink-0 text-red-100 transition hover:text-white"
+                        @click="noticeDismissed = true"
+                    >
+                        x
+                    </button>
+                </div>
+            </div>
+
+            <hr class="border-t-2 border-cetpro dark:border-cetpro-light" />
+        </div>
 
         <div class="mt-2 space-y-3 font-inter">
-            <FormInput v-model="formData.nombre_capacidad" :focus="show" label="Nombre de la unidad didáctica"
-                :error="formErrors?.nombre_capacidad" required />
+            <FormInput
+                v-model="formData.nombre_capacidad"
+                :focus="show"
+                label="Nombre de la unidad didáctica"
+                :error="formErrors?.nombre_capacidad"
+                required
+            />
+
             <div class="flex gap-2">
-                <!-- 3/4 -->
                 <div class="w-3/4">
-                    <FormLabelError label="Número de unidad didáctica" required
-                        :error="formErrors?.numero_capacidad">
-                        <BaseSelectModulo v-model="formData.numero_capacidad" :options="props.indexCapacidades"
-                            label="name" placeholder="seleccione" />
+                    <FormLabelError label="Número de unidad didáctica" required :error="formErrors?.numero_capacidad">
+                        <BaseSelectModulo
+                            v-model="formData.numero_capacidad"
+                            :options="props.indexCapacidades"
+                            label="name"
+                            placeholder="seleccione"
+                        />
                     </FormLabelError>
                 </div>
 
-                <!-- 1/4 -->
                 <div class="w-1/4">
-                    <FormInput v-model="formData.horas" :focus="show" label="Horas" :error="formErrors?.horas"
-                        required />
+                    <FormInput
+                        v-model="formData.horas"
+                        :focus="show"
+                        label="Horas"
+                        :error="formErrors?.horas"
+                        required
+                    />
                 </div>
             </div>
 
             <div class="flex gap-2">
+                <FormInput
+                    v-model="formData.creditos_teoricos"
+                    :focus="show"
+                    label="Crédito teórico"
+                    :error="formErrors?.creditos_teoricos"
+                    required
+                />
 
-                <FormInput v-model="formData.creditos_teoricos" :focus="show" label="Crédito teórico"
-                    :error="formErrors?.creditos_teoricos" required />
-
-                <FormInput v-model="formData.creditos_practicos" :focus="show" label="Crédito práctico"
-                    :error="formErrors?.creditos_practicos" required />
-
+                <FormInput
+                    v-model="formData.creditos_practicos"
+                    :focus="show"
+                    label="Crédito práctico"
+                    :error="formErrors?.creditos_practicos"
+                    required
+                />
             </div>
 
             <div class="flex gap-2">
-                <FormInput type="date" v-model="formData.fecha_inicio" label="Fecha de inicio"
-                    :error="formErrors?.fecha_inicio" required />
-                <FormInput type="date" v-model="formData.fecha_fin" label="Fecha de fin" :error="formErrors?.fecha_fin"
-                    required />
+                <DatePickerInput
+                    v-model="formData.fecha_inicio"
+                    label="Fecha de inicio"
+                    :error="formErrors?.fecha_inicio"
+                    required
+                />
+                <DatePickerInput
+                    v-model="formData.fecha_fin"
+                    label="Fecha de fin"
+                    :error="formErrors?.fecha_fin"
+                    required
+                />
             </div>
 
-            <!-- <div>
-                <CheckBox v-model="formData.status" label="Estado" class="flex items-center" />
-            </div> -->
-
-            <div class="flex gap-2 mt-3">
-                <Button :title="isEditing ? 'Guardar Cambios' : 'Crear Unidad'"
-                    :loading-title="isEditing ? 'Guardando...' : 'Creando...'" :disabled="saving || updating"
-                    :loading="saving || updating" @click="onSubmit" class="!w-full" />
-                <Button v-if="isEditing" title="Cancelar" variant="outline" @click="onCancelEdit"
-                    class="bg-red-500 hover:bg-red-600 text-white px-4" />
+            <div class="mt-3 flex gap-2">
+                <Button
+                    :title="isEditing ? 'Guardar Cambios' : 'Crear Unidad'"
+                    :loading-title="isEditing ? 'Guardando...' : 'Creando...'"
+                    :disabled="saving || updating"
+                    :loading="saving || updating"
+                    @click="onSubmit"
+                    class="!w-full"
+                />
+                <Button
+                    v-if="isEditing"
+                    title="Cancelar"
+                    variant="outline"
+                    @click="onCancelEdit"
+                    class="bg-red-500 px-4 text-white hover:bg-red-600"
+                />
             </div>
         </div>
     </AuthorizationFallback>

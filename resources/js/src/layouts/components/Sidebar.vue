@@ -47,12 +47,16 @@ const checkVisibility = (link) => {
         <aside
             class="bg-cetpro dark:bg-gray-800 text-cetpro-text hidden lg:flex flex-col shrink-0 h-screen transition-all duration-300 ease-in-out"
             :class="layoutStore.isSidebarCollapsed ? 'w-25' : 'w-38'">
-            <div class="h-20 flex items-center justify-between border-b border-cetpro-white/50 shrink-0 px-4 gap-2">
-                <RouterLink :to="{ name: 'start' }" v-if="!layoutStore.isSidebarCollapsed">
-                    <img src="/img/insignia.png" alt="CETPRO PUNO" class="h-12 shrink-0">
+            <div class="h-[69px] flex items-center justify-between border-b border-cetpro-white/50 bg-cetpro shrink-0 px-4 gap-2 dark:border-gray-700 dark:bg-gray-800">
+                <RouterLink
+                    :to="{ name: 'start' }"
+                    v-if="!layoutStore.isSidebarCollapsed"
+                    class="flex h-14 w-14 items-center justify-center rounded-[4px] bg-white dark:h-auto dark:w-auto dark:bg-transparent"
+                >
+                    <img src="/img/cetproLOGOO.png" alt="CETPRO Puno" class="h-12 w-12 shrink-0 object-contain">
                 </RouterLink>
                 <button @click="layoutStore.toggleSidebar"
-                    class="pl-2 rounded-full text-cetpro-text/60 hover:bg-cetpro-light hover:text-white"
+                    class="pl-2 rounded-full text-cetpro-text/70 hover:bg-cetpro hover:text-white dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                     :class="layoutStore.isSidebarCollapsed ? 'mx-auto' : 'ml-auto'">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="h-6 w-6">
@@ -89,12 +93,15 @@ const checkVisibility = (link) => {
         <aside
             class="fixed inset-y-0 left-0 z-40 w-64 bg-cetpro dark:bg-gray-800 text-cetpro-text flex-col shrink-0 transition-transform duration-300 ease-in-out lg:hidden"
             :class="layoutStore.isSidebarOpenMobile ? 'translate-x-0' : '-translate-x-full'">
-            <div class="h-20 flex items-center justify-between border-b border-cetpro-dark/50 px-4">
-                <RouterLink :to="{ name: 'start' }">
-                    <img src="/img/insignia.png" alt="CETPRO PUNO" class="h-12">
+            <div class="h-[69px] flex items-center justify-between border-b border-cetpro-white/50 bg-cetpro px-4 dark:border-gray-700 dark:bg-gray-800">
+                <RouterLink
+                    :to="{ name: 'start' }"
+                    class="flex h-14 w-14 items-center justify-center rounded-[4px] bg-white dark:h-auto dark:w-auto dark:bg-transparent"
+                >
+                    <img src="/img/cetproLOGOO.png" alt="CETPRO Puno" class="h-12 w-12 object-contain">
                 </RouterLink>
                 <button @click="layoutStore.toggleSidebarMobile"
-                    class="p-2 text-cetpro-text/80 rounded-full hover:bg-cetpro-light hover:text-white">
+                    class="p-2 text-cetpro-text/70 rounded-full hover:bg-cetpro hover:text-white dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                     <XMarkIcon class="h-6 w-6" />
                 </button>
             </div>
@@ -117,6 +124,11 @@ const checkVisibility = (link) => {
 </template>
 
 <style>
+:deep(.dark) .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: theme('colors.gray.700');
+    border-color: theme('colors.gray.800');
+}
+
 .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
 }

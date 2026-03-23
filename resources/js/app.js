@@ -1,6 +1,7 @@
-import { createApp } from 'vue';
+﻿import { createApp } from 'vue';
 import App from './App.vue';
 import './app.css';
+import 'flatpickr/dist/flatpickr.css';
 import 'vue-select/dist/vue-select.css';
 import './src/assets/css/vue-select-override.css';
 import './src/utils/axios';

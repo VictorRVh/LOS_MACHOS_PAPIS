@@ -1,14 +1,18 @@
 ﻿<script setup>
 import { ref, computed } from 'vue';
+import flatPickr from 'vue-flatpickr-component';
 import useEstadistica202Store from '../../store/Estadisticas/Estadistica202Store';
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import useModalToast from '../../composables/useModalToast';
 import useExportEstadisticasExcel from '../../composables/estadisticas/useExportEstadisticasExcel';
 import ChartDonutModal from '../../components/estadisticas/ChartDonutModal.vue';
+import { createDatePickerConfig } from '../../utils/datePickerConfig';
 
 const fechaInicio = ref('');
 const fechaFin = ref('');
+
+const datePickerConfig = createDatePickerConfig();
 
 const estadisticaStore = useEstadistica202Store();
 const { showToast } = useModalToast();
@@ -137,88 +141,9 @@ const exportarExcel202 = async () => {
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="flex justify-between items-center mb-6 gap-3">
-      <h2 class="text-xl font-black text-gray-800 uppercase border-l-8 border-cetpro pl-4">
-        202. MATRÍCULA POR CICLO Y SEXO, SEGÚN OPCIONES TÉCNICO PRODUCTIVAS
-      </h2>
-      <div class="flex items-center gap-2">
-        <button @click="abrirGrafico"
-          class="bg-[#0ea5e9] text-white px-4 py-2 rounded-lg font-bold shadow-google-sm hover:bg-sky-600 transition-all">
-          GRAFICO
-        </button>
-        <button @click="exportarExcel202"
-          class="bg-[#10b981] text-white px-4 py-2 rounded-lg font-bold shadow-google-sm hover:bg-emerald-600 transition-all">
-          EXPORTAR EXCEL
-        </button>
-      </div>
-    </div>
-
-    <div
-      class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-xl mb-6 shadow-google-sm border border-gray-100">
-      <div>
-        <label class="text-[10px] font-black uppercase">Fecha Inicio</label>
-        <input type="date" v-model="fechaInicio" class="w-full shadow-google-sm rounded-lg p-2" />
-      </div>
-
-      <div>
-        <label class="text-[10px] font-black uppercase">Fecha Fin</label>
-        <input type="date" v-model="fechaFin" class="w-full shadow-google-sm rounded-lg p-2" />
-      </div>
-      <div class="flex items-end pb-0.5">
-        <button @click="consultarDatos"
-          class="bg-cetpro w-full text-white font-bold py-2 rounded-lg hover:bg-cetpro-dark shadow-google-sm transition-all">
-          CONSULTAR DATOS
-        </button>
-      </div>
-    </div>
-
-    <ChartDonutModal
-      :show="showChart"
-      title="Gráfico 202 - Opciones Técnico Productivas"
-      subtitle="Distribución total por opción"
-      :series="chartSeries"
-      @close="showChart = false"
-    />
-
-
-    <div class="overflow-x-auto rounded-xl shadow-google border border-gray-200">
-      <table class="w-full text-xs text-center">
-        <thead class="bg-gray-800 text-white uppercase tracking-widest">
-          <tr>
-            <th rowspan="2" class="p-4 border-r border-gray-700">N°</th>
-            <th rowspan="2" class="p-4 border-r border-gray-700 text-left">Código y Denominación</th>
-            <th colspan="2" class="p-2 border-b border-gray-700 bg-gray-700">Total</th>
-            <th colspan="2" class="p-2 border-b border-gray-700 bg-cetpro">Básico</th>
-            <th colspan="2" class="p-2 border-b border-gray-700 bg-cetpro-dark">Medio</th>
-          </tr>
-          <tr class="bg-gray-100 text-gray-700 border-b font-black">
-            <th class="p-2 border-r">H</th>
-            <th class="p-2 border-r">M</th>
-            <th class="p-2 border-r">H</th>
-            <th class="p-2 border-r">M</th>
-            <th class="p-2 border-r">H</th>
-            <th class="p-2">M</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y font-bold">
-          <tr v-for="(item, index) in data" :key="index" class="hover:bg-gray-50 transition-all">
-            <td class="p-3 border-r text-gray-400">{{ index + 1 }}</td>
-            <td class="p-3 text-left border-r font-medium">{{ item.nombre }}</td>
-            <td class="p-3 border-r text-gray-600">{{ (item.auxiliar_tecnico?.H || 0) + (item.tecnico?.H || 0) }}</td>
-            <td class="p-3 border-r text-gray-600">{{ (item.auxiliar_tecnico?.M || 0) + (item.tecnico?.M || 0) }}</td>
-            <td class="p-3 border-r text-gray-600">{{ item.auxiliar_tecnico?.H || 0 }}</td>
-            <td class="p-3 border-r text-gray-600">{{ item.auxiliar_tecnico?.M || 0 }}</td>
-            <td class="p-3 border-r text-gray-600">{{ item.tecnico?.H || 0 }}</td>
-            <td class="p-3 text-gray-600">{{ item.tecnico?.M || 0 }}</td>
-          </tr>
-
-          <tr v-if="!data.length">
-            <td colspan="8" class="p-4 text-gray-400">No hay datos disponibles</td>
-          </tr>
-        </tbody>
-
-      </table>
-    </div>
-  </div>
+  <div class="space-y-2 p-3"><div class="flex flex-col gap-1.5 xl:flex-row xl:items-start xl:justify-between"><div class="space-y-0.5"><p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Reporte 202</p><h2 class="text-[1.25rem] font-semibold tracking-[0.01em] text-slate-900">202. MATRÍCULA POR CICLO Y SEXO, SEGÚN OPCIONES TÉCNICO PRODUCTIVAS</h2></div><div class="flex flex-wrap items-center gap-1.5"><button @click="abrirGrafico" class="inline-flex h-8 items-center justify-center rounded-md border border-cetpro/20 bg-cetpro/10 px-3 text-[11px] font-semibold text-cetpro transition-colors hover:bg-cetpro/15">GRAFICO</button><button @click="exportarExcel202" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-emerald-200 bg-white px-3 text-[11px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-50"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 0 1 1 1v6.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3A1 1 0 0 1 7.707 8.293L9 9.586V3a1 1 0 0 1 1-1Zm-6 11a1 1 0 1 0 0 2h12a1 1 0 1 0 0-2H4Z" clip-rule="evenodd" /></svg>Exportar Excel</button></div></div><div class="grid grid-cols-1 gap-1.5 border border-slate-200 bg-white p-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]"><div><label class="mb-0.5 block text-[9px] font-semibold tracking-[0.1em] text-slate-700">FECHA INICIO</label><flat-pickr v-model="fechaInicio" :config="datePickerConfig" class="h-8 w-full rounded-md border border-slate-300 px-2.5 text-[11px] text-slate-800 outline-none transition-colors hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15" /></div><div><label class="mb-0.5 block text-[9px] font-semibold tracking-[0.1em] text-slate-700">FECHA FIN</label><flat-pickr v-model="fechaFin" :config="datePickerConfig" class="h-8 w-full rounded-md border border-slate-300 px-2.5 text-[11px] text-slate-800 outline-none transition-colors hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15" /></div><div class="flex items-end"><button @click="consultarDatos" class="inline-flex h-8 w-full items-center justify-center rounded-md bg-cetpro px-3 text-[11px] font-semibold text-white transition-colors hover:bg-cetpro-dark">Consultar datos</button></div></div><ChartDonutModal :show="showChart" title="Gráfico 202 - Opciones Técnico Productivas" subtitle="Distribución total por opción" :series="chartSeries" @close="showChart = false" /><div class="overflow-x-auto border border-slate-200 bg-white"><table class="w-full text-[10px] text-center"><thead class="bg-slate-800 text-white uppercase tracking-[0.16em]"><tr><th rowspan="2" class="px-2 py-1 border-r border-slate-600">N°</th><th rowspan="2" class="px-2 py-1 border-r border-slate-600 text-left">Código y Denominación</th><th colspan="2" class="px-2 py-1 border-b border-r border-slate-600 bg-slate-700">Total</th><th colspan="2" class="px-2 py-1 border-b border-r border-slate-600 bg-cetpro">Básico</th><th colspan="2" class="px-2 py-1 border-b border-slate-600 bg-cetpro-dark">Medio</th></tr><tr class="bg-slate-50 text-slate-700 border-b font-semibold"><th class="px-2 py-1 border-r border-slate-200">H</th><th class="px-2 py-1 border-r border-slate-200">M</th><th class="px-2 py-1 border-r border-slate-200">H</th><th class="px-2 py-1 border-r border-slate-200">M</th><th class="px-2 py-1 border-r border-slate-200">H</th><th class="px-2 py-1">M</th></tr></thead><tbody class="divide-y divide-slate-200 font-medium text-slate-700"><tr v-for="(item, index) in data" :key="index" class="hover:bg-slate-50/70"><td class="px-2 py-1 border-r border-slate-200 text-slate-400">{{ index + 1 }}</td><td class="px-2 py-1 text-left border-r border-slate-200 font-semibold text-slate-900">{{ item.nombre }}</td><td class="px-2 py-1 border-r border-slate-200">{{ (item.auxiliar_tecnico?.H || 0) + (item.tecnico?.H || 0) }}</td><td class="px-2 py-1 border-r border-slate-200">{{ (item.auxiliar_tecnico?.M || 0) + (item.tecnico?.M || 0) }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.auxiliar_tecnico?.H || 0 }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.auxiliar_tecnico?.M || 0 }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.tecnico?.H || 0 }}</td><td class="px-2 py-1">{{ item.tecnico?.M || 0 }}</td></tr><tr v-if="!data.length"><td colspan="8" class="px-4 py-3 text-slate-400">No hay datos disponibles</td></tr></tbody></table></div></div>
 </template>
+
+
+
+

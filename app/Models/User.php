@@ -28,6 +28,7 @@ class User extends Authenticatable
         'email',
         'telefono',
         'direccion',
+        'avatar_path',
         'password',
         'status',
         'is_deleted'
@@ -52,6 +53,10 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    protected $appends = [
+        'avatar_url',
+    ];
+
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
@@ -70,5 +75,14 @@ class User extends Authenticatable
     public function comisiones()
     {
         return $this->belongsToMany(Comisiones::class, 'comision_usuario', 'id_usuario', 'id_comision');
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar_path) {
+            return null;
+        }
+
+        return asset($this->avatar_path);
     }
 }

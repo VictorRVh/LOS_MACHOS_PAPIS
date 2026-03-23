@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch, computed } from "vue";
+import flatPickr from 'vue-flatpickr-component';
 import * as yup from "yup";
 
 import FormInput from "../../ui/FormInput.vue";
@@ -12,6 +13,7 @@ import useValidation from "../../../composables/useValidation";
 import useHttpRequest from "../../../composables/useHttpRequest";
 import AuthorizationFallback from "../../../components/page/AuthorizationFallback.vue";
 import useProgramacionSubidostore from "../../../store/Documento/useDocumentoSubidoStore";
+import { createDatePickerConfig } from "../../../utils/datePickerConfig";
 
 const props = defineProps({
   programacionToEdit: {
@@ -47,6 +49,8 @@ const initialFormData = () => ({
 });
 
 const formData = ref(initialFormData());
+
+const datePickerConfig = createDatePickerConfig();
 
 const tiposEntrega = [
   { id: "1", nombre: "Subida de unidades didácticas" },
@@ -245,10 +249,21 @@ const onSubmit = async () => {
 
         <!-- Fechas -->
         <div class="grid grid-cols-2 gap-4">
+          <FormLabelError label="Fecha de Inicio *" :error="formErrors.fecha_inicio">
+            <flat-pickr
+              v-model="formData.fecha_inicio"
+              :config="datePickerConfig"
+              class="h-10 w-full rounded-[3px] border border-slate-300 bg-white px-3 py-1.5 text-sm leading-5 text-slate-800 outline-none transition-colors duration-150 hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-cetpro-light/55 dark:focus:border-cetpro-light dark:focus:ring-cetpro-light/20"
+            />
+          </FormLabelError>
 
-          <FormInput v-model="formData.fecha_inicio" label="Fecha de Inicio *" type="date"
-            :error="formErrors.fecha_inicio" />
-          <FormInput v-model="formData.fecha_fin" label="Fecha de Fin *" type="date" :error="formErrors.fecha_fin" />
+          <FormLabelError label="Fecha de Fin *" :error="formErrors.fecha_fin">
+            <flat-pickr
+              v-model="formData.fecha_fin"
+              :config="datePickerConfig"
+              class="h-10 w-full rounded-[3px] border border-slate-300 bg-white px-3 py-1.5 text-sm leading-5 text-slate-800 outline-none transition-colors duration-150 hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-cetpro-light/55 dark:focus:border-cetpro-light dark:focus:ring-cetpro-light/20"
+            />
+          </FormLabelError>
         </div>
 
         <!-- Publicar -->

@@ -19,7 +19,6 @@ import { ref, computed, onMounted } from "vue";
 import useSesionesStore from "../../store/Sesion/useSesionStore";
 import MenuTable from "../../components/table/MenuTable.vue";
 
-
 const props = defineProps({
   id: {
     type: String,
@@ -40,7 +39,7 @@ onMounted(async () => {
     id_grupo: props.id,
     tipo_entrega: 1
   });
-})
+});
 
 if (!capacidadStore.capacidadTerminal?.length)
   await capacidadStore.loadCapacidadTerminal(props.id);
@@ -68,9 +67,7 @@ const canEditCapacidades = computed(() => {
   if (!sesion) return false;
 
   const ahora = new Date();
-
   const fechaInicio = new Date(sesion.fecha_inicio);
-
   const fechaLimite = sesion.fecha_aplazada
     ? new Date(sesion.fecha_aplazada)
     : new Date(sesion.fecha_fin);
@@ -82,7 +79,6 @@ const canEditCapacidades = computed(() => {
 
 const onDelete = (capacidad) => {
   if (!canEditCapacidades.value) {
-    // console.log('NO SE PUEDE ELIMINAR')
     showToast('No se puede eliminar esta unidad, la sesión está fuera de rango o finalizada.', 'warning');
     return;
   }
@@ -96,16 +92,13 @@ const onDelete = (capacidad) => {
       showToast(`Capacidad "${capacidad?.nombre_capacidad}" eliminada exitosamente.`);
       capacidadStore.loadCapacidadTerminal(props.id);
       calificacionCapacidad.loadCapacidadTerminal(props.id);
-    }
-
-    else {
+    } else {
       showToast("No se pudo Eliminar la capacidad. Intenta nuevamente.", "error");
     }
   });
 };
 
 const indexCapacidades = ref([]);
-
 const cantidad = Number(capacidadStore.capacidadTerminal.nro_capacidades || 0);
 
 for (let i = 1; i <= cantidad; i++) {
@@ -117,39 +110,37 @@ for (let i = 1; i <= cantidad; i++) {
 }
 
 const indicesArray = computed(() => {
-  // Mapea los módulos ya asignados
   const asignadas = capacidadStore.capacidadTerminal?.capacidades.map(
     (ep) => ep?.numero_capacidad
   ) || [];
 
-  // Si estoy editando
   const currentId = sliderData.value?.numero_capacidad;
 
   return indexCapacidades.value.filter(
     (indice) => !asignadas.includes(indice.id) || indice.id === currentId
   );
-
 });
 
 const estadoTexto = computed(() => {
-  if (!sesionStore?.sesion) return 'Sin programación'
+  if (!sesionStore?.sesion) return 'Sin programación';
   switch (sesionStore?.sesion?.estado) {
-    case 0: return 'Pendiente'
-    case 1: return 'En curso'
-    case 2: return 'En curso'
-    case 3: return 'En curso'
-    case 4: return 'Finalizada'
-    default: return 'Desconocido'
+    case 0: return 'Pendiente';
+    case 1: return 'En curso';
+    case 2: return 'En curso';
+    case 3: return 'En curso';
+    case 4: return 'Finalizada';
+    default: return 'Desconocido';
   }
-})
-
+});
 </script>
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-unidad-didáctica-docente', 'ver-unidad-didáctica-docente']">
 
-    <div v-if="sesionStore?.sesion.id"
-      class="col-span-full bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-2 px-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+    <div
+      v-if="sesionStore?.sesion.id"
+      class="col-span-full bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-2 px-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2"
+    >
       <div>
         <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200">
           Programación de Unidades Didácticas
@@ -162,7 +153,6 @@ const estadoTexto = computed(() => {
           </strong>
           al
 
-          <!-- SI HAY APLAZAMIENTO -->
           <template v-if="hasAplazamiento">
             <strong class="line-through text-red-400 mx-1">
               {{ formatFecha(sesion.fecha_fin) }}
@@ -173,7 +163,6 @@ const estadoTexto = computed(() => {
             </strong>
           </template>
 
-          <!-- SI NO HAY APLAZAMIENTO -->
           <template v-else>
             <strong>
               {{ formatFecha(sesion.fecha_fin) }}
@@ -181,7 +170,6 @@ const estadoTexto = computed(() => {
           </template>
         </p>
       </div>
-
 
       <div class="px-3 py-1 rounded-full text-sm font-bold" :class="{
         'bg-yellow-100 text-yellow-800': sesionStore?.sesion?.estado === 0,
@@ -192,36 +180,23 @@ const estadoTexto = computed(() => {
       </div>
     </div>
 
-    <div v-else
-      class="col-span-full bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-xl p-3 flex flex-col">
-
-      <h3 class="text-lg font-semibold text-red-800 dark:text-red-200">
-        No existe una programación para crear unidades didácticas
-      </h3>
-
-      <p class="text-sm text-red-700 dark:text-red-300 mt-1">
-        Debe existir la programación para crear unidades. Solicítala a coordinación.
-      </p>
-    </div>
-
     <div class="flex flex-col lg:flex-row px-6 gap-6">
-
-      <!-- FORMULARIO -->
       <div class="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-
-        <CapacidadTerminalSlider :show="slider" :idGrupo="id" :indexCapacidades="indicesArray" :capacidad="sliderData"
-          @hide="hideSlider" />
+        <CapacidadTerminalSlider
+          :show="slider"
+          :idGrupo="id"
+          :indexCapacidades="indicesArray"
+          :capacidad="sliderData"
+          :notice="!sesionStore?.sesion?.id ? 'No existe una programación vigente. Solicítala a coordinación.' : ''"
+          @hide="hideSlider"
+        />
       </div>
 
-      <!-- TABLA -->
       <div class="w-full lg:w-2/3">
         <Table>
           <THead>
             <Th class="w-[10px]">#</Th>
-
-            <!-- 🔥 ESTA ES LA FLEXIBLE -->
             <Th class="w-auto">Nombre Capacidad</Th>
-
             <Th>Horas</Th>
             <Th>Créditos T - P</Th>
             <Th>Fecha Inicio</Th>
@@ -235,24 +210,20 @@ const estadoTexto = computed(() => {
               <Td class="text-center">{{ capacidad?.nombre_capacidad }}</Td>
               <Td class="text-center">{{ capacidad?.horas }}</Td>
               <Td class="text-center">{{ capacidad?.creditos_teoricos }} - {{ capacidad?.creditos_practicos }}</Td>
-          
               <Td class="text-center">{{ capacidad?.fecha_inicio }}</Td>
               <Td class="text-center">{{ capacidad?.fecha_fin }}</Td>
-              <!-- <Td class="align-middle">
-                <div class="flex items-center justify-center gap-1">
-                  <EditButton @click="showSlider(true, capacidad)" :disabled="!canEditCapacidades" />
-                  <DeleteButton @click="onDelete(capacidad)" />
-                </div>
-              </Td> -->
               <Td class="text-center text-gray-600 dark:text-gray-200">
-                <MenuTable :actions="{ view: false, edit: true, delete: true, download: false }" entity-label="Unidad"
-                  @edit="showSlider(true, capacidad)" @delete="onDelete(capacidad)" />
+                <MenuTable
+                  :actions="{ view: false, edit: true, delete: true, download: false }"
+                  entity-label="Unidad"
+                  @edit="showSlider(true, capacidad)"
+                  @delete="onDelete(capacidad)"
+                />
               </Td>
             </Tr>
           </TBody>
         </Table>
       </div>
-
     </div>
   </AuthorizationFallback>
 </template>

@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import axios from "axios";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { ArrowDownTrayIcon, ChevronDownIcon, TableCellsIcon } from "@heroicons/vue/24/outline";
@@ -288,28 +288,29 @@ onBeforeUnmount(() => {
         v-if="openDownloadMenuId"
         ref="downloadMenuRef"
         :style="openDownloadMenuStyles"
-        class="min-w-[240px] rounded-[3px] border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+        class="min-w-[250px] rounded-md border border-slate-200 bg-white p-1.5 shadow-lg shadow-slate-200/70 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none"
       >
         <button
           type="button"
           @click="descargarDocumento(openDownloadMenuId, periodosStore.periodos.find((p) => p.id === openDownloadMenuId)?.nombre_periodo); closeDownloadMenu()"
-          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
+          class="flex w-full items-center gap-2 rounded-md px-2.5 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
         >
           <TableCellsIcon class="h-4 w-4 shrink-0" />
           <span class="flex-1">Matricula institucional</span>
-          <ArrowDownTrayIcon class="h-4 w-4 shrink-0 opacity-70" />
+          <ArrowDownTrayIcon class="h-4 w-4 shrink-0 text-emerald-600 opacity-90 dark:text-emerald-400" />
         </button>
 
         <button
           type="button"
           @click="descargarReporteCertificado(openDownloadMenuId, periodosStore.periodos.find((p) => p.id === openDownloadMenuId)?.nombre_periodo); closeDownloadMenu()"
-          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
+          class="flex w-full items-center gap-2 rounded-md px-2.5 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
         >
           <TableCellsIcon class="h-4 w-4 shrink-0" />
           <span class="flex-1">Certificados</span>
-          <ArrowDownTrayIcon class="h-4 w-4 shrink-0 opacity-70" />
+          <ArrowDownTrayIcon class="h-4 w-4 shrink-0 text-emerald-600 opacity-90 dark:text-emerald-400" />
         </button>
       </div>
     </Teleport>
   </AuthorizationFallback>
 </template>
+

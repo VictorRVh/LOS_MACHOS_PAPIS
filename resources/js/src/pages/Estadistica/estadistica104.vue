@@ -1,14 +1,18 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue';
+import flatPickr from 'vue-flatpickr-component';
 import useEstadistica104Store from '../../store/Estadisticas/Estadistica104Store';
 import useModalToast from '../../composables/useModalToast';
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import useHttpRequest from "../../composables/useHttpRequest";
 import ChartDonutModal from '../../components/estadisticas/ChartDonutModal.vue';
+import { createDatePickerConfig } from '../../utils/datePickerConfig';
 
 const fechaInicio = ref('');
 const fechaFin = ref('');
+
+const datePickerConfig = createDatePickerConfig();
 
 const estadisticaStore = useEstadistica104Store();
 const { showToast } = useModalToast();
@@ -54,7 +58,7 @@ const chartSeries = computed(() =>
 
 const abrirGrafico = () => {
   if (!chartSeries.value.some((s) => s.value > 0)) {
-    showToast('Primero consulta datos para mostrar el gráfico.', 'warning');
+    showToast('Primero consulta datos para mostrar el grÃ¡fico.', 'warning');
     return;
   }
   showChart.value = true;
@@ -167,12 +171,12 @@ const exportarReporte104 = async () => {
     applyRangeBorder(ws, 'A3', 'J3');
 
     ws.mergeCells('A4:J4');
-    ws.getCell('A4').value = `Tipo de gestión: ${cetpro?.tipo_gestion || '-'} | UGEL: ${cetpro?.ugel || '-'} | DRE: ${cetpro?.dre || '-'}`;
+    ws.getCell('A4').value = `Tipo de gestiÃ³n: ${cetpro?.tipo_gestion || '-'} | UGEL: ${cetpro?.ugel || '-'} | DRE: ${cetpro?.dre || '-'}`;
     aplicarBloqueInstitucional(ws.getCell('A4'));
     applyRangeBorder(ws, 'A4', 'J4');
 
     ws.mergeCells('A5:J5');
-    ws.getCell('A5').value = `Ubicación: ${cetpro?.region || '-'} / ${cetpro?.provincia || '-'} / ${cetpro?.distrito || '-'} | Dirección: ${cetpro?.direccion || '-'} | Año: ${cetpro?.anio || '-'}`;
+    ws.getCell('A5').value = `UbicaciÃ³n: ${cetpro?.region || '-'} / ${cetpro?.provincia || '-'} / ${cetpro?.distrito || '-'} | DirecciÃ³n: ${cetpro?.direccion || '-'} | AÃ±o: ${cetpro?.anio || '-'}`;
     aplicarBloqueInstitucional(ws.getCell('A5'));
     applyRangeBorder(ws, 'A5', 'J5');
 
@@ -205,11 +209,11 @@ const exportarReporte104 = async () => {
     ws.mergeCells('G7:J7');
     ws.mergeCells('K7:N7');
 
-    ws.getCell('A7').value = 'CÓDIGO';
-    ws.getCell('B7').value = 'DENOMINACIÓN DE LA CARRERA';
+    ws.getCell('A7').value = 'CÃ“DIGO';
+    ws.getCell('B7').value = 'DENOMINACIÃ“N DE LA CARRERA';
     ws.getCell('C7').value = 'TOTAL GENERAL';
-    ws.getCell('G7').value = 'CICLO AUXILIAR TÉCNICO';
-    ws.getCell('K7').value = 'CICLO TÉCNICO';
+    ws.getCell('G7').value = 'CICLO AUXILIAR TÃ‰CNICO';
+    ws.getCell('K7').value = 'CICLO TÃ‰CNICO';
 
     ['A7', 'B7'].forEach((addr) => styleHeaderGroup(ws.getCell(addr), 'FF1E293B'));
     styleHeaderGroup(ws.getCell('C7'), 'FF334155');
@@ -321,149 +325,33 @@ function applyRangeBorder(ws, startAddr, endAddr) {
 
 
 <template>
-  <div class="p-6">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-      <div>
-        <h2 class="text-xl font-black text-gray-800 uppercase tracking-tighter">104. MATRICULADOS Y RETIRADOS POR
-          CARRERA</h2>
-        <p class="text-sm text-gray-500 font-medium">Reporte detallado por denominación de especialidad técnica.</p>
+  <div class="space-y-2 p-3">
+    <div class="flex flex-col gap-1.5 xl:flex-row xl:items-start xl:justify-between">
+      <div class="space-y-0.5">
+        <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Reporte 104</p>
+        <h2 class="text-[1.25rem] font-semibold tracking-[0.01em] text-slate-900">104. MATRICULADOS Y RETIRADOS POR CARRERA</h2>
+        <p class="text-[11px] text-slate-500">Reporte detallado por denominación de especialidad técnica.</p>
       </div>
-      <div class="flex items-center gap-2">
-        <button @click="abrirGrafico"
-          class="bg-[#0ea5e9] text-white px-5 py-2.5 rounded-lg font-bold shadow-google hover:bg-sky-600 transition-all active:scale-95">
-          GRAFICO
-        </button>
-        <button @click="exportarReporte104"
-          class="bg-[#10b981] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-google hover:bg-emerald-600 transition-all active:scale-95">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd"
-              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-              clip-rule="evenodd" />
-          </svg>
-          DESCARGAR REPORTE
-        </button>
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button @click="abrirGrafico" class="inline-flex h-8 items-center justify-center rounded-md border border-cetpro/20 bg-cetpro/10 px-3 text-[11px] font-semibold text-cetpro transition-colors hover:bg-cetpro/15">GRAFICO</button>
+        <button @click="exportarReporte104" class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-emerald-200 bg-white px-3 text-[11px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-50"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 0 1 1 1v6.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3A1 1 0 0 1 7.707 8.293L9 9.586V3a1 1 0 0 1 1-1Zm-6 11a1 1 0 1 0 0 2h12a1 1 0 1 0 0-2H4Z" clip-rule="evenodd" /></svg>Exportar Excel</button>
       </div>
     </div>
-
-    <!-- Filtros -->
-    <div
-      class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-xl mb-6 shadow-google-sm border border-gray-100">
-      <div>
-        <label class="text-[10px] font-black uppercase">Fecha Inicio</label>
-        <input type="date" v-model="fechaInicio" class="w-full shadow-google-sm rounded-lg p-2" />
-      </div>
-
-      <div>
-        <label class="text-[10px] font-black uppercase">Fecha Fin</label>
-        <input type="date" v-model="fechaFin" class="w-full shadow-google-sm rounded-lg p-2" />
-      </div>
-      <div class="flex items-end pb-0.5">
-        <button @click="consultarDatos"
-          class="bg-cetpro w-full text-white font-bold py-2 rounded-lg hover:bg-cetpro-dark shadow-google-sm transition-all">
-          CONSULTAR DATOS
-        </button>
-      </div>
+    <div class="grid grid-cols-1 gap-1.5 border border-slate-200 bg-white p-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]">
+      <div><label class="mb-0.5 block text-[9px] font-semibold tracking-[0.1em] text-slate-700">FECHA INICIO</label><flat-pickr v-model="fechaInicio" :config="datePickerConfig" class="h-8 w-full rounded-md border border-slate-300 px-2.5 text-[11px] text-slate-800 outline-none transition-colors hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15" /></div>
+      <div><label class="mb-0.5 block text-[9px] font-semibold tracking-[0.1em] text-slate-700">FECHA FIN</label><flat-pickr v-model="fechaFin" :config="datePickerConfig" class="h-8 w-full rounded-md border border-slate-300 px-2.5 text-[11px] text-slate-800 outline-none transition-colors hover:border-cetpro/45 focus:border-cetpro focus:ring-2 focus:ring-cetpro/15" /></div>
+      <div class="flex items-end"><button @click="consultarDatos" class="inline-flex h-8 w-full items-center justify-center rounded-md bg-cetpro px-3 text-[11px] font-semibold text-white transition-colors hover:bg-cetpro-dark">Consultar datos</button></div>
     </div>
-
-    <!-- Tabla -->
-    <div class="overflow-x-auto rounded-xl shadow-google border border-gray-200 bg-white">
-      <table class="w-full text-xs text-center border-collapse">
-        <thead>
-          <tr class="bg-gray-800 text-white uppercase italic">
-            <th rowspan="3" class="p-3 border-r border-gray-700">Código</th>
-            <th rowspan="3" class="p-3 border-r border-gray-700 text-left">Denominación de la Carrera</th>
-            <th colspan="4" class="p-2 border-b border-r border-gray-700 bg-gray-700">Total General</th>
-            <th colspan="4" class="p-2 border-b border-r border-gray-700 bg-cetpro">Ciclo Auxiliar Tecnico</th>
-            <th colspan="4" class="p-2 bg-cetpro-dark border-b border-gray-700">Ciclo Tecnico</th>
-          </tr>
-          <tr class="bg-gray-100 text-gray-700 font-bold border-b border-gray-200">
-            <th colspan="2" class="p-1 border-r">Matric.</th>
-            <th colspan="2" class="p-1 border-r text-red-600">Retir.</th>
-            <th colspan="2" class="p-1 border-r">Matric.</th>
-            <th colspan="2" class="p-1 border-r text-red-600">Retir.</th>
-            <th colspan="2" class="p-1 border-r">Matric.</th>
-            <th colspan="2" class="p-1 text-red-600">Retir.</th>
-          </tr>
-          <tr class="bg-gray-50 text-[10px] text-gray-500 border-b">
-            <th class="p-1 border-r">H</th>
-            <th class="p-1 border-r">M</th>
-            <th class="p-1 border-r">H</th>
-            <th class="p-1 border-r">M</th>
-            <th class="p-1 border-r">H</th>
-            <th class="p-1 border-r">M</th>
-            <th class="p-1 border-r">H</th>
-            <th class="p-1 border-r">M</th>
-            <th class="p-1 border-r">H</th>
-            <th class="p-1 border-r">M</th>
-            <th class="p-1 border-r">H</th>
-            <th class="p-1">M</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y font-bold">
-          <!-- GRAN TOTAL -->
-          <tr class="bg-cetpro/5 text-cetpro font-black">
-            <td colspan="2" class="p-3 text-right border-r uppercase italic">
-              Gran Total
-            </td>
-
-            <!-- Total General -->
-            <td class="p-2 border-r">{{data.reduce((a, c) => a + c.total.matriculados.H, 0)}}</td>
-            <td class="p-2 border-r">{{data.reduce((a, c) => a + c.total.matriculados.M, 0)}}</td>
-            <td class="p-2 border-r">{{data.reduce((a, c) => a + c.total.retirados.H, 0)}}</td>
-            <td class="p-2 border-r">{{data.reduce((a, c) => a + c.total.retirados.M, 0)}}</td>
-
-            <!-- Básico -->
-            <td class="p-2 border-r">{{data.reduce((a, c) => a + c.basico.matriculados.H, 0)}}</td>
-            <td class="p-2 border-r">{{data.reduce((a, c) => a + c.basico.matriculados.M, 0)}}</td>
-            <td class="p-2 border-r">{{data.reduce((a, c) => a + c.basico.retirados.H, 0)}}</td>
-            <td class="p-2 border-r">{{data.reduce((a, c) => a + c.basico.retirados.M, 0)}}</td>
-
-            <!-- Medio -->
-            <td class="p-2 border-r">{{data.reduce((a, c) => a + c.medio.matriculados.H, 0)}}</td>
-            <td class="p-2 border-r">{{data.reduce((a, c) => a + c.medio.matriculados.M, 0)}}</td>
-            <td class="p-2 border-r">{{data.reduce((a, c) => a + c.medio.retirados.H, 0)}}</td>
-            <td class="p-2">{{data.reduce((a, c) => a + c.medio.retirados.M, 0)}}</td>
-          </tr>
-
-          <!-- FILAS DINÁMICAS -->
-          <tr v-for="(item, index) in data" :key="index" class="hover:bg-gray-50 transition-colors">
-            <td class="p-3 border-r text-gray-400">
-              {{ (index + 1).toString().padStart(3, '0') }}
-            </td>
-
-            <td class="p-3 text-left border-r font-medium">
-              {{ item.nombre }}
-            </td>
-
-            <!-- Total -->
-            <td class="p-2 border-r">{{ item.total.matriculados.H }}</td>
-            <td class="p-2 border-r">{{ item.total.matriculados.M }}</td>
-            <td class="p-2 border-r">{{ item.total.retirados.H }}</td>
-            <td class="p-2 border-r">{{ item.total.retirados.M }}</td>
-
-            <!-- Básico -->
-            <td class="p-2 border-r">{{ item.basico.matriculados.H }}</td>
-            <td class="p-2 border-r">{{ item.basico.matriculados.M }}</td>
-            <td class="p-2 border-r">{{ item.basico.retirados.H }}</td>
-            <td class="p-2 border-r">{{ item.basico.retirados.M }}</td>
-
-            <!-- Medio -->
-            <td class="p-2 border-r">{{ item.medio.matriculados.H }}</td>
-            <td class="p-2 border-r">{{ item.medio.matriculados.M }}</td>
-            <td class="p-2 border-r">{{ item.medio.retirados.H }}</td>
-            <td class="p-2">{{ item.medio.retirados.M }}</td>
-          </tr>
-        </tbody>
-
+    <div class="overflow-x-auto border border-slate-200 bg-white">
+      <table class="w-full text-[10px] text-center border-collapse">
+        <thead><tr class="bg-slate-800 text-white uppercase"><th rowspan="3" class="border-r border-slate-600 px-2 py-1">Código</th><th rowspan="3" class="border-r border-slate-600 px-2 py-1 text-left">Denominación de la Carrera</th><th colspan="4" class="border-b border-r border-slate-600 bg-slate-700 px-2 py-1">Total General</th><th colspan="4" class="border-b border-r border-slate-600 bg-cetpro px-2 py-1">Ciclo Auxiliar Tecnico</th><th colspan="4" class="border-b border-slate-600 bg-cetpro-dark px-2 py-1">Ciclo Tecnico</th></tr><tr class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200"><th colspan="2" class="px-2 py-1 border-r">Matric.</th><th colspan="2" class="px-2 py-1 border-r text-red-600">Retir.</th><th colspan="2" class="px-2 py-1 border-r">Matric.</th><th colspan="2" class="px-2 py-1 border-r text-red-600">Retir.</th><th colspan="2" class="px-2 py-1 border-r">Matric.</th><th colspan="2" class="px-2 py-1 text-red-600">Retir.</th></tr><tr class="bg-slate-50 text-[11px] text-slate-500 border-b border-slate-200"><th class="px-2 py-1 border-r">H</th><th class="px-2 py-1 border-r">M</th><th class="px-2 py-1 border-r">H</th><th class="px-2 py-1 border-r">M</th><th class="px-2 py-1 border-r">H</th><th class="px-2 py-1 border-r">M</th><th class="px-2 py-1 border-r">H</th><th class="px-2 py-1 border-r">M</th><th class="px-2 py-1 border-r">H</th><th class="px-2 py-1 border-r">M</th><th class="px-2 py-1 border-r">H</th><th class="px-2 py-1">M</th></tr></thead>
+        <tbody class="divide-y divide-slate-200 font-medium text-slate-700"><tr class="bg-cetpro/5 font-bold text-cetpro"><td colspan="2" class="px-2 py-1 text-right uppercase">Gran Total</td><td class="px-2 py-1 border-r">{{data.reduce((a, c) => a + c.total.matriculados.H, 0)}}</td><td class="px-2 py-1 border-r">{{data.reduce((a, c) => a + c.total.matriculados.M, 0)}}</td><td class="px-2 py-1 border-r">{{data.reduce((a, c) => a + c.total.retirados.H, 0)}}</td><td class="px-2 py-1 border-r">{{data.reduce((a, c) => a + c.total.retirados.M, 0)}}</td><td class="px-2 py-1 border-r">{{data.reduce((a, c) => a + c.basico.matriculados.H, 0)}}</td><td class="px-2 py-1 border-r">{{data.reduce((a, c) => a + c.basico.matriculados.M, 0)}}</td><td class="px-2 py-1 border-r">{{data.reduce((a, c) => a + c.basico.retirados.H, 0)}}</td><td class="px-2 py-1 border-r">{{data.reduce((a, c) => a + c.basico.retirados.M, 0)}}</td><td class="px-2 py-1 border-r">{{data.reduce((a, c) => a + c.medio.matriculados.H, 0)}}</td><td class="px-2 py-1 border-r">{{data.reduce((a, c) => a + c.medio.matriculados.M, 0)}}</td><td class="px-2 py-1 border-r">{{data.reduce((a, c) => a + c.medio.retirados.H, 0)}}</td><td class="px-2 py-1">{{data.reduce((a, c) => a + c.medio.retirados.M, 0)}}</td></tr><tr v-for="(item, index) in data" :key="index" class="hover:bg-slate-50/70"><td class="px-2 py-1 border-r border-slate-200 text-slate-400">{{ index + 1 }}</td><td class="px-2 py-1 text-left border-r border-slate-200 font-semibold text-slate-900">{{ item.nombre }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.total.matriculados.H }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.total.matriculados.M }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.total.retirados.H }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.total.retirados.M }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.basico.matriculados.H }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.basico.matriculados.M }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.basico.retirados.H }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.basico.retirados.M }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.medio.matriculados.H }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.medio.matriculados.M }}</td><td class="px-2 py-1 border-r border-slate-200">{{ item.medio.retirados.H }}</td><td class="px-2 py-1">{{ item.medio.retirados.M }}</td></tr></tbody>
       </table>
     </div>
-
-    <ChartDonutModal
-      :show="showChart"
-      title="Gráfico 104 - Matriculados y Retirados por Carrera"
-      subtitle="Distribución total por denominación de carrera"
-      :series="chartSeries"
-      @close="showChart = false"
-    />
+    <ChartDonutModal :show="showChart" title="Gráfico 104 - Denominación Carrera" subtitle="Distribución general por carrera" :series="chartSeries" @close="showChart = false" />
   </div>
 </template>
+
+
+
+

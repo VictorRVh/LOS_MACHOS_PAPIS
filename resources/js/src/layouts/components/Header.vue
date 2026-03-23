@@ -96,7 +96,7 @@ const onLogout = async () => {
 
 <template>
     <header class="border-b border-slate-200 bg-white transition-colors duration-300 dark:border-gray-700 dark:bg-gray-800">
-        <div class="flex min-h-[68px] items-center justify-between gap-4 px-4 sm:px-6">
+        <div class="flex h-[68px] items-center justify-between gap-4 px-4 sm:px-6">
             <div class="flex min-w-0 items-center gap-3">
                 <button @click.prevent="layoutStore.toggleSidebarMobile"
                     class="rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 lg:hidden">
@@ -162,7 +162,7 @@ const onLogout = async () => {
                         leave-to-class="transform opacity-0 scale-95">
                         <userMenu v-if="isUserMenuOpen" class="absolute right-0 mt-2 z-50"
                             :nombre="userStore.user?.name" :apellido="userStore.user?.apellido_paterno"
-                            :email="userStore.user?.email" :is-dark-mode="isDarkMode" @logout="onLogout"
+                            :email="userStore.user?.email" :avatar-url="userStore.user?.avatar_url" :is-dark-mode="isDarkMode" @logout="onLogout"
                             @toggle-theme="updateDarkMode(!isDarkMode)" @close-menu="isUserMenuOpen = false" />
                     </Transition>
                 </div>

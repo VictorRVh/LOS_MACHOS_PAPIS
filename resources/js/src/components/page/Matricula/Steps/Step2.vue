@@ -2,6 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { MagnifyingGlassIcon } from "@heroicons/vue/24/outline";
 import FormInput from "../../../ui/FormInput.vue";
+import DatePickerInput from "../../../ui/DatePickerInput.vue";
 import FormLabelError from "../../../ui/FormLabelError.vue";
 import BaseSelect from "../../../ui/BaseSelect.vue";
 import BaseSelectGrupo from "../../../ui/BaseSelectGrupo.vue";
@@ -185,16 +186,14 @@ watch(
         <FormInput v-model="formData.apellido_materno" label="Apellido materno *" :error="errors.apellido_materno" />
       </div>
 
-      <div class="mt-2.5 grid gap-2.5 md:grid-cols-4">
-        <FormInput v-model="formData.nombre" label="Nombres *" :error="errors.nombre" />
-        <FormLabelError label="Sexo *" :error="errors.sexo">
-          <BaseSelectGrupo v-model="formData.sexo" :options="opcionesSexo" label="name" value-prop="value" placeholder="Seleccione sexo" :clearable="false" />
-        </FormLabelError>
-        <FormLabelError label="Fecha de nacimiento *" :error="errors.fecha_nacimiento">
-          <FormInput v-model="formData.fecha_nacimiento" type="date" label="" />
-        </FormLabelError>
-        <FormInput v-model="formData.pais_nacimiento" label="Pais de nacimiento" />
-      </div>
+        <div class="mt-2.5 grid gap-2.5 md:grid-cols-4">
+          <FormInput v-model="formData.nombre" label="Nombres *" :error="errors.nombre" />
+          <FormLabelError label="Sexo *" :error="errors.sexo">
+            <BaseSelectGrupo v-model="formData.sexo" :options="opcionesSexo" label="name" value-prop="value" placeholder="Seleccione sexo" :clearable="false" />
+          </FormLabelError>
+          <DatePickerInput v-model="formData.fecha_nacimiento" label="Fecha de nacimiento *" :error="errors.fecha_nacimiento" />
+          <FormInput v-model="formData.pais_nacimiento" label="Pais de nacimiento" />
+        </div>
     </section>
 
     <section class="border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">

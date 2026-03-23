@@ -8,7 +8,9 @@ use App\Traits\Error;
 use App\Traits\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\File;
 
 class UserController extends Controller
 {
@@ -236,6 +238,10 @@ class UserController extends Controller
     public function updateProfile(Request $request, $id)
     {
         try {
+            if ((int) Auth::id() !== (int) $id) {
+                return response()->json(['message' => 'No autorizado para editar este perfil'], 403);
+            }
+
             $validated = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
                 'apellido_paterno' => ['required', 'string', 'max:255'],
@@ -253,6 +259,7 @@ class UserController extends Controller
                 'telefono' => ['nullable', 'string', 'max:20'],
                 'direccion' => ['nullable', 'string', 'max:255'],
                 'fecha_nacimiento' => ['nullable', 'date'],
+                'avatar' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
             ]);
 
             $user = User::find($id);
@@ -260,7 +267,75 @@ class UserController extends Controller
                 return response()->json(['message' => 'Usuario no encontrado'], 404);
             }
 
+            unset($validated['avatar']);
+
+            if ($request->hasFile('avatar')) {
+                $avatar = $request->file('avatar');
+                $mimeType = $avatar->getMimeType();
+
+                if (!in_array($mimeType, ['image/jpeg', 'image/png'])) {
+                    return response()->json(['message' => 'Formato de imagen no permitido'], 422);
+                }
+
+                $relativeDirectory = 'uploads/avatars';
+                $absoluteDirectory = public_path($relativeDirectory);
+
+                if (!File::exists($absoluteDirectory)) {
+                    File::makeDirectory($absoluteDirectory, 0755, true);
+                }
+
+                if ($user->avatar_path) {
+                    $previousAvatar = public_path($user->avatar_path);
+                    if (File::exists($previousAvatar)) {
+                        File::delete($previousAvatar);
+                    }
+                }
+
+                $canConvertToWebp =
+                    function_exists('imagewebp') &&
+                    (
+                        ($mimeType === 'image/jpeg' && function_exists('imagecreatefromjpeg')) ||
+                        ($mimeType === 'image/png' && function_exists('imagecreatefrompng'))
+                    );
+
+                if ($canConvertToWebp) {
+                    $avatarRelativePath = "{$relativeDirectory}/user-{$user->id}.webp";
+                    $avatarAbsolutePath = public_path($avatarRelativePath);
+
+                    $imageResource = match ($mimeType) {
+                        'image/jpeg' => imagecreatefromjpeg($avatar->getRealPath()),
+                        'image/png' => imagecreatefrompng($avatar->getRealPath()),
+                        default => null,
+                    };
+
+                    if (!$imageResource) {
+                        return response()->json(['message' => 'No se pudo procesar la imagen seleccionada'], 422);
+                    }
+
+                    if ($mimeType === 'image/png') {
+                        imagepalettetotruecolor($imageResource);
+                        imagealphablending($imageResource, true);
+                        imagesavealpha($imageResource, true);
+                    }
+
+                    $webpGenerated = imagewebp($imageResource, $avatarAbsolutePath, 82);
+                    imagedestroy($imageResource);
+
+                    if (!$webpGenerated) {
+                        return response()->json(['message' => 'No se pudo convertir la imagen a webp'], 422);
+                    }
+
+                    $validated['avatar_path'] = $avatarRelativePath;
+                } else {
+                    $extension = $mimeType === 'image/png' ? 'png' : 'jpg';
+                    $avatarFileName = "user-{$user->id}.{$extension}";
+                    $avatar->move($absoluteDirectory, $avatarFileName);
+                    $validated['avatar_path'] = "{$relativeDirectory}/{$avatarFileName}";
+                }
+            }
+
             $user->update($validated);
+            $user->refresh();
 
             return response()->json($this->extractPermissionsFromUser($user));
 
@@ -303,6 +378,10 @@ class UserController extends Controller
     public function updatePassword(Request $request, $id)
     {
         try {
+            if ((int) Auth::id() !== (int) $id) {
+                return response()->json(['message' => 'No autorizado para actualizar esta contraseña'], 403);
+            }
+
             $validated = $request->validate([
                 'current_password' => ['required'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],

@@ -287,11 +287,11 @@ class ReporteRegistroMatriculaAndEvaluacionExport
             ->join('competencias as c', 'cc.id_competencia', '=', 'c.id')
             ->where('ct.id_grupo', $this->idGrupo)
 
-           // ->orderBy('c.id') // primero competencia
+            // ->orderBy('c.id') // primero competencia
 
             ->orderByRaw('CAST(ct.numero_capacidad AS UNSIGNED) ASC')
 
-           // ->orderBy('cc.id', 'asc') // orden capacidades dentro de unidad
+            // ->orderBy('cc.id', 'asc') // orden capacidades dentro de unidad
 
             ->select([
                 'c.id as competencia_id',
@@ -434,6 +434,7 @@ class ReporteRegistroMatriculaAndEvaluacionExport
             ->select(
                 'estudiante.id',
                 'estudiante.nro_documento',
+                'matricula.matriculado',
                 DB::raw("CONCAT(
                 estudiante.apellido_paterno, ' ',
                 estudiante.apellido_materno, ', ',
@@ -617,6 +618,7 @@ class ReporteRegistroMatriculaAndEvaluacionExport
 
             // Escribir nota
             $sheet->setCellValue("{$colExperiencia}{$fila}", $notaExp ?? '—');
+
             $sheet->getStyle("{$colExperiencia}{$fila}")
                 ->getAlignment()
                 ->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -629,6 +631,20 @@ class ReporteRegistroMatriculaAndEvaluacionExport
                     ->getColor()
                     ->setRGB($color);
             }
+
+
+            // EVALUANDO RETIRADOS
+            $colEstado = 'AH';
+
+            if ($estudiante->matriculado == 2) {
+                $sheet->setCellValue("{$colEstado}{$fila}", 'RETIRADO');
+            } else {
+                $sheet->setCellValue("{$colEstado}{$fila}", '');
+            }
+
+            $sheet->getStyle("{$colEstado}{$fila}")
+                ->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
 
             $fila++;

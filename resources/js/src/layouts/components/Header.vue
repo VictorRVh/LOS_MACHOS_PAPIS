@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref, computed, watch, onUnmounted } from 'vue';
+import { inject, ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import userMenu from './UserMenu.vue';
 import useAppRouter from '../../composables/useAppRouter';
 import useUserStore from '../../store/useUserStore';
@@ -81,6 +81,12 @@ watch([isUserMenuOpen, isNotificationsOpen], ([userOpen, notifOpen]) => {
     }
 });
 
+onMounted(() => {
+    if (can('ver-actividades-recientes')) {
+        notificacionesStore.loadNotificacionesPendientes()
+    }
+})
+
 onUnmounted(() => {
     document.removeEventListener('mousedown', handleClickOutside);
 });
@@ -95,7 +101,8 @@ const onLogout = async () => {
 </script>
 
 <template>
-    <header class="border-b border-slate-200 bg-white transition-colors duration-300 dark:border-gray-700 dark:bg-gray-800">
+    <header
+        class="border-b border-slate-200 bg-white transition-colors duration-300 dark:border-gray-700 dark:bg-gray-800">
         <div class="flex h-[68px] items-center justify-between gap-4 px-4 sm:px-6">
             <div class="flex min-w-0 items-center gap-3">
                 <button @click.prevent="layoutStore.toggleSidebarMobile"
@@ -115,7 +122,8 @@ const onLogout = async () => {
             </div>
 
             <div class="flex items-center gap-3">
-                <span class="hidden rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-orange-600 lg:inline-flex">
+                <span
+                    class="hidden rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-orange-600 lg:inline-flex">
                     {{ RolUser }}
                 </span>
 
@@ -132,7 +140,8 @@ const onLogout = async () => {
                             <BellIcon class="h-5 w-5" />
                             <div v-if="notificacionesStore.notificacionesPendientes">
                                 <span class="absolute right-1.5 top-1.5 flex h-2.5 w-2.5">
-                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+                                    <span
+                                        class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
                                     <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                                 </span>
                             </div>
@@ -150,7 +159,8 @@ const onLogout = async () => {
                         <div class="block h-10 w-10 shrink-0 overflow-hidden rounded-full">
                             <img v-if="userStore.user?.avatar_url" :src="userStore.user.avatar_url" alt="Avatar"
                                 class="h-full w-full object-cover">
-                            <div v-else class="flex h-full w-full items-center justify-center rounded-full bg-cetpro text-xl font-bold text-white">
+                            <div v-else
+                                class="flex h-full w-full items-center justify-center rounded-full bg-cetpro text-xl font-bold text-white">
                                 <span>{{ userInitial }}</span>
                             </div>
                         </div>
@@ -162,8 +172,9 @@ const onLogout = async () => {
                         leave-to-class="transform opacity-0 scale-95">
                         <userMenu v-if="isUserMenuOpen" class="absolute right-0 mt-2 z-50"
                             :nombre="userStore.user?.name" :apellido="userStore.user?.apellido_paterno"
-                            :email="userStore.user?.email" :avatar-url="userStore.user?.avatar_url" :is-dark-mode="isDarkMode" @logout="onLogout"
-                            @toggle-theme="updateDarkMode(!isDarkMode)" @close-menu="isUserMenuOpen = false" />
+                            :email="userStore.user?.email" :avatar-url="userStore.user?.avatar_url"
+                            :is-dark-mode="isDarkMode" @logout="onLogout" @toggle-theme="updateDarkMode(!isDarkMode)"
+                            @close-menu="isUserMenuOpen = false" />
                     </Transition>
                 </div>
             </div>

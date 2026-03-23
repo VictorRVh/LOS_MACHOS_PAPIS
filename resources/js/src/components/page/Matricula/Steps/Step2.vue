@@ -224,7 +224,7 @@ watch(
         <FormLabelError label="Grado de instruccion" :error="errors.grado_instruccion">
           <BaseSelectGrupo v-model="formData.grado_instruccion" :options="opcionesGradoInstruccion" placeholder="Seleccione grado" />
         </FormLabelError>
-        <FormInput v-model="formData.anio_egreso" label="Ano de egreso" />
+        <FormInput v-model="formData.anio_egreso" label="Año de egreso" />
         <FormLabelError label="Lengua materna" :error="errors.lengua_materna">
           <BaseSelectGrupo v-model="formData.lengua_materna" :options="opcionesLenguaMaterna" placeholder="Seleccione lengua" />
         </FormLabelError>

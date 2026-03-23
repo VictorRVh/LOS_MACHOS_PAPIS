@@ -258,7 +258,7 @@ const getEstadoCapacidadClass = computed(() => {
               {{ estadoCapacidad.status_texto }}
             </span>
             <span v-if="estadoCapacidad.puede_subir_notas" class="text-gray-600 dark:text-gray-400">
-              Fecha lÃ­mite: {{ new Date(estadoCapacidad.fecha_limite_subida).toLocaleDateString('es-PE') }}
+              Fecha límite: {{ new Date(estadoCapacidad.fecha_limite_subida).toLocaleDateString('es-PE') }}
             </span>
           </div>
         </div>

@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import {
   ClockIcon,
@@ -8,11 +9,13 @@ import {
 import Button from '@/components/ui/Button.vue'
 import useNotificacionesStore from '../store/Notificaciones/UseNotificacionesStore'
 
+const route = useRoute()
 /* Estado local */
 const notificacionesStore = useNotificacionesStore();
 
 const allNotifications = ref([])
 const loading = ref(null)
+const highlightedId = ref(null)
 
 /* Computed */
 const unreadNotifications = computed(() => allNotifications.value.filter(n => !n.isRead))
@@ -47,10 +50,25 @@ const markAllAsRead = async () => {
 const markOneAsRead = async (n) => {
   await notificacionesStore.loadNotificacionesMarcarLeido(n.id);
   n.isRead = true;
+  await loadNotifications()
 }
 
-onMounted(() => {
-  loadNotifications()
+onMounted(async () => {
+  await loadNotifications()
+
+  // ── Highlight desde query param ──────────────────────────
+  const id = route.query.highlight
+  if (id) {
+    highlightedId.value = Number(id)
+
+    // Scroll suave hacia la tarjeta
+    await nextTick()
+    const el = document.getElementById(`notif-${id}`)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+    // Quitar el highlight después de 2.5 s
+    setTimeout(() => { highlightedId.value = null }, 2500)
+  }
 })
 </script>
 
@@ -75,8 +93,13 @@ onMounted(() => {
     <!-- LISTA -->
     <div v-if="!loading && allNotifications.length > 0" class="space-y-4">
 
-      <div v-for="n in allNotifications" :key="n.id"
-        class="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div v-for="n in allNotifications" :key="n.id" :id="`notif-${n.id}`" class="flex items-start gap-4 p-4 rounded-lg shadow-sm border
+         transition-colors duration-700
+         bg-white dark:bg-gray-800
+         border-gray-200 dark:border-gray-700" :class="{
+          'bg-blue-50 dark:bg-blue-900/30 border-blue-400 dark:border-blue-500 ring-2 ring-blue-300':
+            highlightedId === n.id
+        }">
         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
           <ClockIcon class="h-6 w-6 text-blue-600 dark:text-blue-400" />
         </div>

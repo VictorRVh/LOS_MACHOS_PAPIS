@@ -96,7 +96,7 @@ const onLogout = async () => {
 
 <template>
     <header class="border-b border-slate-200 bg-white transition-colors duration-300 dark:border-gray-700 dark:bg-gray-800">
-        <div class="flex min-h-[68px] items-center justify-between gap-4 px-4 sm:px-6">
+        <div class="flex h-[68px] items-center justify-between gap-4 px-4 sm:px-6">
             <div class="flex min-w-0 items-center gap-3">
                 <button @click.prevent="layoutStore.toggleSidebarMobile"
                     class="rounded-lg border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700 lg:hidden">

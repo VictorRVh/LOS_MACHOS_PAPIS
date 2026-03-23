@@ -1,0 +1,446 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{newpxtext}
+\usepackage{newpxmath}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\usepackage{tabularx}
+\usepackage[scaled=0.94]{helvet}
+
+\geometry{margin=1.85cm}
+\setlength{\headheight}{14pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+\renewcommand{\arraystretch}{1.18}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  urlcolor=blue!50!black,
+  pdftitle={CETPRO Puno Manual para el Docente}
+}
+
+\definecolor{cetproblue}{HTML}{0F7AA8}
+\definecolor{cetprodark}{HTML}{1F2937}
+\definecolor{cetprolight}{HTML}{F7FAFC}
+\definecolor{cetproline}{HTML}{D6DEE8}
+\definecolor{cetproaccent}{HTML}{F97316}
+
+\titleformat{\section}{\Large\bfseries\sffamily\color{cetprodark}}{\thesection.}{0.55em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily\color{cetproblue}}{\thesubsection.}{0.55em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\sffamily\textcolor{cetprodark}{CETPRO Puno}}
+\rhead{\sffamily\textcolor{cetproblue}{Manual del docente}}
+\cfoot{\thepage}
+
+\setlist[itemize]{leftmargin=1.5em}
+\setlist[enumerate]{leftmargin=1.6em}
+
+\newtcolorbox{manualbox}[1][]{
+  colback=white,
+  colframe=cetproblue,
+  boxrule=0.7pt,
+  arc=2pt,
+  left=9pt,
+  right=9pt,
+  top=9pt,
+  bottom=9pt,
+  #1
+}
+
+\newtcolorbox{stepbox}[1][]{
+  colback=cetprolight,
+  colframe=cetproline,
+  boxrule=0.65pt,
+  arc=2pt,
+  left=9pt,
+  right=9pt,
+  top=9pt,
+  bottom=9pt,
+  #1
+}
+
+\newcommand{\manualscreenshot}[3]{
+  \begin{center}
+    \begin{tcolorbox}[colback=white,colframe=cetproline,boxrule=0.6pt,arc=1pt,left=5pt,right=5pt,top=5pt,bottom=5pt,width=\textwidth]
+      \centering
+      \includegraphics[width=\textwidth]{#1}
+    \end{tcolorbox}
+  \end{center}
+  {\sffamily\bfseries\color{cetprodark}#2}\par
+  {\small #3}\par
+}
+
+\newcommand{\manualshotwide}[2]{
+  \begin{center}
+    \includegraphics[width=\textwidth]{#1}
+  \end{center}
+  {\small #2}\par
+}
+
+\begin{document}
+
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+  \centering
+  \vspace*{0.8cm}
+  \includegraphics[width=0.7\textwidth]{../public/img/cetprologoHorizontal.png}\par
+  \vspace{1.3cm}
+
+  {\Huge\bfseries\sffamily\color{cetprodark} CETPRO Puno\par}
+  \vspace{0.35cm}
+  {\LARGE\bfseries\sffamily\color{cetproblue} Manual para el docente\par}
+  \vspace{0.4cm}
+  {\large Gu\'ia visual y operativa del sistema acad\'emico\par}
+
+  \vspace{1cm}
+  \includegraphics[width=0.16\textwidth]{../public/img/cetproLOGOO.png}\par
+
+  \vfill
+  \begin{manualbox}
+  \textbf{Prop\'osito del documento}\\
+  Este manual explica, en orden real de uso, c\'omo trabaja un docente dentro del sistema:
+  ingreso, cambio de contrase\~na, panel de inicio, navegaci\'on, modo oscuro, perfil,
+  m\'odulos asignados y cada pesta\~na operativa del curso.
+  \end{manualbox}
+
+  \vfill
+  {\large Versi\'on del manual: flujo visual con capturas reales del sistema\par}
+  {\large \today\par}
+\end{titlepage}
+\hypersetup{pageanchor=true}
+\clearpage
+\pagenumbering{arabic}
+
+\tableofcontents
+\newpage
+
+\section{Objetivo del rol docente}
+
+\begin{manualbox}
+El rol docente est\'a dise\~nado para gestionar sus grupos asignados desde una sola vista de trabajo.
+El eje principal del sistema es \textbf{Mis M\'odulos}; desde all\'i el docente entra al detalle del curso
+y trabaja por pesta\~nas: \textbf{Documentos, Sesiones y asistencia, Calificaciones, Unidades Did\'acticas,
+Capacidades, Pr\'acticas y Alumnos}.
+\end{manualbox}
+
+\subsection{Lo que puede hacer el docente}
+
+\begin{itemize}
+  \item Ingresar al sistema con su cuenta institucional.
+  \item Cambiar su contrase\~na en el primer acceso.
+  \item Navegar con breadcrumbs, bot\'on Atr\'as y sidebar.
+  \item Cambiar entre modo claro y modo oscuro.
+  \item Gestionar su perfil, datos personales y contrase\~na.
+  \item Revisar sus m\'odulos asignados y entrar a cada grupo.
+  \item Trabajar documentos, sesiones, calificaciones, unidades, capacidades, pr\'acticas y alumnos.
+\end{itemize}
+
+\section{Ingreso al sistema}
+
+\subsection{Pantalla de login}
+
+\manualscreenshot{CaptuRasManualDocente/Login.png}{Pantalla de acceso}{Aqu\'i el docente ingresa con su usuario y contrase\~na institucional. Esta es la puerta de entrada al sistema.}
+
+\begin{stepbox}
+\textbf{Qu\'e hacer en esta pantalla}
+\begin{enumerate}
+  \item Escribir usuario o correo asignado.
+  \item Ingresar la contrase\~na.
+  \item Pulsar el bot\'on de acceso.
+\end{enumerate}
+\end{stepbox}
+
+\subsection{Cambio de contrase\~na en el primer ingreso}
+
+\manualscreenshot{CaptuRasManualDocente/NuevacontraseniaPrimeravezpng.png}{Cambio obligatorio de contrase\~na}{Si es el primer ingreso, el sistema solicita crear una nueva contrase\~na antes de continuar.}
+
+\begin{stepbox}
+\textbf{Puntos importantes}
+\begin{itemize}
+  \item La nueva contrase\~na debe cumplir la validaci\'on m\'inima del sistema.
+  \item El bot\'on \textbf{Guardar y continuar} tambi\'en responde con la tecla \textbf{Enter}.
+  \item Este paso solo aparece cuando la cuenta entra por primera vez o est\'a forzada a actualizar su clave.
+\end{itemize}
+\end{stepbox}
+
+\subsection{Pantalla de inicio del docente}
+
+\manualscreenshot{CaptuRasManualDocente/IngresoAlsistemaInicio.png}{Inicio del panel docente}{Despu\'es del acceso, el sistema muestra la pantalla de bienvenida del rol docente. Desde aqu\'i empieza toda la navegaci\'on.}
+
+\section{Navegaci\'on general del panel}
+
+\subsection{Sidebar institucional}
+
+\begin{minipage}[t]{0.28\textwidth}
+\manualshotwide{CaptuRasManualDocente/sidebarinsignia.png}{El sidebar contiene la identidad visual institucional y el acceso principal del docente.}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.68\textwidth}
+\manualscreenshot{CaptuRasManualDocente/MisModulos.png}{Acceso a Mis M\'odulos}{La opci\'on principal visible para el docente es \textbf{Mis M\'odulos}. Desde all\'i entra a sus cursos asignados.}
+\end{minipage}
+
+\begin{stepbox}
+\textbf{Elementos principales del sidebar}
+\begin{itemize}
+  \item Logo institucional CETPRO Puno.
+  \item Bot\'on para colapsar o expandir el panel lateral.
+  \item Men\'u base del docente: \textbf{Mis M\'odulos}.
+\end{itemize}
+\end{stepbox}
+
+\subsection{Rutas, breadcrumbs y retorno}
+
+\manualscreenshot{CaptuRasManualDocente/rutasbreadcumbs.png}{Breadcrumbs o ruta de navegaci\'on}{La parte superior muestra en qu\'e secci\'on est\'a trabajando el docente y permite entender la ruta actual dentro del sistema.}
+
+\begin{stepbox}
+\textbf{Para qu\'e sirve}
+\begin{itemize}
+  \item Ubica al docente dentro del sistema.
+  \item Muestra el camino recorrido.
+  \item Se complementa con el bot\'on \textbf{Atr\'as} para volver sin perder contexto.
+\end{itemize}
+\end{stepbox}
+
+\subsection{Rol, modo oscuro y acceso r\'apido al perfil}
+
+\manualscreenshot{CaptuRasManualDocente/tag,ModoDarkNombrePerfil.png}{Barra superior del usuario docente}{En la cabecera aparecen la etiqueta del rol, el interruptor de tema y el nombre del usuario autenticado.}
+
+\manualscreenshot{CaptuRasManualDocente/mododark.png}{Modo oscuro}{El sistema permite cambiar entre modo claro y modo oscuro desde la cabecera del panel.}
+
+\subsection{Men\'u de usuario}
+
+\manualscreenshot{CaptuRasManualDocente/perfilConfiguraciondeCuentaYCerrarSesioncorrerodatosGenerales.png}{Men\'u de perfil del docente}{Desde este men\'u se accede a la configuraci\'on de cuenta, cambio de tema, historial biom\'etrico y cierre de sesi\'on.}
+
+\begin{stepbox}
+\textbf{Opciones visibles en el men\'u}
+\begin{itemize}
+  \item Cambio entre tema claro y oscuro.
+  \item Configuraci\'on de cuenta.
+  \item Vista de ingreso y salida biom\'etrica.
+  \item Acceso al historial completo.
+  \item Cerrar sesi\'on.
+\end{itemize}
+\end{stepbox}
+
+\section{Configuraci\'on de cuenta}
+
+\manualscreenshot{CaptuRasManualDocente/ConfiguraciondelaCUENTA.png}{Pantalla de configuraci\'on de cuenta}{Aqu\'i el docente actualiza sus datos personales y la seguridad de su cuenta.}
+
+\begin{stepbox}
+\textbf{Perfil}
+\begin{itemize}
+  \item Foto de perfil.
+  \item Nombres y apellidos.
+  \item Correo electr\'onico.
+  \item DNI y tel\'efono.
+  \item Direcci\'on y fecha de nacimiento.
+\end{itemize}
+\end{stepbox}
+
+\begin{stepbox}
+\textbf{Seguridad}
+\begin{itemize}
+  \item Contrase\~na actual.
+  \item Nueva contrase\~na.
+  \item Confirmaci\'on de contrase\~na.
+\end{itemize}
+\end{stepbox}
+
+\section{Mis M\'odulos}
+
+\manualscreenshot{CaptuRasManualDocente/MisModulos.png}{Vista de m\'odulos asignados}{Cada tarjeta resume un grupo a cargo del docente y sirve como entrada al trabajo acad\'emico del curso.}
+
+\begin{stepbox}
+\textbf{Informaci\'on que muestra cada tarjeta}
+\begin{itemize}
+  \item Programa o especialidad.
+  \item Nombre del m\'odulo.
+  \item Estado del grupo.
+  \item Porcentaje de avance seg\'un fechas.
+  \item Periodo, secci\'on, turno y cantidad de matriculados.
+  \item Bot\'on \textbf{Gestionar}.
+\end{itemize}
+\end{stepbox}
+
+\subsection{Submen\'u del curso}
+
+\manualscreenshot{CaptuRasManualDocente/SubmenusecundarioParaGestiondelCurso.png}{Submen\'u secundario de gesti\'on del curso}{Al ingresar a un grupo, el sistema despliega un submen\'u con todas las pesta\~nas operativas del docente.}
+
+\begin{stepbox}
+\textbf{Orden habitual de trabajo}
+\begin{enumerate}
+  \item Revisar documentos.
+  \item Programar sesiones y asistencia.
+  \item Consultar o registrar calificaciones.
+  \item Mantener unidades did\'acticas y capacidades.
+  \item Gestionar pr\'acticas.
+  \item Ver el padr\'on de alumnos.
+\end{enumerate}
+\end{stepbox}
+
+\section{Documentos}
+
+\manualscreenshot{CaptuRasManualDocente/DocenteDocumentos.png}{M\'odulo de documentos}{Esta pesta\~na conecta al docente con carpetas y archivos de Google Drive asociados al grupo.}
+
+\begin{stepbox}
+\textbf{Lo que puede hacer aqu\'i}
+\begin{itemize}
+  \item Recargar carpetas.
+  \item Explorar archivos y subcarpetas.
+  \item Descargar material.
+  \item Subir archivos cuando la entrega se encuentra habilitada.
+  \item Eliminar archivos seg\'un la disponibilidad del sistema.
+\end{itemize}
+\end{stepbox}
+
+\section{Sesiones y asistencia}
+
+\manualscreenshot{CaptuRasManualDocente/SesionesyAsistencia.png}{Planificaci\'on de sesiones y asistencia}{El docente programa sesiones, consulta el calendario y accede al flujo de asistencia del grupo.}
+
+\begin{stepbox}
+\textbf{Funciones principales}
+\begin{itemize}
+  \item Seleccionar fechas de sesi\'on.
+  \item Guardar y editar programaciones.
+  \item Revisar sesiones ya registradas.
+  \item Ir a la toma de asistencia.
+  \item Exportar informaci\'on cuando el m\'odulo lo permite.
+\end{itemize}
+\end{stepbox}
+
+\section{Calificaciones}
+
+\manualscreenshot{CaptuRasManualDocente/Calificaciones.png}{Registro y consulta de notas}{En esta pantalla se centralizan las notas por unidad did\'actica y el resultado acad\'emico de cada estudiante.}
+
+\begin{stepbox}
+\textbf{Elementos clave}
+\begin{itemize}
+  \item Selector de unidad did\'actica.
+  \item Tabla de estudiantes con sus notas.
+  \item Promedio, puntaje total y estado final.
+  \item Control de habilitaci\'on seg\'un capacidad y plazo.
+\end{itemize}
+\end{stepbox}
+
+\section{Unidades Did\'acticas}
+
+\manualscreenshot{CaptuRasManualDocente/UnidadesDidacticas.png}{Administraci\'on de unidades did\'acticas}{El docente crea, edita o elimina unidades did\'acticas seg\'un la programaci\'on vigente del grupo.}
+
+\begin{stepbox}
+\textbf{Datos trabajados en esta secci\'on}
+\begin{itemize}
+  \item Nombre de la unidad.
+  \item Horas y cr\'editos.
+  \item Fechas de inicio y fin.
+  \item Estado seg\'un la programaci\'on activa.
+\end{itemize}
+\end{stepbox}
+
+\section{Capacidades}
+
+\manualscreenshot{CaptuRasManualDocente/Capacidades.png}{Capacidades por competencia y unidad}{Esta vista organiza las capacidades del curso y permite mantener alineada la estructura curricular del grupo.}
+
+\begin{stepbox}
+\textbf{Lo que permite hacer}
+\begin{itemize}
+  \item Visualizar competencias agrupadas.
+  \item Desplegar unidades asociadas.
+  \item Crear, editar y eliminar descripciones de capacidad.
+\end{itemize}
+\end{stepbox}
+
+\section{Pr\'acticas}
+
+\manualscreenshot{CaptuRasManualDocente/practicas.png}{Pr\'acticas y experiencia formativa}{El docente registra la experiencia formativa del grupo y califica la pr\'actica de cada estudiante.}
+
+\begin{stepbox}
+\textbf{Proceso habitual}
+\begin{enumerate}
+  \item Registrar o revisar la experiencia formativa.
+  \item Definir modalidad, fechas, horas o evidencia.
+  \item Ingresar la nota del estudiante.
+\end{enumerate}
+\end{stepbox}
+
+\section{Alumnos}
+
+\manualscreenshot{CaptuRasManualDocente/Alumnos.png}{Padr\'on de estudiantes}{La pesta\~na de alumnos muestra la relaci\'on completa de matriculados del grupo con sus datos principales.}
+
+\begin{stepbox}
+\textbf{Informaci\'on disponible}
+\begin{itemize}
+  \item DNI.
+  \item Apellidos y nombres.
+  \item Sexo.
+  \item Fecha de nacimiento.
+  \item Tel\'efono y correo.
+  \item Exportaciones de apoyo acad\'emico.
+\end{itemize}
+\end{stepbox}
+
+\section{Resumen funcional del docente}
+
+\begin{manualbox}[colback=cetprolight,colframe=cetprodark,boxrule=0.85pt]
+\small
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash\bfseries\sffamily}p{0.26\textwidth}|>{\raggedright\arraybackslash}X|}
+\hline
+\textcolor{cetprodark}{\'Area} & \textcolor{cetprodark}{Alcance funcional del docente} \\
+\hline
+Acceso al sistema & Login, validaci\'on de credenciales y cambio obligatorio de contrase\~na cuando corresponda. \\
+\hline
+Navegaci\'on & Uso del sidebar, breadcrumbs, cabecera, tema claro u oscuro y men\'u personal. \\
+\hline
+Cuenta & Actualizaci\'on de perfil, datos personales, contrase\~na y acceso al historial biom\'etrico. \\
+\hline
+Mis M\'odulos & Consulta de grupos asignados y entrada al detalle de cada curso. \\
+\hline
+Documentos & Gesti\'on de carpetas y archivos acad\'emicos asociados al grupo. \\
+\hline
+Sesiones y asistencia & Programaci\'on de sesiones, seguimiento del calendario y toma de asistencia. \\
+\hline
+Calificaciones & Registro y consulta de notas por unidad did\'actica. \\
+\hline
+Unidades Did\'acticas & Alta, edici\'on y baja de unidades seg\'un la programaci\'on activa. \\
+\hline
+Capacidades & Organizaci\'on curricular por competencia y unidad. \\
+\hline
+Pr\'acticas & Registro de experiencia formativa y nota por estudiante. \\
+\hline
+Alumnos & Consulta del padr\'on matriculado y exportaciones de apoyo. \\
+\hline
+\end{tabularx}
+\end{manualbox}
+
+\section{Recomendaciones de uso}
+
+\begin{stepbox}
+\textbf{Flujo sugerido para una jornada de trabajo}
+\begin{enumerate}
+  \item Ingresar al sistema y verificar el panel de inicio.
+  \item Revisar el tema visual y el men\'u de usuario si necesita ajustar configuraci\'on.
+  \item Entrar a \textbf{Mis M\'odulos}.
+  \item Elegir el grupo correcto y pulsar \textbf{Gestionar}.
+  \item Trabajar las pesta\~nas del curso seg\'un la necesidad del d\'ia.
+\end{enumerate}
+\end{stepbox}
+
+\begin{manualbox}
+Este manual fue construido con capturas reales del sistema actual para que el docente identifique visualmente
+cada pantalla y entienda qu\'e hace cada m\'odulo sin perderse en el flujo.
+\end{manualbox}
+
+\end{document}

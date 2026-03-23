@@ -33,6 +33,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore';
 import { useRouter } from 'vue-router';
@@ -40,23 +41,51 @@ import { useRouter } from 'vue-router';
 const breadcrumbStore = useBreadcrumbStore();
 const router = useRouter();
 const { items } = storeToRefs(breadcrumbStore);
+const isNavigating = ref(false);
+
+const isCurrentRoute = (target) => {
+  if (!target) return false;
+  return router.resolve(target).fullPath === router.currentRoute.value.fullPath;
+};
 
 // Ir a inicio
-const goHome = () => {
-  breadcrumbStore.clear();
-  router.push({ name: 'start' });
+const goHome = async () => {
+  if (isNavigating.value) return;
+
+  if (isCurrentRoute({ name: 'start' })) {
+    breadcrumbStore.setBase([{ text: 'Inicio', to: { name: 'start' } }]);
+    return;
+  }
+
+  isNavigating.value = true;
+  try {
+    await router.push({ name: 'start' });
+  } finally {
+    isNavigating.value = false;
+  }
 };
 
 /**
  * 🔥 Retroceso REAL de breadcrumb (no tipo navegador)
  */
 const handleBreadcrumbClick = async (item, index) => {
-  // Navega primero
-  await router.push(item.to);
+  if (!item?.to || isNavigating.value) return;
 
-  // ❗ Ahora que el beforeEach ya reconstruyó,
-  // podemos recortar correctamente sin que se voltee.
-  breadcrumbStore.removeAfter(index);
+  if (isCurrentRoute(item.to)) {
+    breadcrumbStore.removeAfter(index);
+    return;
+  }
+
+  isNavigating.value = true;
+  try {
+    await router.push(item.to);
+
+    // ❗ Ahora que el beforeEach ya reconstruyó,
+    // podemos recortar correctamente sin que se voltee.
+    breadcrumbStore.removeAfter(index);
+  } finally {
+    isNavigating.value = false;
+  }
 };
 
 </script>

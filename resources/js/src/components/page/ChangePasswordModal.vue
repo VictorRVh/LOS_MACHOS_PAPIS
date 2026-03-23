@@ -3,15 +3,15 @@
     <div class="w-full max-w-[32rem] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.22)] animate-fade-in-scale">
       <div class="border-b border-slate-200 px-6 py-5 sm:px-7">
         <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-cetpro/80">Acceso seguro</p>
-        <h2 class="mt-1 text-[1.8rem] font-semibold tracking-tight text-slate-900">Crea tu nueva contrasena</h2>
+        <h2 class="mt-1 text-[1.8rem] font-semibold tracking-tight text-slate-900">Crea tu nueva contraseña</h2>
         <p class="mt-2 max-w-md text-[13px] leading-6 text-slate-600">
-          Por tu seguridad, establece una contrasena personal antes de continuar en la plataforma.
+          Por tu seguridad, establece una contraseña personal antes de continuar en la plataforma.
         </p>
       </div>
 
-      <form @submit.prevent="onSubmit" class="space-y-4 px-6 py-5 sm:px-7">
+      <form @submit.prevent="onSubmit" @keydown.enter.exact.prevent="onSubmit" class="space-y-4 px-6 py-5 sm:px-7">
         <div class="space-y-1.5">
-          <label class="block text-[13px] font-medium text-slate-700">Nueva contrasena</label>
+          <label class="block text-[13px] font-medium text-slate-700">Nueva contraseña</label>
 
           <div class="relative">
             <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
@@ -22,7 +22,7 @@
               v-model="form.password"
               :type="showPass ? 'text' : 'password'"
               class="w-full rounded-none border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-10 text-[14px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:bg-white focus:ring-1 focus:ring-slate-200"
-              placeholder="Minimo 8 caracteres"
+              placeholder="Mínimo 8 caracteres"
               autocomplete="new-password"
               required
             />
@@ -39,7 +39,7 @@
         </div>
 
         <div class="space-y-1.5">
-          <label class="block text-[13px] font-medium text-slate-700">Confirmar contrasena</label>
+          <label class="block text-[13px] font-medium text-slate-700">Confirmar contraseña</label>
 
           <div class="relative">
             <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
@@ -50,7 +50,7 @@
               v-model="form.password_confirmation"
               :type="showConfirm ? 'text' : 'password'"
               class="w-full rounded-none border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-10 text-[14px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:bg-white focus:ring-1 focus:ring-slate-200"
-              placeholder="Vuelve a escribir la contrasena"
+              placeholder="Vuelve a escribir la contraseña"
               autocomplete="new-password"
               required
             />
@@ -83,7 +83,7 @@
             type="submit"
             class="inline-flex h-10 items-center justify-center border border-cetpro bg-cetpro px-5 text-[14px] font-semibold text-white transition hover:bg-cetpro-dark focus:outline-none focus:ring-2 focus:ring-cetpro/20"
           >
-            Guardar y Continuar
+            Guardar y continuar
           </button>
         </div>
       </form>
@@ -121,12 +121,12 @@ const onSubmit = async () => {
   error.value = '';
 
   if (form.value.password.length < 8) {
-    error.value = 'La contrasena debe tener al menos 8 caracteres.';
+    error.value = 'La contraseña debe tener al menos 8 caracteres.';
     return;
   }
 
   if (form.value.password !== form.value.password_confirmation) {
-    error.value = 'Las contrasenas no coinciden.';
+    error.value = 'Las contraseñas no coinciden.';
     return;
   }
 
@@ -138,10 +138,10 @@ const onSubmit = async () => {
     });
 
     emit('success', form.value.password);
-    showToast("Contrasena actualizada correctamente.");
+    showToast("Contraseña actualizada correctamente.");
     closeModal();
   } catch (err) {
-    error.value = err.response?.data?.message || 'Error al intentar cambiar la contrasena.';
+    error.value = err.response?.data?.message || 'Error al intentar cambiar la contraseña.';
   }
 };
 </script>

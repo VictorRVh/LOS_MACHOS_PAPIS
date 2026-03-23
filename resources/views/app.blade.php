@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <title>INTRANET CETPRO</title>
-
+    <link rel="icon" type="image/x-icon" href="{{ asset('img/iconLogo/CETPRO_Image.ico') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     @vite('resources/js/app.js')
@@ -19,7 +19,7 @@
         <strong>Por favor activar js</strong>
     </noscript>
 
-    <div id="app" ></div>
+    <div id="app"></div>
 </body>
 
 </html>

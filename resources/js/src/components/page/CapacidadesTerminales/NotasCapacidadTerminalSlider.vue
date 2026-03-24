@@ -220,7 +220,7 @@ const fechaLimiteFormateada = computed(() => {
               {{ estadoCapacidad.status_texto }}
             </span>
             <span v-if="puedeGuardarNotas" class="ml-2">
-              | Fecha límite: {{ fechaLimiteFormateada }}
+              | Fecha limite: {{ fechaLimiteFormateada }}
             </span>
           </p>
         </div>

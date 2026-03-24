@@ -51,9 +51,9 @@ const checkVisibility = (link) => {
                 <RouterLink
                     :to="{ name: 'start' }"
                     v-if="!layoutStore.isSidebarCollapsed"
-                    class="flex h-14 w-14 items-center justify-center rounded-[4px] bg-white dark:h-auto dark:w-auto dark:bg-transparent"
+                    class="flex h-11 w-9 items-center justify-center rounded-[50%] bg-white dark:h-auto dark:w-auto dark:bg-transparent"
                 >
-                    <img src="/img/cetproLOGOO.png" alt="CETPRO Puno" class="h-12 w-12 shrink-0 object-contain">
+                    <img src="/img/cetproLOGOO.png" alt="CETPRO PUNO" class="h-12 w-12 shrink-0 object-contain">
                 </RouterLink>
                 <button @click="layoutStore.toggleSidebar"
                     class="pl-2 rounded-full text-cetpro-text/70 hover:bg-cetpro hover:text-white dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"

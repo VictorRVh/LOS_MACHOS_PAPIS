@@ -153,6 +153,26 @@ class DocenteController extends Controller
         return response()->json($docente);
     }
 
+    public function getdocenteweb()
+    {
+        $docentes = User::whereHas('roles', function ($query) {
+            $query->where('name', 'docente')
+                ->where('is_deleted', 0);
+        })
+            ->where('status', 1)
+            ->where('is_deleted', 0)
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'nombre_completo' => $user->name . ' ' .
+                        $user->apellido_paterno . ' ' .
+                        $user->apellido_materno,
+                ];
+            });
+
+        return response()->json($docentes);
+    }
     // Actualizar un docente
     public function update(Request $request, $id)
     {

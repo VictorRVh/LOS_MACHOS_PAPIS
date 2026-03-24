@@ -36,7 +36,22 @@ class EspecialidadMadreController extends Controller
 
         return response()->json($especialidad);
     }
+    public function getprogramasweb()
+    {
+        $programas = EspecialidadMadre::with('cicloAcademico')
+            ->where('is_deleted', 0)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'nombre' => $item->nombre_especialidad,
+                    'ciclo' => $item->cicloAcademico->nombre_ciclo ?? null,
+                    'label' => $item->nombre_especialidad . ' - ' . ($item->cicloAcademico->nombre_ciclo ?? 'Sin ciclo'),
+                ];
+            });
 
+        return response()->json($programas);
+    }
     // Crear nueva especialidad
     public function store(Request $request)
     {

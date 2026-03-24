@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\CarpetasGrupoDriveController;
+use App\Http\Controllers\DocenteController;
+use App\Http\Controllers\EspecialidadMadreController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoogleDriveController;
 use App\Models\CarpetasPeriodoDrive;
+use App\Models\EspecialidadMadre;
 
 /**
  * ------------------------------------------------------------------------
@@ -235,7 +238,7 @@ Route::middleware('auth:sanctum')->group(function () {
         \App\Http\Controllers\EstudianteController::class,
         'getEgresados',
     ])->middleware('permission:todo-acceso-egresados|ver-egresados');
- 
+
 
     //BUSCAR DNI
     Route::post('buscar-documento', [
@@ -1355,6 +1358,10 @@ Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
 Route::post('/carpetas-grupo/crear/{id_grupo}', [CarpetasGrupoDriveController::class, 'crearCarpetaGrupo']);
 
 Route::post('/google/calendar-notifications', [GoogleCalendarWebhookController::class, 'handle']);
+
+Route::get('/apidocente', [DocenteController::class, 'getdocenteweb']);
+
+Route::get('/apiprogramas', [EspecialidadMadreController::class, 'getprogramasweb']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/actividades-recientes', function () {

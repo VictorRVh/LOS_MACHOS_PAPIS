@@ -79,11 +79,11 @@ orderDirection.value = "asc";
   <AuthorizationFallback :permissions="['todo-acceso-administrativos', 'ver-administrativos']">
     <div class="w-full space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
       <StatsOverviewSection eyebrow="Gestion institucional" title="Administrativos">
-        <template #actions>
+        <!-- <template #actions>
           <div class="shrink-0">
             <CreateButton @click="showSlider(true)" />
           </div>
-        </template>
+        </template> -->
 
           <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
             <div

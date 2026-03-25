@@ -74,27 +74,6 @@
     </noscript>
 
     <!-- 🔥 CONTENIDO SEO REAL (IMPORTANTE) -->
-    <div class="hidden">
-        <h1>CETPRO PUNO</h1>
-
-        <h2>Intranet CETPRO PUNO</h2>
-        <p>
-            Bienvenido a la intranet del CETPRO Puno. Plataforma digital para la gestión académica,
-            administrativa y educativa del centro técnico en Puno, Perú.
-        </p>
-
-        <h2>Login CETPRO</h2>
-        <p>
-            Accede al sistema CETPRO mediante el login institucional. Esta plataforma permite a estudiantes,
-            docentes y personal administrativo gestionar información académica de forma segura.
-        </p>
-
-        <h2>Sistema CETPRO Puno</h2>
-        <p>
-            El sistema CETPRO Puno está diseñado para optimizar procesos educativos, mejorar la gestión
-            institucional y brindar acceso rápido a la información desde cualquier dispositivo.
-        </p>
-    </div>
 
     <!-- 🔥 APP -->
     <div id="app"></div>

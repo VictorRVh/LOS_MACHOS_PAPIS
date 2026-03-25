@@ -38,18 +38,6 @@ const resumenItems = computed(() => [
     label: "Grupo",
     value: props.nameGrupo || "No seleccionado",
   },
-  {
-    label: "Condicion",
-    value: formData.value.condicion || "No definida",
-  },
-  {
-    label: "Recibo",
-    value: formData.value.nro_recibo || "No registrado",
-  },
-  {
-    label: "Aporte",
-    value: formData.value.aporte ? `S/. ${formData.value.aporte}` : "No registrado",
-  },
 ]);
 </script>
 

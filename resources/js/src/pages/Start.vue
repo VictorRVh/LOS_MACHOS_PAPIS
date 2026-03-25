@@ -243,7 +243,7 @@ onUnmounted(() => {
           <div class="space-y-1.5">
             <div>
               <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Accesos rápidos</p>
-              <h1 class="mt-1 text-[1.3rem] font-semibold tracking-tight text-slate-900 dark:text-slate-100">Panel principal</h1>
+              
             </div>
 
             <div class="flex flex-wrap gap-2">
@@ -307,7 +307,7 @@ onUnmounted(() => {
           <div class="flex flex-col gap-2.5 xl:flex-row xl:items-end xl:justify-between">
             <div class="min-w-0">
               <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Actividad reciente</p>
-              <h2 class="mt-1 text-[1.2rem] font-semibold tracking-tight text-slate-900 dark:text-slate-100">Seguimiento por rol</h2>
+              
             </div>
 
             <div class="flex w-full flex-wrap items-end gap-2 xl:w-auto xl:justify-end">
@@ -342,7 +342,7 @@ onUnmounted(() => {
         </div>
 
         <!-- Contenedor con scroll -->
-        <div class="max-h-52 overflow-y-auto pr-1">
+        <div class="max-h-40 overflow-y-auto pr-1">
           <div v-if="currentActivities.length === 0" class="border border-dashed border-slate-200 bg-slate-50 py-8 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
             No hay actividad reciente para este rol en el rango de fechas seleccionado.
           </div>
@@ -372,7 +372,7 @@ onUnmounted(() => {
         <div class="mb-2.5 flex flex-col gap-3 border-b border-slate-200 pb-2.5 dark:border-slate-700 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Grupos</p>
-            <h2 class="mt-1 text-[1.2rem] font-semibold tracking-tight text-slate-900 dark:text-slate-100">Estado de grupos</h2>
+            
           </div>
 
           <div class="flex flex-wrap gap-2">

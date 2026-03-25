@@ -167,60 +167,59 @@ onBeforeUnmount(() => {
     <div class="space-y-3 bg-slate-100 px-3 py-2.5 transition-colors duration-300 dark:bg-slate-800">
       <StatsOverviewSection eyebrow="Gestion institucional" title="Periodos">
         <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
-            <div
-              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
-            >
-              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                Total periodos
-              </p>
-              <div class="mt-1 flex items-end justify-between gap-3">
-                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalPeriodos }}</p>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">Registrados</span>
-              </div>
-            </div>
-
-            <div
-              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
-            >
-              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                Activos
-              </p>
-              <div class="mt-1 flex items-end justify-between gap-3">
-                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ periodosActivos }}</p>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">Vigentes</span>
-              </div>
-            </div>
-
-            <div
-              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
-            >
-              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                Inactivos
-              </p>
-              <div class="mt-1 flex items-end justify-between gap-3">
-                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ periodosInactivos }}</p>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">Historicos</span>
-              </div>
-            </div>
-
-            <div
-              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
-            >
-              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                Con reportes
-              </p>
-              <div class="mt-1 flex items-end justify-between gap-3">
-                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ periodosConReportes }}</p>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">Disponibles</span>
-              </div>
+          <div
+            class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+              Total periodos
+            </p>
+            <div class="mt-1 flex items-end justify-between gap-3">
+              <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ totalPeriodos
+                }}</p>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">Registrados</span>
             </div>
           </div>
+
+          <div
+            class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+              Activos
+            </p>
+            <div class="mt-1 flex items-end justify-between gap-3">
+              <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ periodosActivos
+                }}</p>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">Vigentes</span>
+            </div>
+          </div>
+
+          <div
+            class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+              Inactivos
+            </p>
+            <div class="mt-1 flex items-end justify-between gap-3">
+              <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{
+                periodosInactivos }}</p>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">Historicos</span>
+            </div>
+          </div>
+
+          <div
+            class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+              Con reportes
+            </p>
+            <div class="mt-1 flex items-end justify-between gap-3">
+              <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{
+                periodosConReportes }}</p>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400">Disponibles</span>
+            </div>
+          </div>
+        </div>
       </StatsOverviewSection>
 
       <div class="flex flex-col gap-4 lg:flex-row">
         <section
-          class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-1/3"
-        >
+          class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-1/3">
           <div class="mb-3">
             <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Agregar periodo</h3>
           </div>
@@ -231,8 +230,7 @@ onBeforeUnmount(() => {
         </section>
 
         <section
-          class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-2/3"
-        >
+          class="w-full border border-slate-200 bg-white p-3 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 lg:w-2/3">
           <div class="mb-3">
             <div>
               <h3 class="mt-1 text-[15px] font-medium text-slate-900 dark:text-slate-100">Lista de periodos</h3>
@@ -252,27 +250,27 @@ onBeforeUnmount(() => {
                 <Td>{{ index + 1 }}</Td>
                 <Td>{{ periodo?.nombre_periodo }}</Td>
                 <Td>
-                  <TableBadge
-                    :label="periodo.status === 1 ? 'Activo' : 'Inactivo'"
-                    :variant="periodo.status === 1 ? 'success' : 'danger'"
-                    :dot="true"
-                  />
+                  <TableBadge :label="periodo.status === 1 ? 'Activo' : 'Inactivo'"
+                    :variant="periodo.status === 1 ? 'success' : 'danger'" :dot="true" />
                 </Td>
                 <Td class="align-middle">
                   <div class="flex items-center justify-center gap-1">
                     <EditButton @click="showSlider(true, periodo)" />
                     <DeleteButton @click="onDelete(periodo)" />
-                    <button
-                      :ref="(el) => setDownloadButtonRef(periodo.id, el)"
-                      type="button"
-                      @click="toggleDownloadMenu(periodo.id)"
-                      class="inline-flex h-8 items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 text-xsm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
-                      :aria-expanded="openDownloadMenuId === periodo.id"
-                      title="Documentos"
-                    >
+                    <button :ref="(el) => setDownloadButtonRef(periodo.id, el)" type="button"
+                      @click="toggleDownloadMenu(periodo.id)" class="inline-flex h-8 items-center gap-2 rounded-[3px] 
+         bg-emerald-600 text-white 
+         px-2.5 text-xsm font-medium 
+         transition-colors 
+         hover:bg-emerald-700 
+         focus-visible:outline-none 
+         focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-1 
+         dark:bg-emerald-500 dark:hover:bg-emerald-600" :aria-expanded="openDownloadMenuId === periodo.id"
+                      title="Documentos">
                       <ArrowDownTrayIcon class="h-4 w-4 shrink-0" />
                       <span>Documentos</span>
-                      <ChevronDownIcon class="h-4 w-4 shrink-0 transition-transform duration-200" :class="openDownloadMenuId === periodo.id ? 'rotate-180' : ''" />
+                      <ChevronDownIcon class="h-4 w-4 shrink-0 transition-transform duration-200"
+                        :class="openDownloadMenuId === periodo.id ? 'rotate-180' : ''" />
                     </button>
                   </div>
                 </Td>
@@ -284,27 +282,19 @@ onBeforeUnmount(() => {
     </div>
 
     <Teleport to="body">
-      <div
-        v-if="openDownloadMenuId"
-        ref="downloadMenuRef"
-        :style="openDownloadMenuStyles"
-        class="min-w-[250px] rounded-md border border-slate-200 bg-white p-1.5 shadow-lg shadow-slate-200/70 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none"
-      >
-        <button
-          type="button"
+      <div v-if="openDownloadMenuId" ref="downloadMenuRef" :style="openDownloadMenuStyles"
+        class="min-w-[250px] rounded-md border border-slate-200 bg-white p-1.5 shadow-lg shadow-slate-200/70 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none">
+        <button type="button"
           @click="descargarDocumento(openDownloadMenuId, periodosStore.periodos.find((p) => p.id === openDownloadMenuId)?.nombre_periodo); closeDownloadMenu()"
-          class="flex w-full items-center gap-2 rounded-md px-2.5 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
-        >
+          class="flex w-full items-center gap-2 rounded-md px-2.5 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300">
           <TableCellsIcon class="h-4 w-4 shrink-0" />
           <span class="flex-1">Matricula institucional</span>
           <ArrowDownTrayIcon class="h-4 w-4 shrink-0 text-emerald-600 opacity-90 dark:text-emerald-400" />
         </button>
 
-        <button
-          type="button"
+        <button type="button"
           @click="descargarReporteCertificado(openDownloadMenuId, periodosStore.periodos.find((p) => p.id === openDownloadMenuId)?.nombre_periodo); closeDownloadMenu()"
-          class="flex w-full items-center gap-2 rounded-md px-2.5 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
-        >
+          class="flex w-full items-center gap-2 rounded-md px-2.5 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300">
           <TableCellsIcon class="h-4 w-4 shrink-0" />
           <span class="flex-1">Certificados</span>
           <ArrowDownTrayIcon class="h-4 w-4 shrink-0 text-emerald-600 opacity-90 dark:text-emerald-400" />
@@ -313,4 +303,3 @@ onBeforeUnmount(() => {
     </Teleport>
   </AuthorizationFallback>
 </template>
-

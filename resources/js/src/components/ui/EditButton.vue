@@ -1,13 +1,11 @@
-<script setup>
-import { PencilSquareIcon } from "@heroicons/vue/24/outline";
-</script>
+
+
 
 <template>
   <button
-    type="button"
-    class="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-sm border border-cetpro/15 bg-white px-2.5 py-1.5 text-xsm font-medium text-cetpro transition-colors duration-150 hover:border-cetpro/25 hover:bg-cetpro/10 active:bg-cetpro/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cetpro/20 focus-visible:ring-offset-1 focus-visible:ring-offset-white disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-cetpro-light dark:hover:bg-cetpro-light/10 dark:active:bg-cetpro-light/15 dark:focus-visible:ring-offset-slate-900"
+    class="flex items-center gap-1 px-2 py-1.5 rounded-sm text-xsm shadow-google bg-cetpro active:bg-cetpro-light hover:bg-cetpro-light dark:bg-cc-10 text-white dark:text-emerald-200 dark:hover:bg-cc-12 cursor-pointer transition duration-150"
   >
-    <PencilSquareIcon class="h-4 w-4 shrink-0" />
-    <span class="leading-none">Editar</span>
+    <PencilSquareIcon class="w-4 h-4" />
+    <span>Editar</span>
   </button>
 </template>

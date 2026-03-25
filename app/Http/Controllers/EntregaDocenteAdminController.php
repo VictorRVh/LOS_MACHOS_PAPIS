@@ -46,22 +46,31 @@ class EntregaDocenteAdminController extends Controller
         // Verificar si hay grupos asociados al periodo
         $gruposExistentes = Grupo::where('id_periodo', $periodo->id)->exists();
 
-        if (!$gruposExistentes) {
+        // if (!$gruposExistentes) {
 
-            throw new \Exception('No puedes Crear esta programacion, por que aun no tieene grupos en este periodo.', 13333);
+        //     throw new \Exception('No puedes Crear esta programacion, por que aun no tieene grupos en este periodo.', 13333);
+        // }
+
+        if (!$gruposExistentes) {
+            return response()->json([
+                'message' => 'No puedes crear esta programación porque no tiene grupos en este periodo.'
+            ], 422);
         }
 
         // CUANDO LA FECHA DE INICIO COINCIDE CON LA DE HOY
         $estadoInicial = EntregaDocenteAdmin::STATUS_PENDIENTE;
 
-        // Convertir ambas fechas a solo YYYY-MM-DD
         $fechaInicio = Carbon::parse($request->fecha_inicio)->startOfDay();
-        $hoy = Carbon::now()->startOfDay();
+        $fechaFin    = Carbon::parse($request->fecha_fin)->endOfDay();  
+        $hoy         = Carbon::now()->startOfDay();
 
-        if ($fechaInicio->lessThanOrEqualTo($hoy)) {
+        if ($fechaFin->lessThan(Carbon::now())) {
+            // La fecha fin ya pasó → FINALIZADO
+            $estadoInicial = EntregaDocenteAdmin::STATUS_FINALIZADO;
+        } elseif ($fechaInicio->lessThanOrEqualTo($hoy)) {
+            // Inicio ya pasó pero fin aún no → ACTIVO
             $estadoInicial = EntregaDocenteAdmin::STATUS_ACTIVO;
         }
-
         // Crear la entrega admin
         $adminEntrega = EntregaDocenteAdmin::create([
             'id_periodo' => $periodo->id,
@@ -102,9 +111,6 @@ class EntregaDocenteAdminController extends Controller
         // Buscar la entrega principal (admin)
         $adminEntrega = EntregaDocenteAdmin::findOrFail($id);
 
-        // CUANDO LA FECHA DE INICIO COINCIDE CON LA DE HOY
-        $estadoInicial = EntregaDocenteAdmin::STATUS_PENDIENTE;
-
         // Convertir ambas fechas a solo YYYY-MM-DD
         // $fechaInicio = Carbon::parse($request->fecha_inicio)->toDateString();
         // $hoy = Carbon::now()->toDateString();
@@ -117,10 +123,14 @@ class EntregaDocenteAdminController extends Controller
         $estadoInicial = EntregaDocenteAdmin::STATUS_PENDIENTE;
 
         $fechaInicio = Carbon::parse($request->fecha_inicio)->startOfDay();
-        $hoy = Carbon::now()->startOfDay();
+        $fechaFin    = Carbon::parse($request->fecha_fin)->endOfDay(); 
+        $hoy         = Carbon::now()->startOfDay();
 
-        // Si la fecha de inicio es hoy o anterior → ACTIVO
-        if ($fechaInicio->lessThanOrEqualTo($hoy)) {
+        if ($fechaFin->lessThan(Carbon::now())) {
+            // La fecha fin ya pasó → FINALIZADO
+            $estadoInicial = EntregaDocenteAdmin::STATUS_FINALIZADO;
+        } elseif ($fechaInicio->lessThanOrEqualTo($hoy)) {
+            // Inicio ya pasó pero fin aún no → ACTIVO
             $estadoInicial = EntregaDocenteAdmin::STATUS_ACTIVO;
         }
 

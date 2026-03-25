@@ -23,7 +23,8 @@ const props = defineProps({
 })
 
 const { store: uploadArchivo, saving: uploadLoading } = useHttpRequest('/entrega_docente_subir')
-const { destroy } = useHttpRequest('entregas_realizadas')
+const { destroy } = useHttpRequest('/entregas_realizadas')
+const { download } = useHttpRequest('/drive/file');
 
 const { showConfirmModal, showToast } = useModalToast();
 
@@ -397,10 +398,10 @@ const {
                           class="text-gray-500 hover:text-blue-600 dark:hover:text-blue-400">
                           <EyeIcon class="h-5 w-5" />
                         </a>
-                        <a :href="archivo.webViewLink" target="_blank" download title="Descargar"
+                        <button title="Descargar" @click="download(archivo.id, archivo.name || archivo.nombre)"
                           class="text-gray-500 hover:text-green-600 dark:hover:text-green-400">
                           <ArrowDownTrayIcon class="h-5 w-5" />
-                        </a>
+                        </button>
                         <button title="Eliminar" @click="eliminarArchivo(carpeta, archivo)"
                           class="text-gray-500 hover:text-red-600 dark:hover:text-red-400">
                           <TrashIcon class="h-4 w-4" />

@@ -42,16 +42,15 @@ const loadNotifications = async () => {
 
 /* Marcar todo como leído */
 const markAllAsRead = async () => {
-  await notificacionesStore.loadNotificacionesMarcarTodo();
-  allNotifications.value.forEach(n => n.isRead = true);
-  loadNotifications()
-}
+    await notificacionesStore.loadNotificacionesMarcarTodo();
+    // Sincroniza la vista local desde el store
+    allNotifications.value.forEach(n => n.isRead = true);
+};
 
 const markOneAsRead = async (n) => {
-  await notificacionesStore.loadNotificacionesMarcarLeido(n.id);
-  n.isRead = true;
-  await loadNotifications()
-}
+    await notificacionesStore.loadNotificacionesMarcarLeido(n.id);
+    n.isRead = true;
+};
 
 onMounted(async () => {
   await loadNotifications()

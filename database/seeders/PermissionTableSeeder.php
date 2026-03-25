@@ -13,6 +13,15 @@ class PermissionTableSeeder extends Seeder
      */
     public function run(): void
     {
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+    
+    DB::table('permission_role')->truncate();
+    DB::table('permissions')->truncate();
+    
+    // ✅ Volver a habilitar
+    DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
         $permissions = [
             'todo-acceso-usuarios',
             'ver-usuarios',
@@ -199,10 +208,10 @@ class PermissionTableSeeder extends Seeder
             'ver-comisión-docente',
 
 
-            // 'ver-perfil-docente',
-            // 'editar-perfil-docente',
-            // 'ver-mis-módulos',
-            // 'ver-estudiantes-asignados',
+            'ver-perfil-docente',
+            'editar-perfil-docente',
+            'ver-mis-módulos',
+            'ver-estudiantes-asignados',
 
             //Competencias
             'todo-acceso-capacidades-docente',
@@ -230,10 +239,6 @@ class PermissionTableSeeder extends Seeder
             ];
         }, $permissions);
 
-        DB::table('permissions')->upsert(
-            $permissions,
-            ['name'],
-            ['created_at']
-        );
+        DB::table('permissions')->insert($permissions);
     }
 }

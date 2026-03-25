@@ -105,7 +105,7 @@ const reactivarNota = async (capacidad) => {
         <Table>
           <THead>
             <Th>#</Th>
-            <Th>Nombre Capacidad</Th>
+            <Th>Nombre Unidad</Th>
             <Th>Fecha Inicio</Th>
             <Th>Fecha Fin</Th>
             <Th>Acciones</Th>

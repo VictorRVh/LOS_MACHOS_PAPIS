@@ -18,8 +18,8 @@ return new class extends Migration
             $table->dateTime('fecha_fin')->nullable();
             $table->boolean('estado');
             $table->uuid('id_admin');
-            $table->string('documento_admin')->nullable();;
-            $table->string('observacion');
+            $table->string('documento_admin')->nullable();
+            $table->string('observacion')->nullable();
 
             $table->boolean('cumplio')->default(0);
 

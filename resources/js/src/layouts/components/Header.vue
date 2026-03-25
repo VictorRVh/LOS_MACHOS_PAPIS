@@ -56,6 +56,8 @@ const isNotificationsOpen = ref(false);
 const userMenuContainer = ref(null);
 const notificationsContainer = ref(null);
 
+let pollInterval = null;
+
 const RolUser = computed(() => userStore.user?.roles?.[0]?.name?.toUpperCase() || 'USUARIO');
 const userInitial = computed(() => userStore.user?.name?.[0]?.toUpperCase() || '?');
 const userFullName = computed(() => {
@@ -83,12 +85,26 @@ watch([isUserMenuOpen, isNotificationsOpen], ([userOpen, notifOpen]) => {
 
 onMounted(() => {
     if (can('ver-actividades-recientes')) {
-        notificacionesStore.loadNotificacionesPendientes()
+        notificacionesStore.loadNotificaciones()
     }
 })
 
 onUnmounted(() => {
     document.removeEventListener('mousedown', handleClickOutside);
+});
+
+onMounted(() => {
+    if (can('ver-actividades-recientes')) {
+        notificacionesStore.loadNotificaciones();
+        // Refresca cada 60 segundos
+        pollInterval = setInterval(() => {
+            notificacionesStore.loadNotificaciones();
+        }, 60_000);
+    }
+});
+
+onUnmounted(() => {
+    clearInterval(pollInterval);
 });
 
 const onLogout = async () => {

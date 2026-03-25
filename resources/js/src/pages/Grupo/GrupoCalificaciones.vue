@@ -156,7 +156,7 @@ const getResumenNotas = (est) => {
         <THead>
           <Th>#</Th>
           <Th>Apellidos y Nombres</Th>
-          <Th v-for="i in lengthUnit" :key="i" class="text-center">CT{{ i }}</Th>
+          <Th v-for="i in lengthUnit" :key="i" class="text-center">UD{{ i }}</Th>
           <Th class="text-center" title="Experiencia formativa en situaciones reales de trabajo">EFSRT</Th>
           <Th class="text-center">PUNTAJE</Th>
           <Th class="text-center">PROMEDIO</Th>

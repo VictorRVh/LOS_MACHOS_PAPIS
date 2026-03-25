@@ -1,75 +1,56 @@
-import { ref } from 'vue';
+// useNotificacionesStore.js
+import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
-
 import useHttpRequest from '../../composables/useHttpRequest';
 
 const useNotificacionesStore = defineStore('Notificaciones', () => {
     const {
         index: getNotificaciones,
-        show: getNotificacionesById,
         loading: notificacionesLoading,
         initialLoading: notificacionesFirstTimeLoading,
     } = useHttpRequest('/notificaciones');
 
     const {
         index: getNotificacionesMarcarTodo,
-        show: getNotificacionesMarcarTodoById,
-        loading: notificacionesMarcarTodoLoading,
-        initialLoading: notificacionesMarcarTodoFirstTimeLoading,
     } = useHttpRequest('/notificaciones/marcar-todo');
 
     const {
-        index: getNotificacionesLeer,
         show: getNotificacionesLeerById,
-        loading: notificacionesLeerLoading,
-        initialLoading: notificacionesLeerFirstTimeLoading,
     } = useHttpRequest('/notificaciones/leer');
 
-    const {
-        index: getNotificacionesPendientes,
-        show: getNotificacionesPendientesById,
-        loading: notificacionesPendientesLoading,
-        initialLoading: notificacionesPendientesFirstTimeLoading,
-    } = useHttpRequest('/notificaciones/pendientes');
-
     const notificaciones = ref([]);
-    const notificacionesFiltrado = ref(null);
 
-    const notificacionesPendientes = ref(0);
+    // ✅ Una sola fuente de verdad — computed, no ref separada
+    const notificacionesPendientes = computed(
+        () => notificaciones.value.filter(n => n.leido == 0).length
+    );
 
     const loadNotificaciones = async () => {
         const res = await getNotificaciones();
-        notificaciones.value = res;
-        notificacionesPendientes.value = res.filter(n => n.leido == 0).length;
+        notificaciones.value = res ?? [];
+        // notificacionesPendientes se actualiza solo por ser computed
     };
 
     const loadNotificacionesMarcarTodo = async () => {
-        const res = await getNotificacionesMarcarTodo();
-        return res;
+        await getNotificacionesMarcarTodo();
+        // Actualiza el array local sin volver a llamar al backend
+        notificaciones.value = notificaciones.value.map(n => ({ ...n, leido: 1 }));
     };
 
     const loadNotificacionesMarcarLeido = async (id) => {
-        const res = await getNotificacionesLeerById(id);
-        return res;
+        await getNotificacionesLeerById(id);
+        const n = notificaciones.value.find(n => n.id === id);
+        if (n) n.leido = 1; // Actualiza local, sin refetch
     };
-
-    const loadNotificacionesPendientes = async () => {
-        const res = await getNotificacionesPendientes()
-        notificacionesPendientes.value = res;
-    }
 
     return {
         notificaciones,
-        loadNotificaciones,
-        notificacionesFiltrado,
+        notificacionesPendientes,
         notificacionesLoading,
         notificacionesFirstTimeLoading,
-
+        loadNotificaciones,
         loadNotificacionesMarcarTodo,
         loadNotificacionesMarcarLeido,
-        loadNotificacionesPendientes,
-
-        notificacionesPendientes,
     };
 });
 

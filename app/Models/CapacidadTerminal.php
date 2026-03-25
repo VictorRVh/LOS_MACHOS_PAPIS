@@ -37,7 +37,7 @@ class CapacidadTerminal extends Model
         'fecha_aplazada' => 'date:Y-m-d',
     ];
 
-    protected $appends = ['puede_reactivar', 'puede_aplazar', 'accion_disponible'];
+    protected $appends = ['puede_reactivar', 'puede_aplazar', 'puede_rectificar', 'accion_disponible'];
     protected $hidden = [
         'grupo'
     ];
@@ -146,14 +146,23 @@ class CapacidadTerminal extends Model
 
         return
             $this->status_nota == 1 &&
-            (
-                $ahora->lte($fechaLimite)
-                || $this->status == 1
-            );
+            $ahora->lte($fechaLimite); // solo fecha, sin || status
     }
 
-
     // Puede solicitar APLAZAMIENTO (fuera del límite, sin nota)
+    // public function getPuedeAplazarAttribute()
+    // {
+    //     $ahora = Carbon::now('America/Lima');
+    //     $fechaLimite = $this->fecha_limite_subida;
+
+    //     return
+    //         $this->status_nota == 0 &&
+    //         (
+    //             $ahora->gt($fechaLimite)
+    //             || $this->status == 4
+    //         );
+    // }
+
     public function getPuedeAplazarAttribute()
     {
         $ahora = Carbon::now('America/Lima');
@@ -161,10 +170,7 @@ class CapacidadTerminal extends Model
 
         return
             $this->status_nota == 0 &&
-            (
-                $ahora->gt($fechaLimite)
-                || $this->status == 4
-            );
+            $ahora->gt($fechaLimite); // solo fecha, sin || status
     }
 
     public function getPuedeRectificarAttribute()
@@ -174,10 +180,7 @@ class CapacidadTerminal extends Model
 
         return
             $this->status_nota == 1 &&
-            (
-                $ahora->gt($fechaLimite)
-                || $this->status == 4
-            );
+            $ahora->gt($fechaLimite);
     }
 
     public function getAccionDisponibleAttribute()
@@ -264,7 +267,7 @@ class CapacidadTerminal extends Model
     {
         return $this->hasMany(NotaCapacidadTerminal::class, 'id_capacidad');
     }
-    
+
     public function capacidadCompetencia()
     {
         return $this->hasMany(CapacidadCompetencia::class, 'id_capacidad_terminal');

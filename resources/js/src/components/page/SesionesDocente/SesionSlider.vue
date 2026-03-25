@@ -156,7 +156,7 @@ const closeAndReset = () => {
     <!-- Unidad Didactica -->
     <FormLabelError label="Unidad Didactica *" :error="formErrors.id_capacidad">
       <BaseSelectGrupo v-model="form.id_capacidad" :options="capacidadStore.capacidadTerminal?.capacidades"
-        label="nombre_capacidad" value-prop="id" placeholder="Seleccione una capacidad"
+        label="nombre_capacidad" value-prop="id" placeholder="Seleccione una unidad"
         :loading="capacidadStore.sesionesLoading" />
     </FormLabelError>
 

@@ -56,7 +56,7 @@ onUnmounted(() => {
 /* Limpiar notificaciones (opcional: puedes llamar al backend si deseas) */
 const markAllAsRead = async () => {
   await notificacionesStore.loadNotificacionesMarcarTodo();
-  await notificacionesStore.loadNotificaciones();
+  // await notificacionesStore.loadNotificaciones();
 };
 
 </script>

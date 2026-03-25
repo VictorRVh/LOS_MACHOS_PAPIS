@@ -51,6 +51,33 @@ const useHttpRequest = (path = '') => {
         }
     };
 
+    const download = async (id, filename = 'archivo') => {
+        try {
+            loading.value = true;
+
+            const response = await axios.get(`${path}/${id}/download`, {
+                responseType: 'blob'
+            });
+
+            const blob = new Blob([response.data]);
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            window.URL.revokeObjectURL(url);
+            loading.value = false;
+        } catch (error) {
+            loading.value = false;
+            handleError(error, null, null);
+        }
+    };
+
     const store = async (data, callback = null) => {
         try {
             saving.value = true;
@@ -229,7 +256,9 @@ const useHttpRequest = (path = '') => {
 
         patchCustom,
 
-        updateFormData
+        updateFormData, 
+        
+        download
     };
 };
 

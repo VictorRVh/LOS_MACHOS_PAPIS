@@ -5,11 +5,14 @@ import infoCetpro from "../store/useCetproStore"
 
 const dataCetpro = infoCetpro();
 
-if (dataCetpro?.cetpro.length <= 0) {
-  await dataCetpro.loadCetpro();
-}
 
-export function generatePdfMatricula(data) {
+export async function generatePdfMatricula(data) {
+  const dataCetpro = infoCetpro();
+
+  if (dataCetpro?.cetpro.length <= 0) {
+    await dataCetpro.loadCetpro();
+  }
+
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "mm",
@@ -39,31 +42,31 @@ export function generatePdfMatricula(data) {
     body: [
       [
         { content: "Nombre del CETPRO", styles: sL },
-        { content: dataCetpro?.cetpro?.cetpro||"-", styles: sD },
+        { content: dataCetpro?.cetpro?.cetpro || "-", styles: sD },
         { content: "DRE/GRE", styles: sL },
-        { content: dataCetpro?.cetpro?.dre||"-", styles: sD },
+        { content: dataCetpro?.cetpro?.dre || "-", styles: sD },
       ],
       [
         { content: "Código modular", styles: sL },
         { content: "240069", styles: sD },
         { content: "UGEL", styles: sL },
-        { content: dataCetpro?.cetpro?.ugel||"-", styles: sD },
+        { content: dataCetpro?.cetpro?.ugel || "-", styles: sD },
       ],
       [
         { content: "Departamento", styles: sL },
-        { content: dataCetpro?.cetpro?.region||"-", styles: sD },
+        { content: dataCetpro?.cetpro?.region || "-", styles: sD },
         { content: "Tipo de Gestión", styles: sL },
-        { content: dataCetpro?.cetpro?.tipo_gestion||"-", styles: sD },
+        { content: dataCetpro?.cetpro?.tipo_gestion || "-", styles: sD },
       ],
-        [
+      [
         { content: "Provincia", styles: sL },
-        { content: dataCetpro?.cetpro?.provincia||"-", styles: sD },
+        { content: dataCetpro?.cetpro?.provincia || "-", styles: sD },
         { content: "Periodo electivo:", styles: sL },
         { content: data?.ficha?.periodo.split('-')[0] || "—", styles: sD },
       ],
       [
         { content: "Distrito", styles: sL },
-        { content: dataCetpro?.cetpro?.distrito||"-", styles: sD },
+        { content: dataCetpro?.cetpro?.distrito || "-", styles: sD },
         { content: "Periodo académico:", styles: sL },
         { content: data?.ficha?.periodo || "—", styles: sD },
       ],
@@ -82,7 +85,7 @@ export function generatePdfMatricula(data) {
 
       [
         { content: "Ciclo:", styles: sL },
-        { content: data?.ficha?.ciclo_academico||"nombre ciclo", styles: sD },
+        { content: data?.ficha?.ciclo_academico || "nombre ciclo", styles: sD },
         { content: "Número de documento de identidad del estudiante:", styles: sL },
         { content: data?.ficha?.nro_documento || "—", styles: sD },
       ],
@@ -159,17 +162,17 @@ export function generatePdfMatricula(data) {
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 15,
     head: [[
-      { content: "EN EL CETPRO /CENTRO LABORAL", styles: { halign: "center" }, styles: { halign: "center" }  },
-      { content: "CRÉDITOS", styles: { halign: "center" }, styles: { halign: "center" }  },
-      { content: "HORAS", styles: { halign: "center" }, styles: { halign: "center" }  },
+      { content: "EN EL CETPRO /CENTRO LABORAL", styles: { halign: "center" }, styles: { halign: "center" } },
+      { content: "CRÉDITOS", styles: { halign: "center" }, styles: { halign: "center" } },
+      { content: "HORAS", styles: { halign: "center" }, styles: { halign: "center" } },
       { content: "OBSERVACIONES", styles: { halign: "center" } }
     ]],
     body: data?.experiencia_formativa
       ? [[
-      // { content: data.experiencia_formativa.nombre_experiencia || "—", styles: { halign: "center" }},
-      { content: "CETPRO"|| "—", styles: { halign: "center" }},
-        {content: data.experiencia_formativa.creditos?.toString() || "—", styles: { halign: "center" }},
-        {content: data.experiencia_formativa.horas?.toString() || "—", styles: { halign: "center" }},
+        // { content: data.experiencia_formativa.nombre_experiencia || "—", styles: { halign: "center" }},
+        { content: "CETPRO" || "—", styles: { halign: "center" } },
+        { content: data.experiencia_formativa.creditos?.toString() || "—", styles: { halign: "center" } },
+        { content: data.experiencia_formativa.horas?.toString() || "—", styles: { halign: "center" } },
         { content: "", styles: { halign: "center" } },
       ]]
       : [],

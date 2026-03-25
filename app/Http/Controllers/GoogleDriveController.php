@@ -117,20 +117,61 @@ class GoogleDriveController extends Controller
                 'supportsAllDrives' => true
             ]);
 
+            $mimeType = $file->getMimeType();
+            $fileName = $file->getName();
+
+            if (str_starts_with($mimeType, 'application/vnd.google-apps')) {
+
+                $exportMap = [
+                    'application/vnd.google-apps.document' =>
+                    ['application/pdf', '.pdf'],
+
+                    'application/vnd.google-apps.spreadsheet' =>
+                    ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx'],
+
+                    'application/vnd.google-apps.presentation' =>
+                    ['application/pdf', '.pdf'],
+                ];
+
+                if (!isset($exportMap[$mimeType])) {
+                    return response()->json([
+                        'error' => 'Este tipo de archivo no puede exportarse'
+                    ], 400);
+                }
+
+                [$exportMime, $extension] = $exportMap[$mimeType];
+
+                $response = $this->driveService->files->export(
+                    $fileId,
+                    $exportMime
+                );
+
+                return response($response->getBody()->getContents(), 200)
+                    ->header('Content-Type', $exportMime)
+                    ->header(
+                        'Content-Disposition',
+                        'attachment; filename="' . $fileName . $extension . '"'
+                    );
+            }
+
             $response = $this->driveService->files->get($fileId, [
                 'alt' => 'media',
                 'supportsAllDrives' => true
             ]);
 
             return response($response->getBody()->getContents(), 200)
-                ->header('Content-Type', $file->getMimeType())
-                ->header('Content-Disposition', 'attachment; filename="' . $file->getName() . '"');
-        } catch (Exception $e) {
-            Log::error('Error al descargar archivo: ' . $e->getMessage());
-            return response()->json(['error' => 'No se pudo descargar el archivo.'], 500);
+                ->header('Content-Type', $mimeType)
+                ->header(
+                    'Content-Disposition',
+                    'attachment; filename="' . $fileName . '"'
+                );
+        } catch (\Exception $e) {
+            \Log::error('Error al descargar archivo: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'No se pudo descargar el archivo.'
+            ], 500);
         }
     }
-
 
     public function createFolder(Request $request)
     {

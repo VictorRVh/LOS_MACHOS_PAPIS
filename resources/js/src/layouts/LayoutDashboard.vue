@@ -19,7 +19,7 @@ const { pushToRoute } = useAppRouter();
 const { showToast } = useModalToast();
 
 let inactivityTimer = null;
-const INACTIVITY_LIMIT = 30 * 1000;
+const INACTIVITY_LIMIT = 60 * 60 * 1000;
 
 const clearInactivityTimer = () => {
     if (inactivityTimer) {

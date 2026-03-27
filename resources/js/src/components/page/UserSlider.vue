@@ -63,8 +63,34 @@ const formErrors = ref({});
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
+const fieldLabels = {
+    name: 'Nombres',
+    apellido_paterno: 'Apellido paterno',
+    apellido_materno: 'Apellido materno',
+    usuario: 'Usuario',
+    dni: 'DNI',
+    email: 'Email',
+    fecha_nacimiento: 'Fecha de nacimiento',
+    telefono: 'Teléfono',
+    direccion: 'Dirección',
+    password: 'Contraseña',
+    confirm_password: 'Confirmar contraseña',
+    roles: 'Rol',
+};
+
 const passwordType = computed(() => showPassword.value ? 'text' : 'password');
 const confirmPasswordType = computed(() => showConfirmPassword.value ? 'text' : 'password');
+const validationSummary = computed(() =>
+    Object.entries(formErrors.value || {}).map(([field, message]) => ({
+        field,
+        label: fieldLabels[field] || field,
+        message,
+    }))
+);
+const validationSummaryText = computed(() => {
+    const labels = validationSummary.value.map((item) => item.label);
+    return labels.length ? `Falta: ${labels.join(', ')}.` : '';
+});
 
 const togglePassword = () => {
     showPassword.value = !showPassword.value;
@@ -109,6 +135,10 @@ const selectedRole = ref(null);
 const onRoleSelect = (role) => {
     formData.value.roles.unshift(role);
     selectedRole.value = null;
+    if (formErrors.value.roles) {
+        const { roles, ...rest } = formErrors.value;
+        formErrors.value = rest;
+    }
 };
 const onRoleRemove = (role) => {
     formData.value.roles = formData.value.roles.filter((fRole) => fRole?.id?.toString() !== role?.id?.toString());
@@ -127,6 +157,7 @@ const schema = yup.object().shape({
     fecha_nacimiento: yup.date().nullable().required("La fecha de nacimiento es requerida."),
     telefono: yup.string().nullable().required("El teléfono es requerido."),
     direccion: yup.string().nullable().required("La dirección es requerida."),
+    roles: yup.array().min(1, 'Debe seleccionar al menos un rol.'),
     status: yup.bool().required(),
     password: yup.string().nullable().test('password-test', '', (value, { createError }) => {
         if (props.user?.id) return true;
@@ -136,6 +167,18 @@ const schema = yup.object().shape({
         return true;
     }),
 });
+
+const applyServerValidationErrors = (error) => {
+    const responseErrors = error?.response?.data?.errors;
+    if (!responseErrors || typeof responseErrors !== 'object') return false;
+
+    formErrors.value = Object.entries(responseErrors).reduce((acc, [field, messages]) => {
+        acc[field] = Array.isArray(messages) ? messages[0] : messages;
+        return acc;
+    }, {});
+
+    return true;
+};
 
 const onSubmit = async () => {
     if (saving.value || updating.value) return;
@@ -150,7 +193,21 @@ const onSubmit = async () => {
     const fieldsToBeOmitted = ['confirm_password'];
     if (props.user?.id) fieldsToBeOmitted.push('password');
     data = omitPropsFromObject(data, fieldsToBeOmitted);
-    const response = props.user?.id ? await updateUser(props.user?.id, data) : await createUser(data);
+
+    let response = null;
+    if (props.user?.id) {
+        response = await updateUser(props.user?.id, data, (error) => {
+            applyServerValidationErrors(error);
+        });
+    } else {
+        try {
+            response = await createUser(data);
+        } catch (error) {
+            applyServerValidationErrors(error);
+            response = null;
+        }
+    }
+
     if (response?.id) {
         showToast(`Usuario ${props.user?.id ? 'actualizado' : 'creado'} correctamente.`);
         formData.value = initialFormData();
@@ -187,8 +244,8 @@ const onSubmit = async () => {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormInput v-model="formData.email" label="Email" />
-                    <FormInput v-model="formData.direccion" label="Dirección" />
+                    <FormInput v-model="formData.email" label="Email" :error="formErrors?.email" required />
+                    <FormInput v-model="formData.direccion" label="Dirección" :error="formErrors?.direccion" required />
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -256,7 +313,7 @@ const onSubmit = async () => {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormLabelError label="Añadir Rol">
+                    <FormLabelError label="Añadir Rol" :error="formErrors?.roles" required>
                         <BaseSelect v-model="selectedRole" :options="roleOptions" label="name"
                             placeholder="Seleccione un rol" @update:modelValue="onRoleSelect" />
                     </FormLabelError>
@@ -267,6 +324,14 @@ const onSubmit = async () => {
                 <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
                     <SelectedChips :items="formData.roles" @remove="onRoleRemove" />
                 </div>
+
+                <p
+                    v-if="validationSummaryText"
+                    class="mt-1 text-sm font-semibold text-red-600 dark:text-red-400"
+                >
+                    {{ validationSummaryText }}
+                </p>
+
                 <div class="flex gap-2 mt-1">
                     <Button :title="user?.id ? 'Guardar Cambios' : 'Crear Usuario'" key="submit-btn"
                         :loading-title="user?.id ? 'Guardando...' : 'Creando...'" class="!mt-6 !w-full h-10"

@@ -25,7 +25,7 @@ class ReporteRegistroMatriculaAndEvaluacionExport
     public function build()
     {
         $spreadsheet = IOFactory::load(
-            storage_path('app/templates/REGISTRO DE MATRICULA Y REGISTRO DE EVALUACIÓN POR MÓDULO nuevo.xlsx')
+            storage_path('app/templates/REGISTRO_DE_MATRICULA_Y_REGISTRO_DE_EVALUACION_POR_MODULO_nuevo.xlsx')
         );
 
         $sheet = $spreadsheet->getActiveSheet();

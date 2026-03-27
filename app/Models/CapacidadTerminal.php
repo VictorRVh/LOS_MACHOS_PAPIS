@@ -37,7 +37,7 @@ class CapacidadTerminal extends Model
         'fecha_aplazada' => 'date:Y-m-d',
     ];
 
-    protected $appends = ['puede_reactivar', 'puede_aplazar', 'puede_rectificar', 'accion_disponible'];
+    protected $appends = ['puede_reactivar', 'puede_aplazar', 'puede_rectificar', 'accion_disponible', 'estado_visual'];
     protected $hidden = [
         'grupo'
     ];
@@ -80,18 +80,31 @@ class CapacidadTerminal extends Model
         return self::STATUS[$this->status] ?? 'Desconocido';
     }
 
+    // public function puedeSubirNotas(): bool
+    // {
+    //     // Solo permitir subida si está ACTIVO
+    //     if ($this->status !== self::STATUS_ACTIVO) {
+    //         return false;
+    //     }
+
+    //     $ahora = Carbon::now('America/Lima');
+    //     $fechaLimite = $this->fecha_limite_subida;
+
+    //     // Permitir hasta la fecha límite (fecha_fin + 1 día a las 23:59)
+    //     return $ahora->lte($fechaLimite);
+    // }
+
     public function puedeSubirNotas(): bool
     {
-        // Solo permitir subida si está ACTIVO
-        if ($this->status !== self::STATUS_ACTIVO) {
+        $ahora = Carbon::now('America/Lima');
+
+        // No permitir antes de que inicie
+        if ($ahora->lt(Carbon::parse($this->fecha_inicio))) {
             return false;
         }
 
-        $ahora = Carbon::now('America/Lima');
-        $fechaLimite = $this->fecha_limite_subida;
-
-        // Permitir hasta la fecha límite (fecha_fin + 1 día a las 23:59)
-        return $ahora->lte($fechaLimite);
+        // Permitir hasta fecha límite (fecha_fin + 1 día)
+        return $ahora->lte($this->fecha_limite_subida);
     }
 
     // NUEVO: Obtener fecha límite de subida
@@ -121,18 +134,33 @@ class CapacidadTerminal extends Model
     // NUEVO: Obtener mensaje de estado de subida
     public function getMensajeSubidaNotasAttribute(): string
     {
-        if ($this->status === self::STATUS_PENDIENTE) {
+
+        $ahora = Carbon::now('America/Lima');
+
+        // if ($this->status === self::STATUS_PENDIENTE) {
+        //     return 'La subida de notas aún no está habilitada. Inicia el ' .
+        //         Carbon::parse($this->fecha_inicio)->format('d/m/Y');
+        // }
+
+        // if ($this->status === self::STATUS_FINALIZADO || $this->status === self::STATUS_COMPLETADO) {
+        //     return 'El plazo para subir notas finalizó el ' .
+        //         $this->fecha_limite_subida->format('d/m/Y H:i');
+        // }
+
+        // if (!$this->puedeSubirNotas()) {
+        //     return 'El plazo para subir notas ha expirado.';
+        // }
+
+        // 🔹 Antes de inicio
+        if ($ahora->lt(Carbon::parse($this->fecha_inicio))) {
             return 'La subida de notas aún no está habilitada. Inicia el ' .
                 Carbon::parse($this->fecha_inicio)->format('d/m/Y');
         }
 
-        if ($this->status === self::STATUS_FINALIZADO || $this->status === self::STATUS_COMPLETADO) {
+        // 🔹 Fuera de plazo
+        if (!$this->puedeSubirNotas()) {
             return 'El plazo para subir notas finalizó el ' .
                 $this->fecha_limite_subida->format('d/m/Y H:i');
-        }
-
-        if (!$this->puedeSubirNotas()) {
-            return 'El plazo para subir notas ha expirado.';
         }
 
         return 'Puede subir notas hasta el ' .
@@ -251,6 +279,39 @@ class CapacidadTerminal extends Model
             : $entrega->fecha_fin;
 
         return $now->between($fechaInicio, $fechaLimite);
+    }
+
+    public function getEstadoVisualAttribute()
+    {
+        if ($this->puedeSubirNotas()) {
+            return [
+                'texto' => 'Disponible para notas',
+                'color' => 'blue'
+            ];
+        }
+
+        switch ($this->status) {
+            case self::STATUS_ACTIVO:
+                return [
+                    'texto' => 'En curso',
+                    'color' => 'green'
+                ];
+            case self::STATUS_PENDIENTE:
+                return [
+                    'texto' => 'Pendiente',
+                    'color' => 'yellow'
+                ];
+            case self::STATUS_FINALIZADO:
+                return [
+                    'texto' => 'Finalizado',
+                    'color' => 'red'
+                ];
+            default:
+                return [
+                    'texto' => 'Desconocido',
+                    'color' => 'gray'
+                ];
+        }
     }
 
     public function grupo()

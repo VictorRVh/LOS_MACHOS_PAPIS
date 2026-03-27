@@ -384,6 +384,7 @@ class NotaCapacidadTerminalController extends Controller
                 'fecha_fin' => $capacidad->fecha_fin,
                 'fecha_limite_subida' => $capacidad->fecha_limite_subida->format('Y-m-d H:i:s'),
                 'puede_subir_notas' => $capacidad->puedeSubirNotas(),
+                'estado_visual'=> $capacidad->estado_visual,
                 'status' => $capacidad->status,
                 'status_texto' => $capacidad->status_texto,
                 'mensaje' => $capacidad->mensaje_subida_notas,

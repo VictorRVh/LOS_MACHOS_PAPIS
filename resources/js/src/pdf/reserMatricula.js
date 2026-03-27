@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export function generatePdfReservaMatricula(data) {
+
     const doc = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -81,7 +82,7 @@ export function generatePdfReservaMatricula(data) {
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-    doc.text(`Periodo Lectivo: 2025`, pageW - margin, y + 5, { align: "right" });
+    doc.text(`Periodo Lectivo: ${data.periodo}`, pageW - margin, y + 5, { align: "right" });
 
     y += 15;
     

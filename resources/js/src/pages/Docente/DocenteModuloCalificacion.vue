@@ -126,8 +126,8 @@ const getResumenNotas = (est) => {
   // 2. Nota de experiencia (sin nota = 0, cuenta como una unidad más)
   const notaExperiencia =
     est.nota_experiencia !== null &&
-    est.nota_experiencia !== "" &&
-    !isNaN(est.nota_experiencia)
+      est.nota_experiencia !== "" &&
+      !isNaN(est.nota_experiencia)
       ? Number(est.nota_experiencia)
       : 0;
   notas.push(notaExperiencia);
@@ -251,11 +251,12 @@ const getEstadoCapacidadClass = computed(() => {
           <!-- âœ… NUEVO: Indicador de estado -->
           <div v-if="estadoCapacidad && capacidadSeleccionada" class="mt-1 text-xs flex items-center gap-2">
             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" :class="{
-              'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': estadoCapacidad.status === 1,
-              'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': estadoCapacidad.status === 0,
-              'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': estadoCapacidad.status === 4,
+              'bg-green-100 text-green-800': estadoCapacidad.estado_visual.color === 'green',
+              'bg-yellow-100 text-yellow-800': estadoCapacidad.estado_visual.color === 'yellow',
+              'bg-red-100 text-red-800': estadoCapacidad.estado_visual.color === 'red',
+              'bg-blue-100 text-blue-800': estadoCapacidad.estado_visual.color === 'blue',
             }">
-              {{ estadoCapacidad.status_texto }}
+              {{ estadoCapacidad.estado_visual.texto }}
             </span>
             <span v-if="estadoCapacidad.puede_subir_notas" class="text-gray-600 dark:text-gray-400">
               Fecha límite: {{ new Date(estadoCapacidad.fecha_limite_subida).toLocaleDateString('es-PE') }}
@@ -352,4 +353,3 @@ const getEstadoCapacidadClass = computed(() => {
   @apply text-gray-400 italic;
 }
 </style>
-

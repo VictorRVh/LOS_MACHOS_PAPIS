@@ -210,28 +210,85 @@ class CapacidadTerminalController extends Controller
     // PUT/PATCH /api/capacidad-terminal/{id}
     public function update(Request $request, $id)
     {
+        $now = now('America/Lima');
+
         $capacidad = CapacidadTerminal::with('grupo.entregaDocenteActiva')->find($id);
 
         if (!$capacidad) {
             return response()->json(['message' => 'Capacidad no encontrada'], 404);
         }
 
-        // VALIDAR PROGRAMACIÓN
-        if (!$capacidad->canEdit()) {
+        // 1VALIDAR PROGRAMACIÓN (igual que en store)
+        $sesion = EntregaDocente::where('id_grupo', $capacidad->id_grupo)
+            ->first();
+
+        if (!$sesion) {
             return response()->json([
-                'message' => 'La programación no permite modificar capacidades'
+                'errorCode' => 13333,
+                'errorMessage' => 'No existe programación para este grupo.'
+            ], 422);
+        }
+
+        if (
+            !$now->between($sesion->fecha_inicio, $sesion->fecha_fin) ||
+            $sesion->estado !== EntregaDocente::STATUS_ACTIVO
+        ) {
+            return response()->json([
+                'errorCode' => 13333,
+                'errorMessage' => 'La programación no permite modificar unidades en este momento.'
             ], 403);
         }
 
+        // VALIDACIÓN DE INPUT
         $request->validate([
             'nombre_capacidad' => 'sometimes|string|max:255',
-            'fecha_inicio' => 'sometimes|date',
-            'fecha_fin' => 'sometimes|date|after_or_equal:fecha_inicio',
+            'fecha_inicio'     => 'sometimes|date',
+            'fecha_fin'        => 'sometimes|date|after_or_equal:fecha_inicio',
             'creditos_teoricos' => 'sometimes|string|max:255',
             'creditos_practicos' => 'sometimes|string|max:255',
+            'horas' => 'sometimes|string|max:255',
         ]);
 
-        $capacidad->update($request->all());
+        // MEZCLAR DATOS ACTUALES + NUEVOS (clave para validar correctamente)
+        $data = array_merge($capacidad->toArray(), $request->all());
+
+        // VALIDACIÓN DE RANGO DE FECHAS (igual que store)
+        $error = CapacidadTerminal::validarRangoFechasGrupo($data);
+
+        if ($error) {
+            return response()->json([
+                'errorCode' => 13333,
+                'errorMessage' => $error
+            ], 422);
+        }
+
+        // CALCULAR STATUS AUTOMÁTICO
+        $fechaInicio = isset($data['fecha_inicio'])
+            ? Carbon::parse($data['fecha_inicio'])->startOfDay()
+            : Carbon::parse($capacidad->fecha_inicio)->startOfDay();
+
+        $fechaFin = isset($data['fecha_fin'])
+            ? Carbon::parse($data['fecha_fin'])->endOfDay()
+            : Carbon::parse($capacidad->fecha_fin)->endOfDay();
+
+        if ($fechaInicio->gt($now)) {
+            $status = 0; // no inicia
+        } elseif ($fechaInicio->lte($now) && $fechaFin->gte($now)) {
+            $status = 1; // en ejecución
+        } elseif ($fechaInicio->lt($now) && $fechaFin->lt($now)) {
+            $status = 4; // finalizado
+        }
+
+        // ACTUALIZAR
+        $capacidad->update([
+            'nombre_capacidad'   => $data['nombre_capacidad'] ?? $capacidad->nombre_capacidad,
+            'fecha_inicio'       => $data['fecha_inicio'] ?? $capacidad->fecha_inicio,
+            'fecha_fin'          => $data['fecha_fin'] ?? $capacidad->fecha_fin,
+            'creditos_teoricos'  => $data['creditos_teoricos'] ?? $capacidad->creditos_teoricos,
+            'creditos_practicos' => $data['creditos_practicos'] ?? $capacidad->creditos_practicos,
+            'horas'              => $data['horas'] ?? $capacidad->horas,
+            'status'             => $status,
+        ]);
 
         return response()->json($capacidad);
     }

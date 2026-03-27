@@ -567,6 +567,7 @@ class MatriculaController extends Controller
             ->join('especialidad_programa', 'grupo.id_especialidad', '=', 'especialidad_programa.id')
             ->join('especialidad_madre', 'especialidad_programa.id_especialidad', '=', 'especialidad_madre.id')
             ->join('modulos', 'grupo.id_modulo', '=', 'modulos.id')
+            ->join('periodo', 'grupo.id_periodo', '=', 'periodo.id')
             ->where('grupo.id', $idGrupo)
             ->select(
                 'especialidad_madre.nombre_especialidad as especialidad',
@@ -577,7 +578,8 @@ class MatriculaController extends Controller
                 'grupo.id_periodo',
                 'grupo.seccion',
                 'grupo.turno',
-                'grupo.id'
+                'grupo.id',
+                'periodo.nombre_periodo as periodo'
             )
             ->first();
 
@@ -623,6 +625,7 @@ class MatriculaController extends Controller
             'especialidad'  => $infoGrupo->especialidad ?? null,
             'id_grupo'      => $infoGrupo->id ?? null,
             'id_periodo'    => $infoGrupo->id_periodo ?? null,
+            'periodo'       => $infoGrupo->periodo ?? null,
             'modulo'        => $infoGrupo->modulo ?? null,
             'seccion'       => $infoGrupo->seccion ?? null,
             'turno'         => $infoGrupo->turno ?? null,
@@ -683,6 +686,7 @@ class MatriculaController extends Controller
             ->join('especialidad_programa', 'grupo.id_especialidad', '=', 'especialidad_programa.id')
             ->join('especialidad_madre', 'especialidad_programa.id_especialidad', '=', 'especialidad_madre.id')
             ->join('modulos', 'grupo.id_modulo', '=', 'modulos.id')
+            ->join('periodo', 'grupo.id_periodo', '=', 'periodo.id')
             ->select(
                 'especialidad_madre.nombre_especialidad as especialidad',
                 'modulos.descripcion as modulo',
@@ -690,7 +694,8 @@ class MatriculaController extends Controller
                 'grupo.fecha_inicio',
                 'grupo.fecha_fin',
                 'grupo.id_periodo',
-                'grupo.id as id_grupo'
+                'grupo.id as id_grupo',
+                'periodo.nombre_periodo as periodo'
             )
             ->get();
 
@@ -702,6 +707,7 @@ class MatriculaController extends Controller
             ->join('especialidad_programa', 'grupo.id_especialidad', '=', 'especialidad_programa.id')
             ->join('especialidad_madre', 'especialidad_programa.id_especialidad', '=', 'especialidad_madre.id')
             ->join('modulos', 'grupo.id_modulo', '=', 'modulos.id')
+            ->join('periodo', 'grupo.id_periodo', '=', 'periodo.id')
             ->where('matricula.reserva', $tipo) // solo los CON reserva
             ->select(
                 'matricula.id as id_matricula',
@@ -726,8 +732,9 @@ class MatriculaController extends Controller
                 'grupo.seccion',
                 'matricula.reserva',   // <-- agregar esto
                 'matricula.fecha_reserva',   // <-- agregar esto
-                'matricula.created_at'     // <-- agregar esto si quieres saber si ya confirmó matrícula
-            )
+                'matricula.created_at',     // <-- agregar esto si quieres saber si ya confirmó matrícula
+                'periodo.nombre_periodo as periodo',
+                )
             ->orderBy('estudiante.apellido_paterno', 'asc')
             ->get();
 

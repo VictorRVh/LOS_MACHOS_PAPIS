@@ -99,7 +99,7 @@ const validateNotes = () => {
 
   for (const note of listNotes.value) {
 
-    if (note.matriculado === 0) continue;
+    if (note.matriculado === 2) continue;
 
     const value = String(note.nota).trim();
 
@@ -212,15 +212,15 @@ const fechaLimiteFormateada = computed(() => {
           <h2 class="text-black font-bold text-2xl">Asignar Notas - Unidad Didactica</h2>
           <!-- ✅ NUEVO: Mostrar información de estado -->
           <p v-if="estadoCapacidad" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Estado: <span :class="{
+            <!-- Estado: <span :class="{
               'text-green-600 font-semibold': estadoCapacidad.status === 1,
               'text-yellow-600 font-semibold': estadoCapacidad.status === 0,
               'text-red-600 font-semibold': estadoCapacidad.status === 4,
             }">
               {{ estadoCapacidad.status_texto }}
-            </span>
-            <span v-if="puedeGuardarNotas" class="ml-2">
-              | Fecha limite: {{ fechaLimiteFormateada }}
+            </span> -->
+            <span v-if="puedeGuardarNotas">
+              Fecha limite: {{ fechaLimiteFormateada }}
             </span>
           </p>
         </div>

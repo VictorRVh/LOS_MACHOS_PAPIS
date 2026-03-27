@@ -161,7 +161,7 @@ const publicarMasivo = async (programacion) => {
     const response = await updateDocente(programacion.id);
 
     if (!response) {
-      return showToast("No se puede publicar masivamente.", "warning");
+      return showToast("No se puede publicar porque no hay grupos activos.", "warning");
     }
 
     showToast("Publicación para todos los grupos realizada correctamente", "success");

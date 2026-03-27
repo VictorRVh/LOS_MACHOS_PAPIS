@@ -61,7 +61,7 @@ class EntregaDocenteAdminController extends Controller
         $estadoInicial = EntregaDocenteAdmin::STATUS_PENDIENTE;
 
         $fechaInicio = Carbon::parse($request->fecha_inicio)->startOfDay();
-        $fechaFin    = Carbon::parse($request->fecha_fin)->endOfDay();  
+        $fechaFin    = Carbon::parse($request->fecha_fin)->endOfDay();
         $hoy         = Carbon::now()->startOfDay();
 
         if ($fechaFin->lessThan(Carbon::now())) {
@@ -123,7 +123,7 @@ class EntregaDocenteAdminController extends Controller
         $estadoInicial = EntregaDocenteAdmin::STATUS_PENDIENTE;
 
         $fechaInicio = Carbon::parse($request->fecha_inicio)->startOfDay();
-        $fechaFin    = Carbon::parse($request->fecha_fin)->endOfDay(); 
+        $fechaFin    = Carbon::parse($request->fecha_fin)->endOfDay();
         $hoy         = Carbon::now()->startOfDay();
 
         if ($fechaFin->lessThan(Carbon::now())) {
@@ -366,13 +366,25 @@ class EntregaDocenteAdminController extends Controller
         $adminEntrega = EntregaDocenteAdmin::findOrFail($id);
         $periodo = Periodo::findOrFail($adminEntrega->id_periodo);
 
-        // Obtener grupos del periodo
-        $grupos = Grupo::with('carpetaDrive')->where('id_periodo', $periodo->id)->get();
+        // 🔹 1. Verificar si existen grupos en el periodo
+        $existenGrupos = Grupo::where('id_periodo', $periodo->id)->exists();
+
+        if (!$existenGrupos) {
+            return response()->json([
+                'message' => 'No existen grupos en el periodo ' . $periodo->nombre_periodo . '. No se puede crear la programación.'
+            ], 422);
+        }
+
+        // 🔹 2. Obtener solo grupos ACTIVOS
+        $grupos = Grupo::with('carpetaDrive')
+            ->where('id_periodo', $periodo->id)
+            ->where('status', 1)
+            ->get();
 
         if ($grupos->isEmpty()) {
             return response()->json([
-                'message' => 'No se encontraron grupos para el periodo ' . $periodo->nombre_periodo,
-            ], 404);
+                'message' => 'No hay grupos activos en el periodo ' . $periodo->nombre_periodo . '. No se puede crear la programación.'
+            ], 422);
         }
 
         $driveController = new GoogleDriveController();
@@ -385,7 +397,6 @@ class EntregaDocenteAdminController extends Controller
                 'fecha_inicio' => $adminEntrega->fecha_inicio,
                 'fecha_fin' => $adminEntrega->fecha_fin,
                 'estado' => $adminEntrega->status,
-                // 'estado' => $estadoInicial,
                 'id_admin' => $adminEntrega->id,
                 'observacion' => $adminEntrega->observacion ?? '',
             ]);
@@ -411,7 +422,7 @@ class EntregaDocenteAdminController extends Controller
                         'nombre_carpeta' => $folderName
                     ]);
                 } else {
-                    \Log::error('Error creando carpeta de tipo_entrega en Drive: ' . $response->getContent());
+                    \Log::error('Error creando carpeta en Drive: ' . $response->getContent());
                 }
             }
         }
@@ -420,7 +431,7 @@ class EntregaDocenteAdminController extends Controller
         $adminEntrega->update(['mostrar' => 1]);
 
         return response()->json([
-            'message' => 'Entrega correctamente correctamente para los grupos del periodo' . $periodo->nombre_periodo,
+            'message' => 'Entrega creada correctamente para los grupos activos del periodo ' . $periodo->nombre_periodo,
             'cantidad_grupos' => $grupos->count(),
         ]);
     }
@@ -497,6 +508,7 @@ class EntregaDocenteAdminController extends Controller
             'especialidad.especialidadMadre'
         ])
             ->where('id_periodo', $idPeriodo)
+            ->where('status', 1)
             ->get();
 
         $gruposFormateados = $grupos->map(function ($grupo) {

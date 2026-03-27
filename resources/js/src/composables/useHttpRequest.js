@@ -150,7 +150,7 @@ const useHttpRequest = (path = '') => {
                 callback(null, response);
             }
 
-            if (response.status === 204) {
+            if (response.status >= 200 && response.status < 300) {
                 return true;
             }
             return false;

@@ -91,7 +91,7 @@ const applyDateFilter = async () => {
 /* -------------------- AUTO-ACTUALIZACIÓN -------------------- */
 let interval = null;
 let inactivityTimer = null;
-const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 min
+const INACTIVITY_LIMIT = 45 * 1000; // 45 s para evitar que el polling mantenga viva la sesion en la prueba
 
 const startAutoUpdate = () => {
   if (!canVerActividades.value) return

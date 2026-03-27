@@ -1,18 +1,19 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount } from 'vue';
 import Button from '../components/ui/Button.vue';
 import ChangePasswordModal from '../components/page/ChangePasswordModal.vue';
-import useHttpRequest from '../composables/useHttpRequest';
+import LoginLockoutModal from '../components/page/LoginLockoutModal.vue';
 import useValidation from '../composables/useValidation';
 import useAppRouter from '../composables/useAppRouter';
 import useUserStore from '../store/useUserStore';
+import useModalToast from '../composables/useModalToast';
 import { string, object } from 'yup';
 import axios from 'axios';
 
-const { store: login, saving: loggingIn } = useHttpRequest('/login');
 const { runYupValidation } = useValidation();
 const { pushToRoute } = useAppRouter();
 const userStore = useUserStore();
+const { showToast } = useModalToast();
 
 const formData = ref({
     usuario: null,
@@ -23,9 +24,15 @@ const showModal = ref(false);
 const lastUser = ref(null);
 const rememberMe = ref(false);
 const currentYear = new Date().getFullYear();
+const loggingIn = ref(false);
+const showLockoutModal = ref(false);
+const lockoutMessage = ref('');
+const lockoutRemainingSeconds = ref(0);
+const lockoutTimer = ref(null);
 
 const isPasswordVisible = ref(false);
 const passwordInputType = computed(() => isPasswordVisible.value ? 'text' : 'password');
+const isLoginBlocked = computed(() => lockoutRemainingSeconds.value > 0);
 
 const togglePasswordVisibility = () => {
     isPasswordVisible.value = !isPasswordVisible.value;
@@ -36,8 +43,69 @@ const schema = object().shape({
     password: string().nullable().required('El campo clave es obligatorio.'),
 });
 
+const stopLockoutTimer = () => {
+    if (lockoutTimer.value) {
+        clearInterval(lockoutTimer.value);
+        lockoutTimer.value = null;
+    }
+};
+
+const closeLockoutModal = () => {
+    if (lockoutRemainingSeconds.value > 0) return;
+    showLockoutModal.value = false;
+    lockoutMessage.value = '';
+};
+
+const openLockoutModal = (seconds, message) => {
+    lockoutRemainingSeconds.value = seconds;
+    lockoutMessage.value = message;
+    showLockoutModal.value = true;
+
+    stopLockoutTimer();
+
+    lockoutTimer.value = setInterval(() => {
+        if (lockoutRemainingSeconds.value <= 1) {
+            lockoutRemainingSeconds.value = 0;
+            stopLockoutTimer();
+            return;
+        }
+
+        lockoutRemainingSeconds.value -= 1;
+    }, 1000);
+};
+
+const handleLoginError = (error) => {
+    const errorData = error?.response?.data ?? {};
+    const errorText = errorData?.errorText ?? 'Ocurrió un error al iniciar sesión.';
+    const lockoutMatch = errorText.match(/(\d+)\s+segundos/i);
+
+    if (lockoutMatch) {
+        openLockoutModal(Number(lockoutMatch[1]), errorText);
+        return;
+    }
+
+    showToast(
+        `${errorData?.errorMessage ?? 'Error'}${errorText ? `\r\n${errorText}` : ''}`,
+        'error',
+    );
+};
+
+const executeLogin = async (payload) => {
+    loggingIn.value = true;
+
+    try {
+        const response = await axios.post('/login', payload);
+        return response.data;
+    } catch (error) {
+        handleLoginError(error);
+        throw error;
+    } finally {
+        loggingIn.value = false;
+    }
+};
+
 const onSignIn = async () => {
-    if (loggingIn.value) return;
+    if (loggingIn.value || isLoginBlocked.value) return;
     const { validated, data, errors } = await runYupValidation(schema, formData.value);
     if (!validated) {
         formErrors.value = errors;
@@ -45,7 +113,15 @@ const onSignIn = async () => {
     }
     formErrors.value = {};
     await axios.get('/sanctum/csrf-cookie');
-    const response = await login(data);
+
+    let response = null;
+
+    try {
+        response = await executeLogin(data);
+    } catch {
+        return;
+    }
+
     if (response?.requiereCambioPassword) {
         userStore.setUserIdTemporal(response.user_id);
         lastUser.value = { usuario: formData.value.usuario };
@@ -62,16 +138,28 @@ const onSignIn = async () => {
 const onPasswordChanged = async (newPassword) => {
     await axios.get('/sanctum/csrf-cookie');
     formData.value.password = newPassword;
-    const response = await login({
-        usuario: lastUser.value.usuario,
-        password: newPassword,
-    });
+
+    let response = null;
+
+    try {
+        response = await executeLogin({
+            usuario: lastUser.value.usuario,
+            password: newPassword,
+        });
+    } catch {
+        return;
+    }
+
     if (response?.user?.id) {
         userStore.setUser(response.user);
         showModal.value = false;
         await pushToRoute({ name: 'start' });
     }
 };
+
+onBeforeUnmount(() => {
+    stopLockoutTimer();
+});
 </script>
 
 <template>
@@ -234,11 +322,12 @@ const onPasswordChanged = async (newPassword) => {
                         </div>
 
                         <Button
-                            title="Ingresar"
+                            :title="isLoginBlocked ? `Espera ${lockoutRemainingSeconds}s` : 'Ingresar'"
                             type="submit"
                             class="!mt-2 !w-full !rounded-none !py-2.5 !text-[15px] !font-semibold !border !border-cetpro bg-cetpro hover:bg-cetpro-dark text-white transition-colors duration-200"
                             loading-title="Ingresando..."
                             :loading="loggingIn"
+                            :disabled="isLoginBlocked"
                         />
                     </form>
 
@@ -272,6 +361,12 @@ const onPasswordChanged = async (newPassword) => {
         </div>
 
         <ChangePasswordModal v-if="showModal" @success="onPasswordChanged" @close="showModal = false" />
+        <LoginLockoutModal
+            :show="showLockoutModal"
+            :remaining-seconds="lockoutRemainingSeconds"
+            :message="lockoutMessage"
+            @close="closeLockoutModal"
+        />
     </section>
 </template>
 

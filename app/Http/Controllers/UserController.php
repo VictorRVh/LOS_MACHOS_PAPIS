@@ -9,6 +9,7 @@ use App\Traits\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\File;
 
@@ -24,9 +25,14 @@ class UserController extends Controller
             })
             ->get();
 
-        $users = $users->map(
-            fn($user) => $this->extractPermissionsFromUser($user)
-        );
+        $users = $users->map(function ($user) {
+            $formattedUser = $this->extractPermissionsFromUser($user);
+            $formattedUser->en_linea = Cache::has(
+                $this->getUserOnlineCacheKey($user->id),
+            );
+
+            return $formattedUser;
+        });
 
         return response()->json($users);
     }
@@ -456,5 +462,10 @@ class UserController extends Controller
         } catch (\Exception $error) {
             return $this->errorResponse($error);
         }
+    }
+
+    protected function getUserOnlineCacheKey(int $userId): string
+    {
+        return "user-online:{$userId}";
     }
 }

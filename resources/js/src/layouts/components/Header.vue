@@ -96,10 +96,10 @@ onUnmounted(() => {
 onMounted(() => {
     if (can('ver-actividades-recientes')) {
         notificacionesStore.loadNotificaciones();
-        // Refresca cada 60 segundos
+        // En la prueba de sesion corta evitamos refrescos demasiado frecuentes
         pollInterval = setInterval(() => {
             notificacionesStore.loadNotificaciones();
-        }, 60_000);
+        }, 120_000);
     }
 });
 

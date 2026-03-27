@@ -52,6 +52,9 @@ const totalUsuarios = computed(() => usuarios.value.length);
 const usuariosActivos = computed(() =>
   usuarios.value.filter((user) => Number(user.status) === 1).length
 );
+const usuariosEnLinea = computed(() =>
+  usuarios.value.filter((user) => Boolean(user.en_linea)).length
+);
 const usuariosInactivos = computed(() =>
   usuarios.value.filter((user) => Number(user.status) !== 1).length
 );
@@ -92,6 +95,7 @@ const {
 });
 
 orderDirection.value = "asc";
+
 </script>
 
 <template>
@@ -104,7 +108,7 @@ orderDirection.value = "asc";
           </div>
         </template>
 
-        <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-4">
+        <div class="grid gap-1 md:grid-cols-2 xl:grid-cols-5">
             <div
               class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
             >
@@ -138,6 +142,18 @@ orderDirection.value = "asc";
               <div class="mt-1 flex items-end justify-between gap-3">
                 <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ usuariosInactivos }}</p>
                 <span class="text-[10px] text-slate-500 dark:text-slate-400">Por revisar</span>
+              </div>
+            </div>
+
+            <div
+              class="border border-slate-200 border-l-[3px] border-l-cetpro bg-white px-2.5 py-1.5 transition-colors duration-300 dark:border-slate-700 dark:border-l-cetpro-light dark:bg-slate-900"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                En línea
+              </p>
+              <div class="mt-1 flex items-end justify-between gap-3">
+                <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ usuariosEnLinea }}</p>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Actividad reciente</span>
               </div>
             </div>
 
@@ -187,6 +203,7 @@ orderDirection.value = "asc";
             <Th>Rol</Th>
             <Th>Fecha de creacion</Th>
             <Th>Estado</Th>
+            <Th>Conexion</Th>
             <Th class="text-center">Accion</Th>
           </THead>
 
@@ -209,6 +226,13 @@ orderDirection.value = "asc";
                 <TableBadge
                   :label="user.status === 1 ? 'Activo' : 'Inactivo'"
                   :variant="user.status === 1 ? 'success' : 'danger'"
+                  :dot="true"
+                />
+              </Td>
+              <Td>
+                <TableBadge
+                  :label="user.en_linea ? 'En línea' : 'Desconectado'"
+                  :variant="user.en_linea ? 'success' : 'neutral'"
                   :dot="true"
                 />
               </Td>

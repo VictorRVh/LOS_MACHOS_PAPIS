@@ -87,7 +87,7 @@ const promedioCaracteres = computed(() => {
               </p>
               <div class="mt-1 flex items-end justify-between gap-3">
                 <p class="text-[1.05rem] font-semibold leading-none text-cetpro dark:text-cetpro-light">{{ modalidadesLargas }}</p>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">RevisiÃ³n</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Revisión</span>
               </div>
             </div>
 

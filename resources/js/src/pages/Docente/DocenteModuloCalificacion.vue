@@ -91,7 +91,7 @@ const estudiantesNormalizados = computed(() => {
   });
 });
 
-// --- Tabla: bÃºsqueda y paginaciÃ³n ---
+
 const {
   pagina,
   itemsPorPagina,
@@ -187,7 +187,7 @@ const verNotasUnidad = async () => {
     return;
   }
 
-  // Mostrar fecha lÃ­mite
+  // Mostrar fech
   const fechaLimite = capacidadTerminalStore.getFechaLimite();
   if (fechaLimite) {
     const fecha = new Date(fechaLimite);
@@ -301,7 +301,7 @@ const getEstadoCapacidadClass = computed(() => {
 
         <TBody>
           <Tr v-for="(est, index) in estudiantesPaginados" :key="est.id_estudiante ?? index">
-            <!-- Si estÃ¡ retirado -->
+       
             <template v-if="est.matriculado === 2">
               <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
               <Td class="font-medium whitespace-nowrap">{{ est.apellidos_nombres }}</Td>
@@ -312,7 +312,7 @@ const getEstadoCapacidadClass = computed(() => {
               </Td>
             </template>
 
-            <!-- Si estÃ¡ activo -->
+     
             <template v-else>
               <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
               <Td class="font-medium whitespace-nowrap">{{ est.apellidos_nombres }}</Td>

@@ -58,7 +58,7 @@ const chartSeries = computed(() =>
 
 const abrirGrafico = () => {
   if (!chartSeries.value.some((s) => s.value > 0)) {
-    showToast('Primero consulta datos para mostrar el grÃ¡fico.', 'warning');
+    showToast('Primero consulta datos para mostrar el gráfico.', 'warning');
     return;
   }
   showChart.value = true;
@@ -171,12 +171,12 @@ const exportarReporte104 = async () => {
     applyRangeBorder(ws, 'A3', 'J3');
 
     ws.mergeCells('A4:J4');
-    ws.getCell('A4').value = `Tipo de gestiÃ³n: ${cetpro?.tipo_gestion || '-'} | UGEL: ${cetpro?.ugel || '-'} | DRE: ${cetpro?.dre || '-'}`;
+    ws.getCell('A4').value = `Tipo de gestión: ${cetpro?.tipo_gestion || '-'} | UGEL: ${cetpro?.ugel || '-'} | DRE: ${cetpro?.dre || '-'}`;
     aplicarBloqueInstitucional(ws.getCell('A4'));
     applyRangeBorder(ws, 'A4', 'J4');
 
     ws.mergeCells('A5:J5');
-    ws.getCell('A5').value = `UbicaciÃ³n: ${cetpro?.region || '-'} / ${cetpro?.provincia || '-'} / ${cetpro?.distrito || '-'} | DirecciÃ³n: ${cetpro?.direccion || '-'} | AÃ±o: ${cetpro?.anio || '-'}`;
+    ws.getCell('A5').value = `Ubicación: ${cetpro?.region || '-'} / ${cetpro?.provincia || '-'} / ${cetpro?.distrito || '-'} | Dirección: ${cetpro?.direccion || '-'} | Año: ${cetpro?.anio || '-'}`;
     aplicarBloqueInstitucional(ws.getCell('A5'));
     applyRangeBorder(ws, 'A5', 'J5');
 
@@ -209,11 +209,11 @@ const exportarReporte104 = async () => {
     ws.mergeCells('G7:J7');
     ws.mergeCells('K7:N7');
 
-    ws.getCell('A7').value = 'CÃ“DIGO';
-    ws.getCell('B7').value = 'DENOMINACIÃ“N DE LA CARRERA';
+    ws.getCell('A7').value = 'CÓDIGO';
+    ws.getCell('B7').value = 'DENOMINACIÓN DE LA CARRERA';
     ws.getCell('C7').value = 'TOTAL GENERAL';
-    ws.getCell('G7').value = 'CICLO AUXILIAR TÃ‰CNICO';
-    ws.getCell('K7').value = 'CICLO TÃ‰CNICO';
+    ws.getCell('G7').value = 'CICLO AUXILIAR TÉCNICO';
+    ws.getCell('K7').value = 'CICLO TÉCNICO';
 
     ['A7', 'B7'].forEach((addr) => styleHeaderGroup(ws.getCell(addr), 'FF1E293B'));
     styleHeaderGroup(ws.getCell('C7'), 'FF334155');

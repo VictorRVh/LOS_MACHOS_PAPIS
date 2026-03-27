@@ -63,7 +63,7 @@ const chartSeries = computed(() => ([
 
 const abrirGrafico = () => {
   if (!chartSeries.value.some((s) => s.value > 0)) {
-    showToast('Primero consulta datos para mostrar el grÃ¡fico.', 'warning');
+    showToast('Primero consulta datos para mostrar el gráfico.', 'warning');
     return;
   }
   showChart.value = true;
@@ -85,7 +85,7 @@ const exportarExcel101 = async () => {
     ];
 
     const { startRow, applyThinBorder } = await addInstitutionalHeader(wb, ws, {
-      reportTitle: 'REPORTE 101 - APROBADOS Y RETIRADOS SEGÃšN CICLO Y SEXO',
+      reportTitle: 'REPORTE 101 - APROBADOS Y RETIRADOS SEGÚN CICLO Y SEXO',
       fechaInicio: fechaInicio.value,
       fechaFin: fechaFin.value,
       totalCols: 8,
@@ -98,11 +98,11 @@ const exportarExcel101 = async () => {
     ws.mergeCells(`E${startRow}:F${startRow}`);
     ws.mergeCells(`G${startRow}:H${startRow}`);
 
-    ws.getCell(`A${startRow}`).value = 'SITUACIÃ“N';
+    ws.getCell(`A${startRow}`).value = 'SITUACIÓN';
     ws.getCell(`B${startRow}`).value = 'TOTAL GENERAL';
     ws.getCell(`C${startRow}`).value = 'TOTAL';
-    ws.getCell(`E${startRow}`).value = 'AUXILIAR TÃ‰CNICO';
-    ws.getCell(`G${startRow}`).value = 'TÃ‰CNICO';
+    ws.getCell(`E${startRow}`).value = 'AUXILIAR TÉCNICO';
+    ws.getCell(`G${startRow}`).value = 'TÉCNICO';
 
     const topHeaders = [`A${startRow}`, `B${startRow}`, `C${startRow}`, `E${startRow}`, `G${startRow}`];
     topHeaders.forEach((addr) => {

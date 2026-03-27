@@ -58,7 +58,7 @@ const estudiantesNormalizados = computed(() => {
   });
 });
 
-// --- Tabla con bÃºsqueda y paginaciÃ³n ---
+// --
 const {
   pagina,
   itemsPorPagina,
@@ -82,7 +82,7 @@ const getEstadoClass = (estado) =>
     ? "text-green-600 dark:text-green-400"
     : "text-red-600 dark:text-red-400";
 
-// --- ðŸ”¥ FunciÃ³n resumen: total, promedio, estado y clases ---
+// --- 
 const getResumenNotas = (est) => {
   // Notas de capacidades
   const notas = (est.capacidades || []).map((c) => {
@@ -145,7 +145,7 @@ const getResumenNotas = (est) => {
         </h3>
 
 
-        <!-- Barra de bÃºsqueda -->
+        
         <div class="flex justify-end">
           <SearchBar :totalResultados="estudiantesOrdenados.length" @search="filtrarEstudiantes" />
         </div>

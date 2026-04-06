@@ -175,20 +175,44 @@ class GoogleDriveController extends Controller
 
     public function createFolder(Request $request)
     {
-        $request->validate(['folderName' => 'required|string|max:255', 'parentFolderId' => 'required|string']);
+        $request->validate([
+            'folderName' => 'required|string|max:255',
+            'parentFolderId' => 'required|string'
+        ]);
+
         try {
+            // 📁 Crear carpeta
             $folderMeta = new \Google_Service_Drive_DriveFile([
                 'name' => $request->folderName,
                 'mimeType' => 'application/vnd.google-apps.folder',
                 'parents' => [$request->parentFolderId]
             ]);
+
             $folder = $this->driveService->files->create($folderMeta, [
                 'fields' => 'id, name',
                 'supportsAllDrives' => true
             ]);
+
+            // 🔓 PERMISO: cualquiera con el enlace = COLABORADOR
+            $permission = new \Google_Service_Drive_Permission([
+                'type' => 'anyone',
+                'role' => 'writer'
+            ]);
+
+            $this->driveService->permissions->create(
+                $folder->id,
+                $permission,
+                [
+                    'supportsAllDrives' => true
+                ]
+            );
+
             return response()->json($folder, 201);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'No se pudo crear la carpeta: ' . $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'No se pudo crear la carpeta o asignar permisos',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -311,6 +335,26 @@ class GoogleDriveController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'No se pudo subir el archivo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getFileById($fileId)
+    {
+        try {
+            $file = $this->driveService->files->get($fileId, [
+                'fields' => 'id, name, mimeType, webViewLink'
+            ]);
+
+            return response()->json([
+                'id' => $file->getId(),
+                'name' => $file->getName(),
+                'mimeType' => $file->getMimeType(),
+                'webViewLink' => $file->getWebViewLink(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage() // 👈 CAMBIA ESTO
             ], 500);
         }
     }

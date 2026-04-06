@@ -33,7 +33,7 @@ class NotaExperienciaFormativaController extends Controller
         $request->validate([
             'id_experiencia'  => 'required|uuid|exists:experiencia_formativa,id',
             'tipo_practicas'  => 'required|integer|in:1,2,3',
-            'file'            => 'nullable|file', // ✅ CAMBIO AQUÍ
+            'file'            => 'nullable|file',
             'nota'            => 'required|numeric|min:0|max:20',
             'parentFolderId'  => 'required|string',
             'id_estudiante'   => 'required|uuid|exists:estudiante,id',
@@ -42,48 +42,64 @@ class NotaExperienciaFormativaController extends Controller
         ]);
 
         try {
-            $fileData = null;
 
-            // ✅ SOLO sube si hay archivo
+            // 🔎 Buscar nota existente
+            $notaExistente = NotaExperienciaFormativa::where([
+                'id_experiencia' => $request->id_experiencia,
+                'id_estudiante'  => $request->id_estudiante,
+            ])->first();
+
+            $fileId = $notaExistente?->documento;
+
+            // 📁 Si llega nuevo archivo → reemplazar
             if ($request->hasFile('file')) {
-                $driveController = new GoogleDriveController();
-                $response = $driveController->uploadFile($request);
 
-                if ($response->status() !== 201) {
-                    return response()->json([
-                        'error' => 'No se pudo subir el archivo al Drive.'
-                    ], 500);
+                $drive = new GoogleDriveController();
+
+                // 🧹 Eliminar archivo anterior si existe
+                if ($fileId) {
+                    $drive->deleteFile($fileId);
                 }
 
-                $fileData = $response->getData();
+                // ⬆️ Subir nuevo archivo
+                $response = $drive->uploadFile($request);
+
+                if ($response->status() !== 201) {
+                    return response()->json(['error' => 'Error al subir archivo'], 500);
+                }
+
+                $fileId = $response->getData()->id;
             }
 
-            // ✅ Guardar con o sin archivo
-            $nota = NotaExperienciaFormativa::create([
-                'id_experiencia' => $request->id_experiencia,
-                'tipo_practicas' => $request->tipo_practicas,
-                'documento'      => $fileData->id ?? null,
-                'nota'           => $request->nota,
-                'id_estudiante'  => $request->id_estudiante,
-                'id_grupo'       => $request->id_grupo,
-                'observacion'    => $request->input('observacion', ''),
-                'status'         => 1,
-            ]);
+            // 💾 Crear o actualizar
+            $nota = NotaExperienciaFormativa::updateOrCreate(
+                [
+                    'id_experiencia' => $request->id_experiencia,
+                    'id_estudiante'  => $request->id_estudiante,
+                ],
+                [
+                    'tipo_practicas' => $request->tipo_practicas,
+                    'nota'           => $request->nota,
+                    'documento'      => $fileId,
+                    'id_grupo'       => $request->id_grupo,
+                    'observacion'    => $request->input('observacion', ''),
+                    'status'         => 1,
+                ]
+            );
 
             return response()->json([
-                'message' => 'Nota registrada correctamente.',
-                'data' => $nota,
-                'drive_file' => $fileData ? [
-                    'id' => $fileData->id,
-                    'name' => $fileData->name ?? 'Archivo',
-                ] : null,
-            ], 201);
+                'message' => $notaExistente
+                    ? 'Nota actualizada correctamente.'
+                    : 'Nota registrada correctamente.',
+                'data' => $nota
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error al guardar la nota: ' . $e->getMessage()
             ], 500);
         }
     }
+
     // PATCH /api/nota_experiencia_formativa/{id}
     public function update(Request $request, $id)
     {

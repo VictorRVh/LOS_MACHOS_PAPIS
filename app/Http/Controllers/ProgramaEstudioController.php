@@ -182,6 +182,6 @@ class ProgramaEstudioController extends Controller
         $programa->save();
         $this->registrarActividad("Eliminó el programa '{$programa->numero_rd}' del '{$programa->año}'", "Eliminado");
 
-        return response()->json(['message' => 'Programa eliminado correctamente'], 200);
+        return response()->json(['message' => 'Programa eliminado correctamente'], 204);
     }
 }

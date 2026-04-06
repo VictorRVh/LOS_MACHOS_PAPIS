@@ -144,7 +144,7 @@ const onSubmit = async () => {
     id_grupo: props.idgroup,
     notas: listNotes.value.map((n) => ({
       id_estudiante: n.id_estudiante,
-      nota: String(n.nota)
+      nota: n.matriculado === 2 || n.nota === "" ? null : String(n.nota)
     })),
   };
 

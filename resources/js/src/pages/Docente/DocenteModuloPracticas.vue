@@ -30,6 +30,7 @@ const props = defineProps({
 const { showToast } = useModalToast();
 const { saving: isSavingExp, store: guardarExperienciaFormativa, update: actualizarExperienciaFormativa } = useHttpRequest('/experiencia_formativa');
 const { saving: isSaving, store: guardarNotaExperienciaFormativa } = useHttpRequest('/nota_experiencia_formativa');
+// const { show: datosArchivo, loading: loadingFiles } = useHttpRequest("/drive/fileName");
 
 const experienciaFormativaStore = useExperienciaFormativaStore();
 
@@ -39,7 +40,9 @@ const selectedAlumno = ref(null);
 const saving = ref(false);
 const idCarpetaGrupo = ref([])
 const idExperienciaFormativa = ref(null);
-const idPracticasDrive = ref(null)
+const idPracticasDrive = ref(null);
+
+const modoEdicionNotas = ref(false)
 
 const nuevaExperiencia = ref({
     fecha_inicio: "",
@@ -92,7 +95,7 @@ onMounted(async () => {
             alumnos.value = est.map(a => ({
                 ...a,
                 lugar: a.lugar || null,
-                documento: a.documento || null,
+                documento: a.documento_url || null,
             }));
         } else {
             console.warn("No se recibió información del grupo.");
@@ -116,9 +119,20 @@ const formData = ref({
     // observacion: ""
 });
 
-function abrirModal(alumno) {
+async function abrirModal(alumno) {
+
+    // const response = await datosArchivo(alumno.documento_id);
+
+    // console.log('rkeofdkeofde', response)
+
     selectedAlumno.value = alumno;
-    formData.value = { lugar: "", documento: null };
+
+    formData.value = {
+        tipo_practicas: alumno.tipo_practicas || null,
+        nota: alumno.nota ?? '',
+        documento: alumno.documento_url,
+    };
+
     showModal.value = true;
 }
 
@@ -265,6 +279,12 @@ const onNotaInput = (event, idx) => {
             </div>
 
 
+            <div class="flex justify-end mb-3">
+                <Button :title="modoEdicionNotas ? 'Finalizar edición' : 'Editar notas'"
+                    :color="modoEdicionNotas ? 'secondary' : 'primary'" size="sm"
+                    @click="modoEdicionNotas = !modoEdicionNotas" />
+            </div>
+
             <Table>
                 <THead>
                     <Th>N°</Th>
@@ -304,16 +324,14 @@ const onNotaInput = (event, idx) => {
                                 <span v-else class="text-gray-400">—</span>
                             </Td>
                             <Td class="text-center">
-                                <!-- Si NO hay experiencia => botón deshabilitado -->
-                                <Button v-if="!existeExperiencia" title="Calificar" color="primary" size="sm"
+                                <Button v-if="!existeExperiencia" title="Calificar" size="sm"
                                     @click="showToast('Debe registrar una experiencia formativa primero.', 'warning')" />
 
-                                <Button v-else-if="alumno.lugar !== null || alumno.documento_id !== null"
+                                <Button v-else-if="(alumno.nota || alumno.documento_id) && !modoEdicionNotas"
                                     title="Ya calificado" color="secondary" size="sm" disabled />
 
-                                <!-- Si SÍ hay experiencia => botón normal -->
-                                <Button v-else title="Calificar" color="primary" size="sm"
-                                    @click="abrirModal(alumno)" />
+                                <Button v-else :title="alumno.nota ? 'Editar nota' : 'Calificar'" color="primary"
+                                    size="sm" @click="abrirModal(alumno)" />
                             </Td>
                         </template>
 
@@ -353,17 +371,16 @@ const onNotaInput = (event, idx) => {
                     </div>
 
                     <FormInputFile v-model="formData.documento" label="Documento (Informe o Evidencia)" />
-                    <!-- <label for="observacion"
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observación
-                        General</label>
-                    <textarea id="observacion" v-model="formData.observacion" rows="2"
-                        class="w-full text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea> -->
 
                     <div v-if="formData.documento" class="mt-3">
                         <div
                             class="flex items-center justify-between text-sm p-2 bg-gray-100 dark:bg-gray-700 rounded-md">
                             <div class="flex items-center gap-2 truncate">
-                                <span class="truncate">{{ formData.documento.name }}</span>
+                                <PaperClipIcon class="h-4 w-4" />
+                                <a :href="formData.documento" target="_blank"
+                                    class="text-blue-600 dark:text-blue-400 hover:underline truncate">
+                                    Archivo Adjunto
+                                </a>
                             </div>
                             <button @click="removeFile" type="button" class="text-red-500 hover:text-red-700">
                                 Quitar

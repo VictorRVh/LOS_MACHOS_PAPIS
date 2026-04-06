@@ -53,6 +53,7 @@ const onDelete = async (programa) => {
     if (!confirmed) return;
     try {
       const isDeleted = await deletePrograma(programa.id);
+      console.log('eliminado', isDeleted)
       if (isDeleted) {
         showToast("Programa de estudio eliminado exitosamente.");
         programaStore.loadProgramas();

@@ -235,6 +235,21 @@ class NotaCapacidadTerminalController extends Controller
             DB::beginTransaction();
 
             foreach ($request->notas as $nota) {
+
+                // 🔴 Si no tiene nota (retirado o vacío)
+                if (is_null($nota['nota'])) {
+
+                    // (Opcional pero recomendado) eliminar si ya existía
+                    NotaCapacidadTerminal::where([
+                        'id_grupo' => $request->id_grupo,
+                        'id_capacidad' => $request->id_capacidad_terminal,
+                        'id_estudiante' => $nota['id_estudiante'],
+                    ])->delete();
+
+                    continue; // 👈 importante: saltar al siguiente
+                }
+
+                // ✅ Solo guarda si SÍ tiene nota
                 NotaCapacidadTerminal::updateOrCreate(
                     [
                         'id_grupo' => $request->id_grupo,
@@ -384,7 +399,7 @@ class NotaCapacidadTerminalController extends Controller
                 'fecha_fin' => $capacidad->fecha_fin,
                 'fecha_limite_subida' => $capacidad->fecha_limite_subida->format('Y-m-d H:i:s'),
                 'puede_subir_notas' => $capacidad->puedeSubirNotas(),
-                'estado_visual'=> $capacidad->estado_visual,
+                'estado_visual' => $capacidad->estado_visual,
                 'status' => $capacidad->status,
                 'status_texto' => $capacidad->status_texto,
                 'mensaje' => $capacidad->mensaje_subida_notas,

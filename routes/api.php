@@ -1353,6 +1353,7 @@ Route::middleware('auth:sanctum')->prefix('drive')->group(function () {
     Route::patch('/file/{fileId}/move', [GoogleDriveController::class, 'moveFile']);
     Route::delete('/file/{fileId}', [GoogleDriveController::class, 'deleteFile']);
     Route::get('/file/{id}/download', [GoogleDriveController::class, 'downloadFile']);
+    Route::get('/fileName/{fileId}', [GoogleDriveController::class, 'getFileById']);
 });
 
 Route::post('/carpetas-grupo/crear/{id_grupo}', [CarpetasGrupoDriveController::class, 'crearCarpetaGrupo']);

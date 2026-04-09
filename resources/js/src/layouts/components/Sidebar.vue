@@ -25,7 +25,7 @@ const navLinks = [
     { name: 'Matricula', routeName: 'matricula.index', icon: IdentificationIcon, permissions: ["todo-acceso-matrículas", "icono-matrículas"] },
     { name: 'Grupo', routeName: 'grupo', icon: TagIcon, permissions: ["todo-acceso-grupos", "icono-grupos"] },
     { name: 'Mis Módulos', routeName: 'moduloAsignado', icon: AcademicCapIcon, permissions: ["ver-mis-módulos", "ver-estudiantes-asignados"] },
-    { name: 'Comisión', routeName: 'comsion.docente', icon: AcademicCapIcon, permissions: ["ver-comsion-docente"] },
+    { name: 'Comisión', routeName: 'comsion.docente', icon: AcademicCapIcon, permissions: ["ver-comisión-docente"] },
     { name: 'Egresados', routeName: 'egresados', icon: AcademicCapIcon, permissions: ["ver-grupos"] },
     { name: 'Ingresos', routeName: 'ingresos', icon: CurrencyDollarIcon, permissions: ["ver-grupos"] },
     { name: 'Ajustes', routeName: 'cetpro.index', icon: Cog8ToothIcon, permissions: ["ver-información-cetpro"] },
@@ -53,7 +53,7 @@ const checkVisibility = (link) => {
                     v-if="!layoutStore.isSidebarCollapsed"
                     class="flex h-11 w-9 items-center justify-center rounded-[50%] bg-white dark:h-auto dark:w-auto dark:bg-transparent"
                 >
-                    <img src="/img/cetproLOGOO.png" alt="CETPRO PUNO" class="h-12 w-12 shrink-0 object-contain">
+                    <img src="/img/CETPRO_Image.png" alt="CETPRO PUNO" class="h-12 w-12 shrink-0 object-contain">
                 </RouterLink>
                 <button @click="layoutStore.toggleSidebar"
                     class="pl-2 rounded-full text-cetpro-text/70 hover:bg-cetpro hover:text-white dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
@@ -98,7 +98,7 @@ const checkVisibility = (link) => {
                     :to="{ name: 'start' }"
                     class="flex h-14 w-14 items-center justify-center rounded-[4px] bg-white dark:h-auto dark:w-auto dark:bg-transparent"
                 >
-                    <img src="/img/cetproLOGOO.png" alt="CETPRO Puno" class="h-12 w-12 object-contain">
+                    <img src="/img/CETPRO_Image.png" alt="CETPRO Puno" class="h-12 w-12 object-contain">
                 </RouterLink>
                 <button @click="layoutStore.toggleSidebarMobile"
                     class="p-2 text-cetpro-text/70 rounded-full hover:bg-cetpro hover:text-white dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">

@@ -71,6 +71,15 @@ class NominaMatriculasExport
         $sheet->mergeCells('M10:O10');
         $sheet->mergeCells('M14:O14');
 
+        // Año actual dinámico
+        $anioActual = date('Y');
+
+        // Texto del título
+        $titulo = "REGISTRO DE MATRÍCULA MODULAR {$anioActual}";
+
+        // Asignar a la celda B1 (ajusta si tu plantilla usa otra celda)
+        $sheet->setCellValue('B1', $titulo);
+
         // Asignar valor
         $sheet->setCellValue('F10', $especialidad);
         $sheet->setCellValue('F11', $modulo);

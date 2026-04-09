@@ -62,7 +62,7 @@ export async function generateCertificadoModular(data, codigo) {
 
   // Rutas de imágenes
   const logoMin = "/img/LogoMinisterio.png";
-  const logoCetpro = "/img/CetproLOGOO.png";
+  const logoCetpro = "/img/CETPRO_Image.png";
 
   const estudiante = (data?.apellidos_nombres || "").toUpperCase();
   const modulo = (data?.modulo || "").toUpperCase();

@@ -227,6 +227,12 @@ class PermissionTableSeeder extends Seeder
             'editar-actividades-recientes',
             'eliminar-actividades-recientes',
 
+            'todo-acceso-egresados',
+            'ver-egresados',
+            'crear-egresados',
+            'editar-egresados',
+            'eliminar-egresados',
+
             'editar-perfil',
             'editar-password'
 

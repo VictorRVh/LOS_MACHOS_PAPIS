@@ -1135,10 +1135,10 @@ LaTeX Font Info:    Font shape `T1/phv/b/n' will be
 (Font)              scaled to size 16.24324pt on input line 106.
 LaTeX Font Info:    Font shape `T1/zpltlf/m/n' will be
 (Font)              scaled to size 12.0pt on input line 108.
-<../public/img/cetproLOGOO.png, id=100, 442.65375pt x 553.31718pt>
-File: ../public/img/cetproLOGOO.png Graphic file (type png)
-<use ../public/img/cetproLOGOO.png>
-Package pdftex.def Info: ../public/img/cetproLOGOO.png  used on input line 111.
+<../public/img/CETPRO_Image.png, id=100, 442.65375pt x 553.31718pt>
+File: ../public/img/CETPRO_Image.png Graphic file (type png)
+<use ../public/img/CETPRO_Image.png>
+Package pdftex.def Info: ../public/img/CETPRO_Image.png  used on input line 111.
 
 (pdftex.def)             Requested size: 78.75897pt x 98.44455pt.
 LaTeX Font Info:    Font shape `T1/zpltlf/b/n' will be
@@ -1149,7 +1149,7 @@ LaTeX Font Info:    Font shape `T1/zpltlf/b/n' will be
 {C:/Users/willi/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/will
 i/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}{C:/Users/willi/App
 Data/Local/Programs/MiKTeX/fonts/enc/dvips/newtx/ntx-ec-tlf.enc} <../public/img
-/cetprologoHorizontal.png> <../public/img/cetproLOGOO.png>]
+/cetprologoHorizontal.png> <../public/img/CETPRO_Image.png>]
 Package hyperref Info: Option `pageanchor' set `true' on input line 125.
 LaTeX Font Info:    Font shape `T1/zpltlf/m/n' will be
 (Font)              scaled to size 14.4pt on input line 129.

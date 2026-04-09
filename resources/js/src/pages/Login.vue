@@ -180,7 +180,7 @@ onBeforeUnmount(() => {
             <div class="relative z-10 mx-auto flex w-full max-w-[42rem] flex-col gap-8">
                 <div class="flex max-w-[30rem] flex-col gap-5">
                     <div class="flex h-20 w-20 items-center justify-center border border-white/65 bg-white/80 p-2 backdrop-blur-sm shadow-[0_10px_24px_rgba(15,23,42,0.10)] opacity-0 animate-fade-in-up">
-                        <img src="/img/cetproLOGOO.png" alt="Logo CETPRO Puno" class="h-full w-full object-contain" />
+                        <img src="/img/CETPRO_Image.png" alt="Logo CETPRO Puno" class="h-full w-full object-contain" />
                     </div>
 
                     <div class="space-y-5">
@@ -233,7 +233,7 @@ onBeforeUnmount(() => {
                 <div class="mb-3 border border-slate-200 bg-white px-3 py-3 shadow-sm opacity-0 animate-fade-in-up lg:hidden">
                     <div class="flex items-center gap-4">
                         <div class="flex h-14 w-14 shrink-0 items-center justify-center border border-slate-200 bg-white p-1.5">
-                            <img src="/img/cetproLOGOO.png" alt="Logo CETPRO Puno" class="h-full w-full object-contain" />
+                            <img src="/img/CETPRO_Image.png" alt="Logo CETPRO Puno" class="h-full w-full object-contain" />
                         </div>
                         <div>
                             <p class="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">CETPRO Puno</p>

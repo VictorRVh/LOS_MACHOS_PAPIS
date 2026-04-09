@@ -25,7 +25,7 @@ export function generatePdfReservaMatricula(data) {
     const drawHeader = () => {
         // --- LOGO CETPRO (IZQUIERDA) ---
         try {
-            doc.addImage("/img/CetproLOGOO.png", "PNG", margin, 12, 18, 20, undefined, 'FAST');
+            doc.addImage("/img/CETPRO_Image.png", "PNG", margin, 12, 18, 20, undefined, 'FAST');
         } catch (e) {}
 
         // --- BLOQUE CENTRAL (TEXTO TÉCNICO) ---

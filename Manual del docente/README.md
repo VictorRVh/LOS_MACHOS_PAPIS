@@ -8,7 +8,7 @@ Contenido de la carpeta:
 Activos usados por el manual:
 
 - `../public/img/cetprologoHorizontal.png`
-- `../public/img/cetproLOGOO.png`
+- `../public/img/CETPRO_Image.png`
 
 Compilaci\'on sugerida:
 

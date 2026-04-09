@@ -1038,7 +1038,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('index_comision_docente/{id}', [
         \App\Http\Controllers\ComisionesController::class,
         'comision_docente',
-    ])->middleware('permission:ver-comsion-docente');
+    ])->middleware('permission:ver-comisión-docente');
 
     Route::post('comisiones', [
         \App\Http\Controllers\ComisionesController::class,

@@ -122,7 +122,7 @@ class ReporteCertificadosPeriodoExport
             ],
         ]);
 
-        $logoPath = public_path('img/cetproLOGOO.png');
+        $logoPath = public_path('img/CETPRO_Image.png');
         if (is_file($logoPath)) {
             $drawing = new Drawing();
             $drawing->setPath($logoPath);

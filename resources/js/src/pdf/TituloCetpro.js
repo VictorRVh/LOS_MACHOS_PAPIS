@@ -73,7 +73,7 @@ export async function generateTituloCetpro(id_egresado, codigoInstitucional = nu
     // 1. LOGOS (Reducidos y centrados)
     try {
       // Logo CETPRO reducido
-      doc.addImage("/img/CetproLOGOO.png", "PNG", margin, 15, 18, 20, undefined, "FAST");
+      doc.addImage("/img/CETPRO_Image.png", "PNG", margin, 15, 18, 20, undefined, "FAST");
     } catch (e) { }
 
     try {
@@ -184,7 +184,7 @@ export async function generateTituloCetpro(id_egresado, codigoInstitucional = nu
 
     // Logo dentro del recuadro (Reducido y centrado)
     try {
-      doc.addImage("/img/CetproLOGOO.png", "PNG", boxX + (boxW / 2) - 13, boxY + 8, 24, 26, undefined, "FAST");
+      doc.addImage("/img/CETPRO_Image.png", "PNG", boxX + (boxW / 2) - 13, boxY + 8, 24, 26, undefined, "FAST");
     } catch (e) { }
 
     let ry = boxY + 55;

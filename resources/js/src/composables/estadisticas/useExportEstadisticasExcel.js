@@ -114,7 +114,7 @@ const addInstitutionalHeader = async (workbook, ws, opts) => {
   ws.getRow(4).height = 22;
   ws.getRow(5).height = 22;
 
-  const logoBase64 = await fetchImageBase64("/img/cetproLOGOO.png");
+  const logoBase64 = await fetchImageBase64("/img/CETPRO_Image.png");
   if (logoBase64) {
     const logoId = workbook.addImage({ base64: logoBase64, extension: "png" });
     const logoStartCol = leftCols + (logoCols === 1 ? 0.1 : 0.45);

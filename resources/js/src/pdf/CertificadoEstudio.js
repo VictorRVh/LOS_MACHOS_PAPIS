@@ -38,7 +38,7 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
 
     // --- ENCABEZADO: LOGOS Y FOTO ---
     try { doc.addImage("/img/LogoMinisterio.png", "PNG", margin, 10, 49, 12, undefined, 'FAST'); } catch (e) {}
-    try { doc.addImage("/img/CetproLOGOO.png", "PNG", (pageW / 2) - 10, 8, 18, 20, undefined, 'FAST'); } catch (e) {}
+    try { doc.addImage("/img/CETPRO_Image.png", "PNG", (pageW / 2) - 10, 8, 18, 20, undefined, 'FAST'); } catch (e) {}
 
     doc.setLineWidth(0.2);
     doc.rect(rightEdge - 25, 10, 25, 30); 
@@ -137,7 +137,7 @@ export async function generateCertificadoEstudio(data, codigo, meta = {}) {
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text(`Lugar y fecha: ${formatearFechaActual(datosCetpro?.lugar)}`, rightEdge, finalY, { align: "right" });
+    doc.text(`Lugar y fecha: ${formatearFechaActual(datosCetpro?.distrito)}`, rightEdge, finalY, { align: "right" });
 
     const signY = finalY + 30;
     doc.setLineWidth(0.5);

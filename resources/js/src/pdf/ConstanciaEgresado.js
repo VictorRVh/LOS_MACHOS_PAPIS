@@ -156,7 +156,7 @@ export async function generateConstanciaEgresado(id_egresado, codigo = "") {
 
     // LOGOS
     try {
-      doc.addImage("/img/CetproLOGOO.png", "PNG", width - mR - 22, 14, 18,22);
+      doc.addImage("/img/CETPRO_Image.png", "PNG", width - mR - 22, 14, 18,22);
     } catch { }
 
     try {

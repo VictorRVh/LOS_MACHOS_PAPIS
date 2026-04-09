@@ -36,7 +36,7 @@ export async function generateConstanciaEstudiante(data) {
 
     const logoMin = "/img/LogoMinisterio.png";
     //const logoCetpro = "/img/cetprologoHorizontal.png";
-    const logoCetpro = "/img/CetproLOGOO.png";
+    const logoCetpro = "/img/CETPRO_Image.png";
 
     // --- 1. ENCABEZADO (ALINEADO Y REDUCIDO) ---
     // Definimos una Y base para que logos y texto estén en la misma fila

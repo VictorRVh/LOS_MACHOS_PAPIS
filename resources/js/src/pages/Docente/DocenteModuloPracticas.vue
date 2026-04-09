@@ -43,6 +43,7 @@ const idExperienciaFormativa = ref(null);
 const idPracticasDrive = ref(null);
 
 const modoEdicionNotas = ref(false)
+const nombreDocumento = ref(null);
 
 const nuevaExperiencia = ref({
     fecha_inicio: "",
@@ -56,6 +57,10 @@ const modalidadPracticas = [
     { id: 2, label: 'PPP EXTERNAS' },
     { id: 3, label: 'NO HIZO PRACTICAS' }
 ];
+
+const esEdicion = computed(() => {
+    return !!selectedAlumno.value?.nota;
+});
 
 onMounted(async () => {
     try {
@@ -95,6 +100,7 @@ onMounted(async () => {
             alumnos.value = est.map(a => ({
                 ...a,
                 lugar: a.lugar || null,
+                documento_id: a.documento_id || null,
                 documento: a.documento_url || null,
             }));
         } else {
@@ -115,6 +121,7 @@ const existeExperiencia = computed(() => {
 const formData = ref({
     tipo_practicas: null,
     documento: null,
+    documento_id: null,
     nota: 0,
     // observacion: ""
 });
@@ -130,14 +137,20 @@ async function abrirModal(alumno) {
     formData.value = {
         tipo_practicas: alumno.tipo_practicas || null,
         nota: alumno.nota ?? '',
-        documento: alumno.documento_url,
+        documento: null,
+        documento_id: alumno.documento_id || null,
     };
+
+    nombreDocumento.value = alumno.documento_id
+        ? 'Documento adjunto'
+        : null;
 
     showModal.value = true;
 }
 
 function removeFile() {
     formData.value.documento = null;
+    nombreDocumento.value = null;
 }
 
 async function guardarExperiencia() {
@@ -221,6 +234,13 @@ async function onSubmit() {
         // form.append("observacion", observacion.value || "");
         form.append("parentFolderId", idPracticasDrive.value);
 
+        if (formData.value.documento instanceof File) {
+            form.append("file", formData.value.documento);
+        }
+        if (esEdicion.value && !formData.value.documento && formData.value.documento_id) {
+            form.append("documento_id", formData.value.documento_id);
+        }
+
         await guardarNotaExperienciaFormativa(form);
 
         await experienciaFormativaStore.loadGetExperienciaFormativaByGrupo(props.id);
@@ -230,7 +250,8 @@ async function onSubmit() {
         alumnos.value = est.map(a => ({
             ...a,
             lugar: a.lugar || "",
-            documento: a.documento || "",
+            documento_id: a.documento_id || null,
+            documento_url: a.documento_url || null,
         }));
 
         showToast("Datos guardados correctamente.", "success");
@@ -251,6 +272,22 @@ const onNotaInput = (event, idx) => {
 
     listNotes.value[idx].nota = value;
 };
+
+function onFileChange(file) {
+    if (file instanceof File) {
+        formData.value.documento = file;
+        formData.value.documento_id = null;
+        nombreDocumento.value = file.name;
+    }
+}
+
+const filePreviewUrl = computed(() => {
+    if (formData.value.documento instanceof File) {
+        return URL.createObjectURL(formData.value.documento);
+    }
+    return selectedAlumno.value?.documento_url || null;
+});
+
 </script>
 
 <template>
@@ -370,18 +407,24 @@ const onNotaInput = (event, idx) => {
                         ]" @input="onNotaInput" required />
                     </div>
 
-                    <FormInputFile v-model="formData.documento" label="Documento (Informe o Evidencia)" />
+                    <FormInputFile v-model="formData.documento" label="Documento (Informe o Evidencia)"
+                        @change="onFileChange" />
 
-                    <div v-if="formData.documento" class="mt-3">
-                        <div
-                            class="flex items-center justify-between text-sm p-2 bg-gray-100 dark:bg-gray-700 rounded-md">
+                    <div v-if="nombreDocumento" class="mt-2 text-sm text-gray-600 flex items-center gap-2">
+                        <PaperClipIcon class="w-4 h-4" />
+                        <span class="truncate">{{ nombreDocumento }}</span>
+                    </div>
+
+                    <div v-if="filePreviewUrl" class="mt-3">
+                        <div class="flex items-center justify-between text-sm p-2 bg-gray-100 rounded-md">
                             <div class="flex items-center gap-2 truncate">
                                 <PaperClipIcon class="h-4 w-4" />
-                                <a :href="formData.documento" target="_blank"
-                                    class="text-blue-600 dark:text-blue-400 hover:underline truncate">
-                                    Archivo Adjunto
+                                <a :href="filePreviewUrl" target="_blank"
+                                    class="text-blue-600 hover:underline truncate">
+                                    {{ nombreDocumento || 'Archivo adjunto' }}
                                 </a>
                             </div>
+
                             <button @click="removeFile" type="button" class="text-red-500 hover:text-red-700">
                                 Quitar
                             </button>

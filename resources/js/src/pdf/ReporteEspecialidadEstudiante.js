@@ -53,10 +53,10 @@ function drawHeader(doc, cetpro, pageW, margin) {
   const rightLogoW = 22;
 
   try {
-    doc.addImage("/img/cetproLOGOO.png", "PNG", margin + 4.1, 11.1, 13.8, 13.8, undefined, "FAST");
+    doc.addImage("/img/CETPRO_Image.png", "PNG", margin + 4.1, 11.1, 13.8, 13.8, undefined, "FAST");
   } catch (e) {
     try {
-      doc.addImage("/img/CetproLOGOO.png", "PNG", margin + 4.1, 11.1, 13.8, 13.8, undefined, "FAST");
+      doc.addImage("/img/CETPRO_Image.png", "PNG", margin + 4.1, 11.1, 13.8, 13.8, undefined, "FAST");
     } catch (err) {}
   }
 
@@ -64,7 +64,7 @@ function drawHeader(doc, cetpro, pageW, margin) {
     doc.addImage("/img/insignia.png", "PNG", pageW - margin - 17.3, 11.3, 12.8, 12.8, undefined, "FAST");
   } catch (e) {
     try {
-      doc.addImage("/img/CetproLOGOO.png", "PNG", pageW - margin - 17.3, 11.3, 12.8, 12.8, undefined, "FAST");
+      doc.addImage("/img/CETPRO_Image.png", "PNG", pageW - margin - 17.3, 11.3, 12.8, 12.8, undefined, "FAST");
     } catch (err) {}
   }
 

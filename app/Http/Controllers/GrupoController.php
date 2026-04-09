@@ -357,7 +357,7 @@ class GrupoController extends Controller
         // -----------------------------
         // 2️⃣ SECCIONES DISPONIBLES
         // -----------------------------
-        $todasSecciones = ['A', 'B', 'C', 'D', 'E', 'F'];
+        $todasSecciones = ['U','A', 'B', 'C', 'D', 'E', 'F'];
 
         $seccionesOcupadas = Grupo::where('id_modulo', $idModulo)
             ->where('id_periodo', $idPeriodo)

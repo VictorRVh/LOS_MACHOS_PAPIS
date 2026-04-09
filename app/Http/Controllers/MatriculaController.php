@@ -560,7 +560,8 @@ class MatriculaController extends Controller
 
     public function getMatriculadosPorGrupoExtendido($idGrupo)
     {
-        $rol = strtoupper(auth()->user()->rol); // convertir a MAYÚSCULA
+        $rol = auth()->user()->roles->first()?->name;
+        $rol = strtoupper($rol);
 
         // Datos del grupo
         $infoGrupo = DB::table('grupo')
@@ -632,7 +633,8 @@ class MatriculaController extends Controller
             'duracion'      => $infoGrupo->duracion ?? null,
             'fecha_inicio'  => $infoGrupo->fecha_inicio ?? null,
             'fecha_fin'     => $infoGrupo->fecha_fin ?? null,
-            'estudiantes'   => $estudiantes
+            'estudiantes'   => $estudiantes,
+            "rol" => $rol
         ]);
     }
 
@@ -734,7 +736,7 @@ class MatriculaController extends Controller
                 'matricula.fecha_reserva',   // <-- agregar esto
                 'matricula.created_at',     // <-- agregar esto si quieres saber si ya confirmó matrícula
                 'periodo.nombre_periodo as periodo',
-                )
+            )
             ->orderBy('estudiante.apellido_paterno', 'asc')
             ->get();
 

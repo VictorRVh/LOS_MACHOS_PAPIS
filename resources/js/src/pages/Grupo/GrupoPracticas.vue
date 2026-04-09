@@ -20,6 +20,9 @@ import { DocumentTextIcon } from '@heroicons/vue/24/outline'
 import BaseSelectCiclo from '../../components/ui/BaseSelectCiclo.vue';
 import FormLabelError from '../../components/ui/FormLabelError.vue';
 
+import SearchBar from "../../components/head_table/headSearch.vue";
+import useTableData from "../../composables/tabla/useTableData";
+
 const props = defineProps({
     id: {
         type: String,
@@ -40,6 +43,7 @@ const saving = ref(false);
 const idCarpetaGrupo = ref([])
 const idExperienciaFormativa = ref(null);
 const idPracticasDrive = ref(null)
+
 
 const nuevaExperiencia = ref({
     fecha_inicio: "",
@@ -209,55 +213,79 @@ async function onSubmit() {
     }
 }
 
+
+const {
+    pagina,
+    itemsPorPagina,
+    paginados: alumnosPaginados,
+    totalPaginas,
+    ordenados: alumnosOrdenados,
+    filtrar: filtrarAlumnos,
+} = useTableData(alumnos, {
+    defaultOrderBy: "apellidos_nombres",
+    searchFields: ["apellidos_nombres", "dni"],
+});
+
+
 </script>
 
 <template>
     <AuthorizationFallback :permissions="['ver-grupos']">
-        <div class="w-full space-y-4">
-
-            <div class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+        <div class="w-full space-y-2">
+            <div class="p-2 border rounded-lg bg-gray-50 dark:bg-gray-800">
                 <h3 class="font-bold text-lg text-cetpro mb-3">Registrar Nueva Experiencia Formativa</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <FormInput type="date" v-model="nuevaExperiencia.fecha_inicio" label="Fecha Inicio" required disabled />
+                    <FormInput type="date" v-model="nuevaExperiencia.fecha_inicio" label="Fecha Inicio" required
+                        disabled />
                     <FormInput type="date" v-model="nuevaExperiencia.fecha_fin" label="Fecha Fin" required disabled />
                     <FormInput v-model="nuevaExperiencia.horas" label="Horas" type="number" min="1"
-                        placeholder="Ej. 120" required disabled/>
-                    
+                        placeholder="Ej. 120" required disabled />
+                        <FormInput v-model="nuevaExperiencia.creditos" label="Horas" type="number" min="1"
+                        placeholder="Ej. 120" required disabled />
+
                 </div>
             </div>
-            <Table>
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300">
+                    Lista de estudiantes
+                </h3>
+
+                <SearchBar :totalResultados="alumnosOrdenados.length" @search="filtrarAlumnos" />
+            </div>
+            <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
                 <THead>
                     <Th>N°</Th>
                     <Th>Apellidos y Nombres</Th>
+                    <Th>Dni</Th>
                     <Th>Modalidad</Th>
                     <Th>Archivo</Th>
-                    
+
                 </THead>
 
                 <TBody>
-                    <Tr v-for="(alumno, index) in alumnos" :key="alumno.id_estudiante">
+                    <Tr v-for="(alumno, index) in alumnosPaginados" :key="alumno.id_estudiante">
 
                         <template v-if="alumno.matriculado == 2">
                             <Td>{{ index + 1 }}</Td>
                             <Td class="font-medium whitespace-nowrap">{{ alumno.apellidos_nombres }}</Td>
+
                             <Td :colspan="3" class="text-center">
-                                <span class="px-3 py-1 rounded bg-red-100 text-red-700 font-semibold text-sm uppercase tracking-wide">
+                                <span
+                                    class="px-3 py-1 rounded bg-red-100 text-red-700 font-semibold text-sm uppercase tracking-wide">
                                     RETIRADO POR INASISTENCIA
                                 </span>
                             </Td>
                         </template>
 
                         <template v-else>
-                            <Td>{{ index + 1 }}</Td>
+                            <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
                             <Td>{{ alumno.apellidos_nombres }}</Td>
-
+                            <Td>{{ alumno.dni ?? '-' }}</Td>
                             <!-- ⭐ AQUI ESTA EL CAMBIO: SI NO HAY NOTA → “SIN NOTA” -->
                             <Td>{{ alumno.tipo_practicas_texto || 'SIN NOTA' }}</Td>
 
                             <Td class="text-center">
-                                <a v-if="alumno.documento_url"
-                                    :href="alumno.documento_url"
-                                    target="_blank"
+                                <a v-if="alumno.documento_url" :href="alumno.documento_url" target="_blank"
                                     class="inline-flex items-center justify-center text-blue-600 hover:text-blue-800"
                                     title="Abrir documento">
                                     <DocumentTextIcon class="w-6 h-6" />
@@ -266,7 +294,7 @@ async function onSubmit() {
                                 <span v-else class="text-gray-400">—</span>
                             </Td>
 
-                           
+
                         </template>
 
                     </Tr>
@@ -280,22 +308,21 @@ async function onSubmit() {
                     </h3>
 
                     <FormLabelError label="Modalidad" required>
-                        <BaseSelectCiclo v-model="formData.tipo_practicas"
-                            :options="modalidadPracticas" label="label"
+                        <BaseSelectCiclo v-model="formData.tipo_practicas" :options="modalidadPracticas" label="label"
                             placeholder="Seleccione la modalidad" />
                     </FormLabelError>
 
                     <FormInputFile v-model="formData.documento" label="Documento (Informe o Evidencia) *" />
 
-                    <label for="observacion"
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label for="observacion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Observación General
                     </label>
                     <textarea id="observacion" v-model="formData.observacion" rows="2"
                         class="w-full text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md"></textarea>
 
                     <div v-if="formData.documento" class="mt-3">
-                        <div class="flex items-center justify-between text-sm p-2 bg-gray-100 dark:bg-gray-700 rounded-md">
+                        <div
+                            class="flex items-center justify-between text-sm p-2 bg-gray-100 dark:bg-gray-700 rounded-md">
                             <div class="flex items-center gap-2 truncate">
                                 <span class="truncate">{{ formData.documento.name }}</span>
                             </div>

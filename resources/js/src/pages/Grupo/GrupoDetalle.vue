@@ -19,8 +19,8 @@ const navLinks = [
   { text: 'Documentos', to: { name: 'grupo.documentos', params: { id: groupId } } },
   { text: 'Sesiones y asistencia', to: { name: 'grupo.asistencia', params: { id: groupId } } },
   { text: 'Calificaciones', to: { name: 'grupo.calificaciones', params: { id: groupId } } },
-  { text: 'Unidades Didacticas', to: { name: 'grupo.capacidades.terminales', params: { id: groupId } } },
-  { text: 'Practicas', to: { name: 'grupo.practicas', params: { id: groupId } } },
+  { text: 'Unidades Didácticas', to: { name: 'grupo.capacidades.terminales', params: { id: groupId } } },
+  { text: 'Prácticas', to: { name: 'grupo.practicas', params: { id: groupId } } },
   { text: 'Alumnos', to: { name: 'grupo.alumnos', params: { id: groupId } } },
 ];
 
@@ -31,15 +31,15 @@ const tituloPrincipal = computed(() => {
 
 const subTitulo = computed(() => {
   if (!infoGrupo.value) return 'Cargando detalles...';
-  return `Modulo ${infoGrupo.value.modulo} · Seccion ${infoGrupo.value.seccion} · Turno ${infoGrupo.value.turno}`;
+  return `Módulo ${infoGrupo.value.modulo} · Seccion ${infoGrupo.value.seccion} · Turno ${infoGrupo.value.turno}`;
 });
 
 const metadataItems = computed(() => {
   if (!infoGrupo.value) return [];
 
   return [
-    { label: 'Modulo', value: infoGrupo.value.modulo },
-    { label: 'Seccion', value: infoGrupo.value.seccion },
+    { label: 'Módulo', value: infoGrupo.value.modulo },
+    { label: 'Sección', value: infoGrupo.value.seccion },
     { label: 'Turno', value: infoGrupo.value.turno },
   ];
 });

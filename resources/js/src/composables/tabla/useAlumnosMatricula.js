@@ -73,7 +73,7 @@ export default function useExportAlumnos() {
         // ======================================================
         // 3) CABECERA DE LA TABLA (incluye datos de pago)
         // ======================================================
-        const tienePagos = lista?.estudiantes?.some(
+        const tienePagos = lista?.matriculados?.some(
             a => a.nro_recibo || a.aporte || a.condicion
         );
 
@@ -144,23 +144,22 @@ export default function useExportAlumnos() {
         // ======================================================
         // 5) ANCHO DE COLUMNAS
         // ======================================================
-        worksheet.columns = [
-            { width: 5 },
-            { width: 30 },
-            { width: 12 },
-            { width: 15 },
-            { width: 10 },
-            { width: 15 },
-            { width: 32 },
-            { width: 15 }
-        ];
+        // ======================================================
+        // 5) ANCHO DE COLUMNAS (FIX REAL)
+        // ======================================================
+        worksheet.getColumn(1).width = 5;
+        worksheet.getColumn(2).width = 30;
+        worksheet.getColumn(3).width = 12;
+        worksheet.getColumn(4).width = 15;
+        worksheet.getColumn(5).width = 10;
+        worksheet.getColumn(6).width = 15;
+        worksheet.getColumn(7).width = 32;
+        worksheet.getColumn(8).width = 15;
 
         if (tienePagos) {
-            worksheet.columns.push(
-                { width: 20 },
-                { width: 15 },
-                { width: 12 }
-            );
+            worksheet.getColumn(9).width = 20;
+            worksheet.getColumn(10).width = 15;
+            worksheet.getColumn(11).width = 12;
         }
 
         // ======================================================

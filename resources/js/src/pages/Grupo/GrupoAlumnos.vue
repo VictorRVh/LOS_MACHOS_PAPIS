@@ -14,6 +14,9 @@ import axios from 'axios';
 import Slider from '../../components/ui/Slider.vue';
 import useModalToast from '../../composables/useModalToast';
 import useExportAlumnos from '../../composables/tabla/useAlumnosMatricula.js';
+import SearchBar from "../../components/head_table/headSearch.vue";
+import useTableData from "../../composables/tabla/useTableData";
+
 
 import useCertificado from "../../store/Grupo/useCertificadoStore.js";
 import { generateConstanciaEstudiante } from "../../pdf/CosntanciaEstudiante.js";
@@ -277,12 +280,37 @@ const handleViewportChange = () => {
   if (!openDocumentsMenuId.value) return;
   updateDocumentsMenuPosition(openDocumentsMenuId.value);
 };
+
+
+const estudiantes = computed(() => matriculados.value?.estudiantes ?? []);
+
+const {
+  pagina,
+  itemsPorPagina,
+  paginados: estudiantesPaginados,
+  totalPaginas,
+  ordenados: estudiantesOrdenados,
+  filtrar: filtrarEstudiantes,
+} = useTableData(estudiantes, {
+  defaultOrderBy: "apellidos",
+  searchFields: ["nombre", "apellidos", "nro_documento", "correo_electronico"],
+});
+
 </script>
 
 <template>
   <AuthorizationFallback :permissions="['todo-acceso-grupos']">
-    <div class="w-full space-y-4 px-3 py-2" v-if="matriculados">
-      <Table>
+
+    <div class="w-full space-y-2 px-3 " v-if="matriculados">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300">
+          Lista de estudiantes
+        </h3>
+
+        <SearchBar :totalResultados="estudiantesOrdenados.length" @search="filtrarEstudiantes" />
+      </div>
+
+      <Table :paginacion="true" :current-page="pagina" :total-pages="totalPaginas" @changePage="pagina = $event">
         <THead>
           <Th>N°</Th>
           <Th>DNI</Th>
@@ -295,14 +323,11 @@ const handleViewportChange = () => {
         </THead>
 
         <TBody>
-          <Tr
-            v-for="(estudiante, index) in matriculados.estudiantes"
-            :key="estudiante.nro_documento"
-            class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
-          >
-            <Td>{{ index + 1 }}</Td>
+          <Tr v-for="(estudiante, index) in estudiantesPaginados" :key="estudiante.nro_documento"
+            class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+            <Td>{{ (pagina - 1) * itemsPorPagina + index + 1 }}</Td>
             <Td>{{ estudiante.nro_documento }}</Td>
-            <Td>{{ estudiante.nombre }} {{ estudiante.apellidos }}</Td>
+            <Td>{{ estudiante.apellidos }}, {{ estudiante.nombre }} </Td>
             <Td>{{ estudiante.sexo }}</Td>
             <Td>{{ estudiante.fecha_nacimiento }}</Td>
             <Td>{{ estudiante.celular_personal ?? '-' }}</Td>
@@ -310,17 +335,14 @@ const handleViewportChange = () => {
 
             <Td>
               <div class="flex justify-center">
-                <button
-                  :ref="(el) => setDocumentsButtonRef(estudiante.id_matricula, el)"
-                  type="button"
+                <button :ref="(el) => setDocumentsButtonRef(estudiante.id_matricula, el)" type="button"
                   @click="toggleDocumentsMenu(estudiante.id_matricula)"
                   class="inline-flex h-8 items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 text-xsm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
-                  :aria-expanded="openDocumentsMenuId === estudiante.id_matricula"
-                  title="Documentos"
-                >
+                  :aria-expanded="openDocumentsMenuId === estudiante.id_matricula" title="Documentos">
                   <ArrowDownTrayIcon class="h-4 w-4 shrink-0" />
                   <span>Documentos</span>
-                  <ChevronDownIcon class="h-4 w-4 shrink-0 transition-transform duration-200" :class="openDocumentsMenuId === estudiante.id_matricula ? 'rotate-180' : ''" />
+                  <ChevronDownIcon class="h-4 w-4 shrink-0 transition-transform duration-200"
+                    :class="openDocumentsMenuId === estudiante.id_matricula ? 'rotate-180' : ''" />
                 </button>
               </div>
             </Td>
@@ -341,31 +363,22 @@ const handleViewportChange = () => {
 
     <Teleport to="#grupo-header-actions">
       <div v-if="matriculados" class="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          @click="descargarNomina(props.id)"
-          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
-        >
+        <button type="button" @click="descargarNomina(props.id)"
+          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900">
           <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
           <span class="text-[12px] font-medium">Nomina</span>
           <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
         </button>
 
-        <button
-          type="button"
-          @click="exportar()"
-          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
-        >
+        <button type="button" @click="exportar()"
+          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900">
           <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
           <span class="text-[12px] font-medium">Alumnos</span>
           <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
         </button>
 
-        <button
-          type="button"
-          @click="exportarMatriculaEvaluaciones(props.id)"
-          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900"
-        >
+        <button type="button" @click="exportarMatriculaEvaluaciones(props.id)"
+          class="inline-flex min-h-[34px] items-center gap-2 rounded-[3px] border border-emerald-200 bg-white px-2.5 py-1 text-left text-emerald-700 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-emerald-900/60 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-950/20 dark:focus-visible:ring-offset-slate-900">
           <TableCellsIcon class="h-3.5 w-3.5 shrink-0" />
           <span class="text-[12px] font-medium">Matriculas y evaluaciones</span>
           <ArrowDownTrayIcon class="h-3.5 w-3.5 shrink-0 opacity-60" />
@@ -374,40 +387,31 @@ const handleViewportChange = () => {
     </Teleport>
 
     <Teleport to="body">
-      <div
-        v-if="openDocumentsMenuId"
-        ref="documentsMenuRef"
-        :style="openDocumentsMenuStyles"
-        class="min-w-[250px] rounded-[3px] border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
-      >
-        <button
-          type="button"
+      <div v-if="openDocumentsMenuId" ref="documentsMenuRef" :style="openDocumentsMenuStyles"
+        class="min-w-[250px] rounded-[3px] border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <button type="button"
           @click="imprimirConstancia(matriculados.estudiantes.find((estudiante) => estudiante.id_matricula === openDocumentsMenuId)); closeDocumentsMenu()"
-          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
-        >
+          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300">
           <DocumentTextIcon class="h-4 w-4 shrink-0" />
           <span class="flex-1">Constancia Est.</span>
-          <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-rose-600 dark:text-rose-300">PDF</span>
+          <span
+            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-rose-600 dark:text-rose-300">PDF</span>
         </button>
 
-        <button
-          type="button"
-          @click="emitirCertificadoEstudio(openDocumentsMenuId); closeDocumentsMenu()"
-          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
-        >
+        <button type="button" @click="emitirCertificadoEstudio(openDocumentsMenuId); closeDocumentsMenu()"
+          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300">
           <DocumentTextIcon class="h-4 w-4 shrink-0" />
           <span class="flex-1">Certificado Estudio</span>
-          <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-rose-600 dark:text-rose-300">PDF</span>
+          <span
+            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-rose-600 dark:text-rose-300">PDF</span>
         </button>
 
-        <button
-          type="button"
-          @click="openCertificadoModal(openDocumentsMenuId); closeDocumentsMenu()"
-          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300"
-        >
+        <button type="button" @click="openCertificadoModal(openDocumentsMenuId); closeDocumentsMenu()"
+          class="flex w-full items-center gap-2 rounded-[3px] px-2.5 py-2 text-left text-sm text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-200 dark:hover:bg-emerald-950/20 dark:hover:text-emerald-300">
           <DocumentTextIcon class="h-4 w-4 shrink-0" />
           <span class="flex-1">Certificado Modular</span>
-          <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-rose-600 dark:text-rose-300">PDF</span>
+          <span
+            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-rose-600 dark:text-rose-300">PDF</span>
         </button>
       </div>
     </Teleport>
@@ -415,10 +419,12 @@ const handleViewportChange = () => {
     <Slider :show="showModal" title="Cambiar Grupo" @hide="showModal = false">
       <hr class="mb-4 border-t-2 border-cetpro dark:border-cetpro-light" />
       <div class="mt-4 space-y-3">
-        <p class="text-gray-600 dark:text-gray-300">Estás a punto de mover <strong>{{ estudiantesSeleccionados.length }}</strong> estudiantes.</p>
+        <p class="text-gray-600 dark:text-gray-300">Estás a punto de mover <strong>{{ estudiantesSeleccionados.length
+            }}</strong> estudiantes.</p>
         <div class="mt-6 flex justify-end gap-2">
           <Button title="Cancelar" variant="secondary" @click="showModal = false" />
-          <Button title="Confirmar" variant="primary" :disabled="!nuevoGrupoId || saving" :loading="saving" @click="cambiarGrupo" />
+          <Button title="Confirmar" variant="primary" :disabled="!nuevoGrupoId || saving" :loading="saving"
+            @click="cambiarGrupo" />
         </div>
       </div>
     </Slider>
@@ -438,12 +444,8 @@ const handleViewportChange = () => {
           <label class="mb-1 block text-sm font-medium">
             Código del certificado
           </label>
-          <input
-            v-model="codigoCertificado"
-            type="text"
-            placeholder="Ej: CM-2026-001"
-            class="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500"
-          />
+          <input v-model="codigoCertificado" type="text" placeholder="Ej: CM-2026-001"
+            class="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500" />
         </div>
 
         <div class="flex justify-end gap-2">
